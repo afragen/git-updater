@@ -127,10 +127,10 @@ class GitHub_Theme_Updater {
 				if( !is_null($theme_data['theme-data']->Version) )
 					if( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
 						// up-to-date!
-						$data->up_to_date[$theme_data['theme_key']]['rollback'] = $tags;
-						$data->up_to_date[$theme_data['theme_key']]['response'] = $update;
+						$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
+						$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
 					} else {
-						$data->response[$theme_data['theme_key']] = $update;
+						$data->response[ $theme_data['theme_key'] ] = $update;
 					}
 				}
 			}
