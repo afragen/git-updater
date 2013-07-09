@@ -2,7 +2,7 @@
 Contributors: afragen, scarstens, codepress
 Tags: plugin, theme, update, github
 Requires at least: 3.4
-Tested up to: 3.5.2
+Tested up to: 3.6
 Plugin URI: https://github.com/afragen/github-updater
 Stable tag: master
 Version: 1.0
