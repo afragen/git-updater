@@ -5,7 +5,7 @@ Requires at least: 3.4
 Tested up to: 3.6
 Plugin URI: https://github.com/afragen/github-updater
 Stable tag: master
-Version: 1.1
+Version: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
