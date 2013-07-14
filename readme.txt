@@ -70,6 +70,7 @@ Please log issues on the GitHub at https://github.com/afragen/github-theme-updat
 
 = 1.1 =
 * sanity check for theme api uri
+* move update renaming from showing in details for wp.org updates
 
 = 1.0 =
 * initial commit to WordPress repo
