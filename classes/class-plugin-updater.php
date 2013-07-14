@@ -209,25 +209,23 @@ class GitHub_Plugin_Updater {
 
 		if( isset( $source ) )
 			for ( $i = 0; $i < count( $this->config ); $i++ ) {
-				if( strpos( $source, $this->config[$i]['repo'] ) ) {
+				if( strpos( $source, $this->config[$i]['repo'] ) )
 					$plugin = $this->config[$i]['repo'];
-
-					if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
-						$upgrader->skin->feedback( "Trying to customize plugin folder name..." );
-						if( isset( $source, $remote_source ) && stristr( $source, $plugin ) ){
-							$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
-							if( @rename( $source, $corrected_source ) ) {
-								$upgrader->skin->feedback( "Plugin folder name corrected to: " . $plugin );
-								return $corrected_source;
-							} else {
-								$upgrader->skin->feedback( "Unable to rename downloaded plugin." );
-								return new WP_Error();
-							}
-						}
-					}
-				}
 			}
 
+		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
+			$upgrader->skin->feedback( "Trying to customize plugin folder name..." );
+			if( isset( $source, $remote_source ) && stristr( $source, $plugin ) ){
+				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
+				if( @rename( $source, $corrected_source ) ) {
+					$upgrader->skin->feedback( "Plugin folder name corrected to: " . $plugin );
+					return $corrected_source;
+				} else {
+					$upgrader->skin->feedback( "Unable to rename downloaded plugin." );
+					return new WP_Error();
+				}
+			}
+		}
 	return $source;
 	}
 
