@@ -5,7 +5,7 @@ Requires at least: 3.4
 Tested up to: 3.6
 Plugin URI: https://github.com/afragen/github-updater
 Stable tag: master
-Version: 1.0
+Version: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,9 @@ This plugin was based upon <a href="https://github.com/WordPress-Phoenix/whitela
 Please log issues on the GitHub at https://github.com/afragen/github-theme-updater/issues
 
 == Changelog ==
+
+= 1.1 =
+* sanity check for theme api uri
 
 = 1.0 =
 * initial commit to WordPress repo
