@@ -150,23 +150,25 @@ class GitHub_Theme_Updater {
 
 		if( isset( $source ) )
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
-				if( strpos( $source, $this->config['theme'][$i] ) )
+				if( strpos( $source, $this->config['theme'][$i] ) ) {
 					$theme = $this->config['theme'][$i];
-			}
-		
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) ) {
-			$upgrader->skin->feedback( "Trying to customize theme folder name..." );
-			if( isset( $source, $remote_source ) && stristr( $source, $theme ) ){
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
-				if( @rename( $source, $corrected_source ) ) {
-					$upgrader->skin->feedback( "Theme folder name corrected to: " . $theme );
-					return $corrected_source;
-				} else {
-					$upgrader->skin->feedback( "Unable to rename downloaded theme." );
-					return new WP_Error();
+
+					if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) ) {
+						$upgrader->skin->feedback( "Trying to customize theme folder name..." );
+						if( isset( $source, $remote_source ) && stristr( $source, $theme ) ){
+							$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
+							if( @rename( $source, $corrected_source ) ) {
+								$upgrader->skin->feedback( "Theme folder name corrected to: " . $theme );
+								return $corrected_source;
+							} else {
+								$upgrader->skin->feedback( "Unable to rename downloaded theme." );
+								return new WP_Error();
+							}
+						}
+					}
 				}
 			}
-		}
+
 	return $source;
 	}
 
