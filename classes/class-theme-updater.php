@@ -150,13 +150,13 @@ class GitHub_Theme_Updater {
 
 		if( isset( $source ) )
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
-				if( strpos( $source, $this->config['theme'][$i] ) )
+				if( stristr( $source, $this->config['theme'][$i] ) )
 					$theme = $this->config['theme'][$i];
 			}
 		
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) ) {
-			$upgrader->skin->feedback( "Trying to customize theme folder name..." );
+		if( isset( $_GET['action'], $source, $theme ) && stristr( $_GET['action'], 'theme' ) ) {
 			if( isset( $source, $remote_source ) && stristr( $source, $theme ) ){
+				$upgrader->skin->feedback( "Trying to customize theme folder name..." );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
 				if( @rename( $source, $corrected_source ) ) {
 					$upgrader->skin->feedback( "Theme folder name corrected to: " . $theme );

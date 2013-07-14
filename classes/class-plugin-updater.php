@@ -209,13 +209,13 @@ class GitHub_Plugin_Updater {
 
 		if( isset( $source ) )
 			for ( $i = 0; $i < count( $this->config ); $i++ ) {
-				if( strpos( $source, $this->config[$i]['repo'] ) )
+				if( stristr( $source, $this->config[$i]['repo'] ) )
 					$plugin = $this->config[$i]['repo'];
 			}
 
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
-			$upgrader->skin->feedback( "Trying to customize plugin folder name..." );
+		if( isset( $_GET['action'], $source, $plugin ) && stristr( $_GET['action'], 'update-selected' ) ) {
 			if( isset( $source, $remote_source ) && stristr( $source, $plugin ) ){
+				$upgrader->skin->feedback( "Trying to customize plugin folder name..." );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
 				if( @rename( $source, $corrected_source ) ) {
 					$upgrader->skin->feedback( "Plugin folder name corrected to: " . $plugin );

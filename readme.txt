@@ -68,6 +68,9 @@ Please log issues on the GitHub at https://github.com/afragen/github-theme-updat
 
 == Changelog ==
 
+= 1.2 =
+* fix to ignore renaming for wp.org plugins
+
 = 1.1 =
 * sanity check for theme api uri
 
