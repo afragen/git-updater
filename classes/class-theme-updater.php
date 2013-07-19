@@ -154,7 +154,7 @@ class GitHub_Theme_Updater {
 					$theme = $this->config['theme'][$i];
 			}
 		
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) ) {
+		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
 			if( isset( $source, $remote_source, $theme ) && stristr( $source, $theme ) ) {
 				$upgrader->skin->feedback( "Trying to customize theme folder name..." );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
@@ -166,7 +166,6 @@ class GitHub_Theme_Updater {
 					return new WP_Error();
 				}
 			}
-		}
 	return $source;
 	}
 
