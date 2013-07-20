@@ -225,7 +225,7 @@ class GitHub_Plugin_Updater {
 					return new WP_Error();
 				}
 			}
-	return $source;
+		return $source;
 	}
 
 	/* https://github.com/UCF/Theme-Updater/issues/3 */
