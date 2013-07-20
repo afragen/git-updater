@@ -199,7 +199,7 @@ class GitHub_Plugin_Updater {
 	
 	/**
 	 *	Github delivers zip files as <Username>-<TagName>.zip
-	 *	must rename this zip file to the accurate theme folder
+	 *	must rename this zip file to the accurate plugin folder
 	 * 
 	 * @since 1.0
 	 * @param string
@@ -209,12 +209,12 @@ class GitHub_Plugin_Updater {
 
 		if( isset( $source ) )
 			for ( $i = 0; $i < count( $this->config ); $i++ ) {
-				if( stristr( $source, $this->config[$i]['repo'] ) )
+				if( stristr( basename( $source ), $this->config[$i]['repo'] ) )
 					$plugin = $this->config[$i]['repo'];
 			}
 
 		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) )
-			if( isset( $source, $remote_source, $plugin ) && stristr( $source, $plugin ) ) {
+			if( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
 				$upgrader->skin->feedback( "Trying to customize plugin folder name..." );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
 				if( @rename( $source, $corrected_source ) ) {
