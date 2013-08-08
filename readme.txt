@@ -5,15 +5,15 @@ Requires at least: 3.4
 Tested up to: 3.6
 Plugin URI: https://github.com/afragen/github-updater
 Stable tag: master
-Version: 1.4
+Version: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A simple plugin to enable automatic updates to your GitHub hosted themes. This plugin is not allowed in the wp.org repo. :-(
+A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins and themes. This plugin is not allowed in the wp.org repo. :-(
 
 == Description ==
 
-This plugin was designed to simply update any GitHub stored WordPress theme. Your theme **must** contain a header in the style.css header denoting the theme's or plugin's location on GitHub. The format is as follows.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
 `GitHub Theme URI: https://github.com/afragen/test-child`
 
@@ -60,13 +60,16 @@ In your plugin the following is an example. You do not need to create a tag in G
 
 The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
 
-This plugin was based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/updater-plugin.php">Whitelabel Framework's updater-plugin.php</a>, which was based upon https://github.com/UCF/Theme-Updater. And the plugin updater class was based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>
+This plugin's theme updater class was based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/updater-plugin.php">Whitelabel Framework's updater-plugin.php</a>, which was based upon https://github.com/UCF/Theme-Updater. The plugin updater class was based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>
 
 == Issues ==
 
 Please log issues on the GitHub at https://github.com/afragen/github-theme-updater/issues
 
 == Changelog ==
+
+= 1.4.1 =
+* oops fixed the readme to more accurately reflect support for both plugins and themes.
 
 = 1.4 =
 * fix for rename functions to be more precise, otherwise might rename wp.org repo themes.
