@@ -9,7 +9,7 @@ Version: 1.4.2
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins and themes. This plugin is not allowed in the wp.org repo. :(
+A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins and themes. This plugin is not allowed in the wp.org repo. :frowning:
 
 ### == Description ==
 
@@ -25,10 +25,7 @@ Where the above URL leads to the repository of your theme or plugin.
 
 ### == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-1. Upload `github-theme-updater` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
+If you're using this plugin you shouldn't have to ask. ;-)
 
 ### == Frequently Asked Questions ==
 
