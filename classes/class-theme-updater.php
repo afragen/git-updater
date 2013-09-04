@@ -116,7 +116,11 @@ class GitHub_Theme_Updater {
 
 			// check and generate download link
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			$newest_tag = $tags[ $newest_tag_key ];
+			if ( $newest_tag_key ) {
+				$newest_tag = $tags[ $newest_tag_key ];
+			} else {
+				$newest_tag = null;
+			}
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
@@ -143,10 +147,10 @@ class GitHub_Theme_Updater {
 	/**
 	 *	Github delivers zip files as <Username>-<TagName>-<Hash>.zip
 	 *	must rename this zip file to the accurate theme folder
-	 * 
+	 *
 	 * @since 1.0
 	 * @param string
-	 * @return string 
+	 * @return string
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
 
@@ -155,7 +159,7 @@ class GitHub_Theme_Updater {
 				if( stristr( basename( $source ), $this->config['theme'][$i] ) )
 					$theme = $this->config['theme'][$i];
 			}
-		
+
 		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
 			if( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
 				$upgrader->skin->feedback( "Trying to customize theme folder name..." );
