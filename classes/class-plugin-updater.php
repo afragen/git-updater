@@ -48,7 +48,8 @@ class GitHub_Plugin_Updater {
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 		$plugins = get_plugins();
 		$i = 0;
-
+		$arr = array();
+		
 		foreach ( $plugins as $plugin => $headers ) {
 			if ( ! empty($headers['GitHub Plugin URI']) ) {
 				$repo = explode( '/', ltrim( parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH ), '/' ) );

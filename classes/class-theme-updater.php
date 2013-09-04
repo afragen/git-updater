@@ -115,7 +115,9 @@ class GitHub_Theme_Updater {
 			usort( $tags, "version_compare" );
 
 			// check and generate download link
-			$newest_tag = end( array_values( $tags ) );
+			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+			$newest_tag = $tags[ $newest_tag_key ];
+
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
 			if( !empty( $newest_tag ) ) {
@@ -148,7 +150,7 @@ class GitHub_Theme_Updater {
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
 
-		if( isset( $source ) )
+		if( isset( $source, $this->config['theme'] ) )
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
 				if( stristr( basename( $source ), $this->config['theme'][$i] ) )
 					$theme = $this->config['theme'][$i];
