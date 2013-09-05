@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Update a WordPress theme via GitHub
+ *
+ *
+ * @version 1.0
+ */
 class GitHub_Theme_Updater {
 
 	protected $config;
@@ -38,13 +44,13 @@ class GitHub_Theme_Updater {
 		$this->config = array();
 		$themes = wp_get_themes();
 
-		foreach ( $themes as $theme ) {
+		foreach( $themes as $theme ) {
 			//regex for standard URI, only special character '-'
 			$github_header_regex = '#s[\:0-9]+\"(GitHub Theme URI)\";s[\:0-9]+\"([a-z0-9_\:\/\.-]+)#i';
 			$serialized_theme = serialize( $theme );
 			preg_match( $github_header_regex, $serialized_theme, $matches );
 
-			if ( ! empty( $matches[2] ) ) {
+			if( ! empty( $matches[2] ) ) {
 				$this->config['theme'][]                                = $theme->stylesheet;
 				$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
 				$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = $matches[2];
@@ -66,7 +72,7 @@ class GitHub_Theme_Updater {
 
 		$response = wp_remote_get( $url );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+		if( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
@@ -83,9 +89,9 @@ class GitHub_Theme_Updater {
 
 		$remote = get_site_transient( md5( $url ) ) ;
 
-		if ( ! $remote ) {
+		if( ! $remote ) {
 			$remote = $this->api( $url );
-			if ( $remote )
+			if( $remote )
 				set_site_transient( md5( $url ), $remote, 60*60 );
 
 		}
@@ -101,7 +107,7 @@ class GitHub_Theme_Updater {
 	 */
 	public function transient_update_themes_filter( $data ){
 
-		foreach ( $this->config as $theme => $theme_data ) {
+		foreach( $this->config as $theme => $theme_data ) {
 			if( empty( $theme_data['GitHub_API_URI'] ) ) continue;
 			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
@@ -116,7 +122,7 @@ class GitHub_Theme_Updater {
 
 			// check and generate download link
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if ( $newest_tag_key ) {
+			if( $newest_tag_key ) {
 				$newest_tag = $tags[ $newest_tag_key ];
 			} else {
 				$newest_tag = null;
@@ -127,9 +133,9 @@ class GitHub_Theme_Updater {
 			if( !empty( $newest_tag ) ) {
 				// setup update array to append version info
 				$update = array();
-				$update['new_version']     = $newest_tag;
-				$update['url']             = $theme_data['GitHub_Theme_URI'];
-				$update['package']         = $download_link;
+				$update['new_version'] = $newest_tag;
+				$update['url']         = $theme_data['GitHub_Theme_URI'];
+				$update['package']     = $download_link;
 
 				if( !is_null($theme_data['theme-data']->Version) )
 					if( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {

@@ -50,8 +50,8 @@ class GitHub_Plugin_Updater {
 		$i = 0;
 		$arr = array();
 		
-		foreach ( $plugins as $plugin => $headers ) {
-			if ( ! empty($headers['GitHub Plugin URI']) ) {
+		foreach( $plugins as $plugin => $headers ) {
+			if( ! empty($headers['GitHub Plugin URI']) ) {
 				$repo = explode( '/', ltrim( parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH ), '/' ) );
 				$arr[$i]['owner']        = $repo[0];
 				$arr[$i]['repo']         = $repo[1];
@@ -76,7 +76,7 @@ class GitHub_Plugin_Updater {
 
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+		if( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
@@ -98,11 +98,11 @@ class GitHub_Plugin_Updater {
 			'archive_format' => 'zipball',
 		);
 
-		foreach ( $segments as $segment => $value ) {
+		foreach( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->github_plugin['access_token'] ) )
+		if( ! empty( $this->github_plugin['access_token'] ) )
 			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'] );
 
 		return 'https://api.github.com' . $endpoint;
@@ -119,10 +119,10 @@ class GitHub_Plugin_Updater {
 
 		$remote = get_site_transient( md5( $this->github_plugin['slug'] ) );
 
-		if ( ! $remote ) {
+		if( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . basename( $this->github_plugin['slug'] ) );
 
-			if ( $remote )
+			if( $remote )
 				set_site_transient( md5( $this->github_plugin['slug'] ), $remote, 60 * 60 );
 		}
 		return $remote;
@@ -138,7 +138,7 @@ class GitHub_Plugin_Updater {
 
 		$data = get_plugin_data( WP_PLUGIN_DIR . '/' . $this->github_plugin['slug'] );
 
-		if ( ! empty( $data['Version'] ) )
+		if( ! empty( $data['Version'] ) )
 			return $data['Version'];
 
 		return false;
@@ -153,12 +153,12 @@ class GitHub_Plugin_Updater {
 	protected function get_remote_version() {
 
 		$response = $this->get_remote_info();
-		if ( ! $response )
+		if( ! $response )
 			return false;
 
 		preg_match( '#^\s*Version\:\s*(.*)$#im', base64_decode( $response->content ), $matches );
 
-		if ( ! empty( $matches[1] ) )
+		if( ! empty( $matches[1] ) )
 			return $matches[1];
 
 		return false;
@@ -174,16 +174,16 @@ class GitHub_Plugin_Updater {
 	 */
 	public function update_available( $transient ) {
 
-		if ( empty( $transient->checked ) )
+		if( empty( $transient->checked ) )
 			return $transient;
 
-		foreach ( $this->config as $plug ) {
+		foreach( $this->config as $plug ) {
 			$this->github_plugin = $plug;
 			$local_version  = $this->get_local_version();
 			$remote_version = $this->get_remote_version();
 			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/master.zip';
 
-			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
+			if( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(
 					'slug'        => dirname( $this->github_plugin['slug'] ),
 					'new_version' => $remote_version,
@@ -204,12 +204,12 @@ class GitHub_Plugin_Updater {
 	 * 
 	 * @since 1.0
 	 * @param string
-	 * @return string 
+	 * @return string
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
 
 		if( isset( $source ) )
-			for ( $i = 0; $i < count( $this->config ); $i++ ) {
+			for( $i = 0; $i < count( $this->config ); $i++ ) {
 				if( stristr( basename( $source ), $this->config[$i]['repo'] ) )
 					$plugin = $this->config[$i]['repo'];
 			}
