@@ -188,5 +188,3 @@ class GitHub_Theme_Updater {
 	}
 
 }
-
-new GitHub_Theme_Updater();

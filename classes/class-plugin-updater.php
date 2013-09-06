@@ -236,5 +236,3 @@ class GitHub_Plugin_Updater {
 	}
 
 }
-
-new GitHub_Plugin_Updater();
