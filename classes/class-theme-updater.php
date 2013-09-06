@@ -1,10 +1,18 @@
 <?php
+/**
+ * GitHub Updater
+ *
+ * @package   GitHubUpdater
+ * @author    Andy Fragen, Seth Carstens, UCF Web Communications
+ * @license   GPL-2.0+
+ * @link      https://github.com/afragen/github-updater
+ */
 
 /**
- * Update a WordPress theme via GitHub
+ * Update a WordPress theme from a GitHub repo.
  *
- *
- * @version 1.0
+ * @package   GitHubUpdater
+ * @author    Andy Fragen, Codepress
  */
 class GitHub_Theme_Updater {
 
@@ -19,7 +27,7 @@ class GitHub_Theme_Updater {
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
-		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
+		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
 	/**
@@ -168,21 +176,29 @@ class GitHub_Theme_Updater {
 
 		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
 			if( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
-				$upgrader->skin->feedback( "Trying to customize theme folder name..." );
+				$upgrader->skin->feedback( __( 'Trying to customize theme folder name...', 'github-updater' ) );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
 				if( @rename( $source, $corrected_source ) ) {
-					$upgrader->skin->feedback( "Theme folder name corrected to: " . $theme );
+					$upgrader->skin->feedback( __( 'Theme folder name corrected to: ', 'github-updater' ) . $theme );
 					return $corrected_source;
 				} else {
-					$upgrader->skin->feedback( "Unable to rename downloaded theme." );
+					$upgrader->skin->feedback( __( 'Unable to rename downloaded theme.', 'github-updater' ) );
 					return new WP_Error();
 				}
 			}
 		return $source;
 	}
 
-	/* https://github.com/UCF/Theme-Updater/issues/3 */
-	public function no_ssl_http_request_args( $args, $url ) {
+	/**
+	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param  array $args Existing HTTP Request arguments.
+	 *
+	 * @return array Amended HTTP Request arguments.
+	 */
+	public function no_ssl_http_request_args( $args ) {
 		$args['sslverify'] = false;
 		return $args;
 	}
