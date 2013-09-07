@@ -224,14 +224,7 @@ class GitHub_Plugin_Updater {
 			$this->github_plugin = $plug;
 			$local_version  = $this->get_local_version();
 			$remote_version = $this->get_remote_version();
-
-			if( ! empty( $this->config['branch'] ) ) {
-				$branch = $this->config['branch'];
-			} else {
-				$branch = 'master';
-			}
-
-			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
+			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/master.zip';
 
 			if( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(
