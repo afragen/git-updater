@@ -16,6 +16,13 @@
  */
 class GitHub_Theme_Updater {
 
+	/**
+	 * Store details of all GitHub-sourced themes that are installed.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var array
+	 */
 	protected $config;
 
 	public function __construct() {
