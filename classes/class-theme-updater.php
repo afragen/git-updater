@@ -164,10 +164,15 @@ class GitHub_Theme_Updater {
 	 *	must rename this zip file to the accurate theme folder
 	 *
 	 * @since 1.0
+	 * 
+	 * @global WP_Filesystem $wp_filesystem
+	 *
 	 * @param string
 	 * @return string
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
+
+		global $wp_filesystem;
 
 		if ( isset( $source, $this->config['theme'] ) )
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
@@ -177,10 +182,16 @@ class GitHub_Theme_Updater {
 
 		if ( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
 			if ( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
-				$upgrader->skin->feedback( __( 'Trying to customize theme folder name...', 'github-updater' ) );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
-				if ( @rename( $source, $corrected_source ) ) {
-					$upgrader->skin->feedback( __( 'Theme folder name corrected to: ', 'github-updater' ) . $theme );
+				$upgrader->skin->feedback(
+					sprintf(
+						__( 'Renaming %s to %s...', 'github-updater' ),
+						'<span class="code">' . basename( $source ) . '</span>',
+						'<span class="code">' . basename( $corrected_source ) . '</span>'
+					)
+				);
+				if( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+					$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
 					return $corrected_source;
 				} else {
 					$upgrader->skin->feedback( __( 'Unable to rename downloaded theme.', 'github-updater' ) );
