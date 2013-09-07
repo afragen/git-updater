@@ -42,10 +42,12 @@ class GitHub_Plugin_Updater {
 	 * @param array $config
 	 */
 	public function __construct() {
+		// This MUST come before we get details about the plugins so the headers are correctly retrieved
+		add_filter( 'extra_plugin_headers', array( $this, 'add_headers' ) );
+
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 
-		add_filter( 'extra_plugin_headers', array( $this, 'add_headers' ) );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_available' ) );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
