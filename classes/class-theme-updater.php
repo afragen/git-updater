@@ -12,7 +12,7 @@
  * Update a WordPress theme from a GitHub repo.
  *
  * @package   GitHubUpdater
- * @author    Andy Fragen, Codepress
+ * @author    Andy Fragen, Seth Carstens
  */
 class GitHub_Theme_Updater {
 
@@ -22,7 +22,7 @@ class GitHub_Theme_Updater {
 		add_filter( 'extra_theme_headers', array( $this, 'add_headers') );
 		$this->get_github_themes();
 
-		if( !empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
+		if( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'site_transient_update_themes', array( $this, 'transient_update_themes_filter') );
 		}
 
@@ -123,7 +123,7 @@ class GitHub_Theme_Updater {
 
 			// Sort and get latest tag
 			$tags = array();
-			if( !($response === false) )
+			if( ! ( false === $response ) )
 				foreach( $response as $num => $tag ) {
 					if( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
