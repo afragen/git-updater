@@ -33,7 +33,8 @@ class GitHub_Theme_Updater {
 	/**
 	 * Add GitHub headers to wp_get_theme
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
+	 *
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
@@ -45,7 +46,7 @@ class GitHub_Theme_Updater {
 	 * Reads in headers of every theme's style.css to get version info.
 	 * Populates variable array
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
 	 */
 	private function get_github_themes() {
 
@@ -72,7 +73,8 @@ class GitHub_Theme_Updater {
 	/**
 	 * Call the GitHub API and return a json decoded body.
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
+	 *
 	 * @param string $url
 	 * @see http://developer.github.com/v3/
 	 * @return boolean|object
@@ -92,7 +94,7 @@ class GitHub_Theme_Updater {
 	 *
 	 * Uses a transient to limit the calls to the API.
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
 	 */
 	protected function get_remote_info( $url ) {
 
@@ -110,7 +112,8 @@ class GitHub_Theme_Updater {
 	/**
 	 * Finds newest tag and compares to current tag
 	 *
-	 * @since 1.0
+	 * @since 1.0.0
+	 *
 	 * @param array $data
 	 * @return array|object
 	 */
@@ -160,10 +163,11 @@ class GitHub_Theme_Updater {
 	}
 
 	/**
-	 *	Github delivers zip files as <Username>-<TagName>-<Hash>.zip
-	 *	must rename this zip file to the accurate theme folder
+	 * Rename the zip folder to be the same as the existing theme folder.
 	 *
-	 * @since 1.0
+	 * Github delivers zip files as <Repo>-<Tag>.zip
+	 *
+	 * @since 1.0.0
 	 * 
 	 * @global WP_Filesystem $wp_filesystem
 	 *
