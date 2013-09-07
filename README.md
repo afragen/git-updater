@@ -82,6 +82,8 @@ Text Domain:       github-updater
 */
 ~~~
 
+Optional plugin headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
+
 The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
 
 ## Issues

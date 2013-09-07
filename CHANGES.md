@@ -1,5 +1,11 @@
 # ChangeLog for GitHub Updater
 
+## 1.5.0
+
+* Lots of documentation and some bug fixes. Thanks @GaryJones
+* Made version checking regex more compatible. Thanks @GaryJones
+* Added ability to define branch to update.
+
 ## 1.4.3
 
 * Fixed a couple of non-fatal PHP errors. Thanks @jazzsequence
