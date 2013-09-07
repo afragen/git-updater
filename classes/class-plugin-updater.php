@@ -289,6 +289,7 @@ class GitHub_Plugin_Updater {
 	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
 
 		global $wp_filesystem;
+		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
 		if ( isset( $source ) ) {
 			for ( $i = 0; $i < count( $this->config ); $i++ ) {
@@ -297,27 +298,31 @@ class GitHub_Plugin_Updater {
 			}
 		}
 
-		if ( isset( $_GET['action'] ) && ( stristr( $_GET['action'], 'update-selected' ) || stristr( $_GET['action'], 'upgrade-plugin' ) ) ) {
-			if ( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
-				$upgrader->skin->feedback(
-					sprintf(
-						__( 'Renaming %s to %s...', 'github-updater' ),
-						'<span class="code">' . basename( $source ) . '</span>',
-						'<span class="code">' . basename( $corrected_source ) . '</span>'
-					)
-				);
-				if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-					$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
-					return $corrected_source;
-				} else {
-					$upgrader->skin->feedback( __( 'Unable to rename downloaded plugin.', 'github-updater' ) );
-					return new WP_Error();
+		if ( isset( $_GET['action'] ) ) {
+			parse_str( $_GET['action'], $action );
+			$action = key( $action );
+			if ( in_array( $action, $update, true ) ) {
+				if ( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
+					$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
+					$upgrader->skin->feedback(
+						sprintf(
+							__( 'Renaming %s to %s...', 'github-updater' ),
+							'<span class="code">' . basename( $source ) . '</span>',
+							'<span class="code">' . basename( $corrected_source ) . '</span>'
+						)
+					);
+					if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+						$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
+						return $corrected_source;
+					} else {
+						$upgrader->skin->feedback( __( 'Unable to rename downloaded plugin.', 'github-updater' ) );
+						return new WP_Error();
+					}
 				}
 			}
-		}
 
-		return $source;
+			return $source;
+		}
 	}
 
 	/**

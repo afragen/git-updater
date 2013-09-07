@@ -178,39 +178,48 @@ class GitHub_Theme_Updater {
 	 * 
 	 * @global WP_Filesystem $wp_filesystem
 	 *
-	 * @param string
+	 * @param string $source
+	 * @param string $remote_source Optional.
+	 * @param object $upgrader      Optional.
+	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
+	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
 
 		global $wp_filesystem;
+		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
-		if ( isset( $source, $this->config['theme'] ) )
+		if ( isset( $source, $this->config['theme'] ) ) {
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
 				if ( stristr( basename( $source ), $this->config['theme'][$i] ) )
 					$theme = $this->config['theme'][$i];
 			}
+		}
 
-		if ( isset( $_GET['action'] ) && ( stristr( $_GET['action'], 'update-selected' ) || stristr( $_GET['action'], 'upgrade-theme' ) ) ) {
-			if ( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
-				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
-				$upgrader->skin->feedback(
-					sprintf(
-						__( 'Renaming %s to %s...', 'github-updater' ),
-						'<span class="code">' . basename( $source ) . '</span>',
-						'<span class="code">' . basename( $corrected_source ) . '</span>'
-					)
-				);
-				if( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-					$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
-					return $corrected_source;
-				} else {
-					$upgrader->skin->feedback( __( 'Unable to rename downloaded theme.', 'github-updater' ) );
-					return new WP_Error();
+		if ( isset( $_GET['action'] ) ) {
+			parse_str( $_GET['action'], $action );
+			$action = key( $action );
+			if ( in_array( $action, $update, true ) ) {
+				if ( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
+					$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
+					$upgrader->skin->feedback(
+						sprintf(
+							__( 'Renaming %s to %s...', 'github-updater' ),
+							'<span class="code">' . basename( $source ) . '</span>',
+							'<span class="code">' . basename( $corrected_source ) . '</span>'
+						)
+					);
+					if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+						$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
+						return $corrected_source;
+					} else {
+						$upgrader->skin->feedback( __( 'Unable to rename downloaded theme.', 'github-updater' ) );
+						return new WP_Error();
+					}
 				}
 			}
+			return $source;
 		}
-		return $source;
 	}
 
 	/**
