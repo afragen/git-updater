@@ -142,7 +142,7 @@ class GitHub_Plugin_Updater {
 		}
 
 		if ( ! empty( $this->github_plugin['access_token'] ) )
-			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'] );
+			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
 	}
