@@ -22,7 +22,7 @@ class GitHub_Theme_Updater {
 		add_filter( 'extra_theme_headers', array( $this, 'add_headers') );
 		$this->get_github_themes();
 
-		if( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
+		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'site_transient_update_themes', array( $this, 'transient_update_themes_filter') );
 		}
 
@@ -52,13 +52,13 @@ class GitHub_Theme_Updater {
 		$this->config = array();
 		$themes = wp_get_themes();
 
-		foreach( $themes as $theme ) {
+		foreach ( $themes as $theme ) {
 			//regex for standard URI, only special character '-'
 			$github_header_regex = '#s[\:0-9]+\"(GitHub Theme URI)\";s[\:0-9]+\"([a-z0-9_\:\/\.-]+)#i';
 			$serialized_theme = serialize( $theme );
 			preg_match( $github_header_regex, $serialized_theme, $matches );
 
-			if( empty( $matches[2] ) )
+			if ( empty( $matches[2] ) )
 				continue;
 
 			$this->config['theme'][]                                = $theme->stylesheet;
@@ -81,7 +81,7 @@ class GitHub_Theme_Updater {
 
 		$response = wp_remote_get( $url );
 
-		if( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
@@ -98,9 +98,9 @@ class GitHub_Theme_Updater {
 
 		$remote = get_site_transient( md5( $url ) ) ;
 
-		if( ! $remote ) {
+		if ( ! $remote ) {
 			$remote = $this->api( $url );
-			if( $remote )
+			if ( $remote )
 				set_site_transient( md5( $url ), $remote, 60*60 );
 
 		}
@@ -116,22 +116,22 @@ class GitHub_Theme_Updater {
 	 */
 	public function transient_update_themes_filter( $data ){
 
-		foreach( $this->config as $theme => $theme_data ) {
-			if( empty( $theme_data['GitHub_API_URI'] ) ) continue;
+		foreach ( $this->config as $theme => $theme_data ) {
+			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
 			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
 
 			// Sort and get latest tag
 			$tags = array();
-			if( ! ( false === $response ) )
+			if ( false !== $response )
 				foreach( $response as $num => $tag ) {
-					if( isset( $tag->name ) ) $tags[] = $tag->name;
+					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
 			usort( $tags, "version_compare" );
 
 			// check and generate download link
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if( $newest_tag_key ) {
+			if ( $newest_tag_key ) {
 				$newest_tag = $tags[ $newest_tag_key ];
 			} else {
 				$newest_tag = null;
@@ -139,15 +139,15 @@ class GitHub_Theme_Updater {
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
-			if( !empty( $newest_tag ) ) {
+			if ( ! empty( $newest_tag ) ) {
 				// setup update array to append version info
 				$update = array();
 				$update['new_version'] = $newest_tag;
 				$update['url']         = $theme_data['GitHub_Theme_URI'];
 				$update['package']     = $download_link;
 
-				if( !is_null($theme_data['theme-data']->Version) )
-					if( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
+				if ( ! is_null($theme_data['theme-data']->Version) )
+					if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
 						// up-to-date!
 						$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
 						$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
@@ -169,17 +169,17 @@ class GitHub_Theme_Updater {
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source=NULL, $upgrader=NULL ) {
 
-		if( isset( $source, $this->config['theme'] ) )
+		if ( isset( $source, $this->config['theme'] ) )
 			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
-				if( stristr( basename( $source ), $this->config['theme'][$i] ) )
+				if ( stristr( basename( $source ), $this->config['theme'][$i] ) )
 					$theme = $this->config['theme'][$i];
 			}
 
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
-			if( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
+		if ( isset( $_GET['action'] ) && stristr( $_GET['action'], 'theme' ) )
+			if ( isset( $source, $remote_source, $theme ) && stristr( basename( $source ), $theme ) ) {
 				$upgrader->skin->feedback( __( 'Trying to customize theme folder name...', 'github-updater' ) );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
-				if( @rename( $source, $corrected_source ) ) {
+				if ( @rename( $source, $corrected_source ) ) {
 					$upgrader->skin->feedback( __( 'Theme folder name corrected to: ', 'github-updater' ) . $theme );
 					return $corrected_source;
 				} else {

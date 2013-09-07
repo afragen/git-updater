@@ -22,7 +22,7 @@ Text Domain:       github-updater
 */
 
 // Load base classes and Launch
-if( is_admin() ) {
+if ( is_admin() ) {
 	require_once 'classes/class-theme-updater.php';
 	require_once 'classes/class-plugin-updater.php';
 	new GitHub_Theme_Updater;
