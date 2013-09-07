@@ -255,6 +255,8 @@ class GitHub_Plugin_Updater {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @global WP_Filesystem $wp_filesystem
+	 *
 	 * @param string $source
 	 * @param string $remote_source Optional.
 	 * @param object $upgrader      Optional.
@@ -271,10 +273,16 @@ class GitHub_Plugin_Updater {
 
 		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
 			if( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
-				$upgrader->skin->feedback( __( 'Trying to customize plugin folder name...', 'github-updater' ) );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
-				if( @rename( $source, $corrected_source ) ) {
-					$upgrader->skin->feedback( __( 'Plugin folder name corrected to: ', 'github-updater' ) . $plugin );
+				$upgrader->skin->feedback(
+					sprintf(
+						__( 'Renaming %s to %s...', 'github-updater' ),
+						'<span class="code">' . basename( $source ) . '</span>',
+						'<span class="code">' . basename( $corrected_source ) . '</span>'
+					)
+				);
+				if( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+					$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
 					return $corrected_source;
 				} else {
 					$upgrader->skin->feedback( __( 'Unable to rename downloaded plugin.', 'github-updater' ) );
