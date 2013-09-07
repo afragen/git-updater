@@ -5,6 +5,8 @@
 * Lots of documentation and some bug fixes. Thanks @GaryJones
 * Made version checking regex more compatible. Thanks @GaryJones
 * Added ability to define branch to update.
+* Refactored plugin/theme renaming code
+* Added `GitHub Branch` feature - Thanks @GaryJones
 
 ## 1.4.3
 
