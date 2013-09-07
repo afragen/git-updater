@@ -29,7 +29,7 @@ class GitHub_Plugin_Updater {
 		add_filter( 'extra_plugin_headers', array( $this, 'add_headers' ) );
 
 		$this->config = $this->get_plugin_meta();
-		
+
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_available' ) );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
@@ -49,7 +49,7 @@ class GitHub_Plugin_Updater {
 		$plugins = get_plugins();
 		$i = 0;
 		$arr = array();
-		
+
 		foreach( $plugins as $plugin => $headers ) {
 			if( ! empty($headers['GitHub Plugin URI']) ) {
 				$repo = explode( '/', ltrim( parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH ), '/' ) );
@@ -103,7 +103,7 @@ class GitHub_Plugin_Updater {
 		}
 
 		if( ! empty( $this->github_plugin['access_token'] ) )
-			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'] );
+			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
 	}
@@ -197,11 +197,11 @@ class GitHub_Plugin_Updater {
 		return $transient;
 	}
 
-	
+
 	/**
 	 *	Github delivers zip files as <Username>-<TagName>.zip
 	 *	must rename this zip file to the accurate plugin folder
-	 * 
+	 *
 	 * @since 1.0
 	 * @param string
 	 * @return string
