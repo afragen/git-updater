@@ -145,6 +145,11 @@ class GitHub_Plugin_Updater {
 		if ( ! empty( $this->github_plugin['access_token'] ) )
 			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
 
+		// If a branch has been given, only check that for the remote info.
+		// If it's not been given, GitHub will use the Default branch.
+		if ( ! empty( $this->github_plugin['branch'] ) )
+			$endpoint = add_query_arg( 'ref', $this->github_plugin['branch'], $endpoint );
+
 		return 'https://api.github.com' . $endpoint;
 	}
 
@@ -204,6 +209,28 @@ class GitHub_Plugin_Updater {
 	}
 
 	/**
+	 * Parse the remote info to find what the default branch is.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return string Default branch name.
+	 */
+	protected function get_default_branch() {
+		// If we've had to call this default branch method, we know that a branch header has not been provided. As such
+		// the remote info was retrieved without a ?ref=... query argument.
+		$response = $this->get_remote_info();
+
+		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
+		if ( ! $response )
+			return 'master';
+
+		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
+		$components = parse_url( $response->url, PHP_URL_QUERY );
+		parse_str( $components );
+		return $ref;
+	}
+
+	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
 	 *
 	 * The branch to download is hard-coded as the Master branch. Consider using Git-Flow so that Master is always clean.
@@ -224,7 +251,10 @@ class GitHub_Plugin_Updater {
 			$this->github_plugin = $plug;
 			$local_version  = $this->get_local_version();
 			$remote_version = $this->get_remote_version();
-			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/master.zip';
+
+			$branch = $this->github_plugin['branch'] ? $this->github_plugin['branch'] : $this->get_default_branch();
+
+			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
 
 			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(
