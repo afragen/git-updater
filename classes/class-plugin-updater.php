@@ -194,7 +194,7 @@ class GitHub_Plugin_Updater {
 		if( ! $response )
 			return false;
 
-		preg_match( '#^\s*Version\:\s*(.*)$#im', base64_decode( $response->content ), $matches );
+		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
 
 		if( ! empty( $matches[1] ) )
 			return $matches[1];
