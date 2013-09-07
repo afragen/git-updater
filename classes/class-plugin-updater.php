@@ -141,7 +141,7 @@ class GitHub_Plugin_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->github_plugin['access_token'] ) )
+		if( ! empty( $this->github_plugin['access_token'] ) )
 			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
