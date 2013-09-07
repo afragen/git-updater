@@ -58,13 +58,14 @@ class GitHub_Theme_Updater {
 			$serialized_theme = serialize( $theme );
 			preg_match( $github_header_regex, $serialized_theme, $matches );
 
-			if( ! empty( $matches[2] ) ) {
-				$this->config['theme'][]                                = $theme->stylesheet;
-				$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-				$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = $matches[2];
-				$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos' . parse_url( $matches[2], PHP_URL_PATH );
-				$this->config[ $theme->stylesheet ]['theme-data']       = wp_get_theme( $theme->stylesheet );
-			}
+			if( empty( $matches[2] ) )
+				continue;
+
+			$this->config['theme'][]                                = $theme->stylesheet;
+			$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
+			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = $matches[2];
+			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos' . parse_url( $matches[2], PHP_URL_PATH );
+			$this->config[ $theme->stylesheet ]['theme-data']       = wp_get_theme( $theme->stylesheet );
 		}
 	}
 
