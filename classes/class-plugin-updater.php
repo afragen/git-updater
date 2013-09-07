@@ -78,7 +78,7 @@ class GitHub_Plugin_Updater {
 		$github_plugins = array();
 		$i              = 0;
 
-		foreach( $plugins as $plugin => $headers ) {
+		foreach ( $plugins as $plugin => $headers ) {
 			if ( empty( $headers['GitHub Plugin URI'] ) )
 				continue;
 
@@ -108,7 +108,7 @@ class GitHub_Plugin_Updater {
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
@@ -138,11 +138,11 @@ class GitHub_Plugin_Updater {
 		 */
 		$segments = apply_filters( 'github_updater_api_segments', $segments );
 
-		foreach( $segments as $segment => $value ) {
+		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if( ! empty( $this->github_plugin['access_token'] ) )
+		if ( ! empty( $this->github_plugin['access_token'] ) )
 			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
@@ -158,10 +158,10 @@ class GitHub_Plugin_Updater {
 	protected function get_remote_info() {
 		$remote = get_site_transient( md5( $this->github_plugin['slug'] ) );
 
-		if( ! $remote ) {
+		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . basename( $this->github_plugin['slug'] ) );
 
-			if( $remote )
+			if ( $remote )
 				set_site_transient( md5( $this->github_plugin['slug'] ), $remote, HOUR_IN_SECONDS );
 		}
 		return $remote;
@@ -177,7 +177,7 @@ class GitHub_Plugin_Updater {
 	protected function get_local_version() {
 		$data = get_plugin_data( WP_PLUGIN_DIR . '/' . $this->github_plugin['slug'] );
 
-		if( ! empty( $data['Version'] ) )
+		if ( ! empty( $data['Version'] ) )
 			return $data['Version'];
 
 		return false;
@@ -192,12 +192,12 @@ class GitHub_Plugin_Updater {
 	 */
 	protected function get_remote_version() {
 		$response = $this->get_remote_info();
-		if( ! $response )
+		if ( ! $response )
 			return false;
 
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
 
-		if( ! empty( $matches[1] ) )
+		if ( ! empty( $matches[1] ) )
 			return $matches[1];
 
 		return false;
@@ -217,16 +217,16 @@ class GitHub_Plugin_Updater {
 	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
 	 */
 	public function update_available( $transient ) {
-		if( empty( $transient->checked ) )
+		if ( empty( $transient->checked ) )
 			return $transient;
 
-		foreach( $this->config as $plug ) {
+		foreach ( $this->config as $plug ) {
 			$this->github_plugin = $plug;
 			$local_version  = $this->get_local_version();
 			$remote_version = $this->get_remote_version();
 			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/master.zip';
 
-			if( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
+			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(
 					'slug'        => dirname( $this->github_plugin['slug'] ),
 					'new_version' => $remote_version,
@@ -255,18 +255,18 @@ class GitHub_Plugin_Updater {
 	 * @return string
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
-		if( isset( $source ) ) {
-			for( $i = 0; $i < count( $this->config ); $i++ ) {
-				if( stristr( basename( $source ), $this->config[$i]['repo'] ) )
+		if ( isset( $source ) ) {
+			for ( $i = 0; $i < count( $this->config ); $i++ ) {
+				if ( stristr( basename( $source ), $this->config[$i]['repo'] ) )
 					$plugin = $this->config[$i]['repo'];
 			}
 		}
 
-		if( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
-			if( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
+		if ( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
+			if ( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
 				$upgrader->skin->feedback( __( 'Trying to customize plugin folder name...', 'github-updater' ) );
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
-				if( @rename( $source, $corrected_source ) ) {
+				if ( @rename( $source, $corrected_source ) ) {
 					$upgrader->skin->feedback( __( 'Plugin folder name corrected to: ', 'github-updater' ) . $plugin );
 					return $corrected_source;
 				} else {
