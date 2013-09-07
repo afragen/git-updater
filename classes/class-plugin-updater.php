@@ -257,6 +257,9 @@ class GitHub_Plugin_Updater {
 	 * @return string
 	 */
 	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
+
+		global $wp_filesystem;
+
 		if ( isset( $source ) ) {
 			for ( $i = 0; $i < count( $this->config ); $i++ ) {
 				if ( stristr( basename( $source ), $this->config[$i]['repo'] ) )
@@ -264,7 +267,7 @@ class GitHub_Plugin_Updater {
 			}
 		}
 
-		if ( isset( $_GET['action'] ) && stristr( $_GET['action'], 'update-selected' ) ) {
+		if ( isset( $_GET['action'] ) && ( stristr( $_GET['action'], 'update-selected' ) || stristr( $_GET['action'], 'upgrade-plugin' ) ) ) {
 			if ( isset( $source, $remote_source, $plugin ) && stristr( basename( $source ), $plugin ) ) {
 				$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
 				$upgrader->skin->feedback(
