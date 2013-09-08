@@ -110,7 +110,7 @@ class GitHub_Theme_Updater {
 		if ( ! $remote ) {
 			$remote = $this->api( $url );
 			if ( $remote )
-				set_site_transient( md5( $url ), $remote, 60*60 );
+				set_site_transient( md5( $url ), $remote, HOUR_IN_SECONDS );
 
 		}
 		return $remote;
