@@ -267,7 +267,6 @@ class GitHub_Plugin_Updater {
 				$transient->response[ $this->github_plugin['slug'] ] = (object) $plugin;
 			}
 		}
-
 		return $transient;
 	}
 

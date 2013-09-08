@@ -111,7 +111,6 @@ class GitHub_Theme_Updater {
 			$remote = $this->api( $url );
 			if ( $remote )
 				set_site_transient( md5( $url ), $remote, HOUR_IN_SECONDS );
-
 		}
 		return $remote;
 	}
@@ -134,7 +133,7 @@ class GitHub_Theme_Updater {
 			// Sort and get latest tag
 			$tags = array();
 			if ( false !== $response )
-				foreach( $response as $num => $tag ) {
+				foreach ( $response as $num => $tag ) {
 					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
 			usort( $tags, "version_compare" );
@@ -149,23 +148,28 @@ class GitHub_Theme_Updater {
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
-			if ( ! empty( $newest_tag ) ) {
-				// setup update array to append version info
-				$update = array();
-				$update['new_version'] = $newest_tag;
-				$update['url']         = $theme_data['GitHub_Theme_URI'];
-				$update['package']     = $download_link;
+			// if no tag set then abort
+			if ( empty( $newest_tag ) )
+				return false;
+			
+			// setup update array to append version info
+			$update = array();
+			$update['new_version'] = $newest_tag;
+			$update['url']         = $theme_data['GitHub_Theme_URI'];
+			$update['package']     = $download_link;
 
-				if ( ! is_null($theme_data['theme-data']->Version) )
-					if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
-						// up-to-date!
-						$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
-						$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
-					} else {
-						$data->response[ $theme_data['theme_key'] ] = $update;
-					}
-				}
+			// if there is no version number abort
+			if ( is_null($theme_data['theme-data']->Version) )
+				return false;
+
+			if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
+				// up-to-date!
+				$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
+				$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
+			} else {
+				$data->response[ $theme_data['theme_key'] ] = $update;
 			}
+		}
 		return $data;
 	}
 
