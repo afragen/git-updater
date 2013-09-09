@@ -301,7 +301,7 @@ class GitHub_Plugin_Updater {
 		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
 			return $source;
 
-		// If the values aren't set, or it's not a GitHub-sourced plugin, abort
+		// If the values aren't set, or it's not GitHub-sourced, abort
 		if ( ! isset( $source, $remote_source, $plugin ) || false === stristr( basename( $source ), $plugin ) )
 			return $source;
 

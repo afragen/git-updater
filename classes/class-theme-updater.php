@@ -126,7 +126,6 @@ class GitHub_Theme_Updater {
 	public function transient_update_themes_filter( $data ){
 
 		foreach ( $this->config as $theme => $theme_data ) {
-			$newest_tag = null;
 			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
 			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
@@ -140,6 +139,7 @@ class GitHub_Theme_Updater {
 			usort( $tags, "version_compare" );
 
 			// check and generate download link
+			$newest_tag = null;
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 			if ( $newest_tag_key )
 				$newest_tag = $tags[ $newest_tag_key ];
@@ -198,7 +198,7 @@ class GitHub_Theme_Updater {
 		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
 			return $source;
 
-		// If the values aren't set, or it's not a GitHub-sourced plugin, abort
+		// If the values aren't set, or it's not GitHub-sourced, abort
 		if ( ! isset( $source, $remote_source, $theme ) || false === stristr( basename( $source ), $theme ) )
 			return $source;
 
