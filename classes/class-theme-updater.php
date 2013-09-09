@@ -126,6 +126,7 @@ class GitHub_Theme_Updater {
 	public function transient_update_themes_filter( $data ){
 
 		foreach ( $this->config as $theme => $theme_data ) {
+			$newest_tag = null;
 			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
 			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
@@ -140,27 +141,20 @@ class GitHub_Theme_Updater {
 
 			// check and generate download link
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if ( $newest_tag_key ) {
+			if ( $newest_tag_key )
 				$newest_tag = $tags[ $newest_tag_key ];
-			} else {
-				$newest_tag = null;
-			}
+
+			// if no tag set or no version number then abort
+			if ( empty( $newest_tag ) || is_null( $theme_data['theme-data']->Version ) )
+				return false;
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
-			// if no tag set then abort
-			if ( empty( $newest_tag ) )
-				return false;
-			
 			// setup update array to append version info
 			$update = array();
 			$update['new_version'] = $newest_tag;
 			$update['url']         = $theme_data['GitHub_Theme_URI'];
 			$update['package']     = $download_link;
-
-			// if there is no version number abort
-			if ( is_null($theme_data['theme-data']->Version) )
-				return false;
 
 			if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
 				// up-to-date!
