@@ -90,6 +90,8 @@ The only extra character allowed in a URI is `-`. Let me know if there is a need
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
 
+If you are using a WordPress Multisite installation, theme updating only works when the plugin has been activated inside each blog. That means no Network Activation - for now.
+
 ## ChangeLog
 
 See [CHANGES.md](CHANGES.md).
