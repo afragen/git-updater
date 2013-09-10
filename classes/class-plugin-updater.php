@@ -132,7 +132,7 @@ class GitHub_Plugin_Updater {
 		/**
  		 * Add or filter the available segments that are used to replace placeholders.
 		 *
-		 * @since 1.4.4
+		 * @since 1.5.0
 		 *
 		 * @param array $segments List of segments.
 		 */
