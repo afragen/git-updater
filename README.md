@@ -60,7 +60,7 @@ Version: 0.1.0
 Description: Child theme of TwentyTwelve.
 Author: Andy Fragen
 Template: twentytwelve
-Template Version: 1.0
+Template Version: 1.0.0
 */
 ~~~
 

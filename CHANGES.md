@@ -8,6 +8,7 @@
 * Refactored plugin/theme renaming code.
 * Added `GitHub Branch` feature - Thanks @GaryJones
 * Trying to comply with WP Coding Standards.
+* Major thanks to @GaryJones for all the pull requests and generally improving this project.
 
 ## 1.4.3
 
