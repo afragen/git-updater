@@ -12,7 +12,7 @@ This plugin was designed to simply update any GitHub hosted WordPress plugin or 
 
 or 
 
-`GitHub Plugin URI: https://github.com/afragen/github-updater`
+`GitHub Plugin URI: afragen/github-updater`
 
 ...where the above URL leads to the repository of your theme or plugin.
 
@@ -71,7 +71,7 @@ In your plugin the following is an example. You do not need to create a tag in G
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-GitHub Plugin URI: https://github.com/afragen/github-updater
+GitHub Plugin URI: afragen/github-updater
 Description: Plugin and Theme Updater classes to pull updates of the GitHub based plugins and themes into wordpress. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>.
 Version:           1.0.0
 Author:            Andy Fragen
