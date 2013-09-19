@@ -17,7 +17,7 @@
 class GitHub_Plugin_Updater {
 
 	/**
-	 * Store details of all Git-sourced plugins that are installed.
+	 * Store details of all GitHub-sourced plugins that are installed.
 	 *
 	 * @since 1.0.0
 	 *
@@ -74,20 +74,14 @@ class GitHub_Plugin_Updater {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins        = get_plugins();
-		$i              = 0;
+		$plugins = get_plugins();
 
 		foreach ( $plugins as $plugin => $headers ) {
 			$git_repo = $this->get_repo_info( $headers );
 			if ( empty( $git_repo['owner'] ) )
 				continue;
-
-			foreach ( $git_repo as $key => $value ) {
-				$github_plugins[$i][ $key ] = $value;
-			}
-
-			$github_plugins[$i]['slug'] = $plugin;
-			$i++;
+			$git_repo['slug'] = $plugin;
+			$github_plugins[] = $git_repo;
 		}
 
 		return $github_plugins;
@@ -101,7 +95,7 @@ class GitHub_Plugin_Updater {
 	* @return array of repo information
 	*
 	*/
-	private function get_repo_info( $headers ) {
+	protected function get_repo_info( $headers ) {
 		$extra_headers = $this->add_headers( null );
 
 		foreach ( $extra_headers as $key => $value ) {
@@ -109,8 +103,8 @@ class GitHub_Plugin_Updater {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
-					$repo_uri = 'https://github.com/';
-					$repo     = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					$repo_uri   = 'https://github.com/';
+					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					break;
 				case 'GitHub Access Token':
 					$git_repo['access_token'] = $headers['GitHub Access Token'];
@@ -122,12 +116,11 @@ class GitHub_Plugin_Updater {
 		}
 
 		// strip surrounding slashes
-		$repo = ltrim( $repo, '/' );
-		$repo = rtrim( $repo, '/' );
-		$git_repo['uri'] = $repo_uri . $repo;
-		$repo = explode( '/', $repo );
-		$git_repo['owner'] = $repo[0];
-		$git_repo['repo']  = $repo[1];
+		$owner_repo = trim( $owner_repo, '/' );
+		$git_repo['uri'] = $repo_uri . $owner_repo;
+		$owner_repo = explode( '/', $owner_repo );
+		$git_repo['owner'] = $owner_repo[0];
+		$git_repo['repo']  = $owner_repo[1];
 
 		return $git_repo;
 	}
