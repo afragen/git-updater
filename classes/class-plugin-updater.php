@@ -104,6 +104,10 @@ class GitHub_Plugin_Updater {
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
 					$repo_uri   = 'https://github.com/';
+
+					// parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
+					// (in addition to the long url format), or it's coincidentally returning all of the short			
+					// URL string, which is what we want  anyway.
 					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					break;
 				case 'GitHub Access Token':
