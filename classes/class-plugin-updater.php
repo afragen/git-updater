@@ -74,24 +74,59 @@ class GitHub_Plugin_Updater {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins        = get_plugins();
-		$github_plugins = array();
-		$i              = 0;
+		$plugins = get_plugins();
 
 		foreach ( $plugins as $plugin => $headers ) {
-			if ( empty( $headers['GitHub Plugin URI'] ) )
+			$git_repo = $this->get_repo_info( $headers );
+			if ( empty( $git_repo['owner'] ) )
 				continue;
-
-			$repo = explode( '/', ltrim( parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH ), '/' ) );
-			$github_plugins[$i]['owner']        = $repo[0];
-			$github_plugins[$i]['repo']         = $repo[1];
-			$github_plugins[$i]['slug']         = $plugin;
-			$github_plugins[$i]['uri']          = $headers['GitHub Plugin URI'];
-			$github_plugins[$i]['access_token'] = $headers['GitHub Access Token'];
-			$github_plugins[$i]['branch']       = $headers['GitHub Branch'];
-			$i++;
+			$git_repo['slug'] = $plugin;
+			$github_plugins[] = $git_repo;
 		}
+
 		return $github_plugins;
+	}
+
+	/**
+	* Parse extra headers to determine repo type and populate info
+	*
+	* @since 1.5.1
+	* @param array of extra headers
+	* @return array of repo information
+	*
+	*/
+	protected function get_repo_info( $headers ) {
+		$extra_headers = $this->add_headers( null );
+
+		foreach ( $extra_headers as $key => $value ) {
+			switch( $value ) {
+				case 'GitHub Plugin URI':
+					if ( empty( $headers['GitHub Plugin URI'] ) )
+						return;
+					$repo_uri   = 'https://github.com/';
+
+					// parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
+					// (in addition to the long url format), or it's coincidentally returning all of the short			
+					// URL string, which is what we want  anyway.
+					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					break;
+				case 'GitHub Access Token':
+					$git_repo['access_token'] = $headers['GitHub Access Token'];
+					break;
+				case 'GitHub Branch':
+					$git_repo['branch'] = $headers['GitHub Branch'];
+					break;
+			}
+		}
+
+		// strip surrounding slashes
+		$owner_repo = trim( $owner_repo, '/' );
+		$git_repo['uri'] = $repo_uri . $owner_repo;
+		$owner_repo = explode( '/', $owner_repo );
+		$git_repo['owner'] = $owner_repo[0];
+		$git_repo['repo']  = $owner_repo[1];
+
+		return $git_repo;
 	}
 
 	/**
