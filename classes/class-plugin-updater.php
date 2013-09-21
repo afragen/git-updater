@@ -157,8 +157,8 @@ class GitHub_Plugin_Updater {
 	 */
 	protected function get_api_url( $endpoint ) {
 		$segments = array(
-			'owner'          => $this->github_plugin['owner'],
-			'repo'           => $this->github_plugin['repo'],
+			'owner' => $this->github_plugin['owner'],
+			'repo'  => $this->github_plugin['repo'],
 		);
 
 		/**
