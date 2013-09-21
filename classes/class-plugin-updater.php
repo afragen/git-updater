@@ -103,12 +103,16 @@ class GitHub_Plugin_Updater {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
-					$repo_uri   = 'https://github.com/';
 
 					// parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
 					// (in addition to the long url format), or it's coincidentally returning all of the short			
-					// URL string, which is what we want  anyway.
+					// URL string, which is what we want anyway.
 					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri'] = 'https://github.com/' . $owner_repo;
+					$owner_repo = explode( '/', $owner_repo );
+					$git_repo['owner'] = $owner_repo[0];
+					$git_repo['repo']  = $owner_repo[1];
 					break;
 				case 'GitHub Access Token':
 					$git_repo['access_token'] = $headers['GitHub Access Token'];
@@ -118,13 +122,6 @@ class GitHub_Plugin_Updater {
 					break;
 			}
 		}
-
-		// strip surrounding slashes
-		$owner_repo = trim( $owner_repo, '/' );
-		$git_repo['uri'] = $repo_uri . $owner_repo;
-		$owner_repo = explode( '/', $owner_repo );
-		$git_repo['owner'] = $owner_repo[0];
-		$git_repo['repo']  = $owner_repo[1];
 
 		return $git_repo;
 	}
