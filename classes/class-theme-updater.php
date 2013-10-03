@@ -63,16 +63,19 @@ class GitHub_Theme_Updater {
 		foreach ( $themes as $theme ) {
 			//regex for standard URI, only special character '-'
 			$github_header_regex = '#s[\:0-9]+\"(GitHub Theme URI)\";s[\:0-9]+\"([a-z0-9_\:\/\.-]+)#i';
-			$serialized_theme = serialize( $theme );
+			$serialized_theme    = serialize( $theme );
 			preg_match( $github_header_regex, $serialized_theme, $matches );
 
 			if ( empty( $matches[2] ) )
 				continue;
 
+			$owner_repo = parse_url( $matches[2], PHP_URL_PATH );
+			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
+
 			$this->config['theme'][]                                = $theme->stylesheet;
 			$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = $matches[2];
-			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos' . parse_url( $matches[2], PHP_URL_PATH );
+			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = 'https://github.com/' . $owner_repo;
+			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos/' . $owner_repo;
 			$this->config[ $theme->stylesheet ]['theme-data']       = wp_get_theme( $theme->stylesheet );
 		}
 	}
