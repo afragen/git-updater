@@ -1,9 +1,10 @@
 # ChangeLog for GitHub Updater
 
-## 1.5.1
+## 1.6.0
 
- * Added separate method to parse repo info from header
+ * Added separate method to parse plugin repo info from header
  * Shortened GitHub Plugin URI to only use owner/repo
+ * Shortened GitHub Theme URI to only use owner/repo
 
 ## 1.5.0
 

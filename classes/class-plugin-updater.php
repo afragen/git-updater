@@ -90,9 +90,13 @@ class GitHub_Plugin_Updater {
 	/**
 	* Parse extra headers to determine repo type and populate info
 	*
-	* @since 1.5.1
+	* @since 1.6.0
 	* @param array of extra headers
 	* @return array of repo information
+	*
+	* parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
+	* (in addition to the long url format), or it's coincidentally returning all of the short
+	* URL string, which is what we want anyway.
 	*
 	*/
 	protected function get_repo_info( $headers ) {
@@ -104,9 +108,6 @@ class GitHub_Plugin_Updater {
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
 
-					// parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
-					// (in addition to the long url format), or it's coincidentally returning all of the short			
-					// URL string, which is what we want anyway.
 					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
 					$git_repo['uri'] = 'https://github.com/' . $owner_repo;

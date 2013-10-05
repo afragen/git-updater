@@ -8,16 +8,16 @@ This plugin is not allowed in the wp.org repo. :frowning:
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-`GitHub Theme URI: https://github.com/afragen/test-child`
+`GitHub Theme URI: afragen/test-child`
 
 or 
 
 `GitHub Plugin URI: afragen/github-updater`
 
-...where the above URL leads to the repository of your theme or plugin.
+...where the above URI leads to the __owner/repository__ of your theme or plugin.
 
 ## Requirements
- * WordPress 3.4 (tested up to 3.6)
+ * WordPress 3.4 (tested up to 3.6.1)
 
 ## Installation
 
@@ -55,7 +55,7 @@ There must be a `GitHub Theme URI` declaration in the `style.css` file and you *
 /*
 Theme Name: Test
 Theme URI: http://drfragen.info/
-GitHub Theme URI: https://github.com/afragen/test-child
+GitHub Theme URI: afragen/test-child
 Version: 0.1.0
 Description: Child theme of TwentyTwelve.
 Author: Andy Fragen
