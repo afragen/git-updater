@@ -74,24 +74,57 @@ class GitHub_Plugin_Updater {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins        = get_plugins();
-		$github_plugins = array();
-		$i              = 0;
+		$plugins = get_plugins();
 
 		foreach ( $plugins as $plugin => $headers ) {
-			if ( empty( $headers['GitHub Plugin URI'] ) )
+			$git_repo = $this->get_repo_info( $headers );
+			if ( empty( $git_repo['owner'] ) )
 				continue;
-
-			$repo = explode( '/', ltrim( parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH ), '/' ) );
-			$github_plugins[$i]['owner']        = $repo[0];
-			$github_plugins[$i]['repo']         = $repo[1];
-			$github_plugins[$i]['slug']         = $plugin;
-			$github_plugins[$i]['uri']          = $headers['GitHub Plugin URI'];
-			$github_plugins[$i]['access_token'] = $headers['GitHub Access Token'];
-			$github_plugins[$i]['branch']       = $headers['GitHub Branch'];
-			$i++;
+			$git_repo['slug'] = $plugin;
+			$github_plugins[] = $git_repo;
 		}
+
 		return $github_plugins;
+	}
+
+	/**
+	* Parse extra headers to determine repo type and populate info
+	*
+	* @since 1.6.0
+	* @param array of extra headers
+	* @return array of repo information
+	*
+	* parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
+	* (in addition to the long url format), or it's coincidentally returning all of the short
+	* URL string, which is what we want anyway.
+	*
+	*/
+	protected function get_repo_info( $headers ) {
+		$extra_headers = $this->add_headers( null );
+
+		foreach ( $extra_headers as $key => $value ) {
+			switch( $value ) {
+				case 'GitHub Plugin URI':
+					if ( empty( $headers['GitHub Plugin URI'] ) )
+						return;
+
+					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri'] = 'https://github.com/' . $owner_repo;
+					$owner_repo = explode( '/', $owner_repo );
+					$git_repo['owner'] = $owner_repo[0];
+					$git_repo['repo']  = $owner_repo[1];
+					break;
+				case 'GitHub Access Token':
+					$git_repo['access_token'] = $headers['GitHub Access Token'];
+					break;
+				case 'GitHub Branch':
+					$git_repo['branch'] = $headers['GitHub Branch'];
+					break;
+			}
+		}
+
+		return $git_repo;
 	}
 
 	/**
@@ -125,8 +158,8 @@ class GitHub_Plugin_Updater {
 	 */
 	protected function get_api_url( $endpoint ) {
 		$segments = array(
-			'owner'          => $this->github_plugin['owner'],
-			'repo'           => $this->github_plugin['repo'],
+			'owner' => $this->github_plugin['owner'],
+			'repo'  => $this->github_plugin['repo'],
 		);
 
 		/**
