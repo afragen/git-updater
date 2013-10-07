@@ -50,7 +50,7 @@ class GitHub_Theme_Updater {
 	}
 
 	/**
-	 * Reads in headers of every theme's style.css to get version info.
+	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
 	 *
 	 * @since 1.0.0
@@ -61,22 +61,18 @@ class GitHub_Theme_Updater {
 		$themes = wp_get_themes();
 
 		foreach ( $themes as $theme ) {
-			//regex for standard URI, only special character '-'
-			$github_header_regex = '#s[\:0-9]+\"(GitHub Theme URI)\";s[\:0-9]+\"([a-z0-9_\:\/\.-]+)#i';
-			$serialized_theme    = serialize( $theme );
-			preg_match( $github_header_regex, $serialized_theme, $matches );
-
-			if ( empty( $matches[2] ) )
+			$github_uri = $theme->get( 'GitHub Theme URI' );
+			if ( empty( $github_uri ) )
 				continue;
 
-			$owner_repo = parse_url( $matches[2], PHP_URL_PATH );
+			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
 
 			$this->config['theme'][]                                = $theme->stylesheet;
 			$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
 			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = 'https://github.com/' . $owner_repo;
 			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos/' . $owner_repo;
-			$this->config[ $theme->stylesheet ]['theme-data']       = wp_get_theme( $theme->stylesheet );
+			$this->config[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
 		}
 	}
 
@@ -148,7 +144,7 @@ class GitHub_Theme_Updater {
 				$newest_tag = $tags[ $newest_tag_key ];
 
 			// if no tag set or no version number then abort
-			if ( empty( $newest_tag ) || is_null( $theme_data['theme-data']->Version ) )
+			if ( empty( $newest_tag ) || is_null( $theme_data['version'] ) )
 				return false;
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
@@ -159,7 +155,7 @@ class GitHub_Theme_Updater {
 			$update['url']         = $theme_data['GitHub_Theme_URI'];
 			$update['package']     = $download_link;
 
-			if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
+			if ( version_compare( $theme_data['version'],  $newest_tag, '>=' ) ) {
 				// up-to-date!
 				$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
 				$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;

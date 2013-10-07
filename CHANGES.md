@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.7.0
+
+ * updated class-theme-updater.php to utilize WP_Theme class
+
 ## 1.6.0
 
  * Added separate method to parse plugin repo info from header
