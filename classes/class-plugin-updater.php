@@ -108,10 +108,10 @@ class GitHub_Plugin_Updater {
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
 
-					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
-					$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri'] = 'https://github.com/' . $owner_repo;
-					$owner_repo = explode( '/', $owner_repo );
+					$owner_repo        = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					$owner_repo        = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri']   = 'https://github.com/' . $owner_repo;
+					$owner_repo        = explode( '/', $owner_repo );
 					$git_repo['owner'] = $owner_repo[0];
 					$git_repo['repo']  = $owner_repo[1];
 					break;
