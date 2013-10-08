@@ -263,6 +263,41 @@ class GitHub_Plugin_Updater {
 		return $ref;
 	}
 
+
+	/**
+	 * Parse the remote info to find most recent tag if tags exist
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return string latest tag.
+	 */
+	protected function get_remote_tag() {
+		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
+		$response = $this->api( $url );
+
+		// Sort and get latest tag
+		$tags = array();
+		if ( false !== $response )
+			foreach ( $response as $num => $tag ) {
+				if ( isset( $tag->name ) ) $tags[] = $tag->name;
+			}
+		usort( $tags, "version_compare" );
+
+		// check and generate download link
+		$newest_tag = null;
+		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+
+		if ( $newest_tag_key )
+			$newest_tag = $tags[ $newest_tag_key ];
+
+		// if no tag set then abort
+		if ( empty( $newest_tag ) )
+			return false;
+
+		return $newest_tag;
+	}
+
+
 	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
 	 *
@@ -287,7 +322,14 @@ class GitHub_Plugin_Updater {
 
 			$branch = $this->github_plugin['branch'] ? $this->github_plugin['branch'] : $this->get_default_branch();
 
-			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
+			$newest_tag = $this->get_remote_tag();
+
+			// just in case user started using tags then stopped.
+			if ( $remote_version && $newest_tag && version_compare( $newest_tag, $remote_version, '>=' ) ) {
+				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $newest_tag . '.zip';
+			} else {
+				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
+			}
 
 			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(

@@ -3,6 +3,7 @@
 ## 1.7.0
 
  * updated class-theme-updater.php to utilize WP_Theme class
+ * added method to update plugins using tags or branch, depending upon which has greater version number.
 
 ## 1.6.0
 
