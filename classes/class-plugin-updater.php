@@ -298,7 +298,7 @@ class GitHub_Plugin_Updater {
 		usort( $tags, 'version_compare' );
 
 		// check and generate download link
-		$newest_tag = null;
+//		$newest_tag = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 		$newest_tag = $tags[ $newest_tag_key ];
 
