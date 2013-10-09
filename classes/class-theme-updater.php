@@ -30,7 +30,7 @@ class GitHub_Theme_Updater {
 		$this->get_github_themes();
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
-			add_filter( 'site_transient_update_themes', array( $this, 'transient_update_themes_filter') );
+			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
@@ -135,7 +135,7 @@ class GitHub_Theme_Updater {
 				foreach ( $response as $num => $tag ) {
 					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
-			usort( $tags, "version_compare" );
+			usort( $tags, 'version_compare' );
 
 			// check and generate download link
 			$newest_tag = null;
