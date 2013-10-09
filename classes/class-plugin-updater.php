@@ -74,7 +74,8 @@ class GitHub_Plugin_Updater {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins = get_plugins();
+		$plugins        = get_plugins();
+		$github_plugins = array();
 
 		foreach ( $plugins as $plugin => $headers ) {
 			$git_repo = $this->get_repo_info( $headers );
