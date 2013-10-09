@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.6.1
+
+ * bugfix for undeclared variable $github_plugins
+
 ## 1.6.0
 
  * Added separate method to parse plugin repo info from header
