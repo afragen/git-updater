@@ -274,7 +274,16 @@ class GitHub_Plugin_Updater {
 	 */
 	protected function get_remote_tag() {
 		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
-		$response = $this->api( $url );
+		
+		// use transient to avoid too many attempts to GitHub API
+		$response = get_site_transient( md5( $this->github_plugin['slug'] . 'tags' ) );
+
+		if ( ! $response ) {
+			$response = $this->api( $url );
+
+			if ( $response )
+				set_site_transient( md5( $this->github_plugin['slug'] . 'tags' ), $response, HOUR_IN_SECONDS );
+		}
 
 		// Sort and get latest tag
 		$tags = array();
@@ -282,18 +291,19 @@ class GitHub_Plugin_Updater {
 			foreach ( $response as $num => $tag ) {
 				if ( isset( $tag->name ) ) $tags[] = $tag->name;
 			}
-		usort( $tags, "version_compare" );
+		
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
+			
+		usort( $tags, 'version_compare' );
 
 		// check and generate download link
 		$newest_tag = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-
-		if ( $newest_tag_key )
-			$newest_tag = $tags[ $newest_tag_key ];
+		$newest_tag = $tags[ $newest_tag_key ];
 
 		// if no tag set then abort
-		if ( empty( $newest_tag ) )
-			return false;
+//		if ( empty( $newest_tag ) )
+//			return false;
 
 		return $newest_tag;
 	}
