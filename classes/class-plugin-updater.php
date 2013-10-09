@@ -268,6 +268,8 @@ class GitHub_Plugin_Updater {
 	/**
 	 * Parse the remote info to find most recent tag if tags exist
 	 *
+	 * Uses a transient to limit the calls to the API.
+	 *
 	 * @since 1.7.0
 	 *
 	 * @return string latest tag.
@@ -275,7 +277,6 @@ class GitHub_Plugin_Updater {
 	protected function get_remote_tag() {
 		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
 		
-		// use transient to avoid too many attempts to GitHub API
 		$response = get_site_transient( md5( $this->github_plugin['slug'] . 'tags' ) );
 
 		if ( ! $response ) {
