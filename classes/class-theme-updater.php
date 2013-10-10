@@ -50,8 +50,10 @@ class GitHub_Theme_Updater {
 	}
 
 	/**
-	* Get array of themes in multisite, wp_get_themes doesn't seem to work under network activation
-	* this is kludge to workaround
+	* Get array of all themes in multisite
+	*
+	* wp_get_themes doesn't seem to work under network activation in the same way as in a single install.
+	* http://core.trac.wordpress.org/changeset/20152
 	*
 	* @since 1.7.0
 	*
@@ -59,13 +61,11 @@ class GitHub_Theme_Updater {
 	*/
 	private function multisite_get_themes() {
 		$themes     = array();
-		$dir_handle = opendir( get_theme_root() );
-		
-		while ( $dir = readdir( $dir_handle ) ) {
-			$themes[] = wp_get_theme( $dir );
-		}
+		$theme_dirs = scandir( get_theme_root(), SCANDIR_SORT_DESCENDING );
 
-		closedir($dir_handle); //closing the directory
+		foreach ( $theme_dirs as $theme_dir ) {
+			$themes[] = wp_get_theme( $theme_dir );
+		}
 
 		return $themes;
 	}
@@ -131,6 +131,7 @@ class GitHub_Theme_Updater {
 
 		if ( ! $remote ) {
 			$remote = $this->api( $url );
+
 			if ( $remote )
 				set_site_transient( md5( $url ), $remote, HOUR_IN_SECONDS );
 		}
