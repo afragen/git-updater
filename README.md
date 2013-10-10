@@ -65,7 +65,7 @@ Template Version: 1.0.0
 ~~~
 
 ### Plugins 
-In your plugin the following is an example. You do not need to create a tag in GitHub for your plugin version.
+In your plugin the following is an example. You do not need to create a tag in GitHub for your plugin version, but if you do create tags, the plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
 
 ~~~php
 /*
@@ -90,7 +90,7 @@ The only extra character allowed in a URI is `-`. Let me know if there is a need
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
 
-If you are using a WordPress Multisite installation, theme updating only works when the plugin has been activated inside each blog. That means no Network Activation - for now.
+If you are using a WordPress Multisite installation, theme updating only works when the plugin has been network activated or activated in the main blog (blog_id 1).
 
 ## ChangeLog
 
