@@ -126,7 +126,7 @@ class GitHub_Theme_Updater {
 
 		foreach ( $this->config as $theme => $theme_data ) {
 			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
-			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
+			$url      = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
 
 			// Sort and get latest tag
