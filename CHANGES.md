@@ -5,7 +5,7 @@
  * updated class-theme-updater.php to utilize WP\_Theme class
  * added method `get_remote_tag` to update plugins using tags or branch, depending upon which has greater version number.
  * `get_remote_tag` uses transient to limit calls to API
- * fix for wp\_get_theme() not working under plugin network activation on multisite installation.
+ * fix for `wp_get_themes` not working under plugin network activation on multisite installation. I recreated `wp_get_themes` by reading in the theme directory and adding the WP\_Theme object of `wp_get_theme( 'dir_in_themes_dir' )` to an array.
 
 ## 1.6.1
 
