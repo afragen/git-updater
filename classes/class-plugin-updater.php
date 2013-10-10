@@ -109,10 +109,10 @@ class GitHub_Plugin_Updater {
 					if ( empty( $headers['GitHub Plugin URI'] ) )
 						return;
 
-					$owner_repo = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
-					$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri'] = 'https://github.com/' . $owner_repo;
-					$owner_repo = explode( '/', $owner_repo );
+					$owner_repo        = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
+					$owner_repo        = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri']   = 'https://github.com/' . $owner_repo;
+					$owner_repo        = explode( '/', $owner_repo );
 					$git_repo['owner'] = $owner_repo[0];
 					$git_repo['repo']  = $owner_repo[1];
 					break;
@@ -264,6 +264,48 @@ class GitHub_Plugin_Updater {
 		return $ref;
 	}
 
+
+	/**
+	 * Parse the remote info to find most recent tag if tags exist
+	 *
+	 * Uses a transient to limit the calls to the API.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return string latest tag.
+	 */
+	protected function get_remote_tag() {
+		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
+		
+		$response = get_site_transient( md5( $this->github_plugin['slug'] . 'tags' ) );
+
+		if ( ! $response ) {
+			$response = $this->api( $url );
+
+			if ( $response )
+				set_site_transient( md5( $this->github_plugin['slug'] . 'tags' ), $response, HOUR_IN_SECONDS );
+		}
+
+		// Sort and get latest tag
+		$tags = array();
+		if ( false !== $response )
+			foreach ( $response as $num => $tag ) {
+				if ( isset( $tag->name ) ) $tags[] = $tag->name;
+			}
+
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
+
+		usort( $tags, 'version_compare' );
+
+		// check and generate download link
+		$newest_tag     = null;
+		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+		$newest_tag     = $tags[ $newest_tag_key ];
+
+		return $newest_tag;
+	}
+
+
 	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
 	 *
@@ -288,7 +330,14 @@ class GitHub_Plugin_Updater {
 
 			$branch = $this->github_plugin['branch'] ? $this->github_plugin['branch'] : $this->get_default_branch();
 
-			$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
+			$newest_tag = $this->get_remote_tag();
+
+			// just in case user started using tags then stopped.
+			if ( $remote_version && $newest_tag && version_compare( $newest_tag, $remote_version, '>=' ) ) {
+				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $newest_tag . '.zip';
+			} else {
+				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
+			}
 
 			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
 				$plugin = array(

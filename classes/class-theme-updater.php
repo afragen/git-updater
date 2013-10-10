@@ -30,7 +30,7 @@ class GitHub_Theme_Updater {
 		$this->get_github_themes();
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
-			add_filter( 'site_transient_update_themes', array( $this, 'transient_update_themes_filter') );
+			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
@@ -50,7 +50,28 @@ class GitHub_Theme_Updater {
 	}
 
 	/**
-	 * Reads in headers of every theme's style.css to get version info.
+	* Get array of themes in multisite, wp_get_themes doesn't seem to work under network activation
+	* this is kludge to workaround
+	*
+	* @since 1.7.0
+	*
+	* @return array
+	*/
+	private function multisite_get_themes() {
+		$themes     = array();
+		$dir_handle = opendir( get_theme_root() );
+		
+		while ( $dir = readdir( $dir_handle ) ) {
+			$themes[] = wp_get_theme( $dir );
+		}
+
+		closedir($dir_handle); //closing the directory
+
+		return $themes;
+	}
+
+	/**
+	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
 	 *
 	 * @since 1.0.0
@@ -60,23 +81,21 @@ class GitHub_Theme_Updater {
 		$this->config = array();
 		$themes = wp_get_themes();
 
+		if ( is_multisite() )
+			$themes = $this->multisite_get_themes();
+
 		foreach ( $themes as $theme ) {
-			//regex for standard URI, only special character '-'
-			$github_header_regex = '#s[\:0-9]+\"(GitHub Theme URI)\";s[\:0-9]+\"([a-z0-9_\:\/\.-]+)#i';
-			$serialized_theme    = serialize( $theme );
-			preg_match( $github_header_regex, $serialized_theme, $matches );
+			$github_uri = $theme->get( 'GitHub Theme URI' );
+			if ( empty( $github_uri ) ) continue;
 
-			if ( empty( $matches[2] ) )
-				continue;
-
-			$owner_repo = parse_url( $matches[2], PHP_URL_PATH );
+			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
 
 			$this->config['theme'][]                                = $theme->stylesheet;
 			$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
 			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = 'https://github.com/' . $owner_repo;
 			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos/' . $owner_repo;
-			$this->config[ $theme->stylesheet ]['theme-data']       = wp_get_theme( $theme->stylesheet );
+			$this->config[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
 		}
 	}
 
@@ -130,7 +149,7 @@ class GitHub_Theme_Updater {
 
 		foreach ( $this->config as $theme => $theme_data ) {
 			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
-			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
+			$url      = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
 
 			// Sort and get latest tag
@@ -139,17 +158,15 @@ class GitHub_Theme_Updater {
 				foreach ( $response as $num => $tag ) {
 					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
-			usort( $tags, "version_compare" );
-
-			// check and generate download link
-			$newest_tag = null;
-			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if ( $newest_tag_key )
-				$newest_tag = $tags[ $newest_tag_key ];
 
 			// if no tag set or no version number then abort
-			if ( empty( $newest_tag ) || is_null( $theme_data['theme-data']->Version ) )
-				return false;
+			if ( empty( $tags ) || is_null( $theme_data['version'] ) ) return false;
+			usort( $tags, 'version_compare' );
+
+			// check and generate download link
+			$newest_tag     = null;
+			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+			$newest_tag     = $tags[ $newest_tag_key ];
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
@@ -159,7 +176,7 @@ class GitHub_Theme_Updater {
 			$update['url']         = $theme_data['GitHub_Theme_URI'];
 			$update['package']     = $download_link;
 
-			if ( version_compare( $theme_data['theme-data']->Version,  $newest_tag, '>=' ) ) {
+			if ( version_compare( $theme_data['version'],  $newest_tag, '>=' ) ) {
 				// up-to-date!
 				$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
 				$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
