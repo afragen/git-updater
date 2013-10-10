@@ -30,7 +30,7 @@ class GitHub_Theme_Updater {
 		$this->get_github_themes();
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
-			add_filter( 'site_transient_update_themes', array( $this, 'transient_update_themes_filter') );
+			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
@@ -126,7 +126,7 @@ class GitHub_Theme_Updater {
 
 		foreach ( $this->config as $theme => $theme_data ) {
 			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
-			$url = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
+			$url      = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
 
 			// Sort and get latest tag
@@ -135,17 +135,15 @@ class GitHub_Theme_Updater {
 				foreach ( $response as $num => $tag ) {
 					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
-			usort( $tags, "version_compare" );
-
-			// check and generate download link
-			$newest_tag = null;
-			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if ( $newest_tag_key )
-				$newest_tag = $tags[ $newest_tag_key ];
 
 			// if no tag set or no version number then abort
-			if ( empty( $newest_tag ) || is_null( $theme_data['version'] ) )
-				return false;
+			if ( empty( $tags ) || is_null( $theme_data['version'] ) ) return false;
+			usort( $tags, 'version_compare' );
+
+			// check and generate download link
+			$newest_tag     = null;
+			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+			$newest_tag     = $tags[ $newest_tag_key ];
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
