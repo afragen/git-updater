@@ -292,9 +292,9 @@ class GitHub_Plugin_Updater {
 			foreach ( $response as $num => $tag ) {
 				if ( isset( $tag->name ) ) $tags[] = $tag->name;
 			}
-		
+
 		if ( empty( $tags ) ) return false;  // no tags are present, exit early
-			
+
 		usort( $tags, 'version_compare' );
 
 		// check and generate download link
