@@ -5,6 +5,10 @@
  * updated class-theme-updater.php to utilize WP_Theme class
  * added method to update plugins using tags or branch, depending upon which has greater version number.
 
+## 1.6.1
+
+ * bugfix for undeclared variable $github_plugins
+
 ## 1.6.0
 
  * Added separate method to parse plugin repo info from header
