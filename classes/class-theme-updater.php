@@ -135,17 +135,15 @@ class GitHub_Theme_Updater {
 				foreach ( $response as $num => $tag ) {
 					if ( isset( $tag->name ) ) $tags[] = $tag->name;
 				}
+
+			// if no tag set or no version number then abort
+			if ( empty( $tags ) || is_null( $theme_data['version'] ) ) return false;
 			usort( $tags, 'version_compare' );
 
 			// check and generate download link
-			$newest_tag = null;
+			$newest_tag     = null;
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			if ( $newest_tag_key )
-				$newest_tag = $tags[ $newest_tag_key ];
-
-			// if no tag set or no version number then abort
-			if ( empty( $newest_tag ) || is_null( $theme_data['version'] ) )
-				return false;
+			$newest_tag     = $tags[ $newest_tag_key ];
 
 			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
