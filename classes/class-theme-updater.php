@@ -86,8 +86,7 @@ class GitHub_Theme_Updater {
 
 		foreach ( $themes as $theme ) {
 			$github_uri = $theme->get( 'GitHub Theme URI' );
-			if ( empty( $github_uri ) )
-				continue;
+			if ( empty( $github_uri ) ) continue;
 
 			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
