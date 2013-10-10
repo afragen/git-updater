@@ -50,6 +50,27 @@ class GitHub_Theme_Updater {
 	}
 
 	/**
+	* Get array of themes in multisite, wp_get_themes doesn't seem to work under network activation
+	* this is kludge to workaround
+	*
+	* @since 1.7.0
+	*
+	* @return array
+	*/
+	private function multisite_get_themes() {
+		$themes     = array();
+		$dir_handle = opendir( get_theme_root() );
+		
+		while ( $dir = readdir( $dir_handle ) ) {
+			$themes[] = wp_get_theme( $dir );
+		}
+
+		closedir($dir_handle); //closing the directory
+
+		return $themes;
+	}
+
+	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
 	 *
@@ -59,6 +80,9 @@ class GitHub_Theme_Updater {
 
 		$this->config = array();
 		$themes = wp_get_themes();
+
+		if ( is_multisite() )
+			$themes = $this->multisite_get_themes();
 
 		foreach ( $themes as $theme ) {
 			$github_uri = $theme->get( 'GitHub Theme URI' );
