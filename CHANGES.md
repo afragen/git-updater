@@ -3,6 +3,7 @@
 ## 1.7.1
 
  * updated the transient for themes
+ * replaced readdir with scandir for creating WP\_Theme object in multisite
 
 ## 1.7.0
 
