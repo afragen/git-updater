@@ -106,8 +106,7 @@ class GitHub_Plugin_Updater {
 		foreach ( $extra_headers as $key => $value ) {
 			switch( $value ) {
 				case 'GitHub Plugin URI':
-					if ( empty( $headers['GitHub Plugin URI'] ) )
-						return;
+					if ( empty( $headers['GitHub Plugin URI'] ) ) return;
 
 					$owner_repo        = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					$owner_repo        = trim( $owner_repo, '/' );  // strip surrounding slashes
