@@ -127,14 +127,15 @@ class GitHub_Theme_Updater {
 	 */
 	protected function get_remote_info( $url ) {
 
-		$remote = get_site_transient( md5( $url ) ) ;
+		$remote = get_site_transient( md5( $url . 'theme' ) ) ;
 
 		if ( ! $remote ) {
 			$remote = $this->api( $url );
 
 			if ( $remote )
-				set_site_transient( md5( $url ), $remote, HOUR_IN_SECONDS );
+				set_site_transient( md5( $url . 'theme' ), $remote, HOUR_IN_SECONDS );
 		}
+
 		return $remote;
 	}
 

@@ -276,7 +276,7 @@ class GitHub_Plugin_Updater {
 	 */
 	protected function get_remote_tag() {
 		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
-		
+
 		$response = get_site_transient( md5( $this->github_plugin['slug'] . 'tags' ) );
 
 		if ( ! $response ) {
