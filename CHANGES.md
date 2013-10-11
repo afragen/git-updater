@@ -1,9 +1,14 @@
 # ChangeLog for GitHub Updater
 
+## 1.7.2
+
+ * removed sorting option from `scandir`. Doesn't work with older versions of PHP < 5.4.0
+ * removed extraneous data from array in `multisite_get_themes`
+
 ## 1.7.1
 
  * updated the transient for themes
- * replaced readdir with scandir for creating WP\_Theme object in multisite
+ * replaced `readdir` with `scandir` for creating WP\_Theme object in multisite
 
 ## 1.7.0
 
