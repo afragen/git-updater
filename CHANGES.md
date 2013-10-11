@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.7.1
+
+ * updated the transient for themes
+
 ## 1.7.0
 
  * updated class-theme-updater.php to utilize WP\_Theme class
