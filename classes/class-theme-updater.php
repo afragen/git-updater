@@ -228,7 +228,7 @@ class GitHub_Theme_Updater {
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %s to %s...', 'github-updater' ),
+				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
 				'<span class="code">' . basename( $source ) . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
@@ -236,7 +236,7 @@ class GitHub_Theme_Updater {
 
 		// If we can rename, do so and return the new name
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
+			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
 			return $corrected_source;
 		}
 
