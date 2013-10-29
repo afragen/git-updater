@@ -59,7 +59,10 @@ class GitHub_Plugin_Updater {
 	 * @since 1.0.0
 	 */
 	public function add_headers( $extra_headers ) {
-		$extra_headers = array( 'GitHub Plugin URI', 'GitHub Access Token', 'GitHub Branch' );
+		$extra_headers[] = 'GitHub Plugin URI';
+		$extra_headers[] = 'GitHub Access Token';
+		$extra_headers[] = 'GitHub Branch';
+
 		return $extra_headers;
 	}
 
