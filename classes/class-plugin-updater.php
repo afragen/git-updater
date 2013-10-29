@@ -59,7 +59,10 @@ class GitHub_Plugin_Updater {
 	 * @since 1.0.0
 	 */
 	public function add_headers( $extra_headers ) {
-		$extra_headers = array( 'GitHub Plugin URI', 'GitHub Access Token', 'GitHub Branch' );
+		$extra_headers[] = 'GitHub Plugin URI';
+		$extra_headers[] = 'GitHub Access Token';
+		$extra_headers[] = 'GitHub Branch';
+
 		return $extra_headers;
 	}
 
@@ -390,7 +393,7 @@ class GitHub_Plugin_Updater {
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %s to %s...', 'github-updater' ),
+				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
 				'<span class="code">' . basename( $source ) . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
@@ -398,7 +401,7 @@ class GitHub_Plugin_Updater {
 
 		// If we can rename, do so and return the new name
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( __( 'Rename successful...', 'github-updater' ) );
+			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
 			return $corrected_source;
 		}
 

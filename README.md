@@ -14,7 +14,7 @@ or
 
 `GitHub Plugin URI: afragen/github-updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or just `<owner>/<repo>`.
 
 ## Requirements
  * WordPress 3.4 (tested up to 3.6.1)
