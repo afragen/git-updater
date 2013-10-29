@@ -1,8 +1,9 @@
 # ChangeLog for GitHub Updater
 
-## 1.7.x
+## 1.7.3
 
  * change `'...'` to `&#8230` in renaming notification
+ * fix to not overwrite extra headers of other plugins.
 
 ## 1.7.2
 
