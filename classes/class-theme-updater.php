@@ -45,7 +45,8 @@ class GitHub_Theme_Updater {
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
-		$extra_headers[] = 'GitHub Theme URI';
+		$gtu_extra_headers = array( 'GitHub Theme URI' );
+		$extra_headers = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
 
 		return $extra_headers;
 	}
