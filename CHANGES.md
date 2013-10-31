@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.7.4
+
+ * changed method of not overwriting extra headers to pass array.
+
 ## 1.7.3
 
  * change `'...'` to `&#8230` in renaming notification
