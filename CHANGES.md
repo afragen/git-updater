@@ -1,6 +1,6 @@
 # ChangeLog for GitHub Updater
 
-## 1.7.x
+## 1.7.4
 
  * changed method of not overwriting extra headers to pass array.
 
