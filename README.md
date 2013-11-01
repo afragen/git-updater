@@ -17,7 +17,7 @@ or
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or just `<owner>/<repo>`.
 
 ## Requirements
- * WordPress 3.4 (tested up to 3.6.1)
+ * WordPress 3.4 (tested up to 3.7.1)
 
 ## Installation
 
@@ -103,4 +103,4 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Built by [Andy Fragen](https://github.com/afragen) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+Built by [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)

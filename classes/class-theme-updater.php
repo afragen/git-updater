@@ -25,81 +25,28 @@ class GitHub_Theme_Updater {
 	 */
 	protected $config;
 
+	/**
+	 * Instance of GitHub_Updater class.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @var class
+	 */
+	protected $gtu_base;
+
 	public function __construct() {
-		add_filter( 'extra_theme_headers', array( $this, 'add_headers') );
-		$this->get_github_themes();
+		$gtu_base = GitHub_Updater::instance();
+
+		// This MUST come before we get details about the plugins so the headers are correctly retrieved
+		add_filter( 'extra_theme_headers', array( $gtu_base, 'add_theme_headers' ) );
+		$this->config = $gtu_base->get_themes_meta();
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
-		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
-	}
-
-	/**
-	 * Add GitHub headers to wp_get_theme
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function add_headers( $extra_headers ) {
-		$gtu_extra_headers = array( 'GitHub Theme URI' );
-		$extra_headers = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
-
-		return $extra_headers;
-	}
-
-	/**
-	* Get array of all themes in multisite
-	*
-	* wp_get_themes doesn't seem to work under network activation in the same way as in a single install.
-	* http://core.trac.wordpress.org/changeset/20152
-	*
-	* @since 1.7.0
-	*
-	* @return array
-	*/
-	private function multisite_get_themes() {
-		$themes     = array();
-		$theme_dirs = scandir( get_theme_root() );
-		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store' ) );
-
-		foreach ( $theme_dirs as $theme_dir ) {
-			$themes[] = wp_get_theme( $theme_dir );
-		}
-
-		return $themes;
-	}
-
-	/**
-	 * Reads in WP_Theme class of each theme.
-	 * Populates variable array
-	 *
-	 * @since 1.0.0
-	 */
-	private function get_github_themes() {
-
-		$this->config = array();
-		$themes = wp_get_themes();
-
-		if ( is_multisite() )
-			$themes = $this->multisite_get_themes();
-
-		foreach ( $themes as $theme ) {
-			$github_uri = $theme->get( 'GitHub Theme URI' );
-			if ( empty( $github_uri ) ) continue;
-
-			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
-			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
-
-			$this->config['theme'][]                                = $theme->stylesheet;
-			$this->config[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-			$this->config[ $theme->stylesheet ]['GitHub_Theme_URI'] = 'https://github.com/' . $owner_repo;
-			$this->config[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos/' . $owner_repo;
-			$this->config[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
-		}
+		add_action( 'http_request_args', array( $gtu_base, 'no_ssl_http_request_args' ) );
 	}
 
 	/**
@@ -247,17 +194,4 @@ class GitHub_Theme_Updater {
 		return new WP_Error();
 	}
 
-	/**
-	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param  array $args Existing HTTP Request arguments.
-	 *
-	 * @return array Amended HTTP Request arguments.
-	 */
-	public function no_ssl_http_request_args( $args ) {
-		$args['sslverify'] = false;
-		return $args;
-	}
 }
