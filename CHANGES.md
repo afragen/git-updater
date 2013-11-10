@@ -2,7 +2,7 @@
 
 ## 1.8.0
 
- * refactored to use base class to abstract from remote git source.
+ * refactored to use base class `GitHub_Updater` and extending classes `GitHub_Plugin_Updater` and `GitHub_Theme_Updater`.
 
 ## 1.7.4
 

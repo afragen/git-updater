@@ -2,8 +2,9 @@
 /**
  * GitHub Updater
  *
- * @package   GitHubUpdater
- * @author    Andy Fragen, Gary Jones
+ * @package   GitHub_Updater
+ * @author    Andy Fragen
+ * @authot    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
@@ -11,25 +12,20 @@
 /**
  * Update a WordPress plugin or theme from a GitHub repo.
  *
- * @package GitHubUpdater
- * @author  Andy Fragen, Gary Jones
+ * @package GitHub_Updater
+ * @author  Andy Fragen
+ * @author  Gary Jones
  */
 class GitHub_Updater {
 
 	/**
-	 * The GitHub_Updater object can be created/obtained via this
-	 * method - this prevents unncessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
+	 * Store details of all GitHub-sourced themes that are installed.
 	 *
-	 * @return GitHub_Updater
+	 * @since 1.0.0
+	 *
+	 * @var array
 	 */
-	protected static $object = false;
-	
-	public static function instance() {
-		$class = __CLASS__;
-		if ( false === self::$object ) self::$object = new $class();
-		return self::$object;
-	}
+	protected $config;
 
 	/**
 	 * Add extra header to get_plugins();
@@ -183,8 +179,8 @@ class GitHub_Updater {
 
 			$config_themes['theme'][]                                = $theme->stylesheet;
 			$config_themes[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-			$config_themes[ $theme->stylesheet ]['GitHub_Theme_URI'] = 'https://github.com/' . $owner_repo;
-			$config_themes[ $theme->stylesheet ]['GitHub_API_URI']   = 'https://api.github.com/repos/' . $owner_repo;
+			$config_themes[ $theme->stylesheet ]['uri'] = 'https://github.com/' . $owner_repo;
+			$config_themes[ $theme->stylesheet ]['api']   = 'https://api.github.com/repos/' . $owner_repo;
 			$config_themes[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
 		}
 

@@ -2,8 +2,8 @@
 /**
  * GitHub Updater
  *
- * @package   GitHubUpdater
- * @author    Andy Fragen, Codepress
+ * @package   GitHub_Updater
+ * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
@@ -11,28 +11,12 @@
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
- * @package GitHubUpdater
- * @author  Andy Fragen, Codepress
+ * @package GitHub_Plugin_Updater
+ * @author  Andy Fragen
+ * @author  Codepress
+ * @link    https://github.com/codepress/github-plugin-updater
  */
-class GitHub_Plugin_Updater {
-
-	/**
-	 * Store details of all GitHub-sourced plugins that are installed.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @var array
-	 */
-	protected $config;
-
-	/**
-	 * Instance of GitHub_Updater class.
-	 *
-	 * @since 1.7.0
-	 *
-	 * @var class
-	 */
-	protected $gtu_base;
+class GitHub_Plugin_Updater extends GitHub_Updater {
 
 	/**
 	 * Store details for one GitHub-sourced plugin during the update procedure.
@@ -43,7 +27,6 @@ class GitHub_Plugin_Updater {
 	 */
 	protected $github_plugin;
 
-
 	/**
 	 * Constructor.
 	 *
@@ -52,17 +35,16 @@ class GitHub_Plugin_Updater {
 	 * @param array $config
 	 */
 	public function __construct() {
-		$gtu_base = GitHub_Updater::instance();
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
-		add_filter( 'extra_plugin_headers', array( $gtu_base, 'add_plugin_headers' ) );
+		add_filter( 'extra_plugin_headers', array( $this, 'add_plugin_headers' ) );
 
 		// Get details of GitHub-sourced plugins
-		$this->config = $gtu_base->get_plugin_meta();
+		$this->config = $this->get_plugin_meta();
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_available' ) );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );									
-		add_action( 'http_request_args', array( $gtu_base, 'no_ssl_http_request_args' ) );
+		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
+		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
 	/**
@@ -101,7 +83,7 @@ class GitHub_Plugin_Updater {
 		);
 
 		/**
- 		 * Add or filter the available segments that are used to replace placeholders.
+		 * Add or filter the available segments that are used to replace placeholders.
 		 *
 		 * @since 1.5.0
 		 *
@@ -243,11 +225,9 @@ class GitHub_Plugin_Updater {
 		if ( empty( $transient->checked ) )
 			return $transient;
 
-		$gtu_base = GitHub_Updater::instance();
-		
 		foreach ( $this->config as $plug ) {
 			$this->github_plugin = $plug;
-			$local_version  = $gtu_base->get_local_version( $this->github_plugin );
+			$local_version  = $this->get_local_version( $this->github_plugin );
 			$remote_version = $this->get_remote_version();
 
 			$branch = $this->github_plugin['branch'] ? $this->github_plugin['branch'] : $this->get_default_branch();
@@ -301,7 +281,7 @@ class GitHub_Plugin_Updater {
 					$plugin = $this->config[$i]['repo'];
 			}
 		}
-		
+
 		// If there's no action set, or not one we recognise, abort
 		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
 			return $source;

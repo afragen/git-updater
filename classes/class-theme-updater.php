@@ -2,8 +2,8 @@
 /**
  * GitHub Updater
  *
- * @package   GitHubUpdater
- * @author    Andy Fragen, Seth Carstens, UCF Web Communications
+ * @package   GitHub_Updater
+ * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
@@ -11,42 +11,27 @@
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   GitHubUpdater
- * @author    Andy Fragen, Seth Carstens
+ * @package   GitHub_Theme_Updater
+ * @author    Andy Fragen
+ * @author    Seth Carstens
+ * @link      https://github.com/scarstens/Github-Theme-Updater
+ * @author    UCF Web Communications
+ * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Theme_Updater {
-
-	/**
-	 * Store details of all GitHub-sourced themes that are installed.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @var array
-	 */
-	protected $config;
-
-	/**
-	 * Instance of GitHub_Updater class.
-	 *
-	 * @since 1.7.0
-	 *
-	 * @var class
-	 */
-	protected $gtu_base;
+class GitHub_Theme_Updater extends GitHub_Updater {
 
 	public function __construct() {
-		$gtu_base = GitHub_Updater::instance();
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
-		add_filter( 'extra_theme_headers', array( $gtu_base, 'add_theme_headers' ) );
-		$this->config = $gtu_base->get_themes_meta();
+		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
+		$this->config = $this->get_themes_meta();
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
-		add_action( 'http_request_args', array( $gtu_base, 'no_ssl_http_request_args' ) );
+		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
 	/**
@@ -100,8 +85,8 @@ class GitHub_Theme_Updater {
 	public function transient_update_themes_filter( $data ){
 
 		foreach ( $this->config as $theme => $theme_data ) {
-			if ( empty( $theme_data['GitHub_API_URI'] ) ) continue;
-			$url      = trailingslashit( $theme_data['GitHub_API_URI'] ) . 'tags';
+			if ( empty( $theme_data['api'] ) ) continue;
+			$url      = trailingslashit( $theme_data['api'] ) . 'tags';
 			$response = $this->get_remote_info( $url );
 
 			// Sort and get latest tag
@@ -120,12 +105,12 @@ class GitHub_Theme_Updater {
 			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 			$newest_tag     = $tags[ $newest_tag_key ];
 
-			$download_link = trailingslashit( $theme_data['GitHub_Theme_URI'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
+			$download_link = trailingslashit( $theme_data['uri'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
 
 			// setup update array to append version info
 			$update = array();
 			$update['new_version'] = $newest_tag;
-			$update['url']         = $theme_data['GitHub_Theme_URI'];
+			$update['url']         = $theme_data['uri'];
 			$update['package']     = $download_link;
 
 			if ( version_compare( $theme_data['version'],  $newest_tag, '>=' ) ) {

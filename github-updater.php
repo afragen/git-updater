@@ -11,7 +11,7 @@
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-GitHub Plugin URI: afragen/github-updater
+GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     master
 Description:       Plugin and Theme Updater classes to pull updates of the GitHub hosted plugins and themes into wordpress. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>.
 Version:           1.7.4
@@ -24,7 +24,7 @@ Text Domain:       github-updater
 
 // Load base classes and Launch
 if ( is_admin() ) {
-	require_once 'classes/class-base-updater.php';
+	require_once 'classes/class-github-updater.php';
 	require_once 'classes/class-theme-updater.php';
 	require_once 'classes/class-plugin-updater.php';
 	new GitHub_Theme_Updater;
