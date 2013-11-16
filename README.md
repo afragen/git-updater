@@ -57,7 +57,7 @@ There must be a `GitHub Theme URI` declaration in the `style.css` file and you *
 /*
 Theme Name: Test
 Theme URI: http://drfragen.info/
-GitHub Theme URI: afragen/test-child
+GitHub Theme URI: https://github.com/afragen/test-child
 Version: 0.1.0
 Description: Child theme of TwentyTwelve.
 Author: Andy Fragen
