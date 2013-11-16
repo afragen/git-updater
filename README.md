@@ -8,16 +8,18 @@ This plugin is not allowed in the wp.org repo. :frowning:
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-`GitHub Theme URI: afragen/test-child`
+`GitHub Theme URI: afragen/test-child`  
+`GitHub Theme URI: https://github.com/afragen/test-child`
 
 or 
 
-`GitHub Plugin URI: afragen/github-updater`
+`GitHub Plugin URI: afragen/github-updater`  
+`GitHub Plugin URI: https://github.com/afragen/github-Updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or just `<owner>/<repo>`.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
 
 ## Requirements
- * WordPress 3.4 (tested up to 3.6.1)
+ * WordPress 3.4 (tested up to 3.7.1)
 
 ## Installation
 
@@ -55,7 +57,7 @@ There must be a `GitHub Theme URI` declaration in the `style.css` file and you *
 /*
 Theme Name: Test
 Theme URI: http://drfragen.info/
-GitHub Theme URI: afragen/test-child
+GitHub Theme URI: https://github.com/afragen/test-child
 Version: 0.1.0
 Description: Child theme of TwentyTwelve.
 Author: Andy Fragen
@@ -71,9 +73,9 @@ In your plugin the following is an example. You do not need to create a tag in G
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-GitHub Plugin URI: afragen/github-updater
+GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     master
-Description: Plugin and Theme Updater classes to pull updates of the GitHub based plugins and themes into wordpress. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>.
+Description:       Plugin and Theme Updater classes to pull updates of the GitHub based plugins and themes into wordpress. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>.
 Version:           1.0.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
@@ -103,4 +105,4 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Built by [Andy Fragen](https://github.com/afragen) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+Built by [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
