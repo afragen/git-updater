@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.8.0
+
+ * refactored to use base class `GitHub_Updater` and extending classes `GitHub_Plugin_Updater` and `GitHub_Theme_Updater`.
+
 ## 1.7.4
 
  * changed method of not overwriting extra headers to pass array.
