@@ -92,6 +92,7 @@ class GitHub_Updater {
 	*/
 	protected function get_repo_info( $headers ) {
 
+		$git_repo      = array();
 		$extra_headers = $this->add_plugin_headers( null );
 
 		foreach ( $extra_headers as $key => $value ) {
@@ -163,9 +164,8 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_themes_meta() {
-
-		//$this->config = array();
-		$themes = wp_get_themes();
+		$config_themes = array();
+		$themes        = wp_get_themes();
 
 		if ( is_multisite() )
 			$themes = $this->multisite_get_themes();
