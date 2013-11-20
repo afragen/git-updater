@@ -1,5 +1,10 @@
 # ChangeLog for GitHub Updater
 
+## 1.8.1
+
+ * added some variable declarations
+ * added early return in no GitHub sourced plugins or themes are identified
+
 ## 1.8.0
 
  * refactored to use base class `GitHub_Updater` and extending classes `GitHub_Plugin_Updater` and `GitHub_Theme_Updater`.
