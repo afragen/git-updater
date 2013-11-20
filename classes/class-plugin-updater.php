@@ -41,6 +41,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
+		if ( empty( $this->config ) ) return;
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_available' ) );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );

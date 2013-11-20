@@ -24,7 +24,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
+
+		// Get details of GitHub-sourced themes
 		$this->config = $this->get_themes_meta();
+		if ( empty( $this->config ) ) return;
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
