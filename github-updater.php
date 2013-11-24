@@ -11,15 +11,15 @@
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     master
-Description:       Plugin and Theme Updater classes to pull updates of the GitHub hosted plugins and themes into wordpress. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>.
+Description:       A plugin to automatically update GitHub hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
 Version:           1.8.1
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Domain Path:       /languages
 Text Domain:       github-updater
+GitHub Plugin URI: https://github.com/afragen/github-updater
+GitHub Branch:     master
 */
 
 // Load base classes and Launch

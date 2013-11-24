@@ -1,5 +1,9 @@
 # ChangeLog for GitHub Updater
 
+## 1.8.x
+
+ * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
+
 ## 1.8.1
 
  * added some variable declarations
