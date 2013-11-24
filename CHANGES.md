@@ -3,6 +3,7 @@
 ## 1.8.x
 
  * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
+ * minor spelling fixes
 
 ## 1.8.1
 

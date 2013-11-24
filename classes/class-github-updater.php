@@ -4,7 +4,7 @@
  *
  * @package   GitHub_Updater
  * @author    Andy Fragen
- * @authot    Gary Jones
+ * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
