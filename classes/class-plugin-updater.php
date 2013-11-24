@@ -43,8 +43,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		$this->config = $this->get_plugin_meta();
 		if ( empty( $this->config ) ) return;
 
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_available' ) );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
@@ -222,7 +222,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
 	 */
-	public function update_available( $transient ) {
+	public function pre_set_site_transient_update_plugins( $transient ) {
 		if ( empty( $transient->checked ) )
 			return $transient;
 
@@ -271,7 +271,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
+	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
 
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );

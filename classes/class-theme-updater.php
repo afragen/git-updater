@@ -30,10 +30,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		if ( empty( $this->config ) ) return;
 
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
-			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'transient_update_themes_filter' ) );
+			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
 		}
 
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection_filter' ), 10, 3 );
+		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
@@ -78,6 +78,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
+	 * Hook into pre_set_site_transient_update_themes to update from GitHub.
+	 *
 	 * Finds newest tag and compares to current tag
 	 *
 	 * @since 1.0.0
@@ -85,7 +87,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @param array $data
 	 * @return array|object
 	 */
-	public function transient_update_themes_filter( $data ){
+	public function pre_set_site_transient_update_themes( $data ){
 
 		foreach ( $this->config as $theme => $theme_data ) {
 			if ( empty( $theme_data['api'] ) ) continue;
@@ -142,7 +144,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection_filter( $source, $remote_source = null, $upgrader = null ) {
+	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
 
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
