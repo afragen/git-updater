@@ -4,6 +4,7 @@
 
  * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
  * minor spelling fixes
+ * renamed some functions for their hooks
 
 ## 1.8.1
 
