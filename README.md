@@ -89,6 +89,12 @@ Optional plugin headers `GitHub Access Token:` and `GitHub Branch:` are availabl
 
 The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
 
+## Branch Support
+
+To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater then the update will pull from the branch and not from the tag.
+
+The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
+
 ## Issues
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
