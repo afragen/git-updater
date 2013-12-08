@@ -177,11 +177,11 @@ class GitHub_Updater {
 			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
 
-			$config_themes['theme'][]                                = $theme->stylesheet;
-			$config_themes[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-			$config_themes[ $theme->stylesheet ]['uri'] = 'https://github.com/' . $owner_repo;
-			$config_themes[ $theme->stylesheet ]['api']   = 'https://api.github.com/repos/' . $owner_repo;
-			$config_themes[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
+			$config_themes['theme'][]                         = $theme->stylesheet;
+			$config_themes[ $theme->stylesheet ]['theme_key'] = $theme->stylesheet;
+			$config_themes[ $theme->stylesheet ]['uri']       = 'https://github.com/' . $owner_repo;
+			$config_themes[ $theme->stylesheet ]['api']       = 'https://api.github.com/repos/' . $owner_repo;
+			$config_themes[ $theme->stylesheet ]['version']   = $theme->get( 'Version' );
 		}
 
 		return $config_themes;
