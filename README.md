@@ -19,7 +19,10 @@ or
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
 
 ## Requirements
- * WordPress 3.4 (tested up to 3.7.1)
+ * WordPress 3.4
+
+## Tested
+ * Up to 3.8
 
 ## Installation
 
