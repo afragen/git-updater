@@ -23,7 +23,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @var array
+	 * @var stdClass
 	 */
 	protected $github_plugin;
 
@@ -42,8 +42,21 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		if ( empty( $this->config ) ) return;
+//fb($this->config);
 
+		foreach ( $this->config as $plugin ) {
+
+			$this->github_plugin = $plugin;
+			$this->get_remote_info();
+			$this->github_plugin->download_link = $this->construct_download_link();
+
+//fb($this->github_plugin->slug);
+//fb($this->github_plugin);
+
+		}
+fb($this->config);
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'plugins_api', array( $this, 'get_remote_changes' ), 999, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
@@ -65,6 +78,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
+//fb('api');
+//fb($url);
+//fb($response);
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
@@ -79,8 +95,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 */
 	protected function get_api_url( $endpoint ) {
 		$segments = array(
-			'owner' => $this->github_plugin['owner'],
-			'repo'  => $this->github_plugin['repo'],
+			'owner' => $this->github_plugin->owner,
+			'repo'  => $this->github_plugin->repo,
 		);
 
 		/**
@@ -96,13 +112,13 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->github_plugin['access_token'] ) )
-			$endpoint = add_query_arg( 'access_token', $this->github_plugin['access_token'], $endpoint );
+		if ( ! empty( $this->github_plugin->access_token ) )
+			$endpoint = add_query_arg( 'access_token', $this->github_plugin->access_token, $endpoint );
 
 		// If a branch has been given, only check that for the remote info.
 		// If it's not been given, GitHub will use the Default branch.
-		if ( ! empty( $this->github_plugin['branch'] ) )
-			$endpoint = add_query_arg( 'ref', $this->github_plugin['branch'], $endpoint );
+		if ( ! empty( $this->github_plugin->branch ) )
+			$endpoint = add_query_arg( 'ref', $this->github_plugin->branch, $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
 	}
@@ -115,49 +131,77 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	protected function get_remote_info() {
-		$remote = get_site_transient( md5( $this->github_plugin['slug'] ) );
-
+		$remote = get_site_transient( md5( $this->github_plugin->slug ) );
 		if ( ! $remote ) {
-			$remote = $this->api( '/repos/:owner/:repo/contents/' . basename( $this->github_plugin['slug'] ) );
+			$remote = $this->api( '/repos/:owner/:repo/contents/' . basename( $this->github_plugin->slug ) );
 
 			if ( $remote )
-				set_site_transient( md5( $this->github_plugin['slug'] ), $remote, HOUR_IN_SECONDS );
+				set_site_transient( md5( $this->github_plugin->slug ), $remote, HOUR_IN_SECONDS );
 		}
-		return $remote;
+
+		if ( ! $remote ) return;
+		
+		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
+
+		if ( ! empty( $matches[1] ) )
+			$this->github_plugin->remote_version = $matches[1];
+
+		$this->github_plugin->branch = $this->github_plugin->branch ? $this->github_plugin->branch : $this->get_default_branch( $remote );
+
+		$this->github_plugin->newest_tag = $this->get_remote_tag();
+				
+//		return $remote;
 	}
 
 	/**
-	 * Retrieve the remote version from the file header of the plugin
+	 * Read the remote CHANGES.md file
 	 *
-	 * @since 1.0.0
+	 * Uses a transient to limit calls to the API.
 	 *
-	 * @return string|boolean Version of remote plugin, false if not determined.
+	 * @since 1.9.0
+	 * @return base64 decoded CHANGES.md or false
 	 */
-	protected function get_remote_version() {
-		$response = $this->get_remote_info();
-		if ( ! $response )
-			return false;
+	public function get_remote_changes( $false, $action, $response ) {
+//fb('get_remote_changes');
+		$this->github_plugin->sections =  array( 'changelog' => 'No changelog is available via GitHub Updater.' );
 
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
+		if ( 'query_plugins' == $action ) return false;
 
-		if ( ! empty( $matches[1] ) )
-			return $matches[1];
+		$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'contents/CHANGES.md';
 
-		return false;
+		$remote = get_site_transient( md5( $this->github_plugin->repo . 'changes' ) );
+		if ( ! $remote ) {
+			$remote = $this->api( $url );
+
+			if ( $remote )
+				set_site_transient( md5( $this->github_plugin->repo . 'changes' ), $remote, HOUR_IN_SECONDS );				
+		}
+
+		if ( false != $remote ) {
+			foreach ( $remote as $key => $value ) {
+				if ( $key == 'content' ) {
+					$this->github_plugin->sections = base64_decode( $value );
+				}
+			}
+		}
+		
+		$response->sections = ( 'plugin_information' == $action ) ? $this->github_plugin->sections : array();
+//fb($response);
+		return $response;
 	}
 
 	/**
 	 * Parse the remote info to find what the default branch is.
 	 *
+	 * If we've had to call this method, we know that a branch header has not been provided.
+	 * As such the remote info was retrieved with a ?ref=... query argument.
+	 *
 	 * @since 1.5.0
+	 * @param array API object
 	 *
 	 * @return string Default branch name.
 	 */
-	protected function get_default_branch() {
-		// If we've had to call this default branch method, we know that a branch header has not been provided. As such
-		// the remote info was retrieved without a ?ref=... query argument.
-		$response = $this->get_remote_info();
-
+	protected function get_default_branch( $response ) {
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
 		if ( ! $response )
 			return 'master';
@@ -178,15 +222,15 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	protected function get_remote_tag() {
-		$url = '/repos/' . trailingslashit( $this->github_plugin['owner'] ) . trailingslashit( $this->github_plugin['repo'] ) . 'tags';
+		$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'tags';
 
-		$response = get_site_transient( md5( $this->github_plugin['slug'] . 'tags' ) );
+		$response = get_site_transient( md5( $this->github_plugin->slug . 'tags' ) );
 
 		if ( ! $response ) {
 			$response = $this->api( $url );
 
 			if ( $response )
-				set_site_transient( md5( $this->github_plugin['slug'] . 'tags' ), $response, HOUR_IN_SECONDS );
+				set_site_transient( md5( $this->github_plugin->slug . 'tags' ), $response, HOUR_IN_SECONDS );
 		}
 
 		// Sort and get latest tag
@@ -208,17 +252,30 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		return $newest_tag;
 	}
 
+	/**
+	 * Construct $download_link
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param stdClass plugin data
+	 */
+	protected function construct_download_link() {
+		// just in case user started using tags then stopped.
+		if ( $this->github_plugin->remote_version && $this->github_plugin->newest_tag && version_compare( $this->github_plugin->newest_tag, $this->github_plugin->remote_version, '>=' ) ) {							
+			$download_link = trailingslashit( $this->github_plugin->uri ) . 'archive/' . $this->github_plugin->newest_tag . '.zip';
+		} else {
+			$download_link = trailingslashit( $this->github_plugin->uri ) . 'archive/' . $this->github_plugin->branch . '.zip';
+		}
+		return $download_link;
+	}
 
 	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
 	 *
-	 * The branch to download is hard-coded as the Master branch. Consider using Git-Flow so that Master is always clean.
-	 *
-	 * @todo fill url with value from remote repostory
-	 *
 	 * @since 1.0.0
 	 *
 	 * @param object $transient Original transient.
+	 * @param stdClass plugin data
 	 *
 	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
 	 */
@@ -226,31 +283,19 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		if ( empty( $transient->checked ) )
 			return $transient;
 
-		foreach ( $this->config as $plug ) {
-			$this->github_plugin = $plug;
-			$local_version  = $this->get_local_version( $this->github_plugin );
-			$remote_version = $this->get_remote_version();
+		foreach ( (array) $this->config as $plugin ) {
 
-			$branch = $this->github_plugin['branch'] ? $this->github_plugin['branch'] : $this->get_default_branch();
+			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
 
-			$newest_tag = $this->get_remote_tag();
-
-			// just in case user started using tags then stopped.
-			if ( $remote_version && $newest_tag && version_compare( $newest_tag, $remote_version, '>=' ) ) {
-				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $newest_tag . '.zip';
-			} else {
-				$download_link = trailingslashit( $this->github_plugin['uri'] ) . 'archive/' . $branch . '.zip';
-			}
-
-			if ( $local_version && $remote_version && version_compare( $remote_version, $local_version, '>' ) ) {
-				$plugin = array(
-					'slug'        => dirname( $this->github_plugin['slug'] ),
-					'new_version' => $remote_version,
-					'url'         => null,
-					'package'     => $download_link,
+			if ( $remote_is_newer ) {
+				$response = array(
+					'slug'        => dirname( $plugin->slug ),
+					'new_version' => $plugin->remote_version,
+					'url'         => $plugin->uri,
+					'package'     => $plugin->download_link,
 				);
 
-				$transient->response[ $this->github_plugin['slug'] ] = (object) $plugin;
+				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
 		return $transient;
@@ -272,15 +317,16 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
-
+fb('upgrader_source_selection');
+fb($this->github_plugin->repo);
+fb($source);
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
-
 		if ( isset( $source ) ) {
-			for ( $i = 0; $i < count( $this->config ); $i++ ) {
-				if ( stristr( basename( $source ), $this->config[$i]['repo'] ) )
-					$plugin = $this->config[$i]['repo'];
-			}
+//			for ( $i = 0; $i < count( $this->config ); $i++ ) {
+				if ( stristr( basename( $source ), $this->github_plugin->repo ) )
+					$plugin = $this->github_plugin->repo;
+//			}
 		}
 
 		// If there's no action set, or not one we recognise, abort
