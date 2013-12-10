@@ -49,16 +49,17 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$this->github_plugin = $plugin;
 			$this->get_remote_info();
 			$this->github_plugin->download_link = $this->construct_download_link();
+			$this->get_remote_changes();
 
 //fb($this->github_plugin->slug);
 //fb($this->github_plugin);
 
 		}
-fb($this->config);
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
-		add_filter( 'plugins_api', array( $this, 'get_remote_changes' ), 999, 3 );
+		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 999, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
+fb($this->config);
 	}
 
 	/**
@@ -75,12 +76,12 @@ fb($this->config);
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
-			return false;
-
 //fb('api');
 //fb($url);
 //fb($response);
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+			return false;
+
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
@@ -119,7 +120,7 @@ fb($this->config);
 		// If it's not been given, GitHub will use the Default branch.
 		if ( ! empty( $this->github_plugin->branch ) )
 			$endpoint = add_query_arg( 'ref', $this->github_plugin->branch, $endpoint );
-
+//fb('https://api.github.com' . $endpoint);
 		return 'https://api.github.com' . $endpoint;
 	}
 
@@ -161,11 +162,8 @@ fb($this->config);
 	 * @since 1.9.0
 	 * @return base64 decoded CHANGES.md or false
 	 */
-	public function get_remote_changes( $false, $action, $response ) {
-//fb('get_remote_changes');
+	public function get_remote_changes() {
 		$this->github_plugin->sections =  array( 'changelog' => 'No changelog is available via GitHub Updater.' );
-
-		if ( 'query_plugins' == $action ) return false;
 
 		$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'contents/CHANGES.md';
 
@@ -180,14 +178,26 @@ fb($this->config);
 		if ( false != $remote ) {
 			foreach ( $remote as $key => $value ) {
 				if ( $key == 'content' ) {
-					$this->github_plugin->sections = base64_decode( $value );
+					$this->github_plugin->sections = array( 'changelog' => base64_decode( $value ) );
 				}
 			}
 		}
-		
-		$response->sections = ( 'plugin_information' == $action ) ? $this->github_plugin->sections : array();
-//fb($response);
-		return $response;
+
+	}
+
+	/**
+	 * Put changelog in plugins_api
+	 *
+	 * @since 1.9.0
+	 */
+	public function plugins_api( $false, $action, $response ) {
+	
+		foreach ( (array) $this->config as $plugin ) {
+			if ($response->slug === $plugin->repo) {  
+	            $response->sections = $plugin->sections;  
+	        }
+        }
+    	return $response;  
 	}
 
 	/**
@@ -316,17 +326,18 @@ fb($this->config);
 	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
+	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 fb('upgrader_source_selection');
+fb($this->config);
 fb($this->github_plugin->repo);
 fb($source);
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 		if ( isset( $source ) ) {
-//			for ( $i = 0; $i < count( $this->config ); $i++ ) {
+			for ( $i = 0; $i < count( $this->config ); $i++ ) {
 				if ( stristr( basename( $source ), $this->github_plugin->repo ) )
 					$plugin = $this->github_plugin->repo;
-//			}
+			}
 		}
 
 		// If there's no action set, or not one we recognise, abort
