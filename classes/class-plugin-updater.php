@@ -165,11 +165,13 @@ fb($this->config);
 	public function get_remote_changes() {
 		$this->github_plugin->sections =  array( 'changelog' => 'No changelog is available via GitHub Updater.' );
 
-		$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'contents/CHANGES.md';
-
+		//$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'contents/CHANGES.md';
+		
 		$remote = get_site_transient( md5( $this->github_plugin->repo . 'changes' ) );
+
 		if ( ! $remote ) {
-			$remote = $this->api( $url );
+			//$remote = $this->api( $url );
+			$remote = $this->api( '/repos/:owner/:repo/contents/' . 'CHANGES.md' );
 
 			if ( $remote )
 				set_site_transient( md5( $this->github_plugin->repo . 'changes' ), $remote, HOUR_IN_SECONDS );				
@@ -308,6 +310,7 @@ fb($this->config);
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
+fb($transient->response);
 		return $transient;
 	}
 
