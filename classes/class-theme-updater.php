@@ -126,6 +126,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$data->response[ $theme_data['theme_key'] ] = $update;
 			}
 		}
+fb($data);
 		return $data;
 	}
 
