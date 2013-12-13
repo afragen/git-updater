@@ -163,7 +163,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * Uses a transient to limit calls to the API.
 	 *
 	 * @since 1.9.0
-	 * @return base64 decoded CHANGES.md or false
+	 * @return base64 decoded CHANGES.md
 	 */
 	public function get_remote_changes() {
 
