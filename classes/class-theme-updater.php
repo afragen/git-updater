@@ -29,12 +29,28 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$this->config = $this->get_themes_meta();
 		if ( empty( $this->config ) ) return;
 
+		foreach ( $this->config as $theme ) {
+			$this->set_defaults( $theme );
+			$this->get_remote_tag( $theme );
+			$this->get_remote_info( $theme->uri );
+		}
+
 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
 		}
 
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
+	}
+
+	/**
+	 * Set default values for theme
+	 *
+	 * @since 1.9.0
+	 */
+	protected function set_defaults( $theme ) {
+		$theme->remote_version = '0.0.0'; //set default value
+		$theme->newest_tag     = '0.0.0'; //set default value
 	}
 
 	/**
@@ -57,7 +73,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
-	 * Reads the remote plugin file.
+	 * Reads the remote theme file.
 	 *
 	 * Uses a transient to limit the calls to the API.
 	 *
@@ -68,13 +84,54 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$remote = get_site_transient( md5( $url . 'theme' ) ) ;
 
 		if ( ! $remote ) {
-			$remote = $this->api( $url );
+			$remote = $this->api( $url . '/style.css' );
 
 			if ( $remote )
 				set_site_transient( md5( $url . 'theme' ), $remote, HOUR_IN_SECONDS );
 		}
 
 		return $remote;
+	}
+
+	/**
+	 * Parse the remote info to find most recent tag if tags exist
+	 *
+	 * Uses a transient to limit the calls to the API.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return string latest tag.
+	 */
+	protected function get_remote_tag( $theme ) {
+
+		$response = get_site_transient( md5( $theme->repo . 'tags' ) );
+
+		if ( ! $response ) {
+			$response = $this->api( $theme->api . '/tags' );
+
+			if ( $response )
+				set_site_transient( md5( $theme->repo . 'tags' ), $response, HOUR_IN_SECONDS );
+		}
+
+		// Sort and get latest tag
+		$tags = array();
+		if ( false !== $response )
+			foreach ( $response as $num => $tag ) {
+				if ( isset( $tag->name ) ) $tags[] = $tag->name;
+			}
+
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
+
+		usort( $tags, 'version_compare' );
+		
+		// check and generate download link
+		$newest_tag     = null;
+		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
+		$newest_tag     = $tags[ $newest_tag_key ];
+
+		$theme->newest_tag    = $newest_tag;
+		$theme->download_link =  $theme->uri . '/archive/' . $theme->newest_tag . '.zip';
+		$theme->tags          = $tags;
 	}
 
 	/**
@@ -89,98 +146,24 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
 
-		foreach ( $this->config as $theme => $theme_data ) {
-			if ( empty( $theme_data['api'] ) ) continue;
-			$url      = trailingslashit( $theme_data['api'] ) . 'tags';
-			$response = $this->get_remote_info( $url );
-
-			// Sort and get latest tag
-			$tags = array();
-			if ( false !== $response )
-				foreach ( $response as $num => $tag ) {
-					if ( isset( $tag->name ) ) $tags[] = $tag->name;
-				}
-
-			// if no tag set or no version number then abort
-			if ( empty( $tags ) || is_null( $theme_data['version'] ) ) return false;
-			usort( $tags, 'version_compare' );
-
-			// check and generate download link
-			$newest_tag     = null;
-			$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-			$newest_tag     = $tags[ $newest_tag_key ];
-
-			$download_link = trailingslashit( $theme_data['uri'] ) . trailingslashit( 'archive' ) . $newest_tag . '.zip';
-
+		foreach ( $this->config as $theme ) {
+			if ( empty( $theme->api ) ) continue;
+			
 			// setup update array to append version info
 			$update = array();
-			$update['new_version'] = $newest_tag;
-			$update['url']         = $theme_data['uri'];
-			$update['package']     = $download_link;
+			$update['new_version'] = $theme->newest_tag;
+			$update['url']         = $theme->uri;
+			$update['package']     = $theme->download_link;
 
-			if ( version_compare( $theme_data['version'],  $newest_tag, '>=' ) ) {
+			if ( version_compare( $theme->local_version,  $theme->newest_tag, '>=' ) ) {
 				// up-to-date!
-				$data->up_to_date[ $theme_data['theme_key'] ]['rollback'] = $tags;
-				$data->up_to_date[ $theme_data['theme_key'] ]['response'] = $update;
+				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->tags;
+				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			} else {
-				$data->response[ $theme_data['theme_key'] ] = $update;
+				$data->response[ $theme->repo ] = $update;
 			}
 		}
 		return $data;
-	}
-
-	/**
-	 * Rename the zip folder to be the same as the existing theme folder.
-	 *
-	 * Github delivers zip files as <Repo>-<Tag>.zip
-	 *
-	 * @since 1.0.0
-	 *
-	 * @global WP_Filesystem $wp_filesystem
-	 *
-	 * @param string $source
-	 * @param string $remote_source Optional.
-	 * @param object $upgrader      Optional.
-	 *
-	 * @return string
-	 */
-	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
-		global $wp_filesystem;
-		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
-
-		if ( isset( $source, $this->config['theme'] ) ) {
-			for ( $i = 0; $i < count( $this->config['theme'] ); $i++ ) {
-				if ( stristr( basename( $source ), $this->config['theme'][$i] ) )
-					$theme = $this->config['theme'][$i];
-			}
-		}
-
-		// If there's no action set, or not one we recognise, abort
-		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
-			return $source;
-
-		// If the values aren't set, or it's not GitHub-sourced, abort
-		if ( ! isset( $source, $remote_source, $theme ) || false === stristr( basename( $source ), $theme ) )
-			return $source;
-
-		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
-		$upgrader->skin->feedback(
-			sprintf(
-				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
-				'<span class="code">' . basename( $source ) . '</span>',
-				'<span class="code">' . basename( $corrected_source ) . '</span>'
-			)
-		);
-
-		// If we can rename, do so and return the new name
-		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
-			return $corrected_source;
-		}
-
-		// Otherwise, return an error
-		$upgrader->skin->feedback( __( 'Unable to rename downloaded theme.', 'github-updater' ) );
-		return new WP_Error();
 	}
 
 }
