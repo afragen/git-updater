@@ -122,22 +122,6 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Retrieves the local version from the file header of the plugin
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return string|boolean Version of installed plugin, false if not determined.
-	 */
-// 	protected function get_local_version( $git_plugin ) {
-// 		$data = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin->slug );
-// 
-// 		if ( ! empty( $data['Version'] ) )
-// 			return $data['Version'];
-// 
-// 		return false;
-// 	}
-
-	/**
 	* Get array of all themes in multisite
 	*
 	* wp_get_themes doesn't seem to work under network activation in the same way as in a single install.
@@ -166,7 +150,8 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_themes_meta() {
-		$config_themes = array();
+		$github_themes = array();
+		$github_theme  = array();
 		$themes        = wp_get_themes();
 
 		if ( is_multisite() )
@@ -179,14 +164,74 @@ class GitHub_Updater {
 			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );  // strip surrounding slashes
 
-			$config_themes['theme'][]                                = $theme->stylesheet;
-			$config_themes[ $theme->stylesheet ]['theme_key']        = $theme->stylesheet;
-			$config_themes[ $theme->stylesheet ]['uri'] = 'https://github.com/' . $owner_repo;
-			$config_themes[ $theme->stylesheet ]['api']   = 'https://api.github.com/repos/' . $owner_repo;
-			$config_themes[ $theme->stylesheet ]['version']          = $theme->get( 'Version' );
+			$github_theme['uri']       = 'https://github.com/' . $owner_repo;
+			$github_theme['api']       = 'https://api.github.com/repos/' . $owner_repo;
+
+			$owner_repo  = explode( '/', $owner_repo );
+
+			$github_theme['owner']     = $owner_repo[0];
+			$github_theme['repo']      = $owner_repo[1];
+			$github_theme['local_version']   = $theme->get( 'Version' );
+
+			$github_themes[ $theme->stylesheet ] = (object) $github_theme;
 		}
 
-		return $config_themes;
+		return $github_themes;
+	}
+
+	/**
+	 * Rename the zip folder to be the same as the existing repository folder.
+	 *
+	 * Github delivers zip files as <Repo>-<Branch>.zip
+	 *
+	 * @since 1.0.0
+	 *
+	 * @global WP_Filesystem $wp_filesystem
+	 *
+	 * @param string $source
+	 * @param string $remote_source Optional.
+	 * @param object $upgrader      Optional.
+	 *
+	 * @return string
+	 */
+	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
+
+		global $wp_filesystem;
+		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
+
+		if ( isset( $source ) ) {
+			foreach ( (array) $this->config as $github_repo ) {
+				if ( stristr( basename( $source ), $github_repo->repo ) )
+					$repo = $github_repo->repo;
+			}
+		}
+
+		// If there's no action set, or not one we recognise, abort
+		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
+			return $source;
+
+		// If the values aren't set, or it's not GitHub-sourced, abort
+		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) )
+			return $source;
+
+		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
+		$upgrader->skin->feedback(
+			sprintf(
+				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
+				'<span class="code">' . basename( $source ) . '</span>',
+				'<span class="code">' . basename( $corrected_source ) . '</span>'
+			)
+		);
+
+		// If we can rename, do so and return the new name
+		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
+			return $corrected_source;
+		}
+
+		// Otherwise, return an error
+		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
+		return new WP_Error();
 	}
 
 	/**
