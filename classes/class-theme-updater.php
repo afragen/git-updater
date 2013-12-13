@@ -126,7 +126,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$data->response[ $theme_data['theme_key'] ] = $update;
 			}
 		}
-fb($data);
 		return $data;
 	}
 
@@ -146,7 +145,6 @@ fb($data);
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source = null, $upgrader = null ) {
-fb($source);
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
