@@ -42,24 +42,33 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		if ( empty( $this->config ) ) return;
-//fb($this->config);
 
 		foreach ( $this->config as $plugin ) {
 
 			$this->github_plugin = $plugin;
+			$this->set_defaults();
 			$this->get_remote_info();
-			$this->github_plugin->download_link = $this->construct_download_link();
 			$this->get_remote_changes();
-
-//fb($this->github_plugin->slug);
-//fb($this->github_plugin);
+			$this->github_plugin->download_link = $this->construct_download_link();
 
 		}
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
-		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 999, 3 );
+		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
-fb($this->config);
+	}
+
+	/**
+	 * Set default values for plugin
+	 *
+	 * @since 1.9.0
+	 */
+	protected function set_defaults() {
+		$this->github_plugin->remote_version = '0.0.0'; //set default value
+		$this->github_plugin->newest_tag     = '0.0.0'; //set default value
+		$this->github_plugin->sections       = array(
+													'changelog' => 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.'
+													);	
 	}
 
 	/**
@@ -76,9 +85,6 @@ fb($this->config);
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-//fb('api');
-//fb($url);
-//fb($response);
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
 			return false;
 
@@ -120,7 +126,7 @@ fb($this->config);
 		// If it's not been given, GitHub will use the Default branch.
 		if ( ! empty( $this->github_plugin->branch ) )
 			$endpoint = add_query_arg( 'ref', $this->github_plugin->branch, $endpoint );
-//fb('https://api.github.com' . $endpoint);
+
 		return 'https://api.github.com' . $endpoint;
 	}
 
@@ -135,7 +141,6 @@ fb($this->config);
 		$remote = get_site_transient( md5( $this->github_plugin->slug ) );
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . basename( $this->github_plugin->slug ) );
-
 			if ( $remote )
 				set_site_transient( md5( $this->github_plugin->slug ), $remote, HOUR_IN_SECONDS );
 		}
@@ -150,8 +155,6 @@ fb($this->config);
 		$this->github_plugin->branch = $this->github_plugin->branch ? $this->github_plugin->branch : $this->get_default_branch( $remote );
 
 		$this->github_plugin->newest_tag = $this->get_remote_tag();
-				
-//		return $remote;
 	}
 
 	/**
@@ -163,20 +166,16 @@ fb($this->config);
 	 * @return base64 decoded CHANGES.md or false
 	 */
 	public function get_remote_changes() {
-		$this->github_plugin->sections =  array( 'changelog' => 'No changelog is available via GitHub Updater.' );
 
-		//$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'contents/CHANGES.md';
-		
 		$remote = get_site_transient( md5( $this->github_plugin->repo . 'changes' ) );
 
 		if ( ! $remote ) {
-			//$remote = $this->api( $url );
-			$remote = $this->api( '/repos/:owner/:repo/contents/' . 'CHANGES.md' );
+			$remote = $this->api( '/repos/:owner/:repo/contents/CHANGES.md' );
 
 			if ( $remote )
 				set_site_transient( md5( $this->github_plugin->repo . 'changes' ), $remote, HOUR_IN_SECONDS );				
 		}
-
+		
 		if ( false != $remote ) {
 			foreach ( $remote as $key => $value ) {
 				if ( $key == 'content' ) {
@@ -195,11 +194,11 @@ fb($this->config);
 	public function plugins_api( $false, $action, $response ) {
 	
 		foreach ( (array) $this->config as $plugin ) {
-			if ($response->slug === $plugin->repo) {  
-	            $response->sections = $plugin->sections;  
-	        }
-        }
-    	return $response;  
+			if ($response->slug === $plugin->repo) {
+				$response->sections = $plugin->sections;
+			}
+		}
+		return $response;  
 	}
 
 	/**
@@ -234,12 +233,11 @@ fb($this->config);
 	 * @return string latest tag.
 	 */
 	protected function get_remote_tag() {
-		$url = '/repos/' . trailingslashit( $this->github_plugin->owner ) . trailingslashit( $this->github_plugin->repo ) . 'tags';
 
 		$response = get_site_transient( md5( $this->github_plugin->slug . 'tags' ) );
 
 		if ( ! $response ) {
-			$response = $this->api( $url );
+			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( $response )
 				set_site_transient( md5( $this->github_plugin->slug . 'tags' ), $response, HOUR_IN_SECONDS );
@@ -272,6 +270,7 @@ fb($this->config);
 	 * @param stdClass plugin data
 	 */
 	protected function construct_download_link() {
+
 		// just in case user started using tags then stopped.
 		if ( $this->github_plugin->remote_version && $this->github_plugin->newest_tag && version_compare( $this->github_plugin->newest_tag, $this->github_plugin->remote_version, '>=' ) ) {							
 			$download_link = trailingslashit( $this->github_plugin->uri ) . 'archive/' . $this->github_plugin->newest_tag . '.zip';
@@ -310,7 +309,6 @@ fb($this->config);
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
-fb($transient->response);
 		return $transient;
 	}
 
@@ -330,16 +328,13 @@ fb($transient->response);
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
-fb('upgrader_source_selection');
-fb($this->config);
-fb($this->github_plugin->repo);
-fb($source);
+
 		global $wp_filesystem;
 		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 		if ( isset( $source ) ) {
-			for ( $i = 0; $i < count( $this->config ); $i++ ) {
-				if ( stristr( basename( $source ), $this->github_plugin->repo ) )
-					$plugin = $this->github_plugin->repo;
+			foreach ( (array) $this->config as $github_repo ) {
+				if ( stristr( basename( $source ), $github_repo->repo ) )
+					$plugin = $github_repo->repo;
 			}
 		}
 
