@@ -163,7 +163,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * Uses a transient to limit calls to the API.
 	 *
 	 * @since 1.9.0
-	 * @return base64 decoded CHANGES.md
+	 * @return base64 decoded CHANGES.md or false
 	 */
 	public function get_remote_changes() {
 
@@ -273,9 +273,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		// just in case user started using tags then stopped.
 		if ( $this->github_plugin->remote_version && $this->github_plugin->newest_tag && version_compare( $this->github_plugin->newest_tag, $this->github_plugin->remote_version, '>=' ) ) {							
-			$download_link = trailingslashit( $this->github_plugin->uri ) . 'archive/' . $this->github_plugin->newest_tag . '.zip';
+			$download_link = $this->github_plugin->uri . '/archive/' . $this->github_plugin->newest_tag . '.zip';
 		} else {
-			$download_link = trailingslashit( $this->github_plugin->uri ) . 'archive/' . $this->github_plugin->branch . '.zip';
+			$download_link = $this->github_plugin->uri . '/archive/' . $this->github_plugin->branch . '.zip';
 		}
 		return $download_link;
 	}
@@ -310,60 +310,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			}
 		}
 		return $transient;
-	}
-
-	/**
-	 * Rename the zip folder to be the same as the existing plugin folder.
-	 *
-	 * Github delivers zip files as <Repo>-<Branch>.zip
-	 *
-	 * @since 1.0.0
-	 *
-	 * @global WP_Filesystem $wp_filesystem
-	 *
-	 * @param string $source
-	 * @param string $remote_source Optional.
-	 * @param object $upgrader      Optional.
-	 *
-	 * @return string
-	 */
-	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
-
-		global $wp_filesystem;
-		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
-		if ( isset( $source ) ) {
-			foreach ( (array) $this->config as $github_repo ) {
-				if ( stristr( basename( $source ), $github_repo->repo ) )
-					$plugin = $github_repo->repo;
-			}
-		}
-
-		// If there's no action set, or not one we recognise, abort
-		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
-			return $source;
-
-		// If the values aren't set, or it's not GitHub-sourced, abort
-		if ( ! isset( $source, $remote_source, $plugin ) || false === stristr( basename( $source ), $plugin ) )
-			return $source;
-
-		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $plugin );
-		$upgrader->skin->feedback(
-			sprintf(
-				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
-				'<span class="code">' . basename( $source ) . '</span>',
-				'<span class="code">' . basename( $corrected_source ) . '</span>'
-			)
-		);
-
-		// If we can rename, do so and return the new name
-		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
-			return $corrected_source;
-		}
-
-		// Otherwise, return an error
-		$upgrader->skin->feedback( __( 'Unable to rename downloaded plugin.', 'github-updater' ) );
-		return new WP_Error();
 	}
 
 }
