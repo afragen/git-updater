@@ -45,7 +45,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater_API {
 			$this->get_remote_changes( 'CHANGES.md' );
 			$this->{$this->type}->download_link = $this->construct_download_link();
 		}
-fb($this->config);
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 //		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );

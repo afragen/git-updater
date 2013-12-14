@@ -45,10 +45,6 @@ class GitHub_Theme_Updater extends GitHub_Updater_API {
 			$this->get_remote_tag();
 			$this->{$this->type}->download_link = $this->construct_download_link();
 		}
-fb($this->config);			
-// 		if ( ! empty($_GET['action'] ) && ( $_GET['action'] == 'do-core-reinstall' || $_GET['action'] == 'do-core-upgrade') ); else {
-// 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
-// 		}
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if (  empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
