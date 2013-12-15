@@ -227,7 +227,7 @@ class GitHub_Updater {
 		$this->{$this->type}->remote_version = '0.0.0'; //set default value
 		$this->{$this->type}->newest_tag     = '0.0.0'; //set default value
 		$this->{$this->type}->sections       = array(
-													'changelog' => 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.'
+			'changelog' => 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.',
 													);	
 	}
 

@@ -129,7 +129,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string Default branch name.
 	 */
 	protected function get_default_branch( $response ) {
-		if ( !empty( $this->{$this->type}->branch ) )
+		if ( ! empty( $this->{$this->type}->branch ) )
 			return $this->{$this->type}->branch;
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
