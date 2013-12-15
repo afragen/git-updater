@@ -28,16 +28,6 @@ class GitHub_Updater {
 	protected $config;
 
 	/**
-	 * Store details for one GitHub-sourced repo during the update procedure.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @var stdClass
-	 */
-	protected $github_plugin;
-	protected $github_theme;
-
-	/**
 	 * Define as either 'plugin' or 'theme'
 	 *
 	 * @since 1.9.0
@@ -46,6 +36,25 @@ class GitHub_Updater {
 	 */
 	protected $type;
 
+	/**
+	 * Instance of class.
+	 * This will be an instance of the appropriate git api.
+	 *
+	 * @since    2.0.0
+	 *
+	 * @var      object
+	 */
+	protected static $instance = null;
+
+	/**
+	 * Store instance of git repository api
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var object
+	 */
+	protected static $repo_api = null;
+	
 	/**
 	 * Add extra header to get_plugins();
 	 *
@@ -66,7 +75,7 @@ class GitHub_Updater {
 	 * @return array
 	 */
 	public function add_theme_headers( $extra_headers ) {
-		$gtu_extra_headers = array( 'GitHub Theme URI' );
+		$gtu_extra_headers = array( 'GitHub Theme URI', 'GitHub Access Token', 'GitHub Branch' );
 		$extra_headers = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
 
 		return $extra_headers;
@@ -79,15 +88,15 @@ class GitHub_Updater {
 	 *
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
-	public function get_plugin_meta() {
+	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
 		$plugins        = get_plugins();
-		$github_plugins = array();
+		$git_plugins = array();
 
 		foreach ( $plugins as $plugin => $headers ) {
-			$git_repo = $this->get_repo_info( $headers );
+			$git_repo = $this->get_local_plugin_meta( $headers );
 			if ( empty( $git_repo['owner'] ) )
 				continue;
 			$git_repo['slug'] = $plugin;
@@ -95,9 +104,9 @@ class GitHub_Updater {
 			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
 
 			$git_repo['local_version'] = $plugin_data['Version'];
-			$github_plugins[ $git_repo['repo'] ] = (object) $git_repo;
+			$git_plugins[ $git_repo['repo'] ] = (object) $git_repo;
 		}
-		return $github_plugins;
+		return $git_plugins;
 	}
 
 	/**
@@ -112,7 +121,7 @@ class GitHub_Updater {
 	* URL string, which is what we want anyway.
 	*
 	*/
-	protected function get_repo_info( $headers ) {
+	protected function get_local_plugin_meta( $headers ) {
 
 		$git_repo      = array();
 		$extra_headers = $this->add_plugin_headers( null );
@@ -121,6 +130,8 @@ class GitHub_Updater {
 			switch( $value ) {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) ) return;
+					$this->type = 'github_plugin';
+//					$repo_api   = GitHub_Updater_GitHub_API::get_instance();
 
 					$owner_repo        = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					$owner_repo        = trim( $owner_repo, '/' );  // strip surrounding slashes
@@ -168,9 +179,9 @@ class GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 */
-	public function get_themes_meta() {
-		$github_themes = array();
-		$github_theme  = array();
+	protected function get_theme_meta() {
+		$git_themes = array();
+		$git_theme  = array();
 		$themes        = wp_get_themes();
 		$extra_headers = $this->add_theme_headers( null );
 
@@ -180,6 +191,7 @@ class GitHub_Updater {
 		foreach ( $themes as $theme ) {
 			$github_uri = $theme->get( 'GitHub Theme URI' );
 			if ( empty( $github_uri ) ) continue;
+			$this->type = 'github_theme';
 
 			foreach ( $extra_headers as $key => $value ) {
 				switch( $value ) {
@@ -201,9 +213,9 @@ class GitHub_Updater {
 				}
 			}
 
-			$github_themes[ $theme->stylesheet ] = (object) $github_theme;
+			$git_themes[ $theme->stylesheet ] = (object) $github_theme;
 		}
-		return $github_themes;
+		return $git_themes;
 	}
 
 	/**
