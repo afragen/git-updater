@@ -14,7 +14,24 @@
  * @package GitHub_Updater_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_API extends GitHub_Updater {
+class GitHub_Updater_GitHub_API extends GitHub_Updater {
+
+	/**
+	 * Return an instance of this class.
+	 *
+	 * @since     2.0.0
+	 *
+	 * @return    object    A single instance of this class.
+	 */
+	public static function get_instance() {
+
+		// If the single instance hasn't been set, set it now.
+		if ( null == self::$instance ) {
+			self::$instance = new self;
+		}
+
+		return self::$instance;
+	}
 
 	/**
 	 * Call the GitHub API and return a json decoded body.
@@ -76,31 +93,6 @@ class GitHub_Updater_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Parse the remote info to find what the default branch is.
-	 *
-	 * If we've had to call this method, we know that a branch header has not been provided.
-	 * As such the remote info was retrieved with a ?ref=... query argument.
-	 *
-	 * @since 1.5.0
-	 * @param array API object
-	 *
-	 * @return string Default branch name.
-	 */
-	protected function get_default_branch( $response ) {
-		if ( !empty( $this->{$this->type}->branch ) )
-			return $this->{$this->type}->branch;
-
-		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response )
-			return 'master';
-
-		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
-		$components = parse_url( $response->url, PHP_URL_QUERY );
-		parse_str( $components );
-		return $ref;
-	}
-
-	/**
 	 * Read the remote file.
 	 *
 	 * Uses a transient to limit the calls to the API.
@@ -123,6 +115,31 @@ class GitHub_Updater_API extends GitHub_Updater {
 			$this->{$this->type}->remote_version = $matches[1];
 
 		$this->{$this->type}->branch = $this->get_default_branch( $remote );
+	}
+
+	/**
+	 * Parse the remote info to find what the default branch is.
+	 *
+	 * If we've had to call this method, we know that a branch header has not been provided.
+	 * As such the remote info was retrieved with a ?ref=... query argument.
+	 *
+	 * @since 1.5.0
+	 * @param array API object
+	 *
+	 * @return string Default branch name.
+	 */
+	protected function get_default_branch( $response ) {
+		if ( !empty( $this->{$this->type}->branch ) )
+			return $this->{$this->type}->branch;
+
+		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
+		if ( ! $response )
+			return 'master';
+
+		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
+		$components = parse_url( $response->url, PHP_URL_QUERY );
+		parse_str( $components );
+		return $ref;
 	}
 
 	/**
@@ -191,7 +208,7 @@ class GitHub_Updater_API extends GitHub_Updater {
 	 * @since 1.9.0
 	 * @return base64 decoded CHANGES.md or false
 	 */
-	public function get_remote_changes() {
+	protected function get_remote_changes() {
 
 		$remote = get_site_transient( md5( $this->{$this->type}->repo . 'changes' ) );
 
@@ -203,11 +220,9 @@ class GitHub_Updater_API extends GitHub_Updater {
 		}
 		
 		if ( false != $remote ) {
-			foreach ( $remote as $key => $value ) {
-				if ( $key == 'content' ) {
-					$this->{$this->type}->sections = array( 'changelog' => base64_decode( $value ) );
-				}
-			}
+			$this->{$this->type}->sections = array(
+				'changelog' => '<pre>' . base64_decode( $remote->content ) . '</pre>',
+				);
 		}
 
 	}

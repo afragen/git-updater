@@ -25,9 +25,9 @@ GitHub Branch:     master
 // Load base classes and Launch
 if ( is_admin() ) {
 	require_once 'includes/class-github-updater.php';
-	require_once 'includes/class-github-updater-api.php';
-	require_once 'includes/class-theme-updater.php';
+	require_once 'includes/class-github-api.php';
 	require_once 'includes/class-plugin-updater.php';
-	new GitHub_Theme_Updater;
+	require_once 'includes/class-theme-updater.php';
 	new GitHub_Plugin_Updater;
+	new GitHub_Theme_Updater;
 }
