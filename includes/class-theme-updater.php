@@ -18,7 +18,7 @@
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Theme_Updater extends GitHub_Updater_API {
+class GitHub_Theme_Updater extends GitHub_Updater_GitHub_API {
 
 	/**
 	 * Constructor.
@@ -29,13 +29,11 @@ class GitHub_Theme_Updater extends GitHub_Updater_API {
 	 */
 	public function __construct() {
 
-		$this->type = 'github_theme';
-
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
 
 		// Get details of GitHub-sourced themes
-		$this->config = $this->get_themes_meta();
+		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) return;
 
 		foreach ( $this->config as $theme ) {

@@ -16,7 +16,7 @@
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class GitHub_Plugin_Updater extends GitHub_Updater_API {
+class GitHub_Plugin_Updater extends GitHub_Updater_GitHub_API {
 
 	/**
 	 * Constructor.
@@ -26,8 +26,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater_API {
 	 * @param array $config
 	 */
 	public function __construct() {
-
-		$this->type = 'github_plugin';
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_plugin_headers', array( $this, 'add_plugin_headers' ) );
