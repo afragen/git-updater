@@ -66,6 +66,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater_GitHub_API {
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ($response->slug === $plugin->repo) {
+				$response->slug     = $plugin->slug;
+				$response->homepage = $plugin->uri;
+				$response->version  = $plugin->remote_version;
 				$response->sections = $plugin->sections;
 			}
 		}
