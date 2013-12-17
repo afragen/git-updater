@@ -19,12 +19,7 @@ or
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
 
 ## Requirements
-
- * WordPress 3.4
-
-## Tested
-
- * Up to 3.8
+ * WordPress 3.4 (tested up to 3.8)
 
 ## Installation
 
@@ -68,6 +63,7 @@ Author:           Andy Fragen
 Template:         twentytwelve
 Template Version: 1.0.0
 GitHub Theme URI: https://github.com/afragen/test-child
+GitHub Branch:    master
 */
 ~~~
 
@@ -90,7 +86,7 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional plugin headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
+Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
 
 The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
 
@@ -99,6 +95,16 @@ The only extra character allowed in a URI is `-`. Let me know if there is a need
 To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater then the update will pull from the branch and not from the tag.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
+
+## Filter Hooks
+
+There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate function returning an integer of the number of hours before expiration of the transient. Usage as follows.
+
+    add_filter( 'github_updater_set_transient_hours', $hours );
+
+This can also be added using an anonymous function call as well.
+
+    add_filter( 'github_updater_set_transient_hours', function() { return 12;} ):
 
 ## Issues
 
