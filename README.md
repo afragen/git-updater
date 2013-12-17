@@ -104,7 +104,7 @@ There is a filter hook to set the number of hours for a transient to expire. You
 
 This can also be added using an anonymous function call as well.
 
-    add_filter( 'github_updater_set_transient_hours', function() { return 12;} ):
+    add_filter( 'github_updater_set_transient_hours', function() { return 12;} );
 
 ## Issues
 
