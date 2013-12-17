@@ -17,6 +17,13 @@
 class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
+	 * Variable for setting update transient hours
+	 *
+	 * @var integer
+	 */
+	 protected static $hours = 4;
+	 
+	/**
 	 * Return an instance of this class.
 	 *
 	 * @since     2.0.0
@@ -103,8 +110,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$remote = get_site_transient( md5( $this->{$this->type}->repo . $file ) );
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
-			if ( $remote )
-				set_site_transient( md5( $this->{$this->type}->repo . $file ), $remote, HOUR_IN_SECONDS );
+
+			if ( $remote ) {
+				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
+				set_site_transient( md5( $this->{$this->type}->repo . $file ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );
+			}
 		}
 
 		if ( ! $remote ) return;
@@ -157,8 +167,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
-			if ( $response )
-				set_site_transient( md5( $this->{$this->type}->repo . 'tags' ), $response, HOUR_IN_SECONDS );
+			if ( $response ) {
+				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
+				set_site_transient( md5( $this->{$this->type}->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+			}
 		}
 
 		// Sort and get latest tag
@@ -215,8 +227,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/CHANGES.md' );
 
-			if ( $remote )
-				set_site_transient( md5( $this->{$this->type}->repo . 'changes' ), $remote, HOUR_IN_SECONDS );				
+			if ( $remote ) {
+				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
+				set_site_transient( md5( $this->{$this->type}->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
+			}
 		}
 		
 		if ( false != $remote ) {
