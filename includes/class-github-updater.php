@@ -62,7 +62,7 @@ class GitHub_Updater {
 	 */
 	public function add_plugin_headers( $extra_headers ) {
 		$gtu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Access Token', 'GitHub Branch' );
-		$extra_headers = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
+		$extra_headers     = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
 
 		return $extra_headers;
 	}
@@ -76,7 +76,7 @@ class GitHub_Updater {
 	 */
 	public function add_theme_headers( $extra_headers ) {
 		$gtu_extra_headers = array( 'GitHub Theme URI', 'GitHub Access Token', 'GitHub Branch' );
-		$extra_headers = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
+		$extra_headers     = array_merge( (array) $extra_headers, (array) $gtu_extra_headers );
 
 		return $extra_headers;
 	}
@@ -92,19 +92,19 @@ class GitHub_Updater {
 		// Ensure get_plugins() function is available.
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins        = get_plugins();
+		$plugins     = get_plugins();
 		$git_plugins = array();
 
 		foreach ( $plugins as $plugin => $headers ) {
 			$git_repo = $this->get_local_plugin_meta( $headers );
 			if ( empty( $git_repo['owner'] ) )
 				continue;
-			$git_repo['slug'] = $plugin;
-			
-			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
 
-			$git_repo['local_version'] = $plugin_data['Version'];
-			$git_plugins[ $git_repo['repo'] ] = (object) $git_repo;
+			$git_repo['slug']                    = $plugin;
+			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
+			$git_repo['local_version']           = $plugin_data['Version'];
+			$git_repo['sections']['description'] = $plugin_data['Description'];
+			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
 		}
 		return $git_plugins;
 	}
@@ -180,8 +180,8 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	protected function get_theme_meta() {
-		$git_themes = array();
-		$git_theme  = array();
+		$git_themes    = array();
+		$git_theme     = array();
 		$themes        = wp_get_themes();
 		$extra_headers = $this->add_theme_headers( null );
 
@@ -224,11 +224,9 @@ class GitHub_Updater {
 	 * @since 1.9.0
 	 */
 	protected function set_defaults() {
-		$this->{$this->type}->remote_version = '0.0.0'; //set default value
-		$this->{$this->type}->newest_tag     = '0.0.0'; //set default value
-		$this->{$this->type}->sections       = array(
-			'changelog' => 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.',
-													);	
+		$this->{$this->type}->remote_version        = '0.0.0'; //set default value
+		$this->{$this->type}->newest_tag            = '0.0.0'; //set default value
+		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';	
 	}
 
 	/**
