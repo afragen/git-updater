@@ -5,12 +5,13 @@
  * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
  * minor spelling fixes
  * renamed some functions for their hooks
- * refactored `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` to use stdClass
- * further refactored base class `GitHub_Updater` to contain renaming code.
- * works on WordPress 3.8
- * added some ability to see changelog for GitHub hosted plugins.
+ * refactored `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` to use stdClass objects 
+ * further refactored base class `GitHub_Updater` to contain renaming code and create stdClass objects for data.
+ * added some ability to see changelog for GitHub hosted plugins. Still need to figure out how to convert Markdown.
  * trying to follow <a href="https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate">WordPress Plugin Boilerplate</a>, so renamed `classes` to `includes`
  * refactored putting all remote api calls in new `class GitHub_Plugin_Updater_API`.
+ * Theme updating should now be able to have a specified branch.
+ * works on WordPress 3.8
 
 ## 1.8.1
 
