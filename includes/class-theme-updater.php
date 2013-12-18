@@ -36,7 +36,7 @@ class GitHub_Theme_Updater extends GitHub_Updater_GitHub_API {
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) return;
 
-		foreach ( $this->config as $theme ) {
+		foreach ( (array) $this->config as $theme ) {
 			$this->{$this->type} = $theme;
 			$this->set_defaults();
 			$this->get_remote_info( 'style.css' );
@@ -64,7 +64,7 @@ class GitHub_Theme_Updater extends GitHub_Updater_GitHub_API {
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
 
-		foreach ( $this->config as $theme ) {
+		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) continue;
 			
 			// setup update array to append version info

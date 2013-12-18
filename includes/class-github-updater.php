@@ -76,7 +76,7 @@ class GitHub_Updater {
 		$plugins     = get_plugins();
 		$git_plugins = array();
 
-		foreach ( $plugins as $plugin => $headers ) {
+		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_repo = $this->get_local_plugin_meta( $headers );
 			if ( empty( $git_repo['owner'] ) )
 				continue;
@@ -107,7 +107,7 @@ class GitHub_Updater {
 		$git_repo      = array();
 		$extra_headers = $this->add_plugin_headers( null );
 
-		foreach ( $extra_headers as $key => $value ) {
+		foreach ( (array) $extra_headers as $key => $value ) {
 			switch( $value ) {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) ) return;
@@ -146,7 +146,7 @@ class GitHub_Updater {
 		$theme_dirs = scandir( get_theme_root() );
 		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store' ) );
 
-		foreach ( $theme_dirs as $theme_dir ) {
+		foreach ( (array) $theme_dirs as $theme_dir ) {
 			$themes[] = wp_get_theme( $theme_dir );
 		}
 
@@ -168,12 +168,12 @@ class GitHub_Updater {
 		if ( is_multisite() )
 			$themes = $this->multisite_get_themes();
 
-		foreach ( $themes as $theme ) {
+		foreach ( (array) $themes as $theme ) {
 			$github_uri = $theme->get( 'GitHub Theme URI' );
 			if ( empty( $github_uri ) ) continue;
 			$this->type = 'github_theme';
 
-			foreach ( $extra_headers as $key => $value ) {
+			foreach ( (array) $extra_headers as $key => $value ) {
 				switch( $value ) {
 					case 'GitHub Theme URI':
 						$owner_repo                    = parse_url( $github_uri, PHP_URL_PATH );

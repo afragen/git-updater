@@ -160,7 +160,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		// Sort and get latest tag
 		$tags = array();
 		if ( false !== $response )
-			foreach ( $response as $num => $tag ) {
+			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $tag->name ) ) $tags[] = $tag->name;
 			}
 

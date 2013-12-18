@@ -35,7 +35,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater_GitHub_API {
 		
 		if ( empty( $this->config ) ) return;
 
-		foreach ( $this->config as $plugin ) {
+		foreach ( (array) $this->config as $plugin ) {
 			$this->{$this->type} = $plugin;
 			$this->set_defaults();
 			$this->get_remote_info( basename( $this->{$this->type}->slug ) );
