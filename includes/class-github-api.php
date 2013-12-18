@@ -23,22 +23,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	 protected static $hours = 4;
 	 
-	/**
-	 * Return an instance of this class.
-	 *
-	 * @since     2.0.0
-	 *
-	 * @return    object    A single instance of this class.
-	 */
-	public static function get_instance() {
-
-		// If the single instance hasn't been set, set it now.
-		if ( null == self::$instance ) {
-			self::$instance = new self;
-		}
-
-		return self::$instance;
-	}
 
 	/**
 	 * Call the GitHub API and return a json decoded body.

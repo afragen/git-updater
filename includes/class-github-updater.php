@@ -37,25 +37,6 @@ class GitHub_Updater {
 	protected $type;
 
 	/**
-	 * Instance of class.
-	 * This will be an instance of the appropriate git api.
-	 *
-	 * @since    2.0.0
-	 *
-	 * @var      object
-	 */
-	protected static $instance = null;
-
-	/**
-	 * Store instance of git repository api
-	 *
-	 * @since 2.0.0
-	 *
-	 * @var object
-	 */
-	protected static $repo_api = null;
-	
-	/**
 	 * Add extra header to get_plugins();
 	 *
 	 * @since 1.0.0
@@ -131,7 +112,6 @@ class GitHub_Updater {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) ) return;
 					$this->type = 'github_plugin';
-//					$repo_api   = GitHub_Updater_GitHub_API::get_instance();
 
 					$owner_repo        = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
 					$owner_repo        = trim( $owner_repo, '/' );  // strip surrounding slashes
@@ -226,7 +206,7 @@ class GitHub_Updater {
 	protected function set_defaults() {
 		$this->{$this->type}->remote_version        = '0.0.0'; //set default value
 		$this->{$this->type}->newest_tag            = '0.0.0'; //set default value
-		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';	
+		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';	
 	}
 
 	/**
