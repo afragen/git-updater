@@ -1,4 +1,12 @@
-## ChangeLog for GitHub Updater
+### ChangeLog for GitHub Updater
+
+#### 2.1.0
+
+ * simplify check for `class Markdown_Parser`
+ * refactor to pass `class GitHub_Update_GitHub_API` as class object. This should enable the creation of other class objects for Bitbucket, etc.
+ * fix for setting branch when API not responding
+ * fix for setting download link when API not responding
+ * redesigned filter for setting transient timeout, but still not working (pull requests welcome)
 
 #### 2.0.1
 

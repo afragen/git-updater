@@ -204,9 +204,10 @@ class GitHub_Updater {
 	 * @since 1.9.0
 	 */
 	protected function set_defaults() {
-		$this->{$this->type}->remote_version        = '0.0.0'; //set default value
-		$this->{$this->type}->newest_tag            = '0.0.0'; //set default value
-		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';	
+		$this->{$this->type}->remote_version        = '0.0.0';
+		$this->{$this->type}->newest_tag            = '0.0.0';
+		$this->{$this->type}->tags                  = array();
+		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
 	}
 
 	/**

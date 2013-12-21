@@ -98,13 +98,15 @@ The default state is either `GitHub Branch: master` or nothing at all. They are 
 
 ## Filter Hooks
 
-There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate function returning an integer of the number of hours before expiration of the transient. Usage as follows.
+There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate function returning an integer of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
 
-    add_filter( 'github_updater_set_transient_hours', $hours );
+    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', $hours ) );
 
 This can also be added using an anonymous function call as well.
 
-    add_filter( 'github_updater_set_transient_hours', function() { return 12;} );
+    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', function() { return 12;} ) );
+    
+### NB - I'm having issues getting this to function. Pull requests welcome.
 
 ## Issues
 

@@ -16,7 +16,25 @@
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class GitHub_Plugin_Updater extends GitHub_Updater_GitHub_API {
+class GitHub_Plugin_Updater extends GitHub_Updater {
+
+	/**
+	 * Define as either 'plugin' or 'theme'
+	 *
+	 * @since 1.9.0
+	 *
+	 * @var string
+	 */
+	protected $type;
+
+	/**
+	 * Class Object for API
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var class object
+	 */
+ 	protected $repo_api;
 
 	/**
 	 * Constructor.
@@ -36,12 +54,19 @@ class GitHub_Plugin_Updater extends GitHub_Updater_GitHub_API {
 		if ( empty( $this->config ) ) return;
 
 		foreach ( (array) $this->config as $plugin ) {
+
+			switch( $this->type ) {
+				case 'github_plugin':
+					$repo_api = new GitHub_Updater_GitHub_API( $plugin );
+					break;
+			}
+
 			$this->{$this->type} = $plugin;
 			$this->set_defaults();
-			$this->get_remote_info( basename( $this->{$this->type}->slug ) );
-			$this->get_remote_tag();
-			$this->get_remote_changes( 'CHANGES.md' );
-			$this->{$this->type}->download_link = $this->construct_download_link();
+			$repo_api->get_remote_info( basename( $this->{$this->type}->slug ) );
+			$repo_api->get_remote_tag();
+			$repo_api->get_remote_changes( 'CHANGES.md' );
+			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 		}
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
