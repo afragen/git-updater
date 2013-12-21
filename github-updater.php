@@ -24,18 +24,12 @@ GitHub Branch:     master
 
 // Load base classes and Launch
 if ( is_admin() ) {
+	if ( ! class_exists( 'Markdown_Parser' ) )
+		require_once 'includes/markdown.php';
 	require_once 'includes/class-github-updater.php';
 	require_once 'includes/class-github-api.php';
 	require_once 'includes/class-plugin-updater.php';
 	require_once 'includes/class-theme-updater.php';
 	new GitHub_Plugin_Updater;
 	new GitHub_Theme_Updater;
-}
-
-// Don't load markdown.php if already loaded elsewhere
-add_action( 'plugins_loaded', 'github_updater_load_markdown' );
-function github_updater_load_markdown() {
-	if ( is_admin() )
-	 	if ( ! class_exists( 'Markdown_Parser' ) )
-	 		require_once 'includes/markdown.php';
 }
