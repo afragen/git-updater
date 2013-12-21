@@ -14,7 +14,25 @@
  * @package GitHub_Updater_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_GitHub_API extends GitHub_Updater {
+class GitHub_Updater_GitHub_API {
+
+	/**
+	 * Define as either 'plugin' or 'theme'
+	 *
+	 * @since 1.9.0
+	 *
+	 * @var string
+	 */
+	protected $type;
+
+	/**
+	 * Class Object for API
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var class object
+	 */
+ 	protected $repo_api;
 
 	/**
 	 * Variable for setting update transient hours
@@ -23,6 +41,17 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	 protected static $hours = 4;
 	 
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $type
+	 */
+	public function __construct( $type ) {
+		$this->type = $type;
+	}
 
 	/**
 	 * Call the GitHub API and return a json decoded body.
@@ -55,8 +84,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	protected function get_api_url( $endpoint ) {
 		$segments = array(
-			'owner' => $this->{$this->type}->owner,
-			'repo'  => $this->{$this->type}->repo,
+			'owner' => $this->type->owner,
+			'repo'  => $this->type->repo,
 		);
 
 		/**
@@ -72,13 +101,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->{$this->type}->access_token ) )
-			$endpoint = add_query_arg( 'access_token', $this->{$this->type}->access_token, $endpoint );
+		if ( ! empty( $this->type->access_token ) )
+			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
 
 		// If a branch has been given, only check that for the remote info.
 		// If it's not been given, GitHub will use the Default branch.
-		if ( ! empty( $this->{$this->type}->branch ) )
-			$endpoint = add_query_arg( 'ref', $this->{$this->type}->branch, $endpoint );
+		if ( ! empty( $this->type->branch ) )
+			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 
 		return 'https://api.github.com' . $endpoint;
 	}
@@ -90,14 +119,14 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 */
-	protected function get_remote_info( $file ) {
-		$remote = get_site_transient( md5( $this->{$this->type}->repo . $file ) );
+	public function get_remote_info( $file ) {
+		$remote = get_site_transient( md5( $this->type->repo . $file ) );
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $remote ) {
 				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
-				set_site_transient( md5( $this->{$this->type}->repo . $file ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( md5( $this->type->repo . $file ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -106,9 +135,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
 
 		if ( ! empty( $matches[1] ) )
-			$this->{$this->type}->remote_version = $matches[1];
+			$this->type->remote_version = $matches[1];
 
-		$this->{$this->type}->branch = $this->get_default_branch( $remote );
+		$this->type->branch = $this->get_default_branch( $remote );
 	}
 
 	/**
@@ -123,8 +152,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string Default branch name.
 	 */
 	protected function get_default_branch( $response ) {
-		if ( ! empty( $this->{$this->type}->branch ) )
-			return $this->{$this->type}->branch;
+		if ( ! empty( $this->type->branch ) )
+			return $this->type->branch;
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
 		if ( ! $response )
@@ -145,15 +174,15 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @return string latest tag.
 	 */
-	protected function get_remote_tag() {
-		$response = get_site_transient( md5( $this->{$this->type}->repo . 'tags' ) );
+	public function get_remote_tag() {
+		$response = get_site_transient( md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( $response ) {
 				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
-				set_site_transient( md5( $this->{$this->type}->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -173,9 +202,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 		$newest_tag     = $tags[ $newest_tag_key ];
 
-		$this->{$this->type}->newest_tag    = $newest_tag;
-		$this->{$this->type}->download_link =  $this->{$this->type}->uri . '/archive/' . $this->{$this->type}->newest_tag . '.zip';
-		$this->{$this->type}->tags          = $tags;
+		$this->type->newest_tag    = $newest_tag;
+		$this->type->download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
+		$this->type->tags          = $tags;
 	}
 
 	/**
@@ -185,13 +214,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @param stdClass plugin data
 	 */
-	protected function construct_download_link() {
+	public function construct_download_link() {
 
 		// just in case user started using tags then stopped.
-		if ( $this->{$this->type}->remote_version && $this->{$this->type}->newest_tag && version_compare( $this->{$this->type}->newest_tag, $this->{$this->type}->remote_version, '>=' ) ) {							
-			$download_link = $this->{$this->type}->uri . '/archive/' . $this->{$this->type}->newest_tag . '.zip';
+		if ( $this->type->remote_version && $this->type->newest_tag && version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) ) {							
+			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
-			$download_link = $this->{$this->type}->uri . '/archive/' . $this->{$this->type}->branch . '.zip';
+			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
 		}
 		return $download_link;
 	}
@@ -204,26 +233,26 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @since 1.9.0
 	 * @return base64 decoded CHANGES.md or false
 	 */
-	protected function get_remote_changes() {
+	public function get_remote_changes() {
 
-		$remote = get_site_transient( md5( $this->{$this->type}->repo . 'changes' ) );
+		$remote = get_site_transient( md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/CHANGES.md' );
 
 			if ( $remote ) {
 				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
-				set_site_transient( md5( $this->{$this->type}->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
+				set_site_transient( md5( $this->type->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
 		
 		if ( false != $remote ) {
-			if ( function_exists( 'Markdown') ) {
+			if ( function_exists( 'Markdown' ) ) {
 				$changelog = Markdown( base64_decode( $remote->content ) );
 			} else {
 				$changelog = '<pre>' . base64_decode( $remote->content ) . '</pre>';
 			}
-			$this->{$this->type}->sections['changelog'] = $changelog;
+			$this->type->sections['changelog'] = $changelog;
 		}
 
 	}
