@@ -1,5 +1,10 @@
 ## ChangeLog for GitHub Updater
 
+#### 2.1.0
+
+ * simplify check for `class Markdown_Parser`
+ * refactor to pass `class GitHub_Update_GitHub_API` as class object. This should enable the creation of other class objects for Bitbucket, etc.
+
 #### 2.0.1
 
  * bugfix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
