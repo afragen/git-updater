@@ -218,7 +218,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 		
 		if ( false != $remote ) {
-			$this->{$this->type}->sections['changelog'] = Markdown( base64_decode( $remote->content ) );
+			if ( function_exists( 'Markdown') ) {
+				$changelog = Markdown( base64_decode( $remote->content ) );
+			} else {
+				$changelog = '<pre>' . base64_decode( $remote->content ) . '</pre>';
+			}
+			$this->{$this->type}->sections['changelog'] = $changelog;
 		}
 
 	}
