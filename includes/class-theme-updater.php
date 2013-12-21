@@ -18,7 +18,26 @@
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Theme_Updater extends GitHub_Updater_GitHub_API {
+class GitHub_Theme_Updater extends GitHub_Updater {
+
+	/**
+	 * Define as either 'plugin' or 'theme'
+	 *
+	 * @since 1.9.0
+	 *
+	 * @var string
+	 */
+	protected $type;
+
+	/**
+	 * Class Object for API
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var class object
+	 */
+ 	protected $repo_api;
+
 
 	/**
 	 * Constructor.
@@ -37,11 +56,18 @@ class GitHub_Theme_Updater extends GitHub_Updater_GitHub_API {
 		if ( empty( $this->config ) ) return;
 
 		foreach ( (array) $this->config as $theme ) {
+
+			switch( $this->type ) {
+				case 'github_theme':
+					$repo_api = new GitHub_Updater_GitHub_API( $theme );
+					break;
+			}
+
 			$this->{$this->type} = $theme;
 			$this->set_defaults();
-			$this->get_remote_info( 'style.css' );
-			$this->get_remote_tag();
-			$this->{$this->type}->download_link = $this->construct_download_link();
+			$repo_api->get_remote_info( 'style.css' );
+			$repo_api->get_remote_tag();
+			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 		}
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
