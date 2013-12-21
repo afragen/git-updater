@@ -12,7 +12,7 @@
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to automatically update GitHub hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
-Version:           2.0.0
+Version:           2.0.1
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -24,11 +24,18 @@ GitHub Branch:     master
 
 // Load base classes and Launch
 if ( is_admin() ) {
-	require_once 'includes/markdown.php';
 	require_once 'includes/class-github-updater.php';
 	require_once 'includes/class-github-api.php';
 	require_once 'includes/class-plugin-updater.php';
 	require_once 'includes/class-theme-updater.php';
 	new GitHub_Plugin_Updater;
 	new GitHub_Theme_Updater;
+}
+
+// Don't load markdown.php if already loaded elsewhere
+add_action( 'plugins_loaded', 'github_updater_load_markdown' );
+function github_updater_load_markdown() {
+	if ( is_admin() )
+	 	if ( ! class_exists( 'Markdown_Parser' ) )
+	 		require_once 'includes/markdown.php';
 }

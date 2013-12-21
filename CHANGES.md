@@ -1,5 +1,9 @@
 ## ChangeLog for GitHub Updater
 
+#### 2.0.1
+
+ * bugfix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
+
 #### 2.0.0
 
  * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
