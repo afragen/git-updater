@@ -39,7 +39,7 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @var integer
 	 */
-	 protected static $hours = 4;
+	 protected static $hours;
 	 
 
 	/**
@@ -51,6 +51,7 @@ class GitHub_Updater_GitHub_API {
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;
+		self::$hours = apply_filters( 'github_updater_set_transient_hours', 1 );
 	}
 
 	/**
@@ -125,19 +126,18 @@ class GitHub_Updater_GitHub_API {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $remote ) {
-				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
 				set_site_transient( md5( $this->type->repo . $file ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
-		if ( ! $remote ) return;
+		$this->type->branch = $this->get_default_branch( $remote );
 
+		if ( ! $remote ) return;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
 
 		if ( ! empty( $matches[1] ) )
 			$this->type->remote_version = $matches[1];
 
-		$this->type->branch = $this->get_default_branch( $remote );
 	}
 
 	/**
@@ -181,7 +181,6 @@ class GitHub_Updater_GitHub_API {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( $response ) {
-				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
 				set_site_transient( md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
@@ -203,7 +202,7 @@ class GitHub_Updater_GitHub_API {
 		$newest_tag     = $tags[ $newest_tag_key ];
 
 		$this->type->newest_tag    = $newest_tag;
-		$this->type->download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
+//		$this->type->download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		$this->type->tags          = $tags;
 	}
 
@@ -217,7 +216,7 @@ class GitHub_Updater_GitHub_API {
 	public function construct_download_link() {
 
 		// just in case user started using tags then stopped.
-		if ( $this->type->remote_version && $this->type->newest_tag && version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) ) {							
+		if ( version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
 			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
@@ -241,7 +240,6 @@ class GitHub_Updater_GitHub_API {
 			$remote = $this->api( '/repos/:owner/:repo/contents/CHANGES.md' );
 
 			if ( $remote ) {
-				self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
 				set_site_transient( md5( $this->type->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
