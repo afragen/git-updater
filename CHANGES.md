@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.1.1
+
+ * bugfix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
+
 #### 2.1.0
 
  * simplify check for `class Markdown_Parser`

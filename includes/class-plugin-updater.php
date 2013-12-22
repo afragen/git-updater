@@ -81,6 +81,10 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function plugins_api( $false, $action, $response ) {
+		if ( ! ( 'plugin_information' == $action ) ) {
+			return $false;
+		}
+
 		$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug . '.php' );
 		if ( ! empty( $wp_repo_data['body'] ) ) {
 			$wp_repo_body = unserialize( $wp_repo_data['body'] );
