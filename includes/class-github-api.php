@@ -233,6 +233,8 @@ class GitHub_Updater_GitHub_API {
 	 * @return base64 decoded CHANGES.md or false
 	 */
 	public function get_remote_changes() {
+		if ( ! class_exists( 'Markdown_Parser' ) )
+			require_once 'markdown.php';
 
 		$remote = get_site_transient( md5( $this->type->repo . 'changes' ) );
 
