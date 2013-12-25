@@ -88,8 +88,6 @@ GitHub Branch:     master
 
 Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
 
-The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
-
 ## Branch Support
 
 To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater then the update will pull from the branch and not from the tag.
