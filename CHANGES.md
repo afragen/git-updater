@@ -6,7 +6,7 @@
 
 #### 2.1.1
 
- * bugfix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
+ * bug fix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
 
 #### 2.1.0
 
@@ -18,7 +18,7 @@
 
 #### 2.0.1
 
- * bugfix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
+ * bug fix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
 
 #### 2.0.0
 
@@ -71,7 +71,7 @@
 
 #### 1.6.1
 
- * bugfix for undeclared variable $github_plugins
+ * bug fix for undeclared variable $github_plugins
 
 #### 1.6.0
 
