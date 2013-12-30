@@ -22,6 +22,11 @@ GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     master
 */
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 // Load base classes and Launch
 if ( is_admin() ) {
 	require_once 'includes/class-github-updater.php';
