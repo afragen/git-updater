@@ -176,13 +176,14 @@ class GitHub_Updater {
 			foreach ( (array) $extra_headers as $key => $value ) {
 				switch( $value ) {
 					case 'GitHub Theme URI':
-						$owner_repo                    = parse_url( $github_uri, PHP_URL_PATH );
-						$owner_repo                    = trim( $owner_repo, '/' );  // strip surrounding slashes
-						$github_theme['uri']           = 'https://github.com/' . $owner_repo;
-						$owner_repo                    = explode( '/', $owner_repo );
-						$github_theme['owner']         = $owner_repo[0];
-						$github_theme['repo']          = $owner_repo[1];
-						$github_theme['local_version'] = $theme->get( 'Version' );
+						$owner_repo                              = parse_url( $github_uri, PHP_URL_PATH );
+						$owner_repo                              = trim( $owner_repo, '/' );
+						$github_theme['uri']                     = 'https://github.com/' . $owner_repo;
+						$owner_repo                              = explode( '/', $owner_repo );
+						$github_theme['owner']                   = $owner_repo[0];
+						$github_theme['repo']                    = $owner_repo[1];
+						$github_theme['local_version']           = $theme->get( 'Version' );
+						$github_theme['sections']['description'] = $theme->get( 'Description' );
 						break;
 					case 'GitHub Access Token':
 						$github_theme['access_token']  = $theme->get( 'GitHub Access Token' );
@@ -208,6 +209,7 @@ class GitHub_Updater {
 		$this->{$this->type}->newest_tag            = '0.0.0';
 		$this->{$this->type}->tags                  = array();
 		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
+		$this->{$this->type}->transient             = array();
 	}
 
 	/**
