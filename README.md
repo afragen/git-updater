@@ -6,7 +6,7 @@ This plugin is not allowed in the wp.org repo. :frowning:
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows. The folder name of the theme or plugin **must** be the same as the repo name.
 
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`

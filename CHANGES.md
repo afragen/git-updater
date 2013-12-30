@@ -3,6 +3,8 @@
 #### 2.1.x
 
  * moved check and load for `markdown.php` into only function that uses it.
+ * minor README updates
+ * added abort if plugin called directly
 
 #### 2.1.1
 
