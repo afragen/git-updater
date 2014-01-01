@@ -39,7 +39,7 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @var integer
 	 */
-	 protected static $hours;
+	 public static $hours = 1;
 	 
 
 	/**
@@ -51,7 +51,7 @@ class GitHub_Updater_GitHub_API {
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;
-		self::$hours = apply_filters( 'github_updater_set_transient_hours', 1 );
+		self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
 	}
 
 	/**
@@ -121,6 +121,7 @@ class GitHub_Updater_GitHub_API {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
+
 		$remote = get_site_transient( md5( $this->type->repo . $file ) );
 		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
@@ -133,6 +134,7 @@ class GitHub_Updater_GitHub_API {
 		$this->type->branch = $this->get_default_branch( $remote );
 
 		if ( ! $remote ) return;
+		$this->type->transient = $remote;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
 
 		if ( ! empty( $matches[1] ) )
@@ -202,7 +204,6 @@ class GitHub_Updater_GitHub_API {
 		$newest_tag     = $tags[ $newest_tag_key ];
 
 		$this->type->newest_tag    = $newest_tag;
-//		$this->type->download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		$this->type->tags          = $tags;
 	}
 
@@ -232,14 +233,14 @@ class GitHub_Updater_GitHub_API {
 	 * @since 1.9.0
 	 * @return base64 decoded CHANGES.md or false
 	 */
-	public function get_remote_changes() {
+	public function get_remote_changes( $changes ) {
 		if ( ! class_exists( 'Markdown_Parser' ) )
 			require_once 'markdown.php';
 
 		$remote = get_site_transient( md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $remote ) {
-			$remote = $this->api( '/repos/:owner/:repo/contents/CHANGES.md' );
+			$remote = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
 			if ( $remote ) {
 				set_site_transient( md5( $this->type->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
@@ -255,6 +256,48 @@ class GitHub_Updater_GitHub_API {
 			$this->type->sections['changelog'] = $changelog;
 		}
 
+	}
+	
+	/**
+	 * Read the repository meta from GitHub API
+	 *
+	 * Uses a transient to limit calls to the API
+	 * @since 2.2.0
+	 * @return base64 decoded repository meta data
+	 */
+	public function get_repo_meta() {
+		$remote = get_site_transient( md5( $this->type->repo . 'meta' ) );
+		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
+
+		if ( ! $remote ) {
+			$remote = $this->api( '/search/repositories' . $meta_query );
+
+			if ( $remote ) {
+				set_site_transient( md5( $this->type->repo . 'meta' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
+			}
+		}
+
+		$this->type->repo_meta = $remote->items[0];
+		$this->add_meta_repo_object();
+	}
+
+	/**
+	 * Add remote data to type object
+	 *
+	 * @since 2.2.0
+	 */
+	private function add_meta_repo_object() {
+		$this->type->last_updated = $this->type->repo_meta->pushed_at;
+		
+		// I'm just making this up
+		$rating = round( $this->type->repo_meta->stargazers_count + $this->type->repo_meta->score );
+		if ( 100 < $rating ) {
+			$this->type->rating = 100;
+		} else {
+			$this->type->rating = $rating;
+		}
+
+		$this->type->num_ratings = $this->type->repo_meta->stargazers_count;
 	}
 
 }

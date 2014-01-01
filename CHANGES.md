@@ -4,7 +4,8 @@
 
  * moved check and load for `markdown.php` into only function that uses it.
  * minor README updates
- * added abort if plugin called directly
+ * added abort if this plugin called directly
+ * added additional data to update available screen in both plugins and themes - issue #8
 
 #### 2.1.1
 

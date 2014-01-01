@@ -83,6 +83,8 @@ class GitHub_Updater {
 
 			$git_repo['slug']                    = $plugin;
 			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
+			$git_repo['author']                  = $plugin_data['AuthorName'];
+			$git_repo['name']                    = $plugin_data['Name'];
 			$git_repo['local_version']           = $plugin_data['Version'];
 			$git_repo['sections']['description'] = $plugin_data['Description'];
 			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
@@ -182,6 +184,8 @@ class GitHub_Updater {
 						$owner_repo                              = explode( '/', $owner_repo );
 						$github_theme['owner']                   = $owner_repo[0];
 						$github_theme['repo']                    = $owner_repo[1];
+						$github_theme['name']                    = $theme->get( 'Name' );
+						$github_theme['author']                  = $theme->get( 'Author' );
 						$github_theme['local_version']           = $theme->get( 'Version' );
 						$github_theme['sections']['description'] = $theme->get( 'Description' );
 						break;
@@ -210,6 +214,13 @@ class GitHub_Updater {
 		$this->{$this->type}->tags                  = array();
 		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
 		$this->{$this->type}->transient             = array();
+		$this->{$this->type}->requires              = null;
+		$this->{$this->type}->tested                = null;
+		$this->{$this->type}->downloaded            = 0;
+		$this->{$this->type}->last_updated          = null;
+		$this->{$this->type}->rating                = 0;
+		$this->{$this->type}->num_ratings           = 0;
+
 	}
 
 	/**

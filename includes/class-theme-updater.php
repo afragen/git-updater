@@ -66,18 +66,113 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$this->{$this->type} = $theme;
 			$this->set_defaults();
 			$repo_api->get_remote_info( 'style.css' );
+			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
+
+			// Add update row to theme row
+			remove_action( "after_theme_row_{$theme->repo}", 'wp_theme_update_row' );
+			add_action( "after_theme_row_{$theme->repo}", array( $this, 'wp_theme_update_row' ), 10, 2 );
+
 		}
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if (  empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
 
+		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
 	}
 
+	/**
+	 * Put changelog in plugins_api, return WP.org data as appropriate
+	 *
+	 * @since 2.0.0
+	 */
+	public function themes_api( $false, $action, $response ) {
+		if ( ! ( 'theme_information' == $action ) ) {
+			return $false;
+		}
+
+		foreach ( (array) $this->config as $theme ) {
+			if ($response->slug === $theme->repo) {
+				$response->slug         = $theme->repo;
+				$response->name         = $theme->name;
+				$response->homepage     = $theme->uri;
+				$response->version      = $theme->remote_version;
+				$response->sections     = $theme->sections;
+				$response->description  = $theme->sections['description'];
+				$response->author       = $theme->author;
+				$response->preview_url  = $theme->sections['changelog'];
+				$response->requires     = $theme->requires;
+				$response->tested       = $theme->tested;
+				$response->downloaded   = $theme->downloaded;
+				$response->last_updated = $theme->last_updated;
+				$response->rating       = $theme->rating;
+				$response->num_ratings  = $theme->num_ratings;
+			}
+		}
+		return $response;  
+	}
+
+
+	public function wp_theme_update_row( $theme_key, $theme ) {
+
+		$current = get_site_transient( 'update_themes' );
+
+		foreach ( (array) $this->config as $theme ) {
+			if ( $theme_key !== $theme->repo ) continue;
+			if ( ! isset( $current->response[$theme_key] ) ) continue;        
+
+			$r = $current->response[ $theme_key ];
+			$wp_list_table = _get_list_table('WP_MS_Themes_List_Table');
+
+			if ( isset( $r['error'] ) ) {
+				echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-error">';
+				printf( 'Error with GitHub Updater. %1$s', $r['error'] );
+// 			} else if ( isset( $current->up_to_date[$theme_key] ) ) {
+// 				$rollback = $current->up_to_date[$theme_key]['rollback'];
+// 				echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
+// 				echo 'Theme is up-to-date! ';
+// 				if ( current_user_can( 'update_themes' ) ) {
+// 					if ( count( $rollback ) > 0) {
+// 						echo "<strong>Rollback to:</strong> ";
+// 						// display last three tags
+// 						for ( $i=0; $i<3 ; $i++ ) {
+// 							$tag = array_pop($rollback);
+// 							if ( empty($tag) ) break;
+// 							if ( $i>0 ) echo ", ";
+// 							printf( '<a href="%s%s">%s</a>', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ), '&rollback=' . urlencode($tag), $tag);
+// 						}
+// 					} else {
+// 						echo "No previous tags to rollback to.";
+// 					}
+// 				}
+			} else {
+//				$themes_allowedtags = array( 'a' => array( 'href' => array(),'title' => array() ),'abbr' => array( 'title' => array() ),'acronym' => array( 'title' => array() ),'code' => array(),'em' => array(),'strong' => array() );
+//				$theme_name = wp_kses( $theme->name, $themes_allowedtags );
+//				$github_url = esc_url( $r['url'] );
+//				$diff_url   = esc_url( $r['url'] . '/compare/' . $theme->local_version . '...' . $r['new_version'] );
+				$diff_url = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
+
+				echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+				printf( 'GitHub Updater has a new version of %s available. ', $theme->name );
+				printf( '<a class="thickbox" title="'. $theme->name . '" href="%s">View version %s details</a> or ', $diff_url, $r['new_version'] );
+
+				if ( current_user_can( 'update_themes' ) ) {
+					if ( empty( $r['package'] ) ) {
+						echo '<em>Automatic update is unavailable for this plugin.</em>';
+					} else {
+						printf( '<a href="%s">update now</a>.', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ) );
+					}
+				}
+			}
+		do_action( "in_theme_update_message-$theme_key", $theme, $r );
+		echo '</div></td></tr>';
+	}
+}
+	
 	/**
 	 * Hook into pre_set_site_transient_update_themes to update from GitHub.
 	 *
@@ -92,7 +187,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) continue;
-			
+
 			// setup update array to append version info
 			$update = array();
 			$update['new_version'] = $theme->newest_tag;
