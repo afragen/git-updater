@@ -156,15 +156,15 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 //					}
 //				}
 			} else {
-//				$themes_allowedtags = array( 'a' => array( 'href' => array(),'title' => array() ),'abbr' => array( 'title' => array() ),'acronym' => array( 'title' => array() ),'code' => array(),'em' => array(),'strong' => array() );
-//				$theme_name = wp_kses( $theme->name, $themes_allowedtags );
+				$themes_allowedtags = array( 'a' => array( 'href' => array(),'title' => array() ),'abbr' => array( 'title' => array() ),'acronym' => array( 'title' => array() ),'code' => array(),'em' => array(),'strong' => array() );
+				$theme_name = wp_kses( $theme->name, $themes_allowedtags );
 //				$github_url = esc_url( $r['url'] );
 //				$diff_url   = esc_url( $r['url'] . '/compare/' . $theme->local_version . '...' . $r['new_version'] );
-				$diff_url = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
+				$details_url = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
 
 				echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
-				printf( 'GitHub Updater has a new version of %s available. ', $theme->name );
-				printf( '<a class="thickbox" title="'. $theme->name . '" href="%s">View version %s details</a> or ', $diff_url, $r['new_version'] );
+				printf( 'GitHub Updater has a new version of %s available. ', $theme_name );
+				printf( '<a class="thickbox" title="'. $theme_name . '" href="%s">View version %s details</a> or ', $details_url, $r['new_version'] );
 
 				if ( current_user_can( 'update_themes' ) ) {
 					if ( empty( $r['package'] ) ) {
