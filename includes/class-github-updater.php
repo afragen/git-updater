@@ -211,15 +211,17 @@ class GitHub_Updater {
 	protected function set_defaults() {
 		$this->{$this->type}->remote_version        = '0.0.0';
 		$this->{$this->type}->newest_tag            = '0.0.0';
+		$this->{$this->type}->download_link         = '';
 		$this->{$this->type}->tags                  = array();
 		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
-		$this->{$this->type}->transient             = array();
 		$this->{$this->type}->requires              = null;
 		$this->{$this->type}->tested                = null;
 		$this->{$this->type}->downloaded            = 0;
 		$this->{$this->type}->last_updated          = null;
 		$this->{$this->type}->rating                = 0;
 		$this->{$this->type}->num_ratings           = 0;
+		$this->{$this->type}->transient             = array();
+		$this->{$this->type}->repo_meta             = array();
 
 	}
 
