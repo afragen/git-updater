@@ -288,16 +288,31 @@ class GitHub_Updater_GitHub_API {
 	 */
 	private function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		
-		// I'm just making this up
-		$rating = round( $this->type->repo_meta->stargazers_count + $this->type->repo_meta->score );
+		$this->type->rating = $this->make_rating();
+		$this->type->num_ratings = $this->type->repo_meta->watchers;
+	}
+
+	/**
+	 * Create some sort of rating from 0 to 100 for use in star ratings
+	 * I'm really just making this up, more based upon popularity
+	 *
+	 * @since 2.2.0
+	 * @return integer
+	 */
+	private function make_rating() {
+		$watchers    = $this->type->repo_meta->watchers;
+		$forks       = $this->type->repo_meta->forks;
+		$open_issues = $this->type->repo_meta->open_issues;
+		$score       = $this->type->repo_meta->score; //what is this anyway?
+
+		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
+
 		if ( 100 < $rating ) {
-			$this->type->rating = 100;
-		} else {
-			$this->type->rating = $rating;
+			return 100;
 		}
 
-		$this->type->num_ratings = $this->type->repo_meta->stargazers_count;
+		return $rating;
+
 	}
 
 }
