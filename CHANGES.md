@@ -9,6 +9,7 @@
  * removed requirement for tags in theme updating
  * removed extra line endings from `remote_version`
  * added ratings function for creating star ratings based upon GitHub repo data.
+ * bring parts of `class GitHub_Theme_Updater` code on par with `class GitHub_Plugin_Updater`
 
 #### 2.1.1
 
