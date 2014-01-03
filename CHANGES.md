@@ -1,11 +1,14 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.1.x
+#### 2.2.0
 
  * moved check and load for `markdown.php` into only function that uses it.
  * minor README updates
  * added abort if this plugin called directly
  * added additional data to update available screen in both plugins and themes - issue #8
+ * removed requirement for tags in theme updating
+ * removed extra line endings from `remote_version`
+ * added ratings function for creating star ratings based upon GitHub repo data.
 
 #### 2.1.1
 

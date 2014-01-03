@@ -49,9 +49,11 @@ Then go to your Plugins screen and click __Activate__.
 
 ## Usage
 
+You do not need to create a tag in GitHub for your theme or plugin version, but if you do create tags, the theme or plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
+
 ### Themes
 
-There must be a `GitHub Theme URI` declaration in the `style.css` file and you **must** create a tag in GitHub for each version.
+There must be a `GitHub Theme URI` declaration in the `style.css` file.
 
 ~~~css
 /*
@@ -68,7 +70,8 @@ GitHub Branch:    master
 ~~~
 
 ### Plugins 
-In your plugin the following is an example. You do not need to create a tag in GitHub for your plugin version, but if you do create tags, the plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
+
+There must be a `GitHub Theme URI` declaration in the plugin's header.
 
 ~~~php
 /*
