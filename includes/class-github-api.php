@@ -138,7 +138,7 @@ class GitHub_Updater_GitHub_API {
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
 
 		if ( ! empty( $matches[1] ) )
-			$this->type->remote_version = $matches[1];
+			$this->type->remote_version = trim( $matches[1] );
 
 	}
 
