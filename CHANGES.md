@@ -11,6 +11,8 @@
  * added ratings function for creating star ratings based upon GitHub repo data.
  * bring parts of `class GitHub_Theme_Updater` code on par with `class GitHub_Plugin_Updater`
  * added 'ghu-' prefix to transients
+ * ripped out theme rollback code. Moved to it's own branch on GitHub.
+ * add custom `after_theme_update_{$stylesheet}` detail.
 
 #### 2.1.1
 
