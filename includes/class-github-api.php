@@ -68,8 +68,9 @@ class GitHub_Updater_GitHub_API {
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != '200' )
+		if ( is_wp_error( $response ) || '200' != wp_remote_retrieve_response_code( $response ) ) {
 			return false;
+		}
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
