@@ -64,6 +64,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$this->{$this->type} = $plugin;
 			$this->set_defaults();
 			$repo_api->get_remote_info( basename( $this->{$this->type}->slug ) );
+			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
 			$repo_api->get_remote_changes( 'CHANGES.md' );
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
@@ -95,13 +96,22 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ($response->slug === $plugin->repo) {
-				$response->slug     = $plugin->slug;
-				$response->homepage = $plugin->uri;
-				$response->version  = $plugin->remote_version;
-				$response->sections = $plugin->sections;
+				$response->slug          = $plugin->slug;
+				$response->plugin_name   = $plugin->name;
+				$response->author        = $plugin->author;
+				$response->homepage      = $plugin->uri;
+				$response->version       = $plugin->remote_version;
+				$response->sections      = $plugin->sections;
+				$response->requires      = $plugin->requires;
+				$response->tested        = $plugin->tested;
+				$response->downloaded    = $plugin->downloaded;
+				$response->last_updated  = $plugin->last_updated;
+				$response->rating        = $plugin->rating;
+				$response->num_ratings   = $plugin->num_ratings;
+				$response->download_link = $plugin->download_link;
 			}
 		}
-		return $response;  
+		return $response;
 	}
 
 	/**

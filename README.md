@@ -6,7 +6,7 @@ This plugin is not allowed in the wp.org repo. :frowning:
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows. The folder name of the theme or plugin **must** be the same as the repo name.
 
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`
@@ -49,9 +49,11 @@ Then go to your Plugins screen and click __Activate__.
 
 ## Usage
 
+You do not need to create a tag in GitHub for your theme or plugin version, but if you do create tags, the theme or plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
+
 ### Themes
 
-There must be a `GitHub Theme URI` declaration in the `style.css` file and you **must** create a tag in GitHub for each version.
+There must be a `GitHub Theme URI` declaration in the `style.css` file.
 
 ~~~css
 /*
@@ -68,7 +70,8 @@ GitHub Branch:    master
 ~~~
 
 ### Plugins 
-In your plugin the following is an example. You do not need to create a tag in GitHub for your plugin version, but if you do create tags, the plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
+
+There must be a `GitHub Theme URI` declaration in the plugin's header.
 
 ~~~php
 /*
@@ -88,8 +91,6 @@ GitHub Branch:     master
 
 Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
 
-The only extra character allowed in a URI is `-`. Let me know if there is a need for others.
-
 ## Branch Support
 
 To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater then the update will pull from the branch and not from the tag.
@@ -100,13 +101,9 @@ The default state is either `GitHub Branch: master` or nothing at all. They are 
 
 There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate function returning an integer of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
 
-    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', $hours ) );
-
-This can also be added using an anonymous function call as well.
-
-    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', function() { return 12;} ) );
+    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', 'transient_hours' ) );
     
-### NB - I'm having issues getting this to function. Pull requests welcome.
+### NB - This does not work. Pull requests welcome.
 
 ## Issues
 

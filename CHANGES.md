@@ -1,8 +1,22 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.2.0
+
+ * moved check and load for `markdown.php` into only function that uses it.
+ * minor README updates
+ * added abort if this plugin called directly
+ * added additional data to update available screen in both plugins and themes - issue #8
+ * removed requirement for tags in theme updating
+ * removed extra line endings from `remote_version`
+ * added ratings function for creating star ratings based upon GitHub repo data.
+ * bring parts of `class GitHub_Theme_Updater` code on par with `class GitHub_Plugin_Updater`
+ * added 'ghu-' prefix to transients
+ * ripped out theme rollback code. Moved to it's own branch on GitHub.
+ * add custom `after_theme_update_{$stylesheet}` detail.
+
 #### 2.1.1
 
- * bugfix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
+ * bug fix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
 
 #### 2.1.0
 
@@ -14,7 +28,7 @@
 
 #### 2.0.1
 
- * bugfix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
+ * bug fix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
 
 #### 2.0.0
 
@@ -67,7 +81,7 @@
 
 #### 1.6.1
 
- * bugfix for undeclared variable $github_plugins
+ * bug fix for undeclared variable $github_plugins
 
 #### 1.6.0
 
