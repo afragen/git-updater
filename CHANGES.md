@@ -1,5 +1,10 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.2.1
+
+ * minor code simplifications
+ * many thanks to @grappler for solving how to remove default `after_theme_row_$stylesheet`
+
 #### 2.2.0
 
  * moved check and load for `markdown.php` into only function that uses it.

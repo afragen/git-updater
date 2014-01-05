@@ -70,9 +70,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_tag();
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 
-			// Add update row to theme row
-			remove_action( "after_theme_row_{$theme->repo}", 'wp_theme_update_row' );
-			add_action( "after_theme_row_{$theme->repo}", array( $this, 'wp_theme_update_row' ), 10, 2 );
+			// Add update row to theme row, only in multisite for >= WP 3.8
+			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 
 		}
 
@@ -144,6 +143,18 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		do_action( "in_theme_update_message-$theme_key", $theme, $r );
 
 		echo '</div></td></tr>';
+	}
+
+	/**
+	 * Remove default after_theme_row_$stylesheet
+	 *
+	 * @since 2.2.1
+	 *
+	 * @author @grappler
+	 * @param string
+	 */
+	public static function remove_after_theme_row( $theme ) {
+		remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
 	}
 
 	/**
