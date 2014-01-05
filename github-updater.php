@@ -35,4 +35,6 @@ if ( is_admin() ) {
 	require_once 'includes/class-theme-updater.php';
 	new GitHub_Plugin_Updater;
 	new GitHub_Theme_Updater;
+
+	add_action( 'after_theme_row', array( 'GitHub_Theme_Updater', 'remove_after_theme_row' ) );
 }
