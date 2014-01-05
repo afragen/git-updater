@@ -247,14 +247,15 @@ class GitHub_Updater_GitHub_API {
 			}
 		}
 		
-		if ( false != $remote ) {
-			if ( function_exists( 'Markdown' ) ) {
-				$changelog = Markdown( base64_decode( $remote->content ) );
-			} else {
-				$changelog = '<pre>' . base64_decode( $remote->content ) . '</pre>';
-			}
-			$this->type->sections['changelog'] = $changelog;
+		if ( ! $remote ) return false;
+
+		if ( function_exists( 'Markdown' ) ) {
+			$changelog = Markdown( base64_decode( $remote->content ) );
+		} else {
+			$changelog = '<pre>' . base64_decode( $remote->content ) . '</pre>';
 		}
+
+		$this->type->sections['changelog'] = $changelog;
 	}
 	
 	/**
