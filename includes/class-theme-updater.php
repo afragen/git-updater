@@ -71,8 +71,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 
 			// Add update row to theme row
-			remove_action( "after_theme_row_{$theme->repo}", 'wp_theme_update_row' );
-			add_action( "after_theme_row_{$theme->repo}", array( $this, 'wp_theme_update_row' ), 10, 2 );
+			remove_action( "after_theme_row_$theme->repo", 'wp_theme_update_row' );
+			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 
 		}
 
