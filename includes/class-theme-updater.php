@@ -70,6 +70,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_tag();
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 
+			// Remove WordPress update row in theme row, only in multisite
+			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ) );
 			// Add update row to theme row, only in multisite for >= WP 3.8
 			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 
