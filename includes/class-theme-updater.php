@@ -27,7 +27,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @var string
 	 */
-	protected $type;
+//	protected $type;
 
 	/**
 	 * Class Object for API
@@ -36,7 +36,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @var class object
 	 */
- 	protected $repo_api;
+// 	protected $repo_api;
 
 
 	/**
@@ -153,8 +153,20 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @author @grappler
 	 * @param string
 	 */
-	public static function remove_after_theme_row( $theme ) {
+	public static function remove_after_theme_row() {
+		$themes = wp_get_themes();
+
+		foreach ( (array) $themes as $theme ) {
+			$github_uri = $theme->get( 'GitHub Theme URI' );
+			if ( empty( $github_uri ) ) continue;
+			
+			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
+			$owner_repo = trim( $owner_repo, '/' );
+			$owner_repo = explode( '/', $owner_repo );
+			$theme      = $owner_repo[1];
+
 		remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
+		}
 	}
 
 	/**

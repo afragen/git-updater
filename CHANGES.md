@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.2.2
+
+ * bug fix for removing update notice for WP.org repo themes. Oops.
+
 #### 2.2.1
 
  * minor code simplifications

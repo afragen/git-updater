@@ -37,6 +37,45 @@ class GitHub_Updater {
 	protected $type;
 
 	/**
+	 * Class Object for API
+	 *
+	 * @since 2.1.0
+	 *
+	 * @var class object
+	 */
+ 	protected $repo_api;
+
+	/**
+	 * Variable for setting update transient hours
+	 *
+	 * @var integer
+	 */
+	protected static $hours = 1;
+	 
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $config
+	 */
+	public function __construct() {
+		add_action( 'init', array( $this, 'init_hooks' ) );
+	}
+
+	/**
+	 * Method to set hooks, called in GitHub_Plugin_Updater::__construct via add_action( 'init'...)
+	 *
+	 * @since 2.3.0
+	 *
+	 * @return integer
+	 */
+	public static function init_hooks() {
+		self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
+		return self::$hours;
+	}
+
+	/**
 	 * Add extra header to get_plugins();
 	 *
 	 * @since 1.0.0

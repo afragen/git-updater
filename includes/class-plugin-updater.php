@@ -25,7 +25,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @var string
 	 */
-	protected $type;
+//	protected $type;
 
 	/**
 	 * Class Object for API
@@ -34,8 +34,15 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @var class object
 	 */
- 	protected $repo_api;
+// 	protected $repo_api;
 
+	/**
+	 * Variable for setting update transient hours
+	 *
+	 * @var integer
+	 */
+//	protected static $hours;
+	 
 	/**
 	 * Constructor.
 	 *
@@ -63,6 +70,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 			$this->{$this->type} = $plugin;
 			$this->set_defaults();
+
 			$repo_api->get_remote_info( basename( $this->{$this->type}->slug ) );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
