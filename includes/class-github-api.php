@@ -14,7 +14,7 @@
  * @package GitHub_Updater_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_GitHub_API {
+class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
 	 * Define as either 'plugin' or 'theme'
@@ -23,7 +23,7 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @var string
 	 */
-	protected $type;
+//	protected $type;
 
 	/**
 	 * Class Object for API
@@ -32,16 +32,15 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @var class object
 	 */
- 	protected $repo_api;
+// 	protected $repo_api;
 
 	/**
 	 * Variable for setting update transient hours
 	 *
 	 * @var integer
 	 */
-	 protected static $hours = 1;
+//	protected static $hours;
 	 
-
 	/**
 	 * Constructor.
 	 *
@@ -51,7 +50,6 @@ class GitHub_Updater_GitHub_API {
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;
-		self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
 	}
 
 	/**
@@ -128,7 +126,7 @@ class GitHub_Updater_GitHub_API {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -183,7 +181,7 @@ class GitHub_Updater_GitHub_API {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -243,7 +241,7 @@ class GitHub_Updater_GitHub_API {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
 			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
 		
@@ -273,7 +271,7 @@ class GitHub_Updater_GitHub_API {
 			$remote = $this->api( '/search/repositories' . $meta_query );
 
 			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $remote, ( self::$hours * HOUR_IN_SECONDS ) );				
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
 

@@ -27,7 +27,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @var string
 	 */
-	protected $type;
+//	protected $type;
 
 	/**
 	 * Class Object for API
@@ -36,7 +36,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @var class object
 	 */
- 	protected $repo_api;
+// 	protected $repo_api;
 
 
 	/**
