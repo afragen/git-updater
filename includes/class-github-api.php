@@ -39,7 +39,7 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @var integer
 	 */
-	 public static $hours = 1;
+	 protected static $hours = 1;
 	 
 
 	/**
