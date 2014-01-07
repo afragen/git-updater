@@ -215,11 +215,17 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function construct_download_link() {
 
 		// just in case user started using tags then stopped.
-		if ( version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
+		if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
 			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
 		}
+
+		// for users wanting to update against branch other than master
+		if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
+			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
+		}
+
 		return $download_link;
 	}
 
