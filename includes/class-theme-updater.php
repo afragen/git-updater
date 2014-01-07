@@ -142,13 +142,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		foreach ( $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
 			if ( empty( $repo_uri ) ) return;
-			
-			$owner_repo = parse_url( $repo_uri, PHP_URL_PATH );
-			$owner_repo = trim( $owner_repo, '/' );
-			$owner_repo = explode( '/', $owner_repo );
-			$theme      = $owner_repo[1];
-
-			remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
+			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 		}
 	}
 
