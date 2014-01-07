@@ -84,7 +84,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->homepage     = $theme->uri;
 				$response->version      = $theme->remote_version;
 				$response->sections     = $theme->sections;
-				$response->description  = $theme->sections['description'];
+				$response->description  = implode( "\n", $theme->sections );
 				$response->author       = $theme->author;
 				$response->preview_url  = $theme->sections['changelog'];
 				$response->requires     = $theme->requires;
