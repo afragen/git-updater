@@ -21,25 +21,6 @@
 class GitHub_Theme_Updater extends GitHub_Updater {
 
 	/**
-	 * Define as either 'plugin' or 'theme'
-	 *
-	 * @since 1.9.0
-	 *
-	 * @var string
-	 */
-//	protected $type;
-
-	/**
-	 * Class Object for API
-	 *
-	 * @since 2.1.0
-	 *
-	 * @var class object
-	 */
-// 	protected $repo_api;
-
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -70,6 +51,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_tag();
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 
+			// Remove WordPress update row in theme row, only in multisite
+			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
 			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 
@@ -101,7 +84,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->homepage     = $theme->uri;
 				$response->version      = $theme->remote_version;
 				$response->sections     = $theme->sections;
-				$response->description  = $theme->sections['description'];
+				$response->description  = implode( "\n", $theme->sections );
 				$response->author       = $theme->author;
 				$response->preview_url  = $theme->sections['changelog'];
 				$response->requires     = $theme->requires;
@@ -153,19 +136,13 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @author @grappler
 	 * @param string
 	 */
-	public static function remove_after_theme_row() {
-		$themes = wp_get_themes();
+	public static function remove_after_theme_row( $theme_key, $theme ) {
 
-		foreach ( (array) $themes as $theme ) {
-			$github_uri = $theme->get( 'GitHub Theme URI' );
-			if ( empty( $github_uri ) ) continue;
-			
-			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
-			$owner_repo = trim( $owner_repo, '/' );
-			$owner_repo = explode( '/', $owner_repo );
-			$theme      = $owner_repo[1];
-
-		remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
+		$repositories = array( 'GitHub Theme URI' );
+		foreach ( $repositories as $repository ) {
+			$repo_uri = $theme->get( $repository );
+			if ( empty( $repo_uri ) ) return;
+			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 		}
 	}
 

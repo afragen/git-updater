@@ -31,7 +31,6 @@ class GitHub_Updater {
 	 * Define as either 'plugin' or 'theme'
 	 *
 	 * @since 1.9.0
-	 *
 	 * @var string
 	 */
 	protected $type;
@@ -40,7 +39,6 @@ class GitHub_Updater {
 	 * Class Object for API
 	 *
 	 * @since 2.1.0
-	 *
 	 * @var class object
 	 */
  	protected $repo_api;
@@ -48,6 +46,7 @@ class GitHub_Updater {
 	/**
 	 * Variable for setting update transient hours
 	 *
+	 * @since 2.x.x
 	 * @var integer
 	 */
 	protected static $hours = 1;
@@ -56,8 +55,6 @@ class GitHub_Updater {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
-	 *
-	 * @param array $config
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'init_hooks' ) );

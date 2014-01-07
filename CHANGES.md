@@ -1,5 +1,13 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.3.0
+
+ * moved action hook to remove `after_theme_row_$stylesheet` to `class GitHub_Theme_Updater`
+ * added feature: if branch other than `master` is specified then tagged version will be ignored. This should make it much easier for beta testing to groups. See [README.md](README.md)
+ * converted `class GitHub_Update_GitHub_API` to extension of `class GitHub_Updater`
+ * combined `description` and `changelog` to show in theme detail view. Rough formatting. Multisite only.
+ * greatly simplified bug fix from 2.2.2, now using Themes API.
+
 #### 2.2.2
 
  * bug fix for removing update notice for WP.org repo themes. Oops.

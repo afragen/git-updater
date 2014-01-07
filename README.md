@@ -93,15 +93,17 @@ Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but n
 
 ## Branch Support
 
-To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater then the update will pull from the branch and not from the tag.
+To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater, then the update will pull from the branch and not from the tag.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
+If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change header back to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
+
 ## Filter Hooks
 
-There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate function returning an integer of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
+There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate integer to the anonymous function of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
 
-    add_filter( 'github_updater_set_transient_hours', array( 'GitHub_Updater_GitHub_API', 'transient_hours' ) );
+    add_filter( 'github_updater_set_transient_hours', function() { return 3; } );
     
 ### NB - This does not work. Pull requests welcome.
 

@@ -19,31 +19,6 @@
 class GitHub_Plugin_Updater extends GitHub_Updater {
 
 	/**
-	 * Define as either 'plugin' or 'theme'
-	 *
-	 * @since 1.9.0
-	 *
-	 * @var string
-	 */
-//	protected $type;
-
-	/**
-	 * Class Object for API
-	 *
-	 * @since 2.1.0
-	 *
-	 * @var class object
-	 */
-// 	protected $repo_api;
-
-	/**
-	 * Variable for setting update transient hours
-	 *
-	 * @var integer
-	 */
-//	protected static $hours;
-	 
-	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
