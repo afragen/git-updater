@@ -52,7 +52,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$this->{$this->type}->download_link = $repo_api->construct_download_link();
 
 			// Remove WordPress update row in theme row, only in multisite
-			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ) );
+			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
 			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 
@@ -136,19 +136,19 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @author @grappler
 	 * @param string
 	 */
-	public static function remove_after_theme_row() {
-		$themes = wp_get_themes();
+	public static function remove_after_theme_row( $theme_key, $theme ) {
 
-		foreach ( (array) $themes as $theme ) {
-			$github_uri = $theme->get( 'GitHub Theme URI' );
-			if ( empty( $github_uri ) ) continue;
+		$repositories = array( 'GitHub Theme URI' );
+		foreach ( $repositories as $repository ) {
+			$repo_uri = $theme->get( $repository );
+			if ( empty( $repo_uri ) ) return;
 			
-			$owner_repo = parse_url( $github_uri, PHP_URL_PATH );
+			$owner_repo = parse_url( $repo_uri, PHP_URL_PATH );
 			$owner_repo = trim( $owner_repo, '/' );
 			$owner_repo = explode( '/', $owner_repo );
 			$theme      = $owner_repo[1];
 
-		remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
+			remove_action( "after_theme_row_$theme", 'wp_theme_update_row', 10 );
 		}
 	}
 
