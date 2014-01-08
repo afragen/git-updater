@@ -91,7 +91,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				$response->last_updated  = $plugin->last_updated;
 				$response->rating        = $plugin->rating;
 				$response->num_ratings   = $plugin->num_ratings;
-				$response->download_link = $plugin->download_link;
+//				$response->download_link = $plugin->download_link;
 			}
 		}
 		return $response;
