@@ -261,6 +261,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $remote ) return false;
 		
 		$this->type->repo_meta = $remote->items[0];
+		if ( isset( $response->message ) ) return false;
 		$this->add_meta_repo_object();
 	}
 
