@@ -41,7 +41,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || '200' != wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) || ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
@@ -96,8 +96,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 
-		$remote = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
-		if ( ! $remote ) {
 			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $remote ) {
@@ -106,6 +104,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		$this->type->branch = $this->get_default_branch( $remote );
+
+		if ( ! $response ) return;
+		if ( isset( $response->message ) ) return false;
 
 		if ( ! $remote ) return;
 		$this->type->transient = $remote;
@@ -131,7 +132,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			return $this->type->branch;
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response )
+		if ( ! $response || isset( $response->message ) )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
@@ -159,6 +160,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
+
+		if ( ! $response ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		// Sort and get latest tag
 		$tags = array();
@@ -229,6 +233,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 		
 		if ( ! $remote ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
 			$changelog = Markdown( base64_decode( $remote->content ) );
