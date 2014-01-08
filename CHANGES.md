@@ -1,9 +1,13 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.3.x
+
+ * now saving transient and adding early return if API returns 404, this should speed up plugin when repo doesn't have `CHANGES.md` file and provide for early return in no tags have been created. If no tags have been created the API is still hit.
+
 #### 2.3.0
 
  * moved action hook to remove `after_theme_row_$stylesheet` to `class GitHub_Theme_Updater`
- * added feature: if branch other than `master` is specified then tagged version will be ignored. This should make it much easier for beta testing to groups. See [README.md](README.md)
+ * added feature: if branch other than `master` is specified then tagged version will be ignored. This should make it much easier for beta testing to groups. See [README.md](https://github.com/afragen/github-updater/blob/develop/README.md)
  * converted `class GitHub_Update_GitHub_API` to extension of `class GitHub_Updater`
  * combined `description` and `changelog` to show in theme detail view. Rough formatting. Multisite only.
  * greatly simplified bug fix from 2.2.2, now using Themes API.
