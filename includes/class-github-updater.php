@@ -249,6 +249,7 @@ class GitHub_Updater {
 		$this->{$this->type}->newest_tag            = '0.0.0';
 		$this->{$this->type}->download_link         = '';
 		$this->{$this->type}->tags                  = array();
+		$this->{$this->type}->rollback              = array();
 		$this->{$this->type}->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
 		$this->{$this->type}->requires              = null;
 		$this->{$this->type}->tested                = null;

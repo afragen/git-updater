@@ -165,24 +165,28 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
-		// Sort and get latest tag
+		// Sort and get newest tag
 		$tags = array();
+		$rollback = array();
 		if ( false !== $response )
 			foreach ( (array) $response as $num => $tag ) {
-				if ( isset( $tag->name ) ) $tags[] = $tag->name;
+				if ( isset( $tag->name ) ) {
+					$tags[] = $tag->name;
+					$rollback[ $tag->name ] = $tag->zipball_url;
+				}
 			}
 
 		if ( empty( $tags ) ) return;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
 		
-		// check and generate download link
 		$newest_tag     = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 		$newest_tag     = $tags[ $newest_tag_key ];
 
-		$this->type->newest_tag    = $newest_tag;
-		$this->type->tags          = $tags;
+		$this->type->newest_tag = $newest_tag;
+		$this->type->tags       = $tags;
+		$this->type->rollback   = $rollback;
 	}
 
 	/**
