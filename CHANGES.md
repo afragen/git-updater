@@ -1,6 +1,6 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.3.x
+#### 2.3.1
 
  * now saving transient and adding early return if API returns 404, this should speed up plugin when repo doesn't have `CHANGES.md` file and provide for early return in no tags have been created. If no tags have been created the API is still hit.
 
