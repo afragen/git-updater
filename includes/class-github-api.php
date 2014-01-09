@@ -41,7 +41,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || '200' != wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) || ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
@@ -96,20 +96,22 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 
-		$remote = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
-		if ( ! $remote ) {
-			$remote = $this->api( '/repos/:owner/:repo/contents/' . $file );
+		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
-			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+			if ( $response ) {
+				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
-		$this->type->branch = $this->get_default_branch( $remote );
+		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $remote ) return;
-		$this->type->transient = $remote;
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $remote->content ), $matches );
+		if ( ! $response ) return;
+		if ( isset( $response->message ) ) return false;
+
+		$this->type->transient = $response;
+		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
 
 		if ( ! empty( $matches[1] ) )
 			$this->type->remote_version = trim( $matches[1] );
@@ -131,7 +133,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			return $this->type->branch;
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response )
+		if ( ! $response || isset( $response->message ) )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
@@ -159,6 +161,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
+
+		if ( ! $response ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		// Sort and get latest tag
 		$tags = array();
@@ -218,22 +223,23 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! class_exists( 'Markdown_Parser' ) )
 			require_once 'markdown.php';
 
-		$remote = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
+		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
-		if ( ! $remote ) {
-			$remote = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
-			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
+			if ( $response ) {
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
-		
-		if ( ! $remote ) return false;
+
+		if ( ! $response ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
-			$changelog = Markdown( base64_decode( $remote->content ) );
+			$changelog = Markdown( base64_decode( $response->content ) );
 		} else {
-			$changelog = '<pre>' . base64_decode( $remote->content ) . '</pre>';
+			$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -247,20 +253,21 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
-		$remote = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
+		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
-		if ( ! $remote ) {
-			$remote = $this->api( '/search/repositories' . $meta_query );
+		if ( ! $response ) {
+			$response = $this->api( '/search/repositories' . $meta_query );
 
-			if ( $remote ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $remote, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
+			if ( $response ) {
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
 
-		if ( ! $remote ) return false;
-		
-		$this->type->repo_meta = $remote->items[0];
+		if ( ! $response ) return false;
+		if ( isset( $response->message ) ) return false;
+
+		$this->type->repo_meta = $response->items[0];
 		$this->add_meta_repo_object();
 	}
 
