@@ -214,10 +214,13 @@ class GitHub_Updater_GitHub_API {
 	 *
 	 * @param stdClass plugin data
 	 */
-	public function construct_download_link() {
+	public function construct_download_link($rollback = false) {
 
 		// just in case user started using tags then stopped.
-		if ( version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
+		if(!empty($rollback)) {
+			$download_link = $this->type->uri . '/zipball/' . $rollback ;
+		}
+		else if ( version_compare( $this->type->newest_tag, $this->type->remote_version, '>=' ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
 			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
