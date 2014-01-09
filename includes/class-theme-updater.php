@@ -68,7 +68,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_info( 'style.css' );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
-			$this->{$this->type}->download_link = $repo_api->construct_download_link();
+			$rollback = false;
+			if (  !empty( $_GET['rollback'] ) $rollback = $_GET['rollback'];
+			$this->{$this->type}->download_link = $repo_api->construct_download_link($rollback);
 
 			// Add update row to theme row, only in multisite for >= WP 3.8
 			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
