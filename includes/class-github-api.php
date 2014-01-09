@@ -163,7 +163,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) return false;
+		if ( ! $response || 'no tags here' == $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		// Sort and get newest tag
@@ -180,7 +180,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( empty( $tags ) ) return;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
-		
+
 		$newest_tag     = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 		$newest_tag     = $tags[ $newest_tag_key ];
