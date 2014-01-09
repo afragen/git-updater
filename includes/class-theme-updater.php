@@ -106,8 +106,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
 
-		foreach ( (array) $this->config as $gtu_theme ) {
-			if ( $theme_key !== $gtu_theme->repo ) continue;
+//		foreach ( (array) $this->config as $gtu_theme ) {
+//			if ( $theme_key !== $gtu_theme->repo ) continue;
 
 			$themes_allowedtags = array('a' => array('href' => array(),'title' => array()),'abbr' => array('title' => array()),'acronym' => array('title' => array()),'code' => array(),'em' => array(),'strong' => array());
 			$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
@@ -115,9 +115,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$details_url        = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
 
 // 			if ( ! isset( $current->response[ $theme_key ] ) ) {
-// 				$rollback = $gtu_theme->tags;
+//				$rollback = $gtu_theme->tags;
 			if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 				$rollback = $current->up_to_date[$theme_key]['rollback'];
+
 				echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 				echo 'Theme is up-to-date! ';
 				if ( current_user_can( 'update_themes' ) ) {
@@ -149,7 +150,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				do_action( "in_theme_update_message-$theme_key", $theme, $r );
 			}
 			echo '</div></td></tr>';
-		}
+//		}
 	}
 
 	/**
