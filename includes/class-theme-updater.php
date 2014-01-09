@@ -49,8 +49,11 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_info( 'style.css' );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
-			$this->{$this->type}->download_link = $repo_api->construct_download_link();
-
+			
+			$rollback = false;
+			if ( ! empty( $_GET['rollback'] ) )
+				$rollback = $_GET['rollback'];
+			$this->{$this->type}->download_link = $repo_api->construct_download_link( $rollback );
 			// Remove WordPress update row in theme row, only in multisite
 			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
@@ -112,8 +115,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$details_url        = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
-			$rollback = $current->up_to_date[$theme_key]['rollback'];
-
+			$rollback      = $current->up_to_date[$theme_key]['rollback'];
+			$rollback_keys = array_keys( $rollback );
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 			echo 'Theme is up-to-date! ';
 			if ( current_user_can( 'update_themes' ) ) {
@@ -121,7 +124,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 					echo "<strong>Rollback to:</strong> ";
 					// display last three tags
 					for ( $i = 0; $i < 3 ; $i++ ) {
-						$tag = array_pop( $rollback );
+						$tag = array_shift( $rollback_keys );
 						if( empty( $tag ) ) break;
 						if ( $i > 0 ) echo ", ";
 						printf('<a href="%s%s">%s</a>', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ), '&rollback=' . urlencode( $tag ), $tag);
@@ -190,9 +193,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 			if ( $remote_is_newer ) {
 				$data->response[ $theme->repo ] = $update;
- 			} else {
- 				// up-to-date!
- 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->tags;
+ 			} else { // up-to-date!
+ 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
  				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}

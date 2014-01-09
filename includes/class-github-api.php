@@ -198,10 +198,14 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link() {
+	public function construct_download_link( $rollback = false ) {
 
+		// check for rollback
 		// just in case user started using tags then stopped.
-		if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
+        if ( ! empty($_GET['rollback'] ) ) {
+//                $download_link = $this->type->rollback[ $_GET['rollback'] ];
+                $download_link = $this->type->uri . '/zipball/' . $rollback;
+        } else  if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
 			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
