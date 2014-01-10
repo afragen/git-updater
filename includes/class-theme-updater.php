@@ -54,6 +54,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			if ( ! empty( $_GET['rollback'] ) )
 				$rollback = $_GET['rollback'];
 			$this->{$this->type}->download_link = $repo_api->construct_download_link( $rollback );
+
 			// Remove WordPress update row in theme row, only in multisite
 			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
