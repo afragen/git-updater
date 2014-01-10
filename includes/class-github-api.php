@@ -195,17 +195,17 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @param stdClass plugin data
+	 * @param boolean only for theme rollback
 	 * 
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
 
 		// check for rollback
-		// just in case user started using tags then stopped.
+		// also just in case user started using tags then stopped.
         if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' == $_GET['action'] && $_GET['theme'] == $this->type->repo ) {
             $download_link = $this->type->uri . '/zipball/' . $rollback;
-        } else  if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
+       } else  if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
 		} else {
 			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';

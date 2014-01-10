@@ -193,9 +193,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 			if ( $remote_is_newer ) {
 				$data->response[ $theme->repo ] = $update;
- 			} else { // up-to-date!
- 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
- 				$data->up_to_date[ $theme->repo ]['response'] = $update;
+			} else { // up-to-date!
+				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
+				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
 		return $data;
