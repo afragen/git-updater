@@ -156,7 +156,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
-			$response = 'no tags here';
+			if ( ! $response ) { $response = 'no tags here'; }
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
