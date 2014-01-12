@@ -20,6 +20,15 @@
  */
 class GitHub_Theme_Updater extends GitHub_Updater {
 
+
+	/**
+	 * Rollback variable
+	 *
+	 * @since 2.x.x
+	 * @var version number
+	 */
+	protected $tag;
+
 	/**
 	 * Constructor.
 	 *
@@ -27,7 +36,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @param array $config
 	 */
-	public function __construct() {
+	public function __construct( $tag = false ) {
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
@@ -50,25 +59,28 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
 			
-			$rollback = false;
 			if ( ! empty( $_GET['rollback'] ) )
-				$rollback = $_GET['rollback'];
-			$this->{$this->type}->download_link = $repo_api->construct_download_link( $rollback );
+				$this->tag = $_GET['rollback'];
+
+			$this->{$this->type}->download_link = $repo_api->construct_download_link( $this->tag );
 
 			// Remove WordPress update row in theme row, only in multisite
 			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
-			add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+			if ( ! $tag ) {
+				add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+			}
 
 		}
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
-		if (  empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
+		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) )
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
 
 		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
+
 	}
 
 	/**
@@ -128,6 +140,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 						$tag = array_shift( $rollback_keys );
 						if( empty( $tag ) ) break;
 						if ( $i > 0 ) echo ", ";
+
 						printf('<a href="%s%s">%s</a>', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ), '&rollback=' . urlencode( $tag ), $tag);
 					}
 				} else {
@@ -180,6 +193,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
+		new GitHub_Theme_Updater( $this->tag );
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) continue;
