@@ -46,11 +46,11 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$this->{$this->type} = $plugin;
 			$this->set_defaults();
 
-			$repo_api->get_remote_info( basename( $this->{$this->type}->slug ) );
+			$repo_api->get_remote_info( basename( $plugin->slug ) );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
 			$repo_api->get_remote_changes( 'CHANGES.md' );
-			$this->{$this->type}->download_link = $repo_api->construct_download_link( $rollback = false );
+			$plugin->download_link = $repo_api->construct_download_link();
 		}
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
@@ -65,7 +65,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		if ( ! ( 'plugin_information' == $action ) ) {
+		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
 		}
 
@@ -78,7 +78,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			if ($response->slug === $plugin->repo) {
+			if ( $response->slug === $plugin->repo ) {
 				$response->slug          = $plugin->slug;
 				$response->plugin_name   = $plugin->name;
 				$response->author        = $plugin->author;
