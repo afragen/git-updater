@@ -1,8 +1,9 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.3.x
+#### 2.x.x
 
  * fixed transient assignment for tags returning empty array.
+ * added transient for `CHANGES.md` to themes, should further cut down on API 403 errors.
 
 #### 2.3.1
 
