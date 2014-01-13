@@ -27,7 +27,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @since 2.x.x
 	 * @var version number
 	 */
-	protected $tag;
+	protected $tag = false;
 
 	/**
 	 * Constructor.
@@ -36,7 +36,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @param array $config
 	 */
-	public function __construct( $tag = false ) {
+	public function __construct() {
 
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
@@ -58,16 +58,27 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_info( 'style.css' );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
-			
-			if ( ! empty( $_GET['rollback'] ) )
-				$this->tag = $_GET['rollback'];
+			$repo_api->get_remote_changes( 'CHANGES.md' );
+			$theme->download_link = $repo_api->construct_download_link();
 
-			$this->{$this->type}->download_link = $repo_api->construct_download_link( $this->tag );
+			// Update theme transient with rollback data
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+				$this->tag         = $_GET['rollback'];
+				$updates_transient = get_site_transient('update_themes');
+				$rollback = array(
+					'new_version' => $this->tag,
+					'url'         => $theme->uri,
+					'package'     => $repo_api->construct_download_link( $this->tag ),
+				);
+
+				$updates_transient->up_to_date[$theme->repo]['response'] = $rollback;
+				set_site_transient( 'update_themes', $updates_transient );
+			}
 
 			// Remove WordPress update row in theme row, only in multisite
 			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
-			if ( ! $tag ) {
+			if ( ! $this->tag ) {
 				add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
 			}
 
@@ -89,12 +100,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function themes_api( $false, $action, $response ) {
-		if ( ! ( 'theme_information' == $action ) ) {
+		if ( ! ( 'theme_information' === $action ) ) {
 			return $false;
 		}
 
 		foreach ( (array) $this->config as $theme ) {
-			if ($response->slug === $theme->repo) {
+			if ( $response->slug === $theme->repo ) {
 				$response->slug         = $theme->repo;
 				$response->name         = $theme->name;
 				$response->homepage     = $theme->uri;
@@ -193,7 +204,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
-		new GitHub_Theme_Updater( $this->tag );
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) continue;
