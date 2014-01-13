@@ -163,11 +163,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response || 'no tags here' == $response ) return false;
+		if ( ! $response || 'no tags here' === $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		// Sort and get newest tag
-		$tags = array();
+		$tags     = array();
 		$rollback = array();
 		if ( false !== $response )
 			foreach ( (array) $response as $num => $tag ) {
@@ -200,10 +200,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-
 		// check for rollback
 		// also just in case user started using tags then stopped.
-        if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' == $_GET['action'] && $_GET['theme'] == $this->type->repo ) {
+        if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
             $download_link = $this->type->uri . '/zipball/' . $rollback;
        } else  if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
 			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
