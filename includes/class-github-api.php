@@ -186,7 +186,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Construct $download_link
+	 * Construct $download_link using Repository Contents API
+	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @since 1.9.0
 	 *
@@ -196,19 +197,24 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function construct_download_link() {
 
-		// just in case user started using tags then stopped.
-		if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
-			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
-		} else {
-			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
-		}
-
+		$endpoint = '';
 		// for users wanting to update against branch other than master
 		if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
-			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
+			$endpoint .= $this->type->branch;
+		} else {
+			// just in case user started using tags then stopped.
+			if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
+				$endpoint .= $this->type->newest_tag;
+			} else {
+				$endpoint .= $this->type->branch;
+			}
 		}
 
-		return $download_link;
+		if ( ! empty( $this->type->access_token ) ) {
+			$endpoint .= '?access_token=' . $this->type->access_token;
+		}
+
+		return $this->type->uri . '/zipball/' . $endpoint;
 	}
 
 	/**
