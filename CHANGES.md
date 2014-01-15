@@ -1,7 +1,11 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.3.2
+#### 2.3.3
 
+ * fixed download link to have correct base URI for Repository Contents API. Oops.
+
+#### 2.3.2
+ 
  * rewrite of `GitHub_Update_GitHub_API::construct_download_link` to download zipball and provide appropriate endpoint.
 
 #### 2.3.1

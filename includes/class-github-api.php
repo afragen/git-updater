@@ -191,30 +191,35 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @param stdClass plugin data
+	 * @param boolean only for theme rollback
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link() {
+	public function construct_download_link( $rollback = false ) {
 
+		$download_link_root = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint = '';
+
+		// check for rollback
+		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
+			$endpoint .= $rollback;
+		
 		// for users wanting to update against branch other than master
-		if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
+		} else if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
 			$endpoint .= $this->type->branch;
+
+		// also just in case user started using tags then stopped.
+		} else if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {
+			$endpoint .= $this->type->newest_tag;
 		} else {
-			// just in case user started using tags then stopped.
-			if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
-				$endpoint .= $this->type->newest_tag;
-			} else {
-				$endpoint .= $this->type->branch;
-			}
+			$endpoint .= $this->type->branch;
 		}
 
 		if ( ! empty( $this->type->access_token ) ) {
 			$endpoint .= '?access_token=' . $this->type->access_token;
 		}
 
-		return $this->type->uri . '/zipball/' . $endpoint;
+		return $download_link_root . $endpoint;
 	}
 
 	/**
