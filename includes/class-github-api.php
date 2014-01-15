@@ -214,7 +214,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= '?access_token=' . $this->type->access_token;
 		}
 
-		return $this->type->uri . '/zipball/' . $endpoint;
+		if ( ! empty( $this->type->access_token ) ) {
+			$private_uri = 'https://api.github.com/repos/';
+			return $private_uri . $this->type->owner . '/' . $this->type->repo . '/zipball/' . $endpoint;
+		} else {
+			return $this->type->uri . '/zipball/' . $endpoint;
+		}
 	}
 
 	/**
