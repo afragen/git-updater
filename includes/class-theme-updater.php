@@ -65,13 +65,13 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
-				$rollback = array(
-					'new_version' => $this->tag,
-					'url'         => $theme->uri,
-					'package'     => $repo_api->construct_download_link( $this->tag ),
+				$rollback          = array(
+							'new_version' => $this->tag,
+							'url'         => $theme->uri,
+							'package'     => $repo_api->construct_download_link( $this->tag ),
 				);
 
-				$updates_transient->up_to_date[$theme->repo]['response'] = $rollback;
+				$updates_transient->response[$theme->repo] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}
 
@@ -131,8 +131,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @since 2.2.0
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
-		$current = get_site_transient( 'update_themes' );
 
+		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array('a' => array('href' => array(),'title' => array()),'abbr' => array('title' => array()),'acronym' => array('title' => array()),'code' => array(),'em' => array(),'strong' => array());
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
 		$wp_list_table      = _get_list_table('WP_MS_Themes_List_Table');
@@ -221,6 +221,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
 				$data->up_to_date[ $theme->repo ]['response'] = $update;
+				$data->response[ $theme->repo ] = $update;
 			}
 		}
 		return $data;

@@ -4,6 +4,7 @@
 
  * fixed transient assignment for tags returning empty array.
  * added transient for `CHANGES.md` to themes, should further cut down on API 403 errors.
+ * new feature: theme rollback to previous version
 
 #### 2.3.1
 
