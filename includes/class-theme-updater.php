@@ -221,7 +221,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
 				$data->up_to_date[ $theme->repo ]['response'] = $update;
-				$data->response[ $theme->repo ] = $update;
 			}
 		}
 		return $data;
