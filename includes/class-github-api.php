@@ -200,22 +200,30 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
+
+		$download_link_root = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+		$endpoint = '';
+
 		// check for rollback
-		// also just in case user started using tags then stopped.
-        if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
-            $download_link = $this->type->uri . '/zipball/' . $rollback;
-       } else  if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {							
-			$download_link = $this->type->uri . '/archive/' . $this->type->newest_tag . '.zip';
-		} else {
-			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
-		}
-
+		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
+			$endpoint .= $rollback;
+		
 		// for users wanting to update against branch other than master
-		if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
-			$download_link = $this->type->uri . '/archive/' . $this->type->branch . '.zip';
+		} else if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
+			$endpoint .= $this->type->branch;
+
+		// also just in case user started using tags then stopped.
+		} else if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {
+			$endpoint .= $this->type->newest_tag;
+		} else {
+			$endpoint .= $this->type->branch;
 		}
 
-		return $download_link;
+		if ( ! empty( $this->type->access_token ) ) {
+			$endpoint .= '?access_token=' . $this->type->access_token;
+		}
+
+		return $download_link_root . $endpoint;
 	}
 
 	/**

@@ -6,6 +6,14 @@
  * added transient for `CHANGES.md` to themes, should further cut down on API 403 errors.
  * new feature: theme rollback to previous version
 
+#### 2.3.3
+
+ * fixed download link to have correct base URI for Repository Contents API. Oops.
+
+#### 2.3.2
+ 
+ * rewrite of `GitHub_Update_GitHub_API::construct_download_link` to download zipball and provide appropriate endpoint.
+
 #### 2.3.1
 
  * now saving transient and adding early return if API returns 404, this should speed up plugin when repo doesn't have `CHANGES.md` file and provide for early return in no tags have been created. If no tags have been created the API is still hit.
