@@ -139,7 +139,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	public static function remove_after_theme_row( $theme_key, $theme ) {
 
 		$repositories = array( 'GitHub Theme URI' );
-		foreach ( $repositories as $repository ) {
+		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
 			if ( empty( $repo_uri ) ) return;
 			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
@@ -161,17 +161,19 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) continue;
 
-			// setup update array to append version info
-			$remote_is_newer = ( 1 === version_compare( $theme->remote_version, $theme->local_version ) );
-
-			if ( $remote_is_newer ) {
 				$update = array(
 					'new_version' => $theme->remote_version,
 					'url'         => $theme->uri,
 					'package'     => $theme->download_link,
 				);
 
+			$remote_is_newer = ( 1 === version_compare( $theme->remote_version, $theme->local_version ) );
+
+			if ( $remote_is_newer ) {
 				$data->response[ $theme->repo ] = $update;
+			} else { // up-to-date!
+				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
+				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
 		return $data;
