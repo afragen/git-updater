@@ -191,7 +191,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Construct $download_link
+	 * Construct $this->type->download_link using Repository Contents API
+	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @since 1.9.0
 	 *
@@ -201,7 +202,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function construct_download_link( $rollback = false ) {
 
-		$download_link_root = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint = '';
 
 		// check for rollback
@@ -223,7 +224,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= '?access_token=' . $this->type->access_token;
 		}
 
-		return $download_link_root . $endpoint;
+		return $download_link_base . $endpoint;
 	}
 
 	/**
