@@ -221,8 +221,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
  		$theme_update_transient = get_site_transient( 'update_themes' );
 
         //if the theme is outdated, diplay the custom theme updater content
-		if ( version_compare( $theme->local_version, $theme->newest_tag, '<' ) ) {
-//        if ( ! empty( $theme_update_transient->response[$theme->repo] ) ) {
+//		if ( version_compare( $theme->local_version, $theme->newest_tag, '<' ) ) {
+        if ( ! empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
                 $update_url = wp_nonce_url( network_admin_url( 'update.php?action=upgrade-theme&amp;theme=' . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ) );
         ob_start();
 ?>
