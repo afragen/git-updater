@@ -216,8 +216,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 	public function append_theme_actions_content( $theme ){
 
-		$details_url        = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
-
+		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
  		$theme_update_transient = get_site_transient( 'update_themes' );
 
         //if the theme is outdated, diplay the custom theme updater content
@@ -228,12 +227,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 ?>
 <strong>There is a new version of <?php echo $theme->name; ?> available now (on Github!). <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">View version <?php echo $theme->remote_version; ?> details</a> or <a href="<?php echo $update_url; ?>" onclick="if ( confirm('<?php _e('Updating this theme will lose any customizations you have made (if you have not been using a child theme). \'Cancel\' to stop, \'OK\' to update.', 'github-updater'); ?>') ) {return true;}return false;">update now</a>.</strong>
 <?php
-        return trim(ob_get_clean(), '1');
+        return trim( ob_get_clean(), '1' );
 
         } else { //END -- if(isset($WLFW_UPDATE_DATA->response[$stylesheet]))
         //if the theme is up to date, display the custom rollback/beta version updater
                 ob_start();
-                $rollback_url = sprintf('%s%s', wp_nonce_url( self_admin_url('update.php?action=upgrade-theme&theme=') . $theme->repo, 'upgrade-theme_' . $theme->repo ), '&rollback=');
+                $rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme->repo, 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
 				if ( version_compare( $theme->local_version, $theme->newest_tag, '>' ) ) {
 					 $version_info = '<span style="color:red;">running beta version '.$theme->local_version.'</span>';
@@ -253,11 +252,11 @@ class GitHub_Theme_Updater extends GitHub_Updater {
         ">
                <option value="">Choose a Version...</option>
         <option><?php echo $theme->branch; ?></option>
-                <?php foreach( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){echo'<option>'.$version.'</option>';}?></select>
+                <?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){echo'<option>'.$version.'</option>';}?></select>
         <a style="display: none;" class="button-primary" href="?" onclick="if( confirm('Are you sure you want to reinstall a new version of <?php $theme->name; ?>?') );else return false;">Install</a>
 </div>
 <?php
-                return trim(ob_get_clean(), '1');
+                return trim( ob_get_clean(), '1' );
         }
 }
 
