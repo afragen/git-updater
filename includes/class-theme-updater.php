@@ -198,7 +198,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	public function customize_theme_update_html($prepared_themes) {
-    fb($prepared_themes);
 	
 	foreach ( (array) $this->config as $theme ) {
 	
