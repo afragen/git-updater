@@ -71,7 +71,7 @@ GitHub Branch:    master
 
 ### Plugins 
 
-There must be a `GitHub Theme URI` declaration in the plugin's header.
+There must be a `GitHub Plugin URI` declaration in the plugin's header.
 
 ~~~php
 /*
