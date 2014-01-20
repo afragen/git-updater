@@ -209,15 +209,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
 			$endpoint .= $rollback;
 		
-		// for users wanting to update against branch other than master
-		} else if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
+		// for users wanting to update against branch other than master or not using tags, else use newest_tag
+		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
 			$endpoint .= $this->type->branch;
-
-		// also just in case user started using tags then stopped.
-		} else if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {
-			$endpoint .= $this->type->newest_tag;
 		} else {
-			$endpoint .= $this->type->branch;
+			$endpoint .= $this->type->newest_tag;
 		}
 
 		if ( ! empty( $this->type->access_token ) ) {
