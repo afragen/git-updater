@@ -191,11 +191,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Construct $download_link using Repository Contents API
-=======
 	 * Construct $this->type->download_link using Repository Contents API
->>>>>>> refs/heads/develop
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @since 1.9.0
@@ -205,49 +201,26 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-<<<<<<< HEAD
-
-		$download_link_root = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
-		$endpoint = '';
-
-=======
 
 		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint = '';
 
->>>>>>> refs/heads/develop
 		// check for rollback
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
 			$endpoint .= $rollback;
 		
-<<<<<<< HEAD
-		// for users wanting to update against branch other than master
-		} else if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
-			$endpoint .= $this->type->branch;
-
-		// also just in case user started using tags then stopped.
-		} else if ( ( 1 != version_compare( $this->type->remote_version, $this->type->newest_tag ) ) && ! ( '0.0.0' === $this->type->newest_tag ) ) {
-			$endpoint .= $this->type->newest_tag;
-		} else {
-			$endpoint .= $this->type->branch;
-=======
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
 		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
->>>>>>> refs/heads/develop
 		}
 
 		if ( ! empty( $this->type->access_token ) ) {
 			$endpoint .= '?access_token=' . $this->type->access_token;
 		}
 
-<<<<<<< HEAD
-		return $download_link_root . $endpoint;
-=======
 		return $download_link_base . $endpoint;
->>>>>>> refs/heads/develop
 	}
 
 	/**
