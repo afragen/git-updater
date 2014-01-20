@@ -4,7 +4,8 @@
 
  * fixed transient assignment for tags returning empty array.
  * added transient for `CHANGES.md` to themes, should further cut down on API 403 errors.
- * new feature: theme rollback to previous version
+ * new feature: theme rollback to previous version thanks scarstens
+ * changed update methodology to use most recent tag first. If not tagged update from default branch.
 
 #### 2.3.3
 
