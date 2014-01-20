@@ -93,7 +93,7 @@ Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but n
 
 ## Branch Support
 
-To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater, then the update will pull from the branch and not from the tag.
+To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch for updating. If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
