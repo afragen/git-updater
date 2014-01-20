@@ -76,10 +76,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 
 			// Remove WordPress update row in theme row, only in multisite
-			add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 			// Add update row to theme row, only in multisite for >= WP 3.8
-			if ( ! $this->tag ) {
-				add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
+				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
+				if ( ! $this->tag ) {
+					add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+				}
 			}
 
 		}
@@ -126,7 +128,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->num_ratings  = $theme->num_ratings;
 			}
 		}
-		return $response;  
+		return $response;
 	}
 
 	/**
@@ -149,6 +151,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			echo 'Theme is up-to-date! ';
 			if ( current_user_can( 'update_themes' ) ) {
 				if ( count( $rollback ) > 0 ) {
+					array_shift( $rollback_keys ); //don't show newest tag, it should be release version
 					echo "<strong>Rollback to:</strong> ";
 					// display last three tags
 					for ( $i = 0; $i < 3 ; $i++ ) {
@@ -197,67 +200,82 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		}
 	}
 
+	/**
+	 * Call update theme messaging if needed
+	 *
+	 * @since 2.4.0
+	 *
+	 * @author Seth Carstens - scarstens
+	 * @return html
+	 */
 	public function customize_theme_update_html($prepared_themes) {
+		foreach ( (array) $this->config as $theme ) {
 	
-	foreach ( (array) $this->config as $theme ) {
-	
-		if ( empty( $prepared_themes[ $theme->repo ] ) ) continue;
+			if ( empty( $prepared_themes[ $theme->repo ] ) ) continue;
 
-		if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
-			$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
-		} else {
-			$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
+			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
+				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
+			} else {
+				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
+			}
 		}
-	}
 		return $prepared_themes;
-
 	}
 
-	public function append_theme_actions_content( $theme ){
+	/**
+	 * Create theme update messaging
+	 * 
+	 * @since 2.4.0
+	 *
+	 * @author Seth Carstens (@scarstens)
+	 *
+	 * @return html
+	 */
+	private function append_theme_actions_content( $theme ){
 
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
- 		$theme_update_transient = get_site_transient( 'update_themes' );
+		$theme_update_transient = get_site_transient( 'update_themes' );
 
-        //if the theme is outdated, diplay the custom theme updater content
-//		if ( version_compare( $theme->local_version, $theme->newest_tag, '<' ) ) {
-        if ( ! empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
-                $update_url = wp_nonce_url( network_admin_url( 'update.php?action=upgrade-theme&amp;theme=' . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ) );
-        ob_start();
-?>
-<strong>There is a new version of <?php echo $theme->name; ?> available now (on Github!). <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">View version <?php echo $theme->remote_version; ?> details</a> or <a href="<?php echo $update_url; ?>" onclick="if ( confirm('<?php _e('Updating this theme will lose any customizations you have made (if you have not been using a child theme). \'Cancel\' to stop, \'OK\' to update.', 'github-updater'); ?>') ) {return true;}return false;">update now</a>.</strong>
-<?php
-        return trim( ob_get_clean(), '1' );
+		// if theme is not present in theme_update transient response ( theme is not up to date )
+		if ( empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
+			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
+			ob_start();
+			?>
+			<strong>There is a new version of <?php echo $theme->name; ?> available now. <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">View version <?php echo $theme->remote_version; ?> details</a> or <a href="<?php echo $update_url; ?>">update now</a>.</strong>
+			<?php
+			return trim( ob_get_clean(), '1' );
 
-        } else { //END -- if(isset($WLFW_UPDATE_DATA->response[$stylesheet]))
-        //if the theme is up to date, display the custom rollback/beta version updater
-                ob_start();
-                $rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme->repo, 'upgrade-theme_' . $theme->repo ), '&rollback=' );
+		} else {
+			//if the theme is up to date, display the custom rollback/beta version updater
+			ob_start();
+			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
-				if ( version_compare( $theme->local_version, $theme->newest_tag, '>' ) ) {
-					 $version_info = '<span style="color:red;">running beta version '.$theme->local_version.'</span>';
-                } else {
-					$version_info = 'up to date with version '.$theme->local_version;
-                }
-                
-?>
-<p>Current version is <?php echo $version_info; ?>. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
-<div id="ghu_versions" style="display:none; width: 100%;">
-        <select style="width: 60%;" 
-            onchange="if(jQuery(this).val() != '') {
-                jQuery(this).next().show(); 
-            jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val()); 
-        } 
-        else jQuery(this).next().hide();
-        ">
-               <option value="">Choose a Version...</option>
-        <option><?php echo $theme->branch; ?></option>
-                <?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){echo'<option>'.$version.'</option>';}?></select>
-        <a style="display: none;" class="button-primary" href="?" onclick="if( confirm('Are you sure you want to reinstall a new version of <?php $theme->name; ?>?') );else return false;">Install</a>
-</div>
-<?php
-                return trim( ob_get_clean(), '1' );
-        }
-}
+			if ( version_compare( $theme->local_version, $theme->newest_tag, '>' ) ) {
+				$version_info = '<span style="color:red;"> '.$theme->local_version.'</span>';
+			} else {
+				$version_info = 'up to date with version '.$theme->local_version;
+			}
+
+			?>
+			<p>Current version is <?php echo $version_info; ?>. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
+			<div id="ghu_versions" style="display:none; width: 100%;">
+				<select style="width: 60%;" 
+					onchange="if(jQuery(this).val() != '') {
+						jQuery(this).next().show(); 
+						jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val()); 
+					}
+					else jQuery(this).next().hide();
+				">
+				<option value="">Choose a Version...</option>
+				<option><?php echo $theme->branch; ?></option>
+				<?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){echo'<option>'.$version.'</option>';}?></select>
+				<a style="display: none;" class="button-primary" href="?">Install</a>
+			</div>
+			<?php
+			return trim( ob_get_clean(), '1' );
+
+		}
+	}
 
 	/**
 	 * Hook into pre_set_site_transient_update_themes to update from GitHub.
