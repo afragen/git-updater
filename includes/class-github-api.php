@@ -259,8 +259,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	
 	/**
 	 * Read the repository meta from GitHub API
-	 *
 	 * Uses a transient to limit calls to the API
+	 *
 	 * @since 2.2.0
 	 * @return base64 decoded repository meta data
 	 */

@@ -134,6 +134,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
+	 * @author Seth Carstens
 	 * @since 2.2.0
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
@@ -205,7 +206,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @since 2.4.0
 	 *
-	 * @author Seth Carstens - scarstens
+	 * @author Seth Carstens
 	 * @return html
 	 */
 	public function customize_theme_update_html($prepared_themes) {
@@ -227,8 +228,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * 
 	 * @since 2.4.0
 	 *
-	 * @author Seth Carstens (@scarstens)
-	 *
+	 * @author Seth Carstens
+	 * @param object $theme
 	 * @return html
 	 */
 	private function append_theme_actions_content( $theme ){
