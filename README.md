@@ -71,7 +71,7 @@ GitHub Branch:    master
 
 ### Plugins 
 
-There must be a `GitHub Theme URI` declaration in the plugin's header.
+There must be a `GitHub Plugin URI` declaration in the plugin's header.
 
 ~~~php
 /*
@@ -93,7 +93,7 @@ Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but n
 
 ## Branch Support
 
-To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch having the same or lesser version number. If the version number of the specified branch is greater, then the update will pull from the branch and not from the tag.
+To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch for updating. If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
@@ -119,7 +119,7 @@ See [CHANGES.md](CHANGES.md).
 
 ## Credits
 
-This plugin's theme updater class was based upon [Whitelabel Framework's updater-plugin.php](https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/updater-plugin.php), which was based upon https://github.com/UCF/Theme-Updater.
+This plugin's theme updater class was based upon [Whitelabel Framework's updater-plugin.php](https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/admin/updater-plugin.php), which was based upon https://github.com/UCF/Theme-Updater.
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 

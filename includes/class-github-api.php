@@ -156,37 +156,46 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
+			if ( ! $response ) { $response = 'no tags here'; }
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
-		if ( ! $response ) return false;
+		if ( ! $response || 'no tags here' === $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
-		// Sort and get latest tag
-		$tags = array();
+		// Sort and get newest tag
+		$tags     = array();
+		$rollback = array();
 		if ( false !== $response )
 			foreach ( (array) $response as $num => $tag ) {
-				if ( isset( $tag->name ) ) $tags[] = $tag->name;
+				if ( isset( $tag->name ) ) {
+					$tags[] = $tag->name;
+					$rollback[ $tag->name ] = $tag->zipball_url;
+				}
 			}
 
 		if ( empty( $tags ) ) return;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
-		
-		// check and generate download link
+
 		$newest_tag     = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
 		$newest_tag     = $tags[ $newest_tag_key ];
 
-		$this->type->newest_tag    = $newest_tag;
-		$this->type->tags          = $tags;
+		$this->type->newest_tag = $newest_tag;
+		$this->type->tags       = $tags;
+		$this->type->rollback   = $rollback;
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Construct $download_link using Repository Contents API
+=======
+	 * Construct $this->type->download_link using Repository Contents API
+>>>>>>> refs/heads/develop
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @since 1.9.0
@@ -196,14 +205,22 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
+<<<<<<< HEAD
 
 		$download_link_root = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint = '';
 
+=======
+
+		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+		$endpoint = '';
+
+>>>>>>> refs/heads/develop
 		// check for rollback
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
 			$endpoint .= $rollback;
 		
+<<<<<<< HEAD
 		// for users wanting to update against branch other than master
 		} else if ( ( 'master' != $this->type->branch ) && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) ) {
 			$endpoint .= $this->type->branch;
@@ -213,13 +230,24 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag;
 		} else {
 			$endpoint .= $this->type->branch;
+=======
+		// for users wanting to update against branch other than master or not using tags, else use newest_tag
+		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+			$endpoint .= $this->type->branch;
+		} else {
+			$endpoint .= $this->type->newest_tag;
+>>>>>>> refs/heads/develop
 		}
 
 		if ( ! empty( $this->type->access_token ) ) {
 			$endpoint .= '?access_token=' . $this->type->access_token;
 		}
 
+<<<<<<< HEAD
 		return $download_link_root . $endpoint;
+=======
+		return $download_link_base . $endpoint;
+>>>>>>> refs/heads/develop
 	}
 
 	/**
@@ -258,8 +286,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	
 	/**
 	 * Read the repository meta from GitHub API
-	 *
 	 * Uses a transient to limit calls to the API
+	 *
 	 * @since 2.2.0
 	 * @return base64 decoded repository meta data
 	 */
