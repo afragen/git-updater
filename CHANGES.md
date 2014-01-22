@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.4.1
+
+ * switched from PHP Markdown Classic to the new PHP Markdown Lib to prevent collisions with other plugins, like Markdown On Save/Improved that also load PHP Markdown or PHP MarkdownExtra.
+
 #### 2.4.0
 
  * fixed transient assignment for tags returning empty array.
