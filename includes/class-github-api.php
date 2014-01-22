@@ -256,7 +256,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$this->type->sections['changelog'] = $changelog;
 	}
-	
+
 	/**
 	 * Read the repository meta from GitHub API
 	 * Uses a transient to limit calls to the API
