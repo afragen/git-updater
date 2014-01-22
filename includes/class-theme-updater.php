@@ -76,7 +76,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 
 			// Remove WordPress update row in theme row, only in multisite
-			// Add update row to theme row, only in multisite for >= WP 3.8
+			// Add update row to theme row, only in multisite for WP < 3.8
 			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
 				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
@@ -250,12 +250,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			//if the theme is up to date, display the custom rollback/beta version updater
 			ob_start();
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
-
-			if ( version_compare( $theme->local_version, $theme->newest_tag, '>' ) ) {
-				$version_info = '<span style="color:red;"> '.$theme->local_version.'</span>';
-			} else {
-				$version_info = 'up to date with version '.$theme->local_version;
-			}
+			$version_info = 'up to date with version '.$theme->local_version;
 
 			?>
 			<p>Current version is <?php echo $version_info; ?>. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
@@ -274,7 +269,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			</div>
 			<?php
 			return trim( ob_get_clean(), '1' );
-
 		}
 	}
 
