@@ -14,7 +14,7 @@ This plugin was designed to simply update any GitHub hosted WordPress plugin or 
 or 
 
 `GitHub Plugin URI: afragen/github-updater`  
-`GitHub Plugin URI: https://github.com/afragen/github-Updater`
+`GitHub Plugin URI: https://github.com/afragen/github-updater`
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
 
@@ -49,7 +49,7 @@ Then go to your Plugins screen and click __Activate__.
 
 ## Usage
 
-You do not need to create a tag in GitHub for your theme or plugin version, but if you do create tags, the theme or plugin will use `version_compare` to determine if your tag is greater than the version in your branch.
+You do not need to create a tag in GitHub for your theme or plugin version, but if you do create tags they will be used preferentially.
 
 ### Themes
 
@@ -125,4 +125,4 @@ The plugin updater class was based upon [codepress/github-plugin-updater](https:
 
 Built by [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 
-Includes [Michel Fortin](https://github/com/michelf)'s [PHP-Markdown](https://github.com/michelf/php-markdown) for rendering ChangeLogs.
+Includes [Michel Fortin](https://github/com/michelf)'s [PHP-Markdown Lib](https://github.com/michelf/php-markdown) for rendering ChangeLogs.
