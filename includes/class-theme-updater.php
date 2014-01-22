@@ -250,10 +250,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			//if the theme is up to date, display the custom rollback/beta version updater
 			ob_start();
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
-			$version_info = 'up to date with version '.$theme->local_version;
 
 			?>
-			<p>Current version is <?php echo $version_info; ?>. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
+			<p>Current version is up to date. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<select style="width: 60%;" 
 					onchange="if(jQuery(this).val() != '') {
