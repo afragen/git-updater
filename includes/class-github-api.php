@@ -232,8 +232,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return base64 decoded CHANGES.md or false
 	 */
 	public function get_remote_changes( $changes ) {
-		if ( ! class_exists( 'Michelf\Markdown' ) )
-			require_once 'Michelf/Markdown.inc.php';
+		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
+			require_once 'markdown.php';
 
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
@@ -248,8 +248,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
-		if ( class_exists( 'Michelf\Markdown' ) ) {
-			$changelog = Michelf\Markdown::defaultTransform( base64_decode( $response->content ) );
+		if ( function_exists( 'Markdown' ) ) {
+			$changelog = Markdown( base64_decode( $response->content ) );
 		} else {
 			$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
 		}
