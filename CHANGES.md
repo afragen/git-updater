@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.4.4
+
+ * forgot to include markdown.php - damn
+
 #### 2.4.2
 
  * removed PHP Markdown Lib as it required PHP >= 5.3 and that's higher than required by WordPress core.

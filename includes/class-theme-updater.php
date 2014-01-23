@@ -24,7 +24,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Rollback variable
 	 *
-	 * @since 2.x.x
+	 * @since 2.4.0
 	 * @var version number
 	 */
 	protected $tag = false;
