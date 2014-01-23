@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.4.2
+
+ * removed PHP Markdown Lib as it required PHP >= 5.3 and that's higher than required by WordPress core.
+
 #### 2.4.1
 
  * switched from PHP Markdown Classic to the new PHP Markdown Lib to prevent collisions with other plugins, like Markdown On Save/Improved that also load PHP Markdown or PHP MarkdownExtra.
