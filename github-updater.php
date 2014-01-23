@@ -27,12 +27,21 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Load base classes and Launch
-if ( is_admin() ) {
-	require_once 'includes/class-github-updater.php';
-	require_once 'includes/class-github-api.php';
-	require_once 'includes/class-plugin-updater.php';
-	require_once 'includes/class-theme-updater.php';
-	new GitHub_Plugin_Updater;
-	new GitHub_Theme_Updater;
+if ( version_compare(PHP_VERSION, '5.3', '<') ) {
+	// PHP version is insufficient
+	require_once 'includes/class-plugin-deactivate-self.php';
+	new Plugin_Deactivate_Self(
+		plugin_basename( __FILE__ ),
+		'<strong>GitHub Updater</strong> requires a minimum of PHP 5.3; This plug-in has been <strong>deactivated</strong>.'
+	);
+} else {
+	// Load base classes and Launch
+	if ( is_admin() ) {
+		require_once 'includes/class-github-updater.php';
+		require_once 'includes/class-github-api.php';
+		require_once 'includes/class-plugin-updater.php';
+		require_once 'includes/class-theme-updater.php';
+		new GitHub_Plugin_Updater;
+		new GitHub_Theme_Updater;
+	}
 }
