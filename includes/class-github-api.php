@@ -95,7 +95,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
-
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
@@ -314,6 +313,30 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		return $rating;
+	}
+	
+	public function clear_transients( $file, $delete ) {
+
+		if ( $delete ) {
+			delete_site_transient( 'ghu-'. md5( $this->type->repo . $file ) );
+			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'tags' ) );
+			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'changes' ) );
+			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'meta' ) );
+		} else {
+			$file = get_site_transient( 'ghu-'. md5( $this->type->repo . $file ) );
+			$tags = get_site_transient( 'ghu-'. md5( $this->type->repo . 'tags' ) );
+			$changes = get_site_transient( 'ghu-'. md5( $this->type->repo . 'changes' ) );
+			$meta = get_site_transient( 'ghu-'. md5( $this->type->repo . 'meta' ) );
+			$tags['mytransient'] = 'tags ' . parse_url($file->html_url, PHP_URL_PATH);
+			$changes->mytransient = 'changes ' . parse_url($file->html_url, PHP_URL_PATH);
+			$meta->mytransient = 'meta ' . parse_url($file->html_url, PHP_URL_PATH);
+			if ( function_exists('fb') ) {
+				fb($file);
+				fb($tags);
+				fb($changes);
+				fb($meta);
+			}
+		}
 	}
 
 }
