@@ -1,5 +1,10 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.4.5
+
+* set PHP MarkdownExtra posts and comments markup to false props @MikeHansonMe
+* remove WP plugin header from `markdown.php`
+
 #### 2.4.4
 
  * forgot to include markdown.php - damn
