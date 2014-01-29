@@ -61,6 +61,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$repo_api->get_remote_changes( 'CHANGES.md' );
 			$theme->download_link = $repo_api->construct_download_link();
 
+//			$repo_api->clear_transients( 'style.css', false ); //for debugging
+						
 			// Update theme transient with rollback data
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
@@ -97,7 +99,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		if ( ! is_multisite() ) {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
-
 	}
 
 	/**
@@ -237,7 +238,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
-		// if theme is not present in theme_update transient response ( theme is not up to date )
+		//if the theme is outdated, display the custom theme updater content
+		//if theme is not present in theme_update transient response ( theme is not up to date )
 		if ( empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();

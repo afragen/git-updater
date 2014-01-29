@@ -199,7 +199,6 @@ class GitHub_Updater {
 	 */
 	protected function get_theme_meta() {
 		$git_themes    = array();
-		$git_theme     = array();
 		$themes        = wp_get_themes();
 		$extra_headers = $this->add_theme_headers( null );
 

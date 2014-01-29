@@ -47,8 +47,8 @@ define( 'MARKDOWNEXTRA_VERSION',  "1.2.8" ); # 29 Nov 2013
 #
 
 # Change to false to remove Markdown from posts and/or comments.
-@define( 'MARKDOWN_WP_POSTS',      true );
-@define( 'MARKDOWN_WP_COMMENTS',   true );
+@define( 'MARKDOWN_WP_POSTS',      false );
+@define( 'MARKDOWN_WP_COMMENTS',   false );
 
 
 
@@ -71,18 +71,6 @@ function Markdown($text) {
 	return $parser->transform($text);
 }
 
-
-### WordPress Plugin Interface ###
-
-/*
-Plugin Name: Markdown Extra
-Plugin Name: Markdown
-Plugin URI: http://michelf.ca/projects/php-markdown/
-Description: <a href="http://daringfireball.net/projects/markdown/syntax">Markdown syntax</a> allows you to write using an easy-to-read, easy-to-write plain text format. Based on the original Perl version by <a href="http://daringfireball.net/">John Gruber</a>. <a href="http://michelf.ca/projects/php-markdown/">More...</a>
-Version: 1.2.8
-Author: Michel Fortin
-Author URI: http://michelf.ca/
-*/
 
 if (isset($wp_version)) {
 	# More details about how it works here:
