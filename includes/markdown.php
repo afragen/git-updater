@@ -47,8 +47,8 @@ define( 'MARKDOWNEXTRA_VERSION',  "1.2.8" ); # 29 Nov 2013
 #
 
 # Change to false to remove Markdown from posts and/or comments.
-@define( 'MARKDOWN_WP_POSTS',      true );
-@define( 'MARKDOWN_WP_COMMENTS',   true );
+@define( 'MARKDOWN_WP_POSTS',      false );
+@define( 'MARKDOWN_WP_COMMENTS',   false );
 
 
 
