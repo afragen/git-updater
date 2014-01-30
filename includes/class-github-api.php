@@ -106,7 +106,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) return;
+		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		$this->type->transient = $response;
@@ -176,7 +176,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 				}
 			}
 
-		if ( empty( $tags ) ) return;  // no tags are present, exit early
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
 
@@ -313,30 +313,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		return $rating;
-	}
-	
-	public function clear_transients( $file, $delete ) {
-
-		if ( $delete ) {
-			delete_site_transient( 'ghu-'. md5( $this->type->repo . $file ) );
-			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'tags' ) );
-			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'changes' ) );
-			delete_site_transient( 'ghu-'. md5( $this->type->repo . 'meta' ) );
-		} else {
-			$file = get_site_transient( 'ghu-'. md5( $this->type->repo . $file ) );
-			$tags = get_site_transient( 'ghu-'. md5( $this->type->repo . 'tags' ) );
-			$changes = get_site_transient( 'ghu-'. md5( $this->type->repo . 'changes' ) );
-			$meta = get_site_transient( 'ghu-'. md5( $this->type->repo . 'meta' ) );
-			$tags['mytransient'] = 'tags ' . parse_url($file->html_url, PHP_URL_PATH);
-			$changes->mytransient = 'changes ' . parse_url($file->html_url, PHP_URL_PATH);
-			$meta->mytransient = 'meta ' . parse_url($file->html_url, PHP_URL_PATH);
-			if ( function_exists('fb') ) {
-				fb($file);
-				fb($tags);
-				fb($changes);
-				fb($meta);
-			}
-		}
 	}
 
 }

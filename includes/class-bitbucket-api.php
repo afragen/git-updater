@@ -106,7 +106,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) return;
+		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		$this->type->transient = $response;
@@ -176,7 +176,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 				}
 			}
 
-		if ( empty( $tags ) ) return;  // no tags are present, exit early
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
