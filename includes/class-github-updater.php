@@ -263,7 +263,7 @@ class GitHub_Updater {
 					case 'Bitbucket Theme URI':
 						if ( empty( $bitbucket_uri ) ) break;
 						$git_theme['type']                    = 'bitbucket_theme';
-						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
+						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
 						$owner_repo                           = explode( '/', $owner_repo );
