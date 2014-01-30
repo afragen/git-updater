@@ -31,6 +31,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( is_admin() ) {
 	require_once 'includes/class-github-updater.php';
 	require_once 'includes/class-github-api.php';
+	require_once 'includes/class-bitbucket-api.php';
 	require_once 'includes/class-plugin-updater.php';
 	require_once 'includes/class-theme-updater.php';
 	new GitHub_Plugin_Updater;

@@ -16,7 +16,6 @@
  */
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
-protected $tag;
 	/**
 	 * Constructor.
 	 *
@@ -85,7 +84,7 @@ protected $tag;
 // 		if ( ! empty( $this->type->branch ) )
 // 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 
-		return 'https://api.bitbucket.org/' . $endpoint;
+		return 'https://bitbucket.org/api/' . $endpoint;
 	}
 
 	/**
@@ -107,11 +106,11 @@ protected $tag;
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) return;
+		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		$this->type->transient = $response;
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
+		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
 
 		if ( ! empty( $matches[1] ) )
 			$this->type->remote_version = trim( $matches[1] );
@@ -155,7 +154,7 @@ protected $tag;
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repositories/:owner/:repo/tags' );
+			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
 			if ( ! $response ) { $response = 'no tags here'; }
 
 			if ( $response ) {
@@ -171,15 +170,16 @@ protected $tag;
 		$rollback = array();
 		if ( false !== $response )
 			foreach ( (array) $response as $num => $tag ) {
-				if ( isset( $tag->name ) ) {
-					$tags[] = $tag->name;
-					$rollback[ $tag->name ] = $tag->zipball_url;
+				if ( isset( $num ) ) {
+					$tags[] = $num;
+					$rollback[ $num ] = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
 				}
 			}
 
-		if ( empty( $tags ) ) return;  // no tags are present, exit early
+		if ( empty( $tags ) ) return false;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
+		krsort( $rollback );
 
 		$newest_tag     = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
@@ -200,7 +200,7 @@ protected $tag;
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-		$download_link_base = 'https://bitbucket.org/repositories/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
+		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 		$endpoint = '';
 
 		// check for rollback
@@ -236,7 +236,7 @@ protected $tag;
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/raw/' . trailingslashit($this->type->branch) . $changes  );
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
@@ -247,9 +247,9 @@ protected $tag;
 		if ( isset( $response->message ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
-			$changelog = Markdown( base64_decode( $response->content ) );
+			$changelog = Markdown( $response->data );
 		} else {
-			$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
+			$changelog = '<pre>' . $response->data . '</pre>';
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -277,8 +277,8 @@ protected $tag;
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
-		$this->type->repo_meta = $response->items[0];
-//		$this->add_meta_repo_object();
+		$this->type->repo_meta = $response;
+		$this->add_meta_repo_object();
 	}
 
 	/**
@@ -287,9 +287,9 @@ protected $tag;
 	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->rating = $this->make_rating();
-		$this->type->num_ratings = $this->type->repo_meta->watchers;
+		$this->type->last_updated = $this->type->repo_meta->updated_on;
+//		$this->type->rating = $this->make_rating();
+//		$this->type->num_ratings = $this->type->repo_meta->watchers;
 	}
 
 	/**
