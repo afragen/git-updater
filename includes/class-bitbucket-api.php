@@ -45,6 +45,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return false;
 		}
 
+		if ( '404' == wp_remote_retrieve_response_code( $response ) ) {
+			return (object) $response;
+		}
+
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
@@ -107,7 +111,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		$this->type->branch = $this->get_default_branch( $response );
 
 		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( isset( $response->response ) ) return false;
 
 		$this->type->transient = $response;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
@@ -132,7 +136,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return $this->type->branch;
 
 		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
-		if ( ! $response || isset( $response->message ) )
+		if ( ! $response || isset( $response->response ) )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
@@ -155,15 +159,16 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
-			if ( ! $response ) { $response = 'no tags here'; }
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
-		if ( ! $response || 'no tags here' === $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( ! $response ) return false;
+		$resp = (array) $response;
+		if ( empty( $resp ) ) return false;
+		if ( isset( $response->response ) ) return false;
 
 		// Sort and get newest tag
 		$tags     = array();
@@ -244,7 +249,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( isset( $response->response ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
 			$changelog = Markdown( $response->data );
@@ -275,7 +280,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( isset( $response->response ) ) return false;
 
 		$this->type->repo_meta = $response;
 		$this->add_meta_repo_object();
