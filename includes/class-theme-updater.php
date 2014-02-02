@@ -195,10 +195,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
 
-		$repositories = array( 'GitHub Theme URI' );
+		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
-			if ( empty( $repo_uri ) ) return;
+			if ( empty( $repo_uri ) ) continue;
 			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 		}
 	}
