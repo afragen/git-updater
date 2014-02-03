@@ -253,7 +253,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
-//		if ( isset( $response->response ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
 			$changelog = Markdown( base64_decode( $response->content ) );

@@ -95,9 +95,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
+//		delete_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 
-		if ( ! $response ) {
+		if ( ! $response && isset( $this->type->branch ) ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
@@ -244,7 +245,12 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
-			$response->message = 'No CHANGES.md found';
+
+			if ( ! $response ) {
+				$response['message'] = 'No CHANGES.md found';
+				$response = (object) $response;
+			}
+
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
