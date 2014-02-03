@@ -45,10 +45,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return false;
 		}
 
-		if ( '404' == wp_remote_retrieve_response_code( $response ) ) {
-			return (object) $response;
-		}
-
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
@@ -100,6 +96,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
+
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
@@ -140,9 +137,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
-		$components = parse_url( $response->url, PHP_URL_QUERY );
-		parse_str( $components );
-		return $ref;
+//		if ( empty( $this->type->transient ) ) return false;
+//		$components = parse_url( $response->url, PHP_URL_QUERY );
+//		parse_str( $components );
+//		return $ref;
 	}
 
 	/**
@@ -155,7 +153,12 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
+//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
+		$arr_resp = (array) $response;
+		if ( ! $arr_resp ) {
+			$response->message = 'No tags';
+		}
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
@@ -166,9 +169,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		$resp = (array) $response;
-		if ( empty( $resp ) ) return false;
-		if ( isset( $response->response ) ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		// Sort and get newest tag
 		$tags     = array();
@@ -238,18 +239,19 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
 			require_once 'markdown.php';
 
+//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
-
+			$response->message = 'No CHANGES.md found';
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
 			}
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->response ) ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
 			$changelog = Markdown( $response->data );

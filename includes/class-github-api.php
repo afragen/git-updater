@@ -96,6 +96,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
+
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
@@ -151,18 +152,23 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
+//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
-			if ( ! $response ) { $response = 'no tags here'; }
+
+			if ( ! $response ) {
+				$response['message'] = 'No tags found';
+				$response = (object) $response;
+			}
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
-		if ( ! $response || 'no tags here' === $response ) return false;
+		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
 		// Sort and get newest tag
@@ -234,6 +240,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
 			require_once 'markdown.php';
 
+//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
@@ -246,6 +253,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
+//		if ( isset( $response->response ) ) return false;
 
 		if ( function_exists( 'Markdown' ) ) {
 			$changelog = Markdown( base64_decode( $response->content ) );
