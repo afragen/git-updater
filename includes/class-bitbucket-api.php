@@ -155,7 +155,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	public function get_remote_tag() {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
-		if ( ! $response || ! $arr_resp ) {
+		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
 			$arr_resp = (array) $response;
 
