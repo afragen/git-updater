@@ -154,15 +154,15 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
-//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
-		$arr_resp = (array) $response;
-		if ( ! $arr_resp ) {
-			$response->message = 'No tags';
-		}
 
-		if ( ! $response ) {
+		if ( ! $response || ! $arr_resp ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
+			$arr_resp = (array) $response;
+
+			if ( ! $response || ! $arr_resp ) {
+				$response->message = 'No tags found';
+			}
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
@@ -240,7 +240,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
 			require_once 'markdown.php';
 
-//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
@@ -277,7 +276,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 */
 	public function get_repo_meta() {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
-//		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {
 			$response = $this->api( '2.0/repositories/:owner/:repo' );

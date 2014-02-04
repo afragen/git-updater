@@ -152,7 +152,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
-//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
@@ -240,7 +239,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
 			require_once 'markdown.php';
 
-//		delete_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
