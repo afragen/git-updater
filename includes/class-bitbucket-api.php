@@ -95,7 +95,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
-//		delete_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 
 		if ( ! $response && isset( $this->type->branch ) ) {
