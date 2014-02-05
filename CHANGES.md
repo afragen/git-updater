@@ -4,6 +4,7 @@
 
 * added `class GitHub_Updater_Bitbucket_API` for Bitbucket hosted plugins and themes.
 * improvements to efficiency by not loading when `DOING_AJAX`
+* improvements to efficiency in use of transients
 
 #### 2.4.5
 

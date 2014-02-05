@@ -101,6 +101,16 @@ The default state is either `GitHub Branch: master` or nothing at all. They are 
 
 If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
 
+## Private Repositories
+
+### GitHub Private Repositories
+
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the header `GitHub Access Token: xxxxxxxxx` to your plugin or theme.
+
+### Bitbucket Private Repositories
+
+I'm still working on this. :wink:
+
 ## Filter Hooks
 
 There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate integer to the anonymous function of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
