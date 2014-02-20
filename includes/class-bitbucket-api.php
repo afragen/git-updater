@@ -255,7 +255,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( isset( $response->message ) || ! isset( $response->content ) ) return false;
 
 		$changelog = '';
 		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
