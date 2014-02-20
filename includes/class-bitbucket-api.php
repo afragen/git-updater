@@ -108,7 +108,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		$this->type->branch = $this->get_default_branch( $response );
 
 		if ( ! $response ) return false;
-		if ( isset( $response->response ) ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		$this->type->transient = $response;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
