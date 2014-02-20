@@ -47,22 +47,23 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $theme ) {
 
-			switch( $this->type ) {
+			switch( $theme->type ) {
 				case 'github_theme':
 					$repo_api = new GitHub_Updater_GitHub_API( $theme );
 					break;
+				case 'bitbucket_theme':
+					$repo_api = new GitHub_Updater_BitBucket_API( $theme );
+					break;
 			}
 
-			$this->{$this->type} = $theme;
-			$this->set_defaults();
+			$this->{$theme->type} = $theme;
+			$this->set_defaults( $theme->type );
 			$repo_api->get_remote_info( 'style.css' );
 			$repo_api->get_repo_meta();
 			$repo_api->get_remote_tag();
 			$repo_api->get_remote_changes( 'CHANGES.md' );
 			$theme->download_link = $repo_api->construct_download_link();
 
-//			$repo_api->clear_transients( 'style.css', false ); //for debugging
-						
 			// Update theme transient with rollback data
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
@@ -194,10 +195,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
 
-		$repositories = array( 'GitHub Theme URI' );
+		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
-			if ( empty( $repo_uri ) ) return;
+			if ( empty( $repo_uri ) ) continue;
 			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 		}
 	}

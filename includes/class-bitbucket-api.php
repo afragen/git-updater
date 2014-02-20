@@ -14,7 +14,7 @@
  * @package GitHub_Updater_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_GitHub_API extends GitHub_Updater {
+class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 	/**
 	 * Constructor.
@@ -81,10 +81,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		// If a branch has been given, only check that for the remote info.
 		// If it's not been given, GitHub will use the Default branch.
-		if ( ! empty( $this->type->branch ) )
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+// 		if ( ! empty( $this->type->branch ) )
+// 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 
-		return 'https://api.github.com' . $endpoint;
+		return 'https://bitbucket.org/api/' . $endpoint;
 	}
 
 	/**
@@ -97,8 +97,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function get_remote_info( $file ) {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
 
-		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
+		if ( ! $response && isset( $this->type->branch ) ) {
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
@@ -111,7 +111,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( isset( $response->message ) ) return false;
 
 		$this->type->transient = $response;
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
+		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
 
 		if ( ! empty( $matches[1] ) )
 			$this->type->remote_version = trim( $matches[1] );
@@ -132,14 +132,15 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! empty( $this->type->branch ) )
 			return $this->type->branch;
 
-		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
+		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
 		if ( ! $response )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
-		$components = parse_url( $response->url, PHP_URL_QUERY );
-		parse_str( $components );
-		return $ref;
+//		if ( empty( $this->type->transient ) ) return false;
+//		$components = parse_url( $response->url, PHP_URL_QUERY );
+//		parse_str( $components );
+//		return $ref;
 	}
 
 	/**
@@ -155,11 +156,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/tags' );
+			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
+			$arr_resp = (array) $response;
 
-			if ( ! $response ) {
-				$response['message'] = 'No tags found';
-				$response = (object) $response;
+			if ( ! $response || ! $arr_resp ) {
+				$response->message = 'No tags found';
 			}
 
 			if ( $response ) {
@@ -175,15 +176,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$rollback = array();
 		if ( false !== $response )
 			foreach ( (array) $response as $num => $tag ) {
-				if ( isset( $tag->name ) ) {
-					$tags[] = $tag->name;
-					$rollback[ $tag->name ] = $tag->zipball_url;
+				if ( isset( $num ) ) {
+					$tags[] = $num;
+					$rollback[ $num ] = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
 				}
 			}
 
 		if ( empty( $tags ) ) return false;  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
+		krsort( $rollback );
 
 		$newest_tag     = null;
 		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
@@ -195,8 +197,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API
-	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
+	 * Construct $download_link
 	 *
 	 * @since 1.9.0
 	 *
@@ -205,18 +206,18 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 		$endpoint = '';
 
 		// check for rollback
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
-			$endpoint .= $rollback;
+			$endpoint .= $rollback . '.zip';
 		
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
 		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
-			$endpoint .= $this->type->branch;
+			$endpoint .= $this->type->branch . '.zip';
 		} else {
-			$endpoint .= $this->type->newest_tag;
+			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
 		if ( ! empty( $this->type->access_token ) ) {
@@ -241,7 +242,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
+
+			if ( ! $response ) {
+				$response['message'] = 'No CHANGES.md found';
+				$response = (object) $response;
+			}
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
@@ -265,20 +271,19 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$this->type->sections['changelog'] = $changelog;
 	}
-
+	
 	/**
 	 * Read the repository meta from GitHub API
-	 * Uses a transient to limit calls to the API
 	 *
+	 * Uses a transient to limit calls to the API
 	 * @since 2.2.0
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
-		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {
-			$response = $this->api( '/search/repositories' . $meta_query );
+			$response = $this->api( '2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
 				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
@@ -288,7 +293,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! $response ) return false;
 		if ( isset( $response->message ) ) return false;
 
-		$this->type->repo_meta = $response->items[0];
+		$this->type->repo_meta = $response;
 		$this->add_meta_repo_object();
 	}
 
@@ -298,9 +303,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->rating = $this->make_rating();
-		$this->type->num_ratings = $this->type->repo_meta->watchers;
+		$this->type->last_updated = $this->type->repo_meta->updated_on;
+//		$this->type->rating = $this->make_rating();
+//		$this->type->num_ratings = $this->type->repo_meta->watchers;
 	}
 
 	/**
@@ -324,5 +329,5 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		return $rating;
 	}
-
+	
 }

@@ -1,6 +1,6 @@
 # GitHub Updater
 
-A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins and themes.
+A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes.
 
 This plugin is not allowed in the wp.org repo. :frowning:
 
@@ -19,7 +19,7 @@ or
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
 
 ## Requirements
- * WordPress 3.4 (tested up to 3.8)
+ * WordPress 3.4 (tested up to 3.9)
 
 ## Installation
 
@@ -49,11 +49,9 @@ Then go to your Plugins screen and click __Activate__.
 
 ## Usage
 
-You do not need to create a tag in GitHub for your theme or plugin version, but if you do create tags they will be used preferentially.
-
 ### Themes
 
-There must be a `GitHub Theme URI` declaration in the `style.css` file.
+There must be a `GitHub Theme URI` or `Bitbucket Theme URI` declaration in the `style.css` file.
 
 ~~~css
 /*
@@ -71,7 +69,7 @@ GitHub Branch:    master
 
 ### Plugins 
 
-There must be a `GitHub Plugin URI` declaration in the plugin's header.
+There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header.
 
 ~~~php
 /*
@@ -89,15 +87,41 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Access Token:` and `GitHub Branch:` are available but not required.
+Optional headers `GitHub Access Token`, `GitHub Branch` and `Bitbucket Branch` are available but not required.
+
+## Tagging
+
+If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
 
 ## Branch Support
 
-To specify a branch that you would like to use for updating, just add a `GitHub Branch:` header. GitHub Updater will preferentially use a tag over a branch for updating. If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
+To specify a branch that you would like to use for updating, just add a `GitHub Branch` header.  If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
-If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change header back to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
+If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
+
+## Bitbucket Support
+
+The `Bitbucket Branch` header is supported for both plugins and themes.
+
+### Bitbucket Plugin Support
+
+Instead of the `GitHub Plugin URI` header you will need to use the `Bitbucket Plugin URI` header.
+
+### Bitbucket Theme Support
+
+Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket Theme URI` header.
+
+## Private Repositories
+
+### GitHub Private Repositories
+
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the header `GitHub Access Token: xxxxxxxxx` to your plugin or theme.
+
+### Bitbucket Private Repositories
+
+I'm still working on this. :wink:
 
 ## Filter Hooks
 

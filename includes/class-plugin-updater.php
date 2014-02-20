@@ -37,14 +37,17 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 
-			switch( $this->type ) {
+			switch( $plugin->type ) {
 				case 'github_plugin':
 					$repo_api = new GitHub_Updater_GitHub_API( $plugin );
 					break;
+				case 'bitbucket_plugin':
+					$repo_api = new GitHub_Updater_BitBucket_API( $plugin );
+					break;
 			}
 
-			$this->{$this->type} = $plugin;
-			$this->set_defaults();
+			$this->{$plugin->type} = $plugin;
+			$this->set_defaults( $plugin->type );
 
 			$repo_api->get_remote_info( basename( $plugin->slug ) );
 			$repo_api->get_repo_meta();
