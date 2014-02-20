@@ -133,7 +133,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return $this->type->branch;
 
 		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
-		if ( ! $response || isset( $response->response ) )
+		if ( ! $response )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
@@ -255,7 +255,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->message ) || ! isset( $response->content ) ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		$changelog = '';
 		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
@@ -291,7 +291,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		if ( ! $response ) return false;
-		if ( isset( $response->response ) ) return false;
+		if ( isset( $response->message ) ) return false;
 
 		$this->type->repo_meta = $response;
 		$this->add_meta_repo_object();

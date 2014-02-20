@@ -133,7 +133,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			return $this->type->branch;
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response || isset( $response->message ) )
+		if ( ! $response )
 			return 'master';
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
