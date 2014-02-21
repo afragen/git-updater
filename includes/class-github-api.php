@@ -101,7 +101,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -163,7 +163,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -244,7 +244,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -252,7 +252,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( isset( $response->message ) ) return false;
 
 		$changelog = '';
-		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog );
 
 		if ( ! $changelog ) {
 			if ( function_exists( 'Markdown' ) ) {
@@ -260,7 +260,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
 			}
-			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( parent::$hours * HOUR_IN_SECONDS ) );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -281,7 +281,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/search/repositories' . $meta_query );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );				
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
