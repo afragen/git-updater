@@ -136,11 +136,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( ! $response )
 			return 'master';
 
-		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
-//		if ( empty( $this->type->transient ) ) return false;
-//		$components = parse_url( $response->url, PHP_URL_QUERY );
-//		parse_str( $components );
-//		return $ref;
 	}
 
 	/**
