@@ -210,7 +210,6 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	protected function get_theme_meta() {
-		$git_theme     = array();
 		$git_themes    = array();
 		$themes        = wp_get_themes();
 		$extra_headers = $this->add_theme_headers( null );
@@ -219,6 +218,7 @@ class GitHub_Updater {
 			$themes = $this->multisite_get_themes();
 
 		foreach ( (array) $themes as $theme ) {
+			$git_theme        = array();
 			$github_uri       = $theme->get( 'GitHub Theme URI' );
 			$github_branch    = $theme->get( 'GitHub Branch' );
 			$github_token     = $theme->get( 'GitHub Access Token' );
