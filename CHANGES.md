@@ -3,6 +3,7 @@
 #### 2.5.x
 
 * added transient to `plugins_api` call
+* better zeroing of variables in getting local theme data
 
 #### 2.5.0
 
