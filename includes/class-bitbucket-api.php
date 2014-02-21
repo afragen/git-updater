@@ -101,7 +101,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
