@@ -262,9 +262,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		if ( ! $changelog ) {
 			if ( function_exists( 'Markdown' ) ) {
-				$changelog = Markdown( base64_decode( $response->content ) );
+				$changelog = Markdown( $response->data );
 			} else {
-				$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
+				$changelog = '<pre>' . $response->data . '</pre>';
 			}
 			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( GitHub_Updater::$hours * HOUR_IN_SECONDS ) );
 		}
