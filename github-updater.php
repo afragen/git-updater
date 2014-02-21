@@ -29,11 +29,27 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Load base classes and Launch
 if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-	require_once 'includes/class-github-updater.php';
-	require_once 'includes/class-github-api.php';
-	require_once 'includes/class-bitbucket-api.php';
-	require_once 'includes/class-plugin-updater.php';
-	require_once 'includes/class-theme-updater.php';
+
+	// Load the GitHub_Updater class if it does not already exist. 
+	if ( !class_exists( 'GitHub_Updater' ) )
+		require_once 'includes/class-github-updater.php';
+
+	// Load the GitHub_Updater_GitHub_API class if it does not already exist.
+	if ( !class_exists( 'GitHub_Updater_GitHub_API' ) )
+		require_once 'includes/class-github-api.php';
+
+	// Load the GitHub_Updater_BitBucket_API class if it does not already exist.
+	if ( !class_exists( 'GitHub_Updater_BitBucket_API' ) )
+		require_once 'includes/class-bitbucket-api.php';
+
+	// Load the GitHub_Plugin_Updater class if it does not already exist.
+	if ( !class_exists( 'GitHub_Plugin_Updater' ) )
+		require_once 'includes/class-plugin-updater.php';
+
+	// Load the GitHub_Theme_Updater class if it does not already exist.
+	if ( !class_exists( 'GitHub_Theme_Updater' ) )
+		require_once 'includes/class-theme-updater.php';
+
 	new GitHub_Plugin_Updater;
 	new GitHub_Theme_Updater;
 }
