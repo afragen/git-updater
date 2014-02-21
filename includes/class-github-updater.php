@@ -41,7 +41,7 @@ class GitHub_Updater {
 	 * @since 2.x.x
 	 * @var integer
 	 */
-	protected static $hours = 1;
+	public static $hours = 1;
 	 
 	/**
 	 * Method to set hooks, called in GitHub_Plugin_Updater::__construct via add_action( 'init'...)
@@ -61,7 +61,7 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch',' GitHub Access Token', 'Bitbucket Plugin URI', 'Bitbucket Branch', 'Bitbucket Access Token' );
+		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch',' GitHub Access Token', 'Bitbucket Plugin URI', 'Bitbucket Branch' );
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
 		return $extra_headers;
@@ -75,7 +75,7 @@ class GitHub_Updater {
 	 * @return array
 	 */
 	public function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token', 'Bitbucket Theme URI', 'Bitbucket Branch', 'Bitbucket Access Token' );
+		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token', 'Bitbucket Theme URI', 'Bitbucket Branch' );
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
 		return $extra_headers;
@@ -132,6 +132,7 @@ class GitHub_Updater {
 		$extra_headers = $this->add_plugin_headers( null );
 
 		foreach ( (array) $extra_headers as $key => $value ) {
+			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) continue;
 			switch( $value ) {
 				case 'GitHub Plugin URI':
 					if ( empty( $headers['GitHub Plugin URI'] ) ) break;
@@ -156,11 +157,14 @@ class GitHub_Updater {
 		}
 
 		foreach ( (array) $extra_headers as $key => $value ) {
+			if ( ! empty( $git_repo['type'] ) && 'bitbucket_plugin' !== $git_repo['type'] ) continue;
 			switch( $value ) {
 				case 'Bitbucket Plugin URI':
 					if ( empty( $headers['Bitbucket Plugin URI'] ) ) break;
 					$git_repo['type']         = 'bitbucket_plugin';
 
+					$git_repo['user']         = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
+					$git_repo['pass']         = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
 					$owner_repo               = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
 					$owner_repo               = trim( $owner_repo, '/' );  // strip surrounding slashes
 					$git_repo['uri']          = 'https://bitbucket.org/' . $owner_repo;
@@ -171,10 +175,6 @@ class GitHub_Updater {
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) break;
 					$git_repo['branch']       = $headers['Bitbucket Branch'];
-					break;
-				case 'Bitbucket Access Token':
-					if ( empty( $headers['Bitbucket Access Token'] ) ) break;
-					$git_repo['access_token'] = $headers['Bitbucket Access Token'];
 					break;
 			}
 		}
@@ -224,7 +224,6 @@ class GitHub_Updater {
 			$github_token     = $theme->get( 'GitHub Access Token' );
 			$bitbucket_uri    = $theme->get( 'Bitbucket Theme URI' );
 			$bitbucket_branch = $theme->get( 'Bitbucket Branch' );
-			$bitbucket_token  = $theme->get( 'Bitbucket Access Token' );
 
 			if ( empty( $github_uri ) &&
 				 empty( $bitbucket_uri ) ) {
@@ -232,10 +231,12 @@ class GitHub_Updater {
 			}
 
 			foreach ( (array) $extra_headers as $key => $value ) {
+				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) continue;
 				switch( $value ) {
 					case 'GitHub Theme URI':
 						if ( empty( $github_uri ) ) break;
 						$git_theme['type']                    = 'github_theme';
+
 						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://github.com/' . $owner_repo;
@@ -259,10 +260,14 @@ class GitHub_Updater {
 			}
 
 			foreach ( (array) $extra_headers as $key => $value ) {
+				if ( ! empty( $git_theme['type'] ) && 'bitbucket_theme' !== $git_theme['type'] ) continue;
 				switch( $value ) {
 					case 'Bitbucket Theme URI':
 						if ( empty( $bitbucket_uri ) ) break;
 						$git_theme['type']                    = 'bitbucket_theme';
+
+						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
+						$git_theme['pass']                    = parse_url( $bitbucket_uri, PHP_URL_PASS );
 						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
@@ -277,10 +282,6 @@ class GitHub_Updater {
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) break;
 						$git_theme['branch']                  = $bitbucket_branch;
-						break;
-					case 'Bitbucket Access Token':
-						if ( empty( $bitbucket_token ) ) break;
-						$git_theme['access_token']            = $bitbucket_token;
 						break;
 				}
 			}
