@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.5.x
+
+* added transient to `plugins_api` call
+
 #### 2.5.0
 
 * added `class GitHub_Updater_Bitbucket_API` for Bitbucket hosted plugins and themes.
