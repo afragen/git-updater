@@ -1,9 +1,12 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.5.x
+#### 2.6.0
 
 * added transient to `plugins_api` call
 * better zeroing of variables in getting local theme data
+* add error checking to loading of classes
+* set default transient timeout to 4 hours
+* added new header `GitHub Timeout` or `Bitbucket Timeout` to set individual plugin/theme transient timeout
 
 #### 2.5.0
 
