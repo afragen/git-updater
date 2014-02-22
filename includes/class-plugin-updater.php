@@ -75,7 +75,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'php' ) );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug . '.php' );
-			set_site_transient( 'ghu-' . md5( $response->slug . 'php' ), $wp_repo_data, ( parent::$hours * HOUR_IN_SECONDS ) );
+			set_site_transient( 'ghu-' . md5( $response->slug . 'php' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
 		if ( ! empty( $wp_repo_data['body'] ) ) {
