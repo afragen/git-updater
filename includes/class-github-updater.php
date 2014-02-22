@@ -41,7 +41,7 @@ class GitHub_Updater {
 	 * @since 2.x.x
 	 * @var integer
 	 */
-	public static $hours = 1;
+	protected static $hours;
 	 
 	/**
 	 * Method to set hooks, called in GitHub_Plugin_Updater::__construct via add_action( 'init'...)
@@ -51,8 +51,7 @@ class GitHub_Updater {
 	 * @return integer
 	 */
 	public static function init_hooks() {
-		self::$hours = apply_filters( 'github_updater_set_transient_hours', self::$hours );
-		return self::$hours;
+		return apply_filters( 'github_updater_set_transient_hours', self::$hours );
 	}
 
 	/**
@@ -61,7 +60,7 @@ class GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch',' GitHub Access Token', 'Bitbucket Plugin URI', 'Bitbucket Branch' );
+		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch',' GitHub Access Token', 'GitHub Timeout', 'Bitbucket Plugin URI', 'Bitbucket Branch', 'Bitbucket Timeout' );
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
 		return $extra_headers;
@@ -75,7 +74,7 @@ class GitHub_Updater {
 	 * @return array
 	 */
 	public function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token', 'Bitbucket Theme URI', 'Bitbucket Branch' );
+		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token', 'GitHub Timeout', 'Bitbucket Theme URI', 'Bitbucket Branch', 'Bitbucket Timeout' );
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
 		return $extra_headers;
@@ -153,6 +152,9 @@ class GitHub_Updater {
 					if ( empty( $headers['GitHub Access Token'] ) ) break;
 					$git_repo['access_token'] = $headers['GitHub Access Token'];
 					break;
+				case 'GitHub Timeout':
+					if ( empty( $headers['GitHub Timeout'] ) ) break;
+					$git_repo['timeout']      = $headers['GitHub Timeout'];
 			}
 		}
 
@@ -175,6 +177,10 @@ class GitHub_Updater {
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) break;
 					$git_repo['branch']       = $headers['Bitbucket Branch'];
+					break;
+				case 'Bitbucket Timeout':
+					if ( empty( $headers['Bitbucket Timeout'] ) ) break;
+					$git_repo['timeout']      = $headers['Bitbucket Timeout'];
 					break;
 			}
 		}
@@ -218,12 +224,14 @@ class GitHub_Updater {
 			$themes = $this->multisite_get_themes();
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme        = array();
-			$github_uri       = $theme->get( 'GitHub Theme URI' );
-			$github_branch    = $theme->get( 'GitHub Branch' );
-			$github_token     = $theme->get( 'GitHub Access Token' );
-			$bitbucket_uri    = $theme->get( 'Bitbucket Theme URI' );
-			$bitbucket_branch = $theme->get( 'Bitbucket Branch' );
+			$git_theme         = array();
+			$github_uri        = $theme->get( 'GitHub Theme URI' );
+			$github_branch     = $theme->get( 'GitHub Branch' );
+			$github_token      = $theme->get( 'GitHub Access Token' );
+			$github_timeout    = $theme->get( 'GitHub Timeout');
+			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
+			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
+			$bitbucket_timeout = $theme->get( 'Bitbucket Timeout' );
 
 			if ( empty( $github_uri ) &&
 				 empty( $bitbucket_uri ) ) {
@@ -256,6 +264,10 @@ class GitHub_Updater {
 						if ( empty( $github_token ) ) break;
 						$git_theme['access_token']            = $github_token;
 						break;
+					case 'GitHub Timeout':
+						if ( empty( $github_timeout ) ) break;
+						$git_theme['timeout']                 = $github_timeout;
+						break;
 				}
 			}
 
@@ -282,6 +294,10 @@ class GitHub_Updater {
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) break;
 						$git_theme['branch']                  = $bitbucket_branch;
+						break;
+					case 'Bitbucket Timeout':
+						if ( empty( $bitbucket_timeout ) ) break;
+						$git_theme['timeout']                 = $bitbucket_timeout;
 						break;
 				}
 			}
@@ -311,7 +327,6 @@ class GitHub_Updater {
 		$this->$type->num_ratings           = 0;
 		$this->$type->transient             = array();
 		$this->$type->repo_meta             = array();
-
 	}
 
 	/**

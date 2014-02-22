@@ -17,6 +17,14 @@
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 	/**
+	 * Variable for setting update transient hours
+	 *
+	 * @since 2.x.x
+	 * @var integer
+	 */
+//	protected static $hours;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 2.1.0
@@ -25,6 +33,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type = $type;
+		self::$hours = 4;
+		if ( ! empty( $this->type->timeout ) )
+			self::$hours = (float) $this->type->timeout;
 	}
 
 	/**
@@ -101,7 +112,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -159,7 +170,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -245,7 +256,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
@@ -261,7 +272,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . $response->data . '</pre>';
 			}
-			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( parent::$hours * HOUR_IN_SECONDS ) );
+			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( self::$hours * HOUR_IN_SECONDS ) );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -281,7 +292,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$response = $this->api( '2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( parent::$hours * HOUR_IN_SECONDS ) );
+				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
 			}
 		}
 
