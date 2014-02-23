@@ -104,7 +104,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 //			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 //		}
 
-		return self::$domain_base . '/api/' . $endpoint;
+		return self::$domain_base . 'api/' . $endpoint;
 	}
 
 	/**
