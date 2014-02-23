@@ -16,13 +16,12 @@
  */
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
+
 	/**
-	 * Variable for setting update transient hours
-	 *
-	 * @since 2.x.x
-	 * @var integer
+	 * Variable of construction of user:pass
+	 * @var
 	 */
-//	protected static $hours;
+	protected static $download_link_base;
 
 	/**
 	 * Constructor.
@@ -32,10 +31,18 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
-		$this->type = $type;
-		self::$hours = 4;
-		if ( ! empty( $this->type->timeout ) )
+		$this->type   = $type;
+		self::$hours  = 4;
+		$private_repo = null;
+
+		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
+		}
+		if ( $this->type->user && $this->type->pass ){
+			$private_repo = $this->type->user . ':' . $this->type->pass . '@';
+		}
+
+		self::$download_link_base = 'https://' . $private_repo . 'bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 	}
 
 	/**
@@ -184,7 +191,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $num ) ) {
 					$tags[] = $num;
-					$rollback[ $num ] = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
+					$rollback[ $num ] = self::$download_link_base . $num . '.zip';
 				}
 			}
 
@@ -212,7 +219,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 		$endpoint = '';
 
 		// check for rollback
@@ -226,11 +232,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint .= '?access_token=' . $this->type->access_token;
-		}
-
-		return $download_link_base . $endpoint;
+		return self::$download_link_base . $endpoint;
 	}
 
 	/**

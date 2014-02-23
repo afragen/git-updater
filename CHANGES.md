@@ -7,6 +7,7 @@
 * add error checking to loading of classes
 * set default transient timeout to 4 hours
 * added new header `GitHub Timeout` or `Bitbucket Timeout` to set individual plugin/theme transient timeout
+* added URI for Bitbucket private repos
 
 #### 2.5.0
 
