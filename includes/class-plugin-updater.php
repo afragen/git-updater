@@ -33,10 +33,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		
-		if ( empty( $this->config ) ) return;
+		if ( empty( $this->config ) ) { return false; }
 
 		foreach ( (array) $this->config as $plugin ) {
-
 			switch( $plugin->type ) {
 				case 'github_plugin':
 					$repo_api = new GitHub_Updater_GitHub_API( $plugin );
@@ -99,7 +98,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				$response->last_updated  = $plugin->last_updated;
 				$response->rating        = $plugin->rating;
 				$response->num_ratings   = $plugin->num_ratings;
-//				$response->download_link = $plugin->download_link;
+				//$response->download_link = $plugin->download_link;
 			}
 		}
 		return $response;
@@ -116,11 +115,11 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) )
+		if ( empty( $transient->checked ) ) {
 			return $transient;
+		}
 
 		foreach ( (array) $this->config as $plugin ) {
-
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
 
 			if ( $remote_is_newer ) {

@@ -26,8 +26,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function __construct( $type ) {
 		$this->type = $type;
 		self::$hours = 4;
-		if ( ! empty( $this->type->timeout ) )
+
+		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
+		}
+
 	}
 
 	/**
@@ -79,13 +82,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->type->access_token ) )
+		if ( ! empty( $this->type->access_token ) ) {
 			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
+		}
+
 
 		// If a branch has been given, only check that for the remote info.
 		// If it's not been given, GitHub will use the Default branch.
-		if ( ! empty( $this->type->branch ) )
+		if ( ! empty( $this->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+		}
 
 		return 'https://api.github.com' . $endpoint;
 	}
@@ -110,14 +116,15 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( ! $response ) { return false; }
+		if ( isset( $response->message ) ) { return false; }
 
 		$this->type->transient = $response;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
 
-		if ( ! empty( $matches[1] ) )
+		if ( ! empty( $matches[1] ) ) {
 			$this->type->remote_version = trim( $matches[1] );
+		}
 	}
 
 	/**
@@ -132,12 +139,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string Default branch name.
 	 */
 	protected function get_default_branch( $response ) {
-		if ( ! empty( $this->type->branch ) )
+		if ( ! empty( $this->type->branch ) ) {
 			return $this->type->branch;
+		}
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response )
-			return 'master';
+		if ( ! $response ) { return 'master'; }
+		if ( isset( $response->message ) ) { return 'master'; }
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
 		$components = parse_url( $response->url, PHP_URL_QUERY );
@@ -170,27 +178,28 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( ! $response ) { return false; }
+		if ( isset( $response->message ) ) { return false; }
 
 		// Sort and get newest tag
 		$tags     = array();
 		$rollback = array();
-		if ( false !== $response )
+		if ( false !== $response ) {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $tag->name ) ) {
 					$tags[] = $tag->name;
 					$rollback[ $tag->name ] = $tag->zipball_url;
 				}
 			}
+		}
 
-		if ( empty( $tags ) ) return false;  // no tags are present, exit early
+		if ( empty( $tags ) ) { return false; }  // no tags are present, exit early
 
 		usort( $tags, 'version_compare' );
 
-		$newest_tag     = null;
-		$newest_tag_key = key( array_slice( $tags, -1, 1, true ) );
-		$newest_tag     = $tags[ $newest_tag_key ];
+		$newest_tag             = null;
+		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
+		$newest_tag             = $tags[ $newest_tag_key ];
 
 		$this->type->newest_tag = $newest_tag;
 		$this->type->tags       = $tags;
@@ -238,8 +247,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return base64 decoded CHANGES.md or false
 	 */
 	public function get_remote_changes( $changes ) {
-		if ( ! class_exists( 'MarkdownExtra_Parser' ) )
+		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
+		}
 
 		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
 
@@ -251,8 +261,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( ! $response ) { return false; }
+		if ( isset( $response->message ) ) { return false; }
 
 		$changelog = '';
 		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog );
@@ -288,8 +298,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) return false;
-		if ( isset( $response->message ) ) return false;
+		if ( ! $response ) { return false; }
+		if ( isset( $response->message ) ) { return false; }
 
 		$this->type->repo_meta = $response->items[0];
 		$this->add_meta_repo_object();
@@ -321,9 +331,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
 
-		if ( 100 < $rating ) {
-			return 100;
-		}
+		if ( 100 < $rating ) { return 100; }
 
 		return $rating;
 	}
