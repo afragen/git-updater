@@ -17,14 +17,6 @@
 class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
-	 * Variable for setting update transient hours
-	 *
-	 * @since 2.x.x
-	 * @var integer
-	 */
-//	protected static $hours;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 2.1.0

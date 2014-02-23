@@ -31,7 +31,7 @@ class GitHub_Updater {
 	 * Class Object for API
 	 *
 	 * @since 2.1.0
-	 * @var class object
+	 * @var stdClass
 	 */
  	protected $repo_api;
 
@@ -45,6 +45,7 @@ class GitHub_Updater {
 	 
 	/**
 	 * Method to set hooks, called in GitHub_Plugin_Updater::__construct via add_action( 'init'...)
+	 * @todo make filter hook work
 	 *
 	 * @since 2.3.0
 	 *

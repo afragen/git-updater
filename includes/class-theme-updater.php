@@ -14,7 +14,7 @@
  * @package   GitHub_Theme_Updater
  * @author    Andy Fragen
  * @author    Seth Carstens
- * @link      https://github.com/scarstens/Github-Theme-Updater
+ * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */

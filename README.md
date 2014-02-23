@@ -121,7 +121,7 @@ In order to specify a private repository you will need to obtain a [personal acc
 
 ### Bitbucket Private Repositories
 
-I'm still working on this. :wink:
+The header should be in the following format: `https://user:password@bitbucket.org/<owner>/<repo>`
 
 ## Setting Transient Timeout
 
