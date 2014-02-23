@@ -121,7 +121,7 @@ In order to specify a private repository you will need to obtain a [personal acc
 
 ### Bitbucket Private Repositories
 
-The header should be in the following format: `https://user:password@bitbucket.org/<owner>/<repo>`
+The header should be in the following format: `Bitbucket Plugin URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>` or `Bitbucket Theme URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>`
 
 ## Setting Transient Timeout
 
