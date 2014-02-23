@@ -21,7 +21,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Variable of construction of user:pass
 	 * @var
 	 */
-	protected static $download_link_base;
+	protected static $domain_base;
 
 	/**
 	 * Constructor.
@@ -42,7 +42,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$private_repo = $this->type->user . ':' . $this->type->pass . '@';
 		}
 
-		self::$download_link_base = 'https://' . $private_repo . 'bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
+		self::$domain_base = 'https://' . $private_repo . 'bitbucket.org/';
 	}
 
 	/**
@@ -102,7 +102,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 // 		if ( ! empty( $this->type->branch ) )
 // 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 
-		return 'https://bitbucket.org/api/' . $endpoint;
+		return self::$domain_base . '/api/' . $endpoint;
 	}
 
 	/**
@@ -191,7 +191,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $num ) ) {
 					$tags[] = $num;
-					$rollback[ $num ] = self::$download_link_base . $num . '.zip';
+					$rollback[ $num ] = self::$domain_base . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
 				}
 			}
 
@@ -232,7 +232,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		return self::$download_link_base . $endpoint;
+		return self::$domain_base . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $endpoint;
 	}
 
 	/**
