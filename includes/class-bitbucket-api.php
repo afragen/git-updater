@@ -16,13 +16,6 @@
  */
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
-
-	/**
-	 * Variable of construction of user:pass
-	 * @var
-	 */
-	protected static $domain_base;
-
 	/**
 	 * Constructor.
 	 *
@@ -33,16 +26,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	public function __construct( $type ) {
 		$this->type   = $type;
 		self::$hours  = 4;
-		$private_repo = null;
 
 		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
 		}
-		if ( $this->type->user && $this->type->pass ){
-			$private_repo = $this->type->user . ':' . $this->type->pass . '@';
-		}
-
-		self::$domain_base = 'https://' . $private_repo . 'bitbucket.org/';
 	}
 
 	/**
@@ -76,10 +63,15 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string
 	 */
 	protected function get_api_url( $endpoint ) {
-		$segments = array(
+		$private_repo = null;
+		$segments     = array(
 			'owner' => $this->type->owner,
 			'repo'  => $this->type->repo,
 		);
+
+		if ( $this->type->user && $this->type->pass ){
+			$private_repo = $this->type->user . ':' . $this->type->pass . '@';
+		}
 
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
@@ -104,7 +96,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 //			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 //		}
 
-		return self::$domain_base . 'api/' . $endpoint;
+		return 'https://' . $private_repo . 'bitbucket.org/api/' . $endpoint;
 	}
 
 	/**
@@ -194,7 +186,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $num ) ) {
 					$tags[] = $num;
-					$rollback[ $num ] = self::$domain_base . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
+					$rollback[ $num ] = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
 				}
 			}
 		}
@@ -236,7 +228,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		return self::$domain_base . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $endpoint;
+		return 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $endpoint;
 	}
 
 	/**
