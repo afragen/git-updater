@@ -30,6 +30,8 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
 		}
+
+		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
 
 	/**
@@ -63,15 +65,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string
 	 */
 	protected function get_api_url( $endpoint ) {
-		$private_repo = null;
 		$segments     = array(
 			'owner' => $this->type->owner,
 			'repo'  => $this->type->repo,
 		);
-
-		if ( $this->type->user && $this->type->pass ){
-			$private_repo = $this->type->user . ':' . $this->type->pass . '@';
-		}
 
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
@@ -335,5 +332,5 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		return $rating;
 	}
-	
+
 }

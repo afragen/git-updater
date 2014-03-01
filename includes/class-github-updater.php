@@ -408,4 +408,26 @@ class GitHub_Updater {
 		return $args;
 	}
 
+	/**
+	 * Add Basis Authentication $args to http_request_args filter hook
+	 *
+	 * @param array $args Existing HTTP Request arguments
+	 *
+	 * @return mixed Amended HTTP Request arguments
+	 */
+	public function maybe_authenticate_http( $args ) {
+		if ( ! empty( $this->type->access_token ) ) { return $args; }
+
+		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
+		if ( $this->type->user && $this->type->pass ) {
+			$username = $this->type->user;
+			$password = $this->type->pass;
+		}
+
+		if ( $username && $password ) {
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
+	}
 }
