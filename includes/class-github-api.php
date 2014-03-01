@@ -144,7 +144,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response ) { return 'master'; }
+		if ( ! $response || ! isset( $response->url ) ) { return 'master'; }
 		if ( isset( $response->message ) ) { return 'master'; }
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
@@ -298,7 +298,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
+		if ( ! $response || ! isset( $response->items ) ) { return false; }
 		if ( isset( $response->message ) ) { return false; }
 
 		$this->type->repo_meta = $response->items[0];
