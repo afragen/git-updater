@@ -95,7 +95,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
+		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 
 		if ( ! is_multisite() ) {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
