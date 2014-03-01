@@ -96,7 +96,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 //			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 //		}
 
-		return 'https://' . $private_repo . 'bitbucket.org/api/' . $endpoint;
+		return 'https://bitbucket.org/api/' . $endpoint;
 	}
 
 	/**
@@ -210,12 +210,13 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @param boolean only for theme rollback
+	 * @param boolean $rollback for theme rollback
 	 * 
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
-		$endpoint = '';
+		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
+		$endpoint           = '';
 
 		// check for rollback
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
@@ -228,7 +229,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		return 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $endpoint;
+		return $download_link_base . $endpoint;
 	}
 
 	/**

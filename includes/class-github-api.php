@@ -212,13 +212,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @param boolean only for theme rollback
+	 * @param boolean $rollback for theme rollback
 	 * 
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
 		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
-		$endpoint = '';
+		$endpoint           = '';
 
 		// check for rollback
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
