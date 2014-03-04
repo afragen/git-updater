@@ -214,7 +214,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public function customize_theme_update_html($prepared_themes) {
 		foreach ( (array) $this->config as $theme ) {
-	
 			if ( empty( $prepared_themes[ $theme->repo ] ) ) { continue; }
 
 			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
@@ -267,7 +266,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				">
 				<option value="">Choose a Version...</option>
 				<option><?php echo $theme->branch; ?></option>
-				<?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){echo'<option>'.$version.'</option>';}?></select>
+				<?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){ echo'<option>'.$version.'</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?">Install</a>
 			</div>
 			<?php

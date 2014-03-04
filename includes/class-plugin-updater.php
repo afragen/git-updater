@@ -67,9 +67,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		if ( ! ( 'plugin_information' === $action ) ) {
-			return $false;
-		}
+		if ( ! ( 'plugin_information' === $action ) ) { return $false; }
 
 		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'php' ) );
 		if ( ! $wp_repo_data ) {

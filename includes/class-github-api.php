@@ -24,13 +24,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
-		$this->type = $type;
+		$this->type  = $type;
 		self::$hours = 4;
 
 		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
 		}
-
 	}
 
 	/**
@@ -187,7 +186,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( false !== $response ) {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $tag->name ) ) {
-					$tags[] = $tag->name;
+					$tags[]                 = $tag->name;
 					$rollback[ $tag->name ] = $tag->zipball_url;
 				}
 			}
@@ -287,7 +286,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
+		$response   = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {

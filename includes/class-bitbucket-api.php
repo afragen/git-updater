@@ -24,8 +24,8 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
-		$this->type   = $type;
-		self::$hours  = 4;
+		$this->type  = $type;
+		self::$hours = 4;
 
 		if ( ! empty( $this->type->timeout ) ) {
 			self::$hours = (float) $this->type->timeout;
@@ -65,7 +65,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string
 	 */
 	protected function get_api_url( $endpoint ) {
-		$segments     = array(
+		$segments = array(
 			'owner' => $this->type->owner,
 			'repo'  => $this->type->repo,
 		);
@@ -160,7 +160,8 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
+		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
+		$response           = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
@@ -184,8 +185,8 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( false !== $response ) {
 			foreach ( (array) $response as $num => $tag ) {
 				if ( isset( $num ) ) {
-					$tags[] = $num;
-					$rollback[ $num ] = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/' . $num . '.zip';
+					$tags[]           = $num;
+					$rollback[ $num ] = $download_link_base . $num . '.zip';
 				}
 			}
 		}

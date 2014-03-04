@@ -325,7 +325,7 @@ class GitHub_Updater {
 		$this->$type->download_link         = '';
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
-		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository. Please consider helping out with a pull request to fix <a href="https://github.com/afragen/github-updater/issues/8">issue #8</a>.';
+		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository.';
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
 		$this->$type->downloaded            = 0;
@@ -409,16 +409,18 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Add Basis Authentication $args to http_request_args filter hook
+	 * Add Basic Authentication $args to http_request_args filter hook
 	 *
 	 * @param array $args Existing HTTP Request arguments
 	 *
 	 * @return mixed Amended HTTP Request arguments
 	 */
 	public function maybe_authenticate_http( $args ) {
+		$username = null;
+		$password = null;
 		if ( ! empty( $this->type->access_token ) ) { return $args; }
-
 		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
+
 		if ( $this->type->user && $this->type->pass ) {
 			$username = $this->type->user;
 			$password = $this->type->pass;

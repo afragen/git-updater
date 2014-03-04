@@ -87,7 +87,7 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Access Token`, `GitHub Branch` and `Bitbucket Branch` are available but not required.
+Optional headers `GitHub Access Token`, `GitHub Branch`, `GitHub Timeout`, `Bitbucket Branch`, and `Bitbucket Timeout` are available but not required.
 
 ## Tagging
 
