@@ -415,10 +415,20 @@ class GitHub_Updater {
 	 *
 	 * @return mixed Amended HTTP Request arguments
 	 */
-	public function maybe_authenticate_http( $args ) {
+	public function maybe_authenticate_http( $args, $type=null ) {
 		$username = null;
 		$password = null;
-		if ( ! empty( $this->type->access_token ) ) { return $args; }
+
+		$ptype = explode( '/', parse_url( $type, PHP_URL_PATH ) );
+		$mybase = basename( $type, ".php" );
+		$repo = $this->type->repo;
+		$ext = pathinfo( basename( $type) , PATHINFO_EXTENSION);
+
+		if ( isset( $args['headers'] ) ) { unset( $args['headers']['Authorization'] ); }
+		//if ( ! empty( $this->type->access_token ) ) { return $args; }
+		//if ( 'zip' === pathinfo( basename( $type ) , PATHINFO_EXTENSION ) ) { return $args; }
+		if ( ! isset( $this->type ) ) { return $args; }
+		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) { return $args; }
 		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
 
 		if ( $this->type->user && $this->type->pass ) {
@@ -432,4 +442,5 @@ class GitHub_Updater {
 
 		return $args;
 	}
+
 }
