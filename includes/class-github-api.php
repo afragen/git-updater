@@ -46,7 +46,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
 
-		if ( is_wp_error( $response ) || ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) || ( ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) ) {
 			return false;
 		}
 
