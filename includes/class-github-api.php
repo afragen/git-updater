@@ -33,7 +33,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Call the GitHub API and return a json decoded body.
+	 * Call the API and return a json decoded body.
 	 *
 	 * @since 1.0.0
 	 *
@@ -279,7 +279,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Read the repository meta from GitHub API
+	 * Read the repository meta from API
 	 * Uses a transient to limit calls to the API
 	 *
 	 * @since 2.2.0

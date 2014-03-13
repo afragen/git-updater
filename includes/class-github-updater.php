@@ -103,7 +103,7 @@ class GitHub_Updater {
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
-				 empty( $headers['Bitbucket Plugin URI'] ) ) {
+				empty( $headers['Bitbucket Plugin URI'] ) ) {
 				continue;
 			}
 
@@ -169,24 +169,24 @@ class GitHub_Updater {
 			switch( $value ) {
 				case 'Bitbucket Plugin URI':
 					if ( empty( $headers['Bitbucket Plugin URI'] ) ) { break; }
-					$git_repo['type']         = 'bitbucket_plugin';
+					$git_repo['type']    = 'bitbucket_plugin';
 
-					$git_repo['user']         = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
-					$git_repo['pass']         = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
-					$owner_repo               = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
-					$owner_repo               = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri']          = 'https://bitbucket.org/' . $owner_repo;
-					$owner_repo               = explode( '/', $owner_repo );
-					$git_repo['owner']        = $owner_repo[0];
-					$git_repo['repo']         = $owner_repo[1];
+					$git_repo['user']    = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
+					$git_repo['pass']    = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
+					$owner_repo          = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
+					$owner_repo          = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri']     = 'https://bitbucket.org/' . $owner_repo;
+					$owner_repo          = explode( '/', $owner_repo );
+					$git_repo['owner']   = $owner_repo[0];
+					$git_repo['repo']    = $owner_repo[1];
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) { break; }
-					$git_repo['branch']       = $headers['Bitbucket Branch'];
+					$git_repo['branch']  = $headers['Bitbucket Branch'];
 					break;
 				case 'Bitbucket Timeout':
 					if ( empty( $headers['Bitbucket Timeout'] ) ) { break; }
-					$git_repo['timeout']      = $headers['Bitbucket Timeout'];
+					$git_repo['timeout'] = $headers['Bitbucket Timeout'];
 					break;
 			}
 		}
@@ -240,8 +240,7 @@ class GitHub_Updater {
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
 			$bitbucket_timeout = $theme->get( 'Bitbucket Timeout' );
 
-			if ( empty( $github_uri ) &&
-				 empty( $bitbucket_uri ) ) {
+			if ( empty( $github_uri ) && empty( $bitbucket_uri ) ) {
 				continue;
 			}
 
