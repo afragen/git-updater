@@ -57,11 +57,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
-			$repo_api->get_remote_info( 'style.css' );
-			$repo_api->get_repo_meta();
-			$repo_api->get_remote_tag();
-			$repo_api->get_remote_changes( 'CHANGES.md' );
-			$theme->download_link = $repo_api->construct_download_link();
+			if ( $repo_api->get_remote_info( 'style.css' ) ) {
+				$repo_api->get_repo_meta();
+				$repo_api->get_remote_tag();
+				$repo_api->get_remote_changes( 'CHANGES.md' );
+				$theme->download_link = $repo_api->construct_download_link();
+			}
 
 			// Update theme transient with rollback data
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {

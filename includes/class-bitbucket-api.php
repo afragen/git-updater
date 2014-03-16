@@ -127,6 +127,8 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		if ( ! empty( $matches[1] ) ) {
 			$this->type->remote_version = trim( $matches[1] );
 		}
+
+		return true;
 	}
 
 	/**

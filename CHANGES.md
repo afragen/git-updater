@@ -10,6 +10,7 @@
 * fixed for Bitbucket private repos
 * abide by WP Coding Guidelines, esp. for braces
 * more error checking for correct variable fetch
+* added graceful exit if repo does not exist
 
 #### 2.5.0
 

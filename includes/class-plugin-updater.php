@@ -48,11 +48,12 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			$repo_api->get_remote_info( basename( $plugin->slug ) );
-			$repo_api->get_repo_meta();
-			$repo_api->get_remote_tag();
-			$repo_api->get_remote_changes( 'CHANGES.md' );
-			$plugin->download_link = $repo_api->construct_download_link();
+			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$repo_api->get_repo_meta();
+				$repo_api->get_remote_tag();
+				$repo_api->get_remote_changes( 'CHANGES.md' );
+				$plugin->download_link = $repo_api->construct_download_link();
+			}
 		}
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
