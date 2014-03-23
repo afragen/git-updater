@@ -87,7 +87,7 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Access Token`, `GitHub Branch` and `Bitbucket Branch` are available but not required.
+Optional headers `GitHub Access Token`, `GitHub Branch`, `GitHub Timeout`, `Bitbucket Branch`, and `Bitbucket Timeout` are available but not required.
 
 ## Tagging
 
@@ -121,15 +121,13 @@ In order to specify a private repository you will need to obtain a [personal acc
 
 ### Bitbucket Private Repositories
 
-I'm still working on this. :wink:
+The header should be in the following format: `Bitbucket Plugin URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>` or `Bitbucket Theme URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>`
 
-## Filter Hooks
+Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
 
-There is a filter hook to set the number of hours for a transient to expire. You can add this to any plugin that you wish to override the default transient expiration. Add an appropriate integer to the anonymous function of the number of hours before expiration of the transient. Default is one hour. Usage as follows.
+## Setting Transient Timeout
 
-    add_filter( 'github_updater_set_transient_hours', function() { return 3; } );
-    
-### NB - This does not work. Pull requests welcome.
+The default number of hours for a plugin/theme's transient to expire is 4 hours. You may add an optional header, `GitHub Timeout` or `Bitbucket Timeout` to set a different transient timeout. The header will accept numeric values representing the number of hours for the plugin/theme's transient timeout. These values are floats.
 
 ## Issues
 

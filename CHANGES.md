@@ -1,5 +1,17 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.6.0
+
+* added transient to `plugins_api` call
+* better zeroing of variables in getting local theme data
+* add error checking to loading of classes
+* set default transient timeout to 4 hours
+* added new header `GitHub Timeout` or `Bitbucket Timeout` to set individual plugin/theme transient timeout
+* <strike>fixed for Bitbucket private repos</strike>
+* abide by WP Coding Guidelines, esp. for braces
+* more error checking for correct variable fetch
+* added graceful exit if repo does not exist
+
 #### 2.5.0
 
 * added `class GitHub_Updater_Bitbucket_API` for Bitbucket hosted plugins and themes.

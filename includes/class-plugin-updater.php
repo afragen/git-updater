@@ -33,10 +33,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		
-		if ( empty( $this->config ) ) return;
+		if ( empty( $this->config ) ) { return false; }
 
 		foreach ( (array) $this->config as $plugin ) {
-
 			switch( $plugin->type ) {
 				case 'github_plugin':
 					$repo_api = new GitHub_Updater_GitHub_API( $plugin );
@@ -49,17 +48,18 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			$repo_api->get_remote_info( basename( $plugin->slug ) );
-			$repo_api->get_repo_meta();
-			$repo_api->get_remote_tag();
-			$repo_api->get_remote_changes( 'CHANGES.md' );
-			$plugin->download_link = $repo_api->construct_download_link();
+			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$repo_api->get_repo_meta();
+				$repo_api->get_remote_tag();
+				$repo_api->get_remote_changes( 'CHANGES.md' );
+				$plugin->download_link = $repo_api->construct_download_link();
+			}
 		}
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_action( 'http_request_args', array( $this, 'no_ssl_http_request_args' ) );
+		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 	}
 
 	/**
@@ -68,11 +68,14 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		if ( ! ( 'plugin_information' === $action ) ) {
-			return $false;
+		if ( ! ( 'plugin_information' === $action ) ) { return $false; }
+
+		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'php' ) );
+		if ( ! $wp_repo_data ) {
+			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug . '.php' );
+			set_site_transient( 'ghu-' . md5( $response->slug . 'php' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
-		$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug . '.php' );
 		if ( ! empty( $wp_repo_data['body'] ) ) {
 			$wp_repo_body = unserialize( $wp_repo_data['body'] );
 			if ( is_object( $wp_repo_body ) ) {
@@ -94,7 +97,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				$response->last_updated  = $plugin->last_updated;
 				$response->rating        = $plugin->rating;
 				$response->num_ratings   = $plugin->num_ratings;
-//				$response->download_link = $plugin->download_link;
+				//$response->download_link = $plugin->download_link;
 			}
 		}
 		return $response;
@@ -111,11 +114,11 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) )
+		if ( empty( $transient->checked ) ) {
 			return $transient;
+		}
 
 		foreach ( (array) $this->config as $plugin ) {
-
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
 
 			if ( $remote_is_newer ) {
