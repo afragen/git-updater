@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.6.1
+
+* fixed CHANGES.md for GFM strikethrough
+
 #### 2.6.0
 
 * added transient to `plugins_api` call
