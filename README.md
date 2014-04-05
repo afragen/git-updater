@@ -125,9 +125,9 @@ The header should be in the following format: `Bitbucket Plugin URI: https://<us
 
 Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
 
-## Setting Transient Timeout
+## Deleting Transients
 
-The default number of hours for a plugin/theme's transient to expire is 4 hours. You may add an optional header, `GitHub Timeout` or `Bitbucket Timeout` to set a different transient timeout. The header will accept numeric values representing the number of hours for the plugin/theme's transient timeout. These values are floats.
+If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the next check will query the API again.
 
 ## Issues
 

@@ -23,7 +23,7 @@ class GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @var array
+	 * @var stdClass
 	 */
 	protected $config;
 
@@ -42,18 +42,13 @@ class GitHub_Updater {
 	 * @var integer
 	 */
 	protected static $hours;
-	 
+
 	/**
-	 * Method to set hooks, called in GitHub_Plugin_Updater::__construct via add_action( 'init'...)
-	 * @todo make filter hook work
+	 * Variable for holding transient ids
 	 *
-	 * @since 2.3.0
-	 *
-	 * @return integer
+	 * @var array
 	 */
-	public static function init_hooks() {
-		return apply_filters( 'github_updater_set_transient_hours', self::$hours );
-	}
+	protected static $transients = array();
 
 	/**
 	 * Add extra header to get_plugins();
@@ -62,8 +57,8 @@ class GitHub_Updater {
 	 */
 	public function add_plugin_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token', 'GitHub Timeout',
-			'Bitbucket Plugin URI', 'Bitbucket Branch', 'Bitbucket Timeout',
+			'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token',
+			'Bitbucket Plugin URI', 'Bitbucket Branch',
 			);
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -79,8 +74,8 @@ class GitHub_Updater {
 	 */
 	public function add_theme_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token', 'GitHub Timeout',
-			'Bitbucket Theme URI', 'Bitbucket Branch', 'Bitbucket Timeout',
+			'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token',
+			'Bitbucket Theme URI', 'Bitbucket Branch',
 			);
 		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -158,9 +153,6 @@ class GitHub_Updater {
 					if ( empty( $headers['GitHub Access Token'] ) ) { break; }
 					$git_repo['access_token'] = $headers['GitHub Access Token'];
 					break;
-				case 'GitHub Timeout':
-					if ( empty( $headers['GitHub Timeout'] ) ) { break; }
-					$git_repo['timeout']      = $headers['GitHub Timeout'];
 			}
 		}
 
@@ -183,10 +175,6 @@ class GitHub_Updater {
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) { break; }
 					$git_repo['branch']  = $headers['Bitbucket Branch'];
-					break;
-				case 'Bitbucket Timeout':
-					if ( empty( $headers['Bitbucket Timeout'] ) ) { break; }
-					$git_repo['timeout'] = $headers['Bitbucket Timeout'];
 					break;
 			}
 		}
@@ -235,10 +223,8 @@ class GitHub_Updater {
 			$github_uri        = $theme->get( 'GitHub Theme URI' );
 			$github_branch     = $theme->get( 'GitHub Branch' );
 			$github_token      = $theme->get( 'GitHub Access Token' );
-			$github_timeout    = $theme->get( 'GitHub Timeout');
 			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
-			$bitbucket_timeout = $theme->get( 'Bitbucket Timeout' );
 
 			if ( empty( $github_uri ) && empty( $bitbucket_uri ) ) {
 				continue;
@@ -270,10 +256,6 @@ class GitHub_Updater {
 						if ( empty( $github_token ) ) { break; }
 						$git_theme['access_token']            = $github_token;
 						break;
-					case 'GitHub Timeout':
-						if ( empty( $github_timeout ) ) { break; }
-						$git_theme['timeout']                 = $github_timeout;
-						break;
 				}
 			}
 
@@ -300,10 +282,6 @@ class GitHub_Updater {
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) { break; }
 						$git_theme['branch']                  = $bitbucket_branch;
-						break;
-					case 'Bitbucket Timeout':
-						if ( empty( $bitbucket_timeout ) ) { break; }
-						$git_theme['timeout']                 = $bitbucket_timeout;
 						break;
 				}
 			}
@@ -442,4 +420,46 @@ class GitHub_Updater {
 		return $args;
 	}
 
+
+	/**
+	 * Used to set_site_transient and checks/stores transient id in array
+	 *
+	 * @param $id
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function make_transient( $id, $response ) {
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+		set_site_transient( $transient, $response, ( self::$hours * HOUR_IN_SECONDS ) );
+		return true;
+	}
+
+	/**
+	 * Returns site_transient and checks/stores transient id in array
+	 *
+	 * @param $id
+	 *
+	 * @return mixed
+	 */
+	protected function get_transient( $id ) {
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+		return get_site_transient( $transient );
+	}
+
+
+	protected function delete_all_transients() {
+		foreach ( self::$transients as $transient ) {
+			delete_site_transient( $transient );
+			$key = array_search( $transient, self::$transients);
+			unset( self::$transients[ $key ] );
+		}
+		return true;
+	}
 }

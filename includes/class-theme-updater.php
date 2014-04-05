@@ -89,6 +89,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		}
 
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients(); }
+
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );

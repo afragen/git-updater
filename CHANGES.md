@@ -1,8 +1,15 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.7.0
+
+* created functions for getting and setting transients
+* added deletion of all transients if _force-check_ is used
+* removed `GitHub Timeout` and `Bitbucket Timeout` headers
+* fix for `wp_remote_retrieve_response_code` check
+
 #### 2.6.1
 
-* fixed CHANGES.md for GFM strikethrough
+* fixed CHANGES.md for GFM strike-through
 
 #### 2.6.0
 

@@ -26,10 +26,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		self::$hours = 4;
-
-		if ( ! empty( $this->type->timeout ) ) {
-			self::$hours = (float) $this->type->timeout;
-		}
 	}
 
 	/**
@@ -45,10 +41,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	protected function api( $url ) {
 		$response = wp_remote_get( $this->get_api_url( $url ) );
+		$code     = wp_remote_retrieve_response_code( $response );
 
-		if ( is_wp_error( $response ) || ( ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) ) {
-			return false;
-		}
+		if ( is_wp_error( $response ) ) { return false; }
+		if ( ( 200 || 404 )!= $code ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
@@ -103,13 +99,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
+		$response = $this->get_transient( $file );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->make_transient( $file, $response );
 			}
 		}
 
@@ -164,7 +160,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string latest tag.
 	 */
 	public function get_remote_tag() {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
+		$response = $this->get_transient( 'tags' );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
@@ -175,7 +171,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->make_transient( 'tags', $response );
 			}
 		}
 
@@ -252,21 +248,20 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			require_once 'markdown.php';
 		}
 
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
+		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->make_transient( 'changes', $response );
 			}
 		}
 
 		if ( ! $response ) { return false; }
 		if ( isset( $response->message ) ) { return false; }
 
-		$changelog = '';
-		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog );
+		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
 			if ( function_exists( 'Markdown' ) ) {
@@ -274,7 +269,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
 			}
-			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( self::$hours * HOUR_IN_SECONDS ) );
+			$this->make_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -288,14 +283,14 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
-		$response   = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
+		$response   = $this->get_transient( 'meta' );
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->make_transient( 'meta', $response );
 			}
 		}
 
