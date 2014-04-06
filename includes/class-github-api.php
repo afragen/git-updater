@@ -40,11 +40,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
-		$response = wp_remote_get( $this->get_api_url( $url ) );
-		$code     = wp_remote_retrieve_response_code( $response );
+		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$code          = wp_remote_retrieve_response_code( $response );
+		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) { return false; }
-		if ( ( 200 || 404 )!= $code ) { return false; }
+		if ( ! in_array( $code, $allowed_codes, true ) ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
