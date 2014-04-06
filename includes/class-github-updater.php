@@ -299,7 +299,7 @@ class GitHub_Updater {
 	protected function set_defaults( $type ) {
 		$this->$type->remote_version        = '0.0.0';
 		$this->$type->newest_tag            = '0.0.0';
-		$this->$type->download_link         = '';
+		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
 		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository.';
@@ -311,6 +311,10 @@ class GitHub_Updater {
 		$this->$type->num_ratings           = 0;
 		$this->$type->transient             = array();
 		$this->$type->repo_meta             = array();
+		$this->$type->watchers              = 0;
+		$this->$type->forks                 = 0;
+		$this->$type->open_issues           = 0;
+		$this->$type->score                 = 0;
 	}
 
 	/**
@@ -454,12 +458,38 @@ class GitHub_Updater {
 	}
 
 
+	/**
+	 * Delete all transients from array of transient ids
+	 *
+	 * @return bool
+	 */
 	protected function delete_all_transients() {
 		foreach ( self::$transients as $transient ) {
 			delete_site_transient( $transient );
-			$key = array_search( $transient, self::$transients);
+			$key = array_search( $transient, self::$transients );
 			unset( self::$transients[ $key ] );
 		}
 		return true;
 	}
+
+	/**
+	 * Create some sort of rating from 0 to 100 for use in star ratings
+	 * I'm really just making this up, more based upon popularity
+	 *
+	 * @since 2.2.0
+	 * @return integer
+	 */
+	protected function make_rating( $repo_meta ) {
+		$watchers    = ( empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers );
+		$forks       = ( empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks );
+		$open_issues = ( empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues );
+		$score       = ( empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score ); //what is this anyway?
+
+		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
+
+		if ( 100 < $rating ) { return 100; }
+
+		return $rating;
+	}
+
 }

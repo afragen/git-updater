@@ -6,6 +6,8 @@
 * added deletion of all transients if _force-check_ is used
 * removed `GitHub Timeout` and `Bitbucket Timeout` headers
 * fix for `wp_remote_retrieve_response_code` check
+* give Seth Carstens proper credit in README.md
+* move `function make_rating` to `class GitHub_Updater`
 
 #### 2.6.1
 
