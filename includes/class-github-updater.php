@@ -429,7 +429,7 @@ class GitHub_Updater {
 	 *
 	 * @return bool
 	 */
-	protected function make_transient( $id, $response ) {
+	protected function set_transient( $id, $response ) {
 		$transient = 'ghu-' . md5( $this->type->repo . $id );
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;

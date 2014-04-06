@@ -109,7 +109,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
-				$this->make_transient( $file, $response );
+				$this->set_transient( $file, $response );
 			}
 		}
 
@@ -171,7 +171,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				$this->make_transient( 'tags', $response );
+				$this->set_transient( 'tags', $response );
 			}
 		}
 
@@ -255,7 +255,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				$this->make_transient( 'changes', $response );
+				$this->set_transient( 'changes', $response );
 			}
 		}
 
@@ -270,7 +270,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . $response->data . '</pre>';
 			}
-			$this->make_transient( 'changelog', $changelog );
+			$this->set_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -290,7 +290,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			$response = $this->api( '2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
-				$this->make_transient( 'meta', $response );
+				$this->set_transient( 'meta', $response );
 			}
 		}
 

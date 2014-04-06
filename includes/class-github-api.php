@@ -106,7 +106,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $response ) {
-				$this->make_transient( $file, $response );
+				$this->set_transient( $file, $response );
 			}
 		}
 
@@ -172,7 +172,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				$this->make_transient( 'tags', $response );
+				$this->set_transient( 'tags', $response );
 			}
 		}
 
@@ -255,7 +255,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
 
 			if ( $response ) {
-				$this->make_transient( 'changes', $response );
+				$this->set_transient( 'changes', $response );
 			}
 		}
 
@@ -270,7 +270,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
 			}
-			$this->make_transient( 'changelog', $changelog );
+			$this->set_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -291,7 +291,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/search/repositories' . $meta_query );
 
 			if ( $response ) {
-				$this->make_transient( 'meta', $response );
+				$this->set_transient( 'meta', $response );
 			}
 		}
 
