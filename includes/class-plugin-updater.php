@@ -89,6 +89,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			if ( $response->slug === $plugin->repo ) {
 				$response->slug          = $plugin->slug;
 				$response->plugin_name   = $plugin->name;
+				$response->name          = $plugin->name;
 				$response->author        = $plugin->author;
 				$response->homepage      = $plugin->uri;
 				$response->version       = $plugin->remote_version;
