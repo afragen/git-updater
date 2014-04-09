@@ -9,6 +9,8 @@
 * give Seth Carstens proper credit in README.md
 * move `function make_rating` to `class GitHub_Updater`
 * fix for plugin name in update detail view
+* fix for Bitbucket repo with no branch tag
+* set default timeout to 12 hours, same as WP.org
 
 #### 2.6.1
 

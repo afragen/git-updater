@@ -127,7 +127,7 @@ Regrettably, I still get an error when trying to download a Bitbucket private re
 
 ## Deleting Transients
 
-If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the next check will query the API again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.
+If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.
 
 ## Issues
 
