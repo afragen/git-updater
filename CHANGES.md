@@ -11,6 +11,7 @@
 * fix for plugin name in update detail view
 * fix for Bitbucket repo with no branch tag
 * set default timeout to 12 hours, same as WP.org
+* fix for 3.9 setting theme update details to display:none;
 
 #### 2.6.3
 

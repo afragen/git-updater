@@ -133,7 +133,16 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->num_ratings  = $theme->num_ratings;
 			}
 		}
+		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
 		return $response;
+	}
+
+	/**
+	 * Fix for new issue in 3.9 :-(
+	 */
+	public function fix_display_none_in_themes_api()
+	{
+		echo '<style> #theme-installer div.install-theme-info { display: block !important; }  </style>';
 	}
 
 	/**
@@ -148,7 +157,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$themes_allowedtags = array('a' => array('href' => array(),'title' => array()),'abbr' => array('title' => array()),'acronym' => array('title' => array()),'code' => array(),'em' => array(),'strong' => array());
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
 		$wp_list_table      = _get_list_table('WP_MS_Themes_List_Table');
-		$details_url        = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
+		$install_url        = self_admin_url( "theme-install.php" );
+		$details_url = add_query_arg( array( 'tab' => 'theme-information', 'theme' => $theme_key, 'TB_iframe' => 'true', 'width' => 270, 'height' => 400), $install_url );
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[$theme_key]['rollback'];
