@@ -12,6 +12,10 @@
 * fix for Bitbucket repo with no branch tag
 * set default timeout to 12 hours, same as WP.org
 
+#### 2.6.3
+
+ * quick error checking fix for `wp_remote_get` error to wordpress.org API - thanks @deckerweb
+
 #### 2.6.1
 
 * fixed CHANGES.md for GFM strike-through
