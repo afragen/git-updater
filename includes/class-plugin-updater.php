@@ -33,6 +33,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		$this->config = $this->get_plugin_meta();
 		
 		if ( empty( $this->config ) ) { return false; }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'plugins' ); }
 
 		foreach ( (array) $this->config as $plugin ) {
 			switch( $plugin->type ) {
@@ -55,7 +56,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			}
 		}
 
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients(); }
+		$this->make_force_check_transient( 'plugins' );
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );

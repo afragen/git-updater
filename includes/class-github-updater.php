@@ -470,14 +470,30 @@ class GitHub_Updater {
 	 *
 	 * @return bool
 	 */
-	protected function delete_all_transients() {
-		foreach ( self::$transients as $transient ) {
+	protected function delete_all_transients( $type ) {
+		$transients = get_site_transient( 'ghu-' . $type );
+		if ( ! $transients ) { return false; }
+
+		foreach ( $transients as $transient ) {
 			delete_site_transient( $transient );
-			$key = array_search( $transient, self::$transients );
-			unset( self::$transients[ $key ] );
+			$key = array_search( $transient, $transients );
+			unset( $transients[ $key ] );
 		}
 		return true;
 	}
+
+
+	/**
+	 * Create transient of $type transients for force-check
+	 *
+	 * @param $type
+	 */
+	protected function make_force_check_transient( $type ) {
+		delete_site_transient( 'ghu-' . $type );
+		set_site_transient( 'ghu-' . $type , self::$transients, 12 * HOUR_IN_SECONDS );
+		self::$transients = array();
+	}
+
 
 	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings

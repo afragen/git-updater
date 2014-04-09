@@ -43,6 +43,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced themes
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) { return false; }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'themes' ); }
 
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
@@ -88,7 +89,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		}
 
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients(); }
+		$this->make_force_check_transient( 'themes' );
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
