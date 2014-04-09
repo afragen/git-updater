@@ -105,7 +105,10 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
 
-		if ( ! $response && isset( $this->type->branch ) ) {
+		if ( ! $response ) {
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = $this->get_default_branch( $response );
+			}
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
