@@ -25,7 +25,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 4;
+		self::$hours = 12;
 	}
 
 	/**
