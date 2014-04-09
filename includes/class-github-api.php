@@ -242,7 +242,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Uses a transient to limit calls to the API.
 	 *
 	 * @since 1.9.0
-	 * @return base64 decoded CHANGES.md or false
+	 * @param $changes
+	 *
+	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {

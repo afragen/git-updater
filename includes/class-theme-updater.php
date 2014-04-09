@@ -34,7 +34,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $config
 	 */
 	public function __construct() {
 
@@ -193,9 +192,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Remove default after_theme_row_$stylesheet
 	 *
 	 * @since 2.2.1
-	 *
 	 * @author @grappler
-	 * @param string
+	 * @param $theme_key
+	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
 
@@ -211,9 +210,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Call update theme messaging if needed
 	 *
 	 * @since 2.4.0
-	 *
 	 * @author Seth Carstens
-	 * @return html
+	 * @param $prepared_themes
+	 *
+	 * @return mixed
 	 */
 	public function customize_theme_update_html($prepared_themes) {
 		foreach ( (array) $this->config as $theme ) {

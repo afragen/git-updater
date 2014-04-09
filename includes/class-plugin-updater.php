@@ -23,7 +23,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $config
 	 */
 	public function __construct() {
 
@@ -68,6 +67,11 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
 	 * @since 2.0.0
+	 * @param $false
+	 * @param $action
+	 * @param $response
+	 *
+	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
 		if ( ! ( 'plugin_information' === $action ) ) { return $false; }
@@ -111,10 +115,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object $transient Original transient.
-	 * @param stdClass plugin data
+	 * @param $transient
 	 *
-	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
+	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
 		if ( empty( $transient->checked ) ) {

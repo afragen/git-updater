@@ -54,6 +54,9 @@ class GitHub_Updater {
 	 * Add extra header to get_plugins();
 	 *
 	 * @since 1.0.0
+	 * @param $extra_headers
+	 *
+	 * @return array
 	 */
 	public function add_plugin_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
@@ -69,6 +72,7 @@ class GitHub_Updater {
 	 * Add extra headers to wp_get_themes()
 	 *
 	 * @since 1.0.0
+	 * @param $extra_headers
 	 *
 	 * @return array
 	 */
@@ -392,9 +396,10 @@ class GitHub_Updater {
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 *
-	 * @param array $args Existing HTTP Request arguments
+	 * @param      $args
+	 * @param null $type
 	 *
-	 * @return mixed Amended HTTP Request arguments
+	 * @return mixed
 	 */
 	public function maybe_authenticate_http( $args, $type=null ) {
 		$username = null;
@@ -461,6 +466,8 @@ class GitHub_Updater {
 	/**
 	 * Delete all transients from array of transient ids
 	 *
+	 * @param $type
+	 *
 	 * @return bool
 	 */
 	protected function delete_all_transients() {
@@ -477,7 +484,9 @@ class GitHub_Updater {
 	 * I'm really just making this up, more based upon popularity
 	 *
 	 * @since 2.2.0
-	 * @return integer
+	 * @param $repo_meta
+	 *
+	 * @return float|int
 	 */
 	protected function make_rating( $repo_meta ) {
 		$watchers    = ( empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers );
