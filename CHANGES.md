@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.6.3
+
+* quick error checking fix for `wp_remote_get` error to wordpress.org API - thanks @deckerweb
+
 #### 2.6.1
 
 * fixed CHANGES.md for GFM strikethrough
