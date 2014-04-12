@@ -34,7 +34,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $config
 	 */
 	public function __construct() {
 
@@ -44,6 +43,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced themes
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) { return false; }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'themes' ); }
 
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
@@ -89,6 +89,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 		}
 
+		$this->make_force_check_transient( 'themes' );
+
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
@@ -113,6 +115,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			return $false;
 		}
 
+		// Early return $false for adding themes from repo
+		if ( isset( $response->fields ) && ! $response->fields['sections'] ) { return $false; }
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( $response->slug === $theme->repo ) {
 				$response->slug         = $theme->repo;
@@ -122,7 +127,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->sections     = $theme->sections;
 				$response->description  = implode( "\n", $theme->sections );
 				$response->author       = $theme->author;
-				$response->preview_url  = $theme->sections['changelog'];
+				$response->preview_url  = $theme->theme_uri;
 				$response->requires     = $theme->requires;
 				$response->tested       = $theme->tested;
 				$response->downloaded   = $theme->downloaded;
@@ -131,7 +136,16 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->num_ratings  = $theme->num_ratings;
 			}
 		}
+		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
 		return $response;
+	}
+
+	/**
+	 * Fix for new issue in 3.9 :-(
+	 */
+	public function fix_display_none_in_themes_api()
+	{
+		echo '<style> #theme-installer div.install-theme-info { display: block !important; }  </style>';
 	}
 
 	/**
@@ -146,7 +160,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		$themes_allowedtags = array('a' => array('href' => array(),'title' => array()),'abbr' => array('title' => array()),'acronym' => array('title' => array()),'code' => array(),'em' => array(),'strong' => array());
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
 		$wp_list_table      = _get_list_table('WP_MS_Themes_List_Table');
-		$details_url        = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme_key&TB_iframe=true&width=270&height=400" );
+		$install_url        = self_admin_url( "theme-install.php" );
+		$details_url = add_query_arg( array( 'tab' => 'theme-information', 'theme' => $theme_key, 'TB_iframe' => 'true', 'width' => 270, 'height' => 400), $install_url );
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[$theme_key]['rollback'];
@@ -191,9 +206,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Remove default after_theme_row_$stylesheet
 	 *
 	 * @since 2.2.1
-	 *
 	 * @author @grappler
-	 * @param string
+	 * @param $theme_key
+	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
 
@@ -209,9 +224,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Call update theme messaging if needed
 	 *
 	 * @since 2.4.0
-	 *
 	 * @author Seth Carstens
-	 * @return html
+	 * @param $prepared_themes
+	 *
+	 * @return mixed
 	 */
 	public function customize_theme_update_html($prepared_themes) {
 		foreach ( (array) $this->config as $theme ) {

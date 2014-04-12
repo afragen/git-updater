@@ -23,7 +23,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $config
 	 */
 	public function __construct() {
 
@@ -34,6 +33,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		$this->config = $this->get_plugin_meta();
 		
 		if ( empty( $this->config ) ) { return false; }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'plugins' ); }
 
 		foreach ( (array) $this->config as $plugin ) {
 			switch( $plugin->type ) {
@@ -56,6 +56,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			}
 		}
 
+		$this->make_force_check_transient( 'plugins' );
+
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
@@ -66,6 +68,11 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
 	 * @since 2.0.0
+	 * @param $false
+	 * @param $action
+	 * @param $response
+	 *
+	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
 		if ( ! ( 'plugin_information' === $action ) ) { return $false; }
@@ -87,8 +94,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $response->slug === $plugin->repo ) {
-				$response->slug          = $plugin->slug;
+				$response->slug          = $plugin->repo;
 				$response->plugin_name   = $plugin->name;
+				$response->name          = $plugin->name;
 				$response->author        = $plugin->author;
 				$response->homepage      = $plugin->uri;
 				$response->version       = $plugin->remote_version;
@@ -99,7 +107,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				$response->last_updated  = $plugin->last_updated;
 				$response->rating        = $plugin->rating;
 				$response->num_ratings   = $plugin->num_ratings;
-				//$response->download_link = $plugin->download_link;
+				$response->download_link = $plugin->download_link;
 			}
 		}
 		return $response;
@@ -110,10 +118,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object $transient Original transient.
-	 * @param stdClass plugin data
+	 * @param $transient
 	 *
-	 * @return $transient If all goes well, an updated transient that may include details of a plugin update.
+	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
 		if ( empty( $transient->checked ) ) {

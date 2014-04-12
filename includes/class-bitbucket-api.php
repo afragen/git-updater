@@ -25,11 +25,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 4;
-
-		if ( ! empty( $this->type->timeout ) ) {
-			self::$hours = (float) $this->type->timeout;
-		}
+		self::$hours = 12;
 
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
@@ -46,11 +42,12 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
-		$response = wp_remote_get( $this->get_api_url( $url ) );
+		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$code          = wp_remote_retrieve_response_code( $response );
+		$allowed_codes = array( 200, 404 );
 
-		if ( is_wp_error( $response ) || ( ( '200' || '404' ) != wp_remote_retrieve_response_code( $response ) ) ) {
-			return false;
-		}
+		if ( is_wp_error( $response ) ) { return false; }
+		if ( ! in_array( $code, $allowed_codes, true ) ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
@@ -106,13 +103,16 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . $file ) );
+		$response = $this->get_transient( $file );
 
-		if ( ! $response && isset( $this->type->branch ) ) {
+		if ( ! $response ) {
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = $this->get_default_branch( $response );
+			}
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . $file ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->set_transient( $file, $response );
 			}
 		}
 
@@ -163,7 +163,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 */
 	public function get_remote_tag() {
 		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
-		$response           = get_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ) );
+		$response           = $this->get_transient( 'tags' );
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
@@ -174,7 +174,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'tags' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->set_transient( 'tags', $response );
 			}
 		}
 
@@ -240,14 +240,16 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Uses a transient to limit calls to the API.
 	 *
 	 * @since 1.9.0
-	 * @return base64 decoded CHANGES.md or false
+	 * @param $changes
+	 *
+	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
 		}
 
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ) );
+		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
@@ -258,15 +260,14 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			}
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'changes' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->set_transient( 'changes', $response );
 			}
 		}
 
 		if ( ! $response ) { return false; }
 		if ( isset( $response->message ) ) { return false; }
 
-		$changelog = '';
-		$changelog = get_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog );
+		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
 			if ( function_exists( 'Markdown' ) ) {
@@ -274,7 +275,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			} else {
 				$changelog = '<pre>' . $response->data . '</pre>';
 			}
-			set_site_transient( 'ghu-' . md5( $this->type->repo . 'changelog' ), $changelog, ( self::$hours * HOUR_IN_SECONDS ) );
+			$this->set_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
@@ -288,13 +289,13 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
-		$response = get_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ) );
+		$response = $this->get_transient( 'meta' );
 
 		if ( ! $response ) {
 			$response = $this->api( '2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
-				set_site_transient( 'ghu-' . md5( $this->type->repo . 'meta' ), $response, ( self::$hours * HOUR_IN_SECONDS ) );
+				$this->set_transient( 'meta', $response );
 			}
 		}
 
@@ -311,29 +312,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
-//		$this->type->rating = $this->make_rating();
-//		$this->type->num_ratings = $this->type->repo_meta->watchers;
-	}
-
-	/**
-	 * Create some sort of rating from 0 to 100 for use in star ratings
-	 * I'm really just making this up, more based upon popularity
-	 *
-	 * @since 2.2.0
-	 * @return integer
-	 */
-	private function make_rating() {
-		$watchers    = $this->type->repo_meta->watchers;
-		$forks       = $this->type->repo_meta->forks;
-		$open_issues = $this->type->repo_meta->open_issues;
-		$score       = $this->type->repo_meta->score; //what is this anyway?
-
-		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
-
-		if ( 100 < $rating ) { return 100; }
-
-		return $rating;
+		$this->type->num_ratings  = $this->type->watchers;
 	}
 
 }

@@ -1,12 +1,27 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.7.0
+
+* created functions for getting and setting transients
+* added deletion of all transients if _force-check_ is used
+* removed `GitHub Timeout` and `Bitbucket Timeout` headers
+* fix for `wp_remote_retrieve_response_code` check
+* give Seth Carstens proper credit in README.md
+* move `function make_rating` to `class GitHub_Updater`
+* fix for plugin name in update detail view
+* fix for Bitbucket repo with no branch tag
+* set default timeout to 12 hours, same as WP.org
+* fix for 3.9 setting theme update details to display:none;
+* fix for error when installing themes from WP.org repo
+* fix for incorrect plugin upgrade link in detail popup
+
 #### 2.6.3
 
-* quick error checking fix for `wp_remote_get` error to wordpress.org API - thanks @deckerweb
+ * quick error checking fix for `wp_remote_get` error to wordpress.org API - thanks @deckerweb
 
 #### 2.6.1
 
-* fixed CHANGES.md for GFM strikethrough
+* fixed CHANGES.md for GFM strike-through
 
 #### 2.6.0
 

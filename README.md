@@ -69,7 +69,7 @@ GitHub Branch:    master
 
 ### Plugins 
 
-There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header.
+There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
 
 ~~~php
 /*
@@ -87,7 +87,7 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Access Token`, `GitHub Branch`, `GitHub Timeout`, `Bitbucket Branch`, and `Bitbucket Timeout` are available but not required.
+Optional headers `GitHub Access Token`, `GitHub Branch`, and `Bitbucket Branch` are available but not required.
 
 ## Tagging
 
@@ -125,9 +125,9 @@ The header should be in the following format: `Bitbucket Plugin URI: https://<us
 
 Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
 
-## Setting Transient Timeout
+## Deleting Transients
 
-The default number of hours for a plugin/theme's transient to expire is 4 hours. You may add an optional header, `GitHub Timeout` or `Bitbucket Timeout` to set a different transient timeout. The header will accept numeric values representing the number of hours for the plugin/theme's transient timeout. These values are floats.
+If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.
 
 ## Issues
 
@@ -145,6 +145,6 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Built by [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones) and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+Built by [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones), [Seth Carstens](https://github.com/scarstens), and [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 
 Includes [Michel Fortin](https://github/com/michelf)'s [PHP-Markdown](https://github.com/michelf/php-markdown) for rendering ChangeLogs.
