@@ -12,6 +12,7 @@
 * fix for Bitbucket repo with no branch tag
 * set default timeout to 12 hours, same as WP.org
 * fix for 3.9 setting theme update details to display:none;
+* fix for error when installing themes from WP.org repo
 
 #### 2.6.3
 

@@ -115,6 +115,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			return $false;
 		}
 
+		// Early return $false for adding themes from repo
+		if ( isset( $response->fields ) && ! $response->fields['sections'] ) { return $false; }
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( $response->slug === $theme->repo ) {
 				$response->slug         = $theme->repo;
@@ -124,7 +127,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->sections     = $theme->sections;
 				$response->description  = implode( "\n", $theme->sections );
 				$response->author       = $theme->author;
-				$response->preview_url  = $theme->sections['changelog'];
+				//$response->preview_url  = $theme->sections['changelog'];
+				$response->preview_url  = $theme->uri;
 				$response->requires     = $theme->requires;
 				$response->tested       = $theme->tested;
 				$response->downloaded   = $theme->downloaded;
