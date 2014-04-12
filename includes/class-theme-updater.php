@@ -127,8 +127,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$response->sections     = $theme->sections;
 				$response->description  = implode( "\n", $theme->sections );
 				$response->author       = $theme->author;
-				//$response->preview_url  = $theme->sections['changelog'];
-				$response->preview_url  = $theme->uri;
+				$response->preview_url  = $theme->theme_uri;
 				$response->requires     = $theme->requires;
 				$response->tested       = $theme->tested;
 				$response->downloaded   = $theme->downloaded;

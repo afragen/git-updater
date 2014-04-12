@@ -248,6 +248,7 @@ class GitHub_Updater {
 						$git_theme['owner']                   = $owner_repo[0];
 						$git_theme['repo']                    = $owner_repo[1];
 						$git_theme['name']                    = $theme->get( 'Name' );
+						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 						$git_theme['author']                  = $theme->get( 'Author' );
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
@@ -279,6 +280,7 @@ class GitHub_Updater {
 						$git_theme['owner']                   = $owner_repo[0];
 						$git_theme['repo']                    = $owner_repo[1];
 						$git_theme['name']                    = $theme->get( 'Name' );
+						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 						$git_theme['author']                  = $theme->get( 'Author' );
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
