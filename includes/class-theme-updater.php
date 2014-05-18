@@ -37,6 +37,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public function __construct() {
 
+		// Early exit if current user can't update themes
+		if ( ! current_user_can( 'update_themes' ) ) { return false; }
+
 		// This MUST come before we get details about the plugins so the headers are correctly retrieved
 		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
 
