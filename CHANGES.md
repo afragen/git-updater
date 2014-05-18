@@ -1,9 +1,5 @@
 ### ChangeLog for GitHub Updater
 
-#### 2.7.1
-
-* early exit if current user can't update plugins/themes
-
 #### 2.7.0
 
 * created functions for getting and setting transients
