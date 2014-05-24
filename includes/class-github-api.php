@@ -247,6 +247,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
+		// early exit if $changes file doesn't exist locally. Saves an API call.
+		if ( ! file_exists( $this->type->local_path . $changes ) ) { return false; }
+
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
 		}
