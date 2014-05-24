@@ -1,5 +1,9 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.7.1
+
+* added early exit if no local `CHANGES.md` file exists. This should save an API call.
+
 #### 2.7.0
 
 * created functions for getting and setting transients
