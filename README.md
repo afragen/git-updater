@@ -1,5 +1,5 @@
 # GitHub Updater
-* Contributors: [afragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
 * Tested up to: 3.9.1
