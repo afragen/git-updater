@@ -9,9 +9,9 @@
  */
 
 /**
- * Get remote data from a GitHub repo.
+ * Get remote data from a Bitbucket repo.
  *
- * @package GitHub_Updater_API
+ * @package GitHub_Updater_Bitbucket_API
  * @author  Andy Fragen
  */
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
