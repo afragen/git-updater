@@ -3,6 +3,7 @@
 #### 2.7.1
 
 * added early exit if no local `CHANGES.md` file exists. This should save an API call.
+* pull update from WP.org if plugin hosted in WP.org and branch is master.
 
 #### 2.7.0
 
