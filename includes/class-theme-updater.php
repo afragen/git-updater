@@ -111,9 +111,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @since 2.0.0
 	 */
 	public function themes_api( $false, $action, $response ) {
-		if ( ! ( 'theme_information' === $action ) ) {
-			return $false;
-		}
+		if ( ! ( 'theme_information' === $action ) ) { return $false; }
 
 		// Early return $false for adding themes from repo
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) { return $false; }
@@ -302,7 +300,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
-
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) { continue; }
 

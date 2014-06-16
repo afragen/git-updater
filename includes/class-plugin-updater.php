@@ -125,9 +125,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
-		}
+		if ( empty( $transient->checked ) ) { return $transient; }
 
 		foreach ( (array) $this->config as $plugin ) {
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
@@ -141,7 +139,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				);
 
 				// if branch is 'master' and plugin is in wp.org repo then pull update from wp.org
-				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) { continue; }
+				if ( isset( $transient->response[ $plugin->slug ]->id ) && 'master' === $plugin->branch ) { continue; }
 
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
