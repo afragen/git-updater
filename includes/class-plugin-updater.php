@@ -92,9 +92,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			$wp_repo = unserialize( $wp_repo_data['body'] );
 			if ( $response->slug === $plugin->repo ) {
-				if ( is_object( $wp_repo ) && 'master' === $plugin->branch ) {
+				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
 					return $response;
 				}
 				$response->slug          = $plugin->repo;
