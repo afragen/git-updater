@@ -134,6 +134,12 @@ Regrettably, I still get an error when trying to download a Bitbucket private re
 
 If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.
 
+## Hosting Plugin in WP.org Repository
+
+If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
+
+The same applies for Bitbucket hosted plugins.
+
 ## Issues
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
