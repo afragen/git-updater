@@ -9,9 +9,9 @@
  */
 
 /**
- * Get remote data from a GitHub repo.
+ * Get remote data from a Bitbucket repo.
  *
- * @package GitHub_Updater_API
+ * @package GitHub_Updater_Bitbucket_API
  * @author  Andy Fragen
  */
 class GitHub_Updater_BitBucket_API extends GitHub_Updater {
@@ -245,6 +245,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
+		// early exit if $changes file doesn't exist locally. Saves an API call.
+		if ( ! file_exists( $this->type->local_path . $changes ) ) { return false; }
+
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
 		}

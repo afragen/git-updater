@@ -148,6 +148,7 @@ class GitHub_Updater {
 					$owner_repo               = explode( '/', $owner_repo );
 					$git_repo['owner']        = $owner_repo[0];
 					$git_repo['repo']         = $owner_repo[1];
+					$git_repo['local_path']   = WP_PLUGIN_DIR . '/' . $git_repo['repo'] . '/';
 					break;
 				case 'GitHub Branch':
 					if ( empty( $headers['GitHub Branch'] ) ) { break; }
@@ -165,20 +166,21 @@ class GitHub_Updater {
 			switch( $value ) {
 				case 'Bitbucket Plugin URI':
 					if ( empty( $headers['Bitbucket Plugin URI'] ) ) { break; }
-					$git_repo['type']    = 'bitbucket_plugin';
+					$git_repo['type']       = 'bitbucket_plugin';
 
-					$git_repo['user']    = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
-					$git_repo['pass']    = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
-					$owner_repo          = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
-					$owner_repo          = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri']     = 'https://bitbucket.org/' . $owner_repo;
-					$owner_repo          = explode( '/', $owner_repo );
-					$git_repo['owner']   = $owner_repo[0];
-					$git_repo['repo']    = $owner_repo[1];
+					$git_repo['user']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
+					$git_repo['pass']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
+					$owner_repo             = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
+					$owner_repo             = trim( $owner_repo, '/' );  // strip surrounding slashes
+					$git_repo['uri']        = 'https://bitbucket.org/' . $owner_repo;
+					$owner_repo             = explode( '/', $owner_repo );
+					$git_repo['owner']      = $owner_repo[0];
+					$git_repo['repo']       = $owner_repo[1];
+					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) { break; }
-					$git_repo['branch']  = $headers['Bitbucket Branch'];
+					$git_repo['branch']     = $headers['Bitbucket Branch'];
 					break;
 			}
 		}
@@ -252,6 +254,7 @@ class GitHub_Updater {
 						$git_theme['author']                  = $theme->get( 'Author' );
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
+						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 						break;
 					case 'GitHub Branch':
 						if ( empty( $github_branch ) ) { break; }
@@ -284,6 +287,7 @@ class GitHub_Updater {
 						$git_theme['author']                  = $theme->get( 'Author' );
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
+						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) { break; }
