@@ -27,9 +27,41 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Call the API and return a json decoded body.
+	 * Add extra headers via filter hooks
+	 */
+	public static function add_headers() {
+		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_GitHub_API', 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_GitHub_API', 'add_theme_headers' ) );
+	}
+
+	/**
+	 * Add extra headers to get_plugins();
 	 *
-	 * @since 1.0.0
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_plugin_headers( $extra_headers ) {
+		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		return $extra_headers;
+	}
+
+	/**
+	 * Add extra headers to wp_get_themes()
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_theme_headers( $extra_headers ) {
+		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		return $extra_headers;
+	}
+
+	/**
+	 * Call the API and return a json decoded body.
 	 *
 	 * @see http://developer.github.com/v3/
 	 *

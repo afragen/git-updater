@@ -33,8 +33,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 */
 	public function __construct() {
 
-		// This MUST come before we get details about the plugins so the headers are correctly retrieved
-		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
+		// This MUST come before we get details about the themes so the headers are correctly retrieved
+		GitHub_Updater_GitHub_API::add_headers();
+		GitHub_Updater_BitBucket_API::add_headers();
 
 		// Get details of GitHub-sourced themes
 		$this->config = $this->get_theme_meta();
@@ -105,7 +106,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 */
 	public function themes_api( $false, $action, $response ) {
-		if ( ! ( 'theme_information' === $action ) ) { return $false; }
+		if ( ! ( 'theme_information' === $action ) ) {
+			return $false;
+		}
 
 		// Early return $false for adding themes from repo
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) { return $false; }

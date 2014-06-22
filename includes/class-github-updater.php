@@ -47,40 +47,11 @@ class GitHub_Updater {
 	protected static $transients = array();
 
 	/**
-	 * Add extra header to get_plugins();
+	 * Variable for holding extra theme and plugin headers
 	 *
-	 * @since 1.0.0
-	 * @param $extra_headers
-	 *
-	 * @return array
+	 * @var array
 	 */
-	public function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers = array(
-			'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token',
-			'Bitbucket Plugin URI', 'Bitbucket Branch',
-			);
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
-	}
-
-	/**
-	 * Add extra headers to wp_get_themes()
-	 *
-	 * @since 1.0.0
-	 * @param $extra_headers
-	 *
-	 * @return array
-	 */
-	public function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array(
-			'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token',
-			'Bitbucket Theme URI', 'Bitbucket Branch',
-			);
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
-	}
+	protected static $extra_headers = array();
 
 	/**
 	 * Get details of GitHub-sourced plugins from those that are installed.
@@ -126,9 +97,8 @@ class GitHub_Updater {
 	*/
 	protected function get_local_plugin_meta( $headers ) {
 		$git_repo      = array();
-		$extra_headers = $this->add_plugin_headers( null );
 
-		foreach ( (array) $extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $key => $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) { continue; }
 			switch( $value ) {
 				case 'GitHub Plugin URI':
@@ -154,7 +124,7 @@ class GitHub_Updater {
 			}
 		}
 
-		foreach ( (array) $extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $key => $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'bitbucket_plugin' !== $git_repo['type'] ) { continue; }
 			switch( $value ) {
 				case 'Bitbucket Plugin URI':
@@ -183,7 +153,7 @@ class GitHub_Updater {
 	/**
 	* Get array of all themes in multisite
 	*
-	* wp_get_themes doesn't seem to work under network activation in the same way as in a single install.
+	* wp_get_themes does not seem to work under network activation in the same way as in a single install.
 	* http://core.trac.wordpress.org/changeset/20152
 	*
 	* @return array
@@ -218,14 +188,13 @@ class GitHub_Updater {
 			$github_branch     = $theme->get( 'GitHub Branch' );
 			$github_token      = $theme->get( 'GitHub Access Token' );
 			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
-		$extra_headers = $this->add_theme_headers( null );
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
 
 			if ( empty( $github_uri ) && empty( $bitbucket_uri ) ) {
 				continue;
 			}
 
-			foreach ( (array) $extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $key => $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) { continue; }
 				switch( $value ) {
 					case 'GitHub Theme URI':
@@ -256,7 +225,7 @@ class GitHub_Updater {
 				}
 			}
 
-			foreach ( (array) $extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $key => $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'bitbucket_theme' !== $git_theme['type'] ) { continue; }
 				switch( $value ) {
 					case 'Bitbucket Theme URI':
