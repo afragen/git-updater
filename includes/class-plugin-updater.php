@@ -20,9 +20,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 1.0.0
-	 *
 	 */
 	public function __construct() {
 
@@ -67,7 +64,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @since 2.0.0
 	 * @param $false
 	 * @param $action
 	 * @param $response
@@ -117,8 +113,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param $transient
 	 *

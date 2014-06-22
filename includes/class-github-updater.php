@@ -21,8 +21,6 @@ class GitHub_Updater {
 	/**
 	 * Store details of all repositories that are installed.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @var stdClass
 	 */
 	protected $config;
@@ -30,7 +28,6 @@ class GitHub_Updater {
 	/**
 	 * Class Object for API
 	 *
-	 * @since 2.1.0
 	 * @var stdClass
 	 */
  	protected $repo_api;
@@ -38,7 +35,6 @@ class GitHub_Updater {
 	/**
 	 * Variable for setting update transient hours
 	 *
-	 * @since 2.x.x
 	 * @var integer
 	 */
 	protected static $hours;
@@ -89,8 +85,6 @@ class GitHub_Updater {
 	/**
 	 * Get details of GitHub-sourced plugins from those that are installed.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
@@ -122,7 +116,6 @@ class GitHub_Updater {
 	/**
 	* Parse extra headers to determine repo type and populate info
 	*
-	* @since 1.6.0
 	* @param array of extra headers
 	* @return array of repo information
 	*
@@ -193,8 +186,6 @@ class GitHub_Updater {
 	* wp_get_themes doesn't seem to work under network activation in the same way as in a single install.
 	* http://core.trac.wordpress.org/changeset/20152
 	*
-	* @since 1.7.0
-	*
 	* @return array
 	*/
 	private function multisite_get_themes() {
@@ -212,13 +203,10 @@ class GitHub_Updater {
 	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
-	 *
-	 * @since 1.0.0
 	 */
 	protected function get_theme_meta() {
 		$git_themes    = array();
 		$themes        = wp_get_themes();
-		$extra_headers = $this->add_theme_headers( null );
 
 		if ( is_multisite() ) {
 			$themes = $this->multisite_get_themes();
@@ -230,6 +218,7 @@ class GitHub_Updater {
 			$github_branch     = $theme->get( 'GitHub Branch' );
 			$github_token      = $theme->get( 'GitHub Access Token' );
 			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
+		$extra_headers = $this->add_theme_headers( null );
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
 
 			if ( empty( $github_uri ) && empty( $bitbucket_uri ) ) {
@@ -303,8 +292,6 @@ class GitHub_Updater {
 
 	/**
 	 * Set default values for plugin/theme
-	 *
-	 * @since 1.9.0
 	 */
 	protected function set_defaults( $type ) {
 		$this->$type->remote_version        = '0.0.0';
@@ -331,8 +318,6 @@ class GitHub_Updater {
 	 * Rename the zip folder to be the same as the existing repository folder.
 	 *
 	 * Github delivers zip files as <Repo>-<Branch>.zip
-	 *
-	 * @since 1.0.0
 	 *
 	 * @global WP_Filesystem $wp_filesystem
 	 *
@@ -387,8 +372,6 @@ class GitHub_Updater {
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param  array $args Existing HTTP Request arguments.
 	 *
@@ -505,7 +488,6 @@ class GitHub_Updater {
 	 * Create some sort of rating from 0 to 100 for use in star ratings
 	 * I'm really just making this up, more based upon popularity
 	 *
-	 * @since 2.2.0
 	 * @param $repo_meta
 	 *
 	 * @return float|int

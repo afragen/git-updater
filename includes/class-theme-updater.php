@@ -24,16 +24,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Rollback variable
 	 *
-	 * @since 2.4.0
 	 * @var version number
 	 */
 	protected $tag = false;
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 1.0.0
-	 *
 	 */
 	public function __construct() {
 
@@ -107,8 +103,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
-	 *
-	 * @since 2.0.0
 	 */
 	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) { return $false; }
@@ -150,7 +144,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
 	 * @author Seth Carstens
-	 * @since 2.2.0
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 
@@ -203,7 +196,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Remove default after_theme_row_$stylesheet
 	 *
-	 * @since 2.2.1
 	 * @author @grappler
 	 * @param $theme_key
 	 * @param $theme
@@ -221,7 +213,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Call update theme messaging if needed
 	 *
-	 * @since 2.4.0
 	 * @author Seth Carstens
 	 * @param $prepared_themes
 	 *
@@ -243,8 +234,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Create theme update messaging
 	 * 
-	 * @since 2.4.0
-	 *
 	 * @author Seth Carstens
 	 * @param object $theme
 	 * @return html
@@ -290,16 +279,15 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update from GitHub.
+	 * Hook into pre_set_site_transient_update_themes to update
 	 *
 	 * Finds newest tag and compares to current tag
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param array $data
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ){
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) { continue; }
 

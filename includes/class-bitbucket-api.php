@@ -19,8 +19,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	/**
 	 * Constructor.
 	 *
-	 * @since 2.1.0
-	 *
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
@@ -55,8 +53,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	/**
 	 * Return API url.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @param string $endpoint
 	 *
 	 * @return string
@@ -69,8 +65,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @since 1.5.0
 		 *
 		 * @param array $segments List of segments.
 		 */
@@ -99,8 +93,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Read the remote file.
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
@@ -137,7 +129,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * If we've had to call this method, we know that a branch header has not been provided.
 	 * As such the remote info was retrieved with a ?ref=... query argument.
 	 *
-	 * @since 1.5.0
 	 * @param array API object
 	 *
 	 * @return string Default branch name.
@@ -156,8 +147,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Parse the remote info to find most recent tag if tags exist
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.7.0
 	 *
 	 * @return string latest tag.
 	 */
@@ -210,8 +199,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	/**
 	 * Construct $download_link
 	 *
-	 * @since 1.9.0
-	 *
 	 * @param boolean $rollback for theme rollback
 	 * 
 	 * @return URI
@@ -239,7 +226,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 *
 	 * Uses a transient to limit calls to the API.
 	 *
-	 * @since 1.9.0
 	 * @param $changes
 	 *
 	 * @return bool
@@ -288,7 +274,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Read the repository meta from API
 	 *
 	 * Uses a transient to limit calls to the API
-	 * @since 2.2.0
+	 *
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
@@ -311,8 +297,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 	/**
 	 * Add remote data to type object
-	 *
-	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
