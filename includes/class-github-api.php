@@ -11,7 +11,7 @@
 /**
  * Get remote data from a GitHub repo.
  *
- * @package GitHub_Updater_API
+ * @package GitHub_Updater_GitHub_API
  * @author  Andy Fragen
  */
 class GitHub_Updater_GitHub_API extends GitHub_Updater {
@@ -41,9 +41,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
+		$ghu_extra_headers     = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 		return $extra_headers;
 	}
 
@@ -54,9 +54,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
+		$ghu_extra_headers     = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 		return $extra_headers;
 	}
 

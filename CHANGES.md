@@ -1,5 +1,10 @@
 ### ChangeLog for GitHub Updater
 
+#### 2.8.0
+
+* refactor API classes and `class GitHub_Updater` to add extra headers from API class. This should allow for better abstraction. Just need to call `GitHub_Updater_{repo}_API::add_headers()` in `class GitHub_Plugin_Updater` and `class GitHub_ Theme_Updater`.
+* remove @since tags
+
 #### 2.7.1
 
 * added early exit if no local `CHANGES.md` file exists. This should save an API call.
@@ -16,7 +21,7 @@
 * fix for plugin name in update detail view
 * fix for Bitbucket repo with no branch tag
 * set default timeout to 12 hours, same as WP.org
-* fix for 3.9 setting theme update details to display:none;
+* fix for 3.9 setting theme update details to `display:none;`
 * fix for error when installing themes from WP.org repo
 * fix for incorrect plugin upgrade link in detail popup
 

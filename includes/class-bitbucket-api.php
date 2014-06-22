@@ -43,9 +43,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'Bitbucket Plugin URI', 'Bitbucket Branch' );
+		$ghu_extra_headers     = array( 'Bitbucket Plugin URI', 'Bitbucket Branch' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 		return $extra_headers;
 	}
 
@@ -56,9 +56,9 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array( 'Bitbucket Theme URI', 'Bitbucket Branch' );
+		$ghu_extra_headers     = array( 'Bitbucket Theme URI', 'Bitbucket Branch' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers     = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 		return $extra_headers;
 	}
 

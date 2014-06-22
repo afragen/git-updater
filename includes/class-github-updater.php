@@ -54,7 +54,7 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 	/**
-	 * Get details of GitHub-sourced plugins from those that are installed.
+	 * Get details of Git-sourced plugins from those that are installed.
 	 *
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
