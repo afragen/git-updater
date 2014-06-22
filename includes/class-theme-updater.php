@@ -40,7 +40,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced themes
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) { return false; }
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'themes' ); }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+			$this->delete_all_transients( 'themes' );
+		}
 
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
@@ -106,9 +108,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 */
 	public function themes_api( $false, $action, $response ) {
-		if ( ! ( 'theme_information' === $action ) ) {
-			return $false;
-		}
+		if ( ! ( 'theme_information' === $action ) ) { return $false; }
 
 		// Early return $false for adding themes from repo
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) { return $false; }

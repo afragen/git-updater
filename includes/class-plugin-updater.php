@@ -31,7 +31,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		$this->config = $this->get_plugin_meta();
 		
 		if ( empty( $this->config ) ) { return false; }
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'plugins' ); }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+			$this->delete_all_transients( 'plugins' );
+		}
 
 		foreach ( (array) $this->config as $plugin ) {
 			switch( $plugin->type ) {
@@ -90,9 +92,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $response->slug === $plugin->repo ) {
-				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
-					return $response;
-				}
+				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) { return $response; }
+
 				$response->slug          = $plugin->repo;
 				$response->plugin_name   = $plugin->name;
 				$response->name          = $plugin->name;
@@ -120,9 +121,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
-		}
+		if ( empty( $transient->checked ) ) { return $transient; }
 
 		foreach ( (array) $this->config as $plugin ) {
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
