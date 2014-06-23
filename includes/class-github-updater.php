@@ -352,43 +352,6 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 *
-	 * @param      $args
-	 * @param null $type
-	 *
-	 * @return mixed
-	 */
-	public function maybe_authenticate_http( $args, $type=null ) {
-		$username = null;
-		$password = null;
-
-		$ptype = explode( '/', parse_url( $type, PHP_URL_PATH ) );
-		$mybase = basename( $type, ".php" );
-		$repo = $this->type->repo;
-		$ext = pathinfo( basename( $type) , PATHINFO_EXTENSION);
-
-		if ( isset( $args['headers'] ) ) { unset( $args['headers']['Authorization'] ); }
-		//if ( ! empty( $this->type->access_token ) ) { return $args; }
-		//if ( 'zip' === pathinfo( basename( $type ) , PATHINFO_EXTENSION ) ) { return $args; }
-		if ( ! isset( $this->type ) ) { return $args; }
-		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) { return $args; }
-		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
-
-		if ( $this->type->user && $this->type->pass ) {
-			$username = $this->type->user;
-			$password = $this->type->pass;
-		}
-
-		if ( $username && $password ) {
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
-
-		return $args;
-	}
-
-
-	/**
 	 * Used to set_site_transient and checks/stores transient id in array
 	 *
 	 * @param $id
