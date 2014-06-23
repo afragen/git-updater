@@ -138,8 +138,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Fix for new issue in 3.9 :-(
 	 */
-	public function fix_display_none_in_themes_api()
-	{
+	public function fix_display_none_in_themes_api() {
 		echo '<style> #theme-installer div.install-theme-info { display: block !important; }  </style>';
 	}
 
@@ -204,7 +203,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-
 		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
@@ -241,7 +239,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @param object $theme
 	 * @return html
 	 */
-	private function append_theme_actions_content( $theme ){
+	private function append_theme_actions_content( $theme ) {
 
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
 		$theme_update_transient = get_site_transient( 'update_themes' );
@@ -289,7 +287,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @param array $data
 	 * @return array|object
 	 */
-	public function pre_set_site_transient_update_themes( $data ){
+	public function pre_set_site_transient_update_themes( $data ) {
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) { continue; }
