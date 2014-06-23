@@ -171,7 +171,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		}
 
 		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
-		if ( ! $response ) { return 'master'; }
+		if ( ! $response || ! isset( $this->type->branch ) ) { return 'master'; }
 
 	}
 
