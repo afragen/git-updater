@@ -14,7 +14,7 @@
  * @package GitHub_Updater_Bitbucket_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_BitBucket_API extends GitHub_Updater {
+class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 	/**
 	 * Constructor.
@@ -64,8 +64,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 	/**
 	 * Call the API and return a json decoded body.
-	 *
-	 * @see http://developer.github.com/v3/
 	 *
 	 * @param string $url
 	 *
@@ -170,7 +168,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return $this->type->branch;
 		}
 
-		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
+		// If we can't contact Bitbucket API, then assume a sensible default in case the non-API part of Bitbucket is working.
 		if ( ! $response || ! isset( $this->type->branch ) ) { return 'master'; }
 
 	}
