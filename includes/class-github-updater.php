@@ -81,6 +81,7 @@ class GitHub_Updater {
 			$git_repo['sections']['description'] = $plugin_data['Description'];
 			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
 		}
+
 		return $git_plugins;
 	}
 
@@ -147,6 +148,7 @@ class GitHub_Updater {
 					break;
 			}
 		}
+
 		return $git_repo;
 	}
 
@@ -256,6 +258,7 @@ class GitHub_Updater {
 
 			$git_themes[ $theme->stylesheet ] = (object) $git_theme;
 		}
+
 		return $git_themes;
 	}
 
@@ -365,6 +368,7 @@ class GitHub_Updater {
 			self::$transients[] = $transient;
 		}
 		set_site_transient( $transient, $response, ( self::$hours * HOUR_IN_SECONDS ) );
+
 		return true;
 	}
 
@@ -380,6 +384,7 @@ class GitHub_Updater {
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
 		}
+
 		return get_site_transient( $transient );
 	}
 
@@ -400,6 +405,7 @@ class GitHub_Updater {
 			$key = array_search( $transient, $transients );
 			unset( $transients[ $key ] );
 		}
+
 		return true;
 	}
 

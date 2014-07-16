@@ -46,6 +46,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$ghu_extra_headers     = array( 'Bitbucket Plugin URI', 'Bitbucket Branch' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
 		return $extra_headers;
 	}
 
@@ -59,6 +60,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$ghu_extra_headers     = array( 'Bitbucket Theme URI', 'Bitbucket Branch' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
 		return $extra_headers;
 	}
 
@@ -170,7 +172,6 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 		// If we can't contact Bitbucket API, then assume a sensible default in case the non-API part of Bitbucket is working.
 		if ( ! $response || ! isset( $this->type->branch ) ) { return 'master'; }
-
 	}
 
 	/**

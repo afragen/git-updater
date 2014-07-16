@@ -110,6 +110,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				$response->download_link = $plugin->download_link;
 			}
 		}
+
 		return $response;
 	}
 
@@ -135,11 +136,14 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 				);
 
 				// if branch is 'master' and plugin is in wp.org repo then pull update from wp.org
-				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) { continue; }
+				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
+					continue;
+				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
+
 		return $transient;
 	}
 

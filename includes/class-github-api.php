@@ -44,6 +44,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$ghu_extra_headers     = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
 		return $extra_headers;
 	}
 
@@ -57,6 +58,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$ghu_extra_headers     = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
 		return $extra_headers;
 	}
 
@@ -171,6 +173,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
 		$components = parse_url( $response->url, PHP_URL_QUERY );
 		parse_str( $components );
+
 		return $ref;
 	}
 

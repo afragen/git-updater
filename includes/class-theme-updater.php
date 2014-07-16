@@ -132,6 +132,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 		}
 		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
+
 		return $response;
 	}
 
@@ -229,6 +230,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 		}
+
 		return $prepared_themes;
 	}
 
@@ -307,6 +309,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
+
 		return $data;
 	}
 
