@@ -77,7 +77,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) { return false; }
-		if ( ! in_array( $code, $allowed_codes, true ) ) { return false; }
+		if ( ! in_array( $code, $allowed_codes, false ) ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
