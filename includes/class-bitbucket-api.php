@@ -14,12 +14,10 @@
  * @package GitHub_Updater_Bitbucket_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_BitBucket_API extends GitHub_Updater {
+class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 2.1.0
 	 *
 	 * @param string $type
 	 */
@@ -31,11 +29,43 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	}
 
 	/**
+	 * Add extra headers via filter hooks
+	 */
+	public static function add_headers() {
+		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_theme_headers' ) );
+	}
+
+	/**
+	 * Add extra header to get_plugins();
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_plugin_headers( $extra_headers ) {
+		$ghu_extra_headers     = array( 'Bitbucket Plugin URI', 'Bitbucket Branch' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
+	 * Add extra headers to wp_get_themes()
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_theme_headers( $extra_headers ) {
+		$ghu_extra_headers     = array( 'Bitbucket Theme URI', 'Bitbucket Branch' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
 	 * Call the API and return a json decoded body.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @see http://developer.github.com/v3/
 	 *
 	 * @param string $url
 	 *
@@ -47,15 +77,13 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) { return false; }
-		if ( ! in_array( $code, $allowed_codes, true ) ) { return false; }
+		if ( ! in_array( $code, $allowed_codes, false ) ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
 	/**
 	 * Return API url.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param string $endpoint
 	 *
@@ -69,8 +97,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @since 1.5.0
 		 *
 		 * @param array $segments List of segments.
 		 */
@@ -99,8 +125,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Read the remote file.
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
@@ -137,7 +161,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * If we've had to call this method, we know that a branch header has not been provided.
 	 * As such the remote info was retrieved with a ?ref=... query argument.
 	 *
-	 * @since 1.5.0
 	 * @param array API object
 	 *
 	 * @return string Default branch name.
@@ -147,17 +170,14 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 			return $this->type->branch;
 		}
 
-		// If we can't contact BitBucket API, then assume a sensible default in case the non-API part of BitBucket is working.
-		if ( ! $response ) { return 'master'; }
-
+		// If we can't contact Bitbucket API, then assume a sensible default in case the non-API part of Bitbucket is working.
+		if ( ! $response || ! isset( $this->type->branch ) ) { return 'master'; }
 	}
 
 	/**
 	 * Parse the remote info to find most recent tag if tags exist
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.7.0
 	 *
 	 * @return string latest tag.
 	 */
@@ -210,8 +230,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	/**
 	 * Construct $download_link
 	 *
-	 * @since 1.9.0
-	 *
 	 * @param boolean $rollback for theme rollback
 	 * 
 	 * @return URI
@@ -239,7 +257,6 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 *
 	 * Uses a transient to limit calls to the API.
 	 *
-	 * @since 1.9.0
 	 * @param $changes
 	 *
 	 * @return bool
@@ -288,7 +305,7 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 	 * Read the repository meta from API
 	 *
 	 * Uses a transient to limit calls to the API
-	 * @since 2.2.0
+	 *
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
@@ -311,13 +328,47 @@ class GitHub_Updater_BitBucket_API extends GitHub_Updater {
 
 	/**
 	 * Add remote data to type object
-	 *
-	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
+	}
+
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook
+	 *
+	 * @param      $args
+	 * @param null $type
+	 *
+	 * @return mixed
+	 */
+	public function maybe_authenticate_http( $args, $type = null ) {
+		$username = null;
+		$password = null;
+
+		$ptype = explode( '/', parse_url( $type, PHP_URL_PATH ) );
+		$mybase = basename( $type, ".php" );
+		$repo = $this->type->repo;
+		$ext = pathinfo( basename( $type) , PATHINFO_EXTENSION);
+
+		if ( isset( $args['headers'] ) ) { unset( $args['headers']['Authorization'] ); }
+		//if ( ! empty( $this->type->access_token ) ) { return $args; }
+		//if ( 'zip' === pathinfo( basename( $type ) , PATHINFO_EXTENSION ) ) { return $args; }
+		if ( ! isset( $this->type ) ) { return $args; }
+		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) { return $args; }
+		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
+
+		if ( $this->type->user && $this->type->pass ) {
+			$username = $this->type->user;
+			$password = $this->type->pass;
+		}
+
+		if ( $username && $password ) {
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
 	}
 
 }

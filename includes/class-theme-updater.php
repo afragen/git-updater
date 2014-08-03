@@ -24,26 +24,25 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Rollback variable
 	 *
-	 * @since 2.4.0
 	 * @var version number
 	 */
 	protected $tag = false;
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 1.0.0
-	 *
 	 */
 	public function __construct() {
 
-		// This MUST come before we get details about the plugins so the headers are correctly retrieved
-		add_filter( 'extra_theme_headers', array( $this, 'add_theme_headers' ) );
+		// This MUST come before we get details about the themes so the headers are correctly retrieved
+		GitHub_Updater_GitHub_API::add_headers();
+		GitHub_Updater_BitBucket_API::add_headers();
 
 		// Get details of GitHub-sourced themes
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) { return false; }
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) { $this->delete_all_transients( 'themes' ); }
+		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+			$this->delete_all_transients( 'themes' );
+		}
 
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
@@ -107,8 +106,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
-	 *
-	 * @since 2.0.0
 	 */
 	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) { return $false; }
@@ -135,14 +132,14 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 		}
 		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
+
 		return $response;
 	}
 
 	/**
 	 * Fix for new issue in 3.9 :-(
 	 */
-	public function fix_display_none_in_themes_api()
-	{
+	public function fix_display_none_in_themes_api() {
 		echo '<style> #theme-installer div.install-theme-info { display: block !important; }  </style>';
 	}
 
@@ -150,7 +147,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
 	 * @author Seth Carstens
-	 * @since 2.2.0
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 
@@ -203,13 +199,11 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Remove default after_theme_row_$stylesheet
 	 *
-	 * @since 2.2.1
 	 * @author @grappler
 	 * @param $theme_key
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-
 		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
@@ -221,7 +215,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Call update theme messaging if needed
 	 *
-	 * @since 2.4.0
 	 * @author Seth Carstens
 	 * @param $prepared_themes
 	 *
@@ -237,19 +230,18 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 		}
+
 		return $prepared_themes;
 	}
 
 	/**
 	 * Create theme update messaging
 	 * 
-	 * @since 2.4.0
-	 *
 	 * @author Seth Carstens
 	 * @param object $theme
 	 * @return html
 	 */
-	private function append_theme_actions_content( $theme ){
+	private function append_theme_actions_content( $theme ) {
 
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
 		$theme_update_transient = get_site_transient( 'update_themes' );
@@ -290,16 +282,15 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update from GitHub.
+	 * Hook into pre_set_site_transient_update_themes to update
 	 *
 	 * Finds newest tag and compares to current tag
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param array $data
 	 * @return array|object
 	 */
-	public function pre_set_site_transient_update_themes( $data ){
+	public function pre_set_site_transient_update_themes( $data ) {
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) { continue; }
 
@@ -318,6 +309,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$data->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
+
 		return $data;
 	}
 

@@ -11,15 +11,13 @@
 /**
  * Get remote data from a GitHub repo.
  *
- * @package GitHub_Updater_API
+ * @package GitHub_Updater_GitHub_API
  * @author  Andy Fragen
  */
 class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 2.1.0
 	 *
 	 * @param string $type
 	 */
@@ -29,9 +27,43 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Call the API and return a json decoded body.
+	 * Add extra headers via filter hooks
+	 */
+	public static function add_headers() {
+		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_GitHub_API', 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_GitHub_API', 'add_theme_headers' ) );
+	}
+
+	/**
+	 * Add extra headers to get_plugins();
 	 *
-	 * @since 1.0.0
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_plugin_headers( $extra_headers ) {
+		$ghu_extra_headers     = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
+	 * Add extra headers to wp_get_themes()
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_theme_headers( $extra_headers ) {
+		$ghu_extra_headers     = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
+		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
+	 * Call the API and return a json decoded body.
 	 *
 	 * @see http://developer.github.com/v3/
 	 *
@@ -45,15 +77,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) { return false; }
-		if ( ! in_array( $code, $allowed_codes, true ) ) { return false; }
+		if ( ! in_array( $code, $allowed_codes, false ) ) { return false; }
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
 	/**
 	 * Return API url.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param string $endpoint
 	 *
@@ -67,8 +97,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @since 1.5.0
 		 *
 		 * @param array $segments List of segments.
 		 */
@@ -96,8 +124,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Read the remote file.
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.0.0
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
@@ -131,7 +157,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * If we've had to call this method, we know that a branch header has not been provided.
 	 * As such the remote info was retrieved with a ?ref=... query argument.
 	 *
-	 * @since 1.5.0
 	 * @param array API object
 	 *
 	 * @return string Default branch name.
@@ -148,6 +173,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
 		$components = parse_url( $response->url, PHP_URL_QUERY );
 		parse_str( $components );
+
 		return $ref;
 	}
 
@@ -155,8 +181,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Parse the remote info to find most recent tag if tags exist
 	 *
 	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @since 1.7.0
 	 *
 	 * @return string latest tag.
 	 */
@@ -208,8 +232,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Construct $this->type->download_link using Repository Contents API
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
-	 * @since 1.9.0
-	 *
 	 * @param boolean $rollback for theme rollback
 	 * 
 	 * @return URI
@@ -241,7 +263,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * Uses a transient to limit calls to the API.
 	 *
-	 * @since 1.9.0
 	 * @param $changes
 	 *
 	 * @return bool
@@ -285,7 +306,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Read the repository meta from API
 	 * Uses a transient to limit calls to the API
 	 *
-	 * @since 2.2.0
 	 * @return base64 decoded repository meta data
 	 */
 	public function get_repo_meta() {
@@ -309,8 +329,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
 	 * Add remote data to type object
-	 *
-	 * @since 2.2.0
 	 */
 	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );

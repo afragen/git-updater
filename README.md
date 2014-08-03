@@ -1,5 +1,5 @@
 # GitHub Updater
-* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
 * Tested up to: 3.9.1
@@ -144,7 +144,13 @@ The same applies for Bitbucket hosted plugins.
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
 
-If you are using a WordPress Multisite installation, the plugin should be network activated.
+If you are using a WordPress Multisite installation, the plugin **should** be network activated.
+
+When first downloading and installing a plugin from GitHub you might have to do the following.
+
+1. Unzip the archive.
+2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
+3. Copy the folder to your plugins directory.
 
 ## ChangeLog
 
