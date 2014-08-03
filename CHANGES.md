@@ -1,10 +1,10 @@
-### ChangeLog for GitHub Updater
 
 #### 2.8.0
 
 * refactor API classes and `class GitHub_Updater` to add extra headers from API class. This should allow for better abstraction. Just need to call `GitHub_Updater_{repo}_API::add_headers()` in `class GitHub_Plugin_Updater` and `class GitHub_ Theme_Updater`.
 * remove @since tags
 * move `maybe_authenticate_http` to `class GitHub_Updater_Bitbucket_API` as it's not used elsewhere
+* use non-strict check for http response code (thanks @echav)
 
 #### 2.7.1
 
