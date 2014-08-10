@@ -30,7 +30,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		
-		if ( empty( $this->config ) ) { return false; }
+		if ( empty( $this->config ) ) {
+			return false;
+		}
 		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
 			$this->delete_all_transients( 'plugins' );
 		}
@@ -74,12 +76,16 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		if ( ! ( 'plugin_information' === $action ) ) { return $false; }
+		if ( ! ( 'plugin_information' === $action ) ) {
+			return $false;
+		}
 
 		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug );
-			if ( is_wp_error( $wp_repo_data ) ) { return false; }
+			if ( is_wp_error( $wp_repo_data ) ) {
+				return false;
+			}
 			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
@@ -92,7 +98,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $response->slug === $plugin->repo ) {
-				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) { return $response; }
+				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
+					return $response;
+				}
 
 				$response->slug          = $plugin->repo;
 				$response->plugin_name   = $plugin->name;
@@ -122,7 +130,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) ) { return $transient; }
+		if ( empty( $transient->checked ) ) {
+			return $transient;
+		}
 
 		foreach ( (array) $this->config as $plugin ) {
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
