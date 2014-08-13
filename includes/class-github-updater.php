@@ -340,6 +340,11 @@ class GitHub_Updater {
 			}
 		}
 
+		// Need to set for upgrade process triggered by remote service
+		if ( is_a( $upgrader, 'Plugin_Upgrader' ) || is_a( $upgrader, 'Theme_Upgrader' ) ) {
+			$_GET['action'] = 'update-selected';
+		}
+
 		// If there's no action set, or not one we recognise, abort
 		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
 			return $source;

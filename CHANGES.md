@@ -1,6 +1,7 @@
 
 #### 2.8.x
 * fix for WP Coding Guidelines
+* added check for remote upgrade processes (props @SLv99)
 
 #### 2.8.0
 * refactor API classes and `class GitHub_Updater` to add extra headers from API class. This should allow for better abstraction. Just need to call `GitHub_Updater_{repo}_API::add_headers()` in `class GitHub_Plugin_Updater` and `class GitHub_ Theme_Updater`.
