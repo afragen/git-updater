@@ -1,7 +1,8 @@
 
 #### 2.8.x
 * fix for WP Coding Guidelines
-* added check for remote upgrade processes (props @SLv99)
+* added check for upgrade process instead of `$_GET['action']` (props @SLv99)
+* added load_launch function so can load in `add_action( 'plugins_loaded', ...`. Hopefully this will solve issues with remote upgraders like iThemes Sync, ManageWP, InfiniteWP, and MainWP
 
 #### 2.8.0
 * refactor API classes and `class GitHub_Updater` to add extra headers from API class. This should allow for better abstraction. Just need to call `GitHub_Updater_{repo}_API::add_headers()` in `class GitHub_Plugin_Updater` and `class GitHub_ Theme_Updater`.
