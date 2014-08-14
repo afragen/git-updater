@@ -330,7 +330,7 @@ class GitHub_Updater {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
+		//$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
 		if ( isset( $source ) ) {
 			foreach ( (array) $this->config as $github_repo ) {
@@ -340,15 +340,17 @@ class GitHub_Updater {
 			}
 		}
 
+		$is_plugin_upgrade = is_a($upgrader, 'Plugin_Upgrader');
+		$is_theme_upgrade = is_a($upgrader, 'Theme_Upgrader');
 		// Need to set for upgrade process triggered by remote service
-		if ( is_a( $upgrader, 'Plugin_Upgrader' ) || is_a( $upgrader, 'Theme_Upgrader' ) ) {
-			$_GET['action'] = 'update-selected';
+		if ( ! is_a( $upgrader, 'Plugin_Upgrader' ) && ! is_a( $upgrader, 'Theme_Upgrader' ) ) {
+			return $source;
 		}
 
 		// If there's no action set, or not one we recognise, abort
-		if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			return $source;
-		}
+		//if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
+			//return $source;
+		//}
 
 		// If the values aren't set, or it's not GitHub-sourced, abort
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
