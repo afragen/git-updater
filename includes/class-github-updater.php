@@ -54,6 +54,32 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 	/**
+	 * Constructor
+	 *
+	 * Calls init() in plugins_loaded hook so other remote upgrader apps like
+	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
+	 * of GitHub_Updater's methods.
+	 *
+	 */
+	public function __construct() {
+		add_action( 'plugins_loaded', array( $this, 'init' ), 30 );
+	}
+
+	/**
+	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
+	 */
+	public function init() {
+		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+			if ( current_user_can( 'update_plugins' ) ) {
+				new GitHub_Plugin_Updater;
+			}
+			if ( current_user_can( 'update_themes' ) ) {
+				new GitHub_Theme_Updater;
+			}
+		}
+	}
+
+	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
 	 * @return array Indexed array of associative arrays of plugin details.
@@ -333,9 +359,9 @@ class GitHub_Updater {
 		//$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
 		if ( isset( $source ) ) {
-			foreach ( (array) $this->config as $github_repo ) {
-				if ( stristr( basename( $source ), $github_repo->repo ) ) {
-					$repo = $github_repo->repo;
+			foreach ( (array) $this->config as $git_repo ) {
+				if ( stristr( basename( $source ), $git_repo->repo ) ) {
+					$repo = $git_repo->repo;
 				}
 			}
 		}
