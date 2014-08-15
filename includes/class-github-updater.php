@@ -69,14 +69,14 @@ class GitHub_Updater {
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
 	 */
 	public function init() {
-		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+		//if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 			if ( current_user_can( 'update_plugins' ) ) {
 				new GitHub_Plugin_Updater;
 			}
 			if ( current_user_can( 'update_themes' ) ) {
 				new GitHub_Theme_Updater;
 			}
-		}
+		//}
 	}
 
 	/**
