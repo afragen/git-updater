@@ -62,7 +62,7 @@ class GitHub_Updater {
 	 *
 	 */
 	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'init' ), 30 );
+		add_action( 'plugins_loaded', array( $this, 'init' ) );
 	}
 
 	/**
