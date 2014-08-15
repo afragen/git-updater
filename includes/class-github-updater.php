@@ -56,9 +56,9 @@ class GitHub_Updater {
 	/**
 	 * Constructor
 	 *
-	 * Calls init() in plugins_loaded hook so other remote upgrader apps like
+	 * Calls $this->init() in plugins_loaded hook so other remote upgrader apps like
 	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-	 * of GitHub_Updater's methods.
+	 * of GitHub_Updater's methods, especially renaming.
 	 *
 	 */
 	public function __construct() {
@@ -366,17 +366,10 @@ class GitHub_Updater {
 			}
 		}
 
-		$is_plugin_upgrade = is_a($upgrader, 'Plugin_Upgrader');
-		$is_theme_upgrade = is_a($upgrader, 'Theme_Upgrader');
-		// Need to set for upgrade process triggered by remote service
+		// Check for upgrade process, return if both are false
 		if ( ! is_a( $upgrader, 'Plugin_Upgrader' ) && ! is_a( $upgrader, 'Theme_Upgrader' ) ) {
 			return $source;
 		}
-
-		// If there's no action set, or not one we recognise, abort
-		//if ( ! isset( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			//return $source;
-		//}
 
 		// If the values aren't set, or it's not GitHub-sourced, abort
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
