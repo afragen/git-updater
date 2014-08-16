@@ -68,7 +68,7 @@ class GitHub_Updater {
 	/**
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
 	 */
-	public function init() {
+	public static function init() {
 		//if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 			if ( current_user_can( 'update_plugins' ) ) {
 				new GitHub_Plugin_Updater;
