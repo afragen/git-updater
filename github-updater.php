@@ -44,7 +44,7 @@ if ( ! class_exists( 'GitHub_Theme_Updater' ) ) {
 new GitHub_Updater;
 
 // Instantiate class GitHub_Plugin_Updater and class GitHub_Theme_Updater
-add_action( 'init', array( 'GitHub_Updater', 'init' );
+add_action( 'init', array( 'GitHub_Updater', 'init' ) );
 
 function github_updater_init () {
 	//$ghu = new GitHub_Updater;
