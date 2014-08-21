@@ -76,8 +76,12 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$code          = wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
-		if ( is_wp_error( $response ) ) { return false; }
-		if ( ! in_array( $code, $allowed_codes, false ) ) { return false; }
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			return false;
+		}
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
@@ -142,8 +146,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		$this->type->transient = $response;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
@@ -171,7 +176,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		}
 
 		// If we can't contact Bitbucket API, then assume a sensible default in case the non-API part of Bitbucket is working.
-		if ( ! $response || ! isset( $this->type->branch ) ) { return 'master'; }
+		if ( ! $response || ! isset( $this->type->branch ) ) {
+			return 'master';
+		}
 	}
 
 	/**
@@ -198,8 +205,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		// Sort and get newest tag
 		$tags     = array();
@@ -213,7 +221,10 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			}
 		}
 
-		if ( empty( $tags ) ) { return false; }  // no tags are present, exit early
+		// no tags are present, exit early
+		if ( empty( $tags ) ) {
+			return false;
+		}
 
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
@@ -263,7 +274,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 */
 	public function get_remote_changes( $changes ) {
 		// early exit if $changes file doesn't exist locally. Saves an API call.
-		if ( ! file_exists( $this->type->local_path . $changes ) ) { return false; }
+		if ( ! file_exists( $this->type->local_path . $changes ) ) {
+			return false;
+		}
 
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
@@ -284,8 +297,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		$changelog = $this->get_transient( 'changelog' );
 
@@ -319,8 +333,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		$this->type->repo_meta = $response;
 		$this->add_meta_repo_object();
@@ -347,17 +362,25 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$username = null;
 		$password = null;
 
-		$ptype = explode( '/', parse_url( $type, PHP_URL_PATH ) );
+		$ptype  = explode( '/', parse_url( $type, PHP_URL_PATH ) );
 		$mybase = basename( $type, ".php" );
-		$repo = $this->type->repo;
-		$ext = pathinfo( basename( $type) , PATHINFO_EXTENSION);
+		$repo   = $this->type->repo;
+		$ext    = pathinfo( basename( $type) , PATHINFO_EXTENSION);
 
-		if ( isset( $args['headers'] ) ) { unset( $args['headers']['Authorization'] ); }
+		if ( isset( $args['headers'] ) ) {
+			unset( $args['headers']['Authorization'] );
+		}
 		//if ( ! empty( $this->type->access_token ) ) { return $args; }
 		//if ( 'zip' === pathinfo( basename( $type ) , PATHINFO_EXTENSION ) ) { return $args; }
-		if ( ! isset( $this->type ) ) { return $args; }
-		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) { return $args; }
-		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) { return $args; }
+		if ( ! isset( $this->type ) ) {
+			return $args;
+		}
+		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) {
+			return $args;
+		}
+		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) {
+			return $args;
+		}
 
 		if ( $this->type->user && $this->type->pass ) {
 			$username = $this->type->user;

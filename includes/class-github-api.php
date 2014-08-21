@@ -76,8 +76,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$code          = wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
-		if ( is_wp_error( $response ) ) { return false; }
-		if ( ! in_array( $code, $allowed_codes, false ) ) { return false; }
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			return false;
+		}
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
@@ -138,8 +142,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		$this->type->branch = $this->get_default_branch( $response );
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		$this->type->transient = $response;
 		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
@@ -167,8 +172,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response || ! isset( $response->url ) ) { return 'master'; }
-		if ( isset( $response->message ) ) { return 'master'; }
+		if ( ! $response || ! isset( $response->url ) || isset( $response->message ) ) {
+			return 'master';
+		}
 
 		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
 		$components = parse_url( $response->url, PHP_URL_QUERY );
@@ -200,8 +206,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		// Sort and get newest tag
 		$tags     = array();
@@ -215,7 +222,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( empty( $tags ) ) { return false; }  // no tags are present, exit early
+		// no tags are present, exit early
+		if ( empty( $tags ) ) {
+			return false;
+		}
 
 		usort( $tags, 'version_compare' );
 
@@ -269,7 +279,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_changes( $changes ) {
 		// early exit if $changes file doesn't exist locally. Saves an API call.
-		if ( ! file_exists( $this->type->local_path . $changes ) ) { return false; }
+		if ( ! file_exists( $this->type->local_path . $changes ) ) {
+			return false;
+		}
 
 		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
 			require_once 'markdown.php';
@@ -285,8 +297,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
 
 		$changelog = $this->get_transient( 'changelog' );
 
@@ -320,8 +333,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response || ! isset( $response->items ) ) { return false; }
-		if ( isset( $response->message ) ) { return false; }
+		if ( ! $response || ! isset( $response->items ) || isset( $response->message ) ) {
+			return false;
+		}
 
 		$this->type->repo_meta = $response->items[0];
 		$this->add_meta_repo_object();
