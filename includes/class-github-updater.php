@@ -56,10 +56,9 @@ class GitHub_Updater {
 	/**
 	 * Constructor
 	 *
-	 * Calls $this->init() in plugins_loaded hook so other remote upgrader apps like
+	 * Calls $this->init() in init hook so other remote upgrader apps like
 	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
 	 * of GitHub_Updater's methods, especially renaming.
-	 *
 	 */
 	public function __construct() {
 		//add_action( 'init', array( $this, 'init' ) );
@@ -69,14 +68,12 @@ class GitHub_Updater {
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
 	 */
 	public static function init() {
-		//if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-			if ( current_user_can( 'update_plugins' ) ) {
-				new GitHub_Plugin_Updater;
-			}
-			if ( current_user_can( 'update_themes' ) ) {
-				new GitHub_Theme_Updater;
-			}
-		//}
+		if ( current_user_can( 'update_plugins' ) ) {
+			new GitHub_Plugin_Updater;
+		}
+		if ( current_user_can( 'update_themes' ) ) {
+			new GitHub_Theme_Updater;
+		}
 	}
 
 	/**
