@@ -69,9 +69,15 @@ class GitHub_Updater {
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
+			if ( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
+				require_once 'class-plugin-updater.php';
+			}
 			new GitHub_Plugin_Updater;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
+			if ( ! class_exists( 'GitHub_Theme_Updater' ) ) {
+				require_once 'class-theme-updater.php';
+			}
 			new GitHub_Theme_Updater;
 		}
 	}

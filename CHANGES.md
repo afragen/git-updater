@@ -1,4 +1,7 @@
 
+#### 2.8.2
+* move loading and initiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time. Thanks to @szepeviktor for bringing this to my attention.
+
 #### 2.8.1
 * fix for WP Coding Guidelines
 * added check for upgrade process instead of `$_GET['action']` (props @SLv99)
