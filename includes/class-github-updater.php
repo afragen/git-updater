@@ -66,8 +66,13 @@ class GitHub_Updater {
 
 	/**
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
+	 * @TODO move class loading to spl_autoload_register()
 	 */
 	public static function init() {
+		if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
+			require_once 'class-github-api.php';
+			require_once 'class-bitbucket-api.php';
+		}
 		if ( current_user_can( 'update_plugins' ) ) {
 			if ( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
 				require_once 'class-plugin-updater.php';
