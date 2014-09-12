@@ -53,6 +53,22 @@ class GitHub_Updater {
 	 */
 	protected static $extra_headers = array();
 
+
+	private function autoload( $class ) {
+		$classes = array(
+			'github_updater_github_api'    => 'class-github-api.php',
+			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
+			'github_plugin_updater'        => 'class-plugin-updater.php',
+			'github_theme_updater'         => 'class-theme-updater.php',
+		);
+
+		$cn = strtolower( $class );
+
+		if ( isset( $classes[ $cn ] ) ) {
+			require_once( $classes[ $cn ] );
+		}
+	}
+
 	/**
 	 * Constructor
 	 *
@@ -62,6 +78,9 @@ class GitHub_Updater {
 	 */
 	public function __construct() {
 		//add_action( 'init', array( $this, 'init' ) );
+		if ( function_exists( 'spl_autoload_register' ) ) {
+			spl_autoload_register( array( $this, 'autoload' ) );
+		}
 	}
 
 	/**
@@ -69,20 +88,20 @@ class GitHub_Updater {
 	 * @TODO move class loading to spl_autoload_register()
 	 */
 	public static function init() {
-		if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
-			require_once 'class-github-api.php';
-			require_once 'class-bitbucket-api.php';
-		}
+		//if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
+			//require_once 'class-github-api.php';
+			//require_once 'class-bitbucket-api.php';
+		//}
 		if ( current_user_can( 'update_plugins' ) ) {
-			if ( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
-				require_once 'class-plugin-updater.php';
-			}
+			//if ( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
+				//require_once 'class-plugin-updater.php';
+			//}
 			new GitHub_Plugin_Updater;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			if ( ! class_exists( 'GitHub_Theme_Updater' ) ) {
-				require_once 'class-theme-updater.php';
-			}
+			//if ( ! class_exists( 'GitHub_Theme_Updater' ) ) {
+				//require_once 'class-theme-updater.php';
+			//}
 			new GitHub_Theme_Updater;
 		}
 	}
