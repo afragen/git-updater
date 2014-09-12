@@ -65,8 +65,7 @@ class GitHub_Updater {
 			'github_theme_updater'         => 'class-theme-updater.php',
 			'github_updater_github_api'    => 'class-github-api.php',
 			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
-			'markdown_parser'              => 'markdown.php',
-			//'markdownextra_parser'         => 'markdown.php',
+			'parsedown'                    => 'Parsedown.php',
 		);
 
 		$cn = strtolower( $class );

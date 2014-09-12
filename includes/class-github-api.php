@@ -300,8 +300,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Markdown_Parser;
-			$changelog = $parser->transform( base64_decode( $response->content ) );
+			$parser    = new Parsedown();
+			$changelog = $parser->text( base64_decode( $response->content ) );
 			$this->set_transient( 'changelog', $changelog );
 		}
 

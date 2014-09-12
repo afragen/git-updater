@@ -300,8 +300,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Markdown_Parser;
-			$changelog = $parser->transform( $response->data );
+			$parser    = new Parsedown();
+			$changelog = $parser->text( $response->data );
 			$this->set_transient( 'changelog', $changelog );
 		}
 
