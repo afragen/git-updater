@@ -278,10 +278,6 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			return false;
 		}
 
-		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
-			require_once 'markdown.php';
-		}
-
 		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {

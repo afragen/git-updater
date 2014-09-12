@@ -54,12 +54,18 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 
+	/**
+	 * Autoloader
+	 *
+	 * @param $class
+	 */
 	private function autoload( $class ) {
 		$classes = array(
-			'github_updater_github_api'    => 'class-github-api.php',
-			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
 			'github_plugin_updater'        => 'class-plugin-updater.php',
 			'github_theme_updater'         => 'class-theme-updater.php',
+			'github_updater_github_api'    => 'class-github-api.php',
+			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
+			'markdownextra_parser'         => 'markdown.php',
 		);
 
 		$cn = strtolower( $class );
@@ -75,6 +81,8 @@ class GitHub_Updater {
 	 * Calls $this->init() in init hook so other remote upgrader apps like
 	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
 	 * of GitHub_Updater's methods, especially renaming.
+	 *
+	 * Calls spl_autoload_register to set loading of classes.
 	 */
 	public function __construct() {
 		//add_action( 'init', array( $this, 'init' ) );
@@ -85,23 +93,13 @@ class GitHub_Updater {
 
 	/**
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
-	 * @TODO move class loading to spl_autoload_register()
+	 * for proper user capabilities.
 	 */
 	public static function init() {
-		//if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
-			//require_once 'class-github-api.php';
-			//require_once 'class-bitbucket-api.php';
-		//}
 		if ( current_user_can( 'update_plugins' ) ) {
-			//if ( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
-				//require_once 'class-plugin-updater.php';
-			//}
 			new GitHub_Plugin_Updater;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			//if ( ! class_exists( 'GitHub_Theme_Updater' ) ) {
-				//require_once 'class-theme-updater.php';
-			//}
 			new GitHub_Theme_Updater;
 		}
 	}
