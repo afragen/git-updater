@@ -1,8 +1,10 @@
 
-#### 2.8.2
-* move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time. Thanks to @szepeviktor for bringing this to my attention.
-* now loading classes via `spl_autoload_register` thanks @szepeviktor for the help.
+#### 2.9.0
+* move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.
+* now loading classes via `spl_autoload_register` thanks  for the help.
 * switched to `erusev/parsedown` for rendering `CHANGES.md`, faster and more light-weight.
+* now parses remote file info to save only file headers to transient. Hopefully speeds up database retrieval of transient.
+* this revision mostly due to @szepeviktor prodding me. ;-)
 
 #### 2.8.1
 * fix for WP Coding Guidelines
