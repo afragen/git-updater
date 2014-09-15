@@ -140,6 +140,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
+		$contents = base64_decode( $response->content );
+		$headers = $this->get_file_data( $contents, $this->type->type );
 		$this->type->branch = $this->get_default_branch( $response );
 
 		if ( ! $response || isset( $response->message ) ) {
