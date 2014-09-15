@@ -53,7 +53,6 @@ class GitHub_Updater {
 	 */
 	protected static $extra_headers = array();
 
-
 	/**
 	 * Autoloader
 	 *
@@ -228,7 +227,7 @@ class GitHub_Updater {
 	private function multisite_get_themes() {
 		$themes     = array();
 		$theme_dirs = scandir( get_theme_root() );
-		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store' ) );
+		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store', 'index.php' ) );
 
 		foreach ( (array) $theme_dirs as $theme_dir ) {
 			$themes[] = wp_get_theme( $theme_dir );
@@ -381,7 +380,6 @@ class GitHub_Updater {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		//$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
 		if ( isset( $source ) ) {
 			foreach ( (array) $this->config as $git_repo ) {
@@ -419,6 +417,68 @@ class GitHub_Updater {
 		// Otherwise, return an error
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new WP_Error();
+	}
+
+	/**
+	 * Take file contents as string and parse headers.
+	 *
+	 * @param $contents
+	 * @param $type
+	 *
+	 * @return array
+	 */
+	protected function get_file_headers( $contents, $type ) {
+
+		$default_plugin_headers = array(
+			'Name'        => 'Plugin Name',
+			'PluginURI'   => 'Plugin URI',
+			'Version'     => 'Version',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+			'Network'     => 'Network',
+		);
+
+		$default_theme_headers = array(
+			'Name'        => 'Theme Name',
+			'ThemeURI'    => 'Theme URI',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'Version'     => 'Version',
+			'Template'    => 'Template',
+			'Status'      => 'Status',
+			'Tags'        => 'Tags',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+		);
+
+		if ( false !== strstr( $type, 'plugin' ) ) {
+			$all_headers = $default_plugin_headers;
+		}
+
+		if ( false !== strstr( $type, 'theme' ) ) {
+			$all_headers = $default_theme_headers;
+		}
+
+		// Make sure we catch CR-only line endings.
+		$file_data = str_replace( "\r", "\n", $contents );
+
+		// Merge extra headers and default headers.
+		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );
+		$all_headers = array_unique( $all_headers );
+
+		foreach ( $all_headers as $field => $regex ) {
+			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
+				$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
+			} else {
+				$all_headers[ $field ] = '';
+			}
+		}
+
+		return $all_headers;
 	}
 
 	/**

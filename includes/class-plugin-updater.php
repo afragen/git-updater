@@ -66,6 +66,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 	}
 
+
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
