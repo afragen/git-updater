@@ -142,6 +142,9 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			return false;
 		}
 
+		if ( ! is_array( $response ) ) {
+			return false;
+		}
 		$this->type->transient      = $response;
 		$this->type->branch         = ( ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master' );
 		$this->type->remote_version = $response['Version'];
