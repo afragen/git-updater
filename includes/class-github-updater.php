@@ -455,11 +455,11 @@ class GitHub_Updater {
 			'DomainPath'  => 'Domain Path',
 		);
 
-		if ( false !== strstr( $type, 'plugin' ) ) {
+		if ( false !== strpos( $type, 'plugin' ) ) {
 			$all_headers = $default_plugin_headers;
 		}
 
-		if ( false !== strstr( $type, 'theme' ) ) {
+		if ( false !== strpos( $type, 'theme' ) ) {
 			$all_headers = $default_theme_headers;
 		}
 
