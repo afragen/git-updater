@@ -129,10 +129,13 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$response = $this->get_transient( $file );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/master/' . $file );
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = 'master';
+			}
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
 
 			if ( $response ) {
-				$contents =  $response->data;
+				$contents = $response->data;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_transient( $file, $response );
 			}
@@ -252,7 +255,10 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = 'master';
+			}
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
 
 			if ( ! $response ) {
 				$response['message'] = 'No CHANGES.md found';
