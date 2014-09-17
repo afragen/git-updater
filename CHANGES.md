@@ -1,7 +1,7 @@
 
 #### 2.9.0
 * move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.
-* now loading classes via `spl_autoload_register` thanks  for the help.
+* now loading classes via `spl_autoload_register`
 * switched to `erusev/parsedown` for rendering `CHANGES.md`, faster and more light-weight.
 * now parses remote file info to save only file headers to transient. Hopefully speeds up database retrieval of transient.
 * this revision mostly due to @szepeviktor prodding me. ;-)

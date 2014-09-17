@@ -420,7 +420,7 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Take file contents as string and parse headers.
+	 * Take remote file contents as string and parse headers.
 	 *
 	 * @param $contents
 	 * @param $type
