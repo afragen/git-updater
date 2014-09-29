@@ -259,9 +259,19 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_changes( $changes ) {
+	public function get_remote_changes() {
+		$changelogs    = array( 'CHANGES.md', 'CHANGELOG.md' );
+		$has_changelog = false;
+
+		foreach ( $changelogs as $changes ) {
+			if ( file_exists( $this->type->local_path . $changes ) ) {
+				$has_changelog = true;
+				break;
+			}
+		}
+
 		// early exit if $changes file doesn't exist locally. Saves an API call.
-		if ( ! file_exists( $this->type->local_path . $changes ) ) {
+		if ( ! $has_changelog ) {
 			return false;
 		}
 
