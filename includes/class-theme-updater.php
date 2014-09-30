@@ -58,10 +58,14 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
+
 			if ( $repo_api->get_remote_info( 'style.css' ) ) {
 				$repo_api->get_repo_meta();
 				$repo_api->get_remote_tag();
-				$repo_api->get_remote_changes();
+				$changelog = $this->get_changelog_filename( $theme->type );
+				if ( $changelog ) {
+					$repo_api->get_remote_changes( $changelog );
+				}
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 

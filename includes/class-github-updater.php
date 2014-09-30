@@ -482,6 +482,25 @@ class GitHub_Updater {
 	}
 
 	/**
+	 * Get filename of changelog and return
+	 *
+	 * @param $type
+	 *
+	 * @return bool or variable
+	 */
+	protected function get_changelog_filename( $type ) {
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
+
+		foreach ( $changelogs as $changes ) {
+			if ( file_exists( $this->$type->local_path . $changes ) ) {
+				return $changes;
+			}
+		}
+
+			return false;
+	}
+
+	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
 	 *
 	 * @param  array $args Existing HTTP Request arguments.
