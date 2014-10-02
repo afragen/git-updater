@@ -1,0 +1,8 @@
+{
+    "name": "afragen/github-updater",
+    "type": "wordpress-muplugin",
+    "license": "MIT",
+    "require": {
+        "composer/installers": "~1.0"
+    }
+}
