@@ -28,6 +28,11 @@ or
 
 ## Installation
 
+### Composer
+
+run the composer command : ``` composer require afragen/github-updater```
+
+
 ### Upload
 
 1. Download the latest tagged archive (choose the "zip" option).
