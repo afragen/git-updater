@@ -6,6 +6,7 @@
 * now parses remote file info to save only file headers to transient. Hopefully speeds up database retrieval of transient.
 * this revision mostly due to @szepeviktor prodding me. ;-)
 * accept `CHANGES.md` or `CHANGELOG.md` for processing, for @GaryJ
+* composer support added, thanks @hyyan
 
 #### 2.8.1
 * fix for WP Coding Guidelines
