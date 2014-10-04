@@ -1,0 +1,8 @@
+{
+    "name": "afragen/github-updater",
+    "type": "wordpress-plugin",
+    "license": "GPLv2",
+    "require": {
+        "composer/installers": "~1.0"
+    }
+}
