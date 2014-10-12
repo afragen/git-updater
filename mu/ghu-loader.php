@@ -32,9 +32,13 @@ function ghu_deactivate() {
 	deactivate_plugins( 'github-updater/github-updater.php' );
 }
 
+function ghu_mu_plugin_active() {
+	return array( 'Activated as mu-plugin' );
+}
+
 //deactivate normal plugin as it's loaded as mu-plugin
 add_action( 'admin_init', 'ghu_deactivate' );
 
 //remove links from plugins.php so user can't delete main plugin
-add_filter( 'network_admin_plugin_action_links_github-updater/github-updater.php', '__return_false' );
-add_filter( 'plugin_action_links_github-updater/github-updater.php', '__return_false' );
+add_filter( 'network_admin_plugin_action_links_github-updater/github-updater.php', 'ghu_mu_plugin_active' );
+add_filter( 'plugin_action_links_github-updater/github-updater.php', 'ghu_mu_plugin_active' );
