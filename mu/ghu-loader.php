@@ -23,13 +23,23 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// deactivate normal plugin
-function GHU_deactivate_normal_plugin() {
-    $normal_plugin = 'github-updater/github-updater.php';
-    if ( is_plugin_active( $normal_plugin ) )
-        deactivate_plugins( $normal_plugin );
+function GHU_is_plugin_active_for_network( $plugin ) {
+    if ( !is_multisite() )
+        return false;
+
+    $plugins = get_site_option( 'active_sitewide_plugins');
+    if ( isset($plugins[$plugin]) )
+        return true;
+
+    return false;
 }
-add_action( 'admin_init', 'GHU_deactivate_normal_plugin' );
+
+// deactivate normal plugin
+$normal_plugin = 'github-updater/github-updater.php';
+if ( in_array( $normal_plugin, (array) get_option( 'active_plugins', array() ) )
+    || GHU_is_plugin_active_for_network( $normal_plugin )
+    )
+    deactivate_plugins( $normal_plugin );
 
 // Load normal plugin
 if ( ! class_exists( 'GitHub_Updater' ) ) {
