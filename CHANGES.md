@@ -4,9 +4,12 @@
 * now loading classes via `spl_autoload_register`
 * switched to `erusev/parsedown` for rendering changelogs, faster and more light-weight.
 * now parses remote file info to save only file headers to transient. Hopefully speeds up database retrieval of transient.
-* this revision mostly due to @szepeviktor prodding me. ;-)
+* added README link to GitHub Link plugin by @szepeviktor
+* added mu-plugin option and instructions.
+* above revisions mostly due to @szepeviktor prodding me. ;-)
 * accept `CHANGES.md` or `CHANGELOG.md` for processing, for @GaryJ
 * composer support added, thanks @hyyan
+* switch to check .org plugin repo as json
 
 #### 2.8.1
 * fix for WP Coding Guidelines
