@@ -86,19 +86,17 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
 		if ( ! $wp_repo_data ) {
-			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug );
+			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug . '.json' );
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
 			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
-		if ( ! empty( $wp_repo_data['body'] ) ) {
-			$wp_repo_body = unserialize( $wp_repo_data['body'] );
+			$wp_repo_body = json_decode( $wp_repo_data['body'] );
 			if ( is_object( $wp_repo_body ) ) {
 				$response = $wp_repo_body;
 			}
-		}
 
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $response->slug === $plugin->repo ) {
