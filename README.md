@@ -57,6 +57,23 @@ Using git, browse to your `/wp-content/plugins/` directory and clone this reposi
 
 Then go to your Plugins screen and click __Activate__.
 
+### Must Use Plugin
+
+1. Choose a method from above for installation
+1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`
+
+```
+# in Linux
+cd <WordPress root>
+ln -sv wp-content/plugins/github-updater/mu/ghu-loader.php wp-content/mu-plugins
+
+:: in Windows (Vista, 7, 8)
+cd /D <WordPress root>
+mklink wp-content\mu-plugins\ghu-loader.php wp-content\plugins\github-updater\mu\ghu-loader.php
+```
+
+This way you get automatic updates but cannot deactivate the plugin.
+
 ## Usage
 
 ### Themes
