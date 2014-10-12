@@ -23,6 +23,14 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// deactivate normal plugin
+function GHU_deactivate_normal_plugin() {
+    $normal_plugin = 'github-updater/github-updater.php';
+    if ( is_plugin_active( $normal_plugin ) )
+        deactivate_plugins( $normal_plugin );
+}
+add_action( 'admin_init', 'GHU_deactivate_normal_plugin' );
+
 // Load normal plugin
 if ( ! class_exists( 'GitHub_Updater' ) ) {
 	require_once 'github-updater/github-updater.php';
