@@ -145,6 +145,11 @@ If you develop your plugin on GitHub and it also resides in the WP.org repo, the
 
 The same applies for Bitbucket hosted plugins.
 
+## Extras
+
+[szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
+<https://github.com/szepeviktor/wordpress-plugin-construction/tree/master/github-link>
+
 ## Issues
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
