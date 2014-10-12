@@ -34,3 +34,6 @@ function ghu_deactivate() {
 
 //deactivate normal plugin as it's loaded as mu-plugin
 add_action( 'admin_init', 'ghu_deactivate' );
+//remove links from plugins.php so user can't delete main plugin
+add_filter( 'network_admin_plugin_action_links_github-updater/github-updater.php', '__return_false' );
+add_filter( 'plugin_action_links_github-updater/github-updater.php', '__return_false' );
