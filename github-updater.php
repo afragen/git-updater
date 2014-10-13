@@ -29,7 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Load main class
 if ( ! class_exists( 'GitHub_Updater' ) ) {
-	define( 'GHU_PATH', plugin_dir_path( __FILE__ ) );
 	require_once 'includes/class-github-updater.php';
 }
 

@@ -70,7 +70,7 @@ class GitHub_Updater {
 		$cn = strtolower( $class );
 
 		if ( isset( $classes[ $cn ] ) ) {
-			require_once( GHU_PATH . 'includes/' . $classes[ $cn ] );
+			require_once( $classes[ $cn ] );
 		}
 	}
 
