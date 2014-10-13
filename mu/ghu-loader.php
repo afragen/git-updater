@@ -31,8 +31,9 @@ if ( ! class_exists( 'GitHub_Updater' ) ) {
 }
 
 function ghu_deactivate( $plugin, $network_wide ) {
-	if ( $plugin === GHU_PLUGIN_FILE )
+	if ( GHU_PLUGIN_FILE === $plugin ) {
 		deactivate_plugins( GHU_PLUGIN_FILE );
+	}
 }
 
 function ghu_mu_plugin_active( $actions ) {
