@@ -36,7 +36,9 @@ function ghu_deactivate( $plugin, $network_wide ) {
 }
 
 function ghu_mu_plugin_active( $actions ) {
-	return array( 'mu-plugin' => 'Activated as mu-plugin' );
+	unset( $actions['activate'] );
+	unset( $actions['delete'] );
+	return array_merge( array( 'mu-plugin' => 'Activated as mu-plugin' ), $actions );
 }
 
 // Deactivate normal plugin as it's loaded as mu-plugin
