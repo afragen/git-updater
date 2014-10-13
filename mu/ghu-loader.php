@@ -43,6 +43,7 @@ function ghu_mu_plugin_active( $actions ) {
 	if ( isset( $actions['delete'] ) ) {
 		unset( $actions['delete'] );
 	}
+
 	return array_merge( array( 'mu-plugin' => 'Activated as mu-plugin' ), $actions );
 }
 
