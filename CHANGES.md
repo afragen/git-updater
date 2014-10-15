@@ -9,7 +9,6 @@
 * above revisions mostly due to @szepeviktor prodding me. ;-)
 * accept `CHANGES.md` or `CHANGELOG.md` for processing, for @GaryJ
 * composer support added, thanks @hyyan
-* switch to check .org plugin repo as json
 
 #### 2.8.1
 * fix for WP Coding Guidelines
