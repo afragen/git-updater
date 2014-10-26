@@ -1,9 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: afragen
- * Date: 10/25/14
- * Time: 3:39 PM
+ * GitHub Updater
+ *
+ * @package   GitHub_Updater
+ * @author    Andy Fragen
+ * @license   GPL-2.0+
+ * @link      https://github.com/afragen/github-updater
  */
 
 class GitHub_Updater_Settings extends GitHub_Updater {
@@ -12,7 +14,16 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	protected $options;
 
+	/**
+	 * Listing of plugins.
+	 * @var
+	 */
 	static $ghu_plugins;
+
+	/**
+	 * Listing of themes.
+	 * @var
+	 */
 	static $ghu_themes;
 
 
@@ -150,18 +161,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function sanitize( $input ) {
 		$new_input = array();
-		/*
-		if( isset( $input['id_number'] ) ) {
-			$new_input['id_number'] = absint( $input['id_number'] );
-		}*/
 		foreach ( $input as $id => $value ) {
 			$new_input[$id] = sanitize_text_field( $input[ $id ] );
 		}
-/*
-		if( isset( $input['token'] ) ) {
-			$new_input['token'] = sanitize_text_field( $input['token'] );
-		}
-*/
+
 		return $new_input;
 	}
 
@@ -169,7 +172,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_github_info() {
-		//print 'Enter your settings below:';
 		print 'Enter your GitHub Access Token';
 	}
 
@@ -177,31 +179,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_bitbucket_info() {
-		//print 'Enter your settings below:';
 		print 'Enter your Bitbucket password:';
 	}
 
 	/**
 	 * Get the settings option array and print one of its values
-	public function id_number_callback() {
-		printf(
-			'<input type="text" id="id_number" name="github_updater[id_number]" value="%s" />',
-			isset( $this->options['id_number'] ) ? esc_attr( $this->options['id_number']) : ''
-		);
-	}
-*/
-
-	/**
-	 * Get the settings option array and print one of its values
 	 */
-	/*
-	public function token_callback( $id ) {
-		printf(
-			'<input type="text" id="' . $id . '" name="github_updater[' . $id . ']" value="%s" />',
-			isset( $this->options[ $id ] ) ? esc_attr( $this->options[ $id ]) : ''
-		);
-	}*/
-
 	public function token_callback( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
