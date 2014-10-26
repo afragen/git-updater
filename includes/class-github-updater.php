@@ -89,7 +89,9 @@ class GitHub_Updater {
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
-		new GitHub_Updater_Settings;
+		if ( is_admin() ) {
+			new GitHub_Updater_Settings;
+		}
 	}
 
 	/**
