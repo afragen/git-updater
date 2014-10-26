@@ -53,7 +53,10 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
 				$repo_api->get_repo_meta();
 				$repo_api->get_remote_tag();
-				$repo_api->get_remote_changes( 'CHANGES.md' );
+				$changelog = $this->get_changelog_filename( $plugin->type );
+				if ( $changelog ) {
+					$repo_api->get_remote_changes( $changelog );
+				}
 				$plugin->download_link = $repo_api->construct_download_link();
 			}
 		}
@@ -65,6 +68,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 	}
+
 
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
@@ -89,12 +93,9 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
-		if ( is_wp_error( $wp_repo_data ) ) { return false; }
-		if ( ! empty( $wp_repo_data['body'] ) ) {
-			$wp_repo_body = unserialize( $wp_repo_data['body'] );
-			if ( is_object( $wp_repo_body ) ) {
-				$response = $wp_repo_body;
-			}
+		$wp_repo_body = unserialize( $wp_repo_data['body'] );
+		if ( is_object( $wp_repo_body ) ) {
+			$response = $wp_repo_body;
 		}
 
 		foreach ( (array) $this->config as $plugin ) {

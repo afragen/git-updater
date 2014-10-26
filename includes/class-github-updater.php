@@ -54,18 +54,45 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 	/**
+	 * Autoloader
+	 *
+	 * @param $class
+	 */
+	private function autoload( $class ) {
+		$classes = array(
+			'github_plugin_updater'        => 'class-plugin-updater.php',
+			'github_theme_updater'         => 'class-theme-updater.php',
+			'github_updater_github_api'    => 'class-github-api.php',
+			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
+			'parsedown'                    => 'Parsedown.php',
+		);
+
+		$cn = strtolower( $class );
+
+		if ( isset( $classes[ $cn ] ) ) {
+			require_once( $classes[ $cn ] );
+		}
+	}
+
+	/**
 	 * Constructor
 	 *
 	 * Calls $this->init() in init hook so other remote upgrader apps like
 	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
 	 * of GitHub_Updater's methods, especially renaming.
+	 *
+	 * Calls spl_autoload_register to set loading of classes.
 	 */
 	public function __construct() {
 		//add_action( 'init', array( $this, 'init' ) );
+		if ( function_exists( 'spl_autoload_register' ) ) {
+			spl_autoload_register( array( $this, 'autoload' ) );
+		}
 	}
 
 	/**
 	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
+	 * for proper user capabilities.
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
@@ -200,7 +227,7 @@ class GitHub_Updater {
 	private function multisite_get_themes() {
 		$themes     = array();
 		$theme_dirs = scandir( get_theme_root() );
-		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store' ) );
+		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store', 'index.php' ) );
 
 		foreach ( (array) $theme_dirs as $theme_dir ) {
 			$themes[] = wp_get_theme( $theme_dir );
@@ -322,7 +349,7 @@ class GitHub_Updater {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
-		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> in your repository.';
+		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.';
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
 		$this->$type->downloaded            = 0;
@@ -353,7 +380,6 @@ class GitHub_Updater {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		//$update = array( 'update-selected', 'update-selected-themes', 'upgrade-theme', 'upgrade-plugin' );
 
 		if ( isset( $source ) ) {
 			foreach ( (array) $this->config as $git_repo ) {
@@ -391,6 +417,87 @@ class GitHub_Updater {
 		// Otherwise, return an error
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new WP_Error();
+	}
+
+	/**
+	 * Take remote file contents as string and parse headers.
+	 *
+	 * @param $contents
+	 * @param $type
+	 *
+	 * @return array
+	 */
+	protected function get_file_headers( $contents, $type ) {
+
+		$default_plugin_headers = array(
+			'Name'        => 'Plugin Name',
+			'PluginURI'   => 'Plugin URI',
+			'Version'     => 'Version',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+			'Network'     => 'Network',
+		);
+
+		$default_theme_headers = array(
+			'Name'        => 'Theme Name',
+			'ThemeURI'    => 'Theme URI',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'Version'     => 'Version',
+			'Template'    => 'Template',
+			'Status'      => 'Status',
+			'Tags'        => 'Tags',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+		);
+
+		if ( false !== strpos( $type, 'plugin' ) ) {
+			$all_headers = $default_plugin_headers;
+		}
+
+		if ( false !== strpos( $type, 'theme' ) ) {
+			$all_headers = $default_theme_headers;
+		}
+
+		// Make sure we catch CR-only line endings.
+		$file_data = str_replace( "\r", "\n", $contents );
+
+		// Merge extra headers and default headers.
+		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );
+		$all_headers = array_unique( $all_headers );
+
+		foreach ( $all_headers as $field => $regex ) {
+			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
+				$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
+			} else {
+				$all_headers[ $field ] = '';
+			}
+		}
+
+		return $all_headers;
+	}
+
+	/**
+	 * Get filename of changelog and return
+	 *
+	 * @param $type
+	 *
+	 * @return bool or variable
+	 */
+	protected function get_changelog_filename( $type ) {
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
+
+		foreach ( $changelogs as $changes ) {
+			if ( file_exists( $this->$type->local_path . $changes ) ) {
+				return $changes;
+			}
+		}
+
+			return false;
 	}
 
 	/**

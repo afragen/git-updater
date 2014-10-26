@@ -43,7 +43,10 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers     = array( 'Bitbucket Plugin URI', 'Bitbucket Branch' );
+		$ghu_extra_headers     = array(
+			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
+			'Bitbucket Branch'     => 'Bitbucket Branch',
+		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -57,7 +60,10 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers     = array( 'Bitbucket Theme URI', 'Bitbucket Branch' );
+		$ghu_extra_headers     = array(
+			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
+			'Bitbucket Branch'    => 'Bitbucket Branch',
+		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -110,23 +116,12 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		/*
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
-		}
-
-		// If a branch has been given, only check that for the remote info.
-		// If it's not been given, GitHub will use the Default branch.
-		if ( ! empty( $this->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-		*/
-
 		return 'https://bitbucket.org/api/' . $endpoint;
 	}
 
 	/**
-	 * Read the remote file.
+	 * Read the remote file and parse headers.
+	 * Saves headers to transient.
 	 *
 	 * Uses a transient to limit the calls to the API.
 	 */
@@ -135,50 +130,29 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = $this->get_default_branch( $response );
+				$this->type->branch = 'master';
 			}
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $file );
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
 
 			if ( $response ) {
+				$contents = $response->data;
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_transient( $file, $response );
 			}
 		}
-
-		$this->type->branch = $this->get_default_branch( $response );
 
 		if ( ! $response || isset( $response->message ) ) {
 			return false;
 		}
 
-		$this->type->transient = $response;
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', $response->data, $matches );
-
-		if ( ! empty( $matches[1] ) ) {
-			$this->type->remote_version = trim( $matches[1] );
+		if ( ! is_array( $response ) ) {
+			return false;
 		}
+		$this->type->transient      = $response;
+		$this->type->branch         = ( ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master' );
+		$this->type->remote_version = $response['Version'];
 
 		return true;
-	}
-
-	/**
-	 * Parse the remote info to find what the default branch is.
-	 *
-	 * If we've had to call this method, we know that a branch header has not been provided.
-	 * As such the remote info was retrieved with a ?ref=... query argument.
-	 *
-	 * @param array API object
-	 *
-	 * @return string Default branch name.
-	 */
-	protected function get_default_branch( $response ) {
-		if ( ! empty( $this->type->branch ) ) {
-			return $this->type->branch;
-		}
-
-		// If we can't contact Bitbucket API, then assume a sensible default in case the non-API part of Bitbucket is working.
-		if ( ! $response || ! isset( $this->type->branch ) ) {
-			return 'master';
-		}
 	}
 
 	/**
@@ -273,22 +247,16 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		// early exit if $changes file doesn't exist locally. Saves an API call.
-		if ( ! file_exists( $this->type->local_path . $changes ) ) {
-			return false;
-		}
-
-		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
-			require_once 'markdown.php';
-		}
-
 		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit($this->type->branch) . $changes  );
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = 'master';
+			}
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
 
 			if ( ! $response ) {
-				$response['message'] = 'No CHANGES.md found';
+				$response['message'] = 'No changelog found';
 				$response = (object) $response;
 			}
 
@@ -304,11 +272,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			if ( function_exists( 'Markdown' ) ) {
-				$changelog = Markdown( $response->data );
-			} else {
-				$changelog = '<pre>' . $response->data . '</pre>';
-			}
+			$parser    = new Parsedown();
+			$changelog = $parser->text( $response->data );
 			$this->set_transient( 'changelog', $changelog );
 		}
 

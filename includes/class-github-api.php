@@ -41,7 +41,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers     = array( 'GitHub Plugin URI', 'GitHub Branch', 'GitHub Access Token' );
+		$ghu_extra_headers     = array(
+			'GitHub Plugin URI'   => 'GitHub Plugin URI',
+			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Access Token' => 'GitHub Access Token',
+		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -55,7 +59,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers     = array( 'GitHub Theme URI', 'GitHub Branch', 'GitHub Access Token' );
+		$ghu_extra_headers     = array(
+			'GitHub Theme URI'    => 'GitHub Theme URI',
+			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Access Token' => 'GitHub Access Token',
+		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -125,7 +133,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Read the remote file.
+	 * Read the remote file and parse headers.
+	 * Saves headers to transient.
 	 *
 	 * Uses a transient to limit the calls to the API.
 	 */
@@ -136,51 +145,24 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 
 			if ( $response ) {
+				$contents = base64_decode( $response->content );
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_transient( $file, $response );
 			}
 		}
-
-		$this->type->branch = $this->get_default_branch( $response );
 
 		if ( ! $response || isset( $response->message ) ) {
 			return false;
 		}
 
-		$this->type->transient = $response;
-		preg_match( '/^[ \t\/*#@]*Version\:\s*(.*)$/im', base64_decode( $response->content ), $matches );
-
-		if ( ! empty( $matches[1] ) ) {
-			$this->type->remote_version = trim( $matches[1] );
+		if ( ! is_array( $response ) ) {
+			return false;
 		}
+		$this->type->transient      = $response;
+		$this->type->branch         = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
+		$this->type->remote_version = $response['Version'];
 
 		return true;
-	}
-
-	/**
-	 * Parse the remote info to find what the default branch is.
-	 *
-	 * If we've had to call this method, we know that a branch header has not been provided.
-	 * As such the remote info was retrieved with a ?ref=... query argument.
-	 *
-	 * @param array API object
-	 *
-	 * @return string Default branch name.
-	 */
-	protected function get_default_branch( $response ) {
-		if ( ! empty( $this->type->branch ) ) {
-			return $this->type->branch;
-		}
-
-		// If we can't contact GitHub API, then assume a sensible default in case the non-API part of GitHub is working.
-		if ( ! $response || ! isset( $response->url ) || isset( $response->message ) ) {
-			return 'master';
-		}
-
-		// Assuming we've got some remote info, parse the 'url' field to get the last bit of the ref query string
-		$components = parse_url( $response->url, PHP_URL_QUERY );
-		parse_str( $components );
-
-		return $ref;
 	}
 
 	/**
@@ -278,15 +260,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		// early exit if $changes file doesn't exist locally. Saves an API call.
-		if ( ! file_exists( $this->type->local_path . $changes ) ) {
-			return false;
-		}
-
-		if ( ! class_exists( 'MarkdownExtra_Parser' ) && ! function_exists( 'Markdown' ) ) {
-			require_once 'markdown.php';
-		}
-
 		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
@@ -304,11 +277,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			if ( function_exists( 'Markdown' ) ) {
-				$changelog = Markdown( base64_decode( $response->content ) );
-			} else {
-				$changelog = '<pre>' . base64_decode( $response->content ) . '</pre>';
-			}
+			$parser    = new Parsedown();
+			$changelog = $parser->text( base64_decode( $response->content ) );
 			$this->set_transient( 'changelog', $changelog );
 		}
 

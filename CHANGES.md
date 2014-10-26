@@ -1,4 +1,15 @@
 
+#### 2.9.0
+* move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.
+* now loading classes via `spl_autoload_register`
+* switched to `erusev/parsedown` for rendering changelogs, faster and more light-weight.
+* now parses remote file info to save only file headers to transient. Hopefully speeds up database retrieval of transient.
+* added README link to GitHub Link plugin by @szepeviktor
+* added mu-plugin option and instructions.
+* above revisions mostly due to @szepeviktor prodding me. ;-)
+* accept `CHANGES.md` or `CHANGELOG.md` for processing, for @GaryJ
+* composer support added, thanks @hyyan
+
 #### 2.8.1
 * fix for WP Coding Guidelines
 * added check for upgrade process instead of `$_GET['action']` (props @SLv99)

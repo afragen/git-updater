@@ -2,7 +2,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
-* Tested up to: 3.9.1
+* Tested up to: 4.0
 * Stable tag: master
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -28,16 +28,21 @@ or
 
 ## Installation
 
+### Composer
+
+Run the composer command: ```composer require afragen/github-updater```
+
+
 ### Upload
 
-1. Download the latest tagged archive (choose the "zip" option).
+1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
 2. Go to the __Plugins -> Add New__ screen and click the __Upload__ tab.
 3. Upload the zipped archive directly.
 4. Go to the Plugins screen and click __Activate__.
 
 ### Manual
 
-1. Download the latest tagged archive (choose the "zip" option).
+1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
 2. Unzip the archive.
 3. Copy the folder to your `/wp-content/plugins/` directory.
 4. Go to the Plugins screen and click __Activate__.
@@ -48,9 +53,27 @@ Check out the Codex for more information about [installing plugins manually](htt
 
 Using git, browse to your `/wp-content/plugins/` directory and clone this repository:
 
-`git clone git@github.com:afragen/github-updater.git`
+`git clone https://github.com/afragen/github-updater.git`
 
 Then go to your Plugins screen and click __Activate__.
+
+### Must Use Plugin
+
+1. Choose a method from above for installation.
+1. **DO NOT** activate!
+1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`.
+
+```
+# in Linux
+cd <WordPress root>
+ln -sv wp-content/plugins/github-updater/mu/ghu-loader.php wp-content/mu-plugins
+
+:: in Windows (Vista, 7, 8)
+cd /D <WordPress root>
+mklink wp-content\mu-plugins\ghu-loader.php wp-content\plugins\github-updater\mu\ghu-loader.php
+```
+
+This way you get automatic updates but cannot deactivate the plugin.
 
 ## Usage
 
@@ -140,6 +163,11 @@ If you develop your plugin on GitHub and it also resides in the WP.org repo, the
 
 The same applies for Bitbucket hosted plugins.
 
+## Extras
+
+[szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
+<https://github.com/szepeviktor/wordpress-plugin-construction/tree/master/github-link>
+
 ## Issues
 
 Please log issues on the GitHub at https://github.com/afragen/github-updater/issues
@@ -162,7 +190,7 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Includes [Michel Fortin](https://github/com/michelf)'s [PHP-Markdown](https://github.com/michelf/php-markdown) for rendering ChangeLogs.
+Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
 
 ## Pull Requests
 
