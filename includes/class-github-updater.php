@@ -320,7 +320,7 @@ class GitHub_Updater {
 						if ( empty( $bitbucket_uri ) ) {
 							break;
 						}
-						
+
 						$git_theme['type']                    = 'bitbucket_theme';
 
 						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
