@@ -31,20 +31,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	}
 
 
-/**
+	/**
 	 * Add options page
 	 */
 	public function add_plugin_page() {
-		/*
-		// This page will be under "Settings"
-		add_options_page(
-			'Settings Admin',
-			'My Settings',
-			'manage_options',
-			'my-setting-admin',
-			array( $this, 'create_admin_page' )
-		);
-*/
 		if ( is_multisite() ) {
 			add_submenu_page(
 				'settings.php',
@@ -63,14 +53,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				array( $this, 'create_admin_page' )
 			);
 		}
-
 	}
 
 	/**
 	 * Options page callback
 	 */
 	public function create_admin_page() {
-		// Set class property
 		$this->options = get_site_option( 'github_updater' );
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		?>
@@ -78,7 +66,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			<h2>GitHub Updater Settings</h2>
 			<form method="post" action="<?php echo $action; ?>">
 				<?php
-				// This prints out all hidden setting fields
 				settings_fields( 'github_updater' );
 				do_settings_sections( 'github-updater' );
 				submit_button();
@@ -102,40 +89,16 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_settings_section(
 			'github_id', // ID
 			'GitHub Private Settings', // Title
-			array( $this, 'print_section_github_info' ), // Callback
+			array( $this, 'print_section_github_info' ),
 			'github-updater' // Page
 		);
 
 		add_settings_section(
 			'bitbucket_id',
 			'Bitbucket Private Settings',
-			array( $this, 'print_section_bitbucket_info' ), // Callback
+			array( $this, 'print_section_bitbucket_info' ),
 			'github-updater'
 		);
-
-/*		add_settings_field(
-			'id_number', // ID
-			'ID Number', // Title
-			array( $this, 'id_number_callback' ), // Callback
-			'github-updater', // Page
-			'github_id' // Section
-		);
-
-		add_settings_field(
-			'token',
-			'Access Token',
-			array( $this, 'token_callback' ),
-			'github-updater',
-			'github_id'
-		);
-
-		add_settings_field(
-			'password',
-			'Password',
-			array( $this, 'token_callback' ),
-			'github-updater',
-			'bitbucket_id'
-		);*/
 
 		$this->ghu_tokens();
 	}
@@ -143,7 +106,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	/**
 	 * Create and return settings fields.
 	 *
-	 * @return array
+	 * @return void
 	 */
 	public function ghu_tokens() {
 		$setting_field = array();
@@ -167,7 +130,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 					$setting_field[ $token->repo ]['section'] = 'bitbucket_id';
 				}
 
-				$setting_fields =  add_settings_field(
+				add_settings_field(
 					$setting_field[ $token->repo ]['id'],
 					$setting_field[ $token->repo ]['title'],
 					array( $this, 'token_callback' ),
@@ -177,8 +140,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				);
 			}
 		}
-
-		return $setting_fields;
 	}
 
 	/**
