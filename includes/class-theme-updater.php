@@ -108,6 +108,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		if ( ! is_multisite() ) {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
+
+		GitHub_Updater_Settings::$ghu_themes = $this->config;
 	}
 
 	/**

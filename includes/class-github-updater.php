@@ -64,6 +64,7 @@ class GitHub_Updater {
 			'github_theme_updater'         => 'class-theme-updater.php',
 			'github_updater_github_api'    => 'class-github-api.php',
 			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
+			'github_updater_settings'      => 'class-github-updater-settings.php',
 			'parsedown'                    => 'Parsedown.php',
 		);
 
@@ -88,6 +89,7 @@ class GitHub_Updater {
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
+		new GitHub_Updater_Settings;
 	}
 
 	/**
@@ -147,7 +149,8 @@ class GitHub_Updater {
 	*
 	*/
 	protected function get_local_plugin_meta( $headers ) {
-		$git_repo      = array();
+		$git_repo = array();
+		$options  = get_site_option( 'github_updater' );
 
 		foreach ( (array) self::$extra_headers as $key => $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
@@ -175,6 +178,9 @@ class GitHub_Updater {
 					$git_repo['branch']       = $headers['GitHub Branch'];
 					break;
 				case 'GitHub Access Token':
+					if ( isset( $git_repo['repo'] ) ) {
+						$headers['GitHub Access Token'] = $options[ $git_repo['repo' ] ];
+					}
 					if ( empty( $headers['GitHub Access Token'] ) ) {
 						break;
 					}
@@ -241,8 +247,9 @@ class GitHub_Updater {
 	 * Populates variable array
 	 */
 	protected function get_theme_meta() {
-		$git_themes    = array();
-		$themes        = wp_get_themes();
+		$git_themes = array();
+		$themes     = wp_get_themes();
+		$options    = get_site_option( 'github_updater' );
 
 		if ( is_multisite() ) {
 			$themes = $this->multisite_get_themes();
@@ -264,11 +271,13 @@ class GitHub_Updater {
 				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) {
 					continue;
 				}
+
 				switch( $value ) {
 					case 'GitHub Theme URI':
 						if ( empty( $github_uri ) ) {
 							break;
 						}
+
 						$git_theme['type']                    = 'github_theme';
 
 						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
@@ -291,6 +300,9 @@ class GitHub_Updater {
 						$git_theme['branch']                  = $github_branch;
 						break;
 					case 'GitHub Access Token':
+						if ( isset( $git_theme['repo'] ) ) {
+							$github_token                     = $options[ $git_theme['repo'] ];
+						}
 						if ( empty( $github_token ) ) {
 							break;
 						}
@@ -308,6 +320,7 @@ class GitHub_Updater {
 						if ( empty( $bitbucket_uri ) ) {
 							break;
 						}
+						
 						$git_theme['type']                    = 'bitbucket_theme';
 
 						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
