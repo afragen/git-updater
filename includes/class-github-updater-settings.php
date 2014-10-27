@@ -34,11 +34,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
-
-		// Merge and update new changes
-		if ( isset( $_POST['github_updater'] ) ) {
-			update_site_option( 'github_updater', $_POST['github_updater'] );
-		}
 	}
 
 
@@ -91,11 +86,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function page_init() {
 		$this->options = get_site_option( 'github_updater' );
-		register_setting(
-			'github_updater', // Option group
-			'github_updater', // Option name
-			array( $this, 'sanitize' ) // Sanitize
-		);
 
 		add_settings_section(
 			'github_id', // ID
@@ -121,7 +111,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function ghu_tokens() {
 		$setting_field = array();
-		$ghu_tokens    = array( GitHub_Updater_Settings::$ghu_plugins, GitHub_Updater_Settings::$ghu_themes );
+		$ghu_tokens    = array( self::$ghu_plugins, self::$ghu_themes );
 
 		foreach ( $ghu_tokens as $key => $tokens ) {
 			foreach ( $tokens as $token) {
@@ -130,14 +120,14 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				$setting_field[ $token->repo ]['id'] = $token->repo;
 				$setting_field[ $token->repo ]['page'] = 'github-updater';
 				if ( false !== strpos( $token->type, 'theme') ) {
-					$type = ' Theme';
+					$type = 'Theme: ';
 				}
 				if ( false !== strpos( $token->type, 'github' ) ) {
-					$setting_field[ $token->repo ]['title'] = $token->name . $type;
+					$setting_field[ $token->repo ]['title'] = $type . $token->name;
 					$setting_field[ $token->repo ]['section'] = 'github_id';
 				}
 				if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-					$setting_field[ $token->repo ]['title'] = $token->name . $type;
+					$setting_field[ $token->repo ]['title'] = $type . $token->name;
 					$setting_field[ $token->repo ]['section'] = 'bitbucket_id';
 				}
 
@@ -149,6 +139,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 					$setting_field[ $token->repo ]['section'],
 					$setting_field[ $token->repo ]['id']
 				);
+
+				register_setting(
+					'github_updater', // Option group
+					$setting_field[ $token->repo ]['id'], // Option name
+					array( $this, 'sanitize' ) // Sanitize
+				);
+
 			}
 		}
 	}
