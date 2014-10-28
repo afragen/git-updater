@@ -63,12 +63,14 @@ Then go to your Plugins screen and click __Activate__.
 1. **DO NOT** activate!
 1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`.
 
+#### in Linux
 ```
-# in Linux
 cd <WordPress root>
 ln -sv wp-content/plugins/github-updater/mu/ghu-loader.php wp-content/mu-plugins
+```
 
-:: in Windows (Vista, 7, 8)
+#### in Windows (Vista, 7, 8)
+```
 cd /D <WordPress root>
 mklink wp-content\mu-plugins\ghu-loader.php wp-content\plugins\github-updater\mu\ghu-loader.php
 ```
@@ -145,11 +147,11 @@ Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket The
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the header `GitHub Access Token: xxxxxxxxx` to your plugin or theme.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the plugin or theme in the Settings page.
 
 ### Bitbucket Private Repositories
 
-The header should be in the following format: `Bitbucket Plugin URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>` or `Bitbucket Theme URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>`
+In order to specify a private repository you will need to add your Bitbucket password to the plugin or theme in the Settings page.
 
 Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
 

@@ -36,7 +36,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 	}
 
-
 	/**
 	 * Add options page
 	 */
