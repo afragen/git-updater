@@ -69,6 +69,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		?>
 		<div class="wrap">
 			<h2>GitHub Updater Settings</h2>
+			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
+				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
+			<?php endif; ?>
 			<form method="post" action="<?php echo $action; ?>">
 				<?php
 				settings_fields( 'github_updater' );
@@ -168,18 +171,21 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_github_info() {
-		print 'Enter your GitHub Access Token';
+		print __( 'Enter your GitHub Access Token', 'github-updater' );
 	}
 
 	/**
 	 * Print the Section text
 	 */
 	public function print_section_bitbucket_info() {
-		print 'Enter your Bitbucket password:';
+		print __( 'Enter your Bitbucket password:', 'github-updater' );
 	}
+
 
 	/**
 	 * Get the settings option array and print one of its values
+	 *
+	 * @param $id
 	 */
 	public function token_callback( $id ) {
 		?>
