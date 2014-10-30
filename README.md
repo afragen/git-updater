@@ -57,7 +57,7 @@ Using git, browse to your `/wp-content/plugins/` directory and clone this reposi
 
 Then go to your Plugins screen and click __Activate__.
 
-### Must Use Plugin
+### Install as a Must Use Plugin (optional)
 
 1. Choose a method from above for installation.
 1. **DO NOT** activate!
