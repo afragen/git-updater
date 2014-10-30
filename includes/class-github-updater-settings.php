@@ -8,6 +8,12 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+/**
+ * Add a settings page.
+ * 
+ * @package GitHub_Updater_Settings
+ * @author Andy Fragen
+ */
 class GitHub_Updater_Settings extends GitHub_Updater {
 	/**
 	 * Holds the values to be used in the fields callbacks
