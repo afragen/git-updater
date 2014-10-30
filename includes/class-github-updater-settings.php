@@ -64,7 +64,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Options page callback
 	 */
 	public function create_admin_page() {
-		$this->options = get_site_option( 'github_updater' );
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		?>
 		<div class="wrap">
@@ -87,13 +86,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Register and add settings
 	 */
 	public function page_init() {
-		$this->options = get_site_option( 'github_updater' );
+		$this->ghu_tokens();
 
 		add_settings_section(
-			'github_id', // ID
-			'GitHub Private Settings', // Title
+			'github_id',                                 // ID
+			'GitHub Private Settings',                   // Title
 			array( $this, 'print_section_github_info' ),
-			'github-updater' // Page
+			'github-updater'                             // Page
 		);
 
 		add_settings_section(
@@ -103,7 +102,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			'github-updater'
 		);
 
-		$this->ghu_tokens();
 	}
 
 	/**
@@ -112,6 +110,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * @return void
 	 */
 	public function ghu_tokens() {
+		$this->options = get_site_option( 'github_updater' );
 		$setting_field = array();
 		$ghu_tokens    = array( self::$ghu_plugins, self::$ghu_themes );
 
@@ -143,9 +142,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				);
 
 				register_setting(
-					'github_updater', // Option group
+					'github_updater',                     // Option group
 					$setting_field[ $token->repo ]['id'], // Option name
-					array( $this, 'sanitize' ) // Sanitize
+					array( $this, 'sanitize' )            // Sanitize
 				);
 
 			}
