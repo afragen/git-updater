@@ -10,7 +10,7 @@
 
 /**
  * Add a settings page.
- * 
+ *
  * @package GitHub_Updater_Settings
  * @author Andy Fragen
  */
