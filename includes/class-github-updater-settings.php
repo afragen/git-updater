@@ -127,7 +127,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				$setting_field[ $token->repo ]['id'] = $token->repo;
 				$setting_field[ $token->repo ]['page'] = 'github-updater';
 				if ( false !== strpos( $token->type, 'theme') ) {
-					$type = 'Theme: ';
+					$type = __( 'Theme: ', 'github-updater' );
 				}
 				if ( false !== strpos( $token->type, 'github' ) ) {
 					$setting_field[ $token->repo ]['title'] = $type . $token->name;
