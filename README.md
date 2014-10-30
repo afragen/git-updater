@@ -2,7 +2,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
-* Tested up to: 4.0
+* Tested up to: 4.1beta
 * Stable tag: master
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -75,7 +75,7 @@ cd /D <WordPress root>
 mklink wp-content\mu-plugins\ghu-loader.php wp-content\plugins\github-updater\mu\ghu-loader.php
 ```
 
-This way you get automatic updates but cannot deactivate the plugin.
+This way you get automatic updates and cannot deactivate the plugin.
 
 ## Usage
 
@@ -147,13 +147,13 @@ Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket The
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the plugin or theme in the Settings page.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
 
 ### Bitbucket Private Repositories
 
-In order to specify a private repository you will need to add your Bitbucket password to the plugin or theme in the Settings page.
+In order to specify a private repository you will need to add your Bitbucket password to the appropriate plugin or theme in the Settings page.
 
-Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
+Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59), though it seems Bitbucket knows this is an issue and won't fix. If someone wants to figure out and create a PR for oAuth...
 
 ## Deleting Transients
 
@@ -184,7 +184,7 @@ When first downloading and installing a plugin from GitHub you might have to do 
 
 ## ChangeLog
 
-See [CHANGES.md](CHANGES.md).
+See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELOG.md` file.
 
 ## Credits
 
