@@ -89,9 +89,6 @@ class GitHub_Updater {
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
-		if ( is_admin() ) {
-			new GitHub_Updater_Settings;
-		}
 	}
 
 	/**
@@ -104,6 +101,9 @@ class GitHub_Updater {
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			new GitHub_Theme_Updater;
+		}
+		if ( is_admin() ) {
+			new GitHub_Updater_Settings;
 		}
 	}
 
