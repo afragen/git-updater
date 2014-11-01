@@ -37,15 +37,14 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Start up
 	 */
 	public function __construct() {
-		if ( ! defined( GHU_PLUGIN_FILE) ) {
-			define( GHU_PLUGIN_FILE, 'github-updater/github-updater.php' );
-		}
+		$plugin_name = 'github-updater/github-updater.php';
+
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 
-		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . GHU_PLUGIN_FILE
- : 'plugin_action_links_' . GHU_PLUGIN_FILE
+		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $plugin_name
+ : 'plugin_action_links_' . $plugin_name
 , array( $this, 'plugin_action_links' ) );
 
 	}
