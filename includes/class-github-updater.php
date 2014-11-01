@@ -102,7 +102,7 @@ class GitHub_Updater {
 		if ( current_user_can( 'update_themes' ) ) {
 			new GitHub_Theme_Updater;
 		}
-		if ( is_admin() ) {
+		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new GitHub_Updater_Settings;
 		}
 	}
