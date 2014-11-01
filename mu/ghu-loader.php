@@ -43,6 +43,9 @@ function ghu_mu_plugin_active( $actions ) {
 	if ( isset( $actions['delete'] ) ) {
 		unset( $actions['delete'] );
 	}
+	if ( isset( $actions['deactivate'] ) ) {
+		unset( $actions['deactivate'] );
+	}
 
 	return array_merge( array( 'mu-plugin' => __('Activated as mu-plugin', 'github-updater' ) ), $actions );
 }
