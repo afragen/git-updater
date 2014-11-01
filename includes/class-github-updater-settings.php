@@ -24,13 +24,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Listing of plugins.
 	 * @var
 	 */
-	static $ghu_plugins;
+	static $ghu_plugins = array();
 
 	/**
 	 * Listing of themes.
 	 * @var
 	 */
-	static $ghu_themes;
+	static $ghu_themes = array();
 
 
 	/**
@@ -117,43 +117,41 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function ghu_tokens() {
 		$this->options = get_site_option( 'github_updater' );
-		$setting_field = array();
-		$ghu_tokens    = array( self::$ghu_plugins, self::$ghu_themes );
+		$ghu_tokens    = array_merge( self::$ghu_plugins, self::$ghu_themes );
 
-		foreach ( $ghu_tokens as $key => $tokens ) {
-			foreach ( $tokens as $token) {
-				$type = '';
-
-				$setting_field[ $token->repo ]['id'] = $token->repo;
-				$setting_field[ $token->repo ]['page'] = 'github-updater';
-				if ( false !== strpos( $token->type, 'theme') ) {
-					$type = __( 'Theme: ', 'github-updater' );
-				}
-				if ( false !== strpos( $token->type, 'github' ) ) {
-					$setting_field[ $token->repo ]['title'] = $type . $token->name;
-					$setting_field[ $token->repo ]['section'] = 'github_id';
-				}
-				if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-					$setting_field[ $token->repo ]['title'] = $type . $token->name;
-					$setting_field[ $token->repo ]['section'] = 'bitbucket_id';
-				}
-
-				add_settings_field(
-					$setting_field[ $token->repo ]['id'],
-					$setting_field[ $token->repo ]['title'],
-					array( $this, 'token_callback' ),
-					$setting_field[ $token->repo ]['page'],
-					$setting_field[ $token->repo ]['section'],
-					$setting_field[ $token->repo ]['id']
-				);
-
-				register_setting(
-					'github_updater',                     // Option group
-					$setting_field[ $token->repo ]['id'], // Option name
-					array( $this, 'sanitize' )            // Sanitize
-				);
-
+		foreach ( $ghu_tokens as $token ) {
+			$type = '';
+			$setting_field = array();
+			if ( false !== strpos( $token->type, 'theme') ) {
+				$type = __( 'Theme: ', 'github-updater' );
 			}
+
+			$setting_field['id'] = $token->repo;
+			$setting_field['page'] = 'github-updater';
+			if ( false !== strpos( $token->type, 'github' ) ) {
+				$setting_field['title'] = $type . $token->name;
+				$setting_field['section'] = 'github_id';
+			}
+			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
+				$setting_field['title'] = $type . $token->name;
+				$setting_field['section'] = 'bitbucket_id';
+			}
+
+			add_settings_field(
+				$setting_field['id'],
+				$setting_field['title'],
+				array( $this, 'token_callback' ),
+				$setting_field['page'],
+				$setting_field['section'],
+				$setting_field['id']
+			);
+
+			register_setting(
+				'github_updater',                     // Option group
+				$setting_field['id'], // Option name
+				array( $this, 'sanitize' )            // Sanitize
+			);
+
 		}
 	}
 
