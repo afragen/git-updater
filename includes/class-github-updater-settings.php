@@ -118,6 +118,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function ghu_tokens() {
 		$this->options = get_site_option( 'github_updater' );
 		$ghu_tokens    = array_merge( self::$ghu_plugins, self::$ghu_themes );
+		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
 
 		foreach ( $ghu_tokens as $token ) {
 			$type = '';
