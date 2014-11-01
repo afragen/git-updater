@@ -37,9 +37,17 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Start up
 	 */
 	public function __construct() {
+		if ( ! defined( GHU_PLUGIN_FILE) ) {
+			define( GHU_PLUGIN_FILE, 'github-updater/github-updater.php' );
+		}
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
+
+		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . GHU_PLUGIN_FILE
+ : 'plugin_action_links_' . GHU_PLUGIN_FILE
+, array( $this, 'plugin_action_links' ) );
+
 	}
 
 	/**
@@ -218,5 +226,24 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		) );
 		exit;
 	}
+
+	/**
+	 * Add setting link to plugin page.
+	 *
+	 * Applied to the list of links to display on the plugins page (beside the activate/deactivate links).
+	 *
+	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
+	 *
+	 * @param $links
+	 *
+	 * @return array
+	 */
+	public function plugin_action_links( $links ) {
+		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
+		$link = array( '<a href="' . network_admin_url( $settings_page ) . '?page=github-updater">' . __( 'Settings', 'github-updater' ) . '</a>' );
+
+		return array_merge( $links, $link );
+	}
+
 
 }
