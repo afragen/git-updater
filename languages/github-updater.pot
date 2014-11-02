@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: GitHub Updater\n"
+"POT-Creation-Date: 2014-11-02 11:23+0100\n"
+"PO-Revision-Date: 2014-11-02 11:23+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.6.10\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class-github-updater-settings.php:63
+#: includes/class-github-updater-settings.php:71
+msgid "GitHub Updater Settings"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:64
+#: includes/class-github-updater-settings.php:72
+msgid "GitHub Updater"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:89
+msgid "Saved."
+msgstr ""
+
+#: includes/class-github-updater-settings.php:138
+msgid "Theme: "
+msgstr ""
+
+#: includes/class-github-updater-settings.php:189
+msgid "Enter your GitHub Access Token"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:196
+msgid "Enter your Bitbucket password:"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:246
+msgid "Settings"
+msgstr ""
+
+#: includes/class-github-updater.php:420
+#, php-format
+msgid "Renaming %s to %s&#8230;"
+msgstr ""
+
+#: includes/class-github-updater.php:428
+msgid "Rename successful&#8230;"
+msgstr ""
+
+#: includes/class-github-updater.php:433
+msgid "Unable to rename downloaded repository."
+msgstr ""
+
+#: includes/class-theme-updater.php:219 includes/class-theme-updater.php:227
+#: includes/class-theme-updater.php:235
+#, php-format
+msgid "GitHub Updater shows a new version of %1$s available."
+msgstr ""
+
+#: includes/class-theme-updater.php:219 includes/class-theme-updater.php:227
+#, php-format
+msgid "View version %4$s details"
+msgstr ""
+
+#: includes/class-theme-updater.php:227
+msgid "Automatic update is unavailable for this theme."
+msgstr ""
+
+#: includes/class-theme-updater.php:235
+#, php-format
+msgid ""
+"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgstr ""
+
+#: mu/ghu-loader.php:51
+msgid "Activated as mu-plugin"
+msgstr ""
