@@ -90,7 +90,7 @@ class GitHub_Updater {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
 
-		// Reverse sort to run access token last
+		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
 	}
 
@@ -183,13 +183,12 @@ class GitHub_Updater {
 					$git_repo['branch']       = $headers['GitHub Branch'];
 					break;
 				case 'GitHub Access Token':
-					if ( isset( $git_repo['repo'] ) ) {
-						$headers['GitHub Access Token'] = $options[ $git_repo['repo' ] ];
-					}
 					if ( empty( $headers['GitHub Access Token'] ) ) {
 						break;
 					}
-					$git_repo['access_token'] = $headers['GitHub Access Token'];
+					$git_repo['access_token']  = $headers['GitHub Access Token'];
+
+					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], $options );
 					break;
 			}
 		}
@@ -214,6 +213,8 @@ class GitHub_Updater {
 					$git_repo['owner']      = $owner_repo[0];
 					$git_repo['repo']       = $owner_repo[1];
 					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
+
+					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], $options );
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) {
@@ -305,13 +306,12 @@ class GitHub_Updater {
 						$git_theme['branch']                  = $github_branch;
 						break;
 					case 'GitHub Access Token':
-						if ( isset( $git_theme['repo'] ) ) {
-							$github_token                     = $options[ $git_theme['repo'] ];
-						}
 						if ( empty( $github_token ) ) {
 							break;
 						}
 						$git_theme['access_token']            = $github_token;
+
+						$this->save_header_options( $git_theme['repo'], $github_token, $options );
 						break;
 				}
 			}
@@ -342,6 +342,8 @@ class GitHub_Updater {
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+
+						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], $options );
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) {
@@ -624,4 +626,18 @@ class GitHub_Updater {
 		return $rating;
 	}
 
+	/**
+	 * Save access tokens and passwords from headers to option.
+	 *
+	 * @param $repo
+	 * @param $value
+	 * @param $options
+	 */
+	protected function save_header_options( $repo, $value, $options ) {
+		if ( ! $value ) {
+			return false;
+		}
+		$options[ $repo ] = $value;
+		update_site_option( 'github_updater', $options );
+	}
 }
