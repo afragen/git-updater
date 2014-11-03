@@ -89,6 +89,9 @@ class GitHub_Updater {
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
+
+		// Reverse sort to run access token last
+		arsort( self::$extra_headers );
 	}
 
 	/**
