@@ -129,6 +129,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function ghu_tokens() {
 		$this->options = get_site_option( 'github_updater' );
 		$ghu_tokens    = array_merge( self::$ghu_plugins, self::$ghu_themes );
+
 		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
 
 		foreach ( $ghu_tokens as $token ) {
@@ -138,14 +139,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				$type = __( 'Theme: ', 'github-updater' );
 			}
 
-			$setting_field['id'] = $token->repo;
-			$setting_field['page'] = 'github-updater';
+			$setting_field['id']    = $token->repo;
+			$setting_field['title'] = $type . $token->name;
+			$setting_field['page']  = 'github-updater';
 			if ( false !== strpos( $token->type, 'github' ) ) {
-				$setting_field['title'] = $type . $token->name;
 				$setting_field['section'] = 'github_id';
 			}
 			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-				$setting_field['title'] = $type . $token->name;
 				$setting_field['section'] = 'bitbucket_id';
 			}
 
@@ -205,7 +205,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function token_callback( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text"  name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( $this->options[ $id ] ); ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( $this->options[ $id ] ); ?>">
 		</label>
 		<?php
 	}
