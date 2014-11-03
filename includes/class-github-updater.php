@@ -235,7 +235,7 @@ class GitHub_Updater {
 	*
 	* @return array
 	*/
-	private function multisite_get_themes() {
+	protected function multisite_get_themes() {
 		$themes     = array();
 		$theme_dirs = scandir( get_theme_root() );
 		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store', 'index.php' ) );
