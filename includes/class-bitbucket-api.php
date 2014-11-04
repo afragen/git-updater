@@ -332,7 +332,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			unset( $args['headers']['Authorization'] );
 		}
 
-		if ( ! isset( $this->type ) && ! isset( $options[ $this->type->repo ] ) ) {
+		if ( ! isset( $this->type ) && ! empty( $options[ $this->type->repo ] ) ) {
 			return $args;
 		}
 
