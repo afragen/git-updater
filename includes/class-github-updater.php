@@ -89,9 +89,6 @@ class GitHub_Updater {
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
-
-		// Reverse sort to run plugin/theme URI first
-		arsort( self::$extra_headers );
 	}
 
 	/**
@@ -156,6 +153,9 @@ class GitHub_Updater {
 	protected function get_local_plugin_meta( $headers ) {
 		$git_repo = array();
 		$options  = get_site_option( 'github_updater' );
+
+		// Reverse sort to run plugin/theme URI first
+		arsort( self::$extra_headers );
 
 		foreach ( (array) self::$extra_headers as $key => $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
@@ -256,6 +256,9 @@ class GitHub_Updater {
 		$git_themes = array();
 		$themes     = wp_get_themes();
 		$options    = get_site_option( 'github_updater' );
+
+		// Reverse sort to run plugin/theme URI first
+		arsort( self::$extra_headers );
 
 		if ( is_multisite() ) {
 			$themes = $this->multisite_get_themes();
