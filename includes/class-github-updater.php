@@ -515,6 +515,7 @@ class GitHub_Updater {
 		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
 
 		foreach ( $changelogs as $changes ) {
+			strtolower( $changes );
 			if ( file_exists( $this->$type->local_path . $changes ) ) {
 				return $changes;
 			}
