@@ -29,7 +29,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Load main class
 if ( ! class_exists( 'GitHub_Updater' ) ) {
-	require_once 'includes/class-github-updater.php';
+	require 'includes/class-github-updater.php';
 	load_plugin_textdomain( 'github-updater', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 
