@@ -10,11 +10,11 @@
 
 A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes.
 
-This plugin is not allowed in the wp.org repo. :frowning:
+This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows. The folder name of the theme or plugin **must** be the same as the repo name.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`
@@ -24,7 +24,7 @@ or
 `GitHub Plugin URI: afragen/github-updater`  
 `GitHub Plugin URI: https://github.com/afragen/github-updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
 
 ## Installation
 
@@ -57,7 +57,7 @@ Using git, browse to your `/wp-content/plugins/` directory and clone this reposi
 
 Then go to your Plugins screen and click __Activate__.
 
-### Install as a Must Use Plugin (optional)
+### Install GitHub Updater as a Must Use Plugin (optional)
 
 1. Choose a method from above for installation.
 1. **DO NOT** activate!
@@ -133,15 +133,11 @@ If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`
 
 ## Bitbucket Support
 
-The `Bitbucket Branch` header is supported for both plugins and themes.
-
-### Bitbucket Plugin Support
-
 Instead of the `GitHub Plugin URI` header you will need to use the `Bitbucket Plugin URI` header.
 
-### Bitbucket Theme Support
-
 Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket Theme URI` header.
+
+The `Bitbucket Branch` header is supported for both plugins and themes.
 
 ## Private Repositories
 
@@ -176,7 +172,7 @@ Please log issues on the GitHub at https://github.com/afragen/github-updater/iss
 
 If you are using a WordPress Multisite installation, the plugin **should** be network activated.
 
-When first downloading and installing a plugin from GitHub you might have to do the following.
+When first downloading and installing a plugin from GitHub you might have to do the following, otherwise the next update may not be able to cleanup after itself and re-activate the updated plugin or theme.
 
 1. Unzip the archive.
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.

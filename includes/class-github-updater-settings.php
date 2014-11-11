@@ -25,7 +25,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Holds the plugin basename
 	 * @var string
 	 */
-	protected $ghu_plugin_name = 'github-updater/github-updater.php';
+	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
 	 * Listing of plugins.
@@ -47,9 +47,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 
-		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name
- : 'plugin_action_links_' . $this->ghu_plugin_name
-, array( $this, 'plugin_action_links' ) );
+		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
 
 		// Load up options
 		$this->options = get_site_option( 'github_updater' );
@@ -129,8 +127,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * @return void
 	 */
 	public function ghu_tokens() {
-		$ghu_tokens    = array_merge( self::$ghu_plugins, self::$ghu_themes );
-
+		$ghu_tokens = array_merge( self::$ghu_plugins, self::$ghu_themes );
 		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
 
 		foreach ( $ghu_tokens as $token ) {
@@ -160,9 +157,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			);
 
 			register_setting(
-				'github_updater',                     // Option group
-				$setting_field['id'], // Option name
-				array( $this, 'sanitize' )            // Sanitize
+				'github_updater',           // Option group
+				$setting_field['id'],       // Option name
+				array( $this, 'sanitize' )  // Sanitize
 			);
 
 		}
@@ -213,7 +210,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 	/**
 	 * Update network settings.
-	 *
 	 * Used when plugin is network activated to save settings.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
@@ -233,13 +229,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 	/**
 	 * Add setting link to plugin page.
-	 *
 	 * Applied to the list of links to display on the plugins page (beside the activate/deactivate links).
 	 *
 	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
-	 *
 	 * @param $links
-	 *
 	 * @return array
 	 */
 	public function plugin_action_links( $links ) {
