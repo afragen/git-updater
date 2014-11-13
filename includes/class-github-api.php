@@ -45,6 +45,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			'GitHub Plugin URI'   => 'GitHub Plugin URI',
 			'GitHub Branch'       => 'GitHub Branch',
 			'GitHub Access Token' => 'GitHub Access Token',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
@@ -158,9 +160,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! is_array( $response ) ) {
 			return false;
 		}
-		$this->type->transient      = $response;
-		$this->type->branch         = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
-		$this->type->remote_version = $response['Version'];
+		$this->type->transient            = $response;
+		$this->type->branch               = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
+		$this->type->remote_version       = $response['Version'];
+		$this->type->requires_wp_version  = ( ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version );
+		$this->type->requires_php_version = ( ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version );
 
 		return true;
 	}
