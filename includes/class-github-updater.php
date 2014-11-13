@@ -385,6 +385,8 @@ class GitHub_Updater {
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
+		$this->$type->requires_wp_version   = '0.0.0';
+		$this->$type->requires_php_version  = '0.0.0';
 	}
 
 	/**

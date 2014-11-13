@@ -142,8 +142,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
-			$wp_version_ok   = ( 1 === version_compare( $wp_version, '3.9' ) );
-			$php_version_ok  = ( 1 === version_compare( phpversion(), '5.3' ) );
+			$wp_version_ok   = ( 1 === version_compare( $wp_version, $plugin->requires_wp_version ) );
+			$php_version_ok  = ( 1 === version_compare( phpversion(), $plugin->requires_php_version ) );
 
 			if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
 				$response = array(
