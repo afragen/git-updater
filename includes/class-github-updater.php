@@ -644,4 +644,5 @@ class GitHub_Updater {
 		$options[ $repo ] = $value;
 		update_site_option( 'github_updater', $options );
 	}
+
 }
