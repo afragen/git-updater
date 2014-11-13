@@ -65,6 +65,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
 			'GitHub Access Token' => 'GitHub Access Token',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
