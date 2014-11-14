@@ -355,15 +355,15 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				continue;
 			}
 
-				$update = array(
+			$remote_is_newer = ( version_compare( $theme->remote_version, $theme->local_version, '>' ) );
+			$wp_version_ok   = ( version_compare( $wp_version, $theme->requires_wp_version, '>=' ) );
+			$php_version_ok  = ( version_compare( phpversion(), $theme->requires_php_version, '>=' ) );
+
+			$update = array(
 					'new_version' => $theme->remote_version,
 					'url'         => $theme->uri,
 					'package'     => $theme->download_link,
 				);
-
-			$remote_is_newer = ( version_compare( $theme->remote_version, $theme->local_version, '>' ) );
-			$wp_version_ok   = ( version_compare( $wp_version, $theme->requires_wp_version, '>=' ) );
-			$php_version_ok  = ( version_compare( phpversion(), $theme->requires_php_version, '>=' ) );
 
 			if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
 				$data->response[ $theme->repo ] = $update;
