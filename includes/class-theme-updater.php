@@ -348,6 +348,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ) {
+		global $wp_version;
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
@@ -361,8 +362,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				);
 
 			$remote_is_newer = ( 1 === version_compare( $theme->remote_version, $theme->local_version ) );
+			$wp_version_ok   = ( 1 === version_compare( $wp_version, $theme->requires_wp_version ) );
+			$php_version_ok  = ( 1 === version_compare( phpversion(), $theme->requires_php_version ) );
 
-			if ( $remote_is_newer ) {
+			if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
 				$data->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
