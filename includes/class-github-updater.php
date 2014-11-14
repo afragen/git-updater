@@ -131,7 +131,7 @@ class GitHub_Updater {
 			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
 			$git_repo['author']                  = $plugin_data['AuthorName'];
 			$git_repo['name']                    = $plugin_data['Name'];
-			$git_repo['local_version']           = $plugin_data['Version'];
+			$git_repo['local_version']           = strtolower( $plugin_data['Version'] );
 			$git_repo['sections']['description'] = $plugin_data['Description'];
 			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
 		}
@@ -298,7 +298,7 @@ class GitHub_Updater {
 						$git_theme['name']                    = $theme->get( 'Name' );
 						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 						$git_theme['author']                  = $theme->get( 'Author' );
-						$git_theme['local_version']           = $theme->get( 'Version' );
+						$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 						break;
