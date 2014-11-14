@@ -24,6 +24,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		self::$hours = 12;
+
+		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
 	}
 
 	/**
@@ -319,4 +321,21 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
 	}
+
+	/**
+	 * Remove any Authorization headers.
+	 * Prevent 401 error from GitHub API.
+	 * Might be coming from added header for Bitbucket.
+	 *
+	 * @param $args
+	 *
+	 * @return mixed
+	 */
+	public function never_authenticate_http( $args ) {
+		if ( isset( $args['headers'] ) ) {
+			unset( $args['headers']['Authorization'] );
+		}
+		return $args;
+	}
+
 }
