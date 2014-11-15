@@ -647,4 +647,21 @@ class GitHub_Updater {
 		update_site_option( 'github_updater', $options );
 	}
 
+	/**
+	 * Function to check if plugin or theme object is updatable.
+	 *
+	 * @param $type
+	 *
+	 * @return array of booleans
+	 */
+	public function can_update( $type ) {
+		global $wp_version;
+		$can_update = array();
+
+		$can_update['remote_is_newer'] = ( version_compare( $type->remote_version, $type->local_version, '>' ) );
+		$can_update['wp_version_ok']   = ( version_compare( $wp_version, $type->requires_wp_version,'>=' ) );
+		$can_update['php_version_ok']  = ( version_compare( phpversion(), $type->requires_php_version, '>=' ) );
+
+		return $can_update;
+	}
 }

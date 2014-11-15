@@ -134,18 +134,13 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		global $wp_version;
-
 		if ( empty( $transient->checked ) ) {
 			return $transient;
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			$remote_is_newer = ( version_compare( $plugin->remote_version, $plugin->local_version, '>' ) );
-			$wp_version_ok   = ( version_compare( $wp_version, $plugin->requires_wp_version,'>=' ) );
-			$php_version_ok  = ( version_compare( phpversion(), $plugin->requires_php_version, '>=' ) );
 
-			if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
+			if ( ! in_array( false, $this->can_update( $plugin ), true ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'new_version' => $plugin->remote_version,
