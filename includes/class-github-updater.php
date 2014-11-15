@@ -386,7 +386,7 @@ class GitHub_Updater {
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '0.0.0';
-		$this->$type->requires_php_version  = '0.0.0';
+		$this->$type->requires_php_version  = '5.2.3';
 	}
 
 	/**
@@ -656,12 +656,16 @@ class GitHub_Updater {
 	 */
 	public function can_update( $type ) {
 		global $wp_version;
-		$can_update = array();
 
-		$can_update['remote_is_newer'] = version_compare( $type->remote_version, $type->local_version, '>' );
-		$can_update['wp_version_ok']   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
-		$can_update['php_version_ok']  = version_compare( phpversion(), $type->requires_php_version, '>=' );
+		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
 
-		return $can_update;
+		if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
+
 }
