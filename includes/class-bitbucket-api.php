@@ -32,8 +32,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * Add extra headers via filter hooks
 	 */
 	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_theme_headers' ) );
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
 	}
 
 	/**
