@@ -140,7 +140,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( ! in_array( false, $this->can_update( $plugin ), true ) ) {
+			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'new_version' => $plugin->remote_version,

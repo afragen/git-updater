@@ -360,7 +360,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				'package'     => $theme->download_link,
 			);
 
-			if ( ! in_array( false, $this->can_update( $theme ), true ) ) {
+			if ( $this->can_update( $theme ) ) {
 				$data->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
