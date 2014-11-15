@@ -355,10 +355,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 
 			$update = array(
-					'new_version' => $theme->remote_version,
-					'url'         => $theme->uri,
-					'package'     => $theme->download_link,
-				);
+				'new_version' => $theme->remote_version,
+				'url'         => $theme->uri,
+				'package'     => $theme->download_link,
+			);
 
 			if ( ! in_array( false, $this->can_update( $theme ), true ) ) {
 				$data->response[ $theme->repo ] = $update;
