@@ -385,7 +385,7 @@ class GitHub_Updater {
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
-		$this->$type->requires_wp_version   = '0.0.0';
+		$this->$type->requires_wp_version   = '3.0';
 		$this->$type->requires_php_version  = '5.2.3';
 	}
 
@@ -661,11 +661,7 @@ class GitHub_Updater {
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
 		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
 
-		if ( $remote_is_newer && $wp_version_ok && $php_version_ok ) {
-			return true;
-		} else {
-			return false;
-		}
+		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
 
 }
