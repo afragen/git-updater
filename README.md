@@ -151,6 +151,16 @@ In order to specify a private repository you will need to add your Bitbucket pas
 
 Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59), though it seems Bitbucket knows this is an issue and won't fix. If someone wants to figure out and create a PR for oAuth...
 
+## WordPress and PHP Requirements
+
+There are now two optional headers for setting minimum requirements for both WordPress and PHP.
+
+Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
+
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
+
+At the moment the default values are **WordPress 3.0** and **PHP 5.2.3**
+
 ## Deleting Transients
 
 If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.

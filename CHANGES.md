@@ -2,6 +2,7 @@
 * Settings Page for your GitHub Access Tokens
 * added POT file and some more i18n fixes - thanks @grappler
 * added `Requires WP` and `Requires PHP` headers to set minimum version requirements - for @GaryJ
+* move update check to function to also check WP and PHP version requirements.
 * unset any HTTP Authorization headers for GitHub API calls as this gives a 401 error. Rare potential bug if you have private Bitbucket repos.
 
 #### 2.9.0

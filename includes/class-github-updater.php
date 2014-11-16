@@ -652,7 +652,7 @@ class GitHub_Updater {
 	 *
 	 * @param $type
 	 *
-	 * @return array of booleans
+	 * @return bool
 	 */
 	public function can_update( $type ) {
 		global $wp_version;
