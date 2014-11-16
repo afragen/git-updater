@@ -115,10 +115,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 		// Set boolean to display settings section
 		foreach ( array_merge( self::$ghu_plugins, self::$ghu_themes ) as $token ) {
-			if ( $bitbucket ) {
-				continue;
-			}
-			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
+			if ( false !== strpos( $token->type, 'bitbucket' ) && ! $bitbucket ) {
 				$bitbucket = true;
 			}
 		}
