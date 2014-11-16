@@ -1,3 +1,6 @@
+#### 3.0.1
+* Remove Bitbucket settings from page if no appropriate plugins or themes exist.
+
 #### 3.0.0
 * Settings Page for your GitHub Access Tokens
 * added POT file and some more i18n fixes - thanks @grappler

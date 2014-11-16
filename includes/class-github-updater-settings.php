@@ -104,6 +104,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function page_init() {
 		$this->ghu_tokens();
+		$bitbucket = false;
 
 		add_settings_section(
 			'github_id',                                 // ID
@@ -112,12 +113,24 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			'github-updater'                             // Page
 		);
 
-		add_settings_section(
-			'bitbucket_id',
-			'Bitbucket Private Settings',
-			array( $this, 'print_section_bitbucket_info' ),
-			'github-updater'
-		);
+		// Set boolean to display settings section
+		foreach ( array_merge( self::$ghu_plugins, self::$ghu_themes ) as $token ) {
+			if ( $bitbucket ) {
+				continue;
+			}
+			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
+				$bitbucket = true;
+			}
+		}
+
+		if ( $bitbucket ) {
+			add_settings_section(
+				'bitbucket_id',
+				'Bitbucket Private Settings',
+				array( $this, 'print_section_bitbucket_info' ),
+				'github-updater'
+			);
+		}
 
 	}
 
@@ -174,7 +187,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function sanitize( $input ) {
 		$new_input = array();
 		foreach ( $input as $id => $value ) {
-			$new_input[$id] = sanitize_text_field( $input[ $id ] );
+			$new_input[ $id ] = sanitize_text_field( $input[ $id ] );
 		}
 
 		return $new_input;
