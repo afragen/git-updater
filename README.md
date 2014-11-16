@@ -159,7 +159,7 @@ Use `Requires WP:` to set the minimum required version of WordPress needed for y
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 3.0** and **PHP 5.2.3**
+At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.3**
 
 ## Deleting Transients
 
