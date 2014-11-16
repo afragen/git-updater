@@ -131,7 +131,7 @@ class GitHub_Updater {
 			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
 			$git_repo['author']                  = $plugin_data['AuthorName'];
 			$git_repo['name']                    = $plugin_data['Name'];
-			$git_repo['local_version']           = $plugin_data['Version'];
+			$git_repo['local_version']           = strtolower( $plugin_data['Version'] );
 			$git_repo['sections']['description'] = $plugin_data['Description'];
 			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
 		}
@@ -298,7 +298,7 @@ class GitHub_Updater {
 						$git_theme['name']                    = $theme->get( 'Name' );
 						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 						$git_theme['author']                  = $theme->get( 'Author' );
-						$git_theme['local_version']           = $theme->get( 'Version' );
+						$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 						break;
@@ -385,6 +385,8 @@ class GitHub_Updater {
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
+		$this->$type->requires_wp_version   = '3.0';
+		$this->$type->requires_php_version  = '5.2.3';
 	}
 
 	/**
@@ -644,4 +646,22 @@ class GitHub_Updater {
 		$options[ $repo ] = $value;
 		update_site_option( 'github_updater', $options );
 	}
+
+	/**
+	 * Function to check if plugin or theme object is updatable.
+	 *
+	 * @param $type
+	 *
+	 * @return array of booleans
+	 */
+	public function can_update( $type ) {
+		global $wp_version;
+
+		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
+
+		return $remote_is_newer && $wp_version_ok && $php_version_ok;
+	}
+
 }

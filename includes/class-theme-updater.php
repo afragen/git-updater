@@ -354,15 +354,13 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				continue;
 			}
 
-				$update = array(
-					'new_version' => $theme->remote_version,
-					'url'         => $theme->uri,
-					'package'     => $theme->download_link,
-				);
+			$update = array(
+				'new_version' => $theme->remote_version,
+				'url'         => $theme->uri,
+				'package'     => $theme->download_link,
+			);
 
-			$remote_is_newer = ( 1 === version_compare( $theme->remote_version, $theme->local_version ) );
-
-			if ( $remote_is_newer ) {
+			if ( $this->can_update( $theme ) ) {
 				$data->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
