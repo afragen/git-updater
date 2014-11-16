@@ -108,6 +108,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		if ( ! is_multisite() ) {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
+
+		GitHub_Updater_Settings::$ghu_themes = $this->config;
 	}
 
 	/**
@@ -213,11 +215,33 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$r = $current->response[ $theme_key ];
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 			if ( ! current_user_can( 'update_themes' ) ) {
-				printf( __( 'GitHub Updater shows a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a>.', 'github-updater' ), $theme['Name'], esc_url( $details_url ), esc_attr( $theme['Name'] ), $r->new_version );
+				printf(
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . ' <a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>.',
+					$theme['Name'],
+					esc_url( $details_url ),
+					esc_attr( $theme['Name'] ),
+					$r->new_version
+				);
 			} else if ( empty( $r['package'] ) ) {
-				printf( __( 'GitHub Updater shows a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a>. <em>Automatic update is unavailable for this theme.</em>', 'github-updater' ), $theme['Name'], esc_url( $details_url ), esc_attr( $theme['Name'] ), $r['new_version'] );
+				printf(
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
+					$theme['Name'],
+					esc_url( $details_url ),
+					esc_attr( $theme['Name'] ),
+					$r['new_version']
+				);
 			} else {
-				printf( __( 'GitHub Updater shows a new version of %1$s available. <a href="%2$s" class="thickbox" title="%3$s">View version %4$s details</a> or <a href="%5$s">update now</a>.', 'github-updater' ), $theme['Name'], esc_url( $details_url ), esc_attr( $theme['Name'] ), $r['new_version'], wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ) );
+				printf(
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
+					$theme['Name'],
+					sprintf(
+						'href="%1$s" class="thickbox" title="%2$s"',
+						esc_url( $details_url ),
+						esc_attr( $theme['Name'] )
+					),
+					$r['new_version'],
+					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key )
+				);
 			}
 
 			do_action( "in_theme_update_message-$theme_key", $theme, $r );
@@ -330,15 +354,13 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				continue;
 			}
 
-				$update = array(
-					'new_version' => $theme->remote_version,
-					'url'         => $theme->uri,
-					'package'     => $theme->download_link,
-				);
+			$update = array(
+				'new_version' => $theme->remote_version,
+				'url'         => $theme->uri,
+				'package'     => $theme->download_link,
+			);
 
-			$remote_is_newer = ( 1 === version_compare( $theme->remote_version, $theme->local_version ) );
-
-			if ( $remote_is_newer ) {
+			if ( $this->can_update( $theme ) ) {
 				$data->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
 				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;

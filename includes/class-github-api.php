@@ -24,14 +24,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		self::$hours = 12;
+
+		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
 	}
 
 	/**
 	 * Add extra headers via filter hooks
 	 */
 	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_GitHub_API', 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_GitHub_API', 'add_theme_headers' ) );
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
 	}
 
 	/**
@@ -45,6 +47,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			'GitHub Plugin URI'   => 'GitHub Plugin URI',
 			'GitHub Branch'       => 'GitHub Branch',
 			'GitHub Access Token' => 'GitHub Access Token',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
@@ -63,6 +67,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
 			'GitHub Access Token' => 'GitHub Access Token',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
@@ -158,9 +164,11 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		if ( ! is_array( $response ) ) {
 			return false;
 		}
-		$this->type->transient      = $response;
-		$this->type->branch         = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
-		$this->type->remote_version = $response['Version'];
+		$this->type->transient            = $response;
+		$this->type->remote_version       = strtolower( $response['Version'] );
+		$this->type->branch               = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
+		$this->type->requires_wp_version  = ( ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version );
+		$this->type->requires_php_version = ( ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version );
 
 		return true;
 	}
@@ -319,4 +327,21 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
 	}
+
+	/**
+	 * Remove any Authorization headers.
+	 * Prevent 401 error from GitHub API.
+	 * Might be coming from added header for Bitbucket.
+	 *
+	 * @param $args
+	 *
+	 * @return mixed
+	 */
+	public function never_authenticate_http( $args ) {
+		if ( isset( $args['headers'] ) ) {
+			unset( $args['headers']['Authorization'] );
+		}
+		return $args;
+	}
+
 }

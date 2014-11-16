@@ -32,8 +32,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * Add extra headers via filter hooks
 	 */
 	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_theme_headers' ) );
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
 	}
 
 	/**
@@ -46,6 +46,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$ghu_extra_headers     = array(
 			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
 			'Bitbucket Branch'     => 'Bitbucket Branch',
+			'Requires WP'          => 'Requires WP',
+			'Requires PHP'         => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
@@ -63,6 +65,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$ghu_extra_headers     = array(
 			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
 			'Bitbucket Branch'    => 'Bitbucket Branch',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
 		);
 		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
@@ -148,9 +152,11 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		if ( ! is_array( $response ) ) {
 			return false;
 		}
-		$this->type->transient      = $response;
-		$this->type->branch         = ( ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master' );
-		$this->type->remote_version = $response['Version'];
+		$this->type->transient            = $response;
+		$this->type->remote_version       = strtolower( $response['Version'] );
+		$this->type->branch               = ( ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master' );
+		$this->type->requires_wp_version  = ( ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version );
+		$this->type->requires_php_version = ( ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version );
 
 		return true;
 	}
@@ -324,35 +330,21 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function maybe_authenticate_http( $args, $type = null ) {
-		$username = null;
+		$options  = get_site_option( 'github_updater' );
 		$password = null;
 
-		$ptype  = explode( '/', parse_url( $type, PHP_URL_PATH ) );
-		$mybase = basename( $type, ".php" );
-		$repo   = $this->type->repo;
-		$ext    = pathinfo( basename( $type) , PATHINFO_EXTENSION);
 
 		if ( isset( $args['headers'] ) ) {
 			unset( $args['headers']['Authorization'] );
 		}
-		//if ( ! empty( $this->type->access_token ) ) { return $args; }
-		//if ( 'zip' === pathinfo( basename( $type ) , PATHINFO_EXTENSION ) ) { return $args; }
-		if ( ! isset( $this->type ) ) {
-			return $args;
-		}
-		if ( ! in_array( $this->type->repo, explode( '/', parse_url( $type, PHP_URL_PATH ) ) ) ) {
-			return $args;
-		}
-		if ( ! isset( $this->type->user ) || ! isset( $this->type->pass ) ) {
+
+		if ( ! isset( $this->type ) && ! empty( $options[ $this->type->repo ] ) ) {
 			return $args;
 		}
 
-		if ( $this->type->user && $this->type->pass ) {
-			$username = $this->type->user;
-			$password = $this->type->pass;
-		}
-
-		if ( $username && $password ) {
+		if ( $options[ $this->type->repo ] ) {
+			$username = $this->type->owner;
+			$password = $options[ $this->type->repo ];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 

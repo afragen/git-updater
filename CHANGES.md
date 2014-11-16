@@ -1,3 +1,9 @@
+#### 3.0.0
+* Settings Page for your GitHub Access Tokens
+* added POT file and some more i18n fixes - thanks @grappler
+* added `Requires WP` and `Requires PHP` headers to set minimum version requirements - for @GaryJ
+* move update check to function to also check WP and PHP version requirements.
+* unset any HTTP Authorization headers for GitHub API calls as this gives a 401 error. Rare potential bug if you have private Bitbucket repos.
 
 #### 2.9.0
 * move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.

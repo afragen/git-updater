@@ -2,7 +2,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
-* Tested up to: 4.0
+* Tested up to: 4.1beta
 * Stable tag: master
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -10,11 +10,11 @@
 
 A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes.
 
-This plugin is not allowed in the wp.org repo. :frowning:
+This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows. The folder name of the theme or plugin **must** be the same as the repo name.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`
@@ -24,7 +24,7 @@ or
 `GitHub Plugin URI: afragen/github-updater`  
 `GitHub Plugin URI: https://github.com/afragen/github-updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
 
 ## Installation
 
@@ -57,23 +57,25 @@ Using git, browse to your `/wp-content/plugins/` directory and clone this reposi
 
 Then go to your Plugins screen and click __Activate__.
 
-### Must Use Plugin
+### Install GitHub Updater as a Must Use Plugin (optional)
 
 1. Choose a method from above for installation.
 1. **DO NOT** activate!
 1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`.
 
+#### in Linux
 ```
-# in Linux
 cd <WordPress root>
 ln -sv wp-content/plugins/github-updater/mu/ghu-loader.php wp-content/mu-plugins
+```
 
-:: in Windows (Vista, 7, 8)
+#### in Windows (Vista, 7, 8)
+```
 cd /D <WordPress root>
 mklink wp-content\mu-plugins\ghu-loader.php wp-content\plugins\github-updater\mu\ghu-loader.php
 ```
 
-This way you get automatic updates but cannot deactivate the plugin.
+This way you get automatic updates and cannot deactivate the plugin.
 
 ## Usage
 
@@ -131,27 +133,33 @@ If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`
 
 ## Bitbucket Support
 
-The `Bitbucket Branch` header is supported for both plugins and themes.
-
-### Bitbucket Plugin Support
-
 Instead of the `GitHub Plugin URI` header you will need to use the `Bitbucket Plugin URI` header.
 
-### Bitbucket Theme Support
-
 Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket Theme URI` header.
+
+The `Bitbucket Branch` header is supported for both plugins and themes.
 
 ## Private Repositories
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the header `GitHub Access Token: xxxxxxxxx` to your plugin or theme.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
 
 ### Bitbucket Private Repositories
 
-The header should be in the following format: `Bitbucket Plugin URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>` or `Bitbucket Theme URI: https://<user>:<password>@bitbucket.org/<owner>/<repo>`
+In order to specify a private repository you will need to add your Bitbucket password to the appropriate plugin or theme in the Settings page.
 
-Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59).
+Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59), though it seems Bitbucket knows this is an issue and won't fix. If someone wants to figure out and create a PR for oAuth...
+
+## WordPress and PHP Requirements
+
+There are now two optional headers for setting minimum requirements for both WordPress and PHP.
+
+Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
+
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
+
+At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.3**
 
 ## Deleting Transients
 
@@ -174,7 +182,7 @@ Please log issues on the GitHub at https://github.com/afragen/github-updater/iss
 
 If you are using a WordPress Multisite installation, the plugin **should** be network activated.
 
-When first downloading and installing a plugin from GitHub you might have to do the following.
+When first downloading and installing a plugin from GitHub you might have to do the following, otherwise the next update may not be able to cleanup after itself and re-activate the updated plugin or theme.
 
 1. Unzip the archive.
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
@@ -182,7 +190,7 @@ When first downloading and installing a plugin from GitHub you might have to do 
 
 ## ChangeLog
 
-See [CHANGES.md](CHANGES.md).
+See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELOG.md` file.
 
 ## Credits
 

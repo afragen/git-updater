@@ -67,6 +67,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
+
+		GitHub_Updater_Settings::$ghu_plugins = $this->config;
 	}
 
 
@@ -137,9 +139,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
 
-			if ( $remote_is_newer ) {
+			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'new_version' => $plugin->remote_version,
