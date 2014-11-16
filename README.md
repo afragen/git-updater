@@ -153,7 +153,7 @@ Regrettably, I still get an error when trying to download a Bitbucket private re
 
 ## WordPress and PHP Requirements
 
-There are now two optional headers for setting minimum requirements for both WordPress and PHP.
+There are now two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
 Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
 
