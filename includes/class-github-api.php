@@ -339,7 +339,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function never_authenticate_http( $args ) {
 		// Exit if on JetPack Stats
-		if ( function_exists( 'get_current_screen' ) && 'jetpack_page_stats' === get_current_screen()->id ) {
+		if ( function_exists( 'get_current_screen' ) &&
+		     false !== strpos( get_current_screen()->id, 'jetpack' )
+			) {
 			return $args;
 		}
 
