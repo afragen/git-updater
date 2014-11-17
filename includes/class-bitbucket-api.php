@@ -333,13 +333,17 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$options  = get_site_option( 'github_updater' );
 		$password = null;
 
-
-		if ( isset( $args['headers'] ) ) {
-			unset( $args['headers']['Authorization'] );
+		// Exit if on JetPack Stats
+		if ( function_exists( 'get_current_screen' ) && 'jetpack_page_stats' === get_current_screen()->id ) {
+			return $args;
 		}
 
 		if ( ! isset( $this->type ) && ! empty( $options[ $this->type->repo ] ) ) {
 			return $args;
+		}
+
+		if ( isset( $args['headers']['Authorization'] ) ) {
+			unset( $args['headers']['Authorization'] );
 		}
 
 		if ( $options[ $this->type->repo ] ) {
