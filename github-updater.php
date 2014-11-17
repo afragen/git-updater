@@ -20,6 +20,7 @@ Domain Path:       /languages
 Text Domain:       github-updater
 GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     develop
+Requires WP:       3.8
 */
 
 // If this file is called directly, abort.
