@@ -1,3 +1,9 @@
+#### 3.0.3
+* Bugfix to properly authenticate on JetPack Stats page
+
+#### 3.0.2
+* simplify check and exit on Settings if no Bitbucket plugins/themes
+
 #### 3.0.1
 * Remove Bitbucket settings from page if no appropriate plugins or themes exist.
 
