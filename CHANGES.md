@@ -1,3 +1,7 @@
+#### 3.0.4
+* Who would've thought `file_exists` was case-sensitive
+* when checking meta, use `empty()` instead of `! isset()` for `null array`
+
 #### 3.0.3
 * Bugfix to properly authenticate on JetPack Stats page
 
