@@ -184,6 +184,7 @@ class GitHub_Updater {
 					break;
 				case 'GitHub Access Token':
 					if ( empty( $headers['GitHub Access Token'] ) ) {
+						$this->save_header_options( $git_repo['repo'], $headers['GitHub Access Token'], $options );
 						break;
 					}
 					$git_repo['access_token']  = $headers['GitHub Access Token'];
@@ -310,6 +311,7 @@ class GitHub_Updater {
 						break;
 					case 'GitHub Access Token':
 						if ( empty( $github_token ) ) {
+							$this->save_header_options( $git_theme['repo'], $github_token, $options );
 							break;
 						}
 						$git_theme['access_token']            = $github_token;
