@@ -145,9 +145,13 @@ The `Bitbucket Branch` header is supported for both plugins and themes.
 
 In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
 
+Leave this empty if the plugin or theme is in a public repository.
+
 ### Bitbucket Private Repositories
 
 In order to specify a private repository you will need to add your Bitbucket password to the appropriate plugin or theme in the Settings page.
+
+Leave this empty if the plugin or theme is in a public repository.
 
 Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59), though it seems Bitbucket knows this is an issue and won't fix. If someone wants to figure out and create a PR for oAuth...
 

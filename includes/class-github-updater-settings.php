@@ -194,14 +194,14 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_github_info() {
-		print __( 'Enter your GitHub Access Token', 'github-updater' );
+		print __( 'Enter your GitHub Access Token. Leave empty if this is a public repository.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Section text
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Enter your Bitbucket password:', 'github-updater' );
+		print __( 'Enter your Bitbucket password. Leave empty if this is a public repository.', 'github-updater' );
 	}
 
 

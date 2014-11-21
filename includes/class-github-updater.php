@@ -367,6 +367,9 @@ class GitHub_Updater {
 	 * Set default values for plugin/theme
 	 */
 	protected function set_defaults( $type ) {
+		$options = get_site_option( 'github_updater' );
+		$this->save_header_options( $this->$type->repo, null, $options );
+
 		$this->$type->remote_version        = '0.0.0';
 		$this->$type->newest_tag            = '0.0.0';
 		$this->$type->download_link         = null;
@@ -517,9 +520,10 @@ class GitHub_Updater {
 		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
 
 		foreach ( $changelogs as $changes ) {
-			$changes = strtolower( $changes );
 			if ( file_exists( $this->$type->local_path . $changes ) ) {
 				return $changes;
+			} elseif ( file_exists( $this->$type->local_path . strtolower( $changes ) ) ) {
+				return strtolower( $changes );
 			}
 		}
 

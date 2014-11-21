@@ -311,7 +311,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		if ( ! $response || ! isset( $response->items ) || isset( $response->message ) ) {
+		if ( ! $response || empty( $response->items ) || isset( $response->message ) ) {
 			return false;
 		}
 
