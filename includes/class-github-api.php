@@ -146,6 +146,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
+		$contents = null;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
@@ -340,6 +341,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function never_authenticate_http( $args ) {
 		// Exit if on JetPack Stats
 		if ( function_exists( 'get_current_screen' ) &&
+		     ! empty( get_current_screen()->id ) &&
 		     false !== strpos( get_current_screen()->id, 'jetpack' )
 			) {
 			return $args;
