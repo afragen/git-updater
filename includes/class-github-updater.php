@@ -368,7 +368,8 @@ class GitHub_Updater {
 	 */
 	protected function set_defaults( $type ) {
 		$options = get_site_option( 'github_updater' );
-		$this->save_header_options( $this->$type->repo, null, $options );
+		$options[ $this->$type->repo ]      = null;
+		update_site_option( 'github_updater', $options );
 
 		$this->$type->remote_version        = '0.0.0';
 		$this->$type->newest_tag            = '0.0.0';
