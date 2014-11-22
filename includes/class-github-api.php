@@ -146,10 +146,12 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
-		$contents = null;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
+			if ( ! isset( $response->content ) ) {
+				return false;
+			}
 
 			if ( $response ) {
 				$contents = base64_decode( $response->content );
