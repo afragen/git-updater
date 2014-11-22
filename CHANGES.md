@@ -1,3 +1,6 @@
+#### 3.0.5
+* fix more PHP Notices
+
 #### 3.0.4
 * Who would've thought `file_exists` was case-sensitive
 * when checking meta, use `empty()` instead of `! isset()` for `null array`
