@@ -1,5 +1,6 @@
 #### 3.0.5
 * fix more PHP Notices
+* correctly set defaults for Settings page :P
 
 #### 3.0.4
 * Who would've thought `file_exists` was case-sensitive
