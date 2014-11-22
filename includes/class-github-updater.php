@@ -368,7 +368,7 @@ class GitHub_Updater {
 	 */
 	protected function set_defaults( $type ) {
 		$options = get_site_option( 'github_updater' );
-		if ( ! $options[ $this->$type->repo ] ) {
+		if ( ! isset( $options[ $this->$type->repo ] ) ) {
 			$options[ $this->$type->repo ] = null;
 			update_site_option( 'github_updater', $options );
 		}
