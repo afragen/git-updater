@@ -1,7 +1,7 @@
 #### 3.0.5
 * fix more PHP Notices
 * correctly set defaults for Settings page :P
-* remove Settings page options for plugins/themes that are no longer present
+* remove options for plugins/themes that are no longer present
 
 #### 3.0.4
 * Who would've thought `file_exists` was case-sensitive
