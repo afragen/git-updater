@@ -149,6 +149,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
+			if ( ! isset( $response->content ) ) {
+				return false;
+			}
 
 			if ( $response ) {
 				$contents = base64_decode( $response->content );
@@ -340,6 +343,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	public function never_authenticate_http( $args ) {
 		// Exit if on JetPack Stats
 		if ( function_exists( 'get_current_screen' ) &&
+		     ! empty( get_current_screen()->id ) &&
 		     false !== strpos( get_current_screen()->id, 'jetpack' )
 			) {
 			return $args;

@@ -36,12 +36,12 @@ msgstr ""
 msgid "Theme: "
 msgstr ""
 
-#: includes/class-github-updater-settings.php:189
-msgid "Enter your GitHub Access Token"
+#: includes/class-github-updater-settings.php:208
+msgid "Enter your GitHub Access Token. Leave empty if this is a public repository."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:196
-msgid "Enter your Bitbucket password:"
+#: includes/class-github-updater-settings.php:215
+msgid "Enter your Bitbucket password. Leave empty if this is a public repository."
 msgstr ""
 
 #: includes/class-github-updater-settings.php:246

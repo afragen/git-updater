@@ -335,6 +335,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 		// Exit if on JetPack Stats
 		if ( function_exists( 'get_current_screen' ) &&
+		     ! empty( get_current_screen()->id ) &&
 		     false !== strpos( get_current_screen()->id, 'jetpack' )
 			) {
 			return $args;
