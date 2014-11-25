@@ -341,10 +341,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function never_authenticate_http( $args ) {
-		// Exit if on JetPack Stats
-		if ( function_exists( 'get_current_screen' ) &&
-		     ! empty( get_current_screen()->id ) &&
-		     false !== strpos( get_current_screen()->id, 'jetpack' )
+		// Exit if on other APIs use HTTP Authorization
+		if ( isset( $args['headers']['Authorization'] ) &&
+		     false !== strpos( $args['headers']['Authorization'], 'JETPACK' )
 			) {
 			return $args;
 		}

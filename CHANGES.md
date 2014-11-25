@@ -1,3 +1,6 @@
+#### 3.0.6
+* fix for other APIs that use HTTP Authentication, like JetPack - thanks @tsquez
+
 #### 3.0.5
 * fix more PHP Notices
 * correctly set defaults for Settings page :P

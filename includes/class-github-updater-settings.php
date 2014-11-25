@@ -179,7 +179,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 		// Unset options that are no longer present
 		foreach ( $this->options as $key => $value ) {
-			if ( ! in_array( $key, $ghu_options, true ) ) {
+			if ( ! in_array( $key, (array) $ghu_options, true ) ) {
 				unset( $this->options[ $key ] );
 			}
 			update_site_option( 'github_updater', $this->options );
