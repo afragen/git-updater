@@ -440,7 +440,14 @@ class GitHub_Updater {
 		);
 
 		// If we can rename, do so and return the new name
-		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
+    // TODO WATCH OUT!
+    // ===============
+    // Workaround until 4.1 https://core.trac.wordpress.org/ticket/29405
+    $ssh = @ssh2_connect($wp_filesystem->options['hostname'], $wp_filesystem->options['port']);
+    ssh2_auth_password($ssh, $wp_filesystem->options['username'], $wp_filesystem->options['password']);
+    $sftp = ssh2_sftp($ssh);
+  
+    if ( ssh2_sftp_rename($sftp, $source, $corrected_source) ) {
 			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
 			return $corrected_source;
 		}
