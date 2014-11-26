@@ -137,14 +137,15 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * @return void
 	 */
 	public function ghu_tokens() {
-		$ghu_tokens = array_merge( self::$ghu_plugins, self::$ghu_themes );
+		$ghu_options_keys = array();
+		$ghu_tokens       = array_merge( self::$ghu_plugins, self::$ghu_themes );
 		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
 		unset( $this->options['github-updater'] ); // GHU should not be in options
 
 		foreach ( $ghu_tokens as $token ) {
-			$ghu_options[] = $token->repo;
-			$type          = '';
-			$setting_field = array();
+			$type                             = '';
+			$setting_field                    = array();
+			$ghu_options_keys[ $token->repo ] = null;
 
 			if ( false !== strpos( $token->type, 'theme') ) {
 				$type = __( 'Theme: ', 'github-updater' );
@@ -178,9 +179,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		}
 
 		// Unset options that are no longer present
-		foreach ( $this->options as $key => $value ) {
-			if ( ! in_array( $key, (array) $ghu_options, true ) ) {
-				unset( $this->options[ $key ] );
+		$ghu_unset_keys = array_diff_key( $this->options, $ghu_options_keys );
+		if ( ! empty( $ghu_unset_keys ) ) {
+			foreach ( $ghu_unset_keys as $key => $value ) {
+				unset( $this->options [ $key ] );
 			}
 			update_site_option( 'github_updater', $this->options );
 		}
