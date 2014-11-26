@@ -337,6 +337,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			return $args;
 		}
 
+		// Exit if on other APIs use HTTP Authorization
 		if ( isset( $args['headers']['Authorization'] ) ) {
 			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
 				return $args;
