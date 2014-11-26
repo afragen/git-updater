@@ -1,3 +1,6 @@
+#### 3.0.7
+* more efficient solution to HTTP Authentication issues
+
 #### 3.0.6
 * fix for other APIs that use HTTP Authentication, like JetPack - thanks @tsquez
 

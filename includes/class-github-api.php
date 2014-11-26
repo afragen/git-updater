@@ -342,12 +342,6 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function never_authenticate_http( $args ) {
 		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) &&
-		     false !== strpos( $args['headers']['Authorization'], 'JETPACK' )
-			) {
-			//return $args;
-		}
-
 		if ( isset( $args['headers']['Authorization'] ) ) {
 			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
 				return $args;
