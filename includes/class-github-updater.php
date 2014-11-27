@@ -586,21 +586,17 @@ class GitHub_Updater {
 	 *
 	 * @param $type
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	protected function delete_all_transients( $type ) {
 		$transients = get_site_transient( 'ghu-' . $type );
-		if ( ! $transients ) {
+		if ( empty( $transients ) ) {
 			return false;
 		}
 
 		foreach ( $transients as $transient ) {
 			delete_site_transient( $transient );
-			$key = array_search( $transient, $transients );
-			unset( $transients[ $key ] );
 		}
-
-		return true;
 	}
 
 
@@ -610,8 +606,7 @@ class GitHub_Updater {
 	 * @param $type
 	 */
 	protected function make_force_check_transient( $type ) {
-		delete_site_transient( 'ghu-' . $type );
-		set_site_transient( 'ghu-' . $type , self::$transients, 12 * HOUR_IN_SECONDS );
+		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 	}
 
