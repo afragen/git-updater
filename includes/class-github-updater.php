@@ -365,6 +365,8 @@ class GitHub_Updater {
 
 	/**
 	 * Set default values for plugin/theme
+	 *
+	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
 		$options = get_site_option( 'github_updater' );
@@ -604,6 +606,7 @@ class GitHub_Updater {
 	 * Create transient of $type transients for force-check
 	 *
 	 * @param $type
+	 * @return void
 	 */
 	protected function make_force_check_transient( $type ) {
 		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
@@ -640,6 +643,7 @@ class GitHub_Updater {
 	 * @param $repo
 	 * @param $value
 	 * @param $options
+	 * @return bool|void
 	 */
 	protected function save_header_options( $repo, $value, $options ) {
 		if ( ! $value ) {
