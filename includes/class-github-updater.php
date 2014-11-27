@@ -370,7 +370,7 @@ class GitHub_Updater {
 		$options = get_site_option( 'github_updater' );
 		if ( ! isset( $options[ $this->$type->repo ] ) ) {
 			$options[ $this->$type->repo ] = null;
-			update_site_option( 'github_updater', $options );
+			add_site_option( 'github_updater', $options );
 		}
 
 		$this->$type->remote_version        = '0.0.0';
