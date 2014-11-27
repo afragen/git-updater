@@ -58,7 +58,7 @@ class GitHub_Updater {
 	 *
 	 * @param $class
 	 */
-	private function autoload( $class ) {
+	protected function autoload( $class ) {
 		$classes = array(
 			'github_plugin_updater'        => 'class-plugin-updater.php',
 			'github_theme_updater'         => 'class-theme-updater.php',
