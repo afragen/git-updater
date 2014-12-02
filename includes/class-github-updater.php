@@ -58,7 +58,7 @@ class GitHub_Updater {
 	 *
 	 * @param $class
 	 */
-	private function autoload( $class ) {
+	protected function autoload( $class ) {
 		$classes = array(
 			'github_plugin_updater'        => 'class-plugin-updater.php',
 			'github_theme_updater'         => 'class-theme-updater.php',
@@ -121,7 +121,8 @@ class GitHub_Updater {
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
-				empty( $headers['Bitbucket Plugin URI'] ) ) {
+				empty( $headers['Bitbucket Plugin URI'] )
+			) {
 				continue;
 			}
 
@@ -365,12 +366,14 @@ class GitHub_Updater {
 
 	/**
 	 * Set default values for plugin/theme
+	 *
+	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
 		$options = get_site_option( 'github_updater' );
 		if ( ! isset( $options[ $this->$type->repo ] ) ) {
 			$options[ $this->$type->repo ] = null;
-			update_site_option( 'github_updater', $options );
+			add_site_option( 'github_updater', $options );
 		}
 
 		$this->$type->remote_version        = '0.0.0';
@@ -586,21 +589,17 @@ class GitHub_Updater {
 	 *
 	 * @param $type
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	protected function delete_all_transients( $type ) {
 		$transients = get_site_transient( 'ghu-' . $type );
-		if ( ! $transients ) {
+		if ( empty( $transients ) ) {
 			return false;
 		}
 
 		foreach ( $transients as $transient ) {
 			delete_site_transient( $transient );
-			$key = array_search( $transient, $transients );
-			unset( $transients[ $key ] );
 		}
-
-		return true;
 	}
 
 
@@ -608,10 +607,10 @@ class GitHub_Updater {
 	 * Create transient of $type transients for force-check
 	 *
 	 * @param $type
+	 * @return void
 	 */
 	protected function make_force_check_transient( $type ) {
-		delete_site_transient( 'ghu-' . $type );
-		set_site_transient( 'ghu-' . $type , self::$transients, 12 * HOUR_IN_SECONDS );
+		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 	}
 
@@ -645,6 +644,7 @@ class GitHub_Updater {
 	 * @param $repo
 	 * @param $value
 	 * @param $options
+	 * @return bool|void
 	 */
 	protected function save_header_options( $repo, $value, $options ) {
 		if ( ! $value ) {
