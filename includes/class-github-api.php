@@ -25,7 +25,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type  = $type;
 		self::$hours = 12;
 
-		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
+		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10, 2 );
 	}
 
 	/**
@@ -340,10 +340,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 *
 	 * @return mixed
 	 */
-	public function never_authenticate_http( $args ) {
+	public function never_authenticate_http( $args, $url ) {
 		// Exit if on other APIs use HTTP Authorization
 		if ( isset( $args['headers']['Authorization'] ) ) {
-			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
+			if ( false === strpos( $url, 'github.com' ) ) {
 				return $args;
 			}
 			unset( $args['headers']['Authorization'] );
