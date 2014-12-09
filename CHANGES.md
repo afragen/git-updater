@@ -1,3 +1,6 @@
+#### 3.0.8
+* improved solution to HTTP Authentication issues that shouldn't require additional fixes when other APIs use HTTP Auth
+
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues
 * more efficient options cleanup
