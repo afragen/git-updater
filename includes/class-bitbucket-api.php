@@ -333,11 +333,11 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$options  = get_site_option( 'github_updater' );
 		$password = null;
 
-		if ( ! isset( $this->type ) && ! empty( $options[ $this->type->repo ] ) ) {
+		if ( ! isset( $this->type ) && empty( $options[ $this->type->repo ] ) ) {
 			return $args;
 		}
 
-		if ( ! empty( $options[ $this->type->repo ] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
+		if ( ! empty( $options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
 			$username = $this->type->owner;
 			$password = $options[ $this->type->repo ];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
