@@ -25,7 +25,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type  = $type;
 		self::$hours = 12;
 
-		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
+		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10, 2 );
 	}
 
 	/**
@@ -337,14 +337,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * Might be coming from added header for Bitbucket.
 	 *
 	 * @param $args
+	 * @param $url
 	 *
 	 * @return mixed
 	 */
-	public function never_authenticate_http( $args ) {
+	public function never_authenticate_http( $args, $url ) {
+		$bitbucket = strpos( $url, 'bitbucket' );
 		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) ) {
+		if ( isset( $args['headers']['Authorization'] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
 			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				return $args;
+				//return $args;
 			}
 			unset( $args['headers']['Authorization'] );
 		}

@@ -324,12 +324,12 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 *
-	 * @param      $args
-	 * @param null $type
+	 * @param  $args
+	 * @param  $url
 	 *
 	 * @return mixed
 	 */
-	public function maybe_authenticate_http( $args, $type = null ) {
+	public function maybe_authenticate_http( $args, $url ) {
 		$options  = get_site_option( 'github_updater' );
 		$password = null;
 
@@ -337,15 +337,17 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			return $args;
 		}
 
-		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) ) {
+		// Unset HTTP Auth header if not calling bitbucket.org
+		if ( isset( $args['headers']['Authorization'] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
 			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				return $args;
+				//return $args;
 			}
 			unset( $args['headers']['Authorization'] );
 		}
 
-		if ( $options[ $this->type->repo ] ) {
+		$bitbucket = strpos( $url, 'bitbucket.org' );
+		$repo = $this->type->repo;
+		if ( ! empty( $options[ $this->type->repo ] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
 			$username = $this->type->owner;
 			$password = $options[ $this->type->repo ];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
