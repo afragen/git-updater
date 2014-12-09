@@ -17,13 +17,20 @@
 class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 	/**
+	 * Holds the values to be used in the fields callbacks
+	 * @var array
+	 */
+	private static $options;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
-		$this->type  = $type;
-		self::$hours = 12;
+		$this->type    = $type;
+		self::$hours   = 12;
+		self::$options = get_site_option( 'github_updater' );
 
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
@@ -323,6 +330,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private Bitbucket repositories only.
 	 *
 	 * @param  $args
 	 * @param  $url
@@ -330,16 +338,15 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function maybe_authenticate_http( $args, $url ) {
-		$options  = get_site_option( 'github_updater' );
 		$password = null;
 
-		if ( ! isset( $this->type ) && empty( $options[ $this->type->repo ] ) ) {
+		if ( ! isset( $this->type ) ) {
 			return $args;
 		}
 
-		if ( ! empty( $options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
+		if ( ! empty( self::$options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
 			$username = $this->type->owner;
-			$password = $options[ $this->type->repo ];
+			$password = self::$options[ $this->type->repo ];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 

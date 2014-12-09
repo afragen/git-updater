@@ -15,11 +15,12 @@
  * @author Andy Fragen
  */
 class GitHub_Updater_Settings extends GitHub_Updater {
+
 	/**
 	 * Holds the values to be used in the fields callbacks
 	 * @var array
 	 */
-	protected $options;
+	private static $options;
 
 	/**
 	 * Holds the plugin basename
@@ -50,7 +51,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
 
 		// Load up options
-		$this->options = get_site_option( 'github_updater' );
+		self::$options = get_site_option( 'github_updater' );
 	}
 
 	/**
@@ -140,7 +141,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		$ghu_options_keys = array();
 		$ghu_tokens       = array_merge( self::$ghu_plugins, self::$ghu_themes );
 		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
-		unset( $this->options['github-updater'] ); // GHU should not be in options
+		unset( self::$options['github-updater'] ); // GHU should not be in options
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '';
@@ -179,12 +180,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		}
 
 		// Unset options that are no longer present
-		$ghu_unset_keys = array_diff_key( $this->options, $ghu_options_keys );
+		$ghu_unset_keys = array_diff_key( self::$options, $ghu_options_keys );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( $this->options [ $key ] );
+				unset( self::$options [ $key ] );
 			}
-			update_site_option( 'github_updater', $this->options );
+			update_site_option( 'github_updater', self::$options );
 		}
 	}
 
@@ -226,7 +227,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function token_callback( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( $this->options[ $id ] ); ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( self::$options[ $id ] ); ?>">
 		</label>
 		<?php
 	}
