@@ -108,6 +108,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return string
 	 */
 	protected function get_api_url( $endpoint ) {
+		$options = get_site_option( 'github_updater' );
 		$segments = array(
 			'owner' => $this->type->owner,
 			'repo'  => $this->type->repo,
@@ -124,8 +125,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
+		if ( ! empty( $options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', $options[ $this->type->repo ], $endpoint );
 		}
 
 
@@ -240,6 +241,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false ) {
+		$options = get_site_option( 'github_updater' );
 		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint           = '';
 
@@ -254,8 +256,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint .= '?access_token=' . $this->type->access_token;
+		if ( ! empty( $options[ $this->type->repo ] ) ) {
+			$endpoint .= '?access_token=' . $options[ $this->type->repo ];
 		}
 
 		return $download_link_base . $endpoint;

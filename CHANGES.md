@@ -1,5 +1,6 @@
 #### 3.0.8
-* improved solution to HTTP Authentication issues that shouldn't require additional fixes when other APIs use HTTP Auth
+* improved solution to HTTP Authentication issues that shouldn't require additional fixes when other APIs use HTTP Auth - thanks @cyberhobo
+* fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
 
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues
