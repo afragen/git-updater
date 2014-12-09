@@ -337,16 +337,6 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			return $args;
 		}
 
-		// Unset HTTP Auth header if not calling bitbucket.org
-		if ( isset( $args['headers']['Authorization'] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
-			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				//return $args;
-			}
-			unset( $args['headers']['Authorization'] );
-		}
-
-		$bitbucket = strpos( $url, 'bitbucket.org' );
-		$repo = $this->type->repo;
 		if ( ! empty( $options[ $this->type->repo ] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
 			$username = $this->type->owner;
 			$password = $options[ $this->type->repo ];

@@ -332,7 +332,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	}
 
 	/**
-	 * Remove any Authorization headers.
+	 * Remove any HTTP Authorization headers if calling bitbucket.org
 	 * Prevent 401 error from GitHub API.
 	 * Might be coming from added header for Bitbucket.
 	 *
@@ -342,12 +342,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function never_authenticate_http( $args, $url ) {
-		$bitbucket = strpos( $url, 'bitbucket' );
-		// Exit if on other APIs use HTTP Authorization
 		if ( isset( $args['headers']['Authorization'] ) && false !== strpos( $url, 'bitbucket.org' ) ) {
-			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				//return $args;
-			}
 			unset( $args['headers']['Authorization'] );
 		}
 
