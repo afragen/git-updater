@@ -85,7 +85,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		?>
 		<div class="wrap">
-			<h2>GitHub Updater Settings</h2>
+			<h2><?php _e( 'GitHub Updater Settings', 'github-updater' ); ?></h2>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
@@ -108,10 +108,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		$bitbucket = false;
 
 		add_settings_section(
-			'github_id',                                 // ID
-			'GitHub Private Settings',                   // Title
+			'github_id',                                       // ID
+			__( 'GitHub Private Settings', 'github-updater' ), // Title
 			array( $this, 'print_section_github_info' ),
-			'github-updater'                             // Page
+			'github-updater'                                   // Page
 		);
 
 		// Set boolean to display settings section
@@ -124,7 +124,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		if ( $bitbucket ) {
 			add_settings_section(
 				'bitbucket_id',
-				'Bitbucket Private Settings',
+				__( 'Bitbucket Private Settings', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
 				'github-updater'
 			);
