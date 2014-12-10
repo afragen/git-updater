@@ -1,7 +1,9 @@
-#### 3.0.8
+#### 3.1.0
 * fix to only add HTTP Authentication header under correct circumstances. This obviates need to fix for other APIs that might also use HTTP Authentication.
 * fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
-* changes `$options` to `private static $options` to save database calls
+* changes `$options` to `private static $options` to save a few database calls
+* woot!! - updating from Bitbucket private repos now works!!
+* Settings page **only** shows private repos
 
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues
