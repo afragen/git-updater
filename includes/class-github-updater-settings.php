@@ -102,35 +102,53 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 	/**
 	 * Register and add settings
+	 * Check to see if it's a private repo
 	 */
 	public function page_init() {
 		$this->ghu_tokens();
-		$bitbucket = false;
-
-		add_settings_section(
-			'github_id',                                       // ID
-			__( 'GitHub Private Settings', 'github-updater' ), // Title
-			array( $this, 'print_section_github_info' ),
-			'github-updater'                                   // Page
-		);
+		$github_private    = false;
+		$bitbucket_private = false;
 
 		// Set boolean to display settings section
 		foreach ( array_merge( self::$ghu_plugins, self::$ghu_themes ) as $token ) {
-			if ( false !== strpos( $token->type, 'bitbucket' ) &&
-			     ! $bitbucket &&
-			     $token->repo_meta->is_private
-			) {
-				$bitbucket = true;
+
+			// Check to see if it's a private repo
+			if ( ! empty( $token->repo_meta ) ) {
+				if ( false !== strpos( $token->type, 'github' ) &&
+				     ! $github_private &&
+				     $token->repo_meta->private
+				) {
+					$github_private = true;
+				}
+				if ( false !== strpos( $token->type, 'bitbucket' ) &&
+				     ! $bitbucket_private &&
+				     $token->repo_meta->is_private
+				) {
+					$bitbucket_private = true;
+				}
 			}
 		}
 
-		if ( $bitbucket ) {
+		if ( $github_private ) {
+			add_settings_section(
+				'github_id',                                       // ID
+				__( 'GitHub Private Settings', 'github-updater' ), // Title
+				array( $this, 'print_section_github_info' ),
+				'github-updater'                                   // Page
+			);
+		}
+
+		if ( $bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
 				__( 'Bitbucket Private Settings', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
 				'github-updater'
 			);
+		}
+
+		if ( ! $github_private && ! $bitbucket_private ) {
+			print( __( '<h3>No private repositories are installed.</h3>', 'github-updater' ) );
 		}
 
 	}
@@ -150,7 +168,8 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			$ghu_options_keys[ $token->repo ] = null;
 
 			// Next if not a private repo
-			if ( ( isset( $token->repo_meta->is_private ) && ! $token->repo_meta->is_private ) ||
+			if ( empty( $token->repo_meta ) ||
+			     ( isset( $token->repo_meta->is_private ) && ! $token->repo_meta->is_private ) ||
 			     ( isset( $token->repo_meta->private ) && ! $token->repo_meta->private )
 			) {
 				continue;
