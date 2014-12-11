@@ -148,7 +148,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		}
 
 		if ( ! $github_private && ! $bitbucket_private ) {
-			print( __( '<h3>No private repositories are installed.</h3>', 'github-updater' ) );
+			add_settings_section(
+				'',
+				__( 'No private repositories are installed.', 'github-updater' ),
+				array(),
+				'github-updater'
+			);
 		}
 
 	}
