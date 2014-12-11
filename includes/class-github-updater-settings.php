@@ -41,6 +41,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	static $ghu_themes = array();
 
 	/**
+	 * Holds boolean on whether or not the repo is private
+	 * @var bool
+	 */
+	static $github_private    = false;
+	static $bitbucket_private = false;
+
+	/**
 	 * Start up
 	 */
 	public function __construct() {
@@ -93,7 +100,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				<?php
 				settings_fields( 'github_updater' );
 				do_settings_sections( 'github-updater' );
-				submit_button();
+				if ( self::$github_private || self::$bitbucket_private ) {
+					submit_button();
+				}
 				?>
 			</form>
 		</div>
@@ -106,30 +115,8 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function page_init() {
 		$this->ghu_tokens();
-		$github_private    = false;
-		$bitbucket_private = false;
-
-		// Set boolean to display settings section
-		foreach ( array_merge( self::$ghu_plugins, self::$ghu_themes ) as $token ) {
-
-			// Check to see if it's a private repo
-			if ( ! empty( $token->repo_meta ) ) {
-				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! $github_private &&
-				     $token->repo_meta->private
-				) {
-					$github_private = true;
-				}
-				if ( false !== strpos( $token->type, 'bitbucket' ) &&
-				     ! $bitbucket_private &&
-				     $token->repo_meta->is_private
-				) {
-					$bitbucket_private = true;
-				}
-			}
-		}
-
-		if ( $github_private ) {
+		
+		if ( self::$github_private ) {
 			add_settings_section(
 				'github_id',                                       // ID
 				__( 'GitHub Private Settings', 'github-updater' ), // Title
@@ -138,7 +125,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			);
 		}
 
-		if ( $bitbucket_private ) {
+		if ( self::$bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
 				__( 'Bitbucket Private Settings', 'github-updater' ),
@@ -147,7 +134,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			);
 		}
 
-		if ( ! $github_private && ! $bitbucket_private ) {
+		if ( ! self::$github_private && ! self::$bitbucket_private ) {
 			add_settings_section(
 				'',
 				__( 'No private repositories are installed.', 'github-updater' ),
@@ -171,11 +158,30 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			$type                             = '';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
+			$is_github                        = false;
+			$is_bitbucket                     = false;
+
+			if ( false !== strpos( $token->type, 'github' ) ) {
+				$is_github = true;
+			}
+			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
+				$is_bitbucket = true;
+			}
+
+			// Check to see if it's a private repo
+			if ( ! empty( $token->repo_meta ) ) {
+				if ( $is_github && $token->repo_meta->private ) {
+					self::$github_private = true;
+				}
+				if ( $is_bitbucket && $token->repo_meta->is_private ) {
+					self::$bitbucket_private = true;
+				}
+			}
 
 			// Next if not a private repo
 			if ( empty( $token->repo_meta ) ||
-			     ( isset( $token->repo_meta->is_private ) && ! $token->repo_meta->is_private ) ||
-			     ( isset( $token->repo_meta->private ) && ! $token->repo_meta->private )
+			     ( $is_github && ! $token->repo_meta->private ) ||
+			     ( $is_bitbucket && ! $token->repo_meta->is_private )
 			) {
 				continue;
 			}
