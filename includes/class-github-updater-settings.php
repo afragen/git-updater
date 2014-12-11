@@ -115,7 +115,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function page_init() {
 		$this->ghu_tokens();
-		
+
 		if ( self::$github_private ) {
 			add_settings_section(
 				'github_id',                                       // ID
@@ -136,7 +136,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 		if ( ! self::$github_private && ! self::$bitbucket_private ) {
 			add_settings_section(
-				'',
+				null,
 				__( 'No private repositories are installed.', 'github-updater' ),
 				array(),
 				'github-updater'
