@@ -188,11 +188,11 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
 			$rollback_keys = array_keys( $rollback );
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
-			_e ( 'Theme is up-to-date! ', 'github-updater' );
+			echo 'Theme is up-to-date! ';
 			if ( current_user_can( 'update_themes' ) ) {
 				if ( count( $rollback ) > 0 ) {
 					array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-					_e( '<strong>Rollback to: </strong>', 'github-updater' );
+					echo "<strong>Rollback to:</strong> ";
 					// display last three tags
 					for ( $i = 0; $i < 3 ; $i++ ) {
 						$tag = array_shift( $rollback_keys );
@@ -206,7 +206,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 						printf( '<a href="%s%s">%s</a>', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ), '&rollback=' . urlencode( $tag ), $tag);
 					}
 				} else {
-					_e ( 'No previous tags to rollback to.', 'github-updater' );
+					echo "No previous tags to rollback to.";
 				}
 			}
 		}
@@ -310,7 +310,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><?php _e( 'There is a new version of ', 'github-updater' ); echo $theme->name; _e( ' available now. ', 'github-updater' ); ?><a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>"><?php _e( 'View version ', 'github-updater' ); echo $theme->remote_version; _e( ' details', 'github-updater' ); ?></a><?php _e( ' or ', 'github-updater' ); ?><a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
+			<strong>There is a new version of <?php echo $theme->name; ?> available now. <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">View version <?php echo $theme->remote_version; ?> details</a> or <a href="<?php echo $update_url; ?>">update now</a>.</strong>
 			<?php
 			return trim( ob_get_clean(), '1' );
 
@@ -320,7 +320,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
 			?>
-			<p><?php _e( 'Current version is up to date. Try ', 'github-updater' ); ?><a href="#" onclick="jQuery('#ghu_versions').toggle();return false;"><?php _e( 'another version?', 'github-updater' ); ?></a></p>
+			<p>Current version is up to date. Try <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;">another version?</a></p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<select style="width: 60%;" 
 					onchange="if(jQuery(this).val() != '') {
@@ -329,10 +329,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 					}
 					else jQuery(this).next().hide();
 				">
-				<option value=""><?php _e( 'Choose a Version&#8230;', 'github-updater' ); ?></option>
+				<option value="">Choose a Version...</option>
 				<option><?php echo $theme->branch; ?></option>
 				<?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){ echo'<option>'.$version.'</option>'; }?></select>
-				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>
+				<a style="display: none;" class="button-primary" href="?">Install</a>
 			</div>
 			<?php
 			return trim( ob_get_clean(), '1' );
