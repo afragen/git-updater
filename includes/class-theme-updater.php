@@ -80,7 +80,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				);
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
-				}
+			}
 
 			// Remove WordPress update row in theme row, only in multisite
 			// Add update row to theme row, only in multisite for WP < 3.8
