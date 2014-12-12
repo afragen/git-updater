@@ -20,7 +20,6 @@
  */
 class GitHub_Theme_Updater extends GitHub_Updater {
 
-
 	/**
 	 * Rollback variable
 	 *
@@ -70,7 +69,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 
 			// Update theme transient with rollback data 
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+			// Single install only
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && ! is_multisite() ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
@@ -191,7 +191,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			if ( current_user_can( 'update_themes' ) ) {
 				if ( count( $rollback ) > 0 ) {
 					array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-					_e( '<strong>Rollback to:</strong>', 'github-updater' );
+					_e( '<strong>Rollback to: </strong>', 'github-updater' );
 					// display last three tags
 					for ( $i = 0; $i < 3 ; $i++ ) {
 						$tag = array_shift( $rollback_keys );
@@ -215,7 +215,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 			if ( ! current_user_can( 'update_themes' ) ) {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . ' <a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>.',
+					__( 'GitHub Updater shows a new version of %1$s available. ', 'github-updater' ) . ' <a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>.',
 					$theme['Name'],
 					esc_url( $details_url ),
 					esc_attr( $theme['Name'] ),
@@ -223,7 +223,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				);
 			} else if ( empty( $r['package'] ) ) {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
+					__( 'GitHub Updater shows a new version of %1$s available. ', 'github-updater' ) . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
 					$theme['Name'],
 					esc_url( $details_url ),
 					esc_attr( $theme['Name'] ),
@@ -231,7 +231,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				);
 			} else {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
+					__( 'GitHub Updater shows a new version of %1$s available. ', 'github-updater' ) . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
 					$theme['Name'],
 					sprintf(
 						'href="%1$s" class="thickbox" title="%2$s"',
@@ -268,23 +268,20 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
-	 * Call update theme messaging if needed
+	 * Call update theme messaging if needed for single site installation
 	 *
 	 * @author Seth Carstens
 	 * @param $prepared_themes
 	 *
 	 * @return mixed
 	 */
-	public function customize_theme_update_html($prepared_themes) {
+	public function customize_theme_update_html( $prepared_themes ) {
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $prepared_themes[ $theme->repo ] ) ) {
 				continue;
 			}
 
-			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ||
-			     version_compare( $theme->remote_version, $theme->local_version, '>' )
-			) {
-				$prepared_themes[ $theme->repo ]['hasUpdate'] = true;
+			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
 				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
 			} else {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
@@ -295,7 +292,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	}
 
 	/**
-	 * Create theme update messaging
+	 * Create theme update messaging for single site installation
 	 * 
 	 * @author Seth Carstens
 	 * @param object $theme
@@ -312,7 +309,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><?php _e('There is a new version of ', 'github-updater' ); ?><?php echo $theme->name; ?><?php _e( 'available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>"><?php _e( 'View version', 'github-updater' ); ?> <?php echo $theme->remote_version; ?><?php _e( 'details', 'github-updater' ); ?></a><?php _e( ' or ', 'github-updater' ); ?><a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
+			<strong><br /><?php _e('There is a new version of ', 'github-updater' ); echo $theme->name; _e( ' available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>"><?php _e( ' View version ', 'github-updater' ); echo $theme->remote_version; _e( ' details', 'github-updater' ); ?></a><?php _e( ' or ', 'github-updater' ); ?><a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
 			<?php
 			return trim( ob_get_clean(), '1' );
 
@@ -333,7 +330,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				">
 				<option value=""><?php _e( 'Choose a Version&#8230;', 'github-updater' ); ?></option>
 				<option><?php echo $theme->branch; ?></option>
-				<?php foreach ( $theme_update_transient->up_to_date[$theme->repo]['rollback'] as $version => $url ){ echo'<option>'.$version.'</option>'; }?></select>
+				<?php foreach ( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] as $version => $url ) { echo'<option>'.$version.'</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
@@ -356,8 +353,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				continue;
 			}
 
-			// Update theme transient with rollback data
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+			// Update theme transient with rollback data for multisite
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && is_multisite() ) {
 				$this->tag         = $_GET['rollback'];
 				$rollback          = array(
 					'new_version' => $this->tag,
