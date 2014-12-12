@@ -23,7 +23,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 12;
+		parent::$hours = 12;
 
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
