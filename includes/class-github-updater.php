@@ -651,8 +651,11 @@ class GitHub_Updater {
 		if ( ! $value ) {
 			return false;
 		}
-		$options[ $repo ] = $value;
-		update_site_option( 'github_updater', $options );
+		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
+			unset( $options[ $repo ] );
+			$options[ $repo ] = $value;
+			update_site_option( 'github_updater', $options );
+		}
 	}
 
 	/**
