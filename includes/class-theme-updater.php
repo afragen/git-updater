@@ -72,7 +72,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			// Update theme transient with rollback data
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
-				$updates_transient = $this->get_transient('update_themes');
+				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
 							'new_version' => $this->tag,
 							'url'         => $theme->uri,
@@ -80,7 +80,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				);
 
 				$updates_transient->response[$theme->repo] = $rollback;
-				$this->set_transient( 'update_themes', $updates_transient );
+				set_site_transient( 'update_themes', $updates_transient );
 			}
 
 			// Remove WordPress update row in theme row, only in multisite
