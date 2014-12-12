@@ -3,7 +3,10 @@
 * fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
 * changes `$options` to `private static $options` to save a few database calls
 * woot!! - updating from Bitbucket private repos now works!!
-* Settings page **only** shows private repos, except for initial setup.
+* Settings page **only** shows private repos, except for initial setup
+* simpler test for checking branch as download endpoint
+* correctly use `parent::` instead of `self::`
+* many updates for translation
 
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues
