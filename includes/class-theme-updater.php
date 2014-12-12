@@ -355,7 +355,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 			// Update theme transient with rollback data for multisite
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && is_multisite() ) {
-				$this->tag         = $_GET['rollback'];
+				$this->tag = $_GET['rollback'];
+
+				if ( ! empty( self::$options[ $theme->repo ] ) && false !== strpos( $theme->type, 'github' ) ) {
+					$theme->rollback[ $this->tag ] = add_query_arg( 'access_token', self::$options[ $theme->repo ], $theme->rollback[ $this->tag ] );
+				}
+
 				$rollback          = array(
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
