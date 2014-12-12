@@ -84,15 +84,10 @@ class GitHub_Updater {
 	/**
 	 * Constructor
 	 *
-	 * Calls $this->init() in init hook so other remote upgrader apps like
-	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-	 * of GitHub_Updater's methods, especially renaming.
-	 *
 	 * Calls spl_autoload_register to set loading of classes.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		//add_action( 'init', array( $this, 'init' ) );
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
