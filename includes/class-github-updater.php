@@ -57,7 +57,7 @@ class GitHub_Updater {
 	 * Holds the values to be used in the fields callbacks
 	 * @var array
 	 */
-	private static $options;
+	protected static $options;
 
 	/**
 	 * Autoloader
@@ -395,6 +395,7 @@ class GitHub_Updater {
 		$this->$type->num_ratings           = 0;
 		$this->$type->transient             = array();
 		$this->$type->repo_meta             = array();
+		$this->$type->private               = true;
 		$this->$type->watchers              = 0;
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;

@@ -17,20 +17,13 @@
 class GitHub_Updater_GitHub_API extends GitHub_Updater {
 
 	/**
-	 * Holds the values to be used in the fields callbacks
-	 * @var array
-	 */
-	private static $options;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $type
 	 */
 	public function __construct( $type ) {
-		$this->type    = $type;
-		self::$hours   = 12;
-		self::$options = get_site_option( 'github_updater' );
+		$this->type  = $type;
+		self::$hours = 12;
 	}
 
 	/**
@@ -129,8 +122,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( self::$options[ $this->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', self::$options[ $this->type->repo ], $endpoint );
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
 		}
 
 
@@ -259,8 +252,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		if ( ! empty( self::$options[ $this->type->repo ] ) ) {
-			$endpoint .= '?access_token=' . self::$options[ $this->type->repo ];
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint .= '?access_token=' . parent::$options[ $this->type->repo ];
 		}
 
 		return $download_link_base . $endpoint;
@@ -334,6 +327,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = $this->type->repo_meta->private;
 	}
 
 }

@@ -17,12 +17,6 @@
 class GitHub_Updater_Settings extends GitHub_Updater {
 
 	/**
-	 * Holds the values to be used in the fields callbacks
-	 * @var array
-	 */
-	private static $options;
-
-	/**
 	 * Holds the plugin basename
 	 * @var string
 	 */
@@ -44,8 +38,8 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Holds boolean on whether or not the repo is private
 	 * @var bool
 	 */
-	static $github_private    = false;
-	static $bitbucket_private = false;
+	private static $github_private    = false;
+	private static $bitbucket_private = false;
 
 	/**
 	 * Start up
@@ -56,9 +50,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
-
-		// Load up options
-		self::$options = get_site_option( 'github_updater' );
 	}
 
 	/**
@@ -158,31 +149,19 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			$type                             = '';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
-			$is_github                        = false;
-			$is_bitbucket                     = false;
-
-			if ( false !== strpos( $token->type, 'github' ) ) {
-				$is_github = true;
-			}
-			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-				$is_bitbucket = true;
-			}
 
 			// Check to see if it's a private repo
-			if ( ! empty( $token->repo_meta ) ) {
-				if ( $is_github && $token->repo_meta->private ) {
+			if ( $token->private ) {
+				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
 					self::$github_private = true;
 				}
-				if ( $is_bitbucket && $token->repo_meta->is_private ) {
+				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
 					self::$bitbucket_private = true;
 				}
 			}
 
 			// Next if not a private repo
-			if ( empty( $token->repo_meta ) ||
-			     ( $is_github && ! $token->repo_meta->private ) ||
-			     ( $is_bitbucket && ! $token->repo_meta->is_private )
-			) {
+			if ( ! $token->private ) {
 				continue;
 			}
 
@@ -218,12 +197,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		}
 
 		// Unset options that are no longer present
-		$ghu_unset_keys = array_diff_key( self::$options, $ghu_options_keys );
+		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( self::$options [ $key ] );
+				unset( parent::$options [ $key ] );
 			}
-			update_site_option( 'github_updater', self::$options );
+			update_site_option( 'github_updater', parent::$options );
 		}
 	}
 
@@ -246,14 +225,14 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_github_info() {
-		print __( 'Enter your GitHub Access Token.', 'github-updater' );
+		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Section text
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Enter your Bitbucket password.', 'github-updater' );
+		print __( 'Enter your Bitbucket password. Leave empty for public repositories.', 'github-updater' );
 	}
 
 
@@ -265,7 +244,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function token_callback( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( self::$options[ $id ] ); ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
 		</label>
 		<?php
 	}
