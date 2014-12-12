@@ -246,7 +246,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= $rollback;
 		
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+		} elseif ( 'master' != $this->type->branch  || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
