@@ -69,19 +69,18 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			// Update theme transient with rollback data
+			// Update theme transient with rollback data 
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
-							'new_version' => $this->tag,
-							'url'         => $theme->uri,
-							'package'     => $repo_api->construct_download_link( $this->tag ),
+					'new_version' => $this->tag,
+					'url'         => $theme->uri,
+					'package'     => $repo_api->construct_download_link( $this->tag ),
 				);
-
-				$updates_transient->response[$theme->repo] = $rollback;
+				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
-			}
+				}
 
 			// Remove WordPress update row in theme row, only in multisite
 			// Add update row to theme row, only in multisite for WP < 3.8
@@ -282,7 +281,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				continue;
 			}
 
-			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
+			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ||
+			     version_compare( $theme->remote_version, $theme->local_version, '>' )
+			) {
+				$prepared_themes[ $theme->repo ]['hasUpdate'] = true;
 				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
 			} else {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
@@ -352,6 +354,18 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
 				continue;
+			}
+
+			// Update theme transient with rollback data
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+				$this->tag         = $_GET['rollback'];
+				$rollback          = array(
+					'new_version' => $this->tag,
+					'url'         => $theme->uri,
+					'package'     => $theme->rollback[ $this->tag ],
+				);
+
+				$data->response[$theme->repo] = $rollback;
 			}
 
 			$update = array(
