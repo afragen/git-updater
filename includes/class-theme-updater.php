@@ -68,8 +68,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			// Update theme transient with rollback data 
-			// Single install only
+			// Update theme transient with rollback data for single install
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && ! is_multisite() ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
