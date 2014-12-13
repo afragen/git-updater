@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2014-11-02 11:23+0100\n"
-"PO-Revision-Date: 2014-11-02 11:23+0100\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2014-12-12 16:47-0800\n"
+"PO-Revision-Date: 2014-12-12 16:50-0800\n"
+"Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: \n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.10\n"
+"X-Generator: Poedit 1.7.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -18,68 +18,132 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/class-github-updater-settings.php:63
-#: includes/class-github-updater-settings.php:71
+#: includes/class-github-updater-settings.php:62
+#: includes/class-github-updater-settings.php:70
+#: includes/class-github-updater-settings.php:86
 msgid "GitHub Updater Settings"
 msgstr ""
 
-#: includes/class-github-updater-settings.php:64
-#: includes/class-github-updater-settings.php:72
+#: includes/class-github-updater-settings.php:63
+#: includes/class-github-updater-settings.php:71
 msgid "GitHub Updater"
 msgstr ""
 
-#: includes/class-github-updater-settings.php:89
+#: includes/class-github-updater-settings.php:88
 msgid "Saved."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:138
+#: includes/class-github-updater-settings.php:113
+msgid "GitHub Private Settings"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:122
+msgid "Bitbucket Private Settings"
+msgstr ""
+
+#: includes/class-github-updater-settings.php:131
+msgid "No private repositories are installed."
+msgstr ""
+
+#: includes/class-github-updater-settings.php:169
 msgid "Theme: "
 msgstr ""
 
-#: includes/class-github-updater-settings.php:208
-msgid "Enter your GitHub Access Token. Leave empty if this is a public repository."
+#: includes/class-github-updater-settings.php:228
+msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:215
-msgid "Enter your Bitbucket password. Leave empty if this is a public repository."
+#: includes/class-github-updater-settings.php:235
+msgid "Enter your Bitbucket password. Leave empty for public repositories."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:246
+#: includes/class-github-updater-settings.php:281
 msgid "Settings"
 msgstr ""
 
-#: includes/class-github-updater.php:420
+#: includes/class-github-updater.php:440
 #, php-format
 msgid "Renaming %s to %s&#8230;"
 msgstr ""
 
-#: includes/class-github-updater.php:428
+#: includes/class-github-updater.php:448
 msgid "Rename successful&#8230;"
 msgstr ""
 
-#: includes/class-github-updater.php:433
+#: includes/class-github-updater.php:453
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
-#: includes/class-theme-updater.php:219 includes/class-theme-updater.php:227
-#: includes/class-theme-updater.php:235
-#, php-format
-msgid "GitHub Updater shows a new version of %1$s available."
+#: includes/class-theme-updater.php:190
+msgid "Theme is up-to-date!&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:219 includes/class-theme-updater.php:227
+#: includes/class-theme-updater.php:194
+msgid "<strong>Rollback to:&nbsp;</strong>"
+msgstr ""
+
+#: includes/class-theme-updater.php:208
+msgid "No previous tags to rollback to."
+msgstr ""
+
+#: includes/class-theme-updater.php:218 includes/class-theme-updater.php:226
+#, php-format
+msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
+msgstr ""
+
+#: includes/class-theme-updater.php:218
 #, php-format
 msgid "View version %4$s details"
 msgstr ""
 
-#: includes/class-theme-updater.php:227
+#: includes/class-theme-updater.php:218
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: includes/class-theme-updater.php:235
+#: includes/class-theme-updater.php:226
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "There is a new version of&nbsp;"
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "&nbsp;available now."
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "&nbsp;View version&nbsp;"
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "&nbsp;details"
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "&nbsp;or&nbsp;"
+msgstr ""
+
+#: includes/class-theme-updater.php:304
+msgid "update now"
+msgstr ""
+
+#: includes/class-theme-updater.php:314
+msgid "Current version is up to date. Try"
+msgstr ""
+
+#: includes/class-theme-updater.php:314
+msgid "another version?"
+msgstr ""
+
+#: includes/class-theme-updater.php:323
+msgid "Choose a Version&#8230;"
+msgstr ""
+
+#: includes/class-theme-updater.php:326
+msgid "Install"
 msgstr ""
 
 #: mu/ghu-loader.php:51
