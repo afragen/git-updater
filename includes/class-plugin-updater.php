@@ -92,6 +92,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
+
 			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 

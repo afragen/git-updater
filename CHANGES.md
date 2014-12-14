@@ -1,3 +1,15 @@
+#### 3.1.0
+* woot!! - updating from Bitbucket private repos now works!!
+* fix to only add HTTP Authentication header under correct circumstances. This obviates need to fix for other APIs that might also use HTTP Authentication.
+* fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
+* changes `$options` to `private static $options` to save a few database calls
+* Settings page **only** shows private repos, except for initial setup
+* simpler test for checking branch as download endpoint
+* correctly use `parent::` instead of `self::`
+* many updates for translation
+* fix to ensure theme rollback and updating works in both single install and multisite
+* fix to save settings from single site installations
+
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues
 * more efficient options cleanup

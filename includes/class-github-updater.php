@@ -54,6 +54,12 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 	/**
+	 * Holds the values to be used in the fields callbacks
+	 * @var array
+	 */
+	protected static $options;
+
+	/**
 	 * Autoloader
 	 *
 	 * @param $class
@@ -78,17 +84,14 @@ class GitHub_Updater {
 	/**
 	 * Constructor
 	 *
-	 * Calls $this->init() in init hook so other remote upgrader apps like
-	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-	 * of GitHub_Updater's methods, especially renaming.
-	 *
 	 * Calls spl_autoload_register to set loading of classes.
+	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		//add_action( 'init', array( $this, 'init' ) );
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
+		self::$options = get_site_option( 'github_updater' );
 	}
 
 	/**
@@ -153,7 +156,6 @@ class GitHub_Updater {
 	*/
 	protected function get_local_plugin_meta( $headers ) {
 		$git_repo = array();
-		$options  = get_site_option( 'github_updater' );
 
 		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
@@ -189,7 +191,7 @@ class GitHub_Updater {
 					}
 					$git_repo['access_token']  = $headers['GitHub Access Token'];
 
-					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], $options );
+					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
 					break;
 			}
 		}
@@ -215,7 +217,7 @@ class GitHub_Updater {
 					$git_repo['repo']       = $owner_repo[1];
 					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
 
-					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], $options );
+					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], self::$options );
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) {
@@ -256,7 +258,6 @@ class GitHub_Updater {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$themes     = wp_get_themes();
-		$options    = get_site_option( 'github_updater' );
 
 		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
@@ -315,7 +316,7 @@ class GitHub_Updater {
 						}
 						$git_theme['access_token']            = $github_token;
 
-						$this->save_header_options( $git_theme['repo'], $github_token, $options );
+						$this->save_header_options( $git_theme['repo'], $github_token, self::$options );
 						break;
 				}
 			}
@@ -347,7 +348,7 @@ class GitHub_Updater {
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 
-						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], $options );
+						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], self::$options );
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) {
@@ -370,10 +371,9 @@ class GitHub_Updater {
 	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
-		$options = get_site_option( 'github_updater' );
-		if ( ! isset( $options[ $this->$type->repo ] ) ) {
-			$options[ $this->$type->repo ] = null;
-			add_site_option( 'github_updater', $options );
+		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
+			self::$options[ $this->$type->repo ] = null;
+			add_site_option( 'github_updater', self::$options );
 		}
 
 		$this->$type->remote_version        = '0.0.0';
@@ -390,6 +390,7 @@ class GitHub_Updater {
 		$this->$type->num_ratings           = 0;
 		$this->$type->transient             = array();
 		$this->$type->repo_meta             = array();
+		$this->$type->private               = true;
 		$this->$type->watchers              = 0;
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
@@ -650,8 +651,12 @@ class GitHub_Updater {
 		if ( ! $value ) {
 			return false;
 		}
-		$options[ $repo ] = $value;
-		update_site_option( 'github_updater', $options );
+		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
+			unset( $options[ $repo ] );
+			$value = sanitize_text_field( $value );
+			$options[ $repo ] = $value;
+			update_site_option( 'github_updater', $options );
+		}
 	}
 
 	/**

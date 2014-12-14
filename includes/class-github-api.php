@@ -23,9 +23,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 12;
-
-		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
+		parent::$hours = 12;
 	}
 
 	/**
@@ -124,8 +122,8 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
 		}
 
 
@@ -248,14 +246,14 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint .= $rollback;
 		
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+		} elseif ( 'master' != $this->type->branch  || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint .= '?access_token=' . $this->type->access_token;
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint .= '?access_token=' . parent::$options[ $this->type->repo ];
 		}
 
 		return $download_link_base . $endpoint;
@@ -329,27 +327,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-	}
-
-	/**
-	 * Remove any Authorization headers.
-	 * Prevent 401 error from GitHub API.
-	 * Might be coming from added header for Bitbucket.
-	 *
-	 * @param $args
-	 *
-	 * @return mixed
-	 */
-	public function never_authenticate_http( $args ) {
-		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) ) {
-			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				return $args;
-			}
-			unset( $args['headers']['Authorization'] );
-		}
-
-		return $args;
+		$this->type->private      = $this->type->repo_meta->private;
 	}
 
 }

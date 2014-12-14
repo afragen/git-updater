@@ -15,11 +15,6 @@
  * @author Andy Fragen
  */
 class GitHub_Updater_Settings extends GitHub_Updater {
-	/**
-	 * Holds the values to be used in the fields callbacks
-	 * @var array
-	 */
-	protected $options;
 
 	/**
 	 * Holds the plugin basename
@@ -40,6 +35,13 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	static $ghu_themes = array();
 
 	/**
+	 * Holds boolean on whether or not the repo is private
+	 * @var bool
+	 */
+	private static $github_private    = false;
+	private static $bitbucket_private = false;
+
+	/**
 	 * Start up
 	 */
 	public function __construct() {
@@ -48,9 +50,6 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
-
-		// Load up options
-		$this->options = get_site_option( 'github_updater' );
 	}
 
 	/**
@@ -84,7 +83,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		?>
 		<div class="wrap">
-			<h2>GitHub Updater Settings</h2>
+			<h2><?php _e( 'GitHub Updater Settings', 'github-updater' ); ?></h2>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
@@ -92,7 +91,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				<?php
 				settings_fields( 'github_updater' );
 				do_settings_sections( 'github-updater' );
-				submit_button();
+				if ( self::$github_private || self::$bitbucket_private ) {
+					submit_button();
+				}
 				?>
 			</form>
 		</div>
@@ -101,32 +102,39 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 	/**
 	 * Register and add settings
+	 * Check to see if it's a private repo
 	 */
 	public function page_init() {
 		$this->ghu_tokens();
-		$bitbucket = false;
 
-		add_settings_section(
-			'github_id',                                 // ID
-			'GitHub Private Settings',                   // Title
-			array( $this, 'print_section_github_info' ),
-			'github-updater'                             // Page
-		);
-
-		// Set boolean to display settings section
-		foreach ( array_merge( self::$ghu_plugins, self::$ghu_themes ) as $token ) {
-			if ( false !== strpos( $token->type, 'bitbucket' ) && ! $bitbucket ) {
-				$bitbucket = true;
-			}
+		if ( self::$github_private ) {
+			add_settings_section(
+				'github_id',                                       // ID
+				__( 'GitHub Private Settings', 'github-updater' ), // Title
+				array( $this, 'print_section_github_info' ),
+				'github-updater'                                   // Page
+			);
 		}
 
-		if ( $bitbucket ) {
+		if ( self::$bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
-				'Bitbucket Private Settings',
+				__( 'Bitbucket Private Settings', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
 				'github-updater'
 			);
+		}
+
+		if ( ! self::$github_private && ! self::$bitbucket_private ) {
+			add_settings_section(
+				null,
+				__( 'No private repositories are installed.', 'github-updater' ),
+				array(),
+				'github-updater'
+			);
+		}
+		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
+			update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
 		}
 
 	}
@@ -139,13 +147,26 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
 		$ghu_tokens       = array_merge( self::$ghu_plugins, self::$ghu_themes );
-		unset( $ghu_tokens['github-updater'] ); // GHU will never be in a private repo
-		unset( $this->options['github-updater'] ); // GHU should not be in options
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
+
+			// Check to see if it's a private repo
+			if ( $token->private ) {
+				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
+					self::$github_private = true;
+				}
+				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
+					self::$bitbucket_private = true;
+				}
+			}
+
+			// Next if not a private repo
+			if ( ! $token->private ) {
+				continue;
+			}
 
 			if ( false !== strpos( $token->type, 'theme') ) {
 				$type = __( 'Theme: ', 'github-updater' );
@@ -179,12 +200,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 		}
 
 		// Unset options that are no longer present
-		$ghu_unset_keys = array_diff_key( $this->options, $ghu_options_keys );
+		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( $this->options [ $key ] );
+				unset( parent::$options [ $key ] );
 			}
-			update_site_option( 'github_updater', $this->options );
+			update_site_option( 'github_updater', parent::$options );
 		}
 	}
 
@@ -207,14 +228,14 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 * Print the Section text
 	 */
 	public function print_section_github_info() {
-		print __( 'Enter your GitHub Access Token. Leave empty if this is a public repository.', 'github-updater' );
+		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Section text
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Enter your Bitbucket password. Leave empty if this is a public repository.', 'github-updater' );
+		print __( 'Enter your Bitbucket password. Leave empty for public repositories.', 'github-updater' );
 	}
 
 
@@ -226,7 +247,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function token_callback( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( $this->options[ $id ] ); ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
 		</label>
 		<?php
 	}

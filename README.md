@@ -2,7 +2,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater
 * Requires at least: 3.8
-* Tested up to: 4.1beta
+* Tested up to: 4.1
 * Stable tag: master
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -117,7 +117,7 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Access Token`, `GitHub Branch`, and `Bitbucket Branch` are available but not required.
+Optional headers `GitHub Branch`, and `Bitbucket Branch` are available but not required.
 
 ## Branch Support
 
@@ -152,8 +152,6 @@ Leave this empty if the plugin or theme is in a public repository.
 In order to specify a private repository you will need to add your Bitbucket password to the appropriate plugin or theme in the Settings page.
 
 Leave this empty if the plugin or theme is in a public repository.
-
-Regrettably, I still get an error when trying to download a Bitbucket private repository. I could use some [help in figuring this one out](https://github.com/afragen/github-updater/issues/59), though it seems Bitbucket knows this is an issue and won't fix. If someone wants to figure out and create a PR for oAuth...
 
 ## WordPress and PHP Requirements
 

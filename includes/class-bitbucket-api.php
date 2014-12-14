@@ -23,7 +23,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 12;
+		parent::$hours = 12;
 
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
@@ -234,7 +234,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			$endpoint .= $rollback . '.zip';
 		
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+		} elseif ( 'master' != $this->type->branch  || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch . '.zip';
 		} else {
 			$endpoint .= $this->type->newest_tag . '.zip';
@@ -319,35 +319,28 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
+		$this->type->private      = $this->type->repo_meta->is_private;
 	}
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private Bitbucket repositories only.
 	 *
-	 * @param      $args
-	 * @param null $type
+	 * @param  $args
+	 * @param  $url
 	 *
 	 * @return mixed
 	 */
-	public function maybe_authenticate_http( $args, $type = null ) {
-		$options  = get_site_option( 'github_updater' );
+	public function maybe_authenticate_http( $args, $url ) {
 		$password = null;
 
-		if ( ! isset( $this->type ) && ! empty( $options[ $this->type->repo ] ) ) {
+		if ( ! isset( $this->type ) ) {
 			return $args;
 		}
 
-		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) ) {
-			if ( false !== strpos( $args['headers']['Authorization'], 'JETPACK' ) ) {
-				return $args;
-			}
-			unset( $args['headers']['Authorization'] );
-		}
-
-		if ( $options[ $this->type->repo ] ) {
+		if ( ! empty( parent::$options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
 			$username = $this->type->owner;
-			$password = $options[ $this->type->repo ];
+			$password = parent::$options[ $this->type->repo ];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 
