@@ -159,7 +159,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
-
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
 				'a'       => array( 'href' => array(), 'title' => array() ),

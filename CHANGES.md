@@ -8,6 +8,7 @@
 * correctly use `parent::` instead of `self::`
 * many updates for translation
 * fix to ensure theme rollback and updating works in both single install and multisite
+* fix to save settings from single site installations
 
 #### 3.0.7
 * more efficient solution to HTTP Authentication issues

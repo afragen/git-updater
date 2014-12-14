@@ -133,6 +133,9 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				'github-updater'
 			);
 		}
+		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
+			update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
+		}
 
 	}
 
