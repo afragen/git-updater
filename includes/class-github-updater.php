@@ -653,6 +653,7 @@ class GitHub_Updater {
 		}
 		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
 			unset( $options[ $repo ] );
+			$value = sanitize_text_field( $value );
 			$options[ $repo ] = $value;
 			update_site_option( 'github_updater', $options );
 		}
