@@ -601,6 +601,7 @@ class GitHub_Updater {
 		foreach ( $transients as $transient ) {
 			delete_site_transient( $transient );
 		}
+		delete_site_transient( 'ghu-' . $type );
 	}
 
 

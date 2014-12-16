@@ -1,3 +1,7 @@
+#### 3.1.1
+* minor transient cleanup
+* update .pot file
+
 #### 3.1.0
 * woot!! - updating from Bitbucket private repos now works!!
 * fix to only add HTTP Authentication header under correct circumstances. This obviates need to fix for other APIs that might also use HTTP Authentication.
