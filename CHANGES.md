@@ -1,6 +1,7 @@
 #### 3.1.1
 * minor transient cleanup
 * update .pot file
+* fix to get all themes under both single and multisite installs
 
 #### 3.1.0
 * woot!! - updating from Bitbucket private repos now works!!

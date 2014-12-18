@@ -232,39 +232,15 @@ class GitHub_Updater {
 	}
 
 	/**
-	* Get array of all themes in multisite
-	*
-	* wp_get_themes does not seem to work under network activation in the same way as in a single install.
-	* http://core.trac.wordpress.org/changeset/20152
-	*
-	* @return array
-	*/
-	protected function multisite_get_themes() {
-		$themes     = array();
-		$theme_dirs = scandir( get_theme_root() );
-		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store', 'index.php' ) );
-
-		foreach ( (array) $theme_dirs as $theme_dir ) {
-			$themes[] = wp_get_theme( $theme_dir );
-		}
-
-		return $themes;
-	}
-
-	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
-		$themes     = wp_get_themes();
+		$themes     = wp_get_themes( array( 'errors' => null ) );
 
 		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
-
-		if ( is_multisite() ) {
-			$themes = $this->multisite_get_themes();
-		}
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme         = array();
