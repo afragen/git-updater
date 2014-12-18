@@ -119,6 +119,14 @@ GitHub Branch:     master
 
 Optional headers `GitHub Branch`, and `Bitbucket Branch` are available but not required.
 
+### Versions
+
+GitHub Updater reads the `Version` headers from both the local file and the remote file. For an update to show as available the remote version number **must** be greater than the local version number. It is **required** to have a `Version` header in your main plugin file or your theme's `style.css` file. It is better to use [Semantic Versioning](http://semver.org).
+
+If you tag releases the version number of the tag must be the same as in the file inside of the tag. Otherwise a circle of updating may ensue. You do not have to tag releases; but if you do the tagged version will be downloaded preferentially. Please refer to the sections below on branches and tags.
+
+When testing I find it simpler to decrease the version number in the local file rather than continually push updates with version number increments or new tags.
+
 ## Branch Support
 
 To specify a branch that you would like to use for updating, just add a `GitHub Branch` header.  If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
@@ -140,6 +148,8 @@ Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket The
 The `Bitbucket Branch` header is supported for both plugins and themes.
 
 ## Private Repositories
+
+Public repositories will not show up in the Settings page.
 
 ### GitHub Private Repositories
 
