@@ -118,8 +118,15 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 		if ( self::$bitbucket_private ) {
 			add_settings_section(
-				'bitbucket_id',
+				'bitbucket_user',
 				__( 'Bitbucket Private Settings', 'github-updater' ),
+				array( $this, 'print_section_bitbucket_username' ),
+				'github-updater'
+			);
+
+			add_settings_section(
+				'bitbucket_id',
+				__( 'Bitbucket Private Repositories', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
 				'github-updater'
 			);
@@ -133,10 +140,10 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				'github-updater'
 			);
 		}
+
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
 			update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
 		}
-
 	}
 
 	/**
@@ -160,6 +167,24 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				}
 				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
 					self::$bitbucket_private = true;
+
+					add_settings_field(
+						'bitbucket_username',
+						'Bitbucket Username',
+						array( $this, 'token_callback' ),
+						'github-updater',
+						'bitbucket_user',
+						array( 'repo' => 'bitbucket_username', 'checkbox' => false )
+					);
+
+					add_settings_field(
+						'bitbucket_password',
+						'Bitbucket Password',
+						array( $this, 'token_callback' ),
+						'github-updater',
+						'bitbucket_user',
+						array( 'repo' => 'bitbucket_password', 'checkbox' => false )
+					);
 				}
 			}
 
@@ -177,9 +202,11 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			$setting_field['page']  = 'github-updater';
 			if ( false !== strpos( $token->type, 'github' ) ) {
 				$setting_field['section'] = 'github_id';
+				$setting_field['callback'] = array( 'repo' => $token->repo, 'checkbox' => false );
 			}
 			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
 				$setting_field['section'] = 'bitbucket_id';
+				$setting_field['callback'] = array( 'repo' => $token->repo, 'checkbox' => true );
 			}
 
 			add_settings_field(
@@ -188,7 +215,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				array( $this, 'token_callback' ),
 				$setting_field['page'],
 				$setting_field['section'],
-				$setting_field['id']
+				$setting_field['callback']
 			);
 
 			register_setting(
@@ -196,11 +223,12 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 				$setting_field['id'],       // Option name
 				array( $this, 'sanitize' )  // Sanitize
 			);
-
 		}
 
 		// Unset options that are no longer present
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
+		unset( $ghu_unset_keys['bitbucket_username'] );
+		unset( $ghu_unset_keys['bitbucket_password'] );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -225,19 +253,26 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	}
 
 	/**
-	 * Print the Section text
+	 * Print the GitHub text
 	 */
 	public function print_section_github_info() {
 		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
-	 * Print the Section text
+	 * Print the Bitbucket repo text
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Enter your Bitbucket password. Leave empty for public repositories.', 'github-updater' );
+		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
+
+	/**
+	 * Print the Bitbucket user/pass text
+	 */
+	public function print_section_bitbucket_username() {
+		print __( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+	}
 
 	/**
 	 * Get the settings option array and print one of its values
@@ -246,9 +281,20 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function token_callback( $id ) {
 		?>
-		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
-		</label>
+			<label for="<?php echo $id['repo']; ?>">
+		<?php
+		if ( ! $id['checkbox'] ) {
+			?>
+				<input type="text" style="width:50%;" name="github_updater[<?php echo $id['repo']; ?>]" value="<?php echo esc_attr( parent::$options[ $id['repo'] ] ); ?>">
+			<?php
+		}
+		if ( $id['checkbox'] ) {
+			?>
+				<input type="checkbox" name="github_updater[<?php echo $id['repo']; ?>]" value="1" <?php checked('1', parent::$options[ $id['repo'] ], true) ?> />
+			<?php
+		}
+		?>
+			</label>
 		<?php
 	}
 
@@ -285,6 +331,5 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 
 		return array_merge( $links, $link );
 	}
-
 
 }

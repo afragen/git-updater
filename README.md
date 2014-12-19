@@ -159,9 +159,13 @@ Leave this empty if the plugin or theme is in a public repository.
 
 ### Bitbucket Private Repositories
 
-In order to specify a private repository you will need to add your Bitbucket password to the appropriate plugin or theme in the Settings page.
+Add your personal Bitbucket username and password in the Settings page. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
 
-Leave this empty if the plugin or theme is in a public repository.
+In order to specify a private repository you will need to check the box next to the repository name in the Settings page.
+
+Leave this unchecked if the plugin or theme is in a public repository.
+
+Do not include your username or password in the URI.
 
 ## WordPress and PHP Requirements
 
