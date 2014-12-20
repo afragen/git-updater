@@ -171,19 +171,19 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 					add_settings_field(
 						'bitbucket_username',
 						'Bitbucket Username',
-						array( $this, 'token_callback' ),
+						array( $this, 'token_callback_text' ),
 						'github-updater',
 						'bitbucket_user',
-						array( 'repo' => 'bitbucket_username', 'checkbox' => false )
+						'bitbucket_username'
 					);
 
 					add_settings_field(
 						'bitbucket_password',
 						'Bitbucket Password',
-						array( $this, 'token_callback' ),
+						array( $this, 'token_callback_text' ),
 						'github-updater',
 						'bitbucket_user',
-						array( 'repo' => 'bitbucket_password', 'checkbox' => false )
+						'bitbucket_password'
 					);
 				}
 			}
@@ -201,18 +201,20 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 			$setting_field['title'] = $type . $token->name;
 			$setting_field['page']  = 'github-updater';
 			if ( false !== strpos( $token->type, 'github' ) ) {
-				$setting_field['section'] = 'github_id';
-				$setting_field['callback'] = array( 'repo' => $token->repo, 'checkbox' => false );
+				$setting_field['section']         = 'github_id';
+				$setting_field['callback_method'] = array( $this, 'token_callback_text' );
+				$setting_field['callback']        =  $token->repo;
 			}
 			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-				$setting_field['section'] = 'bitbucket_id';
-				$setting_field['callback'] = array( 'repo' => $token->repo, 'checkbox' => true );
+				$setting_field['section']         = 'bitbucket_id';
+				$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
+				$setting_field['callback']        = $token->repo;
 			}
 
 			add_settings_field(
 				$setting_field['id'],
 				$setting_field['title'],
-				array( $this, 'token_callback' ),
+				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
 				$setting_field['callback']
@@ -279,22 +281,24 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 *
 	 * @param $id
 	 */
-	public function token_callback( $id ) {
+	public function token_callback_text( $id ) {
 		?>
-			<label for="<?php echo $id['repo']; ?>">
+		<label for="<?php echo $id; ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
+		</label>
 		<?php
-		if ( ! $id['checkbox'] ) {
-			?>
-				<input type="text" style="width:50%;" name="github_updater[<?php echo $id['repo']; ?>]" value="<?php echo esc_attr( parent::$options[ $id['repo'] ] ); ?>">
-			<?php
-		}
-		if ( $id['checkbox'] ) {
-			?>
-				<input type="checkbox" name="github_updater[<?php echo $id['repo']; ?>]" value="1" <?php checked('1', parent::$options[ $id['repo'] ], true) ?> />
-			<?php
-		}
+	}
+
+	/**
+	 * Get the settings option array and print one of its values
+	 *
+	 * @param $id
+	 */
+	public function token_callback_checkbox( $id ) {
 		?>
-			</label>
+		<label for="<?php echo $id; ?>">
+			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true) ?> />
+		</label>
 		<?php
 	}
 
@@ -327,7 +331,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	 */
 	public function plugin_action_links( $links ) {
 		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
-		$link = array( '<a href="' . network_admin_url( $settings_page ) . '?page=github-updater">' . __( 'Settings', 'github-updater' ) . '</a>' );
+		$link          = array( '<a href="' . network_admin_url( $settings_page ) . '?page=github-updater">' . __( 'Settings', 'github-updater' ) . '</a>' );
 
 		return array_merge( $links, $link );
 	}
