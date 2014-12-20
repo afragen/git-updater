@@ -1,3 +1,7 @@
+#### 3.2.0
+* changed settings page and how Bitbucket Private repos authenticate with your username/password
+* update .pot
+
 #### 3.1.1
 * minor transient cleanup
 * update .pot file

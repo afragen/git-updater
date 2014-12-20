@@ -25,6 +25,14 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		$this->type  = $type;
 		parent::$hours = 12;
 
+		if ( ! isset( self::$options['bitbucket_username'] ) ) {
+			self::$options['bitbucket_username'] = null;
+		}
+		if ( ! isset( self::$options['bitbucket_password'] ) ) {
+			self::$options['bitbucket_password'] = null;
+		}
+		add_site_option( 'github_updater', self::$options );
+
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
 
@@ -339,8 +347,8 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		}
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
-			$username = $this->type->owner;
-			$password = parent::$options[ $this->type->repo ];
+			$username = parent::$options['bitbucket_username'];
+			$password = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 
