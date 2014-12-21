@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2014-12-19 00:34-0800\n"
-"PO-Revision-Date: 2014-12-19 00:35-0800\n"
+"POT-Creation-Date: 2014-12-21 09:24-0800\n"
+"PO-Revision-Date: 2014-12-21 09:24-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -53,105 +53,105 @@ msgstr ""
 msgid "Theme: "
 msgstr ""
 
-#: includes/class-github-updater-settings.php:259
+#: includes/class-github-updater-settings.php:261
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:266
+#: includes/class-github-updater-settings.php:268
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:274
+#: includes/class-github-updater-settings.php:276
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: includes/class-github-updater-settings.php:330
+#: includes/class-github-updater-settings.php:334
 msgid "Settings"
 msgstr ""
 
-#: includes/class-github-updater.php:416
+#: includes/class-github-updater.php:469
 #, php-format
 msgid "Renaming %s to %s&#8230;"
 msgstr ""
 
-#: includes/class-github-updater.php:424
+#: includes/class-github-updater.php:477
 msgid "Rename successful&#8230;"
 msgstr ""
 
-#: includes/class-github-updater.php:429
+#: includes/class-github-updater.php:482
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
-#: includes/class-theme-updater.php:188
+#: includes/class-theme-updater.php:184
 msgid "Theme is up-to-date!&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:191
+#: includes/class-theme-updater.php:187
 msgid "<strong>Rollback to:&nbsp;</strong>"
 msgstr ""
 
-#: includes/class-theme-updater.php:205
+#: includes/class-theme-updater.php:201
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: includes/class-theme-updater.php:214 includes/class-theme-updater.php:222
+#: includes/class-theme-updater.php:210 includes/class-theme-updater.php:218
 #, php-format
 msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:214
+#: includes/class-theme-updater.php:210
 #, php-format
 msgid "View version %4$s details"
 msgstr ""
 
-#: includes/class-theme-updater.php:214
+#: includes/class-theme-updater.php:210
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: includes/class-theme-updater.php:222
+#: includes/class-theme-updater.php:218
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "There is a new version of&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "&nbsp;available now."
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "&nbsp;View version&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "&nbsp;details"
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "&nbsp;or&nbsp;"
 msgstr ""
 
-#: includes/class-theme-updater.php:300
+#: includes/class-theme-updater.php:296
 msgid "update now"
 msgstr ""
 
-#: includes/class-theme-updater.php:310
+#: includes/class-theme-updater.php:306
 msgid "Current version is up to date. Try"
 msgstr ""
 
-#: includes/class-theme-updater.php:310
+#: includes/class-theme-updater.php:306
 msgid "another version?"
 msgstr ""
 
-#: includes/class-theme-updater.php:319
+#: includes/class-theme-updater.php:315
 msgid "Choose a Version&#8230;"
 msgstr ""
 
-#: includes/class-theme-updater.php:322
+#: includes/class-theme-updater.php:318
 msgid "Install"
 msgstr ""
 
