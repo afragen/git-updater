@@ -297,7 +297,7 @@ class GitHub_Updater_Settings extends GitHub_Updater {
 	public function token_callback_checkbox( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true) ?> />
+			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> />
 		</label>
 		<?php
 	}

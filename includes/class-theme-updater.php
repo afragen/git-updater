@@ -23,7 +23,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	/**
 	 * Rollback variable
 	 *
-	 * @var version number
+	 * @var number
 	 */
 	protected $tag = false;
 
@@ -31,10 +31,6 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 	 * Constructor.
 	 */
 	public function __construct() {
-
-		// This MUST come before we get details about the themes so the headers are correctly retrieved
-		//GitHub_Updater_GitHub_API::add_headers();
-		//GitHub_Updater_BitBucket_API::add_headers();
 
 		// Get details of git sourced themes
 		$this->config = $this->get_theme_meta();
