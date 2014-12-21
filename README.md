@@ -117,7 +117,9 @@ GitHub Branch:     master
 */
 ~~~
 
-Optional headers `GitHub Branch`, and `Bitbucket Branch` are available but not required.
+### Optional Headers
+
+`GitHub Branch` and `Bitbucket Branch` are available but not required.
 
 ### Versions
 
@@ -129,7 +131,7 @@ When testing I find it simpler to decrease the version number in the local file 
 
 ## Branch Support
 
-To specify a branch that you would like to use for updating, just add a `GitHub Branch` header.  If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
+To specify a branch that you would like to use for updating, just add a branch header.  If you develop on `master` and are pushing tags, GitHub Updater will update to the newest tag. If there are no tags or the specified branch is not `master` GitHub Updater will use the specified branch for updating.
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
@@ -165,7 +167,7 @@ In order to specify a private repository you will need to check the box next to 
 
 Leave this unchecked if the plugin or theme is in a public repository.
 
-Do not include your username or password in the URI.
+Do not include your username or password in the plugin or theme URI.
 
 ## WordPress and PHP Requirements
 

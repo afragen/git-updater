@@ -92,6 +92,7 @@ class GitHub_Updater {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
 		self::$options = get_site_option( 'github_updater' );
+		$this->add_headers();
 	}
 
 	/**
@@ -108,6 +109,58 @@ class GitHub_Updater {
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new GitHub_Updater_Settings;
 		}
+	}
+
+	/**
+	 * Add extra headers via filter hooks
+	 */
+	public static function add_headers() {
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
+	}
+
+	/**
+	 * Add extra headers to get_plugins();
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_plugin_headers( $extra_headers ) {
+		$ghu_extra_headers   = array(
+			'GitHub Plugin URI'    => 'GitHub Plugin URI',
+			'GitHub Branch'        => 'GitHub Branch',
+			'GitHub Access Token'  => 'GitHub Access Token',
+			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
+			'Bitbucket Branch'     => 'Bitbucket Branch',
+			'Requires WP'          => 'Requires WP',
+			'Requires PHP'         => 'Requires PHP',
+		);
+		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
+	 * Add extra headers to wp_get_themes()
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_theme_headers( $extra_headers ) {
+		$ghu_extra_headers   = array(
+			'GitHub Theme URI'    => 'GitHub Theme URI',
+			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Access Token' => 'GitHub Access Token',
+			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
+			'Bitbucket Branch'    => 'Bitbucket Branch',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
+		);
+		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
 	}
 
 	/**

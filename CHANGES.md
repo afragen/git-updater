@@ -1,3 +1,7 @@
+#### 3.2.1
+* refactored adding extra headers to `class GitHub_Updater` to ensure they're added before they're needed, resolves issue with WooThemes Updater plugin
+* update .pot file
+
 #### 3.2.0
 * changed settings page and how Bitbucket Private repos authenticate with your username/password
 * update .pot
