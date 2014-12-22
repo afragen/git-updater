@@ -293,8 +293,6 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 * @return mixed
 	 */
 	public function maybe_authenticate_http( $args, $url ) {
-		$password = null;
-
 		if ( ! isset( $this->type ) ) {
 			return $args;
 		}
