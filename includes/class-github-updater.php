@@ -242,7 +242,7 @@ class GitHub_Updater {
 					if ( empty( $headers['GitHub Access Token'] ) ) {
 						break;
 					}
-					$git_repo['access_token']  = $headers['GitHub Access Token'];
+					$git_repo['access_token'] = $headers['GitHub Access Token'];
 
 					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
 					break;
@@ -260,8 +260,8 @@ class GitHub_Updater {
 					}
 					$git_repo['type']       = 'bitbucket_plugin';
 
-					$git_repo['user']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
-					$git_repo['pass']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
+					//$git_repo['user']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
+					//$git_repo['pass']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
 					$owner_repo             = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
 					$owner_repo             = trim( $owner_repo, '/' );  // strip surrounding slashes
 					$git_repo['uri']        = 'https://bitbucket.org/' . $owner_repo;
@@ -270,7 +270,7 @@ class GitHub_Updater {
 					$git_repo['repo']       = $owner_repo[1];
 					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
 
-					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], self::$options );
+					//$this->save_header_options( $git_repo['repo'], $git_repo['pass'], self::$options );
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) {
@@ -362,8 +362,8 @@ class GitHub_Updater {
 
 						$git_theme['type']                    = 'bitbucket_theme';
 
-						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
-						$git_theme['pass']                    = parse_url( $bitbucket_uri, PHP_URL_PASS );
+						//$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
+						//$git_theme['pass']                    = parse_url( $bitbucket_uri, PHP_URL_PASS );
 						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
@@ -377,7 +377,7 @@ class GitHub_Updater {
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 
-						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], self::$options );
+						//$this->save_header_options( $git_theme['repo'], $git_theme['pass'], self::$options );
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) {
