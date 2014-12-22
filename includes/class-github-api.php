@@ -269,13 +269,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		$this->type->repo_meta = $response->items[0];
-		$this->add_meta_repo_object();
+		$this->_add_meta_repo_object();
 	}
 
 	/**
 	 * Add remote data to type object
 	 */
-	private function add_meta_repo_object() {
+	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;

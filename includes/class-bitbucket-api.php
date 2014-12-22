@@ -270,13 +270,13 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
+		$this->_add_meta_repo_object();
 	}
 
 	/**
 	 * Add remote data to type object
 	 */
-	private function add_meta_repo_object() {
+	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;

@@ -266,9 +266,9 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			}
 
 			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
-				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['update'] = $this->_append_theme_actions_content( $theme );
 			} else {
-				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['description'] .= $this->_append_theme_actions_content( $theme );
 			}
 		}
 
@@ -277,12 +277,12 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 
 	/**
 	 * Create theme update messaging
-	 * 
+	 *
 	 * @author Seth Carstens
 	 * @param object $theme
-	 * @return html
+	 * @return string (content buffer)
 	 */
-	private function append_theme_actions_content( $theme ) {
+	private function _append_theme_actions_content( $theme ) {
 
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
 		$theme_update_transient = get_site_transient( 'update_themes' );
