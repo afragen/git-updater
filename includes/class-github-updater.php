@@ -645,10 +645,10 @@ class GitHub_Updater {
 	 * @return float|int
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = ( empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers );
-		$forks       = ( empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks );
-		$open_issues = ( empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues );
-		$score       = ( empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score ); //what is this anyway?
+		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
+		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
+		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
+		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 
