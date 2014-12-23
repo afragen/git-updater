@@ -119,10 +119,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->branch               = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
-		$this->type->requires_php_version = ( ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version );
-		$this->type->requires_wp_version  = ( ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version );
-		$this->type->requires             = ( ! empty( $response['Requires WP'] ) ) ? $response['Requires WP'] : null;
+		$this->type->branch               = ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master';
+		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
+		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+		$this->type->requires             = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 
 		return true;
 	}
