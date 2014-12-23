@@ -1,3 +1,8 @@
+#### 3.2.2
+* remove scraping of user/pass from Bitbucket URI as it's no longer needed
+* use `Requires WP` header to fill view options detail
+* rename private methods to begin with underscore
+
 #### 3.2.1
 * refactored adding extra headers to `class GitHub_Updater` to ensure they're added before they're needed, resolves issue with WooThemes Updater plugin
 * update .pot file
