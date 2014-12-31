@@ -153,6 +153,8 @@ The `Bitbucket Branch` header is supported for both plugins and themes.
 
 Public repositories will not show up in the Settings page.
 
+![Settings Page](./assets/screenshot-1.png)
+
 ### GitHub Private Repositories
 
 In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
