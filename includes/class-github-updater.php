@@ -613,7 +613,7 @@ class GitHub_Updater {
 	 */
 	protected function delete_all_transients( $type ) {
 		$transients = get_site_transient( 'ghu-' . $type );
-		if ( empty( $transients ) ) {
+		if ( ! $transients ) {
 			return false;
 		}
 
@@ -628,9 +628,13 @@ class GitHub_Updater {
 	 * Create transient of $type transients for force-check
 	 *
 	 * @param $type
-	 * @return void
+	 * @return void|bool
 	 */
 	protected function make_force_check_transient( $type ) {
+		$transient = get_site_transient( 'ghu-' . $type );
+		if ( $transient ) {
+			return false;
+		}
 		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 	}

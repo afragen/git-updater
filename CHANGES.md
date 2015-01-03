@@ -3,6 +3,7 @@
 * use `Requires WP` header to fill view options detail
 * rename private methods to begin with underscore
 * add screenshot to README for Settings Page
+* stop re-creating transient of transients if it already exists
 
 #### 3.2.1
 * refactored adding extra headers to `class GitHub_Updater` to ensure they're added before they're needed, resolves issue with WooThemes Updater plugin
