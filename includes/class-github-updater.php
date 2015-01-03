@@ -421,7 +421,7 @@ class GitHub_Updater {
 	/**
 	 * Rename the zip folder to be the same as the existing repository folder.
 	 *
-	 * Github delivers zip files as <Repo>-<Branch>.zip
+	 * Github delivers zip files as <User>-<Repo>-<Branch|Hash>.zip
 	 *
 	 * @global object $wp_filesystem
 	 *

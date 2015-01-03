@@ -1,6 +1,6 @@
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
-* Tags: plugin, theme, update, updater
+* Tags: plugin, theme, update, updater, github, bitbucket
 * Requires at least: 3.8
 * Tested up to: 4.1
 * Stable tag: master
@@ -183,7 +183,9 @@ At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.3**
 
 ## Deleting Transients
 
-If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. Be careful about refreshing the browser window after this as you may be continually deleting the transients.
+If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour.
+
+Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 
 ## Hosting Plugin in WP.org Repository
 
@@ -206,7 +208,7 @@ When first downloading and installing a plugin from GitHub you might have to do 
 
 1. Unzip the archive.
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
-3. Copy the folder to your plugins directory.
+3. Copy the folder to your plugins directory **or** re-zip folder and add from plugins page.
 
 ## ChangeLog
 

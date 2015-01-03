@@ -2,7 +2,7 @@
 * remove scraping of user/pass from Bitbucket URI as it's no longer needed
 * use `Requires WP` header to fill view options detail
 * rename private methods to begin with underscore
-* add screenshot to README for Settings Page
+* add screenshot to README for Settings Page (only 70 kB)
 * stop re-creating transient of transients if it already exists
 
 #### 3.2.1
