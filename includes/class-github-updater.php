@@ -242,7 +242,7 @@ class GitHub_Updater {
 					if ( empty( $headers['GitHub Access Token'] ) ) {
 						break;
 					}
-					$git_repo['access_token']  = $headers['GitHub Access Token'];
+					$git_repo['access_token'] = $headers['GitHub Access Token'];
 
 					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
 					break;
@@ -260,8 +260,6 @@ class GitHub_Updater {
 					}
 					$git_repo['type']       = 'bitbucket_plugin';
 
-					$git_repo['user']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
-					$git_repo['pass']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
 					$owner_repo             = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
 					$owner_repo             = trim( $owner_repo, '/' );  // strip surrounding slashes
 					$git_repo['uri']        = 'https://bitbucket.org/' . $owner_repo;
@@ -269,8 +267,6 @@ class GitHub_Updater {
 					$git_repo['owner']      = $owner_repo[0];
 					$git_repo['repo']       = $owner_repo[1];
 					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
-
-					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], self::$options );
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) {
@@ -317,7 +313,6 @@ class GitHub_Updater {
 						if ( empty( $github_uri ) ) {
 							break;
 						}
-
 						$git_theme['type']                    = 'github_theme';
 
 						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
@@ -359,11 +354,8 @@ class GitHub_Updater {
 						if ( empty( $bitbucket_uri ) ) {
 							break;
 						}
-
 						$git_theme['type']                    = 'bitbucket_theme';
 
-						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
-						$git_theme['pass']                    = parse_url( $bitbucket_uri, PHP_URL_PASS );
 						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
@@ -376,8 +368,6 @@ class GitHub_Updater {
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
-
-						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], self::$options );
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) {
@@ -431,9 +421,9 @@ class GitHub_Updater {
 	/**
 	 * Rename the zip folder to be the same as the existing repository folder.
 	 *
-	 * Github delivers zip files as <Repo>-<Branch>.zip
+	 * Github delivers zip files as <User>-<Repo>-<Branch|Hash>.zip
 	 *
-	 * @global WP_Filesystem $wp_filesystem
+	 * @global object $wp_filesystem
 	 *
 	 * @param string $source
 	 * @param string $remote_source Optional.
@@ -623,7 +613,7 @@ class GitHub_Updater {
 	 */
 	protected function delete_all_transients( $type ) {
 		$transients = get_site_transient( 'ghu-' . $type );
-		if ( empty( $transients ) ) {
+		if ( ! $transients ) {
 			return false;
 		}
 
@@ -638,9 +628,13 @@ class GitHub_Updater {
 	 * Create transient of $type transients for force-check
 	 *
 	 * @param $type
-	 * @return void
+	 * @return void|bool
 	 */
 	protected function make_force_check_transient( $type ) {
+		$transient = get_site_transient( 'ghu-' . $type );
+		if ( $transient ) {
+			return false;
+		}
 		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 	}
@@ -655,10 +649,10 @@ class GitHub_Updater {
 	 * @return float|int
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = ( empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers );
-		$forks       = ( empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks );
-		$open_issues = ( empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues );
-		$score       = ( empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score ); //what is this anyway?
+		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
+		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
+		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
+		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 
