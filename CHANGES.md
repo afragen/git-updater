@@ -1,3 +1,6 @@
+#### 3.2.3
+* added Ukrainian translation by @andriiryzhkov (our first translation!!)
+
 #### 3.2.2
 * remove scraping of user/pass from Bitbucket URI as it's no longer needed
 * use `Requires WP` header to fill view options detail
