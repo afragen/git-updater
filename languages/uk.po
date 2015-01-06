@@ -1,0 +1,156 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: GitHub Updater\n"
+"POT-Creation-Date: 2014-12-21 09:24-0800\n"
+"PO-Revision-Date: 2015-01-06 16:58+0200\n"
+"Last-Translator: Andrii Ryzhkv <andri.ryzhkov@gmail.com>\n"
+"Language-Team: Andy Fragen <andy@thefragens.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class-github-updater-settings.php:62
+#: includes/class-github-updater-settings.php:70
+#: includes/class-github-updater-settings.php:86
+msgid "GitHub Updater Settings"
+msgstr "Налаштування GitHub Updater"
+
+#: includes/class-github-updater-settings.php:63
+#: includes/class-github-updater-settings.php:71
+msgid "GitHub Updater"
+msgstr "GitHub Updater"
+
+#: includes/class-github-updater-settings.php:88
+msgid "Saved."
+msgstr "Збережено."
+
+#: includes/class-github-updater-settings.php:113
+msgid "GitHub Private Settings"
+msgstr "Налаштування приватного GitHub"
+
+#: includes/class-github-updater-settings.php:122
+msgid "Bitbucket Private Settings"
+msgstr "Налаштування приватного Bitbucket"
+
+#: includes/class-github-updater-settings.php:129
+msgid "Bitbucket Private Repositories"
+msgstr "Приватні сховища Bitbucket"
+
+#: includes/class-github-updater-settings.php:138
+msgid "No private repositories are installed."
+msgstr "Ніякі приватні сховища не встановлені."
+
+#: includes/class-github-updater-settings.php:197
+msgid "Theme: "
+msgstr "Тема:"
+
+#: includes/class-github-updater-settings.php:261
+msgid "Enter your GitHub Access Token. Leave empty for public repositories."
+msgstr "Введіть маркер доступу GitHub . Залиште порожнім для публічних сховищ."
+
+#: includes/class-github-updater-settings.php:268
+msgid "Check box if private repository. Leave unchecked for public repositories."
+msgstr "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
+
+#: includes/class-github-updater-settings.php:276
+msgid "Enter your personal Bitbucket username and password."
+msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
+
+#: includes/class-github-updater-settings.php:334
+msgid "Settings"
+msgstr "Налаштування"
+
+#: includes/class-github-updater.php:469
+#, php-format
+msgid "Renaming %s to %s&#8230;"
+msgstr "Перейменування %s в %s&#8230;"
+
+#: includes/class-github-updater.php:477
+msgid "Rename successful&#8230;"
+msgstr "Перейменувати успішне&#8230;"
+
+#: includes/class-github-updater.php:482
+msgid "Unable to rename downloaded repository."
+msgstr "Неможливо перейменувати скачане сховище."
+
+#: includes/class-theme-updater.php:184
+msgid "Theme is up-to-date!&nbsp;"
+msgstr "Тема не має оновлень!&nbsp;"
+
+#: includes/class-theme-updater.php:187
+msgid "<strong>Rollback to:&nbsp;</strong>"
+msgstr "<strong>Відкат до:&nbsp;</strong>"
+
+#: includes/class-theme-updater.php:201
+msgid "No previous tags to rollback to."
+msgstr "Немає міток для відкату назад."
+
+#: includes/class-theme-updater.php:210 includes/class-theme-updater.php:218
+#, php-format
+msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
+msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
+
+#: includes/class-theme-updater.php:210
+#, php-format
+msgid "View version %4$s details"
+msgstr "Переглянути подробиці версії %4$s"
+
+#: includes/class-theme-updater.php:210
+msgid "Automatic update is unavailable for this theme."
+msgstr "Автоматичне оновлення недоступно для цієї теми."
+
+#: includes/class-theme-updater.php:218
+#, php-format
+msgid "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgstr "<a %2$s>Переглянути подробиці версії %3$s</a> або <a href=\"%4$s\">оновити зараз</a> ."
+
+#: includes/class-theme-updater.php:296
+msgid "There is a new version of&nbsp;"
+msgstr "Нова версія&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;available now."
+msgstr "&nbsp;зараз доступна."
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;View version&nbsp;"
+msgstr "&nbsp;Переглянути версію&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;details"
+msgstr "&nbsp;подробиці"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;or&nbsp;"
+msgstr "&nbsp;або&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "update now"
+msgstr "оновити зараз"
+
+#: includes/class-theme-updater.php:306
+msgid "Current version is up to date. Try"
+msgstr "Поточна версія остання. Спробуйте"
+
+#: includes/class-theme-updater.php:306
+msgid "another version?"
+msgstr "інша версія?"
+
+#: includes/class-theme-updater.php:315
+msgid "Choose a Version&#8230;"
+msgstr "Вибрати версію&#8230;"
+
+#: includes/class-theme-updater.php:318
+msgid "Install"
+msgstr "Встановити"
+
+#: mu/ghu-loader.php:51
+msgid "Activated as mu-plugin"
+msgstr "Активувати як mu-plugin"
