@@ -1,6 +1,73 @@
+#### 3.2.3
+* added Ukrainian translation by @andriiryzhkov (our first translation!!)
+
+#### 3.2.2
+* remove scraping of user/pass from Bitbucket URI as it's no longer needed
+* use `Requires WP` header to fill view options detail
+* rename private methods to begin with underscore
+* add screenshot to README for Settings Page (only 70 kB)
+* stop re-creating transient of transients if it already exists
+
+#### 3.2.1
+* refactored adding extra headers to `class GitHub_Updater` to ensure they're added before they're needed, resolves issue with WooThemes Updater plugin
+* update .pot file
+
+#### 3.2.0
+* changed settings page and how Bitbucket Private repos authenticate with your username/password
+* update .pot
+
+#### 3.1.1
+* minor transient cleanup
+* update .pot file
+* fix to get all themes under both single and multisite installs
+
+#### 3.1.0
+* woot!! - updating from Bitbucket private repos now works!!
+* fix to only add HTTP Authentication header under correct circumstances. This obviates need to fix for other APIs that might also use HTTP Authentication.
+* fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
+* changes `$options` to `private static $options` to save a few database calls
+* Settings page **only** shows private repos, except for initial setup
+* simpler test for checking branch as download endpoint
+* correctly use `parent::` instead of `self::`
+* many updates for translation
+* fix to ensure theme rollback and updating works in both single install and multisite
+* fix to save settings from single site installations
+
+#### 3.0.7
+* more efficient solution to HTTP Authentication issues
+* more efficient options cleanup
+* remove some unnecessary code resulting in few database calls
+* change default option setting to use `add_site_option` so not autoloading options
+
+#### 3.0.6
+* fix for other APIs that use HTTP Authentication, like JetPack - thanks @tsquez
+
+#### 3.0.5
+* fix more PHP Notices
+* correctly set defaults for Settings page :P
+* remove options for plugins/themes that are no longer present
+
+#### 3.0.4
+* Who would've thought `file_exists` was case-sensitive
+* when checking meta, use `empty()` instead of `! isset()` for `null array`
+* set defaults for Settings page
+* fix a number of PHP Notices
+
+#### 3.0.3
+* Bugfix to properly authenticate on JetPack Stats page
+
+#### 3.0.2
+* simplify check and exit on Settings if no Bitbucket plugins/themes
+
+#### 3.0.1
+* Remove Bitbucket settings from page if no appropriate plugins or themes exist.
+
 #### 3.0.0
 * Settings Page for your GitHub Access Tokens
 * added POT file and some more i18n fixes - thanks @grappler
+* added `Requires WP` and `Requires PHP` headers to set minimum version requirements - for @GaryJ
+* move update check to function to also check WP and PHP version requirements.
+* unset any HTTP Authorization headers for GitHub API calls as this gives a 401 error. Rare potential bug if you have private Bitbucket repos.
 
 #### 2.9.0
 * move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.

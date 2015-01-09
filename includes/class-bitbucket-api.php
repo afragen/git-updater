@@ -23,51 +23,16 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 12;
+		parent::$hours = 12;
 
+		if ( ! isset( self::$options['bitbucket_username'] ) ) {
+			self::$options['bitbucket_username'] = null;
+		}
+		if ( ! isset( self::$options['bitbucket_password'] ) ) {
+			self::$options['bitbucket_password'] = null;
+		}
+		add_site_option( 'github_updater', self::$options );
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
-	}
-
-	/**
-	 * Add extra headers via filter hooks
-	 */
-	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( 'GitHub_Updater_Bitbucket_API', 'add_theme_headers' ) );
-	}
-
-	/**
-	 * Add extra header to get_plugins();
-	 *
-	 * @param $extra_headers
-	 * @return array
-	 */
-	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers     = array(
-			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
-			'Bitbucket Branch'     => 'Bitbucket Branch',
-		);
-		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
-	}
-
-	/**
-	 * Add extra headers to wp_get_themes()
-	 *
-	 * @param $extra_headers
-	 * @return array
-	 */
-	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers     = array(
-			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
-			'Bitbucket Branch'    => 'Bitbucket Branch',
-		);
-		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
 	}
 
 	/**
@@ -148,9 +113,12 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		if ( ! is_array( $response ) ) {
 			return false;
 		}
-		$this->type->transient      = $response;
-		$this->type->branch         = ( ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master' );
-		$this->type->remote_version = $response['Version'];
+		$this->type->transient            = $response;
+		$this->type->remote_version       = strtolower( $response['Version'] );
+		$this->type->branch               = ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master';
+		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
+		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+		$this->type->requires             = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 
 		return true;
 	}
@@ -228,7 +196,7 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 			$endpoint .= $rollback . '.zip';
 		
 		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch . '.zip';
 		} else {
 			$endpoint .= $this->type->newest_tag . '.zip';
@@ -303,42 +271,36 @@ class GitHub_Updater_Bitbucket_API extends GitHub_Updater {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
+		$this->_add_meta_repo_object();
 	}
 
 	/**
 	 * Add remote data to type object
 	 */
-	private function add_meta_repo_object() {
+	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
+		$this->type->private      = $this->type->repo_meta->is_private;
 	}
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private Bitbucket repositories only.
 	 *
-	 * @param      $args
-	 * @param null $type
+	 * @param  $args
+	 * @param  $url
 	 *
 	 * @return mixed
 	 */
-	public function maybe_authenticate_http( $args, $type = null ) {
-		$options  = get_site_option( 'github_updater' );
-		$password = null;
-
-
-		if ( isset( $args['headers'] ) ) {
-			unset( $args['headers']['Authorization'] );
-		}
-
-		if ( ! isset( $this->type ) && ! isset( $options[ $this->type->repo ] ) ) {
+	public function maybe_authenticate_http( $args, $url ) {
+		if ( ! isset( $this->type ) ) {
 			return $args;
 		}
 
-		if ( $options[ $this->type->repo ] ) {
-			$username = $this->type->owner;
-			$password = $options[ $this->type->repo ];
+		if ( ! empty( parent::$options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
+			$username = parent::$options['bitbucket_username'];
+			$password = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 

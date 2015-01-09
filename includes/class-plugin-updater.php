@@ -23,10 +23,6 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 	 */
 	public function __construct() {
 
-		// This MUST come before we get details about the plugins so the headers are correctly retrieved
-		GitHub_Updater_GitHub_API::add_headers();
-		GitHub_Updater_BitBucket_API::add_headers();
-
 		// Get details of GitHub-sourced plugins
 		$this->config = $this->get_plugin_meta();
 		
@@ -92,6 +88,7 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
+
 			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
@@ -139,9 +136,8 @@ class GitHub_Plugin_Updater extends GitHub_Updater {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			$remote_is_newer = ( 1 === version_compare( $plugin->remote_version, $plugin->local_version ) );
 
-			if ( $remote_is_newer ) {
+			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'new_version' => $plugin->remote_version,

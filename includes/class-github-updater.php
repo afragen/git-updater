@@ -54,11 +54,17 @@ class GitHub_Updater {
 	protected static $extra_headers = array();
 
 	/**
+	 * Holds the values to be used in the fields callbacks
+	 * @var array
+	 */
+	protected static $options;
+
+	/**
 	 * Autoloader
 	 *
 	 * @param $class
 	 */
-	private function autoload( $class ) {
+	protected function autoload( $class ) {
 		$classes = array(
 			'github_plugin_updater'        => 'class-plugin-updater.php',
 			'github_theme_updater'         => 'class-theme-updater.php',
@@ -78,20 +84,15 @@ class GitHub_Updater {
 	/**
 	 * Constructor
 	 *
-	 * Calls $this->init() in init hook so other remote upgrader apps like
-	 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-	 * of GitHub_Updater's methods, especially renaming.
-	 *
 	 * Calls spl_autoload_register to set loading of classes.
+	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		//add_action( 'init', array( $this, 'init' ) );
 		if ( function_exists( 'spl_autoload_register' ) ) {
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
-
-		// Reverse sort to run plugin/theme URI first
-		arsort( self::$extra_headers );
+		self::$options = get_site_option( 'github_updater' );
+		$this->add_headers();
 	}
 
 	/**
@@ -111,6 +112,58 @@ class GitHub_Updater {
 	}
 
 	/**
+	 * Add extra headers via filter hooks
+	 */
+	public static function add_headers() {
+		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
+	}
+
+	/**
+	 * Add extra headers to get_plugins();
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_plugin_headers( $extra_headers ) {
+		$ghu_extra_headers   = array(
+			'GitHub Plugin URI'    => 'GitHub Plugin URI',
+			'GitHub Branch'        => 'GitHub Branch',
+			'GitHub Access Token'  => 'GitHub Access Token',
+			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
+			'Bitbucket Branch'     => 'Bitbucket Branch',
+			'Requires WP'          => 'Requires WP',
+			'Requires PHP'         => 'Requires PHP',
+		);
+		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
+	 * Add extra headers to wp_get_themes()
+	 *
+	 * @param $extra_headers
+	 * @return array
+	 */
+	public static function add_theme_headers( $extra_headers ) {
+		$ghu_extra_headers   = array(
+			'GitHub Theme URI'    => 'GitHub Theme URI',
+			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Access Token' => 'GitHub Access Token',
+			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
+			'Bitbucket Branch'    => 'Bitbucket Branch',
+			'Requires WP'         => 'Requires WP',
+			'Requires PHP'        => 'Requires PHP',
+		);
+		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
+		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+
+		return $extra_headers;
+	}
+
+	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
 	 * @return array Indexed array of associative arrays of plugin details.
@@ -124,7 +177,8 @@ class GitHub_Updater {
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
-				empty( $headers['Bitbucket Plugin URI'] ) ) {
+				empty( $headers['Bitbucket Plugin URI'] )
+			) {
 				continue;
 			}
 
@@ -134,7 +188,7 @@ class GitHub_Updater {
 			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
 			$git_repo['author']                  = $plugin_data['AuthorName'];
 			$git_repo['name']                    = $plugin_data['Name'];
-			$git_repo['local_version']           = $plugin_data['Version'];
+			$git_repo['local_version']           = strtolower( $plugin_data['Version'] );
 			$git_repo['sections']['description'] = $plugin_data['Description'];
 			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
 		}
@@ -155,7 +209,9 @@ class GitHub_Updater {
 	*/
 	protected function get_local_plugin_meta( $headers ) {
 		$git_repo = array();
-		$options  = get_site_option( 'github_updater' );
+
+		// Reverse sort to run plugin/theme URI first
+		arsort( self::$extra_headers );
 
 		foreach ( (array) self::$extra_headers as $key => $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
@@ -186,9 +242,9 @@ class GitHub_Updater {
 					if ( empty( $headers['GitHub Access Token'] ) ) {
 						break;
 					}
-					$git_repo['access_token']  = $headers['GitHub Access Token'];
+					$git_repo['access_token'] = $headers['GitHub Access Token'];
 
-					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], $options );
+					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
 					break;
 			}
 		}
@@ -204,8 +260,6 @@ class GitHub_Updater {
 					}
 					$git_repo['type']       = 'bitbucket_plugin';
 
-					$git_repo['user']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_USER );
-					$git_repo['pass']       = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PASS );
 					$owner_repo             = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
 					$owner_repo             = trim( $owner_repo, '/' );  // strip surrounding slashes
 					$git_repo['uri']        = 'https://bitbucket.org/' . $owner_repo;
@@ -213,8 +267,6 @@ class GitHub_Updater {
 					$git_repo['owner']      = $owner_repo[0];
 					$git_repo['repo']       = $owner_repo[1];
 					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
-
-					$this->save_header_options( $git_repo['repo'], $git_repo['pass'], $options );
 					break;
 				case 'Bitbucket Branch':
 					if ( empty( $headers['Bitbucket Branch'] ) ) {
@@ -229,37 +281,15 @@ class GitHub_Updater {
 	}
 
 	/**
-	* Get array of all themes in multisite
-	*
-	* wp_get_themes does not seem to work under network activation in the same way as in a single install.
-	* http://core.trac.wordpress.org/changeset/20152
-	*
-	* @return array
-	*/
-	protected function multisite_get_themes() {
-		$themes     = array();
-		$theme_dirs = scandir( get_theme_root() );
-		$theme_dirs = array_diff( $theme_dirs, array( '.', '..', '.DS_Store', 'index.php' ) );
-
-		foreach ( (array) $theme_dirs as $theme_dir ) {
-			$themes[] = wp_get_theme( $theme_dir );
-		}
-
-		return $themes;
-	}
-
-	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
-		$themes     = wp_get_themes();
-		$options    = get_site_option( 'github_updater' );
+		$themes     = wp_get_themes( array( 'errors' => null ) );
 
-		if ( is_multisite() ) {
-			$themes = $this->multisite_get_themes();
-		}
+		// Reverse sort to run plugin/theme URI first
+		arsort( self::$extra_headers );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme         = array();
@@ -283,7 +313,6 @@ class GitHub_Updater {
 						if ( empty( $github_uri ) ) {
 							break;
 						}
-
 						$git_theme['type']                    = 'github_theme';
 
 						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
@@ -295,7 +324,7 @@ class GitHub_Updater {
 						$git_theme['name']                    = $theme->get( 'Name' );
 						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 						$git_theme['author']                  = $theme->get( 'Author' );
-						$git_theme['local_version']           = $theme->get( 'Version' );
+						$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 						break;
@@ -311,7 +340,7 @@ class GitHub_Updater {
 						}
 						$git_theme['access_token']            = $github_token;
 
-						$this->save_header_options( $git_theme['repo'], $github_token, $options );
+						$this->save_header_options( $git_theme['repo'], $github_token, self::$options );
 						break;
 				}
 			}
@@ -325,11 +354,8 @@ class GitHub_Updater {
 						if ( empty( $bitbucket_uri ) ) {
 							break;
 						}
-
 						$git_theme['type']                    = 'bitbucket_theme';
 
-						$git_theme['user']                    = parse_url( $bitbucket_uri, PHP_URL_USER );
-						$git_theme['pass']                    = parse_url( $bitbucket_uri, PHP_URL_PASS );
 						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
 						$owner_repo                           = trim( $owner_repo, '/' );
 						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
@@ -342,8 +368,6 @@ class GitHub_Updater {
 						$git_theme['local_version']           = $theme->get( 'Version' );
 						$git_theme['sections']['description'] = $theme->get( 'Description' );
 						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
-
-						$this->save_header_options( $git_theme['repo'], $git_theme['pass'], $options );
 						break;
 					case 'Bitbucket Branch':
 						if ( empty( $bitbucket_branch ) ) {
@@ -362,8 +386,15 @@ class GitHub_Updater {
 
 	/**
 	 * Set default values for plugin/theme
+	 *
+	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
+		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
+			self::$options[ $this->$type->repo ] = null;
+			add_site_option( 'github_updater', self::$options );
+		}
+
 		$this->$type->remote_version        = '0.0.0';
 		$this->$type->newest_tag            = '0.0.0';
 		$this->$type->download_link         = null;
@@ -378,18 +409,21 @@ class GitHub_Updater {
 		$this->$type->num_ratings           = 0;
 		$this->$type->transient             = array();
 		$this->$type->repo_meta             = array();
+		$this->$type->private               = true;
 		$this->$type->watchers              = 0;
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
+		$this->$type->requires_wp_version   = '0.0.0';
+		$this->$type->requires_php_version  = '5.2.4';
 	}
 
 	/**
 	 * Rename the zip folder to be the same as the existing repository folder.
 	 *
-	 * Github delivers zip files as <Repo>-<Branch>.zip
+	 * Github delivers zip files as <User>-<Repo>-<Branch|Hash>.zip
 	 *
-	 * @global WP_Filesystem $wp_filesystem
+	 * @global object $wp_filesystem
 	 *
 	 * @param string $source
 	 * @param string $remote_source Optional.
@@ -514,6 +548,8 @@ class GitHub_Updater {
 		foreach ( $changelogs as $changes ) {
 			if ( file_exists( $this->$type->local_path . $changes ) ) {
 				return $changes;
+			} elseif ( file_exists( $this->$type->local_path . strtolower( $changes ) ) ) {
+				return strtolower( $changes );
 			}
 		}
 
@@ -573,7 +609,7 @@ class GitHub_Updater {
 	 *
 	 * @param $type
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	protected function delete_all_transients( $type ) {
 		$transients = get_site_transient( 'ghu-' . $type );
@@ -583,11 +619,8 @@ class GitHub_Updater {
 
 		foreach ( $transients as $transient ) {
 			delete_site_transient( $transient );
-			$key = array_search( $transient, $transients );
-			unset( $transients[ $key ] );
 		}
-
-		return true;
+		delete_site_transient( 'ghu-' . $type );
 	}
 
 
@@ -595,10 +628,14 @@ class GitHub_Updater {
 	 * Create transient of $type transients for force-check
 	 *
 	 * @param $type
+	 * @return void|bool
 	 */
 	protected function make_force_check_transient( $type ) {
-		delete_site_transient( 'ghu-' . $type );
-		set_site_transient( 'ghu-' . $type , self::$transients, 12 * HOUR_IN_SECONDS );
+		$transient = get_site_transient( 'ghu-' . $type );
+		if ( $transient ) {
+			return false;
+		}
+		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 	}
 
@@ -612,10 +649,10 @@ class GitHub_Updater {
 	 * @return float|int
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = ( empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers );
-		$forks       = ( empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks );
-		$open_issues = ( empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues );
-		$score       = ( empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score ); //what is this anyway?
+		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
+		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
+		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
+		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 
@@ -632,12 +669,35 @@ class GitHub_Updater {
 	 * @param $repo
 	 * @param $value
 	 * @param $options
+	 * @return bool|void
 	 */
 	protected function save_header_options( $repo, $value, $options ) {
 		if ( ! $value ) {
 			return false;
 		}
-		$options[ $repo ] = $value;
-		update_site_option( 'github_updater', $options );
+		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
+			unset( $options[ $repo ] );
+			$value = sanitize_text_field( $value );
+			$options[ $repo ] = $value;
+			update_site_option( 'github_updater', $options );
+		}
 	}
+
+	/**
+	 * Function to check if plugin or theme object is updatable.
+	 *
+	 * @param $type
+	 *
+	 * @return bool
+	 */
+	public function can_update( $type ) {
+		global $wp_version;
+
+		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
+
+		return $remote_is_newer && $wp_version_ok && $php_version_ok;
+	}
+
 }
