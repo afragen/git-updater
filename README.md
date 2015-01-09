@@ -200,6 +200,7 @@ The same applies for Bitbucket hosted plugins.
 
 ### Translations
 
+* Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 
 ## Issues
