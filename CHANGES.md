@@ -1,3 +1,9 @@
+#### 3.2.5
+* added Italian translation by @overclokk
+
+#### 3.2.4
+* added Portuguese translation by @valeriosouza
+
 #### 3.2.3
 * added Ukrainian translation by @andriiryzhkov (our first translation!!)
 

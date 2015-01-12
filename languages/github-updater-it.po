@@ -1,0 +1,156 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: GitHub Updater\n"
+"POT-Creation-Date: 2014-12-21 09:24-0800\n"
+"PO-Revision-Date: 2015-01-10 11:50+0100\n"
+"Last-Translator: Enea Overclokk <info@overclokk.net>\n"
+"Language-Team: Andy Fragen <andy@thefragens.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: it\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: includes/class-github-updater-settings.php:62
+#: includes/class-github-updater-settings.php:70
+#: includes/class-github-updater-settings.php:86
+msgid "GitHub Updater Settings"
+msgstr "Impostazioni GitHub Updater"
+
+#: includes/class-github-updater-settings.php:63
+#: includes/class-github-updater-settings.php:71
+msgid "GitHub Updater"
+msgstr "GitHub Updater"
+
+#: includes/class-github-updater-settings.php:88
+msgid "Saved."
+msgstr "Salvato."
+
+#: includes/class-github-updater-settings.php:113
+msgid "GitHub Private Settings"
+msgstr "Impostazioni private Bitbucket"
+
+#: includes/class-github-updater-settings.php:122
+msgid "Bitbucket Private Settings"
+msgstr "Impostazioni private Bitbucket"
+
+#: includes/class-github-updater-settings.php:129
+msgid "Bitbucket Private Repositories"
+msgstr "Repository privato Bitbucket"
+
+#: includes/class-github-updater-settings.php:138
+msgid "No private repositories are installed."
+msgstr "Nessun repository privato è installato."
+
+#: includes/class-github-updater-settings.php:197
+msgid "Theme: "
+msgstr "Tema:"
+
+#: includes/class-github-updater-settings.php:261
+msgid "Enter your GitHub Access Token. Leave empty for public repositories."
+msgstr "Inserisci il tuo Access Token di Github. Lascia vuoto per gli archivi pubblici."
+
+#: includes/class-github-updater-settings.php:268
+msgid "Check box if private repository. Leave unchecked for public repositories."
+msgstr "Seleziona se il repository è privato. Lascia deselezionato per gli archivi pubblici."
+
+#: includes/class-github-updater-settings.php:276
+msgid "Enter your personal Bitbucket username and password."
+msgstr "Inserisci la tua username e password di Bitbucket."
+
+#: includes/class-github-updater-settings.php:334
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: includes/class-github-updater.php:469
+#, php-format
+msgid "Renaming %s to %s&#8230;"
+msgstr "Rinominato %s a %s&#8230;"
+
+#: includes/class-github-updater.php:477
+msgid "Rename successful&#8230;"
+msgstr "Rinominato con successo&#8230;"
+
+#: includes/class-github-updater.php:482
+msgid "Unable to rename downloaded repository."
+msgstr "Impossibile rinominare il repository scaricato."
+
+#: includes/class-theme-updater.php:184
+msgid "Theme is up-to-date!&nbsp;"
+msgstr "Il tema è aggiornato!&nbsp;"
+
+#: includes/class-theme-updater.php:187
+msgid "<strong>Rollback to:&nbsp;</strong>"
+msgstr "<strong>Ripristina a:&nbsp;</strong>"
+
+#: includes/class-theme-updater.php:201
+msgid "No previous tags to rollback to."
+msgstr "Nessun tag precedente da ripristinare."
+
+#: includes/class-theme-updater.php:210 includes/class-theme-updater.php:218
+#, php-format
+msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
+msgstr "GitHub Updater mostra una nuova versione di %1$s disponibile.&nbsp;"
+
+#: includes/class-theme-updater.php:210
+#, php-format
+msgid "View version %4$s details"
+msgstr "Visualizza i dettagli della versione %4$s"
+
+#: includes/class-theme-updater.php:210
+msgid "Automatic update is unavailable for this theme."
+msgstr "L&#39;aggiornamento automatico non è disponibile per questo tema."
+
+#: includes/class-theme-updater.php:218
+#, php-format
+msgid "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgstr "<a %2$s>Visualizza i dettagli della versione %3$s</a> o <a href=\"%4$s\">aggiorna adesso</a>."
+
+#: includes/class-theme-updater.php:296
+msgid "There is a new version of&nbsp;"
+msgstr "C'è una nuova versione di&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;available now."
+msgstr "&nbsp;disponibile adesso."
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;View version&nbsp;"
+msgstr "&nbsp;Visualizza versione&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;details"
+msgstr "&nbsp;dettagli"
+
+#: includes/class-theme-updater.php:296
+msgid "&nbsp;or&nbsp;"
+msgstr "&nbsp;o&nbsp;"
+
+#: includes/class-theme-updater.php:296
+msgid "update now"
+msgstr "aggiorna adesso"
+
+#: includes/class-theme-updater.php:306
+msgid "Current version is up to date. Try"
+msgstr "La versione attuale è aggiornata. Prova"
+
+#: includes/class-theme-updater.php:306
+msgid "another version?"
+msgstr "un&#39;altra versione?"
+
+#: includes/class-theme-updater.php:315
+msgid "Choose a Version&#8230;"
+msgstr "Scegli una versione ..."
+
+#: includes/class-theme-updater.php:318
+msgid "Install"
+msgstr "Installa"
+
+#: mu/ghu-loader.php:51
+msgid "Activated as mu-plugin"
+msgstr "Attivato come mu-plugin"
