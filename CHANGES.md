@@ -1,3 +1,6 @@
+#### 3.2.6
+* added French translation by @daniel-menard
+
 #### 3.2.5
 * added Italian translation by @overclokk
 
