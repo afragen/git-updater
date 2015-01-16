@@ -444,7 +444,7 @@ class GitHub_Updater {
 		}
 
 		// Check for upgrade process, return if both are false
-		if ( ! is_a( $upgrader, 'Plugin_Upgrader' ) && ! is_a( $upgrader, 'Theme_Upgrader' ) ) {
+		if ( ! ( $upgrader instanceof Plugin_Upgrader ) && ! ( $upgrader instanceof Theme_Upgrader ) ) {
 			return $source;
 		}
 

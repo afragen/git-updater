@@ -1,3 +1,6 @@
+#### 3.2.7
+* changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
+
 #### 3.2.6
 * added French translation by @daniel-menard
 
