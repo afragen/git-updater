@@ -200,7 +200,8 @@ The same applies for Bitbucket hosted plugins.
 
 ### Translations
 
-* Italian by [Enea](https://github.com/overclokk)
+* French by [Daniel Ménard](https://github.com/daniel-menard)
+* Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 
