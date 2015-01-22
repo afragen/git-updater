@@ -179,7 +179,7 @@ Use `Requires WP:` to set the minimum required version of WordPress needed for y
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.3**
+At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.4**
 
 ## Deleting Transients
 
@@ -197,6 +197,13 @@ The same applies for Bitbucket hosted plugins.
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
 <https://github.com/szepeviktor/wordpress-plugin-construction/tree/master/github-link>
+
+### Translations
+
+* French by [Daniel Ménard](https://github.com/daniel-menard)
+* Italian by [Enea Overclokk](https://github.com/overclokk)
+* Portuguese by [Valerio Souza](https://github.com/valeriosouza)
+* Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 
 ## Issues
 

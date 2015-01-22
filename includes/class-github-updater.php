@@ -415,7 +415,7 @@ class GitHub_Updater {
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '0.0.0';
-		$this->$type->requires_php_version  = '5.2.3';
+		$this->$type->requires_php_version  = '5.2.4';
 	}
 
 	/**
@@ -444,7 +444,7 @@ class GitHub_Updater {
 		}
 
 		// Check for upgrade process, return if both are false
-		if ( ! is_a( $upgrader, 'Plugin_Upgrader' ) && ! is_a( $upgrader, 'Theme_Upgrader' ) ) {
+		if ( ! ( $upgrader instanceof Plugin_Upgrader ) && ! ( $upgrader instanceof Theme_Upgrader ) ) {
 			return $source;
 		}
 
