@@ -2,6 +2,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket
 * Requires at least: 3.8
+* Requires PHP: 5.3
 * Tested up to: 4.1
 * Stable tag: master
 * License: GPLv2 or later
@@ -179,7 +180,7 @@ Use `Requires WP:` to set the minimum required version of WordPress needed for y
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 0.0.0** and **PHP 5.2.4**
+At the moment the default values are **WordPress 0.0.0** and **PHP 5.3**
 
 ## Deleting Transients
 
