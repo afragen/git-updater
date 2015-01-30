@@ -44,3 +44,14 @@ new GitHub_Updater;
  * of GitHub_Updater's methods, especially renaming.
  */
 add_action( 'init', array( 'GitHub_Updater', 'init' ) );
+
+/*
+ * Dummy strings used to translate plugin description in wordpress header
+ */
+if ( false ) {
+    // Plugin Name: not sure it should be translated
+    // __( 'GitHub Updater', 'github-updater' );
+
+    // Description
+    __( 'A plugin to automatically update GitHub or Bitbucket hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.', 'github-updater' );
+}
