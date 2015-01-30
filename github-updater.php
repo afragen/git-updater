@@ -30,17 +30,17 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Load Autoloader
-require_once( 'includes/Autoloader.php' );
+require_once( 'classes/Autoloader.php' );
 
 // Load textdomain
 load_plugin_textdomain( 'github-updater', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 // Instantiate class GitHub_Updater
-new GitHub_Updater;
+new GitHub_Updater__Base;
 
 /**
- * Calls GitHub_Updater::init() in init hook so other remote upgrader apps like
+ * Calls GitHub_Updater__Base::init() in init hook so other remote upgrader apps like
  * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
  * of GitHub_Updater's methods, especially renaming.
  */
-add_action( 'init', array( 'GitHub_Updater', 'init' ) );
+add_action( 'init', array( 'GitHub_Updater__Base', 'init' ) );

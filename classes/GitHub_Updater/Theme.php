@@ -11,14 +11,14 @@
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   GitHub_Updater_Theme
+ * @package   GitHub_Updater__Theme
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Updater_Theme extends GitHub_Updater {
+class GitHub_Updater__Theme extends GitHub_Updater__Base {
 
 	/**
 	 * Rollback variable
@@ -44,10 +44,10 @@ class GitHub_Updater_Theme extends GitHub_Updater {
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
 				case 'github_theme':
-					$repo_api = new GitHub_Updater_GitHub_API( $theme );
+					$repo_api = new GitHub_Updater__GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new GitHub_Updater_BitBucket_API( $theme );
+					$repo_api = new GitHub_Updater__BitBucket_API( $theme );
 					break;
 			}
 
@@ -103,7 +103,7 @@ class GitHub_Updater_Theme extends GitHub_Updater {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
 
-		GitHub_Updater_Settings::$ghu_themes = $this->config;
+		GitHub_Updater__Settings::$ghu_themes = $this->config;
 	}
 
 	/**
@@ -314,7 +314,7 @@ class GitHub_Updater_Theme extends GitHub_Updater {
 				">
 				<option value=""><?php _e( 'Choose a Version&#8230;', 'github-updater' ); ?></option>
 				<option><?php echo $theme->branch; ?></option>
-				<?php foreach ( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] as $version => $url ) { echo'<option>' . $version . '</option>'; }?></select>
+				<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo'<option>' . $version . '</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php

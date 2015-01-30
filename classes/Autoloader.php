@@ -13,7 +13,7 @@ namespace GitHub_Updater;
  * @license   GPL-2.0+
  * @link      http://github.com/afragen/autoloader
  * @copyright 2015 Andy Fragen
- * @version   1.1.0
+ * @version   1.1.1
  */
 
 class Autoloader {
@@ -42,10 +42,10 @@ class Autoloader {
 				$class_dir  = dirname( $file );
 				$class_dir  = str_replace( $base, '', $class_dir );
 				$class_dir  = ltrim( $class_dir, '/' );
-				$class_dir  = str_replace( '/', '_', $class_dir );
+				$class_dir  = str_replace( '/', '__', $class_dir );
 				$class_name = str_replace( '.php', '', basename( $file ) );
 				if ( ! empty( $class_dir ) ) {
-					$class_name = $class_dir . '_' . $class_name;
+					$class_name = $class_dir . '__' . $class_name;
 				}
 				$classes[ strtolower( $class_name ) ] = $file;
 			}

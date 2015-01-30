@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Load normal plugin
-if ( ! class_exists( 'GitHub_Updater' ) ) {
+if ( ! class_exists( 'GitHub_Updater__Base' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	require trailingslashit( WP_PLUGIN_DIR ). $ghu_plugin_file;
 }

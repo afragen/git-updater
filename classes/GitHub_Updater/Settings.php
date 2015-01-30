@@ -11,10 +11,10 @@
 /**
  * Add a settings page.
  *
- * @package GitHub_Updater_Settings
+ * @package GitHub_Updater__Settings
  * @author Andy Fragen
  */
-class GitHub_Updater_Settings extends GitHub_Updater {
+class GitHub_Updater__Settings extends GitHub_Updater__Base {
 
 	/**
 	 * Holds the plugin basename
