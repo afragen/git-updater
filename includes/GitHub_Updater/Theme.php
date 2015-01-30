@@ -11,14 +11,14 @@
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   GitHub_Theme_Updater
+ * @package   GitHub_Updater_Theme
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Theme_Updater extends GitHub_Updater {
+class GitHub_Updater_Theme extends GitHub_Updater {
 
 	/**
 	 * Rollback variable

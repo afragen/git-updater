@@ -21,6 +21,7 @@ Text Domain:       github-updater
 GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     develop
 Requires WP:       3.8
+Requires PHP:      5.3
 */
 
 // If this file is called directly, abort.
@@ -28,11 +29,11 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Load main class
-if ( ! class_exists( 'GitHub_Updater' ) ) {
-	require 'includes/class-github-updater.php';
-	load_plugin_textdomain( 'github-updater', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
+// Load Autoloader
+require_once( 'includes/Autoloader.php' );
+
+// Load textdomain
+load_plugin_textdomain( 'github-updater', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 // Instantiate class GitHub_Updater
 new GitHub_Updater;

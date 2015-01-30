@@ -1,5 +1,8 @@
-#### 3.2.7
+#### 3.3.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
+* added [class Autoloader](https://github.com/afragen/autoloader), requires PHP 5.3 or greater as autoloader class requires namespacing 
+* renamed directory and class names to allow for PSR 0 style loading 
+
 
 #### 3.2.6
 * added French translation by @daniel-menard
