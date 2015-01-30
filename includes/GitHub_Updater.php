@@ -374,7 +374,7 @@ class GitHub_Updater {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
-		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.';
+		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
 		$this->$type->downloaded            = 0;
