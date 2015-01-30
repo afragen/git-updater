@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-01-29 21:09-0800\n"
-"PO-Revision-Date: 2015-01-29 21:09-0800\n"
+"PO-Revision-Date: 2015-01-30 08:14+0100\n"
 "Last-Translator: Daniel Ménard <daniel.menard@laposte.net>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: fr_FR\n"
@@ -23,6 +23,8 @@ msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
 msgstr ""
+"L'historique des modifications n'est pas disponible. Créez un fichier "
+"<code>CHANGES.md</code> ou <code>CHANGELOG.md</code> dans votre dépôt."
 
 #: includes/GitHub_Updater.php:433
 #, php-format
