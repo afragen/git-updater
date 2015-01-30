@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-01-29 21:05-0800\n"
-"PO-Revision-Date: 2015-01-29 21:08-0800\n"
+"PO-Revision-Date: 2015-01-30 13:10+0200\n"
 "Last-Translator: Andrii Ryzhkv <andri.ryzhkov@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.3\n"
+"X-Generator: Poedit 1.7.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -24,6 +24,8 @@ msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
 msgstr ""
+"Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES.md</"
+"code> або <code>CHANGELOG.md</code> у вашому сховищі."
 
 #: includes/GitHub_Updater.php:433
 #, php-format
@@ -32,7 +34,7 @@ msgstr "Перейменування %s в %s&#8230;"
 
 #: includes/GitHub_Updater.php:441
 msgid "Rename successful&#8230;"
-msgstr "Перейменувати успішне&#8230;"
+msgstr "Перейменування успішне&#8230;"
 
 #: includes/GitHub_Updater.php:446
 msgid "Unable to rename downloaded repository."
@@ -67,7 +69,7 @@ msgstr "Приватні сховища Bitbucket"
 
 #: includes/GitHub_Updater/Settings.php:138
 msgid "No private repositories are installed."
-msgstr "Ніякі приватні сховища не встановлені."
+msgstr "Жодне приватне сховище не встановлене."
 
 #: includes/GitHub_Updater/Settings.php:197
 msgid "Theme: "
@@ -101,7 +103,7 @@ msgstr "<strong>Відкат до:&nbsp;</strong>"
 
 #: includes/GitHub_Updater/Theme.php:201
 msgid "No previous tags to rollback to."
-msgstr "Немає міток для відкату назад."
+msgstr "Немає теґів для відкату назад."
 
 #: includes/GitHub_Updater/Theme.php:210 includes/GitHub_Updater/Theme.php:218
 #, php-format
@@ -155,7 +157,7 @@ msgstr "Поточна версія остання. Спробуйте"
 
 #: includes/GitHub_Updater/Theme.php:306
 msgid "another version?"
-msgstr "інша версія?"
+msgstr "іншу версію?"
 
 #: includes/GitHub_Updater/Theme.php:315
 msgid "Choose a Version&#8230;"
