@@ -60,51 +60,25 @@ class GitHub_Updater {
 	protected static $options;
 
 	/**
-	 * Autoloader
-	 *
-	 * @param $class
-	 */
-	protected function autoload( $class ) {
-		$classes = array(
-			'github_plugin_updater'        => 'class-plugin-updater.php',
-			'github_theme_updater'         => 'class-theme-updater.php',
-			'github_updater_github_api'    => 'class-github-api.php',
-			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
-			'github_updater_settings'      => 'class-github-updater-settings.php',
-			'parsedown'                    => 'Parsedown.php',
-		);
-
-		$cn = strtolower( $class );
-
-		if ( isset( $classes[ $cn ] ) ) {
-			require_once( $classes[ $cn ] );
-		}
-	}
-
-	/**
 	 * Constructor
 	 *
-	 * Calls spl_autoload_register to set loading of classes.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( function_exists( 'spl_autoload_register' ) ) {
-			spl_autoload_register( array( $this, 'autoload' ) );
-		}
 		self::$options = get_site_option( 'github_updater' );
 		$this->add_headers();
 	}
 
 	/**
-	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
+	 * Instantiate GitHub_Updater_Plugin and GitHub_Updater_Theme
 	 * for proper user capabilities.
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new GitHub_Plugin_Updater;
+			new GitHub_Updater_Plugin;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new GitHub_Theme_Updater;
+			new GitHub_Updater_Theme;
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new GitHub_Updater_Settings;
@@ -415,7 +389,7 @@ class GitHub_Updater {
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '0.0.0';
-		$this->$type->requires_php_version  = '5.2.4';
+		$this->$type->requires_php_version  = '5.3';
 	}
 
 	/**

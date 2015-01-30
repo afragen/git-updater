@@ -11,12 +11,12 @@
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
- * @package GitHub_Plugin_Updater
+ * @package GitHub_Updater_Plugin
  * @author  Andy Fragen
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class GitHub_Plugin_Updater extends GitHub_Updater {
+class GitHub_Updater_Plugin extends GitHub_Updater {
 
 	/**
 	 * Constructor.
