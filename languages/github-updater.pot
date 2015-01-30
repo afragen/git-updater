@@ -18,31 +18,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/GitHub_Updater.php:377
-msgid ""
-"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
-"md</code> or <code>CHANGELOG.md</code> in your repository."
-msgstr ""
-
-#: includes/GitHub_Updater.php:433
-#, php-format
-msgid "Renaming %s to %s&#8230;"
-msgstr ""
-
-#: includes/GitHub_Updater.php:441
-msgid "Rename successful&#8230;"
-msgstr ""
-
-#: includes/GitHub_Updater.php:446
-msgid "Unable to rename downloaded repository."
-msgstr ""
-
 #: includes/GitHub_Updater/Settings.php:62
 #: includes/GitHub_Updater/Settings.php:70
 #: includes/GitHub_Updater/Settings.php:86
 msgid "GitHub Updater Settings"
 msgstr ""
 
+#. Plugin Name of the plugin/theme
 #: includes/GitHub_Updater/Settings.php:63
 #: includes/GitHub_Updater/Settings.php:71
 msgid "GitHub Updater"
@@ -101,14 +83,11 @@ msgstr ""
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: includes/GitHub_Updater/Theme.php:210
-#: includes/GitHub_Updater/Theme.php:218
-#, php-format
+#: includes/GitHub_Updater/Theme.php:210 includes/GitHub_Updater/Theme.php:218
 msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
 msgstr ""
 
 #: includes/GitHub_Updater/Theme.php:210
-#, php-format
 msgid "View version %4$s details"
 msgstr ""
 
@@ -117,7 +96,6 @@ msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #: includes/GitHub_Updater/Theme.php:218
-#, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
 msgstr ""
@@ -162,6 +140,41 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
+#: includes/GitHub_Updater.php:377
+msgid ""
+"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
+"md</code> or <code>CHANGELOG.md</code> in your repository."
+msgstr ""
+
+#: includes/GitHub_Updater.php:433
+msgid "Renaming %s to %s&#8230;"
+msgstr ""
+
+#: includes/GitHub_Updater.php:441
+msgid "Rename successful&#8230;"
+msgstr ""
+
+#: includes/GitHub_Updater.php:446
+msgid "Unable to rename downloaded repository."
+msgstr ""
+
 #: mu/ghu-loader.php:51
 msgid "Activated as mu-plugin"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/afragen/github-updater"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+"themes into WordPress. Plugin class based upon <a href=\"https://github.com/"
+"codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. Theme "
+"class based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"framework\">Whitelabel Framework</a> modifications."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Andy Fragen"
 msgstr ""
