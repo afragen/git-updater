@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-01-29 21:05-0800\n"
-"PO-Revision-Date: 2015-01-30 13:10+0200\n"
+"POT-Creation-Date: 2015-01-30 14:23-0800\n"
+"PO-Revision-Date: 2015-01-31 10:44+0200\n"
 "Last-Translator: Andrii Ryzhkv <andri.ryzhkov@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
@@ -19,7 +19,7 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/GitHub_Updater.php:377
+#: classes/GitHub_Updater/Base.php:377
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -27,99 +27,100 @@ msgstr ""
 "Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES.md</"
 "code> або <code>CHANGELOG.md</code> у вашому сховищі."
 
-#: includes/GitHub_Updater.php:433
+#: classes/GitHub_Updater/Base.php:433
 #, php-format
 msgid "Renaming %s to %s&#8230;"
 msgstr "Перейменування %s в %s&#8230;"
 
-#: includes/GitHub_Updater.php:441
+#: classes/GitHub_Updater/Base.php:441
 msgid "Rename successful&#8230;"
 msgstr "Перейменування успішне&#8230;"
 
-#: includes/GitHub_Updater.php:446
+#: classes/GitHub_Updater/Base.php:446
 msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
-#: includes/GitHub_Updater/Settings.php:62
-#: includes/GitHub_Updater/Settings.php:70
-#: includes/GitHub_Updater/Settings.php:86
+#: classes/GitHub_Updater/Settings.php:62
+#: classes/GitHub_Updater/Settings.php:70
+#: classes/GitHub_Updater/Settings.php:86
 msgid "GitHub Updater Settings"
 msgstr "Налаштування GitHub Updater"
 
-#: includes/GitHub_Updater/Settings.php:63
-#: includes/GitHub_Updater/Settings.php:71
+#. Plugin Name of the plugin/theme
+#: classes/GitHub_Updater/Settings.php:63
+#: classes/GitHub_Updater/Settings.php:71
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: includes/GitHub_Updater/Settings.php:88
+#: classes/GitHub_Updater/Settings.php:88
 msgid "Saved."
 msgstr "Збережено."
 
-#: includes/GitHub_Updater/Settings.php:113
+#: classes/GitHub_Updater/Settings.php:113
 msgid "GitHub Private Settings"
 msgstr "Налаштування приватного GitHub"
 
-#: includes/GitHub_Updater/Settings.php:122
+#: classes/GitHub_Updater/Settings.php:122
 msgid "Bitbucket Private Settings"
 msgstr "Налаштування приватного Bitbucket"
 
-#: includes/GitHub_Updater/Settings.php:129
+#: classes/GitHub_Updater/Settings.php:129
 msgid "Bitbucket Private Repositories"
 msgstr "Приватні сховища Bitbucket"
 
-#: includes/GitHub_Updater/Settings.php:138
+#: classes/GitHub_Updater/Settings.php:138
 msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
-#: includes/GitHub_Updater/Settings.php:197
+#: classes/GitHub_Updater/Settings.php:197
 msgid "Theme: "
 msgstr "Тема:"
 
-#: includes/GitHub_Updater/Settings.php:261
+#: classes/GitHub_Updater/Settings.php:261
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
-msgstr "Введіть маркер доступу GitHub . Залиште порожнім для публічних сховищ."
+msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: includes/GitHub_Updater/Settings.php:268
+#: classes/GitHub_Updater/Settings.php:268
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
 
-#: includes/GitHub_Updater/Settings.php:276
+#: classes/GitHub_Updater/Settings.php:276
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 
-#: includes/GitHub_Updater/Settings.php:334
+#: classes/GitHub_Updater/Settings.php:334
 msgid "Settings"
 msgstr "Налаштування"
 
-#: includes/GitHub_Updater/Theme.php:184
+#: classes/GitHub_Updater/Theme.php:184
 msgid "Theme is up-to-date!&nbsp;"
 msgstr "Тема не має оновлень!&nbsp;"
 
-#: includes/GitHub_Updater/Theme.php:187
+#: classes/GitHub_Updater/Theme.php:187
 msgid "<strong>Rollback to:&nbsp;</strong>"
 msgstr "<strong>Відкат до:&nbsp;</strong>"
 
-#: includes/GitHub_Updater/Theme.php:201
+#: classes/GitHub_Updater/Theme.php:201
 msgid "No previous tags to rollback to."
 msgstr "Немає теґів для відкату назад."
 
-#: includes/GitHub_Updater/Theme.php:210 includes/GitHub_Updater/Theme.php:218
+#: classes/GitHub_Updater/Theme.php:210 classes/GitHub_Updater/Theme.php:218
 #, php-format
 msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
 msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
 
-#: includes/GitHub_Updater/Theme.php:210
+#: classes/GitHub_Updater/Theme.php:210
 #, php-format
 msgid "View version %4$s details"
 msgstr "Переглянути подробиці версії %4$s"
 
-#: includes/GitHub_Updater/Theme.php:210
+#: classes/GitHub_Updater/Theme.php:210
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичне оновлення недоступно для цієї теми."
 
-#: includes/GitHub_Updater/Theme.php:218
+#: classes/GitHub_Updater/Theme.php:218
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
@@ -127,46 +128,68 @@ msgstr ""
 "<a %2$s>Переглянути подробиці версії %3$s</a> або <a href=\"%4$s\">оновити "
 "зараз</a> ."
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "There is a new version of&nbsp;"
 msgstr "Нова версія&nbsp;"
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "&nbsp;available now."
 msgstr "&nbsp;зараз доступна."
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "&nbsp;View version&nbsp;"
 msgstr "&nbsp;Переглянути версію&nbsp;"
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "&nbsp;details"
 msgstr "&nbsp;подробиці"
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "&nbsp;or&nbsp;"
 msgstr "&nbsp;або&nbsp;"
 
-#: includes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:296
 msgid "update now"
 msgstr "оновити зараз"
 
-#: includes/GitHub_Updater/Theme.php:306
+#: classes/GitHub_Updater/Theme.php:306
 msgid "Current version is up to date. Try"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: includes/GitHub_Updater/Theme.php:306
+#: classes/GitHub_Updater/Theme.php:306
 msgid "another version?"
 msgstr "іншу версію?"
 
-#: includes/GitHub_Updater/Theme.php:315
+#: classes/GitHub_Updater/Theme.php:315
 msgid "Choose a Version&#8230;"
 msgstr "Вибрати версію&#8230;"
 
-#: includes/GitHub_Updater/Theme.php:318
+#: classes/GitHub_Updater/Theme.php:318
 msgid "Install"
 msgstr "Встановити"
 
 #: mu/ghu-loader.php:51
 msgid "Activated as mu-plugin"
 msgstr "Активувати як mu-plugin"
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/afragen/github-updater"
+msgstr "https://github.com/afragen/github-updater"
+
+#. Description of the plugin/theme
+msgid ""
+"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+"themes into WordPress. Plugin class based upon <a href=\"https://github.com/"
+"codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. Theme "
+"class based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"framework\">Whitelabel Framework</a> modifications."
+msgstr ""
+"Плаґін для автоматичного оновлення плаґінів та тем WordPress, які "
+"розміщуються на GitHub або BitBucket. Клас плаґіну основано на <a href="
+"\"https://github.com/codepress/github-plugin-updater\">codepress / GitHub-"
+"Plugin-Updater</a> . Клас теми основано на модифікаціях <a href=\"https://"
+"github.com/WordPress-Phoenix/whitelabel-framework\">Whitelabel Framework</a>."
+
+#. Author of the plugin/theme
+msgid "Andy Fragen"
+msgstr "Енді Фраген"
