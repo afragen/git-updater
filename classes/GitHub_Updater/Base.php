@@ -12,11 +12,11 @@
 /**
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * @package GitHub_Updater
+ * @package GitHub_Updater__Base
  * @author  Andy Fragen
  * @author  Gary Jones
  */
-class GitHub_Updater {
+class GitHub_Updater__Base {
 
 	/**
 	 * Store details of all repositories that are installed.
@@ -70,18 +70,18 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Instantiate GitHub_Updater_Plugin and GitHub_Updater_Theme
+	 * Instantiate GitHub_Updater__Plugin and GitHub_Updater__Theme
 	 * for proper user capabilities.
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new GitHub_Updater_Plugin;
+			new GitHub_Updater__Plugin;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new GitHub_Updater_Theme;
+			new GitHub_Updater__Theme;
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
-			new GitHub_Updater_Settings;
+			new GitHub_Updater__Settings;
 		}
 	}
 
@@ -187,7 +187,7 @@ class GitHub_Updater {
 		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
 
-		foreach ( (array) self::$extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
 				continue;
 			}
@@ -223,7 +223,7 @@ class GitHub_Updater {
 			}
 		}
 
-		foreach ( (array) self::$extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'bitbucket_plugin' !== $git_repo['type'] ) {
 				continue;
 			}
@@ -277,7 +277,7 @@ class GitHub_Updater {
 				continue;
 			}
 
-			foreach ( (array) self::$extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) {
 					continue;
 				}
@@ -319,7 +319,7 @@ class GitHub_Updater {
 				}
 			}
 
-			foreach ( (array) self::$extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'bitbucket_theme' !== $git_theme['type'] ) {
 					continue;
 				}
