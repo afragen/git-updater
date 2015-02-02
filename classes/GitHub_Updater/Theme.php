@@ -66,8 +66,8 @@ class Theme extends Base {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			// Update theme transient with rollback data for single install
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && ! is_multisite() ) {
+			// Update theme transient with rollback data
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
@@ -339,24 +339,7 @@ class Theme extends Base {
 			if ( empty( $theme->uri ) ) {
 				continue;
 			}
-
-			// Update theme transient with rollback data for multisite
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && is_multisite() ) {
-				$this->tag = $_GET['rollback'];
-
-				if ( ! empty( parent::$options[ $theme->repo ] ) && false !== strpos( $theme->type, 'github' ) ) {
-					$theme->rollback[ $this->tag ] = add_query_arg( 'access_token', parent::$options[ $theme->repo ], $theme->rollback[ $this->tag ] );
-				}
-
-				$rollback          = array(
-					'new_version' => $this->tag,
-					'url'         => $theme->uri,
-					'package'     => $theme->rollback[ $this->tag ],
-				);
-
-				$data->response[$theme->repo] = $rollback;
-			}
-
+			
 			$update = array(
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
