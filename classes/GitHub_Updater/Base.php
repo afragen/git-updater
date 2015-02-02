@@ -420,11 +420,11 @@ class Base {
 		}
 
 		// Check for upgrade process, return if both are false
-		if ( ! ( $upgrader instanceof Plugin_Upgrader ) && ! ( $upgrader instanceof Theme_Upgrader ) ) {
+		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
-		// If the values aren't set, or it's not GitHub-sourced, abort
+		// If the values aren't set, or it's wp.org sourced, abort
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
 			return $source;
 		}
@@ -446,7 +446,7 @@ class Base {
 
 		// Otherwise, return an error
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
-		return new WP_Error();
+		return new \WP_Error();
 	}
 
 	/**
