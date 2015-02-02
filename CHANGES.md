@@ -5,7 +5,6 @@
 * clean up a number of foreach loops where I was only using either key or value, not both
 * Special thanks for all my translators, especially @grappler for adding translation key for description
 
-
 #### 3.2.6
 * added French translation by @daniel-menard
 

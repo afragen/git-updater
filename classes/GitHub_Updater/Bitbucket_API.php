@@ -8,13 +8,15 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Get remote data from a Bitbucket repo.
  *
- * @package GitHub_Updater__Bitbucket_API
+ * @package Fragen\GitHub_Updater\Bitbucket_API
  * @author  Andy Fragen
  */
-class GitHub_Updater__Bitbucket_API extends GitHub_Updater__Base {
+class Bitbucket_API extends Base {
 
 	/**
 	 * Constructor.
@@ -240,7 +242,7 @@ class GitHub_Updater__Bitbucket_API extends GitHub_Updater__Base {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Parsedown();
+			$parser    = new Parsedown;
 			$changelog = $parser->text( $response->data );
 			$this->set_transient( 'changelog', $changelog );
 		}

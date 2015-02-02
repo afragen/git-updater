@@ -8,17 +8,19 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   GitHub_Updater__Theme
+ * @package   Fragen\GitHub_Updater\Theme
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Updater__Theme extends GitHub_Updater__Base {
+class Theme extends Base {
 
 	/**
 	 * Rollback variable
@@ -44,10 +46,10 @@ class GitHub_Updater__Theme extends GitHub_Updater__Base {
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
 				case 'github_theme':
-					$repo_api = new GitHub_Updater__GitHub_API( $theme );
+					$repo_api = new GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new GitHub_Updater__BitBucket_API( $theme );
+					$repo_api = new BitBucket_API( $theme );
 					break;
 			}
 
@@ -103,7 +105,7 @@ class GitHub_Updater__Theme extends GitHub_Updater__Base {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
 
-		GitHub_Updater__Settings::$ghu_themes = $this->config;
+		Settings::$ghu_themes = $this->config;
 	}
 
 	/**

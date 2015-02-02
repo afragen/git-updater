@@ -8,15 +8,17 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
- * @package GitHub_Updater__Plugin
+ * @package Fragen\GitHub_Updater\Plugin
  * @author  Andy Fragen
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class GitHub_Updater__Plugin extends GitHub_Updater__Base {
+class Plugin extends Base {
 
 	/**
 	 * Constructor.
@@ -36,10 +38,10 @@ class GitHub_Updater__Plugin extends GitHub_Updater__Base {
 		foreach ( (array) $this->config as $plugin ) {
 			switch( $plugin->type ) {
 				case 'github_plugin':
-					$repo_api = new GitHub_Updater__GitHub_API( $plugin );
+					$repo_api = new GitHub_API( $plugin );
 					break;
 				case 'bitbucket_plugin':
-					$repo_api = new GitHub_Updater__BitBucket_API( $plugin );
+					$repo_api = new BitBucket_API( $plugin );
 					break;
 			}
 
@@ -64,7 +66,7 @@ class GitHub_Updater__Plugin extends GitHub_Updater__Base {
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 
-		GitHub_Updater__Settings::$ghu_plugins = $this->config;
+		Settings::$ghu_plugins = $this->config;
 	}
 
 

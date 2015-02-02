@@ -2,21 +2,23 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * @package GitHub_Updater__Base
+ * @package Fragen\GitHub_Updater\Base
  * @author  Andy Fragen
  * @author  Gary Jones
  */
-class GitHub_Updater__Base {
+class Base {
 
 	/**
 	 * Store details of all repositories that are installed.
@@ -75,13 +77,13 @@ class GitHub_Updater__Base {
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new GitHub_Updater__Plugin;
+			new Plugin;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new GitHub_Updater__Theme;
+			new Theme;
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
-			new GitHub_Updater__Settings;
+			new Settings;
 		}
 	}
 
