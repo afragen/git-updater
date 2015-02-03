@@ -519,12 +519,17 @@ class Base {
 	 * @return bool or variable
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
-		$local_files = scandir( $this->$type->local_path );
-		$changes     = array_intersect( $local_files, $changelogs );
-		
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changes    = null;
+
+		if ( is_dir( $this->$type->local_path ) ) {
+			$local_files = scandir( $this->$type->local_path );
+			$changes = array_intersect( (array) $local_files, $changelogs );
+			$changes = array_pop( $changes );
+		}
+
 		if ( ! empty( $changes ) ) {
-			return array_pop( $changes );
+			return $changes;
 		}
 
 			return false;
