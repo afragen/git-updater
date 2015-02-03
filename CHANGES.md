@@ -1,20 +1,16 @@
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
-* added [class Autoloader](https://github.com/afragen/autoloader), requires PHP 5.3 or greater as autoloader class requires namespacing 
+* requires PHP 5.3 or greater as autoloader class requires namespacing 
+* updated classes for namespacing
 * renamed directory and class names to allow for PSR 4 style loading 
 * clean up a number of foreach loops where I was only using either key or value, not both
 * Special thanks for all my translators, especially @grappler for adding translation key for description
+* bugfix to correctly pick CHANGES.MD or CHANGELOG.MD regardless of case
 
-#### 3.2.6
+#### 3.2.3 - 3.2.6
 * added French translation by @daniel-menard
-
-#### 3.2.5
 * added Italian translation by @overclokk
-
-#### 3.2.4
 * added Portuguese translation by @valeriosouza
-
-#### 3.2.3
 * added Ukrainian translation by @andriiryzhkov (our first translation!!)
 
 #### 3.2.2
