@@ -12,7 +12,7 @@
 Plugin Name:       GitHub Updater MU loader
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to automatically update GitHub or Bitbucket hosted plugins and themes into WordPress. Disables normal plugin activation and deletion.
-Version:           1.2.1
+Version:           1.3.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Load normal plugin
-if ( ! class_exists( 'Fragen\GitHub_Updater\Base' ) ) {
+if ( ! class_exists( '\\Fragen\\GitHub_Updater\\Base' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	require trailingslashit( WP_PLUGIN_DIR ). $ghu_plugin_file;
 }
