@@ -49,7 +49,7 @@ class Theme extends Base {
 					$repo_api = new GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new BitBucket_API( $theme );
+					$repo_api = new Bitbucket_API( $theme );
 					break;
 			}
 

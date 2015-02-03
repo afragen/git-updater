@@ -41,7 +41,7 @@ class Plugin extends Base {
 					$repo_api = new GitHub_API( $plugin );
 					break;
 				case 'bitbucket_plugin':
-					$repo_api = new BitBucket_API( $plugin );
+					$repo_api = new Bitbucket_API( $plugin );
 					break;
 			}
 
