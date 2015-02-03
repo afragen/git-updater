@@ -519,14 +519,12 @@ class Base {
 	 * @return bool or variable
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$local_files = scandir( $this->$type->local_path );
 
-		foreach ( $changelogs as $changes ) {
-			if ( file_exists( $this->$type->local_path . $changes ) ) {
-				return $changes;
-			} elseif ( file_exists( $this->$type->local_path . strtolower( $changes ) ) ) {
-				return strtolower( $changes );
-			}
+		$changes = array_intersect( $local_files, $changelogs );
+		if ( ! empty( $changes ) ) {
+			return array_pop( $changes );
 		}
 
 			return false;
