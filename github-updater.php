@@ -35,13 +35,13 @@ load_plugin_textdomain( 'github-updater', false, __DIR__ . '/languages' );
 // Plugin namespace root
 $root = array( 'Fragen\GitHub_Updater' => __DIR__ . '/classes/GitHub_Updater' );
 
-// Add compat classes
-$compatibility = array( 'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/classes/Parsedown.php' );
+// Add extra classes
+$extra_classes = array( 'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/vendor/Parsedown.php' );
 
 // Load Autoloader
 require_once( __DIR__ . '/classes/GitHub_Updater/Autoloader.php' );
 $class_loader = 'Fragen\GitHub_Updater\Autoloader';
-new $class_loader( $root, $compatibility );
+new $class_loader( $root, $extra_classes );
 
 // Instantiate class GitHub_Updater
 new Fragen\GitHub_Updater\Base;
