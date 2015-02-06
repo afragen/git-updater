@@ -214,14 +214,6 @@ class Base {
 					}
 					$git_repo['branch']       = $headers['GitHub Branch'];
 					break;
-				case 'GitHub Access Token':
-					if ( empty( $headers['GitHub Access Token'] ) ) {
-						break;
-					}
-					$git_repo['access_token'] = $headers['GitHub Access Token'];
-
-					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
-					break;
 			}
 		}
 
@@ -271,7 +263,6 @@ class Base {
 			$git_theme         = array();
 			$github_uri        = $theme->get( 'GitHub Theme URI' );
 			$github_branch     = $theme->get( 'GitHub Branch' );
-			$github_token      = $theme->get( 'GitHub Access Token' );
 			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
 
@@ -309,14 +300,6 @@ class Base {
 							break;
 						}
 						$git_theme['branch']                  = $github_branch;
-						break;
-					case 'GitHub Access Token':
-						if ( empty( $github_token ) ) {
-							break;
-						}
-						$git_theme['access_token']            = $github_token;
-
-						$this->save_header_options( $git_theme['repo'], $github_token, self::$options );
 						break;
 				}
 			}
@@ -640,26 +623,6 @@ class Base {
 		}
 
 		return $rating;
-	}
-
-	/**
-	 * Save access tokens and passwords from headers to option.
-	 *
-	 * @param $repo
-	 * @param $value
-	 * @param $options
-	 * @return bool|void
-	 */
-	protected function save_header_options( $repo, $value, $options ) {
-		if ( ! $value ) {
-			return false;
-		}
-		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
-			unset( $options[ $repo ] );
-			$value = sanitize_text_field( $value );
-			$options[ $repo ] = $value;
-			update_site_option( 'github_updater', $options );
-		}
 	}
 
 	/**
