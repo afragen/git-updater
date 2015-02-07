@@ -13,7 +13,8 @@ namespace Fragen\GitHub_Updater;
 /**
  * Get remote data from a Bitbucket repo.
  *
- * @package Fragen\GitHub_Updater\Bitbucket_API
+ * Class    Bitbucket_API
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class Bitbucket_API extends Base {

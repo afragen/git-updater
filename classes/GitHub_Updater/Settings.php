@@ -13,8 +13,9 @@ namespace Fragen\GitHub_Updater;
 /**
  * Add a settings page.
  *
- * @package Fragen\GitHub_Updater\Settings
- * @author Andy Fragen
+ * Class    Settings
+ * @package Fragen\GitHub_Updater
+ * @author  Andy Fragen
  */
 class Settings extends Base {
 

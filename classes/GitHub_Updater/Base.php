@@ -14,7 +14,8 @@ namespace Fragen\GitHub_Updater;
 /**
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * @package Fragen\GitHub_Updater\Base
+ * Class    Base
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Gary Jones
  */
