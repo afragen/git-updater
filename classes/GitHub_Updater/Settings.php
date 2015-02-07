@@ -8,13 +8,15 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Add a settings page.
  *
- * @package GitHub_Updater_Settings
+ * @package Fragen\GitHub_Updater\Settings
  * @author Andy Fragen
  */
-class GitHub_Updater_Settings extends GitHub_Updater {
+class Settings extends Base {
 
 	/**
 	 * Holds the plugin basename

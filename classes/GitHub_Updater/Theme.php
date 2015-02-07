@@ -8,17 +8,19 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   GitHub_Theme_Updater
+ * @package   Fragen\GitHub_Updater\Theme
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
  * @author    UCF Web Communications
  * @link      https://github.com/UCF/Theme-Updater
  */
-class GitHub_Theme_Updater extends GitHub_Updater {
+class Theme extends Base {
 
 	/**
 	 * Rollback variable
@@ -44,10 +46,10 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
 				case 'github_theme':
-					$repo_api = new GitHub_Updater_GitHub_API( $theme );
+					$repo_api = new GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new GitHub_Updater_BitBucket_API( $theme );
+					$repo_api = new Bitbucket_API( $theme );
 					break;
 			}
 
@@ -64,8 +66,8 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			// Update theme transient with rollback data for single install
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && ! is_multisite() ) {
+			// Update theme transient with rollback data
+			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
@@ -103,7 +105,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 		}
 
-		GitHub_Updater_Settings::$ghu_themes = $this->config;
+		Settings::$ghu_themes = $this->config;
 	}
 
 	/**
@@ -314,7 +316,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 				">
 				<option value=""><?php _e( 'Choose a Version&#8230;', 'github-updater' ); ?></option>
 				<option><?php echo $theme->branch; ?></option>
-				<?php foreach ( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] as $version => $url ) { echo'<option>' . $version . '</option>'; }?></select>
+				<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo'<option>' . $version . '</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
@@ -337,24 +339,7 @@ class GitHub_Theme_Updater extends GitHub_Updater {
 			if ( empty( $theme->uri ) ) {
 				continue;
 			}
-
-			// Update theme transient with rollback data for multisite
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) && is_multisite() ) {
-				$this->tag = $_GET['rollback'];
-
-				if ( ! empty( parent::$options[ $theme->repo ] ) && false !== strpos( $theme->type, 'github' ) ) {
-					$theme->rollback[ $this->tag ] = add_query_arg( 'access_token', parent::$options[ $theme->repo ], $theme->rollback[ $this->tag ] );
-				}
-
-				$rollback          = array(
-					'new_version' => $this->tag,
-					'url'         => $theme->uri,
-					'package'     => $theme->rollback[ $this->tag ],
-				);
-
-				$data->response[$theme->repo] = $rollback;
-			}
-
+			
 			$update = array(
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,

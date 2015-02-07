@@ -8,13 +8,15 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Get remote data from a GitHub repo.
  *
- * @package GitHub_Updater_GitHub_API
+ * @package Fragen\GitHub_Updater\GitHub_API
  * @author  Andy Fragen
  */
-class GitHub_Updater_GitHub_API extends GitHub_Updater {
+class GitHub_API extends Base {
 
 	/**
 	 * Constructor.
@@ -158,7 +160,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$tags     = array();
 		$rollback = array();
 		if ( false !== $response ) {
-			foreach ( (array) $response as $num => $tag ) {
+			foreach ( (array) $response as $tag ) {
 				if ( isset( $tag->name ) ) {
 					$tags[]                 = $tag->name;
 					$rollback[ $tag->name ] = $tag->zipball_url;
@@ -239,7 +241,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Parsedown();
+			$parser    = new Parsedown;
 			$changelog = $parser->text( base64_decode( $response->content ) );
 			$this->set_transient( 'changelog', $changelog );
 		}

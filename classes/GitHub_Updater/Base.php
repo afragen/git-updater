@@ -2,21 +2,23 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * @package GitHub_Updater
+ * @package Fragen\GitHub_Updater\Base
  * @author  Andy Fragen
  * @author  Gary Jones
  */
-class GitHub_Updater {
+class Base {
 
 	/**
 	 * Store details of all repositories that are installed.
@@ -60,54 +62,28 @@ class GitHub_Updater {
 	protected static $options;
 
 	/**
-	 * Autoloader
-	 *
-	 * @param $class
-	 */
-	protected function autoload( $class ) {
-		$classes = array(
-			'github_plugin_updater'        => 'class-plugin-updater.php',
-			'github_theme_updater'         => 'class-theme-updater.php',
-			'github_updater_github_api'    => 'class-github-api.php',
-			'github_updater_bitbucket_api' => 'class-bitbucket-api.php',
-			'github_updater_settings'      => 'class-github-updater-settings.php',
-			'parsedown'                    => 'Parsedown.php',
-		);
-
-		$cn = strtolower( $class );
-
-		if ( isset( $classes[ $cn ] ) ) {
-			require_once( $classes[ $cn ] );
-		}
-	}
-
-	/**
 	 * Constructor
 	 *
-	 * Calls spl_autoload_register to set loading of classes.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( function_exists( 'spl_autoload_register' ) ) {
-			spl_autoload_register( array( $this, 'autoload' ) );
-		}
 		self::$options = get_site_option( 'github_updater' );
 		$this->add_headers();
 	}
 
 	/**
-	 * Instantiate GitHub_Plugin_Updater and GitHub_Theme_Updater
+	 * Instantiate GitHub_Updater__Plugin and GitHub_Updater__Theme
 	 * for proper user capabilities.
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new GitHub_Plugin_Updater;
+			new Plugin;
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new GitHub_Theme_Updater;
+			new Theme;
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
-			new GitHub_Updater_Settings;
+			new Settings;
 		}
 	}
 
@@ -213,7 +189,7 @@ class GitHub_Updater {
 		// Reverse sort to run plugin/theme URI first
 		arsort( self::$extra_headers );
 
-		foreach ( (array) self::$extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
 				continue;
 			}
@@ -238,18 +214,10 @@ class GitHub_Updater {
 					}
 					$git_repo['branch']       = $headers['GitHub Branch'];
 					break;
-				case 'GitHub Access Token':
-					if ( empty( $headers['GitHub Access Token'] ) ) {
-						break;
-					}
-					$git_repo['access_token'] = $headers['GitHub Access Token'];
-
-					$this->save_header_options( $git_repo['repo'], $git_repo['access_token'], self::$options );
-					break;
 			}
 		}
 
-		foreach ( (array) self::$extra_headers as $key => $value ) {
+		foreach ( (array) self::$extra_headers as $value ) {
 			if ( ! empty( $git_repo['type'] ) && 'bitbucket_plugin' !== $git_repo['type'] ) {
 				continue;
 			}
@@ -295,7 +263,6 @@ class GitHub_Updater {
 			$git_theme         = array();
 			$github_uri        = $theme->get( 'GitHub Theme URI' );
 			$github_branch     = $theme->get( 'GitHub Branch' );
-			$github_token      = $theme->get( 'GitHub Access Token' );
 			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
 			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
 
@@ -303,7 +270,7 @@ class GitHub_Updater {
 				continue;
 			}
 
-			foreach ( (array) self::$extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) {
 					continue;
 				}
@@ -334,18 +301,10 @@ class GitHub_Updater {
 						}
 						$git_theme['branch']                  = $github_branch;
 						break;
-					case 'GitHub Access Token':
-						if ( empty( $github_token ) ) {
-							break;
-						}
-						$git_theme['access_token']            = $github_token;
-
-						$this->save_header_options( $git_theme['repo'], $github_token, self::$options );
-						break;
 				}
 			}
 
-			foreach ( (array) self::$extra_headers as $key => $value ) {
+			foreach ( (array) self::$extra_headers as $value ) {
 				if ( ! empty( $git_theme['type'] ) && 'bitbucket_theme' !== $git_theme['type'] ) {
 					continue;
 				}
@@ -400,7 +359,7 @@ class GitHub_Updater {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
-		$this->$type->sections['changelog'] = 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.';
+		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
 		$this->$type->downloaded            = 0;
@@ -415,7 +374,7 @@ class GitHub_Updater {
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '0.0.0';
-		$this->$type->requires_php_version  = '5.2.4';
+		$this->$type->requires_php_version  = '5.3';
 	}
 
 	/**
@@ -444,11 +403,11 @@ class GitHub_Updater {
 		}
 
 		// Check for upgrade process, return if both are false
-		if ( ! is_a( $upgrader, 'Plugin_Upgrader' ) && ! is_a( $upgrader, 'Theme_Upgrader' ) ) {
+		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
-		// If the values aren't set, or it's not GitHub-sourced, abort
+		// If the values aren't set, or it's wp.org sourced, abort
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
 			return $source;
 		}
@@ -470,7 +429,7 @@ class GitHub_Updater {
 
 		// Otherwise, return an error
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
-		return new WP_Error();
+		return new \WP_Error();
 	}
 
 	/**
@@ -543,14 +502,17 @@ class GitHub_Updater {
 	 * @return bool or variable
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md' );
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changes    = null;
 
-		foreach ( $changelogs as $changes ) {
-			if ( file_exists( $this->$type->local_path . $changes ) ) {
-				return $changes;
-			} elseif ( file_exists( $this->$type->local_path . strtolower( $changes ) ) ) {
-				return strtolower( $changes );
-			}
+		if ( is_dir( $this->$type->local_path ) ) {
+			$local_files = scandir( $this->$type->local_path );
+			$changes = array_intersect( (array) $local_files, $changelogs );
+			$changes = array_pop( $changes );
+		}
+
+		if ( ! empty( $changes ) ) {
+			return $changes;
 		}
 
 			return false;
@@ -661,26 +623,6 @@ class GitHub_Updater {
 		}
 
 		return $rating;
-	}
-
-	/**
-	 * Save access tokens and passwords from headers to option.
-	 *
-	 * @param $repo
-	 * @param $value
-	 * @param $options
-	 * @return bool|void
-	 */
-	protected function save_header_options( $repo, $value, $options ) {
-		if ( ! $value ) {
-			return false;
-		}
-		if ( empty( $options[ $repo ] )  && ! empty( $value ) ) {
-			unset( $options[ $repo ] );
-			$value = sanitize_text_field( $value );
-			$options[ $repo ] = $value;
-			update_site_option( 'github_updater', $options );
-		}
 	}
 
 	/**
