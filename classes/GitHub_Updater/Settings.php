@@ -56,6 +56,20 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Define tabs for Settings page.
+	 * By defining in a method, strings can be translated.
+	 *
+	 * @return array
+	 */
+	private function _settings_tabs() {
+		return array(
+				'github_updater_settings'        => __( 'Settings', 'github-updater' ),
+				'github_updater_install_plugin' => __( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'  => __( 'Install Theme', 'github-updater' ),
+			);
+	}
+
+	/**
 	 * Add options page
 	 */
 	public function add_plugin_page() {
@@ -80,27 +94,59 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Renders setting tabs.
+	 *
+	 * Walks through the object's tabs array and prints them one by one.
+	 * Provides the heading for the settings page.
+	 *
+	 * @access private
+	 */
+	private function _options_tabs() {
+		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
+		echo '<h2 class="nav-tab-wrapper">';
+		foreach ( $this->_settings_tabs() as $key => $name ) {
+			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
+			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>';
+		}
+		echo '</h2>';
+	}
+
+	/**
 	 * Options page callback
 	 */
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
+		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		?>
 		<div class="wrap">
-			<h2><?php _e( 'GitHub Updater Settings', 'github-updater' ); ?></h2>
+			<h2><?php _e( 'GitHub Updater', 'github-updater' ); ?></h2>
+			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
 			<form method="post" action="<?php echo $action; ?>">
 				<?php
-				settings_fields( 'github_updater' );
-				do_settings_sections( 'github-updater' );
-				if ( self::$github_private || self::$bitbucket_private ) {
-					submit_button();
+				if ( 'github_updater_settings' === $tab ) {
+					settings_fields( 'github_updater' );
+					do_settings_sections( 'github-updater' );
+					if ( self::$github_private || self::$bitbucket_private ) {
+						submit_button();
+					}
 				}
 				?>
 			</form>
+
+			<?php
+			if ( 'github_updater_install_plugin' === $tab ) {
+				new Install( 'plugin' );
+			}
+			if ( 'github_updater_install_theme' === $tab ) {
+				new Install( 'theme' );
+			}
+			?>
 		</div>
-	<?php
+		<?php
+
 	}
 
 	/**
