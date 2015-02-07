@@ -6,6 +6,7 @@
 * clean up a number of foreach loops where I was only using either key or value, not both
 * Special thanks for all my translators, especially @grappler for adding translation key for description
 * bugfix to correctly pick CHANGES.MD or CHANGELOG.MD regardless of case
+* removed reading/saving `GitHub Access Token` header into settings. Must use Settings Page.
 
 #### 3.2.3 - 3.2.6
 * added French translation by @daniel-menard
