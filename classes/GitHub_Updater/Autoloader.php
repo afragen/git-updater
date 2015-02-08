@@ -4,12 +4,11 @@
 namespace Fragen\GitHub_Updater;
 
 /**
- * Class Autoloader
- * @package Fragen\GitHub_Updater\Autoloader
  *
  * To use with different plugins be sure to create a new namespace.
  *
- * @package   Autoloader
+ * Class      Autoloader
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen <andy@thefragens.com>
  * @author    Barry Hughes <barry@codingkillsme.com>
  * @license   GPL-2.0+
