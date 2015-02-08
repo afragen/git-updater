@@ -138,10 +138,10 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
-				new Install( __( 'plugin', 'github-updater' ) );
+				new Install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
-				new Install( __( 'theme', 'github-updater' ) );
+				new Install( 'theme' );
 			}
 			?>
 		</div>
