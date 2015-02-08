@@ -408,12 +408,29 @@ class Base {
 			return $source;
 		}
 
+		// Check for upgrade process from Install
+		if ( empty( $repo ) ) {
+			if ( ! empty( $upgrader->skin->options['plugin'] ) ) {
+				$repo = $upgrader->skin->options['plugin'];
+			}
+			if ( ! empty( $upgrader->skin->options['theme'] ) ) {
+				$repo = $upgrader->skin->options['theme'];
+			}
+		}
+
+
 		// If the values aren't set, or it's wp.org sourced, abort
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
 			return $source;
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
+
+		// Abort if already corrected
+		if ( stristr( basename( $source ), $repo ) === $repo ) {
+			return $corrected_source;
+		}
+
 		$upgrader->skin->feedback(
 			sprintf(
 				__( 'Renaming %s to %s&#8230;', 'github-updater' ),
