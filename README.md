@@ -154,7 +154,7 @@ The `Bitbucket Branch` header is supported for both plugins and themes.
 
 Public repositories will not show up in the Settings page.
 
-![Settings Page](./assets/screenshot-1.png)
+![Settings Tab](./assets/screenshot-1.png)
 
 ### GitHub Private Repositories
 
@@ -197,6 +197,8 @@ The same applies for Bitbucket hosted plugins.
 ## Remote Installation of Repositories
 
 From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available.
+
+![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
 ## Extras
 
