@@ -408,6 +408,14 @@ class Base {
 			return $source;
 		}
 
+		// This check to ensure exact match to repo name
+		// this should keep 'test-plugin' from matching 'test-plugin2
+		if ( ! empty( $repo ) &&
+		     $repo !== $upgrader->skin->options['plugin'] ||
+		     $repo !== $upgrader->skin->options['theme']
+		) {
+			$repo = null;
+		}
 		// Check for upgrade process from Install
 		if ( empty( $repo ) ) {
 			if ( ! empty( $upgrader->skin->options['plugin'] ) ) {
