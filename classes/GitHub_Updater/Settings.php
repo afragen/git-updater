@@ -63,7 +63,7 @@ class Settings extends Base {
 	 */
 	private function _settings_tabs() {
 		return array(
-				'github_updater_settings'        => __( 'Settings', 'github-updater' ),
+				'github_updater_settings'       => __( 'Settings', 'github-updater' ),
 				'github_updater_install_plugin' => __( 'Install Plugin', 'github-updater' ),
 				'github_updater_install_theme'  => __( 'Install Theme', 'github-updater' ),
 			);
@@ -124,17 +124,17 @@ class Settings extends Base {
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
-			<form method="post" action="<?php echo $action; ?>">
-				<?php
-				if ( 'github_updater_settings' === $tab ) {
-					settings_fields( 'github_updater' );
-					do_settings_sections( 'github-updater' );
-					if ( self::$github_private || self::$bitbucket_private ) {
-						submit_button();
-					}
-				}
-				?>
-			</form>
+			<?php if ( 'github_updater_settings' === $tab ) : ?>
+				<form method="post" action="<?php echo $action; ?>">
+					<?php
+						settings_fields( 'github_updater' );
+						do_settings_sections( 'github_updater_install_settings' );
+						if ( self::$github_private || self::$bitbucket_private ) {
+							submit_button();
+						}
+					?>
+				</form>
+			<?php endif; ?>
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
@@ -161,7 +161,7 @@ class Settings extends Base {
 				'github_id',                                       // ID
 				__( 'GitHub Private Settings', 'github-updater' ), // Title
 				array( $this, 'print_section_github_info' ),
-				'github-updater'                                   // Page
+				'github_updater_install_settings'                                   // Page
 			);
 		}
 
@@ -170,14 +170,14 @@ class Settings extends Base {
 				'bitbucket_user',
 				__( 'Bitbucket Private Settings', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_username' ),
-				'github-updater'
+				'github_updater_install_settings'
 			);
 
 			add_settings_section(
 				'bitbucket_id',
 				__( 'Bitbucket Private Repositories', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
-				'github-updater'
+				'github_updater_install_settings'
 			);
 		}
 
@@ -186,12 +186,12 @@ class Settings extends Base {
 				null,
 				__( 'No private repositories are installed.', 'github-updater' ),
 				array(),
-				'github-updater'
+				'github_updater_install_settings'
 			);
 		}
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
+			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		}
 	}
 
@@ -221,7 +221,7 @@ class Settings extends Base {
 						'bitbucket_username',
 						'Bitbucket Username',
 						array( $this, 'token_callback_text' ),
-						'github-updater',
+						'github_updater_install_settings',
 						'bitbucket_user',
 						'bitbucket_username'
 					);
@@ -230,7 +230,7 @@ class Settings extends Base {
 						'bitbucket_password',
 						'Bitbucket Password',
 						array( $this, 'token_callback_text' ),
-						'github-updater',
+						'github_updater_install_settings',
 						'bitbucket_user',
 						'bitbucket_password'
 					);
@@ -248,7 +248,7 @@ class Settings extends Base {
 
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . $token->name;
-			$setting_field['page']  = 'github-updater';
+			$setting_field['page']  = 'github_updater_install_settings';
 			if ( false !== strpos( $token->type, 'github' ) ) {
 				$setting_field['section']         = 'github_id';
 				$setting_field['callback_method'] = array( $this, 'token_callback_text' );
@@ -294,7 +294,7 @@ class Settings extends Base {
 	 * @param array $input Contains all settings fields as array keys
 	 * @return array
 	 */
-	public function sanitize( $input ) {
+	public static function sanitize( $input ) {
 		$new_input = array();
 		foreach ( $input as $id => $value ) {
 			$new_input[ $id ] = sanitize_text_field( $input[ $id ] );
@@ -359,7 +359,7 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_network_setting() {
-		update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
+		update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		wp_redirect( add_query_arg(
 			array(
 				'page'    => 'github-updater',
