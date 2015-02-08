@@ -1,3 +1,6 @@
+#### 4.1.0
+* added remote installation of plugins or themes
+
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
 * requires PHP 5.3 or greater as autoloader class requires namespacing 
