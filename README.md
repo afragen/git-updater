@@ -194,6 +194,10 @@ If you develop your plugin on GitHub and it also resides in the WP.org repo, the
 
 The same applies for Bitbucket hosted plugins.
 
+## Remote Installation
+
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes.
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
