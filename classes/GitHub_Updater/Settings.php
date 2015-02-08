@@ -161,7 +161,7 @@ class Settings extends Base {
 				'github_id',                                       // ID
 				__( 'GitHub Private Settings', 'github-updater' ), // Title
 				array( $this, 'print_section_github_info' ),
-				'github_updater_install_settings'                                   // Page
+				'github_updater_install_settings'                  // Page
 			);
 		}
 
@@ -317,7 +317,6 @@ class Settings extends Base {
 		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
-
 	/**
 	 * Print the Bitbucket user/pass text
 	 */
@@ -333,7 +332,7 @@ class Settings extends Base {
 	public function token_callback_text( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>" >
 		</label>
 		<?php
 	}
@@ -346,7 +345,7 @@ class Settings extends Base {
 	public function token_callback_checkbox( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> />
+			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> >
 		</label>
 		<?php
 	}
