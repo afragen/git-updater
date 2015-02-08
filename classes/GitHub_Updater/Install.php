@@ -132,6 +132,14 @@ class Install extends Settings {
 	 * @param $type
 	 */
 	public function register_settings( $type ) {
+
+		if ( 'plugin' === $type ) {
+			$repo_type = __( 'Plugin', 'github-updater' );
+		}
+		if ( 'theme' === $type ) {
+			$repo_type = __( 'Theme', 'github-updater' );
+		}
+
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
@@ -140,14 +148,14 @@ class Install extends Settings {
 
 		add_settings_section(
 			$type,
-			__( 'GitHub Updater Install ' . ucfirst( $type ), 'github-updater' ),
+			__( 'GitHub Updater Install ', 'github-updater' ) . $repo_type,
 			array(),
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
-			__( ucfirst( $type ) . ' URI', 'github-updater' ),
+			$repo_type . __( ' URI', 'github-updater' ),
 			array( $this, 'get_repo' ),
 			'github_updater_install_' . $type,
 			$type,
