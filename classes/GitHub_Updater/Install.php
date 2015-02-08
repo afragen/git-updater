@@ -156,7 +156,7 @@ class Install extends Base {
 
 		add_settings_field(
 			$type . '_api',
-			__( 'Remote Host API', 'github-updater' ),
+			__( 'Remote Repository Host', 'github-updater' ),
 			array( $this, 'api' ),
 			'github_updater_install_' . $type,
 			$type,
@@ -165,7 +165,7 @@ class Install extends Base {
 
 		add_settings_field(
 			$type . '_branch',
-			__( 'Branch', 'github-updater' ),
+			__( 'Repository Branch', 'github-updater' ),
 			array( $this, 'branch' ),
 			'github_updater_install_' . $type,
 			$type,
@@ -174,7 +174,7 @@ class Install extends Base {
 
 		add_settings_field(
 			'is_private',
-			__( 'Private', 'github-updater' ),
+			__( 'Private Repository', 'github-updater' ),
 			array( $this, 'is_private' ),
 			'github_updater_install_' . $type,
 			$type,

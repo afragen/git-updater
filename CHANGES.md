@@ -1,5 +1,5 @@
 #### 4.1.0
-* added remote installation of plugins or themes
+* added remote installation of plugins or themes both public and private
 
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
