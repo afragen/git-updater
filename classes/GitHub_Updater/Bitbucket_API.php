@@ -297,11 +297,30 @@ class Bitbucket_API extends Base {
 	 * @return mixed
 	 */
 	public function maybe_authenticate_http( $args, $url ) {
-		if ( ! isset( $this->type ) ) {
+		if ( ! isset( $this->type ) || false === stristr( $url, 'bitbucket' ) ) {
 			return $args;
 		}
 
-		if ( ! empty( parent::$options[ $this->type->repo ] ) && false !== strpos( $url, $this->type->repo ) ) {
+		$bitbucket_private         = false;
+		$bitbucket_private_install = false;
+
+		// Check whether attempting to update private Bitbucket repo
+		if ( ! empty( parent::$options[ $this->type->repo ] ) &&
+		     false !== strpos( $url, $this->type->repo )
+		) {
+			$bitbucket_private = true;
+		}
+
+		// Check whether attempting to install private Bitbucket repo
+		if ( isset( $_POST['option_page'] ) &&
+		     'github_updater_install' === $_POST['option_page'] &&
+		     'bitbucket' === $_POST['github_updater_api'] &&
+		     isset( $_POST['is_private'] )
+		) {
+			$bitbucket_private_install = true;
+		}
+
+		if ( $bitbucket_private || $bitbucket_private_install ) {
 			$username = parent::$options['bitbucket_username'];
 			$password = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );

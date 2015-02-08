@@ -42,7 +42,6 @@ class Install extends Base {
 	public function __construct( $type ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php'; // Need for upgrade classes.
 		$this->install( $type );
-		//add_filter( 'http_request_args', array( 'Base', 'maybe_authenticate_http' ), 10, 2 );
 	}
 
 	/**
@@ -173,7 +172,6 @@ class Install extends Base {
 			$type
 		);
 
-		/*
 		add_settings_field(
 			'is_private',
 			__( 'Private', 'github-updater' ),
@@ -191,7 +189,6 @@ class Install extends Base {
 			$type,
 			$type
 		);
-		*/
 
 	}
 
@@ -240,7 +237,7 @@ class Install extends Base {
 	public function is_private() {
 		?>
 		<label for="is_private">
-			<input type="checkbox" <?php checked( '1', false, true ) ?> >
+			<input type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
 		</label>
 		<?php
 	}
