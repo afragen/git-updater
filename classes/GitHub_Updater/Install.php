@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * Class    Install
  * @package Fragen\GitHub_Updater
  */
-class Install extends Settings {
+class Install {
 
 	/**
 	 * Remote Host APIs.
