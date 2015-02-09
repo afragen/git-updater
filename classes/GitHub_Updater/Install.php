@@ -12,7 +12,7 @@ namespace Fragen\GitHub_Updater;
 
 
 /**
- * Install <author>/<repo> directly from plugin.
+ * Install <author>/<repo> directly from GitHub Updater.
  *
  * Class    Install
  * @package Fragen\GitHub_Updater
@@ -94,7 +94,7 @@ class Install {
 			// Perform the action and install the plugin from the $source urldecode().
 			$upgrader->install( $url );
 
-			// Flush plugins cache so we can make sure that the installed plugins list is always up to date.
+			// Flush cache so we can make sure that the installed plugins/themes list is always up to date.
 			wp_cache_flush();
 		}
 
@@ -242,6 +242,9 @@ class Install {
 	<?php
 	}
 
+	/**
+	 * Setting for private repo
+	 */
 	public function is_private() {
 		?>
 		<label for="is_private">
@@ -250,6 +253,9 @@ class Install {
 		<?php
 	}
 
+	/**
+	 * GitHub Access Token for remote install
+	 */
 	public function access_token() {
 		?>
 		<label for="github_access_token">
@@ -259,10 +265,6 @@ class Install {
 			</p>
 		</label>
 		<?php
-	}
-
-	public function test() {
-		print 'Testing...';
 	}
 
 }
