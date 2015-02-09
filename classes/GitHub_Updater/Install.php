@@ -36,7 +36,6 @@ class Install {
 
 	/**
 	 * Constructor
-	 *
 	 * @param $type
 	 */
 	public function __construct( $type ) {
@@ -46,7 +45,6 @@ class Install {
 
 	/**
 	 * Install remote plugin or theme.
-	 *
 	 * @param $type
 	 */
 	public function install( $type ) {
@@ -105,7 +103,6 @@ class Install {
 
 	/**
 	 * Create Install Plugin or Install Theme page.
-	 *
 	 * @param $type
 	 */
 	public function create_form( $type ) {
@@ -128,7 +125,6 @@ class Install {
 
 	/**
 	 * Add settings sections.
-	 *
 	 * @param $type
 	 */
 	public function register_settings( $type ) {

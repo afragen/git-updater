@@ -1,5 +1,9 @@
 #### 4.1.0
 * added remote installation of plugins or themes both public and private
+* remote installation using either full URI or short `<owner><repo>` format
+* created new tabbed interface for settings
+* added another screenshot to readme
+* I'd like to apologize to all my translators for adding new strings often, you guys are great, thanks!
 
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
