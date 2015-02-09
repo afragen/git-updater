@@ -206,7 +206,7 @@ class Install {
 	public function get_repo() {
 		?>
 		<label for="github_updater_repo">
-			<input type="text" style="width:50%;" name="github_updater_repo" value="">
+			<input type="text" style="width:50%;" name="github_updater_repo" value="" >
 		</label>
 		<?php
 	}
@@ -217,7 +217,7 @@ class Install {
 	public function branch() {
 		?>
 		<label for="github_updater_branch">
-			<input type="text" style="width:50%;" name="github_updater_branch" value="">
+			<input type="text" style="width:50%;" name="github_updater_branch" value="" >
 			<p class="description">
 				<?php _e( 'Enter branch name or leave empty for `master`', 'github-updater' ) ?>
 			</p>
@@ -253,7 +253,7 @@ class Install {
 	public function access_token() {
 		?>
 		<label for="github_access_token">
-			<input type="text" style="width:50%;" name="github_access_token" value="" />
+			<input type="text" style="width:50%;" name="github_access_token" value="" >
 			<p class="description">
 				<?php _e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
 			</p>
