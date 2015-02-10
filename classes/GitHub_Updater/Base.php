@@ -412,8 +412,8 @@ class Base {
 		// This check to ensure exact match to repo name
 		// this should keep 'test-plugin' from matching 'test-plugin2
 		if ( ! empty( $repo ) &&
-		     (  $repo !== $upgrader->skin->options['plugin']  ||
-		     $repo !== $upgrader->skin->options['theme'] )
+		     ( isset( $upgrader->skin->options['plugin'] ) && $repo !== $upgrader->skin->options['plugin'] ) ||
+		     ( isset( $upgrader->skin->options['theme'] ) && $repo !== $upgrader->skin->options['theme'] )
 		) {
 			$repo = null;
 		}
