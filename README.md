@@ -158,15 +158,15 @@ Public repositories will not show up in the Settings page.
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings tab.
 
 Leave this empty if the plugin or theme is in a public repository.
 
 ### Bitbucket Private Repositories
 
-Add your personal Bitbucket username and password in the Settings page. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
+Add your personal Bitbucket username and password in the Settings tab. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
 
-In order to specify a private repository you will need to check the box next to the repository name in the Settings page.
+In order to specify a private repository you will need to check the box next to the repository name in the Settings tab.
 
 Leave this unchecked if the plugin or theme is in a public repository.
 
@@ -196,7 +196,7 @@ The same applies for Bitbucket hosted plugins.
 
 ## Remote Installation of Repositories
 
-From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available.
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available. You may use either a full URI or short `<owner>/<repo>` format.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
