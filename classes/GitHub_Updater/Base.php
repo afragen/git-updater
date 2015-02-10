@@ -394,6 +394,7 @@ class Base {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
+		$repo = null;
 
 		if ( isset( $source ) ) {
 			foreach ( (array) $this->config as $git_repo ) {
@@ -411,8 +412,8 @@ class Base {
 		// This check to ensure exact match to repo name
 		// this should keep 'test-plugin' from matching 'test-plugin2
 		if ( ! empty( $repo ) &&
-		     $repo !== $upgrader->skin->options['plugin'] ||
-		     $repo !== $upgrader->skin->options['theme']
+		     (  $repo !== $upgrader->skin->options['plugin']  ||
+		     $repo !== $upgrader->skin->options['theme'] )
 		) {
 			$repo = null;
 		}
