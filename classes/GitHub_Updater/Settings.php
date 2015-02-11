@@ -266,7 +266,7 @@ class Settings extends Base {
 			if ( false !== strpos( $token->type, 'github' ) ) {
 				$setting_field['section']         = 'github_id';
 				$setting_field['callback_method'] = array( $this, 'token_callback_text' );
-				$setting_field['callback']        =  $token->repo;
+				$setting_field['callback']        = $token->repo;
 			}
 			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
 				$setting_field['section']         = 'bitbucket_id';
@@ -346,9 +346,10 @@ class Settings extends Base {
 	 * @param $id
 	 */
 	public function token_callback_text( $id ) {
+		$name = isset( parent::$options[ $id ] ) ? esc_attr( parent::$options[ $id ] ) : '';
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>" >
+			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
 		</label>
 		<?php
 	}
