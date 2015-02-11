@@ -8,11 +8,13 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /*
 Plugin Name:       GitHub Updater MU loader
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to automatically update GitHub or Bitbucket hosted plugins and themes into WordPress. Disables normal plugin activation and deletion.
-Version:           1.3.0
+Version:           1.4.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
