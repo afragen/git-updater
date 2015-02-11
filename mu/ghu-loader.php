@@ -8,7 +8,7 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+use Fragen\GitHub_Updater;
 
 /*
 Plugin Name:       GitHub Updater MU loader
