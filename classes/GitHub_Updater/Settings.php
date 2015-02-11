@@ -347,9 +347,10 @@ class Settings extends Base {
 	 */
 	public function token_callback_text( $id ) {
 		$name = isset( parent::$options[ $id ] ) ? esc_attr( parent::$options[ $id ] ) : '';
+		$type = stristr( $id, 'password' ) ? 'password' : 'text';
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
+			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
 		</label>
 		<?php
 	}
