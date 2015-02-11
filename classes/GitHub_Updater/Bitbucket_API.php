@@ -311,11 +311,15 @@ class Bitbucket_API extends Base {
 			$bitbucket_private = true;
 		}
 
-		// Check whether attempting to install private Bitbucket repo
+		/**
+		 * Check whether attempting to install private Bitbucket repo
+		 * and abort if Bitbucket user/pass not set.
+		 */
 		if ( isset( $_POST['option_page'] ) &&
 		     'github_updater_install' === $_POST['option_page'] &&
 		     'bitbucket' === $_POST['github_updater_api'] &&
-		     isset( $_POST['is_private'] )
+		     isset( $_POST['is_private'] ) &&
+		     ( ! empty( parent::$options['bitbucket_username'] ) || ! empty( parent::$options['bitbucket_password'] ) )
 		) {
 			$bitbucket_private_install = true;
 		}
