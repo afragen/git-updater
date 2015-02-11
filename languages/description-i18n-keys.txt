@@ -13,6 +13,16 @@ msgid ""
 "framework\">Whitelabel Framework</a> modifications."
 msgstr ""
 
+#. Description of mu plugin
+msgid ""
+"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+"themes into WordPress. Disables normal plugin activation and deletion."
+msgstr ""
+
+#. Plugin Name of the mu plugin/theme
+msgid "GitHub Updater MU loader"
+msgstr ""
+
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
