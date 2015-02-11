@@ -129,9 +129,7 @@ class Settings extends Base {
 					<?php
 						settings_fields( 'github_updater' );
 						do_settings_sections( 'github_updater_install_settings' );
-						if ( self::$github_private || self::$bitbucket_private ) {
-							submit_button();
-						}
+						submit_button();
 					?>
 				</form>
 			<?php endif; ?>
@@ -168,14 +166,38 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$bitbucket_private ) {
-			add_settings_section(
-				'bitbucket_user',
-				__( 'Bitbucket Private Settings', 'github-updater' ),
-				array( $this, 'print_section_bitbucket_username' ),
-				'github_updater_install_settings'
-			);
+		/**
+		 * Add settings for Bitbucket Username and Password.
+		 */
+		add_settings_section(
+			'bitbucket_user',
+			__( 'Bitbucket Private Settings', 'github-updater' ),
+			array( $this, 'print_section_bitbucket_username' ),
+			'github_updater_install_settings'
+		);
 
+		add_settings_field(
+			'bitbucket_username',
+			'Bitbucket Username',
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'bitbucket_user',
+			'bitbucket_username'
+		);
+
+		add_settings_field(
+			'bitbucket_password',
+			'Bitbucket Password',
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'bitbucket_user',
+			'bitbucket_password'
+		);
+
+		/**
+		 * Show section for private Bitbucket repositories.
+		 */
+		if ( self::$bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
 				__( 'Bitbucket Private Repositories', 'github-updater' ),
@@ -224,24 +246,6 @@ class Settings extends Base {
 				}
 				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
 					self::$bitbucket_private = true;
-
-					add_settings_field(
-						'bitbucket_username',
-						'Bitbucket Username',
-						array( $this, 'token_callback_text' ),
-						'github_updater_install_settings',
-						'bitbucket_user',
-						'bitbucket_username'
-					);
-
-					add_settings_field(
-						'bitbucket_password',
-						'Bitbucket Password',
-						array( $this, 'token_callback_text' ),
-						'github_updater_install_settings',
-						'bitbucket_user',
-						'bitbucket_password'
-					);
 				}
 			}
 
