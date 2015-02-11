@@ -1,5 +1,5 @@
 #### 4.1.0
-* added remote installation of plugins or themes both public and private
+* added remote installation of plugins or themes, both public and private
 * remote installation using either full URI or short `<owner><repo>` format
 * created new tabbed interface for settings
 * added another screenshot to readme
