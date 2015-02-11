@@ -195,7 +195,7 @@ class Install {
 
 		add_settings_field(
 			'is_private',
-			__( 'Private Repository', 'github-updater' ),
+			__( 'Private Bitbucket Repository', 'github-updater' ),
 			array( $this, 'is_private' ),
 			'github_updater_install_' . $type,
 			$type,
