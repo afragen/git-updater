@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-10 19:00-0800\n"
-"PO-Revision-Date: 2015-02-10 19:00-0800\n"
+"POT-Creation-Date: 2015-02-10 22:00-0800\n"
+"PO-Revision-Date: 2015-02-10 22:00-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -213,7 +213,7 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
-#: mu/ghu-loader.php:51
+#: mu/ghu-loader.php:55
 msgid "Activated as mu-plugin"
 msgstr ""
 
@@ -230,6 +230,17 @@ msgid ""
 "framework\">Whitelabel Framework</a> modifications."
 msgstr ""
 
+#. Description of mu plugin
+msgid ""
+"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+"themes into WordPress. Disables normal plugin activation and deletion."
+msgstr ""
+
+#. Plugin Name of the mu plugin/theme
+msgid "GitHub Updater MU loader"
+msgstr ""
+
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
+
