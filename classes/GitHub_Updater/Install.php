@@ -54,12 +54,17 @@ class Install {
 				$_POST['github_updater_branch'] = 'master';
 			}
 
-			// transform URI to owner/repo
+			/**
+			 * Transform URI to owner/repo
+			 */
 			$_POST['github_updater_repo'] = parse_url( $_POST['github_updater_repo'], PHP_URL_PATH );
 			$_POST['github_updater_repo'] = trim( $_POST['github_updater_repo'], '/' );
 
 			self::$options = Settings::sanitize( $_POST );
 
+			/**
+			 * Create GitHub endpoint.
+			 */
 			if ( 'github' === self::$options['github_updater_api'] ) {
 				self::$options['download_link'] = 'https://api.github.com/repos/' . self::$options['github_updater_repo'] . '/zipball/' . self::$options['github_updater_branch'];
 
@@ -67,6 +72,10 @@ class Install {
 					self::$options['download_link'] .= '?access_token=' . self::$options['github_access_token'];
 				}
 			}
+
+			/**
+			 * Create Bitbucket endpoint.
+			 */
 			if ( 'bitbucket' === self::$options['github_updater_api'] ) {
 				self::$options['download_link'] = 'https://bitbucket.org/' . self::$options['github_updater_repo'] . '/get/' . self::$options['github_updater_branch'] . '.zip';
 			}
@@ -78,21 +87,26 @@ class Install {
 			if ( 'plugin' === $type ) {
 				$plugin = self::$options['repo'][1];
 
-				// Create a new instance of Plugin_Upgrader.
+				/**
+				 * Create a new instance of Plugin_Upgrader.
+				 */
 				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
 			}
 
 			if ( 'theme' === $type ) {
 				$theme = self::$options['repo'][1];
 
-				// Create a new instance of Theme_Upgrader.
+				/**
+				 * Create a new instance of Theme_Upgrader.
+				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
 			}
 
-			// Perform the action and install the plugin from the $source urldecode().
+			/**
+			 * Perform the action and install the plugin from the $source urldecode().
+			 * Flush cache so we can make sure that the installed plugins/themes list is always up to date.
+			 */
 			$upgrader->install( $url );
-
-			// Flush cache so we can make sure that the installed plugins/themes list is always up to date.
 			wp_cache_flush();
 		}
 
@@ -129,6 +143,9 @@ class Install {
 	 */
 	public function register_settings( $type ) {
 
+		/**
+		 * Place translatable strings into variables.
+		 */
 		if ( 'plugin' === $type ) {
 			$repo_type = __( 'Plugin', 'github-updater' );
 		}

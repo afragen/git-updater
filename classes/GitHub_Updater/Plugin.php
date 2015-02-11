@@ -26,7 +26,9 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 
-		// Get details of GitHub-sourced plugins
+		/**
+		 * Get details of git sourced plugins.
+		 */
 		$this->config = $this->get_plugin_meta();
 		
 		if ( empty( $this->config ) ) {
@@ -148,7 +150,9 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 				);
 
-				// if branch is 'master' and plugin is in wp.org repo then pull update from wp.org
+				/**
+				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
+				 */
 				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
 					continue;
 				}

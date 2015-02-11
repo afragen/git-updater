@@ -156,6 +156,9 @@ class Settings extends Base {
 	public function page_init() {
 		$this->ghu_tokens();
 
+		/**
+		 * Show section for private GitHub repositories.
+		 */
 		if ( self::$github_private ) {
 			add_settings_section(
 				'github_id',                                       // ID
@@ -181,6 +184,9 @@ class Settings extends Base {
 			);
 		}
 
+		/**
+		 * Show if no private repositories are present.
+		 */
 		if ( ! self::$github_private && ! self::$bitbucket_private ) {
 			add_settings_section(
 				null,
@@ -209,7 +215,9 @@ class Settings extends Base {
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
-			// Check to see if it's a private repo
+			/**
+			 * Check to see if it's a private repo and set variables
+			 */
 			if ( $token->private ) {
 				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
 					self::$github_private = true;
@@ -237,7 +245,9 @@ class Settings extends Base {
 				}
 			}
 
-			// Next if not a private repo
+			/**
+			 * Next if not a private repo.
+			 */
 			if ( ! $token->private ) {
 				continue;
 			}
@@ -276,7 +286,9 @@ class Settings extends Base {
 			);
 		}
 
-		// Unset options that are no longer present
+		/**
+		 * Unset options that are no longer present and update options.
+		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
@@ -289,7 +301,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Sanitize each setting field as needed
+	 * Sanitize each setting field as needed.
 	 *
 	 * @param array $input Contains all settings fields as array keys
 	 * @return array
@@ -304,28 +316,28 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub text
+	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
 		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
-	 * Print the Bitbucket repo text
+	 * Print the Bitbucket repo text.
 	 */
 	public function print_section_bitbucket_info() {
 		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
 	/**
-	 * Print the Bitbucket user/pass text
+	 * Print the Bitbucket user/pass text.
 	 */
 	public function print_section_bitbucket_username() {
 		print __( 'Enter your personal Bitbucket username and password.', 'github-updater' );
 	}
 
 	/**
-	 * Get the settings option array and print one of its values
+	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $id
 	 */
@@ -338,7 +350,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Get the settings option array and print one of its values
+	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $id
 	 */

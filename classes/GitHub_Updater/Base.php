@@ -24,14 +24,14 @@ class Base {
 	/**
 	 * Store details of all repositories that are installed.
 	 *
-	 * @var stdClass
+	 * @var object
 	 */
 	protected $config;
 
 	/**
 	 * Class Object for API
 	 *
-	 * @var stdClass
+	 * @var object
 	 */
  	protected $repo_api;
 
@@ -146,7 +146,9 @@ class Base {
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
-		// Ensure get_plugins() function is available.
+		/**
+		 * Ensure get_plugins() function is available.
+		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
 		$plugins     = get_plugins();
@@ -176,8 +178,8 @@ class Base {
 	/**
 	* Parse extra headers to determine repo type and populate info
 	*
-	* @param array of extra headers
-	* @return array of repo information
+	* @param array - extra headers
+	* @return array - repo information
 	*
 	* parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
 	* (in addition to the long url format), or it's coincidentally returning all of the short
@@ -187,7 +189,9 @@ class Base {
 	protected function get_local_plugin_meta( $headers ) {
 		$git_repo = array();
 
-		// Reverse sort to run plugin/theme URI first
+		/**
+		 * Reverse sort to run plugin/theme URI first.
+		 */
 		arsort( self::$extra_headers );
 
 		foreach ( (array) self::$extra_headers as $value ) {
@@ -257,7 +261,9 @@ class Base {
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
 
-		// Reverse sort to run plugin/theme URI first
+		/**
+		 * Reverse sort to run plugin/theme URI first.
+		 */
 		arsort( self::$extra_headers );
 
 		foreach ( (array) $themes as $theme ) {
@@ -404,20 +410,27 @@ class Base {
 			}
 		}
 
-		// Check for upgrade process, return if both are false
+		/**
+		 * Check for upgrade process, return if both are false
+		 */
 		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
-		// This check to ensure exact match to repo name
-		// this should keep 'test-plugin' from matching 'test-plugin2
+		/**
+		 * Check to ensure exact match to repo name.
+		 * This should keep 'test-plugin' from matching 'test-plugin2
+		 */
 		if ( ! empty( $repo ) &&
 		     ( isset( $upgrader->skin->options['plugin'] ) && $repo !== $upgrader->skin->options['plugin'] ) ||
 		     ( isset( $upgrader->skin->options['theme'] ) && $repo !== $upgrader->skin->options['theme'] )
 		) {
 			$repo = null;
 		}
-		// Check for upgrade process from Install
+
+		/**
+		 * Check for upgrade process from Fragen\GitHub_Updater\Install
+		 */
 		if ( empty( $repo ) ) {
 			if ( ! empty( $upgrader->skin->options['plugin'] ) ) {
 				$repo = $upgrader->skin->options['plugin'];
@@ -427,15 +440,18 @@ class Base {
 			}
 		}
 
-
-		// If the values aren't set, or it's wp.org sourced, abort
+		/**
+		 * If the values aren't set, or it's wp.org sourced, abort.
+		 */
 		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
 			return $source;
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
 
-		// Abort if already corrected
+		/**
+		 * Abort if already corrected.
+		 */
 		if ( stristr( basename( $source ), $repo ) === $repo ) {
 			return $corrected_source;
 		}
@@ -448,13 +464,17 @@ class Base {
 			)
 		);
 
-		// If we can rename, do so and return the new name
+		/**
+		 * If we can rename, do so and return the new name.
+		 */
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 			$upgrader->skin->feedback( __( 'Rename successful&#8230;', 'github-updater' ) );
 			return $corrected_source;
 		}
 
-		// Otherwise, return an error
+		/**
+		 * Otherwise, return an error.
+		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new \WP_Error();
 	}
@@ -503,10 +523,14 @@ class Base {
 			$all_headers = $default_theme_headers;
 		}
 
-		// Make sure we catch CR-only line endings.
+		/**
+		 * Make sure we catch CR-only line endings.
+		 */
 		$file_data = str_replace( "\r", "\n", $contents );
 
-		// Merge extra headers and default headers.
+		/**
+		 * Merge extra headers and default headers.
+		 */
 		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );
 		$all_headers = array_unique( $all_headers );
 

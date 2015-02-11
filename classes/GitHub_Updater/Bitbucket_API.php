@@ -154,7 +154,9 @@ class Bitbucket_API extends Base {
 			return false;
 		}
 
-		// Sort and get newest tag
+		/**
+		 * Sort and get newest tag.
+		 */
 		$tags     = array();
 		$rollback = array();
 		if ( false !== $response ) {
@@ -188,13 +190,15 @@ class Bitbucket_API extends Base {
 	 *
 	 * @param boolean $rollback for theme rollback
 	 * 
-	 * @return URI
+	 * @return string URI
 	 */
 	public function construct_download_link( $rollback = false ) {
 		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 		$endpoint           = '';
 
-		// check for rollback
+		/**
+		 * Check for rollback.
+		 */
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
 			$endpoint .= $rollback . '.zip';
 		
@@ -304,7 +308,9 @@ class Bitbucket_API extends Base {
 		$bitbucket_private         = false;
 		$bitbucket_private_install = false;
 
-		// Check whether attempting to update private Bitbucket repo
+		/**
+		 * Check whether attempting to update private Bitbucket repo.
+		 */
 		if ( ! empty( parent::$options[ $this->type->repo ] ) &&
 		     false !== strpos( $url, $this->type->repo )
 		) {
