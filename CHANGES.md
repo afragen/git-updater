@@ -5,6 +5,9 @@
 * added another screenshot to readme
 * I'd like to apologize to all my translators for adding new strings often, you guys are great, thanks!
 
+#### 4.0.1
+* hotfix to force an array type when sanitizing settings
+
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
 * requires PHP 5.3 or greater as autoloader class requires namespacing 
