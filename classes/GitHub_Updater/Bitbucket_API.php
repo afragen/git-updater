@@ -22,7 +22,7 @@ class Bitbucket_API extends Base {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $type
+	 * @param object $type
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;

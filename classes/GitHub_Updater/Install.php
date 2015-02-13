@@ -103,6 +103,12 @@ class Install {
 			}
 
 			/**
+			 * Need to ensure that Bitbucket_API is loaded so
+			 * `maybe_authenticate_http()` is called.
+			 */
+			new Bitbucket_API( (object) $type );
+
+			/**
 			 * Perform the action and install the plugin from the $source urldecode().
 			 * Flush cache so we can make sure that the installed plugins/themes list is always up to date.
 			 */
