@@ -6,7 +6,7 @@
 * I'd like to apologize to all my translators for adding new strings often, you guys are great, thanks!
 
 #### 4.0.1
-* hotfix to force an array type when sanitizing settings
+* hotfix to force an array type when sanitizing settings, it gave me a fatal I wasn't expecting.
 
 #### 4.0.0
 * changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
