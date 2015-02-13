@@ -74,10 +74,13 @@ class Install {
 			}
 
 			/**
-			 * Create Bitbucket endpoint.
+			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
+			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$options['github_updater_api'] ) {
 				self::$options['download_link'] = 'https://bitbucket.org/' . self::$options['github_updater_repo'] . '/get/' . self::$options['github_updater_branch'] . '.zip';
+
+				new Bitbucket_API( (object) $type );
 			}
 
 			self::$options['repo'] = explode( '/', self::$options['github_updater_repo'] );
@@ -101,12 +104,6 @@ class Install {
 				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
 			}
-
-			/**
-			 * Need to ensure that Bitbucket_API is loaded so
-			 * `maybe_authenticate_http()` is called.
-			 */
-			new Bitbucket_API( (object) $type );
 
 			/**
 			 * Perform the action and install the plugin from the $source urldecode().
