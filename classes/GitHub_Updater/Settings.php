@@ -249,7 +249,7 @@ class Settings extends Base {
 	 */
 	public function sanitize( $input ) {
 		$new_input = array();
-		foreach ( $input as $id => $value ) {
+		foreach ( (array)  $input as $id => $value ) {
 			$new_input[ $id ] = sanitize_text_field( $input[ $id ] );
 		}
 
