@@ -69,6 +69,8 @@ class Plugin extends Base {
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
 
+		add_action('install_plugins_pre_plugin-information', array( $this, 'update_changelog' ) );
+		
 		Settings::$ghu_plugins = $this->config;
 	}
 
@@ -162,6 +164,44 @@ class Plugin extends Base {
 		}
 
 		return $transient;
+	}
+	
+	public function update_changelog() {
+		$dir = WP_PLUGIN_DIR . '\\';
+		$slug = $_GET['plugin'];
+
+		$plugins = get_plugins('\\' . $slug);
+		
+		foreach( $plugins as $val ) {
+			$plugin = $val;
+			break;
+		}
+
+		if( array_key_exists('GitHub Plugin URI', $plugin) ) {
+			if( $plugin['GitHub Plugin URI'] != '' ) {
+				$purl = parse_url( $plugin['GitHub Plugin URI'] );
+
+				$purl['scheme'] = 'https://';
+				$purl['host'] = 'raw.githubusercontent.com';
+				$purl['path'] .= '/master/README.md';
+			
+				$readme = implode( '', $purl );
+
+				$contents = file_get_contents( $readme );
+				
+				//include_once( 'Parsedown.php' );
+				
+				$Parsedown = new Parsedown;
+				
+				include(ABSPATH . 'wp-admin/admin-header.php');
+				
+				echo $Parsedown->text( $contents );
+				
+				include(ABSPATH . 'wp-admin/admin-footer.php');
+
+				exit();
+			}
+		}
 	}
 
 }
