@@ -152,6 +152,13 @@ class Settings extends Base {
 	 * Check to see if it's a private repo
 	 */
 	public function page_init() {
+
+		register_setting(
+			'github_updater',           // Option group
+			'github_updater',           // Option name
+			array( $this, 'sanitize' )  // Sanitize
+		);
+
 		$this->ghu_tokens();
 
 		/**
@@ -224,7 +231,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Create and return settings fields.
+	 * Create and return settings fields for private repositories.
 	 *
 	 * @return void
 	 */
@@ -281,12 +288,6 @@ class Settings extends Base {
 				$setting_field['page'],
 				$setting_field['section'],
 				$setting_field['callback']
-			);
-
-			register_setting(
-				'github_updater',           // Option group
-				$setting_field['id'],       // Option name
-				array( $this, 'sanitize' )  // Sanitize
 			);
 		}
 
