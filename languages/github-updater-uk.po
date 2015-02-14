@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-11 21:00-0800\n"
-"PO-Revision-Date: 2015-02-11 21:01-0800\n"
+"POT-Creation-Date: 2015-02-14 08:39-0800\n"
+"PO-Revision-Date: 2015-02-14 08:47-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
@@ -40,64 +40,64 @@ msgstr "Перейменування успішне&#8230;"
 msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
-#: classes/GitHub_Updater/Install.php:130
+#: classes/GitHub_Updater/Install.php:133
 #: classes/GitHub_Updater/Settings.php:67
 #, fuzzy
 msgid "Install Plugin"
 msgstr "Встановити"
 
-#: classes/GitHub_Updater/Install.php:133
+#: classes/GitHub_Updater/Install.php:136
 #: classes/GitHub_Updater/Settings.php:68
 #, fuzzy
 msgid "Install Theme"
 msgstr "Встановити"
 
-#: classes/GitHub_Updater/Install.php:150
+#: classes/GitHub_Updater/Install.php:153
 msgid "Plugin"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:153
+#: classes/GitHub_Updater/Install.php:156
 #, fuzzy
 msgid "Theme"
 msgstr "Тема:"
 
-#: classes/GitHub_Updater/Install.php:164
+#: classes/GitHub_Updater/Install.php:167
 #, fuzzy
 msgid "GitHub Updater Install "
 msgstr "GitHub Updater"
 
-#: classes/GitHub_Updater/Install.php:171
+#: classes/GitHub_Updater/Install.php:174
 msgid " URI"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:180
+#: classes/GitHub_Updater/Install.php:183
 msgid "Remote Repository Host"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:189
+#: classes/GitHub_Updater/Install.php:192
 msgid "Repository Branch"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:198
+#: classes/GitHub_Updater/Install.php:201
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Приватні сховища Bitbucket"
 
-#: classes/GitHub_Updater/Install.php:207
+#: classes/GitHub_Updater/Install.php:210
 msgid "GitHub Access Token"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:235
+#: classes/GitHub_Updater/Install.php:238
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:277
+#: classes/GitHub_Updater/Install.php:280
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
 #: classes/GitHub_Updater/Settings.php:66
-#: classes/GitHub_Updater/Settings.php:400
+#: classes/GitHub_Updater/Settings.php:401
 msgid "Settings"
 msgstr "Налаштування"
 
@@ -106,7 +106,7 @@ msgstr "Налаштування"
 msgid "GitHub Updater Settings"
 msgstr "Налаштування GitHub Updater"
 
-#. Plugin Name of the plugin/theme 
+#. Plugin Name of the plugin/theme
 #: classes/GitHub_Updater/Settings.php:80
 #: classes/GitHub_Updater/Settings.php:88
 #: classes/GitHub_Updater/Settings.php:122
@@ -117,37 +117,37 @@ msgstr "GitHub Updater"
 msgid "Saved."
 msgstr "Збережено."
 
-#: classes/GitHub_Updater/Settings.php:163
+#: classes/GitHub_Updater/Settings.php:170
 msgid "GitHub Private Settings"
 msgstr "Налаштування приватного GitHub"
 
-#: classes/GitHub_Updater/Settings.php:174
+#: classes/GitHub_Updater/Settings.php:181
 msgid "Bitbucket Private Settings"
 msgstr "Налаштування приватного Bitbucket"
 
-#: classes/GitHub_Updater/Settings.php:203
+#: classes/GitHub_Updater/Settings.php:210
 msgid "Bitbucket Private Repositories"
 msgstr "Приватні сховища Bitbucket"
 
-#: classes/GitHub_Updater/Settings.php:215
+#: classes/GitHub_Updater/Settings.php:222
 msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
-#: classes/GitHub_Updater/Settings.php:260
+#: classes/GitHub_Updater/Settings.php:267
 msgid "Theme: "
 msgstr "Тема:"
 
-#: classes/GitHub_Updater/Settings.php:326
+#: classes/GitHub_Updater/Settings.php:327
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: classes/GitHub_Updater/Settings.php:333
+#: classes/GitHub_Updater/Settings.php:334
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
 
-#: classes/GitHub_Updater/Settings.php:340
+#: classes/GitHub_Updater/Settings.php:341
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 

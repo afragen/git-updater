@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-11 20:57-0800\n"
-"PO-Revision-Date: 2015-02-11 20:57-0800\n"
+"POT-Creation-Date: 2015-02-14 08:39-0800\n"
+"PO-Revision-Date: 2015-02-14 08:45-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Valério Souza <valeriosza@gmail.com>\n"
 "Language: pt_BR\n"
@@ -13,8 +13,8 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -37,58 +37,58 @@ msgstr "Renomeado com sucesso&#8230;"
 msgid "Unable to rename downloaded repository."
 msgstr "Não é possível renomear o repositório baixado."
 
-#: classes/GitHub_Updater/Install.php:130
+#: classes/GitHub_Updater/Install.php:133
 #: classes/GitHub_Updater/Settings.php:67
 #, fuzzy
 msgid "Install Plugin"
 msgstr "Instalar"
 
-#: classes/GitHub_Updater/Install.php:133
+#: classes/GitHub_Updater/Install.php:136
 #: classes/GitHub_Updater/Settings.php:68
 #, fuzzy
 msgid "Install Theme"
 msgstr "Instalar"
 
-#: classes/GitHub_Updater/Install.php:150
+#: classes/GitHub_Updater/Install.php:153
 msgid "Plugin"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:153
+#: classes/GitHub_Updater/Install.php:156
 #, fuzzy
 msgid "Theme"
 msgstr "Tema:"
 
-#: classes/GitHub_Updater/Install.php:164
+#: classes/GitHub_Updater/Install.php:167
 #, fuzzy
 msgid "GitHub Updater Install "
 msgstr "GitHub Updater"
 
-#: classes/GitHub_Updater/Install.php:171
+#: classes/GitHub_Updater/Install.php:174
 msgid " URI"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:180
+#: classes/GitHub_Updater/Install.php:183
 msgid "Remote Repository Host"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:189
+#: classes/GitHub_Updater/Install.php:192
 msgid "Repository Branch"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:198
+#: classes/GitHub_Updater/Install.php:201
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Repositórios Privados do Bitbucket"
 
-#: classes/GitHub_Updater/Install.php:207
+#: classes/GitHub_Updater/Install.php:210
 msgid "GitHub Access Token"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:235
+#: classes/GitHub_Updater/Install.php:238
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: classes/GitHub_Updater/Install.php:277
+#: classes/GitHub_Updater/Install.php:280
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
@@ -96,7 +96,7 @@ msgstr ""
 "públicos."
 
 #: classes/GitHub_Updater/Settings.php:66
-#: classes/GitHub_Updater/Settings.php:400
+#: classes/GitHub_Updater/Settings.php:401
 msgid "Settings"
 msgstr "Configurações"
 
@@ -116,40 +116,40 @@ msgstr "GitHub Updater"
 msgid "Saved."
 msgstr "Salvo."
 
-#: classes/GitHub_Updater/Settings.php:163
+#: classes/GitHub_Updater/Settings.php:170
 msgid "GitHub Private Settings"
 msgstr "Configurações do GitHub Privado"
 
-#: classes/GitHub_Updater/Settings.php:174
+#: classes/GitHub_Updater/Settings.php:181
 msgid "Bitbucket Private Settings"
 msgstr "Configurações do Bitbucket Privado"
 
-#: classes/GitHub_Updater/Settings.php:203
+#: classes/GitHub_Updater/Settings.php:210
 msgid "Bitbucket Private Repositories"
 msgstr "Repositórios Privados do Bitbucket"
 
-#: classes/GitHub_Updater/Settings.php:215
+#: classes/GitHub_Updater/Settings.php:222
 msgid "No private repositories are installed."
 msgstr "Não há repositórios privados instalados."
 
-#: classes/GitHub_Updater/Settings.php:260
+#: classes/GitHub_Updater/Settings.php:267
 msgid "Theme: "
 msgstr "Tema:"
 
-#: classes/GitHub_Updater/Settings.php:326
+#: classes/GitHub_Updater/Settings.php:327
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Digite seu Token de Acesso do GitHub. Deixe em branco para repositórios "
 "públicos."
 
-#: classes/GitHub_Updater/Settings.php:333
+#: classes/GitHub_Updater/Settings.php:334
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Marque se o repositório é privado. Deixe desmarcado se o repositório for "
 "publico."
 
-#: classes/GitHub_Updater/Settings.php:340
+#: classes/GitHub_Updater/Settings.php:341
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Digite seu usuário e senha do Bitbucket."
 
