@@ -1,6 +1,6 @@
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
-* Tags: plugin, theme, update, updater, github, bitbucket
+* Tags: plugin, theme, update, updater, github, bitbucket, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
 * Tested up to: 4.1
@@ -154,19 +154,19 @@ The `Bitbucket Branch` header is supported for both plugins and themes.
 
 Public repositories will not show up in the Settings page.
 
-![Settings Page](./assets/screenshot-1.png)
+![Settings Tab](./assets/screenshot-1.png)
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings page.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings tab.
 
 Leave this empty if the plugin or theme is in a public repository.
 
 ### Bitbucket Private Repositories
 
-Add your personal Bitbucket username and password in the Settings page. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
+Add your personal Bitbucket username and password in the Settings tab. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
 
-In order to specify a private repository you will need to check the box next to the repository name in the Settings page.
+In order to specify a private repository you will need to check the box next to the repository name in the Settings tab.
 
 Leave this unchecked if the plugin or theme is in a public repository.
 
@@ -193,6 +193,12 @@ Be careful about refreshing the browser window after this as you may be continua
 If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
 
 The same applies for Bitbucket hosted plugins.
+
+## Remote Installation of Repositories
+
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available. You may use either a full URI or short `<owner>/<repo>` format.
+
+![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
 ## Extras
 

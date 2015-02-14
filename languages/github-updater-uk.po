@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-01-30 14:23-0800\n"
-"PO-Revision-Date: 2015-01-31 10:44+0200\n"
-"Last-Translator: Andrii Ryzhkv <andri.ryzhkov@gmail.com>\n"
+"POT-Creation-Date: 2015-02-14 08:39-0800\n"
+"PO-Revision-Date: 2015-02-14 08:47-0800\n"
+"Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: classes/GitHub_Updater/Base.php:377
+#: classes/GitHub_Updater/Base.php:369
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -27,100 +27,157 @@ msgstr ""
 "Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES.md</"
 "code> або <code>CHANGELOG.md</code> у вашому сховищі."
 
-#: classes/GitHub_Updater/Base.php:433
+#: classes/GitHub_Updater/Base.php:461
 #, php-format
 msgid "Renaming %s to %s&#8230;"
 msgstr "Перейменування %s в %s&#8230;"
 
-#: classes/GitHub_Updater/Base.php:441
+#: classes/GitHub_Updater/Base.php:471
 msgid "Rename successful&#8230;"
 msgstr "Перейменування успішне&#8230;"
 
-#: classes/GitHub_Updater/Base.php:446
+#: classes/GitHub_Updater/Base.php:478
 msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
-#: classes/GitHub_Updater/Settings.php:62
-#: classes/GitHub_Updater/Settings.php:70
-#: classes/GitHub_Updater/Settings.php:86
+#: classes/GitHub_Updater/Install.php:133
+#: classes/GitHub_Updater/Settings.php:67
+#, fuzzy
+msgid "Install Plugin"
+msgstr "Встановити"
+
+#: classes/GitHub_Updater/Install.php:136
+#: classes/GitHub_Updater/Settings.php:68
+#, fuzzy
+msgid "Install Theme"
+msgstr "Встановити"
+
+#: classes/GitHub_Updater/Install.php:153
+msgid "Plugin"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:156
+#, fuzzy
+msgid "Theme"
+msgstr "Тема:"
+
+#: classes/GitHub_Updater/Install.php:167
+#, fuzzy
+msgid "GitHub Updater Install "
+msgstr "GitHub Updater"
+
+#: classes/GitHub_Updater/Install.php:174
+msgid " URI"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:183
+msgid "Remote Repository Host"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:192
+msgid "Repository Branch"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:201
+#, fuzzy
+msgid "Private Bitbucket Repository"
+msgstr "Приватні сховища Bitbucket"
+
+#: classes/GitHub_Updater/Install.php:210
+msgid "GitHub Access Token"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:238
+msgid "Enter branch name or leave empty for `master`"
+msgstr ""
+
+#: classes/GitHub_Updater/Install.php:280
+#, fuzzy
+msgid "Enter GitHub Access Token for private GitHub repositories."
+msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
+
+#: classes/GitHub_Updater/Settings.php:66
+#: classes/GitHub_Updater/Settings.php:401
+msgid "Settings"
+msgstr "Налаштування"
+
+#: classes/GitHub_Updater/Settings.php:79
+#: classes/GitHub_Updater/Settings.php:87
 msgid "GitHub Updater Settings"
 msgstr "Налаштування GitHub Updater"
 
 #. Plugin Name of the plugin/theme
-#: classes/GitHub_Updater/Settings.php:63
-#: classes/GitHub_Updater/Settings.php:71
+#: classes/GitHub_Updater/Settings.php:80
+#: classes/GitHub_Updater/Settings.php:88
+#: classes/GitHub_Updater/Settings.php:122
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: classes/GitHub_Updater/Settings.php:88
+#: classes/GitHub_Updater/Settings.php:125
 msgid "Saved."
 msgstr "Збережено."
 
-#: classes/GitHub_Updater/Settings.php:113
+#: classes/GitHub_Updater/Settings.php:170
 msgid "GitHub Private Settings"
 msgstr "Налаштування приватного GitHub"
 
-#: classes/GitHub_Updater/Settings.php:122
+#: classes/GitHub_Updater/Settings.php:181
 msgid "Bitbucket Private Settings"
 msgstr "Налаштування приватного Bitbucket"
 
-#: classes/GitHub_Updater/Settings.php:129
+#: classes/GitHub_Updater/Settings.php:210
 msgid "Bitbucket Private Repositories"
 msgstr "Приватні сховища Bitbucket"
 
-#: classes/GitHub_Updater/Settings.php:138
+#: classes/GitHub_Updater/Settings.php:222
 msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
-#: classes/GitHub_Updater/Settings.php:197
+#: classes/GitHub_Updater/Settings.php:267
 msgid "Theme: "
 msgstr "Тема:"
 
-#: classes/GitHub_Updater/Settings.php:261
+#: classes/GitHub_Updater/Settings.php:327
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: classes/GitHub_Updater/Settings.php:268
+#: classes/GitHub_Updater/Settings.php:334
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
 
-#: classes/GitHub_Updater/Settings.php:276
+#: classes/GitHub_Updater/Settings.php:341
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 
-#: classes/GitHub_Updater/Settings.php:334
-msgid "Settings"
-msgstr "Налаштування"
-
-#: classes/GitHub_Updater/Theme.php:184
+#: classes/GitHub_Updater/Theme.php:195
 msgid "Theme is up-to-date!&nbsp;"
 msgstr "Тема не має оновлень!&nbsp;"
 
-#: classes/GitHub_Updater/Theme.php:187
+#: classes/GitHub_Updater/Theme.php:198
 msgid "<strong>Rollback to:&nbsp;</strong>"
 msgstr "<strong>Відкат до:&nbsp;</strong>"
 
-#: classes/GitHub_Updater/Theme.php:201
+#: classes/GitHub_Updater/Theme.php:212
 msgid "No previous tags to rollback to."
 msgstr "Немає теґів для відкату назад."
 
-#: classes/GitHub_Updater/Theme.php:210 classes/GitHub_Updater/Theme.php:218
+#: classes/GitHub_Updater/Theme.php:221 classes/GitHub_Updater/Theme.php:229
 #, php-format
 msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
 msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
 
-#: classes/GitHub_Updater/Theme.php:210
+#: classes/GitHub_Updater/Theme.php:221
 #, php-format
 msgid "View version %4$s details"
 msgstr "Переглянути подробиці версії %4$s"
 
-#: classes/GitHub_Updater/Theme.php:210
+#: classes/GitHub_Updater/Theme.php:221
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичне оновлення недоступно для цієї теми."
 
-#: classes/GitHub_Updater/Theme.php:218
+#: classes/GitHub_Updater/Theme.php:229
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
@@ -128,47 +185,47 @@ msgstr ""
 "<a %2$s>Переглянути подробиці версії %3$s</a> або <a href=\"%4$s\">оновити "
 "зараз</a> ."
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "There is a new version of&nbsp;"
 msgstr "Нова версія&nbsp;"
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "&nbsp;available now."
 msgstr "&nbsp;зараз доступна."
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "&nbsp;View version&nbsp;"
 msgstr "&nbsp;Переглянути версію&nbsp;"
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "&nbsp;details"
 msgstr "&nbsp;подробиці"
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "&nbsp;or&nbsp;"
 msgstr "&nbsp;або&nbsp;"
 
-#: classes/GitHub_Updater/Theme.php:296
+#: classes/GitHub_Updater/Theme.php:309
 msgid "update now"
 msgstr "оновити зараз"
 
-#: classes/GitHub_Updater/Theme.php:306
+#: classes/GitHub_Updater/Theme.php:321
 msgid "Current version is up to date. Try"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: classes/GitHub_Updater/Theme.php:306
+#: classes/GitHub_Updater/Theme.php:321
 msgid "another version?"
 msgstr "іншу версію?"
 
-#: classes/GitHub_Updater/Theme.php:315
+#: classes/GitHub_Updater/Theme.php:330
 msgid "Choose a Version&#8230;"
 msgstr "Вибрати версію&#8230;"
 
-#: classes/GitHub_Updater/Theme.php:318
+#: classes/GitHub_Updater/Theme.php:333
 msgid "Install"
 msgstr "Встановити"
 
-#: mu/ghu-loader.php:51
+#: mu/ghu-loader.php:55
 msgid "Activated as mu-plugin"
 msgstr "Активувати як mu-plugin"
 

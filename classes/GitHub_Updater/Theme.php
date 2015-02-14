@@ -13,7 +13,8 @@ namespace Fragen\GitHub_Updater;
 /**
  * Update a WordPress theme from a GitHub repo.
  *
- * @package   Fragen\GitHub_Updater\Theme
+ * Class      Theme
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
@@ -34,7 +35,9 @@ class Theme extends Base {
 	 */
 	public function __construct() {
 
-		// Get details of git sourced themes
+		/**
+		 * Get details of git sourced themes.
+		 */
 		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) {
 			return false;
@@ -66,7 +69,9 @@ class Theme extends Base {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			// Update theme transient with rollback data
+			/**
+			 * Update theme transient with rollback data.
+			 */
 			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
@@ -79,8 +84,10 @@ class Theme extends Base {
 				set_site_transient( 'update_themes', $updates_transient );
 			}
 
-			// Remove WordPress update row in theme row, only in multisite
-			// Add update row to theme row, only in multisite for WP < 3.8
+			/**
+			 * Remove WordPress update row in theme row, only in multisite.
+			 * Add update row to theme row, only in multisite for WP < 3.8
+			 */
 			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
 				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
@@ -116,7 +123,9 @@ class Theme extends Base {
 			return $false;
 		}
 
-		// Early return $false for adding themes from repo
+		/**
+		 * Early return $false for adding themes from repo
+		 */
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) {
 			return $false;
 		}
@@ -289,8 +298,10 @@ class Theme extends Base {
 		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
-		//if the theme is outdated, display the custom theme updater content
-		//if theme is not present in theme_update transient response ( theme is not up to date )
+		/**
+		 * If the theme is outdated, display the custom theme updater content.
+		 * If theme is not present in theme_update transient response ( theme is not up to date )
+		 */
 		if ( empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
@@ -300,7 +311,9 @@ class Theme extends Base {
 
 			return trim( ob_get_clean(), '1' );
 		} else {
-			//if the theme is up to date, display the custom rollback/beta version updater
+			/**
+			 * If the theme is up to date, display the custom rollback/beta version updater
+			 */
 			ob_start();
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 

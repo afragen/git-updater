@@ -13,8 +13,9 @@ namespace Fragen\GitHub_Updater;
 /**
  * Add a settings page.
  *
- * @package Fragen\GitHub_Updater\Settings
- * @author Andy Fragen
+ * Class    Settings
+ * @package Fragen\GitHub_Updater
+ * @author  Andy Fragen
  */
 class Settings extends Base {
 
@@ -55,6 +56,20 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Define tabs for Settings page.
+	 * By defining in a method, strings can be translated.
+	 *
+	 * @return array
+	 */
+	private function _settings_tabs() {
+		return array(
+				'github_updater_settings'       => __( 'Settings', 'github-updater' ),
+				'github_updater_install_plugin' => __( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'  => __( 'Install Theme', 'github-updater' ),
+			);
+	}
+
+	/**
 	 * Add options page
 	 */
 	public function add_plugin_page() {
@@ -79,27 +94,57 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Renders setting tabs.
+	 *
+	 * Walks through the object's tabs array and prints them one by one.
+	 * Provides the heading for the settings page.
+	 *
+	 * @access private
+	 */
+	private function _options_tabs() {
+		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
+		echo '<h2 class="nav-tab-wrapper">';
+		foreach ( $this->_settings_tabs() as $key => $name ) {
+			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
+			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>';
+		}
+		echo '</h2>';
+	}
+
+	/**
 	 * Options page callback
 	 */
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
+		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		?>
 		<div class="wrap">
-			<h2><?php _e( 'GitHub Updater Settings', 'github-updater' ); ?></h2>
+			<h2><?php _e( 'GitHub Updater', 'github-updater' ); ?></h2>
+			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
-			<form method="post" action="<?php echo $action; ?>">
-				<?php
-				settings_fields( 'github_updater' );
-				do_settings_sections( 'github-updater' );
-				if ( self::$github_private || self::$bitbucket_private ) {
-					submit_button();
-				}
-				?>
-			</form>
+			<?php if ( 'github_updater_settings' === $tab ) : ?>
+				<form method="post" action="<?php echo $action; ?>">
+					<?php
+						settings_fields( 'github_updater' );
+						do_settings_sections( 'github_updater_install_settings' );
+						submit_button();
+					?>
+				</form>
+			<?php endif; ?>
+
+			<?php
+			if ( 'github_updater_install_plugin' === $tab ) {
+				new Install( 'plugin' );
+			}
+			if ( 'github_updater_install_theme' === $tab ) {
+				new Install( 'theme' );
+			}
+			?>
 		</div>
-	<?php
+		<?php
+
 	}
 
 	/**
@@ -107,49 +152,86 @@ class Settings extends Base {
 	 * Check to see if it's a private repo
 	 */
 	public function page_init() {
+
+		register_setting(
+			'github_updater',           // Option group
+			'github_updater',           // Option name
+			array( $this, 'sanitize' )  // Sanitize
+		);
+
 		$this->ghu_tokens();
 
+		/**
+		 * Show section for private GitHub repositories.
+		 */
 		if ( self::$github_private ) {
 			add_settings_section(
 				'github_id',                                       // ID
 				__( 'GitHub Private Settings', 'github-updater' ), // Title
 				array( $this, 'print_section_github_info' ),
-				'github-updater'                                   // Page
+				'github_updater_install_settings'                  // Page
 			);
 		}
 
-		if ( self::$bitbucket_private ) {
-			add_settings_section(
-				'bitbucket_user',
-				__( 'Bitbucket Private Settings', 'github-updater' ),
-				array( $this, 'print_section_bitbucket_username' ),
-				'github-updater'
-			);
+		/**
+		 * Add settings for Bitbucket Username and Password.
+		 */
+		add_settings_section(
+			'bitbucket_user',
+			__( 'Bitbucket Private Settings', 'github-updater' ),
+			array( $this, 'print_section_bitbucket_username' ),
+			'github_updater_install_settings'
+		);
 
+		add_settings_field(
+			'bitbucket_username',
+			'Bitbucket Username',
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'bitbucket_user',
+			'bitbucket_username'
+		);
+
+		add_settings_field(
+			'bitbucket_password',
+			'Bitbucket Password',
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'bitbucket_user',
+			'bitbucket_password'
+		);
+
+		/**
+		 * Show section for private Bitbucket repositories.
+		 */
+		if ( self::$bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
 				__( 'Bitbucket Private Repositories', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
-				'github-updater'
+				'github_updater_install_settings'
 			);
 		}
 
+		/**
+		 * Show if no private repositories are present.
+		 */
 		if ( ! self::$github_private && ! self::$bitbucket_private ) {
 			add_settings_section(
 				null,
 				__( 'No private repositories are installed.', 'github-updater' ),
 				array(),
-				'github-updater'
+				'github_updater_install_settings'
 			);
 		}
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
+			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		}
 	}
 
 	/**
-	 * Create and return settings fields.
+	 * Create and return settings fields for private repositories.
 	 *
 	 * @return void
 	 */
@@ -162,35 +244,21 @@ class Settings extends Base {
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
-			// Check to see if it's a private repo
+			/**
+			 * Check to see if it's a private repo and set variables
+			 */
 			if ( $token->private ) {
 				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
 					self::$github_private = true;
 				}
 				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
 					self::$bitbucket_private = true;
-
-					add_settings_field(
-						'bitbucket_username',
-						'Bitbucket Username',
-						array( $this, 'token_callback_text' ),
-						'github-updater',
-						'bitbucket_user',
-						'bitbucket_username'
-					);
-
-					add_settings_field(
-						'bitbucket_password',
-						'Bitbucket Password',
-						array( $this, 'token_callback_text' ),
-						'github-updater',
-						'bitbucket_user',
-						'bitbucket_password'
-					);
 				}
 			}
 
-			// Next if not a private repo
+			/**
+			 * Next if not a private repo.
+			 */
 			if ( ! $token->private ) {
 				continue;
 			}
@@ -201,11 +269,11 @@ class Settings extends Base {
 
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . $token->name;
-			$setting_field['page']  = 'github-updater';
+			$setting_field['page']  = 'github_updater_install_settings';
 			if ( false !== strpos( $token->type, 'github' ) ) {
 				$setting_field['section']         = 'github_id';
 				$setting_field['callback_method'] = array( $this, 'token_callback_text' );
-				$setting_field['callback']        =  $token->repo;
+				$setting_field['callback']        = $token->repo;
 			}
 			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
 				$setting_field['section']         = 'bitbucket_id';
@@ -221,15 +289,11 @@ class Settings extends Base {
 				$setting_field['section'],
 				$setting_field['callback']
 			);
-
-			register_setting(
-				'github_updater',           // Option group
-				$setting_field['id'],       // Option name
-				array( $this, 'sanitize' )  // Sanitize
-			);
 		}
 
-		// Unset options that are no longer present
+		/**
+		 * Unset options that are no longer present and update options.
+		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
@@ -242,14 +306,14 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Sanitize each setting field as needed
+	 * Sanitize each setting field as needed.
 	 *
 	 * @param array $input Contains all settings fields as array keys
 	 * @return array
 	 */
-	public function sanitize( $input ) {
+	public static function sanitize( $input ) {
 		$new_input = array();
-		foreach ( (array)  $input as $id => $value ) {
+		foreach ( (array) $input as $id => $value ) {
 			$new_input[ $id ] = sanitize_text_field( $input[ $id ] );
 		}
 
@@ -257,49 +321,50 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub text
+	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
 		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
-	 * Print the Bitbucket repo text
+	 * Print the Bitbucket repo text.
 	 */
 	public function print_section_bitbucket_info() {
 		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
-
 	/**
-	 * Print the Bitbucket user/pass text
+	 * Print the Bitbucket user/pass text.
 	 */
 	public function print_section_bitbucket_username() {
 		print __( 'Enter your personal Bitbucket username and password.', 'github-updater' );
 	}
 
 	/**
-	 * Get the settings option array and print one of its values
+	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $id
 	 */
 	public function token_callback_text( $id ) {
+		$name = isset( parent::$options[ $id ] ) ? esc_attr( parent::$options[ $id ] ) : '';
+		$type = stristr( $id, 'password' ) ? 'password' : 'text';
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="text" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo esc_attr( parent::$options[ $id ] ); ?>">
+			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
 		</label>
 		<?php
 	}
 
 	/**
-	 * Get the settings option array and print one of its values
+	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $id
 	 */
 	public function token_callback_checkbox( $id ) {
 		?>
 		<label for="<?php echo $id; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> />
+			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> >
 		</label>
 		<?php
 	}
@@ -312,7 +377,7 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_network_setting() {
-		update_site_option( 'github_updater', $this->sanitize( $_POST['github_updater'] ) );
+		update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		wp_redirect( add_query_arg(
 			array(
 				'page'    => 'github-updater',
