@@ -146,6 +146,9 @@ class Theme extends Base {
 				$response->last_updated = $theme->last_updated;
 				$response->rating       = $theme->rating;
 				$response->num_ratings  = $theme->num_ratings;
+				if ( $theme->private ) {
+					add_action( 'admin_head', array( $this, 'remove_rating_in_private_repo' ) );
+				}
 			}
 		}
 		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
@@ -157,7 +160,14 @@ class Theme extends Base {
 	 * Fix for new issue in 3.9 :-(
 	 */
 	public function fix_display_none_in_themes_api() {
-		echo '<style> #theme-installer div.install-theme-info { display: block !important; }  </style>';
+		echo '<style> #theme-installer div.install-theme-info { display: block !important; } </style>';
+	}
+
+	/**
+	 * Remove star rating for private themes.
+	 */
+	public function remove_rating_in_private_repo() {
+		echo '<style> #theme-installer div.install-theme-info div.star-rating { display: none; } </style>';
 	}
 
 	/**
