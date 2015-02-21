@@ -1,3 +1,6 @@
+#### 4.1.2
+* hide star ratings from **View details** screen for private repos
+
 #### 4.1.1
 * add `plugin` to `$response` in `Plugin::pre_set_site_transient_update_plugins` to fix PHP Notice
 * rename `classes` to `src` to follow more conventional naming

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-20 18:05-0800\n"
-"PO-Revision-Date: 2015-02-20 18:05-0800\n"
+"POT-Creation-Date: 2015-02-21 10:36-0800\n"
+"PO-Revision-Date: 2015-02-21 10:36-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -140,75 +140,75 @@ msgstr ""
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:195
+#: src/GitHub_Updater/Theme.php:205
 msgid "Theme is up-to-date!&nbsp;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:198
+#: src/GitHub_Updater/Theme.php:208
 msgid "<strong>Rollback to:&nbsp;</strong>"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:212
+#: src/GitHub_Updater/Theme.php:222
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:221 src/GitHub_Updater/Theme.php:229
+#: src/GitHub_Updater/Theme.php:231 src/GitHub_Updater/Theme.php:239
 #, php-format
 msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:221
+#: src/GitHub_Updater/Theme.php:231
 #, php-format
 msgid "View version %4$s details"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:221
+#: src/GitHub_Updater/Theme.php:231
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:229
+#: src/GitHub_Updater/Theme.php:239
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "There is a new version of&nbsp;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "&nbsp;available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "&nbsp;View version&nbsp;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "&nbsp;details"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "&nbsp;or&nbsp;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:319
 msgid "update now"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
+#: src/GitHub_Updater/Theme.php:331
 msgid "Current version is up to date. Try"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
+#: src/GitHub_Updater/Theme.php:331
 msgid "another version?"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:330
+#: src/GitHub_Updater/Theme.php:340
 msgid "Choose a Version&#8230;"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:333
+#: src/GitHub_Updater/Theme.php:343
 msgid "Install"
 msgstr ""
 

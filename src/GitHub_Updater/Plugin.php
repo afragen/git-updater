@@ -119,9 +119,11 @@ class Plugin extends Base {
 				$response->tested        = $plugin->tested;
 				$response->downloaded    = $plugin->downloaded;
 				$response->last_updated  = $plugin->last_updated;
-				$response->rating        = $plugin->rating;
-				$response->num_ratings   = $plugin->num_ratings;
 				$response->download_link = $plugin->download_link;
+				if ( ! $plugin->private ) {
+					$response->num_ratings = $plugin->num_ratings;
+					$response->rating      = $plugin->rating;
+				}
 			}
 		}
 

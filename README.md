@@ -27,6 +27,8 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
 
+Developers please note that your plugin/theme installation directory and remote repository names **must** be identical. This includes case sensitivity. Otherwise issues may arise where certain features fail to work properly. Please be consistent in your naming.
+
 ## Installation
 
 ### Composer
@@ -218,7 +220,7 @@ Please log issues on the GitHub at https://github.com/afragen/github-updater/iss
 
 If you are using a WordPress Multisite installation, the plugin **should** be network activated.
 
-When first downloading and installing a plugin from GitHub you might have to do the following, otherwise the next update may not be able to cleanup after itself and re-activate the updated plugin or theme.
+When first downloading and installing a plugin from GitHub you might have to do the following, otherwise the next update may not be able to cleanup after itself and re-activate the updated plugin or theme. Or you can just use the remote install feature and this will be done for you. :wink:
 
 1. Unzip the archive.
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
