@@ -402,59 +402,68 @@ class Base {
 		global $wp_filesystem;
 		$repo = null;
 
-		if ( isset( $source ) ) {
-			foreach ( (array) $this->config as $git_repo ) {
-				if ( stristr( basename( $source ), $git_repo->repo ) ) {
-					$repo = $git_repo->repo;
-				}
-			}
-		}
-
 		/**
-		 * Check for upgrade process, return if both are false
+		 * Check for upgrade process, return if both are false.
 		 */
 		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
 		/**
-		 * Check to ensure exact match to repo name.
-		 * This should keep 'test-plugin' from matching 'test-plugin2
+		 * Return $source if name already corrected.
 		 */
-		if ( ! empty( $repo ) &&
-		     ( isset( $upgrader->skin->options['plugin'] ) && $repo !== $upgrader->skin->options['plugin'] ) ||
-		     ( isset( $upgrader->skin->options['theme'] ) && $repo !== $upgrader->skin->options['theme'] )
+		if ( ( isset( $upgrader->skin->options['plugin' ] ) &&
+			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
+			( isset( $upgrader->skin->options['theme'] ) &&
+			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
 		) {
-			$repo = null;
+			return $source;
 		}
 
 		/**
-		 * Check for upgrade process from Fragen\GitHub_Updater\Install
+		 * Get correct repo name based upon $upgrader instance if present.
 		 */
-		if ( empty( $repo ) ) {
-			if ( ! empty( $upgrader->skin->options['plugin'] ) ) {
+		if ( $upgrader instanceof \Plugin_Upgrader ) {
+			if ( isset( $upgrader->skin->options['plugin'] ) &&
+			     stristr( basename( $source ), $upgrader->skin->options['plugin'] ) ) {
 				$repo = $upgrader->skin->options['plugin'];
 			}
-			if ( ! empty( $upgrader->skin->options['theme'] ) ) {
+		}
+		if ( $upgrader instanceof \Theme_Upgrader ) {
+			if ( isset( $upgrader->skin->options['theme'] ) &&
+			     stristr( basename( $source ), $upgrader->skin->options['theme'] ) ) {
 				$repo = $upgrader->skin->options['theme'];
 			}
 		}
 
+
 		/**
-		 * If the values aren't set, or it's wp.org sourced, abort.
+		 * Get repo for automatic update process.
 		 */
-		if ( ! isset( $source, $remote_source, $repo ) || false === stristr( basename( $source ), $repo ) ) {
-			return $source;
+		if ( empty( $repo ) ) {
+			foreach ( (array) $this->config as $git_repo ) {
+				if ( $upgrader instanceof \Plugin_Upgrader && ( false !== stristr( $git_repo->type, 'plugin' ) ) ) {
+					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+				}
+				if ( $upgrader instanceof \Theme_Upgrader && ( false !== stristr( $git_repo->type, 'theme' ) ) ) {
+					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+				}
+			}
+			/**
+			 * Return already corrected $source or wp.org $source.
+			 */
+			if ( empty( $repo ) ) {
+				return $source;
+			}
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
-
-		/**
-		 * Abort if already corrected.
-		 */
-		if ( stristr( basename( $source ), $repo ) === $repo ) {
-			return $corrected_source;
-		}
 
 		$upgrader->skin->feedback(
 			sprintf(

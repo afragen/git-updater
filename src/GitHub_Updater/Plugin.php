@@ -145,6 +145,7 @@ class Plugin extends Base {
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
+					'plugin'      => $plugin->slug,
 					'new_version' => $plugin->remote_version,
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,

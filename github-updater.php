@@ -12,7 +12,7 @@
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to automatically update GitHub or Bitbucket hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
-Version:           4.1.0
+Version:           4.1.1
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -33,13 +33,13 @@ if ( ! defined( 'WPINC' ) ) {
 load_plugin_textdomain( 'github-updater', false, __DIR__ . '/languages' );
 
 // Plugin namespace root
-$root = array( 'Fragen\GitHub_Updater' => __DIR__ . '/classes/GitHub_Updater' );
+$root = array( 'Fragen\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array( 'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/vendor/Parsedown.php' );
 
 // Load Autoloader
-require_once( __DIR__ . '/classes/GitHub_Updater/Autoloader.php' );
+require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
 $class_loader = 'Fragen\GitHub_Updater\Autoloader';
 new $class_loader( $root, $extra_classes );
 

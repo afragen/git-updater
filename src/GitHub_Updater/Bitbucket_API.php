@@ -311,7 +311,8 @@ class Bitbucket_API extends Base {
 		/**
 		 * Check whether attempting to update private Bitbucket repo.
 		 */
-		if ( ! empty( parent::$options[ $this->type->repo ] ) &&
+		if ( isset( $this->type->repo ) &&
+			! empty( parent::$options[ $this->type->repo ] ) &&
 		     false !== strpos( $url, $this->type->repo )
 		) {
 			$bitbucket_private = true;
