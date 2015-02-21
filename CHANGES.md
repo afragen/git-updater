@@ -1,6 +1,7 @@
 #### 4.1.1
 * add `plugin` to `$response` in `Plugin::pre_set_site_transient_update_plugins` to fix PHP Notice
 * rename `classes` to `src` to follow more conventional naming
+* refactor renaming code to function under all circumstances, I hope ;-)
 
 #### 4.1.0
 * added remote installation of plugins or themes, both public and private
