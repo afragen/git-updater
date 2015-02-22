@@ -103,7 +103,7 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-			if ( $response->slug === $plugin->repo ) {
+			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
 				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
 					return $response;
 				}
