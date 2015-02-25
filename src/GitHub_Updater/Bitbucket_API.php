@@ -47,13 +47,14 @@ class Bitbucket_API extends Base {
 	 */
 	protected function api( $url ) {
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
-		$code          = wp_remote_retrieve_response_code( $response );
+		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			$this->error_message( $code );
 			return false;
 		}
 
