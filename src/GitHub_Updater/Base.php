@@ -702,4 +702,30 @@ class Base {
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
 
+	/**
+	 * Display message when API returns other than 200 or 404.
+	 * Usually 403 as API rate limit max out or private repo with no token set.
+	 *
+	 * @return bool|string
+	 */
+	protected function error_message( $code ) {
+		global $pagenow;
+		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
+		$settings_pages = array( 'settings.php', 'options-general.php' );
+
+		if (
+			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
+			( in_array( $pagenow, $settings_pages ) && 'github-updater' !== $_GET['page'] )
+		) {
+			return false;
+		}
+
+		?>
+		<div class="error">
+			<p><strong><?php echo $this->type->name; ?></strong><?php  _e( ' was not checked.', 'github-updater' ); ?>&nbsp;
+			<?php _e( 'GitHub Updater Error Code: ', 'github-updater' ); echo $code; ?></p>
+		</div>
+	<?php
+	}
+
 }

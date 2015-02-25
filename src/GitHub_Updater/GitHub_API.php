@@ -54,31 +54,6 @@ class GitHub_API extends Base {
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
-
-	/**
-	 * Display message when API returns other than 200 or 404.
-	 * Usually 403 as API rate limit max out or private repo with no token set.
-	 */
-	private function _error_message() {
-		global $pagenow;
-		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
-		$settings_pages = array( 'settings.php', 'options-general.php' );
-
-		if (
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
-			( in_array( $pagenow, $settings_pages ) && 'github-updater' !== $_GET['page'] )
-		) {
-			return false;
-		}
-
-		?>
-		<div class="error">
-			<p><strong><?php _e( 'GitHub Updater Error', 'github-updater' ); ?></strong></p>
-			<p><strong><?php echo $this->type->name; ?></strong><?php  _e( ' was not checked. GitHub may have reached it\'s API limit or a private repo needs it\'s access token set. You may have to wait an hour before the limit is reset.', 'github-updater' ); ?> </p>
-		</div>
-		<?php
-	}
-
 	/**
 	 * Return API url.
 	 *
