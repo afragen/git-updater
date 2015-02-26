@@ -47,7 +47,8 @@ class GitHub_API extends Base {
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
-			$this->error_message( $code );
+			parent::$error_code = $code;
+			$this->create_error_message();
 			return false;
 		}
 

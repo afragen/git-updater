@@ -63,6 +63,12 @@ class Base {
 	protected static $options;
 
 	/**
+	 * Holds HTTP error code from API call.
+	 * @var integer
+	 */
+	protected static $error_code;
+
+	/**
 	 * Constructor
 	 *
 	 * Loads options to private static variable.
@@ -706,9 +712,9 @@ class Base {
 	 * Display message when API returns other than 200 or 404.
 	 * Usually 403 as API rate limit max out or private repo with no token set.
 	 *
-	 * @return bool|string
+	 * @return bool
 	 */
-	protected function error_message( $code ) {
+	protected function create_error_message() {
 		global $pagenow;
 		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
 		$settings_pages = array( 'settings.php', 'options-general.php' );
@@ -720,12 +726,20 @@ class Base {
 			return false;
 		}
 
+		add_action( 'admin_head', array( $this, 'show_error_message' ) );
+	}
+
+	/**
+	 * Display error message.
+	 */
+	public function show_error_message() {
 		?>
 		<div class="error">
-			<p><strong><?php echo $this->type->name; ?></strong><?php  _e( ' was not checked.', 'github-updater' ); ?>&nbsp;
-			<?php _e( 'GitHub Updater Error Code: ', 'github-updater' ); echo $code; ?></p>
+			<p><strong><?php echo $this->type->name; ?></strong>&nbsp;
+				<?php _e( 'was not checked.', 'github-updater' ); ?>&nbsp;
+				<?php _e( 'GitHub Updater Error Code: ', 'github-updater' ); echo self::$error_code; ?></p>
 		</div>
-	<?php
+		<?php
 	}
 
 }
