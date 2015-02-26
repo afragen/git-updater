@@ -1,0 +1,247 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: GitHub Updater\n"
+"POT-Creation-Date: 2015-02-26 11:58+0100\n"
+"PO-Revision-Date: 2015-02-26 11:59+0100\n"
+"Last-Translator: Andréas Lundgren <adevade@gmail.com>\n"
+"Language-Team: Andy Fragen <andy@thefragens.com>\n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.4\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: mu/ghu-loader.php:55
+msgid "Activated as mu-plugin"
+msgstr "Aktiverad som mu-tillägg"
+
+#: src/GitHub_Updater/Base.php:369
+msgid ""
+"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
+"md</code> or <code>CHANGELOG.md</code> in your repository."
+msgstr ""
+"Ingen changelog finns tillgänglig via GitHub Updater. Skapa filen "
+"<code>CHANGES.md</code> eller <code>CHANGELOG.md</code> i din repository."
+
+#: src/GitHub_Updater/Base.php:470
+#, php-format
+msgid "Renaming %s to %s&#8230;"
+msgstr "Döper om %s till %s&#8230;"
+
+#: src/GitHub_Updater/Base.php:480
+msgid "Rename successful&#8230;"
+msgstr "Namnbytet lyckades&#8230;"
+
+#: src/GitHub_Updater/Base.php:487
+msgid "Unable to rename downloaded repository."
+msgstr "Kunde inte döpa om den nedladdade mappen."
+
+#: src/GitHub_Updater/Base.php:725
+msgid " was not checked."
+msgstr " testades inte."
+
+#: src/GitHub_Updater/Base.php:726
+msgid "GitHub Updater Error Code: "
+msgstr "GitHub Updater - Felkod: "
+
+#: src/GitHub_Updater/Install.php:133 src/GitHub_Updater/Settings.php:67
+msgid "Install Plugin"
+msgstr "Installera tillägg"
+
+#: src/GitHub_Updater/Install.php:136 src/GitHub_Updater/Settings.php:68
+msgid "Install Theme"
+msgstr "Installera tema"
+
+#: src/GitHub_Updater/Install.php:153
+msgid "Plugin"
+msgstr "Tilläggs-"
+
+#: src/GitHub_Updater/Install.php:156
+msgid "Theme"
+msgstr "Tema-"
+
+#: src/GitHub_Updater/Install.php:167
+msgid "GitHub Updater Install "
+msgstr "GitHub Updater-installation"
+
+#: src/GitHub_Updater/Install.php:174
+msgid " URI"
+msgstr "URI"
+
+#: src/GitHub_Updater/Install.php:183
+msgid "Remote Repository Host"
+msgstr "Fjärrvärd för repository"
+
+#: src/GitHub_Updater/Install.php:192
+msgid "Repository Branch"
+msgstr "Repository branch"
+
+#: src/GitHub_Updater/Install.php:201
+msgid "Private Bitbucket Repository"
+msgstr "Privat Bitbucket repository"
+
+#: src/GitHub_Updater/Install.php:210
+msgid "GitHub Access Token"
+msgstr "GitHub Access Token"
+
+#: src/GitHub_Updater/Install.php:238
+msgid "Enter branch name or leave empty for `master`"
+msgstr "Fyll i namn för branch eller lämna tomt för <code>master</code>"
+
+#: src/GitHub_Updater/Install.php:280
+msgid "Enter GitHub Access Token for private GitHub repositories."
+msgstr "Fyll i GitHub Access Token för privata GitHub repositories."
+
+#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:401
+msgid "Settings"
+msgstr "Inställningar"
+
+#: src/GitHub_Updater/Settings.php:79 src/GitHub_Updater/Settings.php:87
+msgid "GitHub Updater Settings"
+msgstr "GitHub Updater-inställningar"
+
+#: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:88
+#: src/GitHub_Updater/Settings.php:122
+msgid "GitHub Updater"
+msgstr "GitHub Updater"
+
+#: src/GitHub_Updater/Settings.php:125
+msgid "Saved."
+msgstr "Sparat."
+
+#: src/GitHub_Updater/Settings.php:170
+msgid "GitHub Private Settings"
+msgstr "GitHub - Privata inställningar"
+
+#: src/GitHub_Updater/Settings.php:181
+msgid "Bitbucket Private Settings"
+msgstr "Bitbucket - Privata inställningar"
+
+#: src/GitHub_Updater/Settings.php:210
+msgid "Bitbucket Private Repositories"
+msgstr "Bitbucket - Privata repositories"
+
+#: src/GitHub_Updater/Settings.php:222
+msgid "No private repositories are installed."
+msgstr "Inga privata repositories är installerade."
+
+#: src/GitHub_Updater/Settings.php:267
+msgid "Theme: "
+msgstr "Tema:"
+
+#: src/GitHub_Updater/Settings.php:327
+msgid "Enter your GitHub Access Token. Leave empty for public repositories."
+msgstr "Fyll i ditt GitHub Access Token. Lämna tomt för öppna repositories."
+
+#: src/GitHub_Updater/Settings.php:334
+msgid ""
+"Check box if private repository. Leave unchecked for public repositories."
+msgstr ""
+"Kryssa i rutan om det är privata repositories. Lämna okryssad för öppna "
+"repositories."
+
+#: src/GitHub_Updater/Settings.php:341
+msgid "Enter your personal Bitbucket username and password."
+msgstr "Fyll i dina personliga inloggningsuppgifter för Bitbucket."
+
+#: src/GitHub_Updater/Theme.php:205
+msgid "Theme is up-to-date!&nbsp;"
+msgstr "Temat är aktuellt!&nbsp;"
+
+#: src/GitHub_Updater/Theme.php:208
+msgid "<strong>Rollback to:&nbsp;</strong>"
+msgstr "<strong>Gå tillbaka till:&nbsp;</strong>"
+
+#: src/GitHub_Updater/Theme.php:222
+msgid "No previous tags to rollback to."
+msgstr "Inga tidigare taggar att gå tillbaka till."
+
+#: src/GitHub_Updater/Theme.php:231 src/GitHub_Updater/Theme.php:239
+#, php-format
+msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
+msgstr ""
+"GitHub Updater visar att det finns en ny version av %1$s tillgänglig.&nbsp;"
+
+#: src/GitHub_Updater/Theme.php:231
+#, php-format
+msgid "View version %4$s details"
+msgstr "Visa detaljer för version %4$s"
+
+#: src/GitHub_Updater/Theme.php:231
+msgid "Automatic update is unavailable for this theme."
+msgstr "Automatiska uppdateringar är inte tillgängligt för detta tema."
+
+#: src/GitHub_Updater/Theme.php:239
+#, php-format
+msgid ""
+"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgstr ""
+"<a %2$s>Visa detaljer för version %3$s</a> eller <a href=\"%4$s\">uppdatera "
+"nu</a>."
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "There is a new version of&nbsp;"
+msgstr "Det finns en ny version av&nbsp;"
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "&nbsp;available now."
+msgstr "&nbsp;tillgänglig."
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "&nbsp;View version&nbsp;"
+msgstr "&nbsp;Visa version&nbsp;"
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "&nbsp;details"
+msgstr "&nbsp;detaljer"
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "&nbsp;or&nbsp;"
+msgstr "&nbsp;eller&nbsp;"
+
+#: src/GitHub_Updater/Theme.php:319
+msgid "update now"
+msgstr "uppdatera nu"
+
+#: src/GitHub_Updater/Theme.php:331
+msgid "Current version is up to date. Try"
+msgstr "Nuvarande version är aktuell. Testa"
+
+#: src/GitHub_Updater/Theme.php:331
+msgid "another version?"
+msgstr "en annan version?"
+
+#: src/GitHub_Updater/Theme.php:340
+msgid "Choose a Version&#8230;"
+msgstr "Välj en version&#8230;"
+
+#: src/GitHub_Updater/Theme.php:343
+msgid "Install"
+msgstr "Installera"
+
+#~ msgid "https://github.com/afragen/github-updater"
+#~ msgstr "https://github.com/afragen/github-updater"
+
+#~ msgid ""
+#~ "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+#~ "themes into WordPress. Plugin class based upon <a href=\"https://github."
+#~ "com/codepress/github-plugin-updater\">codepress/github-plugin-updater</"
+#~ "a>. Theme class based upon <a href=\"https://github.com/WordPress-Phoenix/"
+#~ "whitelabel-framework\">Whitelabel Framework</a> modifications."
+#~ msgstr ""
+#~ "Ett tillägg för att automatiskt uppdatera andra tillägg och teman från "
+#~ "GitHub eller Bitbucket till WordPress. Tilläggs-klassen är baserat på <a "
+#~ "href=\"https://github.com/codepress/github-plugin-updater\">codepress/"
+#~ "github-plugin-updater</a>. Tema-klassen är baserad på <a href=\"https://"
+#~ "github.com/WordPress-Phoenix/whitelabel-framework\">Whitelabel Framework</"
+#~ "a> modifieringar."
+
+#~ msgid "Andy Fragen"
+#~ msgstr "Andy Fragen"
