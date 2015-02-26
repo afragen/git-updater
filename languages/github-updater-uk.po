@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-02-25 20:36-0800\n"
-"PO-Revision-Date: 2015-02-25 20:51-0800\n"
+"PO-Revision-Date: 2015-02-26 09:35-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
@@ -33,12 +33,12 @@ msgstr ""
 
 #: src/GitHub_Updater/Base.php:476
 #, php-format
-msgid "Renaming %s to %s&#8230;"
-msgstr "Перейменування %s в %s&#8230;"
+msgid "Renaming %s to %s"
+msgstr "Перейменування %s в %s"
 
 #: src/GitHub_Updater/Base.php:486
-msgid "Rename successful&#8230;"
-msgstr "Перейменування успішне&#8230;"
+msgid "Rename successful"
+msgstr "Перейменування успішне"
 
 #: src/GitHub_Updater/Base.php:493
 msgid "Unable to rename downloaded repository."
@@ -46,54 +46,44 @@ msgstr "Неможливо перейменувати скачане схови�
 
 #: src/GitHub_Updater/Base.php:739
 msgid "was not checked."
-msgstr ""
+msgstr "не було підтверджено."
 
 #: src/GitHub_Updater/Base.php:740
-#, fuzzy
-msgid "GitHub Updater Error Code: "
-msgstr "GitHub Updater"
+msgid "GitHub Updater Error Code:"
+msgstr "GitHub Updater код помилки:"
 
 #: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
-#, fuzzy
 msgid "Install Plugin"
-msgstr "Встановити"
+msgstr "Встановити плагін"
 
 #: src/GitHub_Updater/Install.php:137 src/GitHub_Updater/Settings.php:68
-#, fuzzy
 msgid "Install Theme"
-msgstr "Встановити"
+msgstr "Інсталювати тему"
 
 #: src/GitHub_Updater/Install.php:154
-#, fuzzy
 msgid "Plugin"
-msgstr ""
-"Плаґін для автоматичного оновлення плаґінів та тем WordPress, які "
-"розміщуються на GitHub або BitBucket. Клас плаґіну основано на <a href="
-"\"https://github.com/codepress/github-plugin-updater\">codepress / GitHub-"
-"Plugin-Updater</a> . Клас теми основано на модифікаціях <a href=\"https://"
-"github.com/WordPress-Phoenix/whitelabel-framework\">Whitelabel Framework</a>."
+msgstr "Плагін"
 
 #: src/GitHub_Updater/Install.php:157
-#, fuzzy
 msgid "Theme"
-msgstr "Тема:"
+msgstr "тему:"
 
 #: src/GitHub_Updater/Install.php:168
 #, fuzzy
-msgid "GitHub Updater Install "
+msgid "GitHub Updater Install"
 msgstr "GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:175
-msgid " URI"
+msgid "URI"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:184
 msgid "Remote Repository Host"
-msgstr ""
+msgstr "Віддаленого сховища хост"
 
 #: src/GitHub_Updater/Install.php:193
 msgid "Repository Branch"
-msgstr ""
+msgstr "Репозиторій відділення"
 
 #: src/GitHub_Updater/Install.php:202
 #, fuzzy
@@ -106,7 +96,7 @@ msgstr ""
 
 #: src/GitHub_Updater/Install.php:239
 msgid "Enter branch name or leave empty for `master`"
-msgstr ""
+msgstr "Введіть ім'я відділення або Залиште пустим для 'майстер'"
 
 #: src/GitHub_Updater/Install.php:281
 #, fuzzy
@@ -148,8 +138,8 @@ msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
 #: src/GitHub_Updater/Settings.php:267
-msgid "Theme: "
-msgstr "Тема:"
+msgid "Theme:"
+msgstr "тему:"
 
 #: src/GitHub_Updater/Settings.php:327
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
@@ -166,9 +156,8 @@ msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 
 #: src/GitHub_Updater/Theme.php:205
-#, fuzzy
 msgid "Theme is up-to-date!"
-msgstr "Тема не має оновлень!&nbsp;"
+msgstr "Тема не має оновлень!"
 
 #: src/GitHub_Updater/Theme.php:209
 msgid "<strong>Rollback to:</strong>"
@@ -220,7 +209,7 @@ msgstr "Переглянути подробиці версії %4$s"
 
 #: src/GitHub_Updater/Theme.php:321
 msgid "or"
-msgstr ""
+msgstr "або"
 
 #: src/GitHub_Updater/Theme.php:321
 msgid "update now"

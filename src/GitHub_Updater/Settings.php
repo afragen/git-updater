@@ -264,7 +264,7 @@ class Settings extends Base {
 			}
 
 			if ( false !== strpos( $token->type, 'theme') ) {
-				$type = __( 'Theme: ', 'github-updater' );
+				$type = __( 'Theme:', 'github-updater' ) . '&nbsp;';
 			}
 
 			$setting_field['id']    = $token->repo;

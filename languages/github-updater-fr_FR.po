@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-02-25 20:36-0800\n"
-"PO-Revision-Date: 2015-02-25 20:44-0800\n"
+"PO-Revision-Date: 2015-02-26 09:20-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: fr_FR\n"
@@ -32,12 +32,12 @@ msgstr ""
 
 #: src/GitHub_Updater/Base.php:476
 #, php-format
-msgid "Renaming %s to %s&#8230;"
-msgstr "Renommage de %s to %s&#8230;"
+msgid "Renaming %s to %s"
+msgstr "Renommage de %s to %s"
 
 #: src/GitHub_Updater/Base.php:486
-msgid "Rename successful&#8230;"
-msgstr "Le renommage a réussi&#8230;"
+msgid "Rename successful"
+msgstr "Le renommage a réussi"
 
 #: src/GitHub_Updater/Base.php:493
 msgid "Unable to rename downloaded repository."
@@ -45,54 +45,45 @@ msgstr "Impossible de renommer le dépôt téléchargé."
 
 #: src/GitHub_Updater/Base.php:739
 msgid "was not checked."
-msgstr ""
+msgstr "n'a pas été vérifié."
 
 #: src/GitHub_Updater/Base.php:740
-#, fuzzy
-msgid "GitHub Updater Error Code: "
-msgstr "GitHub Updater"
+msgid "GitHub Updater Error Code:"
+msgstr "Code d'erreur GitHub Updater :"
 
 #: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
-#, fuzzy
 msgid "Install Plugin"
-msgstr "Installer"
+msgstr "Installer le Plugin"
 
 #: src/GitHub_Updater/Install.php:137 src/GitHub_Updater/Settings.php:68
-#, fuzzy
 msgid "Install Theme"
-msgstr "Installer"
+msgstr "Installer le Thème"
 
 #: src/GitHub_Updater/Install.php:154
-#, fuzzy
 msgid "Plugin"
-msgstr ""
-"Ne cochez cela que si vous voulez réinitialiser les réglages de l'extension "
-"lors de sa réactivation"
+msgstr "Plugin"
 
 #: src/GitHub_Updater/Install.php:157
-#, fuzzy
 msgid "Theme"
-msgstr "Thème : "
+msgstr "Thème :"
 
 #: src/GitHub_Updater/Install.php:168
-#, fuzzy
-msgid "GitHub Updater Install "
-msgstr "GitHub Updater"
+msgid "GitHub Updater Install"
+msgstr "GitHub Updater Installer"
 
 #: src/GitHub_Updater/Install.php:175
-msgid " URI"
+msgid "URI"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:184
 msgid "Remote Repository Host"
-msgstr ""
+msgstr "Référentiel distant hôte"
 
 #: src/GitHub_Updater/Install.php:193
 msgid "Repository Branch"
-msgstr ""
+msgstr "Branche de référentiel"
 
 #: src/GitHub_Updater/Install.php:202
-#, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Dépôts BitBucket privés"
 
@@ -102,10 +93,9 @@ msgstr ""
 
 #: src/GitHub_Updater/Install.php:239
 msgid "Enter branch name or leave empty for `master`"
-msgstr ""
+msgstr "Entrez le nom de la branche ou laissez vide pour « master »"
 
 #: src/GitHub_Updater/Install.php:281
-#, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 "Entrez votre clé d'accès GitHub (GitHub Access Token). Laissez vide pour un "
@@ -146,8 +136,8 @@ msgid "No private repositories are installed."
 msgstr "Aucun dépôt privé n'est installé."
 
 #: src/GitHub_Updater/Settings.php:267
-msgid "Theme: "
-msgstr "Thème : "
+msgid "Theme:"
+msgstr "Thème :"
 
 #: src/GitHub_Updater/Settings.php:327
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
@@ -214,12 +204,13 @@ msgid "View version"
 msgstr "Voir les détails de la version %4$s"
 
 #: src/GitHub_Updater/Theme.php:321
+#, fuzzy
 msgid "details"
-msgstr ""
+msgstr "&nbsp;"
 
 #: src/GitHub_Updater/Theme.php:321
 msgid "or"
-msgstr ""
+msgstr "ou"
 
 #: src/GitHub_Updater/Theme.php:321
 msgid "update now"

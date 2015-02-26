@@ -165,14 +165,14 @@ class Install {
 
 		add_settings_section(
 			$type,
-			__( 'GitHub Updater Install ', 'github-updater' ) . $repo_type,
+			__( 'GitHub Updater Install', 'github-updater' ) . '&nbsp;' . $repo_type,
 			array(),
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
-			$repo_type . __( ' URI', 'github-updater' ),
+			$repo_type . '&nbsp;' .  __( 'URI', 'github-updater' ),
 			array( $this, 'get_repo' ),
 			'github_updater_install_' . $type,
 			$type,
