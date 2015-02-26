@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-20 18:05-0800\n"
-"PO-Revision-Date: 2015-02-20 18:07-0800\n"
+"POT-Creation-Date: 2015-02-25 20:36-0800\n"
+"PO-Revision-Date: 2015-02-25 20:47-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: it\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Attivato come mu-plugin"
 
-#: src/GitHub_Updater/Base.php:369
+#: src/GitHub_Updater/Base.php:375
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -30,30 +30,39 @@ msgstr ""
 "Nessun changelog è disponibile con GitHub Updater. Crea un file "
 "<code>CHANGES.md</code> o <code>CHANGELOG.md</code> nel tuo repository."
 
-#: src/GitHub_Updater/Base.php:470
+#: src/GitHub_Updater/Base.php:476
 #, php-format
 msgid "Renaming %s to %s&#8230;"
 msgstr "Rinominato %s a %s&#8230;"
 
-#: src/GitHub_Updater/Base.php:480
+#: src/GitHub_Updater/Base.php:486
 msgid "Rename successful&#8230;"
 msgstr "Rinominato con successo&#8230;"
 
-#: src/GitHub_Updater/Base.php:487
+#: src/GitHub_Updater/Base.php:493
 msgid "Unable to rename downloaded repository."
 msgstr "Impossibile rinominare il repository scaricato."
 
-#: src/GitHub_Updater/Install.php:133 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Base.php:739
+msgid "was not checked."
+msgstr ""
+
+#: src/GitHub_Updater/Base.php:740
+#, fuzzy
+msgid "GitHub Updater Error Code: "
+msgstr "GitHub Updater"
+
+#: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
 #, fuzzy
 msgid "Install Plugin"
 msgstr "Installa"
 
-#: src/GitHub_Updater/Install.php:136 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:137 src/GitHub_Updater/Settings.php:68
 #, fuzzy
 msgid "Install Theme"
 msgstr "Installa"
 
-#: src/GitHub_Updater/Install.php:153
+#: src/GitHub_Updater/Install.php:154
 #, fuzzy
 msgid "Plugin"
 msgstr ""
@@ -64,42 +73,42 @@ msgstr ""
 "temi è basata su <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
 "framework\">Whitelabel Framework</a> modificata."
 
-#: src/GitHub_Updater/Install.php:156
+#: src/GitHub_Updater/Install.php:157
 #, fuzzy
 msgid "Theme"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Install.php:167
+#: src/GitHub_Updater/Install.php:168
 #, fuzzy
 msgid "GitHub Updater Install "
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Install.php:174
+#: src/GitHub_Updater/Install.php:175
 msgid " URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:183
+#: src/GitHub_Updater/Install.php:184
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:192
+#: src/GitHub_Updater/Install.php:193
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:201
+#: src/GitHub_Updater/Install.php:202
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Repository privato Bitbucket"
 
-#: src/GitHub_Updater/Install.php:210
+#: src/GitHub_Updater/Install.php:211
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:238
+#: src/GitHub_Updater/Install.php:239
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:280
+#: src/GitHub_Updater/Install.php:281
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
@@ -126,7 +135,7 @@ msgstr "Salvato."
 
 #: src/GitHub_Updater/Settings.php:170
 msgid "GitHub Private Settings"
-msgstr "Impostazioni private Bitbucket"
+msgstr "Impostazioni private GitHub"
 
 #: src/GitHub_Updater/Settings.php:181
 msgid "Bitbucket Private Settings"
@@ -161,33 +170,33 @@ msgstr ""
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Inserisci la tua username e password di Bitbucket."
 
-#: src/GitHub_Updater/Theme.php:195
-msgid "Theme is up-to-date!&nbsp;"
-msgstr "Il tema è aggiornato!&nbsp;"
+#: src/GitHub_Updater/Theme.php:205
+msgid "Theme is up-to-date!"
+msgstr "Il tema è aggiornato!"
 
-#: src/GitHub_Updater/Theme.php:198
-msgid "<strong>Rollback to:&nbsp;</strong>"
-msgstr "<strong>Ripristina a:&nbsp;</strong>"
+#: src/GitHub_Updater/Theme.php:209
+msgid "<strong>Rollback to:</strong>"
+msgstr "<strong>Ripristina a:</strong>"
 
-#: src/GitHub_Updater/Theme.php:212
+#: src/GitHub_Updater/Theme.php:224
 msgid "No previous tags to rollback to."
 msgstr "Nessun tag precedente da ripristinare."
 
-#: src/GitHub_Updater/Theme.php:221 src/GitHub_Updater/Theme.php:229
+#: src/GitHub_Updater/Theme.php:233 src/GitHub_Updater/Theme.php:241
 #, php-format
-msgid "GitHub Updater shows a new version of %1$s available.&nbsp;"
-msgstr "GitHub Updater mostra una nuova versione di %1$s disponibile.&nbsp;"
+msgid "GitHub Updater shows a new version of %1$s available."
+msgstr "GitHub Updater mostra una nuova versione di %1$s disponibile."
 
-#: src/GitHub_Updater/Theme.php:221
+#: src/GitHub_Updater/Theme.php:233
 #, php-format
 msgid "View version %4$s details"
 msgstr "Visualizza i dettagli della versione %4$s"
 
-#: src/GitHub_Updater/Theme.php:221
+#: src/GitHub_Updater/Theme.php:233
 msgid "Automatic update is unavailable for this theme."
 msgstr "L&#39;aggiornamento automatico non è disponibile per questo tema."
 
-#: src/GitHub_Updater/Theme.php:229
+#: src/GitHub_Updater/Theme.php:241
 #, php-format
 msgid ""
 "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
@@ -195,43 +204,46 @@ msgstr ""
 "<a %2$s>Visualizza i dettagli della versione %3$s</a> o <a href=\"%4$s"
 "\">aggiorna adesso</a>."
 
-#: src/GitHub_Updater/Theme.php:309
-msgid "There is a new version of&nbsp;"
-msgstr "C'è una nuova versione di&nbsp;"
+#: src/GitHub_Updater/Theme.php:321
+msgid "There is a new version of"
+msgstr "C'è una nuova versione di"
 
-#: src/GitHub_Updater/Theme.php:309
-msgid "&nbsp;available now."
-msgstr "&nbsp;disponibile adesso."
+#: src/GitHub_Updater/Theme.php:321
+msgid "available now."
+msgstr "disponibile adesso."
 
-#: src/GitHub_Updater/Theme.php:309
-msgid "&nbsp;View version&nbsp;"
-msgstr "&nbsp;Visualizza versione&nbsp;"
+#: src/GitHub_Updater/Theme.php:321
+#, fuzzy
+msgid "View version"
+msgstr "Visualizza i dettagli della versione %4$s"
 
-#: src/GitHub_Updater/Theme.php:309
-msgid "&nbsp;details"
-msgstr "&nbsp;dettagli"
+#: src/GitHub_Updater/Theme.php:321
+#, fuzzy
+msgid "details"
+msgstr "Visualizza i dettagli della versione %4$s"
 
-#: src/GitHub_Updater/Theme.php:309
-msgid "&nbsp;or&nbsp;"
-msgstr "&nbsp;o&nbsp;"
+#: src/GitHub_Updater/Theme.php:321
+msgid "or"
+msgstr ""
 
-#: src/GitHub_Updater/Theme.php:309
+#: src/GitHub_Updater/Theme.php:321
 msgid "update now"
 msgstr "aggiorna adesso"
 
-#: src/GitHub_Updater/Theme.php:321
+#: src/GitHub_Updater/Theme.php:333
 msgid "Current version is up to date. Try"
 msgstr "La versione attuale è aggiornata. Prova"
 
-#: src/GitHub_Updater/Theme.php:321
+#: src/GitHub_Updater/Theme.php:333
 msgid "another version?"
 msgstr "un&#39;altra versione?"
 
-#: src/GitHub_Updater/Theme.php:330
-msgid "Choose a Version&#8230;"
+#: src/GitHub_Updater/Theme.php:342
+#, fuzzy
+msgid "Choose a Version"
 msgstr "Scegli una versione ..."
 
-#: src/GitHub_Updater/Theme.php:333
+#: src/GitHub_Updater/Theme.php:345
 msgid "Install"
 msgstr "Installa"
 
@@ -257,3 +269,6 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "&nbsp;or&nbsp;"
+#~ msgstr "&nbsp;o&nbsp;"
