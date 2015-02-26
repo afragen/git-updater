@@ -324,21 +324,21 @@ class Settings extends Base {
 	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
-		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+		_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket repo text.
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+		_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket user/pass text.
 	 */
 	public function print_section_bitbucket_username() {
-		print __( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+		_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
 	}
 
 	/**
