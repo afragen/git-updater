@@ -1,5 +1,6 @@
 #### 4.1.4
-* add message to certain admin pages when API returns HTTP error code.
+* add message to certain admin pages when API returns HTTP error code
+* update POT to remove HTML entity codes from strings and generally try to make i18n better
 
 #### 4.1.3
 * use `strtolower` comparison of plugin directory and repo name. This might is an issue related to the manual installation of a plugin before any update might occur. This allows the **View details** screen to display in these instances where the case of the directory and repo aren't identical. This doesn't work for themes.

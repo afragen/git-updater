@@ -185,7 +185,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'bitbucket_username',
-			'Bitbucket Username',
+			__( 'Bitbucket Username', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
@@ -194,7 +194,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'bitbucket_password',
-			'Bitbucket Password',
+			__( 'Bitbucket Password', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
