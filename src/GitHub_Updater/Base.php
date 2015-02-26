@@ -692,7 +692,7 @@ class Base {
 	}
 
 	/**
-	 * Function to check if plugin or theme object is updatable.
+	 * Function to check if plugin or theme object is able to be updated.
 	 *
 	 * @param $type
 	 *
