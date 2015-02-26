@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-25 20:36-0800\n"
-"PO-Revision-Date: 2015-02-26 09:25-0800\n"
+"POT-Creation-Date: 2015-02-26 13:10-0800\n"
+"PO-Revision-Date: 2015-02-26 15:01-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: it\n"
@@ -131,6 +131,14 @@ msgstr "Impostazioni private GitHub"
 #: src/GitHub_Updater/Settings.php:181
 msgid "Bitbucket Private Settings"
 msgstr "Impostazioni private Bitbucket"
+
+#: src/GitHub_Updater/Settings.php:188
+msgid "Bitbucket Username"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:197
+msgid "Bitbucket Password"
+msgstr ""
 
 #: src/GitHub_Updater/Settings.php:210
 msgid "Bitbucket Private Repositories"

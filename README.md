@@ -213,6 +213,7 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 * Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
+* Swedish by [Andréas Lundgren](https://github.com/Adevade)
 
 ## Issues
 
