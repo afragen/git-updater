@@ -47,7 +47,7 @@ class GitHub_API extends Base {
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
-			parent::$error_code = $code;
+			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo => $code ) );
 			$this->create_error_message();
 			return false;
 		}

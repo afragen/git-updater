@@ -202,6 +202,26 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
+## Error Messages
+
+GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401.
+
+### 403 - Unauthorized Access
+
+#### GitHub
+* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is just informative and will go away in less than an hour
+* a private GitHub repo without an Access Token designated in the Settings.
+
+### 401 - Incorrect Authentication
+
+#### Bitbucket
+* incorrect Bitbucket user/pass, no `read` access to private Bitbucket repo
+* private Bitbucket repo not checked in Settings
+
+#### GitHub
+* using a GitHub Access Token for a public repo
+* an incorrect Access Token for a private GitHub repo.
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.

@@ -64,9 +64,9 @@ class Base {
 
 	/**
 	 * Holds HTTP error code from API call.
-	 * @var integer
+	 * @var array ( $this->type-repo => $code )
 	 */
-	protected static $error_code;
+	protected static $error_code = array();
 
 	/**
 	 * Constructor
@@ -737,7 +737,7 @@ class Base {
 		<div class="error">
 			<p><strong><?php echo $this->type->name; ?></strong>&nbsp;
 				<?php _e( 'was not checked.', 'github-updater' ); ?>&nbsp;
-				<?php _e( 'GitHub Updater Error Code:', 'github-updater' ); echo '&nbsp;'; echo self::$error_code; ?></p>
+				<?php _e( 'GitHub Updater Error Code:', 'github-updater' ); echo '&nbsp;'; echo self::$error_code[ $this->type->repo ]; ?></p>
 		</div>
 		<?php
 	}
