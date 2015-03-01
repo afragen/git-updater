@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-26 13:10-0800\n"
-"PO-Revision-Date: 2015-02-26 15:02-0800\n"
+"POT-Creation-Date: 2015-03-01 14:18-0800\n"
+"PO-Revision-Date: 2015-03-01 14:21-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Valério Souza <valeriosza@gmail.com>\n"
 "Language: pt_BR\n"
@@ -104,7 +104,7 @@ msgstr ""
 "Digite seu Token de Acesso do GitHub. Deixe em branco para repositórios "
 "públicos."
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:401
+#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
 msgid "Settings"
 msgstr "Configurações"
 
@@ -114,57 +114,57 @@ msgstr "Configurações do GitHub Update"
 
 #. Plugin Name of the plugin/theme
 #: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:88
-#: src/GitHub_Updater/Settings.php:122
+#: src/GitHub_Updater/Settings.php:125
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:125
+#: src/GitHub_Updater/Settings.php:129
 msgid "Saved."
 msgstr "Salvo."
 
-#: src/GitHub_Updater/Settings.php:170
+#: src/GitHub_Updater/Settings.php:174
 msgid "GitHub Private Settings"
 msgstr "Configurações do GitHub Privado"
 
-#: src/GitHub_Updater/Settings.php:181
+#: src/GitHub_Updater/Settings.php:185
 msgid "Bitbucket Private Settings"
 msgstr "Configurações do Bitbucket Privado"
 
-#: src/GitHub_Updater/Settings.php:188
+#: src/GitHub_Updater/Settings.php:192
 msgid "Bitbucket Username"
 msgstr "Bitbucket Nome de usuário:"
 
-#: src/GitHub_Updater/Settings.php:197
+#: src/GitHub_Updater/Settings.php:201
 msgid "Bitbucket Password"
 msgstr "Bitbucket senha"
 
-#: src/GitHub_Updater/Settings.php:210
+#: src/GitHub_Updater/Settings.php:214
 msgid "Bitbucket Private Repositories"
 msgstr "Repositórios Privados do Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:222
+#: src/GitHub_Updater/Settings.php:226
 msgid "No private repositories are installed."
 msgstr "Não há repositórios privados instalados."
 
-#: src/GitHub_Updater/Settings.php:267
+#: src/GitHub_Updater/Settings.php:271
 #, fuzzy
 msgid "Theme:"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Settings.php:327
+#: src/GitHub_Updater/Settings.php:331
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Digite seu Token de Acesso do GitHub. Deixe em branco para repositórios "
 "públicos."
 
-#: src/GitHub_Updater/Settings.php:334
+#: src/GitHub_Updater/Settings.php:338
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Marque se o repositório é privado. Deixe desmarcado se o repositório for "
 "publico."
 
-#: src/GitHub_Updater/Settings.php:341
+#: src/GitHub_Updater/Settings.php:345
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Digite seu usuário e senha do Bitbucket."
 
@@ -218,7 +218,7 @@ msgstr "Ver versão %4$s detalhada"
 #: src/GitHub_Updater/Theme.php:321
 #, fuzzy
 msgid "details"
-msgstr "Ver versão %4$s detalhada"
+msgstr "&nbsp;detalhes"
 
 #: src/GitHub_Updater/Theme.php:321
 msgid "or"

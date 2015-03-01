@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-02-26 13:10-0800\n"
-"PO-Revision-Date: 2015-02-26 15:03-0800\n"
+"POT-Creation-Date: 2015-03-01 14:18-0800\n"
+"PO-Revision-Date: 2015-03-01 14:22-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
@@ -103,7 +103,7 @@ msgstr "Введіть ім'я відділення або Залиште пус
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:401
+#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
 msgid "Settings"
 msgstr "Налаштування"
 
@@ -113,53 +113,53 @@ msgstr "Налаштування GitHub Updater"
 
 #. Plugin Name of the plugin/theme
 #: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:88
-#: src/GitHub_Updater/Settings.php:122
+#: src/GitHub_Updater/Settings.php:125
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:125
+#: src/GitHub_Updater/Settings.php:129
 msgid "Saved."
 msgstr "Збережено."
 
-#: src/GitHub_Updater/Settings.php:170
+#: src/GitHub_Updater/Settings.php:174
 msgid "GitHub Private Settings"
 msgstr "Налаштування приватного GitHub"
 
-#: src/GitHub_Updater/Settings.php:181
+#: src/GitHub_Updater/Settings.php:185
 msgid "Bitbucket Private Settings"
 msgstr "Налаштування приватного Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:188
+#: src/GitHub_Updater/Settings.php:192
 msgid "Bitbucket Username"
 msgstr "Bitbucket ім'я користувача"
 
-#: src/GitHub_Updater/Settings.php:197
+#: src/GitHub_Updater/Settings.php:201
 msgid "Bitbucket Password"
 msgstr "Bitbucket пароль"
 
-#: src/GitHub_Updater/Settings.php:210
+#: src/GitHub_Updater/Settings.php:214
 msgid "Bitbucket Private Repositories"
 msgstr "Приватні сховища Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:222
+#: src/GitHub_Updater/Settings.php:226
 msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
-#: src/GitHub_Updater/Settings.php:267
+#: src/GitHub_Updater/Settings.php:271
 msgid "Theme:"
 msgstr "тему:"
 
-#: src/GitHub_Updater/Settings.php:327
+#: src/GitHub_Updater/Settings.php:331
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:334
+#: src/GitHub_Updater/Settings.php:338
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:341
+#: src/GitHub_Updater/Settings.php:345
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 
