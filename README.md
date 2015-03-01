@@ -1,3 +1,5 @@
+![GitHub Updater](./assets/GitHub_Updater_logo.png)
+
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, remote install
@@ -209,7 +211,7 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 ### 403 - Unauthorized Access
 
 #### GitHub
-* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is just informative and will go away in less than an hour
+* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
 * a private GitHub repo without an Access Token designated in the Settings.
 
 ### 401 - Incorrect Authentication
@@ -258,6 +260,8 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
 Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+
+GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 ## Pull Requests
 
