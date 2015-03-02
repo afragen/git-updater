@@ -202,10 +202,12 @@ class Theme extends Base {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
 			$rollback_keys = array_keys( $rollback );
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
-			_e( 'Theme is up-to-date!&nbsp;', 'github-updater' );
+			_e( 'Theme is up-to-date!', 'github-updater' );
+			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
 				array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-				_e( '<strong>Rollback to:&nbsp;</strong>', 'github-updater' );
+				_e( '<strong>Rollback to:</strong>', 'github-updater' );
+				echo '&nbsp';
 				// display last three tags
 				for ( $i = 0; $i < 3 ; $i++ ) {
 					$tag = array_shift( $rollback_keys );
@@ -228,7 +230,7 @@ class Theme extends Base {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 			if ( empty( $r['package'] ) ) {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.&nbsp;', 'github-updater' ) . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
 					$theme_name,
 					esc_url( $details_url ),
 					esc_attr( $theme_name ),
@@ -236,7 +238,7 @@ class Theme extends Base {
 				);
 			} else {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.&nbsp;', 'github-updater' ) . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
 					$theme_name,
 					sprintf(
 						'href="%1$s" class="thickbox" title="%2$s"',
@@ -316,7 +318,7 @@ class Theme extends Base {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><br /><?php _e('There is a new version of&nbsp;', 'github-updater' ); echo $theme->name; _e( '&nbsp;available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>"><?php _e( '&nbsp;View version&nbsp;', 'github-updater' ); echo $theme->remote_version; _e( '&nbsp;details', 'github-updater' ); ?></a><?php _e( '&nbsp;or&nbsp;', 'github-updater' ); ?><a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
+			<strong><br /><?php _e('There is a new version of', 'github-updater' ); echo '&nbsp'; echo $theme->name; echo '&nbsp'; _e( 'available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">&nbsp;<?php _e( 'View version', 'github-updater' ); echo '&nbsp'; echo $theme->remote_version; echo '&nbsp'; _e( 'details', 'github-updater' ); ?></a>&nbsp;<?php _e( 'or', 'github-updater' ); ?>&nbsp;<a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
@@ -337,7 +339,7 @@ class Theme extends Base {
 					}
 					else jQuery(this).next().hide();
 				">
-				<option value=""><?php _e( 'Choose a Version&#8230;', 'github-updater' ); ?></option>
+				<option value=""><?php _e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 				<option><?php echo $theme->branch; ?></option>
 				<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo'<option>' . $version . '</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>

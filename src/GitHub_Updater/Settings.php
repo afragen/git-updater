@@ -117,9 +117,13 @@ class Settings extends Base {
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
+		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' );
 		?>
 		<div class="wrap">
-			<h2><?php _e( 'GitHub Updater', 'github-updater' ); ?></h2>
+			<h2>
+				<img src="<?php echo $logo; ?>" alt="GitHub Updater logo" >
+				<div style="clear:both;"><?php _e( 'GitHub Updater', 'github-updater' ); ?></div>
+			</h2>
 			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
 				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
@@ -185,7 +189,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'bitbucket_username',
-			'Bitbucket Username',
+			__( 'Bitbucket Username', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
@@ -194,7 +198,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'bitbucket_password',
-			'Bitbucket Password',
+			__( 'Bitbucket Password', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
@@ -264,7 +268,7 @@ class Settings extends Base {
 			}
 
 			if ( false !== strpos( $token->type, 'theme') ) {
-				$type = __( 'Theme: ', 'github-updater' );
+				$type = __( 'Theme:', 'github-updater' ) . '&nbsp;';
 			}
 
 			$setting_field['id']    = $token->repo;
@@ -324,21 +328,21 @@ class Settings extends Base {
 	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
-		print __( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+		_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket repo text.
 	 */
 	public function print_section_bitbucket_info() {
-		print __( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+		_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket user/pass text.
 	 */
 	public function print_section_bitbucket_username() {
-		print __( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+		_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
 	}
 
 	/**

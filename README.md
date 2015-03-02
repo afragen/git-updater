@@ -1,3 +1,5 @@
+![GitHub Updater](./assets/GitHub_Updater_logo.png)
+
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, remote install
@@ -202,6 +204,26 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
+## Error Messages
+
+GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401.
+
+### 403 - Unauthorized Access
+
+#### GitHub
+* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
+* a private GitHub repo without an Access Token designated in the Settings.
+
+### 401 - Incorrect Authentication
+
+#### Bitbucket
+* incorrect Bitbucket user/pass, no `read` access to private Bitbucket repo
+* private Bitbucket repo not checked in Settings
+
+#### GitHub
+* using a GitHub Access Token for a public repo
+* an incorrect Access Token for a private GitHub repo.
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
@@ -213,6 +235,7 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 * Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
+* Swedish by [Andréas Lundgren](https://github.com/Adevade)
 
 ## Issues
 
@@ -237,6 +260,8 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
 Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+
+GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 ## Pull Requests
 

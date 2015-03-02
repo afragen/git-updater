@@ -25,3 +25,4 @@ Add the first line of the following to plugin name
 #: includes/GitHub_Updater/Settings.php:71
 msgid "GitHub Updater"
 msgstr ""
+
