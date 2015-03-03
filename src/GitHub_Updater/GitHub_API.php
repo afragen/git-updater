@@ -48,6 +48,7 @@ class GitHub_API extends Base {
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
 			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo => $code ) );
+			$this->_ratelimit_reset( $response );
 			$this->create_error_message();
 			return false;
 		}
@@ -296,6 +297,19 @@ class GitHub_API extends Base {
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
 		$this->type->private      = $this->type->repo_meta->private;
+	}
+
+	/**
+	 * Calculate and store time until rate limit reset.
+	 *
+	 * @param $response
+	 */
+	private function _ratelimit_reset( $response ) {
+		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
+			$ratelimit = (integer) $response['headers']['x-ratelimit-reset'];
+			$wait = date( 'i', $ratelimit - time() );
+			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo . '-wait' => $wait ) );
+		}
 	}
 
 }

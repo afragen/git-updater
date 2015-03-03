@@ -213,6 +213,7 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 #### GitHub
 * usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
 * a private GitHub repo without an Access Token designated in the Settings.
+* will tell you how long until GitHub API's rate limit will be reset
 
 ### 401 - Incorrect Authentication
 

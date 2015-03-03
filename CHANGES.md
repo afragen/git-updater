@@ -1,3 +1,6 @@
+#### 4.1.5
+* added minutes until reset of GitHub API's rate limit to error message
+
 #### 4.1.4
 * add message to certain admin pages when API returns HTTP error code
 * update POT to remove HTML entity codes from strings and generally try to make i18n better
