@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-01 14:18-0800\n"
-"PO-Revision-Date: 2015-03-01 14:22-0800\n"
+"POT-Creation-Date: 2015-03-02 21:15-0800\n"
+"PO-Revision-Date: 2015-03-02 21:25-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: uk\n"
@@ -45,12 +45,14 @@ msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
 #: src/GitHub_Updater/Base.php:739
-msgid "was not checked."
-msgstr "не було підтверджено."
+#, php-format
+msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
+msgstr "<strong>%1$s</strong> не перевірив. GitHub Updater код помилки: %2$s"
 
-#: src/GitHub_Updater/Base.php:740
-msgid "GitHub Updater Error Code:"
-msgstr "GitHub Updater код помилки:"
+#: src/GitHub_Updater/Base.php:741
+#, php-format
+msgid "GitHub API's rate limit will reset in %1$s minutes."
+msgstr "Обмеження частоти GitHub API буде скинути в %1$s хвилин."
 
 #: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
@@ -260,6 +262,12 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Енді Фраген"
+
+#~ msgid "was not checked."
+#~ msgstr "не було підтверджено."
+
+#~ msgid "GitHub Updater Error Code:"
+#~ msgstr "GitHub Updater код помилки:"
 
 #~ msgid "&nbsp;or&nbsp;"
 #~ msgstr "&nbsp;або&nbsp;"

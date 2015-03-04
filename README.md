@@ -213,6 +213,7 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 #### GitHub
 * usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
 * a private GitHub repo without an Access Token designated in the Settings.
+* will tell you how long until GitHub API's rate limit will be reset
 
 ### 401 - Incorrect Authentication
 
@@ -248,6 +249,8 @@ When first downloading and installing a plugin from GitHub you might have to do 
 1. Unzip the archive.
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
 3. Copy the folder to your plugins directory **or** re-zip folder and add from plugins page.
+
+W3 Total Cache object cache also clears the transient cache. Unfortunately this hampers GitHub Updater's storage of API data using the Transient API. The solution is to turn off the object cache.
 
 ## ChangeLog
 

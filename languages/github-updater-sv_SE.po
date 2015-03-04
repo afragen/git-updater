@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-01 14:18-0800\n"
-"PO-Revision-Date: 2015-03-01 14:22-0800\n"
+"POT-Creation-Date: 2015-03-02 21:15-0800\n"
+"PO-Revision-Date: 2015-03-02 21:24-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: sv_SE\n"
@@ -44,12 +44,15 @@ msgid "Unable to rename downloaded repository."
 msgstr "Kunde inte döpa om den"
 
 #: src/GitHub_Updater/Base.php:739
-msgid "was not checked."
-msgstr "kunde inte kontrolleras. "
+#, php-format
+msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
+msgstr ""
+"<strong>%1$s</strong> har inte kontrollerats. GitHub Updater felkod: %2$s"
 
-#: src/GitHub_Updater/Base.php:740
-msgid "GitHub Updater Error Code:"
-msgstr "GitHub Updater felkod:"
+#: src/GitHub_Updater/Base.php:741
+#, php-format
+msgid "GitHub API's rate limit will reset in %1$s minutes."
+msgstr "Gränsen för GitHub API återställs %1$s minuter."
 
 #: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
@@ -254,3 +257,9 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "was not checked."
+#~ msgstr "kunde inte kontrolleras. "
+
+#~ msgid "GitHub Updater Error Code:"
+#~ msgstr "GitHub Updater felkod:"
