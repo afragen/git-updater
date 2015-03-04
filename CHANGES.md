@@ -1,5 +1,7 @@
-#### 4.1.5
+#### 4.2.0
 * added minutes until reset of GitHub API's rate limit to error message
+* added `placeholder = "master"` to remote install branch text input
+* I should have made the last version 4.2.0 as I added a new feature. I'll try to be better with semantic versioning in the future. ;-)
 
 #### 4.1.4
 * add message to certain admin pages when API returns HTTP error code

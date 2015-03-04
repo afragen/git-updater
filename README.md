@@ -250,6 +250,8 @@ When first downloading and installing a plugin from GitHub you might have to do 
 2. Fix the folder name to remove to extra stuff GitHub adds to the download, like _-master_.
 3. Copy the folder to your plugins directory **or** re-zip folder and add from plugins page.
 
+W3 Total Cache object cache also clears the transient cache. Unfortunately this hampers GitHub Updater's storage of API data using the Transient API. The solution is to turn off the object cache.
+
 ## ChangeLog
 
 See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELOG.md` file.

@@ -306,8 +306,8 @@ class GitHub_API extends Base {
 	 */
 	private function _ratelimit_reset( $response ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-			$ratelimit = (integer) $response['headers']['x-ratelimit-reset'];
-			$wait = date( 'i', $ratelimit - time() );
+			$reset              = (integer) $response['headers']['x-ratelimit-reset'];
+			$wait               = date( 'i', $reset - time() );
 			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo . '-wait' => $wait ) );
 		}
 	}

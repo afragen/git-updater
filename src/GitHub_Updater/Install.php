@@ -234,7 +234,7 @@ class Install {
 	public function branch() {
 		?>
 		<label for="github_updater_branch">
-			<input type="text" style="width:50%;" name="github_updater_branch" value="" >
+			<input type="text" style="width:50%;" name="github_updater_branch" value="" placeholder="master">
 			<p class="description">
 				<?php _e( 'Enter branch name or leave empty for `master`', 'github-updater' ) ?>
 			</p>
