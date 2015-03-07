@@ -740,6 +740,9 @@ class Base {
 				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
 					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %1$s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
 				<?php endif; ?>
+				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
+					<br><?php _e( 'There is probably an error on the GitHub Updater Settings page', 'github-updater' ); ?>
+				<?php endif; ?>
 			</p>
 		</div>
 		<?php
