@@ -29,6 +29,21 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
+	add_action( 'admin_notices', 'github_updater_version_check' );
+	return false;
+}
+
+function github_updater_version_check() {
+	?>
+	<div class="error">
+		<p>
+			<?php printf( __( 'GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask your service provider to update PHP on your server', 'github-updater' ) ) ?>
+		</p>
+	</div>
+<?php
+}
+
 // Load textdomain
 load_plugin_textdomain( 'github-updater', false, __DIR__ . '/languages' );
 
