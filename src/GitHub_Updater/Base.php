@@ -79,7 +79,7 @@ class Base {
 	}
 
 	/**
-	 * Instantiate GitHub_Updater__Plugin and GitHub_Updater__Theme
+	 * Instantiate Fragen\GitHub_Updater\Plugin and Fragen\GitHub_Updater\Theme
 	 * for proper user capabilities.
 	 */
 	public static function init() {
