@@ -83,13 +83,34 @@ class Base {
 	 * for proper user capabilities.
 	 */
 	public static function init() {
-		if ( current_user_can( 'update_plugins' ) ) {
+
+		/**
+		 * The prefix for filters within this function.
+		 * @afragen, you might have a better way of doing this elsewhere in the plugin,
+		 * this is just how I like to do it.
+		 */
+		$filter_prefix = sanitize_html_class( __CLASS__ . '_' . __FUNCTION__ . '_' );
+
+		// Determine if the user can update plugins, and pass the verdict through a filter.
+		$plugins        = current_user_can( 'update_plugins' );
+		$plugins_filter = $filter_prefix . 'plugins';
+		$plugins        = apply_filters( $plugins_filter, $plugins );
+
+		if ( $plugins ) {
 			new Plugin;
 		}
-		if ( current_user_can( 'update_themes' ) ) {
+
+		// Determine if the user can update themes, and pass the verdict through a filter.
+		$themes        = current_user_can( 'update_themes' );
+		$themes_filter = $filter_prefix . 'themes';
+		$themes        = apply_filters( $themes_filter, $themes );
+
+		if ( $themes ) {
 			new Theme;
 		}
-		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
+		
+		// If the user has either plugins or themes, give him settings as well.
+		if ( is_admin() && ( $plugins || $themes ) ) {
 			new Settings;
 		}
 	}
