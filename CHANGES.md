@@ -1,3 +1,8 @@
+#### 4.2.1
+* add PHP version check for graceful exit
+* add to error message for 401 error.
+* save settings when remote installing a private repo
+
 #### 4.2.0
 * added minutes until reset of GitHub API's rate limit to error message
 * added `placeholder = "master"` to remote install branch text input

@@ -11,7 +11,7 @@
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes.
+A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -200,13 +200,13 @@ The same applies for Bitbucket hosted plugins.
 
 ## Remote Installation of Repositories
 
-From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available. You may use either a full URI or short `<owner>/<repo>` format.
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
 ## Error Messages
 
-GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401.
+GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401. If you don't have an Access Token set for a private GitHub repo you will get a 404 error.
 
 ### 403 - Unauthorized Access
 
