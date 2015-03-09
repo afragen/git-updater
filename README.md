@@ -232,7 +232,9 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 
 ### Translations
 
-* French by [Daniel Ménard](https://github.com/daniel-menard)
+* French by
+    * [Daniel Ménard](https://github.com/daniel-menard)
+    * [fxbenard](https://github.com/fxbenard)
 * Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
