@@ -1,3 +1,7 @@
+#### 4.2.2
+* fix POT and some updated languages, thanks @fxbenard
+* fix PHP notice for `$options` settings on initial install - thanks @benosman
+
 #### 4.2.1
 * add PHP version check for graceful exit
 * add to error message for 401 error.
