@@ -29,7 +29,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
+if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
 	add_action( 'admin_notices', 'github_updater_version_check' );
 	return false;
 }
