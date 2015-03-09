@@ -74,7 +74,7 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		self::$options = get_site_option( 'github_updater' );
+		self::$options = get_site_option( 'github_updater', array());
 		$this->add_headers();
 	}
 
