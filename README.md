@@ -239,6 +239,7 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 * Portuguese by [Valerio Souza](https://github.com/valeriosouza)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
+* Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
 
 ## Issues
 
