@@ -1,3 +1,6 @@
+#### 4.2.x
+* use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
+
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
 * fix PHP notice for `$options` settings on initial install - thanks @benosman

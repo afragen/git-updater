@@ -29,19 +29,12 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
-	add_action( 'admin_notices', 'github_updater_version_check' );
-	return false;
-}
+//PHP minimum version check
+require_once ( plugin_dir_path( __FILE__ ) . '/vendor/WPUpdatePhp.php' );
+$updatePhp = new WPUpdatePhp( '5.3.0', __FILE__ );
 
-function github_updater_version_check() {
-	?>
-	<div class="error">
-		<p>
-			<?php printf( __( 'GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask your service provider to update PHP on your server', 'github-updater' ) ) ?>
-		</p>
-	</div>
-<?php
+if ( ! $updatePhp->does_it_meet_required_php_version() ) {
+	return false;
 }
 
 // Load textdomain
@@ -51,7 +44,10 @@ load_plugin_textdomain( 'github-updater', false, __DIR__ . '/languages' );
 $root = array( 'Fragen\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
-$extra_classes = array( 'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/vendor/Parsedown.php' );
+$extra_classes = array(
+	'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/vendor/Parsedown.php',
+	//'WPUpdatePHP'                     => __DIR__ . '/vendor/WPUpdatePhp.php',
+	);
 
 // Load Autoloader
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
