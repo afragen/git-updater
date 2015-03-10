@@ -11,8 +11,7 @@
   ],
   "require": {
     "composer/installers": "~1.0",
-    "php": ">=5.3",
-    "afragen/github-updater": "dev-master"
+    "php": ">=5.3"
   },
   "authors": [
     {
