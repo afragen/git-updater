@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-02 21:15-0800\n"
-"PO-Revision-Date: 2015-03-02 21:24-0800\n"
+"POT-Creation-Date: 2015-03-11 19:47-0800\n"
+"PO-Revision-Date: 2015-03-11 19:51-0800\n"
 "Last-Translator: Andréas Lundgren\n"
 "Language-Team: Andréas Lundgren\n"
 "Language: sv_SE\n"
@@ -13,8 +13,8 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
-"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -54,51 +54,55 @@ msgstr ""
 msgid "GitHub API's rate limit will reset in %1$s minutes."
 msgstr "Gränsen för GitHub API återställs %1$s minuter."
 
-#: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Base.php:744
+msgid "There is probably an error on the GitHub Updater Settings page"
+msgstr ""
+
+#: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr "Installera tillägg"
 
-#: src/GitHub_Updater/Install.php:137 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:144 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr "Installera tema"
 
-#: src/GitHub_Updater/Install.php:154
+#: src/GitHub_Updater/Install.php:161
 msgid "Plugin"
 msgstr "Tilläggs-"
 
-#: src/GitHub_Updater/Install.php:157
+#: src/GitHub_Updater/Install.php:164
 msgid "Theme"
 msgstr "Tema-"
 
-#: src/GitHub_Updater/Install.php:168
+#: src/GitHub_Updater/Install.php:175
 msgid "GitHub Updater Install"
 msgstr "GitHub Updater-installera"
 
-#: src/GitHub_Updater/Install.php:175
+#: src/GitHub_Updater/Install.php:182
 msgid "URI"
 msgstr "URI"
 
-#: src/GitHub_Updater/Install.php:184
+#: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
 msgstr "Fjärrvärd för repo"
 
-#: src/GitHub_Updater/Install.php:193
+#: src/GitHub_Updater/Install.php:200
 msgid "Repository Branch"
 msgstr "Repo branch"
 
-#: src/GitHub_Updater/Install.php:202
+#: src/GitHub_Updater/Install.php:209
 msgid "Private Bitbucket Repository"
 msgstr "Privat Bitbucket repo"
 
-#: src/GitHub_Updater/Install.php:211
+#: src/GitHub_Updater/Install.php:218
 msgid "GitHub Access Token"
 msgstr "GitHub Access Token"
 
-#: src/GitHub_Updater/Install.php:239
+#: src/GitHub_Updater/Install.php:246
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Fyll i ett branch-namn eller lämna tomt för <code>master</code>"
 
-#: src/GitHub_Updater/Install.php:281
+#: src/GitHub_Updater/Install.php:288
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Fyll i GitHub Access Token för privata GitHub repos."
 
@@ -235,16 +239,26 @@ msgstr "Välj en version"
 msgid "Install"
 msgstr "Installera"
 
+#: vendor/WPUpdatePhp.php:84
+#, php-format
+msgid ""
+"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
+"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
+"update/\">how you can update</a>."
+msgstr ""
+
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
+#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-"themes into WordPress. Plugin class based upon <a href=\"https://github.com/"
-"codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. Theme "
-"class based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"themes. It also allows for remote installation of plugins or themes into "
+"WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
+"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
 "framework\">Whitelabel Framework</a> modifications."
 msgstr ""
 "Ett tillägg för att automatiskt uppdatera teman och tillägg från GitHub "

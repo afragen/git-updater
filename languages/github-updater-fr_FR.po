@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-03-09 12:40:46+00:00\n"
-"PO-Revision-Date: 2015-03-09 13:52+0100\n"
+"POT-Creation-Date: 2015-03-11 19:47-0800\n"
+"PO-Revision-Date: 2015-03-11 19:50-0800\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -18,14 +18,6 @@ msgstr ""
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
-
-#: github-updater.php:41
-msgid ""
-"GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
-"your service provider to update PHP on your server"
-msgstr ""
-"GitHub Updater ne se charge pas. Il nécessite PHP 5.3 ou supérieur. Veuillez "
-"demander à votre hébergeur de mettre à jour PHP sur votre serveur."
 
 #: mu/ghu-loader.php:55
 msgid "Activated as mu-plugin"
@@ -256,6 +248,14 @@ msgstr "Choisissez une version"
 msgid "Install"
 msgstr "Installer"
 
+#: vendor/WPUpdatePhp.php:84
+#, php-format
+msgid ""
+"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
+"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
+"update/\">how you can update</a>."
+msgstr ""
+
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
@@ -280,6 +280,14 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid ""
+#~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
+#~ "your service provider to update PHP on your server"
+#~ msgstr ""
+#~ "GitHub Updater ne se charge pas. Il nécessite PHP 5.3 ou supérieur. "
+#~ "Veuillez demander à votre hébergeur de mettre à jour PHP sur votre "
+#~ "serveur."
 
 #~ msgid "was not checked."
 #~ msgstr "n'a pas été vérifié."

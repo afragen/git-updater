@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-02 21:15-0800\n"
-"PO-Revision-Date: 2015-03-02 21:22-0800\n"
+"POT-Creation-Date: 2015-03-11 19:47-0800\n"
+"PO-Revision-Date: 2015-03-11 19:51-0800\n"
 "Last-Translator: Valério Souza <valeriosza@gmail.com>\n"
 "Language-Team: Valério Souza <valeriosza@gmail.com>\n"
 "Language: pt_BR\n"
@@ -54,53 +54,57 @@ msgstr ""
 msgid "GitHub API's rate limit will reset in %1$s minutes."
 msgstr "Limite de taxa do GitHub API irá repor em minutos de %1$s."
 
-#: src/GitHub_Updater/Install.php:134 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Base.php:744
+msgid "There is probably an error on the GitHub Updater Settings page"
+msgstr ""
+
+#: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr "Instalar o Plugin"
 
-#: src/GitHub_Updater/Install.php:137 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:144 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr "Instalar um novo tema"
 
-#: src/GitHub_Updater/Install.php:154
+#: src/GitHub_Updater/Install.php:161
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:157
+#: src/GitHub_Updater/Install.php:164
 #, fuzzy
 msgid "Theme"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Install.php:168
+#: src/GitHub_Updater/Install.php:175
 msgid "GitHub Updater Install"
 msgstr "Instalar o GitHub Updater"
 
-#: src/GitHub_Updater/Install.php:175
+#: src/GitHub_Updater/Install.php:182
 msgid "URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:184
+#: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
 msgstr "Repositório remoto Host"
 
-#: src/GitHub_Updater/Install.php:193
+#: src/GitHub_Updater/Install.php:200
 msgid "Repository Branch"
 msgstr "Ramo de repositório"
 
-#: src/GitHub_Updater/Install.php:202
+#: src/GitHub_Updater/Install.php:209
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Repositórios Privados do Bitbucket"
 
-#: src/GitHub_Updater/Install.php:211
+#: src/GitHub_Updater/Install.php:218
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:239
+#: src/GitHub_Updater/Install.php:246
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Digite o nome de ramo ou deixe em branco para o 'mestre'"
 
-#: src/GitHub_Updater/Install.php:281
+#: src/GitHub_Updater/Install.php:288
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
@@ -247,16 +251,26 @@ msgstr "Escolha a Versão"
 msgid "Install"
 msgstr "Instalar"
 
+#: vendor/WPUpdatePhp.php:84
+#, php-format
+msgid ""
+"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
+"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
+"update/\">how you can update</a>."
+msgstr ""
+
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
+#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-"themes into WordPress. Plugin class based upon <a href=\"https://github.com/"
-"codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. Theme "
-"class based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"themes. It also allows for remote installation of plugins or themes into "
+"WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
+"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
 "framework\">Whitelabel Framework</a> modifications."
 msgstr ""
 "Um plugin para atualizar automaticamente o GitHub ou Bitbucket hospedado "
