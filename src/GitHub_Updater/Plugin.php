@@ -89,7 +89,7 @@ class Plugin extends Base {
 
 		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
 		if ( ! $wp_repo_data ) {
-			$wp_repo_data = wp_remote_get( 'http://api.wordpress.org/plugins/info/1.0/' . $response->slug );
+			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
