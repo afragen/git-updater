@@ -1,5 +1,7 @@
 #### 4.2.x
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
+* don't use variable for calling a class. bad Andy
+* use https://api.wordpress.org not http
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
