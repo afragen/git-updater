@@ -13,7 +13,6 @@ if ( ! class_exists( 'WPUpdatePhp' ) ) {
 
 		/**
 		 * @param $minimum_version
-		 * @param $file
 		 */
 		public function __construct( $minimum_version ) {
 			$this->minimum_version = $minimum_version;
