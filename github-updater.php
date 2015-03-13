@@ -24,12 +24,14 @@ Requires WP:       3.8
 Requires PHP:      5.3
 */
 
-// If this file is called directly, abort.
+/**
+ * Exit if called directly.
+ * PHP version check and exit.
+ */
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-//PHP minimum version check
 require_once ( plugin_dir_path( __FILE__ ) . '/vendor/WPUpdatePhp.php' );
 $updatePhp = new WPUpdatePhp( '5.3.0' );
 
