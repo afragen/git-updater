@@ -238,15 +238,14 @@ class Theme extends Base {
 				);
 			} else {
 				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
+					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details%5$s or %6$supdate now%7$s.', 'github-updater' ),
 					$theme_name,
-					sprintf(
-						'href="%1$s" class="thickbox" title="%2$s"',
-						esc_url( $details_url ),
-						esc_attr( $theme_name )
-					),
+					esc_url( $details_url ),
+					esc_attr( $theme_name ),
 					$r['new_version'],
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key )
+					'</a>',
+					'<a href="' . wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ) . '">',
+					'</a>'
 				);
 			}
 
