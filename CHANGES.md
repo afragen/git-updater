@@ -21,6 +21,7 @@
 * add message to certain admin pages when API returns HTTP error code
 * update POT to remove HTML entity codes from strings and generally try to make i18n better
 * Swedish translation by [Andréas Lundgren](https://github.com/Adevade)
+* Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
 * added logo to README and Settings page
 
 #### 4.1.3
