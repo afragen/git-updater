@@ -726,7 +726,13 @@ class Base {
 			return false;
 		}
 
-		add_action( 'admin_head', array( $this, 'show_error_message' ) );
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			if ( ! is_main_network() ) {
+				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
+			} else {
+				add_action( 'admin_head', array( $this, 'show_error_message' ) );
+			}
+		}
 	}
 
 	/**
