@@ -323,7 +323,7 @@ class Theme extends Base {
 						__( 'There is a new version of %1$s available now.', 'github-updater' ) . '&nbsp' . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details%5$s or %6$supdate now%7$s.', 'github-updater' ),
 						$theme->name,
 						esc_url( $details_url ),
-						esc_attr( $theme_name ),
+						esc_attr( $theme->name ),
 						$theme->remote_version,
 						'</a>',
 						'<a href="' . $update_url . '">',
