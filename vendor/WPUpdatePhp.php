@@ -79,6 +79,7 @@ class WPUpdatePhp {
 	private function load_minimum_required_version_notice() {
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
+			add_action( 'admin_head', array( $this, 'admin_notice' ) );
 		}
 	}
 
@@ -89,7 +90,7 @@ class WPUpdatePhp {
 		?>
 		<div class="error">
 			<p>
-				<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more information about <a href="http://www.wpupdatephp.com/update/">how you can update</a>.' ), $this->plugin_name, $this->minimum_version ); ?>
+				<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more information about %3$sshow you can update%4$s.' ), $this->plugin_name, $this->minimum_version, '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
 			</p>
 		</div>
 	<?php
