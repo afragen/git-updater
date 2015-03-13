@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:07-0800\n"
-"Last-Translator: Enea Overclokk\n"
+"PO-Revision-Date: 2015-03-13 22:38+0100\n"
+"Last-Translator: Enea Overclokk <info@overclokk.net>\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -56,6 +56,7 @@ msgstr "Limite di frequenza su GitHub API si resetterà in minuti di %1$s."
 #: src/GitHub_Updater/Base.php:744
 msgid "There is probably an error on the GitHub Updater Settings page"
 msgstr ""
+"Probabilmente c'è un errore nella pagina impostazioni di GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
@@ -70,19 +71,18 @@ msgid "Plugin"
 msgstr "Plugin"
 
 #: src/GitHub_Updater/Install.php:164
-#, fuzzy
 msgid "Theme"
 msgstr "Tema:"
 
 #: src/GitHub_Updater/Install.php:175
-#, fuzzy, php-format
+#, php-format
 msgid "GitHub Updater Install %s"
-msgstr "GitHub Updater Install"
+msgstr "GitHub Updater Installa %s"
 
 #: src/GitHub_Updater/Install.php:182
 #, php-format
 msgid "%s URI"
-msgstr ""
+msgstr "%s URI"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -93,20 +93,18 @@ msgid "Repository Branch"
 msgstr "Ramo di repository"
 
 #: src/GitHub_Updater/Install.php:209
-#, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Repository privato Bitbucket"
 
 #: src/GitHub_Updater/Install.php:218
 msgid "GitHub Access Token"
-msgstr ""
+msgstr "GitHub Access Token"
 
 #: src/GitHub_Updater/Install.php:246
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Immettere il nome del ramo o lasciare vuoto per 'master'"
 
 #: src/GitHub_Updater/Install.php:288
-#, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 "Inserisci il tuo Access Token di Github. Lascia vuoto per gli archivi "
@@ -140,11 +138,11 @@ msgstr "Impostazioni private Bitbucket"
 
 #: src/GitHub_Updater/Settings.php:192
 msgid "Bitbucket Username"
-msgstr ""
+msgstr "Username Bitbucket"
 
 #: src/GitHub_Updater/Settings.php:201
 msgid "Bitbucket Password"
-msgstr ""
+msgstr "Password Bitbucket"
 
 #: src/GitHub_Updater/Settings.php:214
 msgid "Bitbucket Private Repositories"
@@ -155,7 +153,6 @@ msgid "No private repositories are installed."
 msgstr "Nessun repository privato è installato."
 
 #: src/GitHub_Updater/Settings.php:271
-#, fuzzy
 msgid "Theme:"
 msgstr "Tema:"
 
@@ -203,32 +200,27 @@ msgstr "Visualizza i dettagli della versione %4$s"
 msgid "Automatic update is unavailable for this theme."
 msgstr "L&#39;aggiornamento automatico non è disponibile per questo tema."
 
-#: src/GitHub_Updater/Theme.php:241
+#: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:323
 #, php-format
 msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
 "%4$sVisualizza i dettagli della versione %5$s o %6$saggiorna adesso%7$s"
 
-#: src/GitHub_Updater/Theme.php:320
-#, fuzzy, php-format
-msgid "There is a new version of %s available now."
-msgstr "C'è una nuova versione di"
-
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:323
 #, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr "%sVisualizza i dettagli della versione %s %s o %saggiorna adesso%s."
+msgid "There is a new version of %1$s available now."
+msgstr "E' disponibile una nuova versione di %1$s."
 
-#: src/GitHub_Updater/Theme.php:332
-#, fuzzy, php-format
+#: src/GitHub_Updater/Theme.php:345
+#, php-format
 msgid "Current version is up to date. Try %sanother version%s"
-msgstr "La versione attuale è aggiornata. Prova"
+msgstr "La versione attuale è aggiornata. Prova %sun&#39;altra versione%s"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:354
 msgid "Choose a Version"
 msgstr "Scegli una versione"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:357
 msgid "Install"
 msgstr "Installa"
 
@@ -236,15 +228,17 @@ msgstr "Installa"
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
+"Purtroppo %1$s non può essere eseguito su versioni di PHP più vecchie di "
+"%2$s. Puoi leggere ulteriori informazioni su %3$s come è possibile aggiornare"
+"%4$s."
 
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
-#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
 "themes. It also allows for remote installation of plugins or themes into "
@@ -263,6 +257,13 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#, fuzzy
+#~ msgid "There is a new version of %s available now."
+#~ msgstr "C'è una nuova versione di"
+
+#~ msgid "%sView version %s details%s or %supdate now%s."
+#~ msgstr "%sVisualizza i dettagli della versione %s %s o %saggiorna adesso%s."
 
 #~ msgid "available now."
 #~ msgstr "disponibile adesso."
