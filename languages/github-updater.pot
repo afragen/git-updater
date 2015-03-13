@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-11 19:47-0800\n"
-"PO-Revision-Date: 2015-03-11 19:47-0800\n"
+"POT-Creation-Date: 2015-03-12 20:46-0800\n"
+"PO-Revision-Date: 2015-03-12 20:48-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -43,7 +43,7 @@ msgstr ""
 
 #: src/GitHub_Updater/Base.php:739
 #, php-format
-msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
+msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
 msgstr ""
 
 #: src/GitHub_Updater/Base.php:741
@@ -72,11 +72,13 @@ msgid "Theme"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:175
-msgid "GitHub Updater Install"
+#, php-format
+msgid "GitHub Updater Install %s"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:182
-msgid "URI"
+#, php-format
+msgid "%s URI"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:191
@@ -167,7 +169,8 @@ msgid "Theme is up-to-date!"
 msgstr ""
 
 #: src/GitHub_Updater/Theme.php:209
-msgid "<strong>Rollback to:</strong>"
+#, php-format
+msgid "%sRollback to:%s"
 msgstr ""
 
 #: src/GitHub_Updater/Theme.php:224
@@ -190,56 +193,37 @@ msgstr ""
 
 #: src/GitHub_Updater/Theme.php:241
 #, php-format
-msgid ""
-"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "There is a new version of"
+#: src/GitHub_Updater/Theme.php:320
+#, php-format
+msgid "There is a new version of %s available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "available now."
+#: src/GitHub_Updater/Theme.php:320
+#, php-format
+msgid "%sView version %s details%s or %supdate now%s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "View version"
+#: src/GitHub_Updater/Theme.php:332
+#, php-format
+msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "details"
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "or"
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "update now"
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "Current version is up to date. Try"
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "another version?"
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:345
+#: src/GitHub_Updater/Theme.php:344
 msgid "Install"
 msgstr ""
 
-#: vendor/WPUpdatePhp.php:84
+#: vendor/WPUpdatePhp.php:93
 #, php-format
 msgid ""
-"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
-"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
-"update/\">how you can update</a>."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$sshow you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme

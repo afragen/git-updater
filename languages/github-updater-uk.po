@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-11 19:47-0800\n"
-"PO-Revision-Date: 2015-03-11 19:52-0800\n"
+"POT-Creation-Date: 2015-03-12 20:46-0800\n"
+"PO-Revision-Date: 2015-03-12 21:17-0800\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
@@ -46,8 +46,8 @@ msgstr "Неможливо перейменувати скачане схови�
 
 #: src/GitHub_Updater/Base.php:739
 #, php-format
-msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
-msgstr "<strong>%1$s</strong> не перевірив. GitHub Updater код помилки: %2$s"
+msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+msgstr "%1$s не перевірив. GitHub Updater код помилки: %2$s"
 
 #: src/GitHub_Updater/Base.php:741
 #, php-format
@@ -75,12 +75,13 @@ msgid "Theme"
 msgstr "тему:"
 
 #: src/GitHub_Updater/Install.php:175
-#, fuzzy
-msgid "GitHub Updater Install"
+#, fuzzy, php-format
+msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:182
-msgid "URI"
+#, php-format
+msgid "%s URI"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:191
@@ -174,8 +175,9 @@ msgid "Theme is up-to-date!"
 msgstr "Тема не має оновлень!"
 
 #: src/GitHub_Updater/Theme.php:209
-msgid "<strong>Rollback to:</strong>"
-msgstr "<strong>Відкат до:</strong>"
+#, php-format
+msgid "%sRollback to:%s"
+msgstr "%sВідкат до:%s"
 
 #: src/GitHub_Updater/Theme.php:224
 msgid "No previous tags to rollback to."
@@ -197,60 +199,37 @@ msgstr "Автоматичне оновлення недоступно для ц
 
 #: src/GitHub_Updater/Theme.php:241
 #, php-format
-msgid ""
-"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
-msgstr ""
-"<a %2$s>Переглянути подробиці версії %3$s</a> або <a href=\"%4$s\">оновити "
-"зараз</a> ."
+msgid "View version %4$s details%5$s or %6$supdate now%7$s."
+msgstr "%4$sПереглянути подробиці версії %5$s або %6$sоновити зараз%7$s ."
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "There is a new version of"
+#: src/GitHub_Updater/Theme.php:320
+#, fuzzy, php-format
+msgid "There is a new version of %s available now."
 msgstr "Нова версія"
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "available now."
-msgstr "зараз доступна."
+#: src/GitHub_Updater/Theme.php:320
+#, php-format
+msgid "%sView version %s details%s or %supdate now%s."
+msgstr "%sПереглянути подробиці версії %s %s або %sоновити зараз%s ."
 
-#: src/GitHub_Updater/Theme.php:321
-#, fuzzy
-msgid "View version"
-msgstr "Переглянути подробиці версії %4$s"
-
-#: src/GitHub_Updater/Theme.php:321
-#, fuzzy
-msgid "details"
-msgstr "Переглянути подробиці версії %4$s"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "or"
-msgstr "або"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "update now"
-msgstr "оновити зараз"
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "Current version is up to date. Try"
+#: src/GitHub_Updater/Theme.php:332
+#, fuzzy, php-format
+msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: src/GitHub_Updater/Theme.php:333
-msgid "another version?"
-msgstr "іншу версію?"
-
-#: src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
 msgstr "Вибрати версію"
 
-#: src/GitHub_Updater/Theme.php:345
+#: src/GitHub_Updater/Theme.php:344
 msgid "Install"
 msgstr "Встановити"
 
-#: vendor/WPUpdatePhp.php:84
+#: vendor/WPUpdatePhp.php:93
 #, php-format
 msgid ""
-"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
-"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
-"update/\">how you can update</a>."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$sshow you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -276,6 +255,26 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Енді Фраген"
+
+#~ msgid "available now."
+#~ msgstr "зараз доступна."
+
+#, fuzzy
+#~ msgid "View version"
+#~ msgstr "Переглянути подробиці версії %4$s"
+
+#, fuzzy
+#~ msgid "details"
+#~ msgstr "Переглянути подробиці версії %4$s"
+
+#~ msgid "or"
+#~ msgstr "або"
+
+#~ msgid "update now"
+#~ msgstr "оновити зараз"
+
+#~ msgid "another version?"
+#~ msgstr "іншу версію?"
 
 #~ msgid "was not checked."
 #~ msgstr "не було підтверджено."

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-11 19:47-0800\n"
-"PO-Revision-Date: 2015-03-11 19:51-0800\n"
+"POT-Creation-Date: 2015-03-12 20:46-0800\n"
+"PO-Revision-Date: 2015-03-12 21:07-0800\n"
 "Last-Translator: Enea Overclokk\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
@@ -45,10 +45,8 @@ msgstr "Impossibile rinominare il repository scaricato."
 
 #: src/GitHub_Updater/Base.php:739
 #, php-format
-msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
-msgstr ""
-"<strong>%1$s</strong> non è stata verificata. Codice di errore GitHub "
-"Updater: %2$s"
+msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+msgstr "%1$s non è stata verificata. Codice di errore GitHub Updater: %2$s"
 
 #: src/GitHub_Updater/Base.php:741
 #, php-format
@@ -77,12 +75,13 @@ msgid "Theme"
 msgstr "Tema:"
 
 #: src/GitHub_Updater/Install.php:175
-#, fuzzy
-msgid "GitHub Updater Install"
+#, fuzzy, php-format
+msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater Install"
 
 #: src/GitHub_Updater/Install.php:182
-msgid "URI"
+#, php-format
+msgid "%s URI"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:191
@@ -182,8 +181,9 @@ msgid "Theme is up-to-date!"
 msgstr "Il tema è aggiornato!"
 
 #: src/GitHub_Updater/Theme.php:209
-msgid "<strong>Rollback to:</strong>"
-msgstr "<strong>Ripristina a:</strong>"
+#, php-format
+msgid "%sRollback to:%s"
+msgstr "%sRipristina a:%s"
 
 #: src/GitHub_Updater/Theme.php:224
 msgid "No previous tags to rollback to."
@@ -205,60 +205,38 @@ msgstr "L&#39;aggiornamento automatico non è disponibile per questo tema."
 
 #: src/GitHub_Updater/Theme.php:241
 #, php-format
-msgid ""
-"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
-"<a %2$s>Visualizza i dettagli della versione %3$s</a> o <a href=\"%4$s"
-"\">aggiorna adesso</a>."
+"%4$sVisualizza i dettagli della versione %5$s o %6$saggiorna adesso%7$s"
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "There is a new version of"
+#: src/GitHub_Updater/Theme.php:320
+#, fuzzy, php-format
+msgid "There is a new version of %s available now."
 msgstr "C'è una nuova versione di"
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "available now."
-msgstr "disponibile adesso."
+#: src/GitHub_Updater/Theme.php:320
+#, php-format
+msgid "%sView version %s details%s or %supdate now%s."
+msgstr "%sVisualizza i dettagli della versione %s %s o %saggiorna adesso%s."
 
-#: src/GitHub_Updater/Theme.php:321
-#, fuzzy
-msgid "View version"
-msgstr "Visualizza i dettagli della versione %4$s"
-
-#: src/GitHub_Updater/Theme.php:321
-#, fuzzy
-msgid "details"
-msgstr "Visualizza i dettagli della versione %4$s"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "or"
-msgstr "o"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "update now"
-msgstr "aggiorna adesso"
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "Current version is up to date. Try"
+#: src/GitHub_Updater/Theme.php:332
+#, fuzzy, php-format
+msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La versione attuale è aggiornata. Prova"
 
-#: src/GitHub_Updater/Theme.php:333
-msgid "another version?"
-msgstr "un&#39;altra versione?"
-
-#: src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
 msgstr "Scegli una versione"
 
-#: src/GitHub_Updater/Theme.php:345
+#: src/GitHub_Updater/Theme.php:344
 msgid "Install"
 msgstr "Installa"
 
-#: vendor/WPUpdatePhp.php:84
+#: vendor/WPUpdatePhp.php:93
 #, php-format
 msgid ""
-"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
-"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
-"update/\">how you can update</a>."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$sshow you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -285,6 +263,26 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "available now."
+#~ msgstr "disponibile adesso."
+
+#, fuzzy
+#~ msgid "View version"
+#~ msgstr "Visualizza i dettagli della versione %4$s"
+
+#, fuzzy
+#~ msgid "details"
+#~ msgstr "Visualizza i dettagli della versione %4$s"
+
+#~ msgid "or"
+#~ msgstr "o"
+
+#~ msgid "update now"
+#~ msgstr "aggiorna adesso"
+
+#~ msgid "another version?"
+#~ msgstr "un&#39;altra versione?"
 
 #~ msgid "was not checked."
 #~ msgstr "non è stata verificata."

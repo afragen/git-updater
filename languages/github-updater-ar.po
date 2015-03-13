@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-11 19:47-0800\n"
-"PO-Revision-Date: 2015-03-11 19:49-0800\n"
+"POT-Creation-Date: 2015-03-12 20:46-0800\n"
+"PO-Revision-Date: 2015-03-12 21:19-0800\n"
 "Last-Translator: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language-Team: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language: ar\n"
@@ -15,8 +15,8 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
 "esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && "
+"n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: mu/ghu-loader.php:55
@@ -46,8 +46,8 @@ msgstr "غير قادر على إعادة تسمية المستودع الذي �
 
 #: src/GitHub_Updater/Base.php:739
 #, php-format
-msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
-msgstr "<strong>%1$s</strong>  غير موجود . رمز خطأ GitHub  : %2$s"
+msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+msgstr "‏%1$s  غير موجود . رمز خطأ GitHub  : %2$s"
 
 #: src/GitHub_Updater/Base.php:741
 #, php-format
@@ -75,12 +75,14 @@ msgid "Theme"
 msgstr "موضوع"
 
 #: src/GitHub_Updater/Install.php:175
-msgid "GitHub Updater Install"
+#, fuzzy, php-format
+msgid "GitHub Updater Install %s"
 msgstr "تحميل"
 
 #: src/GitHub_Updater/Install.php:182
-msgid "URI"
-msgstr "(الرابط)"
+#, php-format
+msgid "%s URI"
+msgstr ""
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -157,8 +159,7 @@ msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "أدخل رمز وصول GitHub  . قم بتركه فارغاً من أجل المستودعات العامة"
 
 #: src/GitHub_Updater/Settings.php:338
-msgid ""
-"Check box if private repository. Leave unchecked for public repositories."
+msgid "Check box if private repository. Leave unchecked for public repositories."
 msgstr "قم بالاختيار إذا كان المستودع خاص , قم بتركه من أجل المستودعات العامة"
 
 #: src/GitHub_Updater/Settings.php:345
@@ -170,8 +171,9 @@ msgid "Theme is up-to-date!"
 msgstr "الموضوع محدث"
 
 #: src/GitHub_Updater/Theme.php:209
-msgid "<strong>Rollback to:</strong>"
-msgstr "<strong> التراجع ل : </strong>"
+#, php-format
+msgid "%sRollback to:%s"
+msgstr "‏‪%‬s التراجع ل : ‪%‬s"
 
 #: src/GitHub_Updater/Theme.php:224
 msgid "No previous tags to rollback to."
@@ -192,58 +194,40 @@ msgid "Automatic update is unavailable for this theme."
 msgstr "التحديث التلقائي غير متوافر لهذا الموضوع"
 
 #: src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid ""
-"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+#, fuzzy, php-format
+msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
 "<a %2$s> مراجعة تفاصيل الإصدار %3$s  </a> أو <a href=\"%4$s\"> حدث الأن </a>."
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "There is a new version of"
+#: src/GitHub_Updater/Theme.php:320
+#, fuzzy, php-format
+msgid "There is a new version of %s available now."
 msgstr "هناك نسخة جديدة من "
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "available now."
-msgstr "متوافر الأن"
+#: src/GitHub_Updater/Theme.php:320
+#, fuzzy, php-format
+msgid "%sView version %s details%s or %supdate now%s."
+msgstr ""
+"<a %2$s> مراجعة تفاصيل الإصدار %3$s  </a> أو <a href=\"%4$s\"> حدث الأن </a>."
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "View version"
-msgstr "رؤية الإصدار"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "details"
-msgstr "تفاصيل"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "or"
-msgstr "أو"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "update now"
-msgstr "حدث الأن"
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "Current version is up to date. Try"
+#: src/GitHub_Updater/Theme.php:332
+#, fuzzy, php-format
+msgid "Current version is up to date. Try %sanother version%s"
 msgstr "النسخة الحالية محدثة . قم بتجربة"
 
-#: src/GitHub_Updater/Theme.php:333
-msgid "another version?"
-msgstr "نسخة أخرى ؟"
-
-#: src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
 msgstr "قم باختيار نسخة"
 
-#: src/GitHub_Updater/Theme.php:345
+#: src/GitHub_Updater/Theme.php:344
 msgid "Install"
 msgstr "تنصيب"
 
-#: vendor/WPUpdatePhp.php:84
+#: vendor/WPUpdatePhp.php:93
 #, php-format
 msgid ""
-"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
-"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/update/"
-"\">how you can update</a>."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$sshow you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -255,8 +239,8 @@ msgid ""
 "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
 "themes. It also allows for remote installation of plugins or themes into "
 "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
-"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
-"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class based "
+"upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
 "\">Whitelabel Framework</a> modifications."
 msgstr ""
 "إضافة لتحديث التقائي للإضافات والموضوعات المستضافة على GitHub  أو   "
@@ -269,9 +253,30 @@ msgstr ""
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
 
+#~ msgid "URI"
+#~ msgstr "(الرابط)"
+
+#~ msgid "available now."
+#~ msgstr "متوافر الأن"
+
+#~ msgid "View version"
+#~ msgstr "رؤية الإصدار"
+
+#~ msgid "details"
+#~ msgstr "تفاصيل"
+
+#~ msgid "or"
+#~ msgstr "أو"
+
+#~ msgid "update now"
+#~ msgstr "حدث الأن"
+
+#~ msgid "another version?"
+#~ msgstr "نسخة أخرى ؟"
+
 #~ msgid ""
 #~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
 #~ "your service provider to update PHP on your server"
 #~ msgstr ""
-#~ "لن يتم تفعيل الإضافة . إن الإضافة تحتاج PHP 5.3  أو أعلى . الرجاء طلب "
-#~ "تحديث النسخة الحالية من قبل مزود الخدمة"
+#~ "لن يتم تفعيل الإضافة . إن الإضافة تحتاج PHP 5.3  أو أعلى . الرجاء طلب تحديث "
+#~ "النسخة الحالية من قبل مزود الخدمة"

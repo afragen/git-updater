@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-11 19:47-0800\n"
-"PO-Revision-Date: 2015-03-11 19:51-0800\n"
+"POT-Creation-Date: 2015-03-12 20:46-0800\n"
+"PO-Revision-Date: 2015-03-12 21:18-0800\n"
 "Last-Translator: Andréas Lundgren\n"
 "Language-Team: Andréas Lundgren\n"
 "Language: sv_SE\n"
@@ -45,9 +45,8 @@ msgstr "Kunde inte döpa om den"
 
 #: src/GitHub_Updater/Base.php:739
 #, php-format
-msgid "<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s"
-msgstr ""
-"<strong>%1$s</strong> har inte kontrollerats. GitHub Updater felkod: %2$s"
+msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+msgstr "%1$s har inte kontrollerats. GitHub Updater felkod: %2$s"
 
 #: src/GitHub_Updater/Base.php:741
 #, php-format
@@ -75,12 +74,14 @@ msgid "Theme"
 msgstr "Tema-"
 
 #: src/GitHub_Updater/Install.php:175
-msgid "GitHub Updater Install"
+#, fuzzy, php-format
+msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater-installera"
 
 #: src/GitHub_Updater/Install.php:182
-msgid "URI"
-msgstr "URI"
+#, php-format
+msgid "%s URI"
+msgstr ""
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -170,8 +171,9 @@ msgid "Theme is up-to-date!"
 msgstr "Temat är aktuellt!"
 
 #: src/GitHub_Updater/Theme.php:209
-msgid "<strong>Rollback to:</strong>"
-msgstr "<strong>Gå tillbaka till:</strong>"
+#, php-format
+msgid "%sRollback to:%s"
+msgstr "%sGå tillbaka till:%s"
 
 #: src/GitHub_Updater/Theme.php:224
 msgid "No previous tags to rollback to."
@@ -192,59 +194,40 @@ msgid "Automatic update is unavailable for this theme."
 msgstr "Automatiska uppdateringar är inte tillgängligt för detta temat."
 
 #: src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid ""
-"<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
+#, fuzzy, php-format
+msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
 "<a %2$s>Visa detaljer för version %3$s</a> eller <a href=\"%4$s\">uppdatera "
 "nu</a>."
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "There is a new version of"
+#: src/GitHub_Updater/Theme.php:320
+#, fuzzy, php-format
+msgid "There is a new version of %s available now."
 msgstr "Det finns en ny version av"
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "available now."
-msgstr "tillgänglig."
+#: src/GitHub_Updater/Theme.php:320
+#, php-format
+msgid "%sView version %s details%s or %supdate now%s."
+msgstr "%sVisa detaljer för version %s %s eller %suppdatera nu%s."
 
-#: src/GitHub_Updater/Theme.php:321
-msgid "View version"
-msgstr "Visa detaljer för version"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "details"
-msgstr "&nbsp;"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "or"
-msgstr "eller"
-
-#: src/GitHub_Updater/Theme.php:321
-msgid "update now"
-msgstr "uppdatera nu"
-
-#: src/GitHub_Updater/Theme.php:333
-msgid "Current version is up to date. Try"
+#: src/GitHub_Updater/Theme.php:332
+#, fuzzy, php-format
+msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Nuvarande version är aktuell. Testa"
 
-#: src/GitHub_Updater/Theme.php:333
-msgid "another version?"
-msgstr "en annan version?"
-
-#: src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
 msgstr "Välj en version"
 
-#: src/GitHub_Updater/Theme.php:345
+#: src/GitHub_Updater/Theme.php:344
 msgid "Install"
 msgstr "Installera"
 
-#: vendor/WPUpdatePhp.php:84
+#: vendor/WPUpdatePhp.php:93
 #, php-format
 msgid ""
-"Unfortunately, <strong>%1$s</strong> can not run on PHP versions older than "
-"%2$s. Read more information about <a href=\"http://www.wpupdatephp.com/"
-"update/\">how you can update</a>."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$sshow you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -271,6 +254,27 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "URI"
+#~ msgstr "URI"
+
+#~ msgid "available now."
+#~ msgstr "tillgänglig."
+
+#~ msgid "View version"
+#~ msgstr "Visa detaljer för version"
+
+#~ msgid "details"
+#~ msgstr "&nbsp;"
+
+#~ msgid "or"
+#~ msgstr "eller"
+
+#~ msgid "update now"
+#~ msgstr "uppdatera nu"
+
+#~ msgid "another version?"
+#~ msgstr "en annan version?"
 
 #~ msgid "was not checked."
 #~ msgstr "kunde inte kontrolleras. "
