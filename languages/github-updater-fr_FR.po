@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
 "POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:09-0800\n"
+"PO-Revision-Date: 2015-03-13 09:47+0100\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -76,14 +76,14 @@ msgid "Theme"
 msgstr "Thème :"
 
 #: src/GitHub_Updater/Install.php:175
-#, fuzzy, php-format
+#, php-format
 msgid "GitHub Updater Install %s"
-msgstr "GitHub Updater installation"
+msgstr "GitHub Updater installation %s"
 
 #: src/GitHub_Updater/Install.php:182
 #, php-format
 msgid "%s URI"
-msgstr ""
+msgstr "%s URI"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -208,9 +208,9 @@ msgstr ""
 "Voir les détails de la version %4$s %5$s ou %6$smettre à jour maintenant%7$s."
 
 #: src/GitHub_Updater/Theme.php:320
-#, fuzzy, php-format
+#, php-format
 msgid "There is a new version of %s available now."
-msgstr "Une nouvelle version de"
+msgstr "Une nouvelle version de %s est disponible."
 
 #: src/GitHub_Updater/Theme.php:320
 #, php-format
@@ -219,9 +219,9 @@ msgstr ""
 "%sVoir les détails de la version %s %s ou <%smettre à jour maintenant%s."
 
 #: src/GitHub_Updater/Theme.php:332
-#, fuzzy, php-format
+#, php-format
 msgid "Current version is up to date. Try %sanother version%s"
-msgstr "La version actuelle est à jour. Essayez"
+msgstr "La version actuelle est à jour. Essayez %sune autre version%s"
 
 #: src/GitHub_Updater/Theme.php:341
 msgid "Choose a Version"
@@ -237,6 +237,8 @@ msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
 "information about %3$sshow you can update%4$s."
 msgstr ""
+"Malheureusement, %1$s ne fonctionne pas sur les versions de PHP antérieures "
+"à la v.%2$s. En savoir plus sur%3$scomment vous pouvez mettre à jour%4$s."
 
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
