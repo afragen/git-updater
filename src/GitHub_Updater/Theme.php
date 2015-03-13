@@ -206,7 +206,7 @@ class Theme extends Base {
 			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
 				array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-				echo sprintf( __( '%sRollback to:%s', 'github-updater' ), '<strong>', '</strong>' );
+				printf( __( '%sRollback to:%s', 'github-updater' ), '<strong>', '</strong>' );
 				echo '&nbsp';
 				// display last three tags
 				for ( $i = 0; $i < 3 ; $i++ ) {
@@ -342,7 +342,7 @@ class Theme extends Base {
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
 			?>
-			<p><?php echo sprintf( __( 'Current version is up to date. Try %sanother version%s', 'github-updater' ), '<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">', '</a>' ); ?></p>
+			<p><?php printf( __( 'Current version is up to date. Try %sanother version%s', 'github-updater' ), '<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">', '</a>' ); ?></p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<select style="width: 60%;" 
 					onchange="if(jQuery(this).val() != '') {
