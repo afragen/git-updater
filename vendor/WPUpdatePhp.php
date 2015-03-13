@@ -90,7 +90,7 @@ class WPUpdatePhp {
 		?>
 		<div class="error">
 			<p>
-				<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more information about %3$sshow you can update%4$s.' ), $this->plugin_name, $this->minimum_version, '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
+				<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more information about %3$show you can update%4$s.' ), $this->plugin_name, $this->minimum_version, '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
 			</p>
 		</div>
 	<?php

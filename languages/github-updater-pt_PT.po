@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:00-0800\n"
+"PO-Revision-Date: 2015-03-13 12:23-0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -198,31 +198,26 @@ msgstr "Ver detalhes da versão %4$s"
 msgid "Automatic update is unavailable for this theme."
 msgstr "Actualizações automáticas indisponíveis para este tema."
 
-#: src/GitHub_Updater/Theme.php:241
-#, fuzzy, php-format
+#: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:323
+#, php-format
 msgid "View version %4$s details%5$s or %6$supdate now%7$s."
-msgstr "%sVer detalhes da versão %s%s ou %sactualize agora%s."
+msgstr "Ver detalhes da versão %4$s%5$s ou %6$sactualize agora%7$s."
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:323
 #, php-format
-msgid "There is a new version of %s available now."
-msgstr "Está disponível uma nova versão de %s."
+msgid "There is a new version of %1$s available now."
+msgstr "Está disponível uma nova versão de %1$s."
 
-#: src/GitHub_Updater/Theme.php:320
-#, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr "%sVer detalhes da versão %s%s ou %sactualize agora%s."
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:345
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Esta é a versão actual. Experimente %soutra versão%s"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:354
 msgid "Choose a Version"
 msgstr "Escolha uma versão"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:357
 msgid "Install"
 msgstr "Instalar"
 
@@ -230,8 +225,10 @@ msgstr "Instalar"
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
+"Infelizmente, o %1$s não corre em versões do PHP anteriores a %2$s. Leia "
+"mais informações sobre %3$scomo pode actualizar%4$s."
 
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
@@ -249,48 +246,10 @@ msgstr ""
 "Um plugin para actualizar automaticamente plugins e temas alojados no GitHub "
 "ou Bitbucket. Permite a instalação remota de plugins ou temas no WordPress. "
 "Classe de plugin baseada em <a href=\"https://github.com/codepress/github-"
-"plugin-updater\">codepress/github-plugin-updater</a>. Classe de theme "
-"baseada em modificações de <a href=\"https://github.com/WordPress-Phoenix/"
-"whitelabel-framework\">Whitelabel Framework</a>."
+"plugin-updater\">codepress/github-plugin-updater</a>. Classe de tema baseada "
+"em modificações de <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"framework\">Whitelabel Framework</a>."
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
-
-#~ msgid ""
-#~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
-#~ "your service provider to update PHP on your server"
-#~ msgstr ""
-#~ "O GitHub Updater não será carregado. Necessita do PHP 5.3 ou superior. "
-#~ "Por favor solicite ao seu serviço de alojamento para actualizar o PHP no "
-#~ "seu servidor"
-
-#~ msgid ""
-#~ "<a %2$s>View version %3$s details</a> or <a href=\"%4$s\">update now</a>."
-#~ msgstr ""
-#~ "<a %2$s>Ver detalhes da versão %3$s</a> ou <a href=\"%4$s\">actualize "
-#~ "agora</a>."
-
-#~ msgid "There is a new version of"
-#~ msgstr "Existe uma nova versão de"
-
-#~ msgid "available now."
-#~ msgstr "disponível agora."
-
-#~ msgid "View version"
-#~ msgstr "Ver versão"
-
-#~ msgid "details"
-#~ msgstr "detalhes"
-
-#~ msgid "or"
-#~ msgstr "ou"
-
-#~ msgid "update now"
-#~ msgstr "actualizar agora"
-
-#~ msgid "another version?"
-#~ msgstr "outra versão?"
-
-#~ msgid "URI"
-#~ msgstr "URI"

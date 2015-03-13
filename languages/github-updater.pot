@@ -191,31 +191,26 @@ msgstr ""
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:241
+#: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:323
 #, php-format
 msgid "View version %4$s details%5$s or %6$supdate now%7$s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:323
 #, php-format
-msgid "There is a new version of %s available now."
+msgid "There is a new version of %1$s available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:320
-#, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr ""
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:345
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:354
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:357
 msgid "Install"
 msgstr ""
 
@@ -223,7 +218,7 @@ msgstr ""
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme

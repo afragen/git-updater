@@ -317,7 +317,20 @@ class Theme extends Base {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><br /><?php echo sprintf( __( 'There is a new version of %s available now.', 'github-updater' ), $theme->name ); ?> <?php echo sprintf( __( '%sView version %s details%s or %supdate now%s.', 'github-updater' ), '<a href="' . $details_url . '" class="thickbox" title="' . $theme->name . '">', $theme->remote_version, '</a>&nbsp;', '<a href="' . $update_url . '">', '</a>' ); ?></strong>
+			<strong><br />
+				<?php
+					printf( 
+						__( 'There is a new version of %1$s available now.', 'github-updater' ) . '&nbsp' . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details%5$s or %6$supdate now%7$s.', 'github-updater' ),
+						$theme->name,
+						esc_url( $details_url ),
+						esc_attr( $theme_name ),
+						$theme->remote_version,
+						'</a>',
+						'<a href="' . $update_url . '">',
+						'</a>'
+					);
+				?>
+			</strong>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
