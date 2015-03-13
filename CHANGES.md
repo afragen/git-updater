@@ -3,7 +3,8 @@
 * don't use variable for calling a class. bad Andy
 * use https://api.wordpress.org not http
 * Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
-* make strings better for translation
+* make strings better for translation - thanks @pedro-mendonca
+* additional Portuguese translation by [Pedro Mendonça](https://github.com/pedro-mendonca)
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard

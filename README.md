@@ -236,7 +236,9 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
     * [Daniel Ménard](https://github.com/daniel-menard)
     * [fxbenard](https://github.com/fxbenard)
 * Italian by [Enea Overclokk](https://github.com/overclokk)
-* Portuguese by [Valerio Souza](https://github.com/valeriosouza)
+* Portuguese by
+    * [Valerio Souza](https://github.com/valeriosouza)
+    * [Pedro Mendonça](https://github.com/pedro-mendonca)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
