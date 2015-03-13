@@ -206,8 +206,9 @@ class Theme extends Base {
 			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
 				array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-				printf( __( '%sRollback to:%s', 'github-updater' ), '<strong>', '</strong>' );
-				echo '&nbsp';
+				echo '<strong>';
+				_e( 'Rollback to:', 'github-updater' );
+				echo '</strong> ';
 				// display last three tags
 				for ( $i = 0; $i < 3 ; $i++ ) {
 					$tag = array_shift( $rollback_keys );
