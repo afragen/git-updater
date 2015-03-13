@@ -185,16 +185,16 @@ class Theme extends Base {
 				'em'      => array(),
 				'strong'  => array(),
 			);
-		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$install_url        = self_admin_url( "theme-install.php" );
-		$details_url = add_query_arg(
+		$theme_name    = wp_kses( $theme['Name'], $themes_allowedtags );
+		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$install_url   = self_admin_url( "theme-install.php" );
+		$details_url   = add_query_arg(
 				array(
-					'tab' => 'theme-information',
-					'theme' => $theme_key,
+					'tab'       => 'theme-information',
+					'theme'     => $theme_key,
 					'TB_iframe' => 'true',
-					'width' => 270,
-					'height' => 400
+					'width'     => 270,
+					'height'    => 400
 				),
 				$install_url );
 
