@@ -172,14 +172,14 @@ class Install extends Base {
 
 		add_settings_section(
 			$type,
-			__( 'GitHub Updater Install', 'github-updater' ) . '&nbsp;' . $repo_type,
+			sprintf(__( 'GitHub Updater Install %s', 'github-updater' ), $repo_type ),
 			array(),
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
-			$repo_type . '&nbsp;' .  __( 'URI', 'github-updater' ),
+			sprintf( __( '%s URI', 'github-updater' ), $repo_type ),
 			array( $this, 'get_repo' ),
 			'github_updater_install_' . $type,
 			$type,

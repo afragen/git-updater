@@ -318,7 +318,7 @@ class Theme extends Base {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><br /><?php _e('There is a new version of', 'github-updater' ); echo '&nbsp'; echo $theme->name; echo '&nbsp'; _e( 'available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">&nbsp;<?php _e( 'View version', 'github-updater' ); echo '&nbsp'; echo $theme->remote_version; echo '&nbsp'; _e( 'details', 'github-updater' ); ?></a>&nbsp;<?php _e( 'or', 'github-updater' ); ?>&nbsp;<a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
+			<strong><br /><?php echo sprintf(__('There is a new version of %s available now.', 'github-updater' ), $theme->name ); ?> <?php echo sprintf(__( '%sView version %s details%s or %supdate now%s.', 'github-updater' ), '<a href="'.$details_url.'" class="thickbox" title="'.$theme->name.'">', $theme->remote_version, '</a>&nbsp;', '<a href="'.$update_url.'">', '</a>' ); ?></strong>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
@@ -330,7 +330,7 @@ class Theme extends Base {
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
 			?>
-			<p><?php _e( 'Current version is up to date. Try', 'github-updater' ); ?> <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;"><?php _e( 'another version?', 'github-updater' ); ?></a></p>
+			<p><?php echo sprintf(__( 'Current version is up to date. Try %sanother version%s', 'github-updater' ), '<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">','</a>'); ?></p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<select style="width: 60%;" 
 					onchange="if(jQuery(this).val() != '') {
