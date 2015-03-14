@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
 "POT-Creation-Date: 2015-03-13 16:19-0800\n"
-"PO-Revision-Date: 2015-03-14 08:32+0100\n"
+"PO-Revision-Date: 2015-03-14 09:49+0100\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -88,7 +88,7 @@ msgstr "%s URI"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
-msgstr "Nom de domaine du dépôt distant"
+msgstr "Hébergeur du dépôt"
 
 #: src/GitHub_Updater/Install.php:200
 msgid "Repository Branch"
@@ -96,7 +96,7 @@ msgstr "Branche de référence"
 
 #: src/GitHub_Updater/Install.php:209
 msgid "Private Bitbucket Repository"
-msgstr "Dépôts BitBucket privés"
+msgstr "Dépôt BitBucket privé"
 
 #: src/GitHub_Updater/Install.php:218
 msgid "GitHub Access Token"
@@ -193,7 +193,7 @@ msgstr "GitHub Updater indique qu'une nouvelle version de %s est disponible."
 #: src/GitHub_Updater/Theme.php:243
 #, php-format
 msgid "View version %s details."
-msgstr "Voir les détails de la version %s"
+msgstr "Voir les détails de la version %s."
 
 #: src/GitHub_Updater/Theme.php:247
 msgid "Automatic update is unavailable for this theme."
@@ -203,7 +203,7 @@ msgstr "La mise à jour automatique n'est pas disponible pour ce thème."
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
-"Voir les détails de la version %1$s%2$s ou %3$smettre à jour maintenant%4$s."
+"Voir les détails de la version %1$s %2$s ou %3$smettre à jour maintenant%4$s."
 
 #: src/GitHub_Updater/Theme.php:335
 #, php-format
@@ -230,7 +230,7 @@ msgid ""
 "information about %3$show you can update%4$s."
 msgstr ""
 "Malheureusement, %1$s ne fonctionne pas sur les versions de PHP antérieures "
-"à la v.%2$s. En savoir plus sur%3$sles possibilités de mise à jour%4$s."
+"à la v.%2$s. En savoir plus sur %3$sles possibilités de mise à jour%4$s."
 
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
