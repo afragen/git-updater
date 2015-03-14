@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-13 11:40+0100\n"
+"POT-Creation-Date: 2015-03-13 16:19-0800\n"
+"PO-Revision-Date: 2015-03-14 09:49+0100\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -13,9 +13,9 @@ msgstr ""
 "X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;"
-"esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;"
-"__ngettext_noop:1,2\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -25,11 +25,11 @@ msgstr "Installé en tant que plugin \"must-use\" (MU-plugin)."
 
 #: src/GitHub_Updater/Base.php:375
 msgid ""
-"No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or "
-"<code>CHANGELOG.md</code> in your repository."
+"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
+"md</code> or <code>CHANGELOG.md</code> in your repository."
 msgstr ""
-"L'historique des modifications n'est pas disponible. Créez un fichier <code>CHANGES.md</"
-"code> ou <code>CHANGELOG.md</code> dans votre dépôt."
+"L'historique des modifications n'est pas disponible. Créez un fichier "
+"<code>CHANGES.md</code> ou <code>CHANGELOG.md</code> dans votre dépôt."
 
 #: src/GitHub_Updater/Base.php:476
 #, php-format
@@ -44,17 +44,19 @@ msgstr "Le renommage a réussi"
 msgid "Unable to rename downloaded repository."
 msgstr "Impossible de renommer le dépôt téléchargé."
 
-#: src/GitHub_Updater/Base.php:739
+#: src/GitHub_Updater/Base.php:745
 #, php-format
-msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
-msgstr "%1$s n'a pas été vérifié. Code d'erreur de GitHub Updater : %2$s"
+msgid "%s was not checked. GitHub Updater Error Code: %s"
+msgstr "%s n'a pas été vérifié. Code d'erreur de GitHub Updater : %s"
 
-#: src/GitHub_Updater/Base.php:741
+#: src/GitHub_Updater/Base.php:747
 #, php-format
-msgid "GitHub API's rate limit will reset in %1$s minutes."
-msgstr "La limite sur le nombre d'appels à l'API GitHub sera réinitialisée dans %1$s minutes."
+msgid "GitHub API's rate limit will reset in %s minutes."
+msgstr ""
+"La limite sur le nombre d'appels à l'API GitHub sera réinitialisée dans %s "
+"minutes."
 
-#: src/GitHub_Updater/Base.php:744
+#: src/GitHub_Updater/Base.php:750
 msgid "There is probably an error on the GitHub Updater Settings page"
 msgstr "Il y a probablement une erreur dans les réglages de GitHub Updater"
 
@@ -86,7 +88,7 @@ msgstr "%s URI"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
-msgstr "Nom de domaine du dépôt distant"
+msgstr "Hébergeur du dépôt"
 
 #: src/GitHub_Updater/Install.php:200
 msgid "Repository Branch"
@@ -94,7 +96,7 @@ msgstr "Branche de référence"
 
 #: src/GitHub_Updater/Install.php:209
 msgid "Private Bitbucket Repository"
-msgstr "Dépôts BitBucket privés"
+msgstr "Dépôt BitBucket privé"
 
 #: src/GitHub_Updater/Install.php:218
 msgid "GitHub Access Token"
@@ -157,12 +159,15 @@ msgstr "Thème :"
 #: src/GitHub_Updater/Settings.php:331
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
-"Entrez votre jeton d'accès GitHub (GitHub Access Token). Laissez vide pour un dépôt public."
+"Entrez votre jeton d'accès GitHub (GitHub Access Token). Laissez vide pour "
+"un dépôt public."
 
 #: src/GitHub_Updater/Settings.php:338
-msgid "Check box if private repository. Leave unchecked for public repositories."
+msgid ""
+"Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
-"Cochez la case s'il s'agit d'un dépôt privé. Ne pas cocher s'il s'agit d'un dépôt public."
+"Cochez la case s'il s'agit d'un dépôt privé. Ne pas cocher s'il s'agit d'un "
+"dépôt public."
 
 #: src/GitHub_Updater/Settings.php:345
 msgid "Enter your personal Bitbucket username and password."
@@ -172,65 +177,60 @@ msgstr "Entrez votre nom d'utilisateur et mot de passe de Bitbucket."
 msgid "Theme is up-to-date!"
 msgstr "Le thème est à jour !"
 
-#: src/GitHub_Updater/Theme.php:209
-#, php-format
-msgid "%sRollback to:%s"
-msgstr "%sRevenir à la version : %s"
+#: src/GitHub_Updater/Theme.php:210
+msgid "Rollback to:"
+msgstr "Revenir à la version :"
 
-#: src/GitHub_Updater/Theme.php:224
+#: src/GitHub_Updater/Theme.php:228
 msgid "No previous tags to rollback to."
 msgstr "Aucun tag précédent."
 
-#: src/GitHub_Updater/Theme.php:233 src/GitHub_Updater/Theme.php:241
+#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
 #, php-format
-msgid "GitHub Updater shows a new version of %1$s available."
-msgstr "GitHub Updater indique qu'une nouvelle version de %1$s est disponible."
+msgid "GitHub Updater shows a new version of %s available."
+msgstr "GitHub Updater indique qu'une nouvelle version de %s est disponible."
 
-#: src/GitHub_Updater/Theme.php:233
+#: src/GitHub_Updater/Theme.php:243
 #, php-format
-msgid "View version %4$s details"
-msgstr "Voir les détails de la version %4$s"
+msgid "View version %s details."
+msgstr "Voir les détails de la version %s."
 
-#: src/GitHub_Updater/Theme.php:233
+#: src/GitHub_Updater/Theme.php:247
 msgid "Automatic update is unavailable for this theme."
 msgstr "La mise à jour automatique n'est pas disponible pour ce thème."
 
-#: src/GitHub_Updater/Theme.php:241
+#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
 #, php-format
-msgid "View version %4$s details%5$s or %6$supdate now%7$s."
-msgstr "Voir les détails de la version %4$s %5$s ou %6$smettre à jour maintenant%7$s."
+msgid "View version %1$s details%2$s or %3$supdate now%4$s."
+msgstr ""
+"Voir les détails de la version %1$s %2$s ou %3$smettre à jour maintenant%4$s."
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:335
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Une nouvelle version de %s est disponible."
 
-#: src/GitHub_Updater/Theme.php:320
-#, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr "%sVoir les détails de la version %s %s ou %smettre à jour maintenant%s."
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:362
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La version actuelle est à jour. Essayez %sune autre version%s"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:376
 msgid "Choose a Version"
 msgstr "Choisissez une version"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:379
 msgid "Install"
 msgstr "Installer"
 
-#: vendor/WPUpdatePhp.php:93
+#: vendor/WPUpdatePhp.php:96
 #, php-format
 msgid ""
-"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more information "
-"about %3$sshow you can update%4$s."
+"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
+"information about %3$show you can update%4$s."
 msgstr ""
-"Malheureusement, %1$s ne fonctionne pas sur les versions de PHP antérieures à la v.%2$s. En "
-"savoir plus sur%3$sles possibilités de mise à jour%4$s."
+"Malheureusement, %1$s ne fonctionne pas sur les versions de PHP antérieures "
+"à la v.%2$s. En savoir plus sur %3$sles possibilités de mise à jour%4$s."
 
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
@@ -238,22 +238,28 @@ msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
 msgid ""
-"A plugin to automatically update GitHub or Bitbucket hosted plugins and themes. It also "
-"allows for remote installation of plugins or themes into WordPress. Plugin class based upon "
-"<a href=\"https://github.com/codepress/github-plugin-updater\">codepress/github-plugin-"
-"updater</a>. Theme class based upon <a href=\"https://github.com/WordPress-Phoenix/"
-"whitelabel-framework\">Whitelabel Framework</a> modifications."
+"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
+"themes. It also allows for remote installation of plugins or themes into "
+"WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
+"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"framework\">Whitelabel Framework</a> modifications."
 msgstr ""
-"Une extension pour mettre à jour automatiquement des extensions et des thèmes WordPress "
-"hébergés sur GitHub ou Bitbucket. Elle permet également d'installer des extensions et des "
-"thèmes dans WordPress. La classe Plugin est basée sur <a href=\"https://github.com/"
-"codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. La classe Theme est "
-"une version modifiée du <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
-"\">Whitelabel Framework</a>."
+"Une extension pour mettre à jour automatiquement des extensions et des "
+"thèmes WordPress hébergés sur GitHub ou Bitbucket. Elle permet également "
+"d'installer des extensions et des thèmes dans WordPress. La classe Plugin "
+"est basée sur <a href=\"https://github.com/codepress/github-plugin-updater"
+"\">codepress/github-plugin-updater</a>. La classe Theme est une version "
+"modifiée du <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
+"framework\">Whitelabel Framework</a>."
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "%sView version %s details%s or %supdate now%s."
+#~ msgstr ""
+#~ "%sVoir les détails de la version %s %s ou %smettre à jour maintenant%s."
 
 #~ msgid "URI"
 #~ msgstr "URI"
@@ -277,11 +283,12 @@ msgstr "Andy Fragen"
 #~ msgstr "une autre version ?"
 
 #~ msgid ""
-#~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask your service "
-#~ "provider to update PHP on your server"
+#~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
+#~ "your service provider to update PHP on your server"
 #~ msgstr ""
-#~ "GitHub Updater ne se charge pas. Il nécessite PHP 5.3 ou supérieur. Veuillez demander à "
-#~ "votre hébergeur de mettre à jour PHP sur votre serveur."
+#~ "GitHub Updater ne se charge pas. Il nécessite PHP 5.3 ou supérieur. "
+#~ "Veuillez demander à votre hébergeur de mettre à jour PHP sur votre "
+#~ "serveur."
 
 #~ msgid "was not checked."
 #~ msgstr "n'a pas été vérifié."
