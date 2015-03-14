@@ -78,8 +78,11 @@ class WPUpdatePhp {
 	 */
 	private function load_minimum_required_version_notice() {
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
-			add_action( 'admin_head', array( $this, 'admin_notice' ) );
+			if ( ! is_main_network() ) {
+				add_action( 'admin_notices', array( $this, 'admin_notice' ) );
+			} else {
+				add_action( 'admin_head', array( $this, 'admin_notice' ) );
+			}
 		}
 	}
 

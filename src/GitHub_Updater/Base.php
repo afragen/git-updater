@@ -726,7 +726,13 @@ class Base {
 			return false;
 		}
 
-		add_action( 'admin_head', array( $this, 'show_error_message' ) );
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			if ( ! is_main_network() ) {
+				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
+			} else {
+				add_action( 'admin_head', array( $this, 'show_error_message' ) );
+			}
+		}
 	}
 
 	/**
@@ -736,9 +742,9 @@ class Base {
 		?>
 		<div class="error">
 			<p>
-				<?php printf( __( '%1$s was not checked. GitHub Updater Error Code: %2$s', 'github-updater' ), '<strong>' . $this->type->name . '</strong>', self::$error_code[ $this->type->repo ] ); ?>
+				<?php printf( __( '%s was not checked. GitHub Updater Error Code: %s', 'github-updater' ), '<strong>' . $this->type->name . '</strong>', self::$error_code[ $this->type->repo ] ); ?>
 				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
-					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %1$s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
+					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
 				<?php endif; ?>
 				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
 					<br><?php _e( 'There is probably an error on the GitHub Updater Settings page', 'github-updater' ); ?>
