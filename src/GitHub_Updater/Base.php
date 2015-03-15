@@ -742,7 +742,13 @@ class Base {
 		?>
 		<div class="error">
 			<p>
-				<?php printf( __( '%s was not checked. GitHub Updater Error Code: %s', 'github-updater' ), '<strong>' . $this->type->name . '</strong>', self::$error_code[ $this->type->repo ] ); ?>
+				<?php
+					printf(
+						__( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
+						'<strong>' . $this->type->name . '</strong>'
+					);
+					echo self::$error_code[ $this->type->repo ] ;
+				?>
 				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
 					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
 				<?php endif; ?>
