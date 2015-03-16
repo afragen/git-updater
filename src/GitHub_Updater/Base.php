@@ -758,7 +758,7 @@ class Base {
 				<?php endif; ?>
 				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
 					<br>
-					<?php _e( 'There is probably an error on the GitHub Updater Settings page', 'github-updater' ); ?>
+					<?php _e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
 				<?php endif; ?>
 			</p>
 		</div>
