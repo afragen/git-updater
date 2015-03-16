@@ -473,7 +473,7 @@ class Base {
 
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %s to %s', 'github-updater' ) . '&#8230;',
+				__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
 				'<span class="code">' . basename( $source ) . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
@@ -742,7 +742,7 @@ class Base {
 		?>
 		<div class="error">
 			<p>
-				<?php printf( __( '%s was not checked. GitHub Updater Error Code: %s', 'github-updater' ), '<strong>' . $this->type->name . '</strong>', self::$error_code[ $this->type->repo ] ); ?>
+				<?php printf( __( '%1$s was not checked. GitHub Updater Error Code: %2$s', 'github-updater' ), '<strong>' . $this->type->name . '</strong>', self::$error_code[ $this->type->repo ] ); ?>
 				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
 					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
 				<?php endif; ?>
