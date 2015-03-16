@@ -99,7 +99,7 @@ class Bitbucket_API extends Base {
 		$response = $this->get_transient( $file );
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
+			if ( empty( $this->type->branch ) ) {
 				$this->type->branch = 'master';
 			}
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
