@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-13 16:19-0800\n"
-"PO-Revision-Date: 2015-03-13 16:19-0800\n"
+"POT-Creation-Date: 2015-03-16 08:58-0800\n"
+"PO-Revision-Date: 2015-03-16 08:58-0800\n"
 "Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -41,18 +41,18 @@ msgstr ""
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:745
+#: src/GitHub_Updater/Base.php:746
 #, php-format
-msgid "%s was not checked. GitHub Updater Error Code: %s"
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:747
+#: src/GitHub_Updater/Base.php:754
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:750
-msgid "There is probably an error on the GitHub Updater Settings page"
+#: src/GitHub_Updater/Base.php:761
+msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
