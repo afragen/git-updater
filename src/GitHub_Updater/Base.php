@@ -473,7 +473,7 @@ class Base {
 
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %s to %s', 'github-updater' ) . '&#8230;',
+				__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
 				'<span class="code">' . basename( $source ) . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
