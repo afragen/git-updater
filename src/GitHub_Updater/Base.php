@@ -163,6 +163,18 @@ class Base {
 		$git_plugins = array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
+			$git_plugin = array();
+			$repo_types = array(
+				'GitHub'    => 'github_plugin',
+				'Bitbucket' => 'bitbucket_plugin',
+				'GitLab'    => 'gitlab_plugin',
+			);
+			$repo_base_uris = array(
+				'github_plugin'    => 'https://github.com/',
+				'bitbucket_plugin' => 'https://bitbucket.org/',
+				'gitlab_plugin'    => 'https://gitlab.com/',
+			);
+
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
 			     empty( $headers['Bitbucket Plugin URI'] ) &&
 			     empty( $headers['GitLab Plugin URI'] )
@@ -170,77 +182,49 @@ class Base {
 				continue;
 			}
 
-			$git_repo = $this->get_local_plugin_meta( $headers );
+			foreach ( (array) self::$extra_headers as $value ) {
+				$repo_type     = null;
+				$repo_header   = null;
+				$repo_branch   = null;
+				$repo_base_uri = null;
 
-			$git_repo['slug']                    = $plugin;
-			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
-			$git_repo['author']                  = $plugin_data['AuthorName'];
-			$git_repo['name']                    = $plugin_data['Name'];
-			$git_repo['local_version']           = strtolower( $plugin_data['Version'] );
-			$git_repo['sections']['description'] = $plugin_data['Description'];
-			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
+				if ( empty( $headers[ $value ] ) ||
+				     false === stristr( $value, 'Plugin' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+
+				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
+					$repo_type     = $repo_types[ $header_parts[0] ];
+					$repo_header   = $value;
+					$repo_branch   = $header_parts[0] . ' Branch';
+					$repo_base_uri = $repo_base_uris[ $repo_type ];
+				}
+
+				$git_plugin['type']                    = $repo_type;
+				$owner_repo                            = parse_url( $headers[ $repo_header ], PHP_URL_PATH );
+				$owner_repo                            = trim( $owner_repo, '/' );  // strip surrounding slashes
+				$git_plugin['uri']                     = $repo_base_uri . $owner_repo;
+				$owner_repo                            = explode( '/', $owner_repo );
+				$git_plugin['owner']                   = $owner_repo[0];
+				$git_plugin['repo']                    = $owner_repo[1];
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $git_plugin['repo'] . '/';
+				$git_plugin['branch']                  = $headers[ $repo_branch ];
+				$git_plugin['slug']                    = $plugin;
+
+				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
+				$git_plugin['author']                  = $plugin_data['AuthorName'];
+				$git_plugin['name']                    = $plugin_data['Name'];
+				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
+				$git_plugin['sections']['description'] = $plugin_data['Description'];
+			}
+
+			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
 		}
 
 		return $git_plugins;
-	}
-
-	/**
-	* Parse extra headers to determine repo type and populate info
-	*
-	* @param array - extra headers
-	* @return array - repo information
-	*
-	* parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
-	* (in addition to the long url format), or it's coincidentally returning all of the short
-	* URL string, which is what we want anyway.
-	*
-	*/
-	protected function get_local_plugin_meta( $headers ) {
-		$git_plugin = array();
-		$repo_types = array(
-			'GitHub'    => 'github_plugin',
-			'Bitbucket' => 'bitbucket_plugin',
-			'GitLab'    => 'gitlab_plugin',
-			);
-		$repo_base_uris = array(
-			'github_plugin'    => 'https://github.com/',
-			'bitbucket_plugin' => 'https://bitbucket.org/',
-			'gitlab_plugin'    => 'https://gitlab.com/',
-			);
-
-		foreach ( (array) self::$extra_headers as $value ) {
-			$repo_type     = null;
-			$repo_header   = null;
-			$repo_branch   = null;
-			$repo_base_uri = null;
-
-			if ( empty( $headers[ $value ] ) ||
-			     false === stristr( $value, 'Plugin' )
-			) {
-				continue;
-			}
-
-			$header_parts = explode( ' ', $value );
-
-			if ( array_key_exists( $header_parts[0], $repo_types ) ) {
-				$repo_type     = $repo_types[ $header_parts[0] ];
-				$repo_header   = $value;
-				$repo_branch   = $header_parts[0] . ' Branch';
-				$repo_base_uri = $repo_base_uris[ $repo_type ];
-			}
-
-			$git_plugin['type']       = $repo_type;
-			$owner_repo               = parse_url( $headers[ $repo_header ], PHP_URL_PATH );
-			$owner_repo               = trim( $owner_repo, '/' );  // strip surrounding slashes
-			$git_plugin['uri']        = $repo_base_uri . $owner_repo;
-			$owner_repo               = explode( '/', $owner_repo );
-			$git_plugin['owner']      = $owner_repo[0];
-			$git_plugin['repo']       = $owner_repo[1];
-			$git_plugin['local_path'] = WP_PLUGIN_DIR . '/' . $git_plugin['repo'] . '/';
-			$git_plugin['branch']     = $headers[ $repo_branch ];
-		}
-
-		return $git_plugin;
 	}
 
 	/**
