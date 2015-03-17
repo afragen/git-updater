@@ -53,8 +53,7 @@ $extra_classes = array(
 
 // Load Autoloader
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
-$class_loader = 'Fragen\GitHub_Updater\Autoloader';
-new $class_loader( $root, $extra_classes );
+new Fragen\GitHub_Updater\Autoloader( $root, $extra_classes );
 
 // Instantiate class GitHub_Updater
 new Fragen\GitHub_Updater\Base;
