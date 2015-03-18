@@ -228,7 +228,7 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
-<https://github.com/szepeviktor/wordpress-plugin-construction/tree/master/github-link>
+<https://github.com/szepeviktor/github-link>
 
 ### Translations
 
