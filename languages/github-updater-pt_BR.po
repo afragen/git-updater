@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:04-0800\n"
+"POT-Creation-Date: 2015-03-17 17:17-0800\n"
+"PO-Revision-Date: 2015-03-17 17:21-0800\n"
 "Last-Translator: Valério Souza <valeriosza@gmail.com>\n"
 "Language-Team: Valério Souza <valeriosza@gmail.com>\n"
 "Language: pt_BR\n"
@@ -13,8 +13,8 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
-"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Ativado como mu-plugin"
 
-#: src/GitHub_Updater/Base.php:375
+#: src/GitHub_Updater/Base.php:317
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -30,31 +30,31 @@ msgstr ""
 "No changelog está disponível via GitHub Updater. Crie um arquivo "
 "<code>CHANGES.md</code> ou <code>CHANGELOG.md</code> em seu repositório."
 
-#: src/GitHub_Updater/Base.php:476
-#, php-format
-msgid "Renaming %s to %s"
+#: src/GitHub_Updater/Base.php:418
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
 msgstr "Renomeando %s para %s"
 
-#: src/GitHub_Updater/Base.php:486
+#: src/GitHub_Updater/Base.php:428
 msgid "Rename successful"
 msgstr "Renomeado com sucesso"
 
-#: src/GitHub_Updater/Base.php:493
+#: src/GitHub_Updater/Base.php:435
 msgid "Unable to rename downloaded repository."
 msgstr "Não é possível renomear o repositório baixado."
 
-#: src/GitHub_Updater/Base.php:739
-#, php-format
-msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+#: src/GitHub_Updater/Base.php:688
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr "%1$s não foi verificada. GitHub Updater código de erro: %2$s"
 
-#: src/GitHub_Updater/Base.php:741
-#, php-format
-msgid "GitHub API's rate limit will reset in %1$s minutes."
-msgstr "Limite de taxa do GitHub API irá repor em minutos de %1$s."
+#: src/GitHub_Updater/Base.php:696
+#, fuzzy, php-format
+msgid "GitHub API's rate limit will reset in %s minutes."
+msgstr "Limite de taxa do GitHub API irá repor em minutos de s $ %1."
 
-#: src/GitHub_Updater/Base.php:744
-msgid "There is probably an error on the GitHub Updater Settings page"
+#: src/GitHub_Updater/Base.php:703
+msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
@@ -80,9 +80,9 @@ msgid "GitHub Updater Install %s"
 msgstr "Instalar o GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:182
-#, php-format
+#, fuzzy, php-format
 msgid "%s URI"
-msgstr ""
+msgstr "%sReverter para:%s"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -180,62 +180,57 @@ msgstr "Digite seu usuário e senha do Bitbucket."
 msgid "Theme is up-to-date!"
 msgstr "Tema está atualizado!"
 
-#: src/GitHub_Updater/Theme.php:209
-#, php-format
-msgid "%sRollback to:%s"
+#: src/GitHub_Updater/Theme.php:210
+#, fuzzy
+msgid "Rollback to:"
 msgstr "%sReverter para:%s"
 
-#: src/GitHub_Updater/Theme.php:224
+#: src/GitHub_Updater/Theme.php:228
 msgid "No previous tags to rollback to."
 msgstr "Nenhuma tag anterior para reverter."
 
-#: src/GitHub_Updater/Theme.php:233 src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid "GitHub Updater shows a new version of %1$s available."
+#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
+#, fuzzy, php-format
+msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater tem uma nova versão do %1$s disponível."
 
-#: src/GitHub_Updater/Theme.php:233
-#, php-format
-msgid "View version %4$s details"
+#: src/GitHub_Updater/Theme.php:243
+#, fuzzy, php-format
+msgid "View version %s details."
 msgstr "Ver versão %4$s detalhada"
 
-#: src/GitHub_Updater/Theme.php:233
+#: src/GitHub_Updater/Theme.php:247
 msgid "Automatic update is unavailable for this theme."
 msgstr "Atualização automática não está disponível para esse tema."
 
-#: src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid "View version %4$s details%5$s or %6$supdate now%7$s."
+#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
+#, fuzzy, php-format
+msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Ver versão %4$s detalhada%5$s ou %6$satualizar agora%7$s."
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:335
 #, fuzzy, php-format
 msgid "There is a new version of %s available now."
 msgstr "Há uma nova versão do"
 
-#: src/GitHub_Updater/Theme.php:320
-#, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr "%sVer versão %s detalhada%s ou %satualizar agora%s."
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:362
 #, fuzzy, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "A versão está atualizada. Tentar"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:376
 msgid "Choose a Version"
 msgstr "Escolha a Versão"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:379
 msgid "Install"
 msgstr "Instalar"
 
-#: vendor/WPUpdatePhp.php:93
+#: vendor/WPUpdatePhp.php:96
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -262,6 +257,9 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "%sView version %s details%s or %supdate now%s."
+#~ msgstr "%sVer versão %s detalhada%s ou %satualizar agora%s."
 
 #~ msgid "available now."
 #~ msgstr "disponível agora."

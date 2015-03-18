@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:17-0800\n"
+"POT-Creation-Date: 2015-03-17 17:17-0800\n"
+"PO-Revision-Date: 2015-03-17 17:21-0800\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Активувати як mu-plugin"
 
-#: src/GitHub_Updater/Base.php:375
+#: src/GitHub_Updater/Base.php:317
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -31,31 +31,31 @@ msgstr ""
 "Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES.md</"
 "code> або <code>CHANGELOG.md</code> у вашому сховищі."
 
-#: src/GitHub_Updater/Base.php:476
-#, php-format
-msgid "Renaming %s to %s"
+#: src/GitHub_Updater/Base.php:418
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
 msgstr "Перейменування %s в %s"
 
-#: src/GitHub_Updater/Base.php:486
+#: src/GitHub_Updater/Base.php:428
 msgid "Rename successful"
 msgstr "Перейменування успішне"
 
-#: src/GitHub_Updater/Base.php:493
+#: src/GitHub_Updater/Base.php:435
 msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
-#: src/GitHub_Updater/Base.php:739
-#, php-format
-msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+#: src/GitHub_Updater/Base.php:688
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr "%1$s не перевірив. GitHub Updater код помилки: %2$s"
 
-#: src/GitHub_Updater/Base.php:741
-#, php-format
-msgid "GitHub API's rate limit will reset in %1$s minutes."
+#: src/GitHub_Updater/Base.php:696
+#, fuzzy, php-format
+msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "Обмеження частоти GitHub API буде скинути в %1$s хвилин."
 
-#: src/GitHub_Updater/Base.php:744
-msgid "There is probably an error on the GitHub Updater Settings page"
+#: src/GitHub_Updater/Base.php:703
+msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
@@ -80,9 +80,9 @@ msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:182
-#, php-format
+#, fuzzy, php-format
 msgid "%s URI"
-msgstr ""
+msgstr "%sВідкат до:%s"
 
 #: src/GitHub_Updater/Install.php:191
 msgid "Remote Repository Host"
@@ -174,62 +174,57 @@ msgstr "Введіть ваші особисті BitBucket ім&#39;я кори�
 msgid "Theme is up-to-date!"
 msgstr "Тема не має оновлень!"
 
-#: src/GitHub_Updater/Theme.php:209
-#, php-format
-msgid "%sRollback to:%s"
+#: src/GitHub_Updater/Theme.php:210
+#, fuzzy
+msgid "Rollback to:"
 msgstr "%sВідкат до:%s"
 
-#: src/GitHub_Updater/Theme.php:224
+#: src/GitHub_Updater/Theme.php:228
 msgid "No previous tags to rollback to."
 msgstr "Немає теґів для відкату назад."
 
-#: src/GitHub_Updater/Theme.php:233 src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid "GitHub Updater shows a new version of %1$s available."
+#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
+#, fuzzy, php-format
+msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater показує, що доступна нова версія %1$s."
 
-#: src/GitHub_Updater/Theme.php:233
-#, php-format
-msgid "View version %4$s details"
+#: src/GitHub_Updater/Theme.php:243
+#, fuzzy, php-format
+msgid "View version %s details."
 msgstr "Переглянути подробиці версії %4$s"
 
-#: src/GitHub_Updater/Theme.php:233
+#: src/GitHub_Updater/Theme.php:247
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичне оновлення недоступно для цієї теми."
 
-#: src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid "View version %4$s details%5$s or %6$supdate now%7$s."
+#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
+#, fuzzy, php-format
+msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "%4$sПереглянути подробиці версії %5$s або %6$sоновити зараз%7$s ."
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:335
 #, fuzzy, php-format
 msgid "There is a new version of %s available now."
 msgstr "Нова версія"
 
-#: src/GitHub_Updater/Theme.php:320
-#, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr "%sПереглянути подробиці версії %s %s або %sоновити зараз%s ."
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:362
 #, fuzzy, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:376
 msgid "Choose a Version"
 msgstr "Вибрати версію"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:379
 msgid "Install"
 msgstr "Встановити"
 
-#: vendor/WPUpdatePhp.php:93
+#: vendor/WPUpdatePhp.php:96
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -255,6 +250,9 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Енді Фраген"
+
+#~ msgid "%sView version %s details%s or %supdate now%s."
+#~ msgstr "%sПереглянути подробиці версії %s %s або %sоновити зараз%s ."
 
 #~ msgid "available now."
 #~ msgstr "зараз доступна."

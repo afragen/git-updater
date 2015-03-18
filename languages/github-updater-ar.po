@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-12 20:46-0800\n"
-"PO-Revision-Date: 2015-03-12 21:19-0800\n"
+"POT-Creation-Date: 2015-03-17 17:17-0800\n"
+"PO-Revision-Date: 2015-03-17 17:21-0800\n"
 "Last-Translator: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language-Team: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language: ar\n"
@@ -15,15 +15,15 @@ msgstr ""
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
 "esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && "
-"n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: mu/ghu-loader.php:55
 msgid "Activated as mu-plugin"
 msgstr "تفعيل كإضافة تلقائية"
 
-#: src/GitHub_Updater/Base.php:375
+#: src/GitHub_Updater/Base.php:317
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</"
 "code> or <code>CHANGELOG.md</code> in your repository."
@@ -31,31 +31,32 @@ msgstr ""
 "ملف متابعة التغيرات غير متوافر من خلال GitHub Updater. قم بإنشاء ملف "
 "<code>CHANGES.md</code>  أو <code>CHANGELOG.md</code> في المستودع الخاص بك"
 
-#: src/GitHub_Updater/Base.php:476
-#, php-format
-msgid "Renaming %s to %s"
+#: src/GitHub_Updater/Base.php:418
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
 msgstr "إعادة تسمية %s  إلى %s"
 
-#: src/GitHub_Updater/Base.php:486
+#: src/GitHub_Updater/Base.php:428
 msgid "Rename successful"
 msgstr "تمت إعادة التسمية بنجاح"
 
-#: src/GitHub_Updater/Base.php:493
+#: src/GitHub_Updater/Base.php:435
 msgid "Unable to rename downloaded repository."
 msgstr "غير قادر على إعادة تسمية المستودع الذي تم تنزيله"
 
-#: src/GitHub_Updater/Base.php:739
-#, php-format
-msgid "%1$s was not checked. GitHub Updater Error Code: %2$s"
+#: src/GitHub_Updater/Base.php:688
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr "‏%1$s  غير موجود . رمز خطأ GitHub  : %2$s"
 
-#: src/GitHub_Updater/Base.php:741
-#, php-format
-msgid "GitHub API's rate limit will reset in %1$s minutes."
+#: src/GitHub_Updater/Base.php:696
+#, fuzzy, php-format
+msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "GitHub API's rate limit will reset in %1$s minutes."
 
-#: src/GitHub_Updater/Base.php:744
-msgid "There is probably an error on the GitHub Updater Settings page"
+#: src/GitHub_Updater/Base.php:703
+#, fuzzy
+msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr "هناك خطأ ما في صفحة إعدادت GitHub "
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
@@ -159,7 +160,8 @@ msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "أدخل رمز وصول GitHub  . قم بتركه فارغاً من أجل المستودعات العامة"
 
 #: src/GitHub_Updater/Settings.php:338
-msgid "Check box if private repository. Leave unchecked for public repositories."
+msgid ""
+"Check box if private repository. Leave unchecked for public repositories."
 msgstr "قم بالاختيار إذا كان المستودع خاص , قم بتركه من أجل المستودعات العامة"
 
 #: src/GitHub_Updater/Settings.php:345
@@ -170,64 +172,58 @@ msgstr "أدخل اسم المستخدم و كلمة السر لحساب Bitbuck
 msgid "Theme is up-to-date!"
 msgstr "الموضوع محدث"
 
-#: src/GitHub_Updater/Theme.php:209
-#, php-format
-msgid "%sRollback to:%s"
+#: src/GitHub_Updater/Theme.php:210
+#, fuzzy
+msgid "Rollback to:"
 msgstr "‏‪%‬s التراجع ل : ‪%‬s"
 
-#: src/GitHub_Updater/Theme.php:224
+#: src/GitHub_Updater/Theme.php:228
 msgid "No previous tags to rollback to."
 msgstr "لا يوجد أية tags  لتراجع "
 
-#: src/GitHub_Updater/Theme.php:233 src/GitHub_Updater/Theme.php:241
-#, php-format
-msgid "GitHub Updater shows a new version of %1$s available."
+#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
+#, fuzzy, php-format
+msgid "GitHub Updater shows a new version of %s available."
 msgstr "نسخة  %1$s   جديدة متوافرة "
 
-#: src/GitHub_Updater/Theme.php:233
-#, php-format
-msgid "View version %4$s details"
+#: src/GitHub_Updater/Theme.php:243
+#, fuzzy, php-format
+msgid "View version %s details."
 msgstr "رؤية تفاصيل نسخة %4$s"
 
-#: src/GitHub_Updater/Theme.php:233
+#: src/GitHub_Updater/Theme.php:247
 msgid "Automatic update is unavailable for this theme."
 msgstr "التحديث التلقائي غير متوافر لهذا الموضوع"
 
-#: src/GitHub_Updater/Theme.php:241
+#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
 #, fuzzy, php-format
-msgid "View version %4$s details%5$s or %6$supdate now%7$s."
+msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 "<a %2$s> مراجعة تفاصيل الإصدار %3$s  </a> أو <a href=\"%4$s\"> حدث الأن </a>."
 
-#: src/GitHub_Updater/Theme.php:320
+#: src/GitHub_Updater/Theme.php:335
 #, fuzzy, php-format
 msgid "There is a new version of %s available now."
 msgstr "هناك نسخة جديدة من "
 
-#: src/GitHub_Updater/Theme.php:320
-#, fuzzy, php-format
-msgid "%sView version %s details%s or %supdate now%s."
-msgstr ""
-"<a %2$s> مراجعة تفاصيل الإصدار %3$s  </a> أو <a href=\"%4$s\"> حدث الأن </a>."
-
-#: src/GitHub_Updater/Theme.php:332
+#: src/GitHub_Updater/Theme.php:362
 #, fuzzy, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "النسخة الحالية محدثة . قم بتجربة"
 
-#: src/GitHub_Updater/Theme.php:341
+#: src/GitHub_Updater/Theme.php:376
 msgid "Choose a Version"
 msgstr "قم باختيار نسخة"
 
-#: src/GitHub_Updater/Theme.php:344
+#: src/GitHub_Updater/Theme.php:379
 msgid "Install"
 msgstr "تنصيب"
 
-#: vendor/WPUpdatePhp.php:93
+#: vendor/WPUpdatePhp.php:96
 #, php-format
 msgid ""
 "Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$sshow you can update%4$s."
+"information about %3$show you can update%4$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -239,8 +235,8 @@ msgid ""
 "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
 "themes. It also allows for remote installation of plugins or themes into "
 "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
-"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class based "
-"upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
+"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
 "\">Whitelabel Framework</a> modifications."
 msgstr ""
 "إضافة لتحديث التقائي للإضافات والموضوعات المستضافة على GitHub  أو   "
@@ -252,6 +248,12 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#, fuzzy
+#~ msgid "%sView version %s details%s or %supdate now%s."
+#~ msgstr ""
+#~ "<a %2$s> مراجعة تفاصيل الإصدار %3$s  </a> أو <a href=\"%4$s\"> حدث الأن </"
+#~ "a>."
 
 #~ msgid "URI"
 #~ msgstr "(الرابط)"
@@ -278,5 +280,5 @@ msgstr "Andy Fragen"
 #~ "GitHub Updater will not load. It requires PHP 5.3 or greater. Please ask "
 #~ "your service provider to update PHP on your server"
 #~ msgstr ""
-#~ "لن يتم تفعيل الإضافة . إن الإضافة تحتاج PHP 5.3  أو أعلى . الرجاء طلب تحديث "
-#~ "النسخة الحالية من قبل مزود الخدمة"
+#~ "لن يتم تفعيل الإضافة . إن الإضافة تحتاج PHP 5.3  أو أعلى . الرجاء طلب "
+#~ "تحديث النسخة الحالية من قبل مزود الخدمة"

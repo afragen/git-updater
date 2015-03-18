@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-03-13 16:19-0800\n"
-"PO-Revision-Date: 2015-03-14 09:49+0100\n"
+"POT-Creation-Date: 2015-03-17 17:17-0800\n"
+"PO-Revision-Date: 2015-03-17 17:21-0800\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Installé en tant que plugin \"must-use\" (MU-plugin)."
 
-#: src/GitHub_Updater/Base.php:375
+#: src/GitHub_Updater/Base.php:317
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -31,34 +31,36 @@ msgstr ""
 "L'historique des modifications n'est pas disponible. Créez un fichier "
 "<code>CHANGES.md</code> ou <code>CHANGELOG.md</code> dans votre dépôt."
 
-#: src/GitHub_Updater/Base.php:476
-#, php-format
-msgid "Renaming %s to %s"
+#: src/GitHub_Updater/Base.php:418
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
 msgstr "Renommage de %s en %s"
 
-#: src/GitHub_Updater/Base.php:486
+#: src/GitHub_Updater/Base.php:428
 msgid "Rename successful"
 msgstr "Le renommage a réussi"
 
-#: src/GitHub_Updater/Base.php:493
+#: src/GitHub_Updater/Base.php:435
 msgid "Unable to rename downloaded repository."
 msgstr "Impossible de renommer le dépôt téléchargé."
 
-#: src/GitHub_Updater/Base.php:745
-#, php-format
-msgid "%s was not checked. GitHub Updater Error Code: %s"
+#: src/GitHub_Updater/Base.php:688
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr "%s n'a pas été vérifié. Code d'erreur de GitHub Updater : %s"
 
-#: src/GitHub_Updater/Base.php:747
+#: src/GitHub_Updater/Base.php:696
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 "La limite sur le nombre d'appels à l'API GitHub sera réinitialisée dans %s "
 "minutes."
 
-#: src/GitHub_Updater/Base.php:750
-msgid "There is probably an error on the GitHub Updater Settings page"
-msgstr "Il y a probablement une erreur dans les réglages de GitHub Updater"
+#: src/GitHub_Updater/Base.php:703
+#, fuzzy
+msgid "There is probably an error on the GitHub Updater Settings page."
+msgstr ""
+"Il y a probablement une erreur sur la page des réglages de GitHub Updater"
 
 #: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"

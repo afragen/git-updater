@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-13 16:19-0800\n"
-"PO-Revision-Date: 2015-03-14 11:14+0100\n"
+"POT-Creation-Date: 2015-03-17 17:17-0800\n"
+"PO-Revision-Date: 2015-03-17 17:21-0800\n"
 "Last-Translator: Enea Overclokk <info@overclokk.net>\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Attivato come mu-plugin"
 
-#: src/GitHub_Updater/Base.php:375
+#: src/GitHub_Updater/Base.php:317
 msgid ""
 "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
 "md</code> or <code>CHANGELOG.md</code> in your repository."
@@ -30,31 +30,32 @@ msgstr ""
 "Nessun changelog è disponibile con GitHub Updater. Crea un file "
 "<code>CHANGES.md</code> o <code>CHANGELOG.md</code> nel tuo repository."
 
-#: src/GitHub_Updater/Base.php:476
-#, php-format
-msgid "Renaming %s to %s"
-msgstr "Rinominato %s in %s"
+#: src/GitHub_Updater/Base.php:418
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
+msgstr "Rinominato %s a %s"
 
-#: src/GitHub_Updater/Base.php:486
+#: src/GitHub_Updater/Base.php:428
 msgid "Rename successful"
 msgstr "Rinominato con successo"
 
-#: src/GitHub_Updater/Base.php:493
+#: src/GitHub_Updater/Base.php:435
 msgid "Unable to rename downloaded repository."
 msgstr "Impossibile rinominare il repository scaricato."
 
-#: src/GitHub_Updater/Base.php:745
-#, php-format
-msgid "%s was not checked. GitHub Updater Error Code: %s"
+#: src/GitHub_Updater/Base.php:688
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr "%1$s non è stato verificato. Codice di errore di GitHub Updater: %2$s"
 
-#: src/GitHub_Updater/Base.php:747
+#: src/GitHub_Updater/Base.php:696
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "Il limite di frequenza delle GitHub API si resetterà in %s  minuti."
 
-#: src/GitHub_Updater/Base.php:750
-msgid "There is probably an error on the GitHub Updater Settings page"
+#: src/GitHub_Updater/Base.php:703
+#, fuzzy
+msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 "Probabilmente c'è un errore nella pagina impostazioni di GitHub Updater"
 
