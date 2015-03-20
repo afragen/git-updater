@@ -225,7 +225,7 @@ class Install extends Base {
 	public function get_repo() {
 		?>
 		<label for="github_updater_repo">
-			<input type="text" style="width:50%;" name="github_updater_repo" value="" >
+			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus >
 		</label>
 		<?php
 	}
