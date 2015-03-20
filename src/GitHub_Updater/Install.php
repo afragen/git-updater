@@ -182,7 +182,6 @@ class Install extends Base {
 			sprintf( __( '%s URI', 'github-updater' ), $repo_type ),
 			array( $this, 'get_repo' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -191,7 +190,6 @@ class Install extends Base {
 			__( 'Remote Repository Host', 'github-updater' ),
 			array( $this, 'api' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -200,7 +198,6 @@ class Install extends Base {
 			__( 'Repository Branch', 'github-updater' ),
 			array( $this, 'branch' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -209,7 +206,6 @@ class Install extends Base {
 			__( 'Private Bitbucket Repository', 'github-updater' ),
 			array( $this, 'is_private' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -218,7 +214,6 @@ class Install extends Base {
 			__( 'GitHub Access Token', 'github-updater' ),
 			array( $this, 'access_token' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
