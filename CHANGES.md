@@ -6,6 +6,9 @@
 * make strings better for translation - thanks @pedro-mendonca and @fxbenard
 * additional Portuguese translation by [Pedro Mendonça](https://github.com/pedro-mendonca)
 * refactor for getting local plugin and theme meta, now simpler for additional APIs (I'm thinking about you GitLab)
+* fix link in README to GitHub Link
+* correctly pass array as last argument in `add_settings_field`
+* add focus to URI input field
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
