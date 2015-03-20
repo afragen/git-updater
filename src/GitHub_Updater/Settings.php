@@ -193,7 +193,7 @@ class Settings extends Base {
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
-			'bitbucket_username'
+			array( 'id' => 'bitbucket_username' )
 		);
 
 		add_settings_field(
@@ -202,7 +202,7 @@ class Settings extends Base {
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
-			'bitbucket_password'
+			array( 'id' => 'bitbucket_password' )
 		);
 
 		/**
@@ -291,7 +291,7 @@ class Settings extends Base {
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				$setting_field['callback']
+				array( 'id' => $setting_field['callback'] )
 			);
 		}
 
@@ -348,14 +348,14 @@ class Settings extends Base {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param $id
+	 * @param $args
 	 */
-	public function token_callback_text( $id ) {
-		$name = isset( parent::$options[ $id ] ) ? esc_attr( parent::$options[ $id ] ) : '';
-		$type = stristr( $id, 'password' ) ? 'password' : 'text';
+	public function token_callback_text( $args ) {
+		$name = isset( parent::$options[ $args['id' ] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
+		$type = stristr( $args['id'], 'password' ) ? 'password' : 'text';
 		?>
-		<label for="<?php echo $id; ?>">
-			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
+		<label for="<?php echo $args['id']; ?>">
+			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $args['id']; ?>]" value="<?php echo $name; ?>" >
 		</label>
 		<?php
 	}
@@ -363,12 +363,12 @@ class Settings extends Base {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param $id
+	 * @param $args
 	 */
-	public function token_callback_checkbox( $id ) {
+	public function token_callback_checkbox( $args ) {
 		?>
-		<label for="<?php echo $id; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> >
+		<label for="<?php echo $args['id']; ?>">
+			<input type="checkbox" name="github_updater[<?php echo $args['id']; ?>]" value="1" <?php checked('1', parent::$options[ $args['id'] ], true); ?> >
 		</label>
 		<?php
 	}
