@@ -34,8 +34,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 require_once ( plugin_dir_path( __FILE__ ) . '/vendor/WPUpdatePhp.php' );
 $updatePhp = new WPUpdatePhp( '5.3.0' );
+$updatePhp->set_plugin_name( 'GitHub Updater' );
 
-if ( ! $updatePhp->does_my_plugin_meet_required_php_version( __FILE__ ) ) {
+if ( ! $updatePhp->does_it_meet_required_php_version() ) {
 	return false;
 }
 
