@@ -1,6 +1,5 @@
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
-* don't use variable for calling a class. bad Andy
 * use https://api.wordpress.org not http
 * Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
 * make strings better for translation - thanks @pedro-mendonca and @fxbenard
