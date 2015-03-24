@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-17 17:17-0800\n"
-"PO-Revision-Date: 2015-03-17 17:17-0800\n"
-"Last-Translator: Andy Fragen <andy@thefragens.com>\n"
+"POT-Creation-Date: 2015-03-24 08:31-0000\n"
+"PO-Revision-Date: 2015-03-24 08:31-0000\n"
+"Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.7.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -81,27 +81,27 @@ msgstr ""
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:191
+#: src/GitHub_Updater/Install.php:190
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:200
+#: src/GitHub_Updater/Install.php:198
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:209
+#: src/GitHub_Updater/Install.php:206
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:218
+#: src/GitHub_Updater/Install.php:214
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:246
+#: src/GitHub_Updater/Install.php:241
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:288
+#: src/GitHub_Updater/Install.php:283
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -213,11 +213,23 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
-#: vendor/WPUpdatePhp.php:96
+#: vendor/WPUpdatePhp.php:24
+msgid "this plugin"
+msgstr ""
+
+#: vendor/WPUpdatePhp.php:91
 #, php-format
-msgid ""
-"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$show you can update%4$s."
+msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+msgstr ""
+
+#: vendor/WPUpdatePhp.php:93 vendor/WPUpdatePhp.php:109
+#, php-format
+msgid "Read more information about %show you can update%s."
+msgstr ""
+
+#: vendor/WPUpdatePhp.php:107
+#, php-format
+msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -237,3 +249,4 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
+
