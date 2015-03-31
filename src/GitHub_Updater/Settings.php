@@ -178,6 +178,25 @@ class Settings extends Base {
 		}
 
 		/**
+		 * Add settings for GitHub Personal Access Token
+		 */
+		add_settings_section(
+			'github_access_token',
+			__( 'Personal GitHub Access Token', 'github-updater' ),
+			array( $this, 'print_section_github_access_token' ),
+			'github_updater_install_settings'
+		);
+
+		add_settings_field(
+			'github_access_token',
+			__( 'GitHub Access Token', 'github-updater' ),
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'github_access_token',
+			array( 'id' => 'github_access_token' )
+		);
+
+		/**
 		 * Add settings for Bitbucket Username and Password.
 		 */
 		add_settings_section(
@@ -301,6 +320,7 @@ class Settings extends Base {
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
+		unset( $ghu_unset_keys['github_access_token'] );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -329,6 +349,13 @@ class Settings extends Base {
 	 */
 	public function print_section_github_info() {
 		_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitHub Personal Access Token text.
+	 */
+	public function print_section_github_access_token() {
+		_e( 'Enter your personal GitHub Access Token to avoid API access limits.', 'github-updater' );
 	}
 
 	/**

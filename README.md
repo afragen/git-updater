@@ -208,6 +208,8 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401. If you don't have an Access Token set for a private GitHub repo you will get a 404 error.
 
+There is a new setting for a personal GitHub Access Token. Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Thanks [mlteal](https://github.com/mlteal).
+
 ### 403 - Unauthorized Access
 
 #### GitHub
