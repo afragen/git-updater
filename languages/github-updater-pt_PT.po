@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-24 08:31-0000\n"
-"PO-Revision-Date: 2015-03-24 08:52-0000\n"
+"POT-Creation-Date: 2015-03-31 08:42-0000\n"
+"PO-Revision-Date: 2015-03-31 08:46-0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -96,7 +96,7 @@ msgstr "Ramo do repositório"
 msgid "Private Bitbucket Repository"
 msgstr "Repositório privado do Bitbucket"
 
-#: src/GitHub_Updater/Install.php:214
+#: src/GitHub_Updater/Install.php:214 src/GitHub_Updater/Settings.php:192
 msgid "GitHub Access Token"
 msgstr "Token de acesso do GitHub"
 
@@ -109,7 +109,7 @@ msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 "Introduza o token de acesso do GitHub para repositórios privados do GitHub."
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
+#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:432
 msgid "Settings"
 msgstr "Definições"
 
@@ -132,43 +132,53 @@ msgid "GitHub Private Settings"
 msgstr "Definições privadas do GitHub"
 
 #: src/GitHub_Updater/Settings.php:185
+msgid "Personal GitHub Access Token"
+msgstr "Token pessoal de acesso do GitHub"
+
+#: src/GitHub_Updater/Settings.php:204
 msgid "Bitbucket Private Settings"
 msgstr "Definições privadas do Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:192
+#: src/GitHub_Updater/Settings.php:211
 msgid "Bitbucket Username"
 msgstr "Utilizador do Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:201
+#: src/GitHub_Updater/Settings.php:220
 msgid "Bitbucket Password"
 msgstr "Senha do Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:214
+#: src/GitHub_Updater/Settings.php:233
 msgid "Bitbucket Private Repositories"
 msgstr "Repositórios privados do Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:226
+#: src/GitHub_Updater/Settings.php:245
 msgid "No private repositories are installed."
 msgstr "Nenhum repositório privado instalado."
 
-#: src/GitHub_Updater/Settings.php:271
+#: src/GitHub_Updater/Settings.php:290
 msgid "Theme:"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:351
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Introduza o seu Token de acesso do GitHub. Deixe vazio para repositórios "
 "públicos."
 
-#: src/GitHub_Updater/Settings.php:338
+#: src/GitHub_Updater/Settings.php:358
+msgid "Enter your personal GitHub Access Token to avoid API access limits."
+msgstr ""
+"Introduza o seu Token pessoal de acesso do GitHub para evitar o limite de "
+"acessos da API."
+
+#: src/GitHub_Updater/Settings.php:365
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Seleccione a opção se for um repositório privado. Não seleccione para "
 "repositórios públicos."
 
-#: src/GitHub_Updater/Settings.php:345
+#: src/GitHub_Updater/Settings.php:372
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Introduza o seu utilizador e senha do seu Bitbucket"
 
@@ -225,17 +235,17 @@ msgstr "Instalar"
 msgid "this plugin"
 msgstr "este plugin"
 
-#: vendor/WPUpdatePhp.php:91
+#: vendor/WPUpdatePhp.php:92
 #, php-format
 msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
 msgstr "Infelizmente, o %1$s não corre em versões do PHP anteriores a %2$s."
 
-#: vendor/WPUpdatePhp.php:93 vendor/WPUpdatePhp.php:109
+#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
 #, php-format
 msgid "Read more information about %show you can update%s."
 msgstr "Leia mais informações sobre %scomo pode actualizar%s."
 
-#: vendor/WPUpdatePhp.php:107
+#: vendor/WPUpdatePhp.php:108
 #, php-format
 msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr "%1$s recomenda uma versão de PHP superior a %2$s."
