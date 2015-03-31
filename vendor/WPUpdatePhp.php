@@ -77,6 +77,7 @@ class WPUpdatePhp {
 	private function load_version_notice( $callback ) {
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			add_action( 'admin_notices', $callback );
+			add_action( 'network_admin_notices', $callback );
 		}
 	}
 
