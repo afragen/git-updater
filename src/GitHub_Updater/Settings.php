@@ -182,14 +182,14 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'github_access_token',
-			__( 'GitHub Personal Access Token', 'github-updater' ),
+			__( 'Personal GitHub Access Token', 'github-updater' ),
 			array( $this, 'print_section_github_access_token' ),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
-			__( 'GitHub Personal Access Token', 'github-updater' ),
+			__( 'GitHub Access Token', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'github_access_token',
