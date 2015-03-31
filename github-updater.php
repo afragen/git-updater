@@ -44,12 +44,12 @@ if ( ! $updatePhp->does_it_meet_required_php_version() ) {
 load_plugin_textdomain( 'github-updater', false, __DIR__ . '/languages' );
 
 // Plugin namespace root
-$root = array( 'Fragen\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
+$root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array(
-	'Fragen\GitHub_Updater\Parsedown' => __DIR__ . '/vendor/Parsedown.php',
-	//'WPUpdatePHP'                     => __DIR__ . '/vendor/WPUpdatePhp.php',
+	'Fragen\\GitHub_Updater\\Parsedown' => __DIR__ . '/vendor/Parsedown.php',
+	'WPUpdatePHP'                       => __DIR__ . '/vendor/WPUpdatePhp.php',
 	);
 
 // Load Autoloader
