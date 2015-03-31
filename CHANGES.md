@@ -8,7 +8,7 @@
 * fix link in README to GitHub Link
 * correctly pass array as last argument in `add_settings_field`
 * add focus to URI input field
-* add Setting for personal GitHub Access Token to avoid API rate limit. Thanks @mlteal
+* add Setting for personal GitHub Access Token to avoid API rate limit - thanks @mlteal
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
