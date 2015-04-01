@@ -72,13 +72,13 @@ class Theme extends Base {
 			/**
 			 * Update theme transient with rollback data.
 			 */
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+			if ( ! empty( $_GET['rollback'] ) && ( isset( $_GET['theme'] ) && $_GET['theme'] === $theme->repo ) ) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
-					'package'     => $repo_api->construct_download_link( $this->tag ),
+					'package'     => $repo_api->construct_download_link( $this->tag, false ),
 				);
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
@@ -275,7 +275,7 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
+		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI', 'GitLab Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
 			if ( empty( $repo_uri ) ) {

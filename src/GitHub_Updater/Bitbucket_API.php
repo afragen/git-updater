@@ -191,10 +191,11 @@ class Bitbucket_API extends Base {
 	 * Construct $download_link
 	 *
 	 * @param boolean $rollback for theme rollback
+	 * @param boolean $branch_switch for direct branch changing
 	 * 
 	 * @return string URI
 	 */
-	public function construct_download_link( $rollback = false ) {
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
 		$endpoint           = '';
 
@@ -209,6 +210,13 @@ class Bitbucket_API extends Base {
 			$endpoint .= $this->type->branch . '.zip';
 		} else {
 			$endpoint .= $this->type->newest_tag . '.zip';
+		}
+
+		/**
+		 * Create endpoint for branch switching.
+		 */
+		if ( $branch_switch ) {
+			$endpoint = $branch_switch . '.zip';
 		}
 
 		return $download_link_base . $endpoint;
@@ -281,6 +289,37 @@ class Bitbucket_API extends Base {
 
 		$this->type->repo_meta = $response;
 		$this->_add_meta_repo_object();
+		$this->get_branches();
+	}
+
+	/**
+	 * Create array of branches and download links as array.
+	 * @return bool
+	 */
+	public function get_branches() {
+		$branches = array();
+		$response = $this->get_transient( 'branches' );
+
+		if ( ! $response ) {
+			$response = $this->api( '1.0/repositories/:owner/:repo/branches' );
+
+			if ( $response ) {
+				foreach ( $response as $branch ) {
+					$branches[ $branch->branch ] = $this->construct_download_link( false, $branch->branch );
+				}
+				$this->type->branches = $branches;
+				$this->set_transient( 'branches', $branches );
+				return true;
+			}
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
+
+		$this->type->branches = $response;
+
+		return true;
 	}
 
 	/**

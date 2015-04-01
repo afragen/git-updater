@@ -314,6 +314,7 @@ class Base {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
+		$this->$type->branches              = array();
 		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;

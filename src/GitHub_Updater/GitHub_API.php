@@ -200,10 +200,11 @@ class GitHub_API extends Base {
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @param boolean $rollback for theme rollback
+	 * @param boolean $branch_switch for direct branch changing
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link( $rollback = false ) {
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint           = '';
 
@@ -221,6 +222,13 @@ class GitHub_API extends Base {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
+		}
+
+		/**
+		 * Create endpoint for branch switching.
+		 */
+		if ( $branch_switch ) {
+			$endpoint = $branch_switch;
 		}
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
@@ -293,6 +301,7 @@ class GitHub_API extends Base {
 
 		$this->type->repo_meta = $response->items[0];
 		$this->_add_meta_repo_object();
+		$this->get_branches();
 	}
 
 	/**
@@ -303,6 +312,36 @@ class GitHub_API extends Base {
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
 		$this->type->private      = $this->type->repo_meta->private;
+	}
+
+	/**
+	 * Create array of branches and download links as array.
+	 * @return bool
+	 */
+	public function get_branches() {
+		$branches = array();
+		$response = $this->get_transient( 'branches' );
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/branches' );
+
+			if ( $response ) {
+				foreach ( $response as $branch ) {
+					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
+				}
+				$this->type->branches = $branches;
+				$this->set_transient( 'branches', $branches );
+				return true;
+			}
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
+
+		$this->type->branches = $response;
+
+		return true;
 	}
 
 	/**

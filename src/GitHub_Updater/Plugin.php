@@ -22,6 +22,13 @@ namespace Fragen\GitHub_Updater;
 class Plugin extends Base {
 
 	/**
+	 * Rollback variable
+	 *
+	 * @var string branch
+	 */
+	protected $tag = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -60,6 +67,29 @@ class Plugin extends Base {
 				}
 				$plugin->download_link = $repo_api->construct_download_link();
 			}
+
+			/**
+			 * Update plugin transient with rollback (branch switching) data.
+			 */
+			if ( ! empty( $_GET['rollback'] ) &&
+			     ( isset( $_GET['plugin'] ) && $_GET['plugin'] === $plugin->slug )
+			) {
+				$this->tag         = $_GET['rollback'];
+				$updates_transient = get_site_transient('update_plugins');
+				$rollback          = array(
+					'slug'        => $plugin->repo,
+					'plugin'      => $plugin->slug,
+					'new_version' => $this->tag,
+					'url'         => $plugin->uri,
+					'package'     => $repo_api->construct_download_link( false, $this->tag ),
+				);
+				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
+				//unset( $updates_transient->checked[ $plugin->slug ] );
+				//$updates_transient->checked[ $plugin->slug ] = '0';
+				set_site_transient( 'update_plugins', $updates_transient );
+			}
+
+			add_action( "after_plugin_row_$plugin->slug", array( $this, 'wp_plugin_update_row' ), 15, 3 );
 		}
 
 		$this->make_force_check_transient( 'plugins' );
@@ -72,6 +102,37 @@ class Plugin extends Base {
 		Settings::$ghu_plugins = $this->config;
 	}
 
+
+	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
+		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$plugin        = dirname( $plugin_file );
+		$id            = $plugin . '-id';
+		$branches      = isset( $this->config[ $plugin ] ) ? $this->config[ $plugin ]->branches : null;
+
+		if ( isset( $this->config[ $plugin ] ) ) {
+			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
+
+			if ( $branches ) {
+				printf( __( 'Try %sanother branch%s', 'github-updater' ),
+					'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+					'</a>'
+				);
+
+				print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+				foreach ( $branches as $branch => $uri ) {
+					printf( '<li><a href="%s%s">%s</a></li>',
+						wp_nonce_url(
+							self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ) ),
+						'&rollback=' . urlencode( $branch ),
+						esc_attr( $branch )
+					);
+				}
+				print( '</ul>' );
+			}
+			echo '</div></td></tr>';
+		}
+
+	}
 
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
@@ -157,6 +218,16 @@ class Plugin extends Base {
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
+					continue;
+				}
+
+				/**
+				 * Don't overwrite if branch switching.
+				 */
+				if ( isset( $_GET['rollback'] ) &&
+				     ( isset( $_GET['plugin'] ) &&
+				       $plugin->slug === $_GET['plugin'] )
+				) {
 					continue;
 				}
 
