@@ -109,29 +109,31 @@ class Plugin extends Base {
 		$id            = $plugin . '-id';
 		$branches      = isset( $this->config[ $plugin ] ) ? $this->config[ $plugin ]->branches : null;
 
+		if ( ! $branches ) {
+			return false;
+		}
+
 		if ( isset( $this->config[ $plugin ] ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			if ( $branches ) {
-				printf( __( 'Try %sanother branch%s', 'github-updater' ),
-					'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
-					'</a>'
-				);
+			printf( __( 'Current branch is `%s`, try %sanother branch%s.', 'github-updater' ),
+				$this->config[ $plugin ]->branch,
+				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+				'</a>'
+			);
 
-				print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-				foreach ( $branches as $branch => $uri ) {
-					printf( '<li><a href="%s%s">%s</a></li>',
-						wp_nonce_url(
-							self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ) ),
-						'&rollback=' . urlencode( $branch ),
-						esc_attr( $branch )
-					);
-				}
-				print( '</ul>' );
+			print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+			foreach ( $branches as $branch => $uri ) {
+				printf( '<li><a href="%s%s">%s</a></li>',
+					wp_nonce_url(
+						self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ) ),
+					'&rollback=' . urlencode( $branch ),
+					esc_attr( $branch )
+				);
 			}
+			print( '</ul>' );
 			echo '</div></td></tr>';
 		}
-
 	}
 
 	/**
