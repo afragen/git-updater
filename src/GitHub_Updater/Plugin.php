@@ -84,8 +84,6 @@ class Plugin extends Base {
 					'package'     => $repo_api->construct_download_link( false, $this->tag ),
 				);
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
-				//unset( $updates_transient->checked[ $plugin->slug ] );
-				//$updates_transient->checked[ $plugin->slug ] = '0';
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
@@ -124,9 +122,9 @@ class Plugin extends Base {
 
 			print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 			foreach ( $branches as $branch => $uri ) {
+
 				printf( '<li><a href="%s%s">%s</a></li>',
-					wp_nonce_url(
-						self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ) ),
+					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
 					'&rollback=' . urlencode( $branch ),
 					esc_attr( $branch )
 				);
