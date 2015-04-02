@@ -102,6 +102,7 @@ class Plugin extends Base {
 
 
 	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
+		$branch_keys   = array( 'GitHub Branch', 'Bitbucket Branch', 'GitLab Branch' );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$plugin        = dirname( $plugin_file );
 		$id            = $plugin . '-id';
@@ -111,11 +112,24 @@ class Plugin extends Base {
 			return false;
 		}
 
+		/**
+		 * Get current branch.
+		 */
+		foreach ( $branch_keys as $branch_key ) {
+			$branch = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
+			if ( 'master' !== $branch ) {
+				break;
+			}
+		}
+
+		/**
+		 * Create after_plugin_row_
+		 */
 		if ( isset( $this->config[ $plugin ] ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
 			printf( __( 'Current branch is `%s`, try %sanother branch%s.', 'github-updater' ),
-				$this->config[ $plugin ]->branch,
+				$branch,
 				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
 				'</a>'
 			);
