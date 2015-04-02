@@ -47,12 +47,25 @@ class Install extends Base {
 	/**
 	 * Install remote plugin or theme.
 	 * @param $type
+	 *
+	 * @return bool
 	 */
 	public function install( $type ) {
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' == $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
 				$_POST['github_updater_branch'] = 'master';
+			}
+
+			/**
+			 * Exit early if no repo entered.
+			 */
+			if ( empty( $_POST['github_updater_repo'] ) ) {
+				echo '<h3>';
+				_e( 'A repository URI is required.', 'github-updater' );
+				echo '</h3>';
+
+				return false;
 			}
 
 			/**
