@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-24 08:31-0000\n"
-"PO-Revision-Date: 2015-03-24 08:31-0000\n"
+"POT-Creation-Date: 2015-03-31 08:42-0000\n"
+"PO-Revision-Date: 2015-03-31 08:42-0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -93,7 +93,7 @@ msgstr ""
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:214
+#: src/GitHub_Updater/Install.php:214 src/GitHub_Updater/Settings.php:192
 msgid "GitHub Access Token"
 msgstr ""
 
@@ -105,7 +105,7 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
+#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:432
 msgid "Settings"
 msgstr ""
 
@@ -128,39 +128,47 @@ msgid "GitHub Private Settings"
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:185
+msgid "Personal GitHub Access Token"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:204
 msgid "Bitbucket Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:192
+#: src/GitHub_Updater/Settings.php:211
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:201
+#: src/GitHub_Updater/Settings.php:220
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:214
+#: src/GitHub_Updater/Settings.php:233
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:226
+#: src/GitHub_Updater/Settings.php:245
 msgid "No private repositories are installed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:271
+#: src/GitHub_Updater/Settings.php:290
 msgid "Theme:"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:351
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:338
+#: src/GitHub_Updater/Settings.php:358
+msgid "Enter your personal GitHub Access Token to avoid API access limits."
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:365
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:345
+#: src/GitHub_Updater/Settings.php:372
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
@@ -217,17 +225,17 @@ msgstr ""
 msgid "this plugin"
 msgstr ""
 
-#: vendor/WPUpdatePhp.php:91
+#: vendor/WPUpdatePhp.php:92
 #, php-format
 msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
 msgstr ""
 
-#: vendor/WPUpdatePhp.php:93 vendor/WPUpdatePhp.php:109
+#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
 #, php-format
 msgid "Read more information about %show you can update%s."
 msgstr ""
 
-#: vendor/WPUpdatePhp.php:107
+#: vendor/WPUpdatePhp.php:108
 #, php-format
 msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr ""
@@ -249,4 +257,3 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
-
