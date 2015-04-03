@@ -19,7 +19,7 @@ License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Domain Path:       /languages
 Text Domain:       github-updater
 GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     branch-switcher
+GitHub Branch:     develop
 Requires WP:       3.8
 Requires PHP:      5.3
 */

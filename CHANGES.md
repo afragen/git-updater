@@ -1,6 +1,3 @@
-#### 4.4.0
-* add Setting for branch switching from the Plugins page
-
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
 * use https://api.wordpress.org not http
@@ -12,6 +9,7 @@
 * correctly pass array as last argument in `add_settings_field`
 * add focus to URI input field
 * add Setting for personal GitHub Access Token to avoid API rate limit - thanks @mlteal
+* add Setting for branch switching from the Plugins page
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
