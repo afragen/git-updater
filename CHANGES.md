@@ -10,6 +10,7 @@
 * add focus to URI input field
 * add Setting for personal GitHub Access Token to avoid API rate limit - thanks @mlteal
 * add Setting for branch switching from the Plugins page
+* add 'View details' link in Plugins page
 
 #### 4.2.2
 * fix POT and some updated languages, thanks @fxbenard
