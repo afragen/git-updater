@@ -102,6 +102,11 @@ class Plugin extends Base {
 
 
 	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
+		$options = get_site_option( 'github_updater' );
+		if ( ! isset( $options['branch_switch'] ) ) {
+			return false;
+		}
+
 		$branch_keys   = array( 'GitHub Branch', 'Bitbucket Branch', 'GitLab Branch' );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$plugin        = dirname( $plugin_file );

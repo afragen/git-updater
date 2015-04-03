@@ -165,17 +165,21 @@ class Settings extends Base {
 
 		$this->ghu_tokens();
 
-		/**
-		 * Show section for private GitHub repositories.
-		 */
-		if ( self::$github_private ) {
-			add_settings_section(
-				'github_id',                                       // ID
-				__( 'GitHub Private Settings', 'github-updater' ), // Title
-				array( $this, 'print_section_github_info' ),
-				'github_updater_install_settings'                  // Page
-			);
-		}
+		add_settings_section(
+			'github_updater_settings',
+			__( 'GitHub Updater Settings', 'github-updater' ),
+			array( $this, 'print_section_ghu_settings'),
+			'github_updater_install_settings'
+		);
+
+		add_settings_field(
+			'branch_switch',
+			__( 'Enable Plugin Branch Switching', 'github-updater' ),
+			array( $this, 'token_callback_checkbox' ),
+			'github_updater_install_settings',
+			'github_updater_settings',
+			array( 'id' => 'branch_switch' )
+		);
 
 		/**
 		 * Add settings for GitHub Personal Access Token
@@ -195,6 +199,18 @@ class Settings extends Base {
 			'github_access_token',
 			array( 'id' => 'github_access_token' )
 		);
+
+		/**
+		 * Show section for private GitHub repositories.
+		 */
+		if ( self::$github_private ) {
+			add_settings_section(
+				'github_id',                                       // ID
+				__( 'GitHub Private Settings', 'github-updater' ), // Title
+				array( $this, 'print_section_github_info' ),
+				'github_updater_install_settings'                  // Page
+			);
+		}
 
 		/**
 		 * Add settings for Bitbucket Username and Password.
@@ -321,6 +337,7 @@ class Settings extends Base {
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
 		unset( $ghu_unset_keys['github_access_token'] );
+		unset( $ghu_unset_keys['branch_switch'] );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -342,6 +359,13 @@ class Settings extends Base {
 		}
 
 		return $new_input;
+	}
+
+	/**
+	 * Print the GitHub Updater text
+	 */
+	public function print_section_ghu_settings() {
+		_e( 'Check to enable branch switching from the Plugins page.', 'github-updater' );
 	}
 
 	/**

@@ -304,6 +304,9 @@ class Base {
 	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
+		if ( ! isset( self::$options['branch_switch'] ) ) {
+			self::$options['branch_switch']      = null;
+		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );

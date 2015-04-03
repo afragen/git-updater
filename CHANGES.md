@@ -1,3 +1,6 @@
+#### 4.4.0
+* add Setting for branch switching from the Plugins page
+
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
 * use https://api.wordpress.org not http
