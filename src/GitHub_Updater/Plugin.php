@@ -103,7 +103,7 @@ class Plugin extends Base {
 
 	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
 		$options = get_site_option( 'github_updater' );
-		if ( ! isset( $options['branch_switch'] ) ) {
+		if ( empty( $options['branch_switch'] ) ) {
 			return false;
 		}
 
@@ -133,7 +133,7 @@ class Plugin extends Base {
 		if ( isset( $this->config[ $plugin ] ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+			printf( __( 'Current branch is `%s`, try %sanother branch%s.', 'github-updater' ),
 				$branch,
 				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
 				'</a>'
