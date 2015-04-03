@@ -188,6 +188,13 @@ class Plugin extends Base {
 		}
 
 		if ( ! empty( $slug ) && isset( $repo[1] ) && array_key_exists( $repo[1], $this->config ) ) {
+			/**
+			 * Remove 'Visit plugin site' link in favor or 'View details' link.
+			 */
+			if ( false !== stristr( $plugin_meta[2], 'Visit plugin site' ) ) {
+				unset( $plugin_meta[2] );
+			}
+
 			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
 				                            '&TB_iframe=true&width=600&height=550' ) ),
