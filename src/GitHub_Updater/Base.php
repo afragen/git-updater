@@ -304,6 +304,9 @@ class Base {
 	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
+		if ( ! isset( self::$options['branch_switch'] ) ) {
+			self::$options['branch_switch']      = null;
+		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
@@ -314,6 +317,7 @@ class Base {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
+		$this->$type->branches              = array();
 		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
