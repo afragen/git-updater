@@ -92,6 +92,7 @@ class Plugin extends Base {
 
 		$this->make_force_check_transient( 'plugins' );
 
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ) );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
@@ -101,6 +102,14 @@ class Plugin extends Base {
 	}
 
 
+	/**
+	 * Add branch switch row to plugins page.
+	 *
+	 * @param $plugin_file
+	 * @param $plugin_data
+	 *
+	 * @return bool
+	 */
 	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
@@ -151,6 +160,41 @@ class Plugin extends Base {
 			print( '</ul>' );
 			echo '</div></td></tr>';
 		}
+	}
+
+	/**
+	 * Add 'View details' link to plugins page.
+	 *
+	 * @param $plugin_meta
+	 *
+	 * @return array
+	 */
+	public function plugin_row_meta( $plugin_meta ) {
+		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
+
+		/**
+		 * Sanity check for some commercial plugins.
+		 */
+		if ( ! isset( $plugin_meta[2] ) ) {
+			return $plugin_meta;
+		}
+
+		preg_match( $regex_pattern, $plugin_meta[2], $matches );
+
+		if ( 'View details' !== $matches[2] ) {
+			$slug = trim( parse_url( $matches[1], PHP_URL_PATH ), '/' );
+			$repo = explode( '/', $slug );
+		}
+
+		if ( ! empty( $slug ) && isset( $repo[1] ) && array_key_exists( $repo[1], $this->config ) ) {
+			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
+				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
+				                            '&TB_iframe=true&width=600&height=550' ) ),
+				__( 'View details' )
+			);
+		}
+
+		return $plugin_meta;
 	}
 
 	/**
