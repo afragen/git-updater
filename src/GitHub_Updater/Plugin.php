@@ -164,6 +164,7 @@ class Plugin extends Base {
 
 	/**
 	 * Add 'View details' link to plugins page.
+	 * Only works if `Plugin URI' === `GitHub Plugin URI`
 	 *
 	 * @param $plugin_meta
 	 *
