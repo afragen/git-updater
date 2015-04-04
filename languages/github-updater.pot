@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-04-02 21:14-0800\n"
-"PO-Revision-Date: 2015-04-02 21:14-0800\n"
+"POT-Creation-Date: 2015-04-03 22:08-0800\n"
+"PO-Revision-Date: 2015-04-03 22:08-0800\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -41,17 +41,17 @@ msgstr ""
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:692
+#: src/GitHub_Updater/Base.php:689
 #, php-format
 msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:700
+#: src/GitHub_Updater/Base.php:697
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:707
+#: src/GitHub_Updater/Base.php:704
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
@@ -109,9 +109,13 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:136
+#: src/GitHub_Updater/Plugin.php:145
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
+msgstr ""
+
+#: src/GitHub_Updater/Plugin.php:201
+msgid "View details"
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:456
