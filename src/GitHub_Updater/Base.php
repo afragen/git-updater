@@ -673,11 +673,8 @@ class Base {
 		}
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			if ( ! is_main_network() ) {
 				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
-			} else {
-				add_action( 'admin_head', array( $this, 'show_error_message' ) );
-			}
+				add_action( 'network_admin_notices', array( $this, 'show_error_message' ) );
 		}
 	}
 
@@ -686,7 +683,7 @@ class Base {
 	 */
 	public function show_error_message() {
 		?>
-		<div class="error">
+		<div class="error notice is-dismissible">
 			<p>
 				<?php
 					printf( __( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),

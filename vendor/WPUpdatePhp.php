@@ -87,7 +87,7 @@ class WPUpdatePhp {
 	 */
 	public function minimum_admin_notice() {
 		?>
-		<div class="error">
+		<div class="error notice is-dismissible">
 			<p>
 			<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s.', 'github-updater' ), $this->plugin_name, $this->minimum_version ); ?>
 			<br>
@@ -103,7 +103,7 @@ class WPUpdatePhp {
 	 */
 	public function recommended_admin_notice() {
 		?>
-		<div class="error">
+		<div class="error notice is-dismissible">
 			<p>
 				<?php printf( __( '%1$s recommends a PHP version greater than %2$s.', 'github-updater' ), ucfirst( $this->plugin_name ), $this->recommended_version ); ?>
 				<br>
