@@ -142,7 +142,7 @@ class Plugin extends Base {
 		if ( isset( $this->config[ $plugin ] ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			printf( __( 'Current branch is `%s`, try %sanother branch%s.', 'github-updater' ),
+			printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 				$branch,
 				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
 				'</a>'
@@ -198,7 +198,7 @@ class Plugin extends Base {
 			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
 				                            '&TB_iframe=true&width=600&height=550' ) ),
-				__( 'View details' )
+				__( 'View details', 'github-updater' )
 			);
 		}
 
