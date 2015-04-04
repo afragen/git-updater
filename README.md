@@ -5,13 +5,13 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.1
+* Tested up to: 4.2beta
 * Stable tag: master
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes.
+A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -142,6 +142,8 @@ The default state is either `GitHub Branch: master` or nothing at all. They are 
 
 If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
 
+In the GitHub Updater Settings there is a new setting to enable branch switching for plugins. When checked there will be a new ability from the Plugins page to switch between plugin branches.
+
 ## Tagging
 
 If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
@@ -200,13 +202,15 @@ The same applies for Bitbucket hosted plugins.
 
 ## Remote Installation of Repositories
 
-From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. If you install a private repository you must update the Settings tab so updates will be available. You may use either a full URI or short `<owner>/<repo>` format.
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
 ## Error Messages
 
-GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401.
+GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401. If you don't have an Access Token set for a private GitHub repo you will get a 404 error.
+
+There is a new setting for a personal GitHub Access Token. Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Thanks [mlteal](https://github.com/mlteal).
 
 ### 403 - Unauthorized Access
 
@@ -228,15 +232,20 @@ GitHub Updater now reports a small error message on certain pages in the dashboa
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
-<https://github.com/szepeviktor/wordpress-plugin-construction/tree/master/github-link>
+<https://github.com/szepeviktor/github-link>
 
 ### Translations
 
-* French by [Daniel Ménard](https://github.com/daniel-menard)
+* French by
+    * [Daniel Ménard](https://github.com/daniel-menard)
+    * [fxbenard](https://github.com/fxbenard)
 * Italian by [Enea Overclokk](https://github.com/overclokk)
-* Portuguese by [Valerio Souza](https://github.com/valeriosouza)
+* Portuguese by
+    * [Valerio Souza](https://github.com/valeriosouza)
+    * [Pedro Mendonça](https://github.com/pedro-mendonca)
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
+* Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
 
 ## Issues
 

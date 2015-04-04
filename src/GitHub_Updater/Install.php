@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * Class    Install
  * @package Fragen\GitHub_Updater
  */
-class Install {
+class Install extends Base {
 
 	/**
 	 * Remote Host APIs.
@@ -32,7 +32,7 @@ class Install {
 	 * Class options.
 	 * @var array
 	 */
-	protected static $options = array();
+	protected static $install = array();
 
 	/**
 	 * Constructor
@@ -47,6 +47,8 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 * @param $type
+	 *
+	 * @return bool
 	 */
 	public function install( $type ) {
 
@@ -56,40 +58,58 @@ class Install {
 			}
 
 			/**
+			 * Exit early if no repo entered.
+			 */
+			if ( empty( $_POST['github_updater_repo'] ) ) {
+				echo '<h3>';
+				_e( 'A repository URI is required.', 'github-updater' );
+				echo '</h3>';
+
+				return false;
+			}
+
+			/**
 			 * Transform URI to owner/repo
 			 */
 			$_POST['github_updater_repo'] = parse_url( $_POST['github_updater_repo'], PHP_URL_PATH );
 			$_POST['github_updater_repo'] = trim( $_POST['github_updater_repo'], '/' );
 
-			self::$options = Settings::sanitize( $_POST );
+			self::$install = Settings::sanitize( $_POST );
+			self::$install['repo'] = explode( '/', self::$install['github_updater_repo'] );
 
 			/**
 			 * Create GitHub endpoint.
+			 * Save Access Token if present.
 			 */
-			if ( 'github' === self::$options['github_updater_api'] ) {
-				self::$options['download_link'] = 'https://api.github.com/repos/' . self::$options['github_updater_repo'] . '/zipball/' . self::$options['github_updater_branch'];
+			if ( 'github' === self::$install['github_updater_api'] ) {
+				self::$install['download_link'] = 'https://api.github.com/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
 
-				if ( ! empty( self::$options['github_access_token'] ) ) {
-					self::$options['download_link'] .= '?access_token=' . self::$options['github_access_token'];
+				if ( ! empty( self::$install['github_access_token'] ) ) {
+					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
+					parent::$options[ self::$install['repo'][1] ] = self::$install['github_access_token'];
 				}
 			}
 
 			/**
 			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
+			 * Save private setting if present.
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
-			if ( 'bitbucket' === self::$options['github_updater_api'] ) {
-				self::$options['download_link'] = 'https://bitbucket.org/' . self::$options['github_updater_repo'] . '/get/' . self::$options['github_updater_branch'] . '.zip';
+			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
+				self::$install['download_link'] = 'https://bitbucket.org/' . self::$install['github_updater_repo'] . '/get/' . self::$install['github_updater_branch'] . '.zip';
+				if ( isset( self::$install['is_private'] ) ) {
+					parent::$options[ self::$install['repo'][1] ] = 1;
+				}
 
 				new Bitbucket_API( (object) $type );
 			}
 
-			self::$options['repo'] = explode( '/', self::$options['github_updater_repo'] );
-			$url                   = self::$options['download_link'];
-			$nonce                 = wp_nonce_url( $url );
+			update_site_option( 'github_updater', parent::$options );
+			$url   = self::$install['download_link'];
+			$nonce = wp_nonce_url( $url );
 
 			if ( 'plugin' === $type ) {
-				$plugin = self::$options['repo'][1];
+				$plugin = self::$install['repo'][1];
 
 				/**
 				 * Create a new instance of Plugin_Upgrader.
@@ -98,7 +118,7 @@ class Install {
 			}
 
 			if ( 'theme' === $type ) {
-				$theme = self::$options['repo'][1];
+				$theme = self::$install['repo'][1];
 
 				/**
 				 * Create a new instance of Theme_Upgrader.
@@ -165,17 +185,16 @@ class Install {
 
 		add_settings_section(
 			$type,
-			__( 'GitHub Updater Install', 'github-updater' ) . '&nbsp;' . $repo_type,
+			sprintf(__( 'GitHub Updater Install %s', 'github-updater' ), $repo_type ),
 			array(),
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
-			$repo_type . '&nbsp;' .  __( 'URI', 'github-updater' ),
+			sprintf( __( '%s URI', 'github-updater' ), $repo_type ),
 			array( $this, 'get_repo' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -184,7 +203,6 @@ class Install {
 			__( 'Remote Repository Host', 'github-updater' ),
 			array( $this, 'api' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -193,7 +211,6 @@ class Install {
 			__( 'Repository Branch', 'github-updater' ),
 			array( $this, 'branch' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -202,7 +219,6 @@ class Install {
 			__( 'Private Bitbucket Repository', 'github-updater' ),
 			array( $this, 'is_private' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -211,7 +227,6 @@ class Install {
 			__( 'GitHub Access Token', 'github-updater' ),
 			array( $this, 'access_token' ),
 			'github_updater_install_' . $type,
-			$type,
 			$type
 		);
 
@@ -223,7 +238,7 @@ class Install {
 	public function get_repo() {
 		?>
 		<label for="github_updater_repo">
-			<input type="text" style="width:50%;" name="github_updater_repo" value="" >
+			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus >
 		</label>
 		<?php
 	}

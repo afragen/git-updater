@@ -72,13 +72,15 @@ class Theme extends Base {
 			/**
 			 * Update theme transient with rollback data.
 			 */
-			if ( ! empty( $_GET['rollback'] ) && ( $_GET['theme'] === $theme->repo ) ) {
+			if ( ! empty( $_GET['rollback'] ) &&
+			     ( isset( $_GET['theme'] ) && $_GET['theme'] === $theme->repo )
+			) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
-					'package'     => $repo_api->construct_download_link( $this->tag ),
+					'package'     => $repo_api->construct_download_link( $this->tag, false ),
 				);
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
@@ -185,16 +187,16 @@ class Theme extends Base {
 				'em'      => array(),
 				'strong'  => array(),
 			);
-		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$install_url        = self_admin_url( "theme-install.php" );
-		$details_url = add_query_arg(
+		$theme_name    = wp_kses( $theme['Name'], $themes_allowedtags );
+		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$install_url   = self_admin_url( "theme-install.php" );
+		$details_url   = add_query_arg(
 				array(
-					'tab' => 'theme-information',
-					'theme' => $theme_key,
+					'tab'       => 'theme-information',
+					'theme'     => $theme_key,
 					'TB_iframe' => 'true',
-					'width' => 270,
-					'height' => 400
+					'width'     => 270,
+					'height'    => 400
 				),
 				$install_url );
 
@@ -206,8 +208,9 @@ class Theme extends Base {
 			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
 				array_shift( $rollback_keys ); //don't show newest tag, it should be release version
-				_e( '<strong>Rollback to:</strong>', 'github-updater' );
-				echo '&nbsp';
+				echo '<strong>';
+				_e( 'Rollback to:', 'github-updater' );
+				echo '</strong> ';
 				// display last three tags
 				for ( $i = 0; $i < 3 ; $i++ ) {
 					$tag = array_shift( $rollback_keys );
@@ -217,8 +220,11 @@ class Theme extends Base {
 					if ( $i > 0 ) {
 						echo ", ";
 					}
-
-					printf( '<a href="%s%s">%s</a>', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ), '&rollback=' . urlencode( $tag ), $tag);
+					printf( '<a href="%s%s">%s</a>',
+						wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
+						'&rollback=' . urlencode( $tag ),
+						$tag
+					);
 				}
 			} else {
 				_e( 'No previous tags to rollback to.', 'github-updater' );
@@ -229,24 +235,32 @@ class Theme extends Base {
 			$r = $current->response[ $theme_key ];
 			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 			if ( empty( $r['package'] ) ) {
-				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . '<a href="%2$s" class="thickbox" title="%3$s">' . __( 'View version %4$s details', 'github-updater' ) . '</a>. <em>' . __( 'Automatic update is unavailable for this theme.', 'github-updater' ) . '</em>',
-					$theme_name,
+				printf( __( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
+					$theme_name
+				);
+				printf( ' <a href="%s" class="thickbox" title="%s"> ',
 					esc_url( $details_url ),
-					esc_attr( $theme_name ),
+					esc_attr( $theme_name )
+				);
+				printf( __( 'View version %s details.', 'github-updater' ),
 					$r['new_version']
 				);
+				echo '</a><em>';
+				_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
+				echo '</em>';
 			} else {
-				printf(
-					__( 'GitHub Updater shows a new version of %1$s available.', 'github-updater' ) . '&nbsp' . __( '<a %2$s>View version %3$s details</a> or <a href="%4$s">update now</a>.', 'github-updater' ),
-					$theme_name,
-					sprintf(
-						'href="%1$s" class="thickbox" title="%2$s"',
-						esc_url( $details_url ),
-						esc_attr( $theme_name )
-					),
+				printf( __( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
+					$theme_name
+				);
+				printf( ' <a href="%s" class="thickbox" title="%s"> ',
+					esc_url( $details_url ),
+					esc_attr( $theme_name )
+				);
+				printf( __( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$r['new_version'],
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key )
+					'</a>',
+					'<a href="' . wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ) . '">',
+					'</a>'
 				);
 			}
 
@@ -263,7 +277,7 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI' );
+		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI', 'GitLab Theme URI' );
 		foreach ( (array) $repositories as $repository ) {
 			$repo_uri = $theme->get( $repository );
 			if ( empty( $repo_uri ) ) {
@@ -318,7 +332,23 @@ class Theme extends Base {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
-			<strong><br /><?php _e('There is a new version of', 'github-updater' ); echo '&nbsp'; echo $theme->name; echo '&nbsp'; _e( 'available now.', 'github-updater' ); ?> <a href="<?php echo $details_url; ?>" class="thickbox" title="<?php echo $theme->name; ?>">&nbsp;<?php _e( 'View version', 'github-updater' ); echo '&nbsp'; echo $theme->remote_version; echo '&nbsp'; _e( 'details', 'github-updater' ); ?></a>&nbsp;<?php _e( 'or', 'github-updater' ); ?>&nbsp;<a href="<?php echo $update_url; ?>"><?php _e( 'update now', 'github-updater' ); ?></a>.</strong>
+			<strong><br />
+				<?php
+					printf( __( 'There is a new version of %s available now.', 'github-updater' ),
+						$theme->name
+					);
+					printf( ' <a href="%s" class="thickbox" title="%s">',
+						esc_url( $details_url ),
+						esc_attr( $theme->name )
+					);
+					printf( __( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
+						$theme->remote_version,
+						'</a>',
+						'<a href="' . $update_url . '">',
+						'</a>'
+					);
+				?>
+			</strong>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
@@ -330,7 +360,13 @@ class Theme extends Base {
 			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
 
 			?>
-			<p><?php _e( 'Current version is up to date. Try', 'github-updater' ); ?> <a href="#" onclick="jQuery('#ghu_versions').toggle();return false;"><?php _e( 'another version?', 'github-updater' ); ?></a></p>
+			<p><?php
+				printf( __( 'Current version is up to date. Try %sanother version%s', 'github-updater' ),
+					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
+					'</a>'
+				);
+				?>
+			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<select style="width: 60%;" 
 					onchange="if(jQuery(this).val() != '') {

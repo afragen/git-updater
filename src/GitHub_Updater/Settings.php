@@ -165,6 +165,41 @@ class Settings extends Base {
 
 		$this->ghu_tokens();
 
+		add_settings_section(
+			'github_updater_settings',
+			__( 'GitHub Updater Settings', 'github-updater' ),
+			array( $this, 'print_section_ghu_settings'),
+			'github_updater_install_settings'
+		);
+
+		add_settings_field(
+			'branch_switch',
+			__( 'Enable Plugin Branch Switching', 'github-updater' ),
+			array( $this, 'token_callback_checkbox' ),
+			'github_updater_install_settings',
+			'github_updater_settings',
+			array( 'id' => 'branch_switch' )
+		);
+
+		/**
+		 * Add settings for GitHub Personal Access Token
+		 */
+		add_settings_section(
+			'github_access_token',
+			__( 'Personal GitHub Access Token', 'github-updater' ),
+			array( $this, 'print_section_github_access_token' ),
+			'github_updater_install_settings'
+		);
+
+		add_settings_field(
+			'github_access_token',
+			__( 'GitHub Access Token', 'github-updater' ),
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'github_access_token',
+			array( 'id' => 'github_access_token' )
+		);
+
 		/**
 		 * Show section for private GitHub repositories.
 		 */
@@ -193,7 +228,7 @@ class Settings extends Base {
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
-			'bitbucket_username'
+			array( 'id' => 'bitbucket_username' )
 		);
 
 		add_settings_field(
@@ -202,7 +237,7 @@ class Settings extends Base {
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
-			'bitbucket_password'
+			array( 'id' => 'bitbucket_password' )
 		);
 
 		/**
@@ -291,7 +326,7 @@ class Settings extends Base {
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				$setting_field['callback']
+				array( 'id' => $setting_field['callback'] )
 			);
 		}
 
@@ -301,6 +336,8 @@ class Settings extends Base {
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
+		unset( $ghu_unset_keys['github_access_token'] );
+		unset( $ghu_unset_keys['branch_switch'] );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -325,10 +362,24 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Print the GitHub Updater text
+	 */
+	public function print_section_ghu_settings() {
+		_e( 'Check to enable branch switching from the Plugins page.', 'github-updater' );
+	}
+
+	/**
 	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
 		_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitHub Personal Access Token text.
+	 */
+	public function print_section_github_access_token() {
+		_e( 'Enter your personal GitHub Access Token to avoid API access limits.', 'github-updater' );
 	}
 
 	/**
@@ -348,14 +399,14 @@ class Settings extends Base {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param $id
+	 * @param $args
 	 */
-	public function token_callback_text( $id ) {
-		$name = isset( parent::$options[ $id ] ) ? esc_attr( parent::$options[ $id ] ) : '';
-		$type = stristr( $id, 'password' ) ? 'password' : 'text';
+	public function token_callback_text( $args ) {
+		$name = isset( parent::$options[ $args['id' ] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
+		$type = stristr( $args['id'], 'password' ) ? 'password' : 'text';
 		?>
-		<label for="<?php echo $id; ?>">
-			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $id; ?>]" value="<?php echo $name; ?>" >
+		<label for="<?php echo $args['id']; ?>">
+			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $args['id']; ?>]" value="<?php echo $name; ?>" >
 		</label>
 		<?php
 	}
@@ -363,12 +414,12 @@ class Settings extends Base {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param $id
+	 * @param $args
 	 */
-	public function token_callback_checkbox( $id ) {
+	public function token_callback_checkbox( $args ) {
 		?>
-		<label for="<?php echo $id; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $id; ?>]" value="1" <?php checked('1', parent::$options[ $id ], true); ?> >
+		<label for="<?php echo $args['id']; ?>">
+			<input type="checkbox" name="github_updater[<?php echo $args['id']; ?>]" value="1" <?php checked('1', parent::$options[ $args['id'] ], true); ?> >
 		</label>
 		<?php
 	}

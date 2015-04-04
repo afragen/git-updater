@@ -1,3 +1,26 @@
+#### 4.3.0
+* use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
+* use https://api.wordpress.org not http
+* Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
+* make strings better for translation - thanks @pedro-mendonca and @fxbenard
+* additional Portuguese translation by [Pedro Mendonça](https://github.com/pedro-mendonca)
+* refactor for getting local plugin and theme meta, now simpler for additional APIs (I'm thinking about you GitLab)
+* fix link in README to GitHub Link
+* correctly pass array as last argument in `add_settings_field`
+* add focus to URI input field
+* add Setting for personal GitHub Access Token to avoid API rate limit - thanks @mlteal
+* add Setting for branch switching from the Plugins page
+* add 'View details' link in Plugins page
+
+#### 4.2.2
+* fix POT and some updated languages, thanks @fxbenard
+* fix PHP notice for `$options` settings on initial install - thanks @benosman
+
+#### 4.2.1
+* add PHP version check for graceful exit
+* add to error message for 401 error.
+* save settings when remote installing a private repo
+
 #### 4.2.0
 * added minutes until reset of GitHub API's rate limit to error message
 * added `placeholder = "master"` to remote install branch text input

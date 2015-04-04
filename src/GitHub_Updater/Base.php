@@ -74,12 +74,12 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		self::$options = get_site_option( 'github_updater' );
+		self::$options = get_site_option( 'github_updater', array() );
 		$this->add_headers();
 	}
 
 	/**
-	 * Instantiate GitHub_Updater__Plugin and GitHub_Updater__Theme
+	 * Instantiate Fragen\GitHub_Updater\Plugin and Fragen\GitHub_Updater\Theme
 	 * for proper user capabilities.
 	 */
 	public static function init() {
@@ -112,9 +112,10 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Plugin URI'    => 'GitHub Plugin URI',
 			'GitHub Branch'        => 'GitHub Branch',
-			'GitHub Access Token'  => 'GitHub Access Token',
 			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
 			'Bitbucket Branch'     => 'Bitbucket Branch',
+			'GitLab Plugin URI'    => 'GitLab Plugin URI',
+			'GitLab Branch'        => 'GitLab Branch',
 			'Requires WP'          => 'Requires WP',
 			'Requires PHP'         => 'Requires PHP',
 		);
@@ -134,9 +135,10 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Access Token' => 'GitHub Access Token',
 			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
 			'Bitbucket Branch'    => 'Bitbucket Branch',
+			'GitLab Theme URI'    => 'GitLab Theme URI',
+			'GitLab Branch'       => 'GitLab Branch',
 			'Requires WP'         => 'Requires WP',
 			'Requires PHP'        => 'Requires PHP',
 		);
@@ -161,102 +163,68 @@ class Base {
 		$git_plugins = array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
+			$git_plugin = array();
+			$repo_types = array(
+				'GitHub'    => 'github_plugin',
+				'Bitbucket' => 'bitbucket_plugin',
+				'GitLab'    => 'gitlab_plugin',
+			);
+			$repo_base_uris = array(
+				'github_plugin'    => 'https://github.com/',
+				'bitbucket_plugin' => 'https://bitbucket.org/',
+				'gitlab_plugin'    => 'https://gitlab.com/',
+			);
+
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
-				empty( $headers['Bitbucket Plugin URI'] )
+			     empty( $headers['Bitbucket Plugin URI'] ) &&
+			     empty( $headers['GitLab Plugin URI'] )
 			) {
 				continue;
 			}
 
-			$git_repo = $this->get_local_plugin_meta( $headers );
+			foreach ( (array) self::$extra_headers as $value ) {
+				$repo_type     = null;
+				$repo_header   = null;
+				$repo_branch   = null;
+				$repo_base_uri = null;
 
-			$git_repo['slug']                    = $plugin;
-			$plugin_data                         = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_repo['slug'] );
-			$git_repo['author']                  = $plugin_data['AuthorName'];
-			$git_repo['name']                    = $plugin_data['Name'];
-			$git_repo['local_version']           = strtolower( $plugin_data['Version'] );
-			$git_repo['sections']['description'] = $plugin_data['Description'];
-			$git_plugins[ $git_repo['repo'] ]    = (object) $git_repo;
+				if ( empty( $headers[ $value ] ) ||
+				     false === stristr( $value, 'Plugin' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+
+				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
+					$repo_type     = $repo_types[ $header_parts[0] ];
+					$repo_header   = $value;
+					$repo_branch   = $header_parts[0] . ' Branch';
+					$repo_base_uri = $repo_base_uris[ $repo_type ];
+				}
+
+				$git_plugin['type']                    = $repo_type;
+				$owner_repo                            = parse_url( $headers[ $repo_header ], PHP_URL_PATH );
+				$owner_repo                            = trim( $owner_repo, '/' );  // strip surrounding slashes
+				$git_plugin['uri']                     = $repo_base_uri . $owner_repo;
+				$owner_repo                            = explode( '/', $owner_repo );
+				$git_plugin['owner']                   = $owner_repo[0];
+				$git_plugin['repo']                    = $owner_repo[1];
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $git_plugin['repo'] . '/';
+				$git_plugin['branch']                  = $headers[ $repo_branch ];
+				$git_plugin['slug']                    = $plugin;
+
+				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
+				$git_plugin['author']                  = $plugin_data['AuthorName'];
+				$git_plugin['name']                    = $plugin_data['Name'];
+				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
+				$git_plugin['sections']['description'] = $plugin_data['Description'];
+			}
+
+			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
 		}
 
 		return $git_plugins;
-	}
-
-	/**
-	* Parse extra headers to determine repo type and populate info
-	*
-	* @param array - extra headers
-	* @return array - repo information
-	*
-	* parse_url( ..., PHP_URL_PATH ) is either clever enough to handle the short url format
-	* (in addition to the long url format), or it's coincidentally returning all of the short
-	* URL string, which is what we want anyway.
-	*
-	*/
-	protected function get_local_plugin_meta( $headers ) {
-		$git_repo = array();
-
-		/**
-		 * Reverse sort to run plugin/theme URI first.
-		 */
-		arsort( self::$extra_headers );
-
-		foreach ( (array) self::$extra_headers as $value ) {
-			if ( ! empty( $git_repo['type'] ) && 'github_plugin' !== $git_repo['type'] ) {
-				continue;
-			}
-			switch( $value ) {
-				case 'GitHub Plugin URI':
-					if ( empty( $headers['GitHub Plugin URI'] ) ) {
-						break;
-					}
-					$git_repo['type']         = 'github_plugin';
-
-					$owner_repo               = parse_url( $headers['GitHub Plugin URI'], PHP_URL_PATH );
-					$owner_repo               = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri']          = 'https://github.com/' . $owner_repo;
-					$owner_repo               = explode( '/', $owner_repo );
-					$git_repo['owner']        = $owner_repo[0];
-					$git_repo['repo']         = $owner_repo[1];
-					$git_repo['local_path']   = WP_PLUGIN_DIR . '/' . $git_repo['repo'] . '/';
-					break;
-				case 'GitHub Branch':
-					if ( empty( $headers['GitHub Branch'] ) ) {
-						break;
-					}
-					$git_repo['branch']       = $headers['GitHub Branch'];
-					break;
-			}
-		}
-
-		foreach ( (array) self::$extra_headers as $value ) {
-			if ( ! empty( $git_repo['type'] ) && 'bitbucket_plugin' !== $git_repo['type'] ) {
-				continue;
-			}
-			switch( $value ) {
-				case 'Bitbucket Plugin URI':
-					if ( empty( $headers['Bitbucket Plugin URI'] ) ) {
-						break;
-					}
-					$git_repo['type']       = 'bitbucket_plugin';
-
-					$owner_repo             = parse_url( $headers['Bitbucket Plugin URI'], PHP_URL_PATH );
-					$owner_repo             = trim( $owner_repo, '/' );  // strip surrounding slashes
-					$git_repo['uri']        = 'https://bitbucket.org/' . $owner_repo;
-					$owner_repo             = explode( '/', $owner_repo );
-					$git_repo['owner']      = $owner_repo[0];
-					$git_repo['repo']       = $owner_repo[1];
-					$git_repo['local_path'] = WP_PLUGIN_DIR . '/' . $git_repo['repo'] .'/';
-					break;
-				case 'Bitbucket Branch':
-					if ( empty( $headers['Bitbucket Branch'] ) ) {
-						break;
-					}
-					$git_repo['branch']     = $headers['Bitbucket Branch'];
-					break;
-			}
-		}
-
-		return $git_repo;
 	}
 
 	/**
@@ -266,88 +234,62 @@ class Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
-
-		/**
-		 * Reverse sort to run plugin/theme URI first.
-		 */
-		arsort( self::$extra_headers );
+		$repo_types = array(
+			'GitHub'    => 'github_theme',
+			'Bitbucket' => 'bitbucket_theme',
+			'GitLab'    => 'gitlab_theme',
+		);
+		$repo_base_uris = array(
+			'github_theme'    => 'https://github.com/',
+			'bitbucket_theme' => 'https://bitbucket.org/',
+			'gitlab_theme'    => 'https://gitlab.com/',
+		);
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme         = array();
-			$github_uri        = $theme->get( 'GitHub Theme URI' );
-			$github_branch     = $theme->get( 'GitHub Branch' );
-			$bitbucket_uri     = $theme->get( 'Bitbucket Theme URI' );
-			$bitbucket_branch  = $theme->get( 'Bitbucket Branch' );
+			$git_theme     = array();
+			$repo_type     = null;
+			$repo_branch   = null;
+			$repo_base_uri = null;
+			$repo_uri      = null;
 
-			if ( empty( $github_uri ) && empty( $bitbucket_uri ) ) {
+			foreach ( (array) self::$extra_headers as $value ) {
+
+				$repo_uri = $theme->get( $value );
+				if ( empty( $repo_uri ) ||
+				     false === stristr( $value, 'Theme' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+
+				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
+					$repo_type     = $repo_types[ $header_parts[0] ];
+					$repo_branch   = $header_parts[0] . ' Branch';
+					$repo_base_uri = $repo_base_uris[ $repo_type ];
+				}
+
+				$git_theme['type']                    = $repo_type;
+				$owner_repo                           = parse_url( $repo_uri, PHP_URL_PATH );
+				$owner_repo                           = trim( $owner_repo, '/' );
+				$git_theme['uri']                     = $repo_base_uri . $owner_repo;
+				$owner_repo                           = explode( '/', $owner_repo );
+				$git_theme['owner']                   = $owner_repo[0];
+				$git_theme['repo']                    = $owner_repo[1];
+				$git_theme['name']                    = $theme->get( 'Name' );
+				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
+				$git_theme['author']                  = $theme->get( 'Author' );
+				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
+				$git_theme['sections']['description'] = $theme->get( 'Description' );
+				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['branch']                  = $theme->get( $repo_branch );
+			}
+
+			/**
+			 * Exit if not git hosted theme.
+			 */
+			if ( empty( $git_theme ) ) {
 				continue;
-			}
-
-			foreach ( (array) self::$extra_headers as $value ) {
-				if ( ! empty( $git_theme['type'] ) && 'github_theme' !== $git_theme['type'] ) {
-					continue;
-				}
-
-				switch( $value ) {
-					case 'GitHub Theme URI':
-						if ( empty( $github_uri ) ) {
-							break;
-						}
-						$git_theme['type']                    = 'github_theme';
-
-						$owner_repo                           = parse_url( $github_uri, PHP_URL_PATH );
-						$owner_repo                           = trim( $owner_repo, '/' );
-						$git_theme['uri']                     = 'https://github.com/' . $owner_repo;
-						$owner_repo                           = explode( '/', $owner_repo );
-						$git_theme['owner']                   = $owner_repo[0];
-						$git_theme['repo']                    = $owner_repo[1];
-						$git_theme['name']                    = $theme->get( 'Name' );
-						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
-						$git_theme['author']                  = $theme->get( 'Author' );
-						$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
-						$git_theme['sections']['description'] = $theme->get( 'Description' );
-						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
-						break;
-					case 'GitHub Branch':
-						if ( empty( $github_branch ) ) {
-							break;
-						}
-						$git_theme['branch']                  = $github_branch;
-						break;
-				}
-			}
-
-			foreach ( (array) self::$extra_headers as $value ) {
-				if ( ! empty( $git_theme['type'] ) && 'bitbucket_theme' !== $git_theme['type'] ) {
-					continue;
-				}
-				switch( $value ) {
-					case 'Bitbucket Theme URI':
-						if ( empty( $bitbucket_uri ) ) {
-							break;
-						}
-						$git_theme['type']                    = 'bitbucket_theme';
-
-						$owner_repo                           = parse_url( $bitbucket_uri, PHP_URL_PATH );
-						$owner_repo                           = trim( $owner_repo, '/' );
-						$git_theme['uri']                     = 'https://bitbucket.org/' . $owner_repo;
-						$owner_repo                           = explode( '/', $owner_repo );
-						$git_theme['owner']                   = $owner_repo[0];
-						$git_theme['repo']                    = $owner_repo[1];
-						$git_theme['name']                    = $theme->get( 'Name' );
-						$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
-						$git_theme['author']                  = $theme->get( 'Author' );
-						$git_theme['local_version']           = $theme->get( 'Version' );
-						$git_theme['sections']['description'] = $theme->get( 'Description' );
-						$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
-						break;
-					case 'Bitbucket Branch':
-						if ( empty( $bitbucket_branch ) ) {
-							break;
-						}
-						$git_theme['branch']                  = $bitbucket_branch;
-						break;
-				}
 			}
 
 			$git_themes[ $theme->stylesheet ] = (object) $git_theme;
@@ -362,6 +304,9 @@ class Base {
 	 * @param $type
 	 */
 	protected function set_defaults( $type ) {
+		if ( ! isset( self::$options['branch_switch'] ) ) {
+			self::$options['branch_switch']      = null;
+		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
@@ -372,6 +317,7 @@ class Base {
 		$this->$type->download_link         = null;
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
+		$this->$type->branches              = array();
 		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
@@ -386,7 +332,7 @@ class Base {
 		$this->$type->forks                 = 0;
 		$this->$type->open_issues           = 0;
 		$this->$type->score                 = 0;
-		$this->$type->requires_wp_version   = '0.0.0';
+		$this->$type->requires_wp_version   = '3.8.0';
 		$this->$type->requires_php_version  = '5.3';
 	}
 
@@ -473,7 +419,7 @@ class Base {
 
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %s to %s', 'github-updater' ) . '&#8230;',
+				__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
 				'<span class="code">' . basename( $source ) . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
@@ -726,7 +672,10 @@ class Base {
 			return false;
 		}
 
-		add_action( 'admin_head', array( $this, 'show_error_message' ) );
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
+				add_action( 'network_admin_notices', array( $this, 'show_error_message' ) );
+		}
 	}
 
 	/**
@@ -734,11 +683,25 @@ class Base {
 	 */
 	public function show_error_message() {
 		?>
-		<div class="error">
+		<div class="error notice is-dismissible">
 			<p>
-				<?php printf( __( '<strong>%1$s</strong> was not checked. GitHub Updater Error Code: %2$s', 'github-updater' ), $this->type->name, self::$error_code[ $this->type->repo ] ); ?>
+				<?php
+					printf( __( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
+						'<strong>' . $this->type->name . '</strong>'
+					);
+					echo ' ' . self::$error_code[ $this->type->repo ];
+				?>
 				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
-					<br><?php printf( __( 'GitHub API\'s rate limit will reset in %1$s minutes.', 'github-updater' ), self::$error_code[ $this->type->repo . '-wait'] ); ?>
+					<br>
+					<?php
+						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
+							self::$error_code[ $this->type->repo . '-wait' ]
+						);
+					?>
+				<?php endif; ?>
+				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
+					<br>
+					<?php _e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
 				<?php endif; ?>
 			</p>
 		</div>
