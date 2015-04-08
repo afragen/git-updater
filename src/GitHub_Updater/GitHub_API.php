@@ -8,72 +8,25 @@
  * @link      https://github.com/afragen/github-updater
  */
 
+namespace Fragen\GitHub_Updater;
+
 /**
  * Get remote data from a GitHub repo.
  *
- * @package GitHub_Updater_GitHub_API
+ * Class    GitHub_API
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitHub_Updater_GitHub_API extends GitHub_Updater {
+class GitHub_API extends Base {
 
 	/**
 	 * Constructor.
 	 *
-	 * @param string $type
+	 * @param object $type
 	 */
 	public function __construct( $type ) {
 		$this->type  = $type;
-		self::$hours = 12;
-
-		add_filter( 'http_request_args', array( $this, 'never_authenticate_http' ), 10 );
-	}
-
-	/**
-	 * Add extra headers via filter hooks
-	 */
-	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
-	}
-
-	/**
-	 * Add extra headers to get_plugins();
-	 *
-	 * @param $extra_headers
-	 * @return array
-	 */
-	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers     = array(
-			'GitHub Plugin URI'   => 'GitHub Plugin URI',
-			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Access Token' => 'GitHub Access Token',
-			'Requires WP'         => 'Requires WP',
-			'Requires PHP'        => 'Requires PHP',
-		);
-		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
-	}
-
-	/**
-	 * Add extra headers to wp_get_themes()
-	 *
-	 * @param $extra_headers
-	 * @return array
-	 */
-	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers     = array(
-			'GitHub Theme URI'    => 'GitHub Theme URI',
-			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Access Token' => 'GitHub Access Token',
-			'Requires WP'         => 'Requires WP',
-			'Requires PHP'        => 'Requires PHP',
-		);
-		parent::$extra_headers = array_unique( array_merge( parent::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers         = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
+		parent::$hours = 12;
 	}
 
 	/**
@@ -87,13 +40,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 */
 	protected function api( $url ) {
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
-		$code          = wp_remote_retrieve_response_code( $response );
+		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo => $code ) );
+			$this->_ratelimit_reset( $response );
+			$this->create_error_message();
 			return false;
 		}
 
@@ -124,13 +80,16 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint = add_query_arg( 'access_token', $this->type->access_token, $endpoint );
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
+		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
 
-
-		// If a branch has been given, only check that for the remote info.
-		// If it's not been given, GitHub will use the Default branch.
+		/**
+		 * If a branch has been given, only check that for the remote info.
+		 * If it's not been given, GitHub will use the Default branch.
+		 */
 		if ( ! empty( $this->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
@@ -169,9 +128,10 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->branch               = ( ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master' );
-		$this->type->requires_wp_version  = ( ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version );
-		$this->type->requires_php_version = ( ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version );
+		$this->type->branch               = ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master';
+		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
+		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+		$this->type->requires             = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 
 		return true;
 	}
@@ -203,11 +163,13 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			return false;
 		}
 
-		// Sort and get newest tag
+		/**
+		 * Sort and get newest tag.
+		 */
 		$tags     = array();
 		$rollback = array();
 		if ( false !== $response ) {
-			foreach ( (array) $response as $num => $tag ) {
+			foreach ( (array) $response as $tag ) {
 				if ( isset( $tag->name ) ) {
 					$tags[]                 = $tag->name;
 					$rollback[ $tag->name ] = $tag->zipball_url;
@@ -215,7 +177,9 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 			}
 		}
 
-		// no tags are present, exit early
+		/**
+		 * No tags are present, exit early.
+		 */
 		if ( empty( $tags ) ) {
 			return false;
 		}
@@ -236,26 +200,43 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @param boolean $rollback for theme rollback
+	 * @param boolean $branch_switch for direct branch changing
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link( $rollback = false ) {
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
 		$endpoint           = '';
 
-		// check for rollback
+		/**
+		 * Check for rollback.
+		 */
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
 			$endpoint .= $rollback;
-		
-		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} else if ( ( 'master' != $this->type->branch && ( -1 != version_compare( $this->type->remote_version, $this->type->local_version ) ) || ( '0.0.0' === $this->type->newest_tag ) ) ) {
+
+			/**
+			 * For users wanting to update against branch other than master
+			 * or if not using tags, else use newest_tag.
+			 */
+		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		if ( ! empty( $this->type->access_token ) ) {
-			$endpoint .= '?access_token=' . $this->type->access_token;
+		/**
+		 * Create endpoint for branch switching.
+		 */
+		if ( $branch_switch ) {
+			$endpoint = $branch_switch;
+		}
+
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
+			return $download_link_base . $endpoint;
+		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+			return $download_link_base . $endpoint;
 		}
 
 		return $download_link_base . $endpoint;
@@ -288,7 +269,7 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Parsedown();
+			$parser    = new Parsedown;
 			$changelog = $parser->text( base64_decode( $response->content ) );
 			$this->set_transient( 'changelog', $changelog );
 		}
@@ -319,40 +300,61 @@ class GitHub_Updater_GitHub_API extends GitHub_Updater {
 		}
 
 		$this->type->repo_meta = $response->items[0];
-		$this->add_meta_repo_object();
+		$this->_add_meta_repo_object();
+		$this->get_branches();
 	}
 
 	/**
 	 * Add remote data to type object
 	 */
-	private function add_meta_repo_object() {
+	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = $this->type->repo_meta->private;
 	}
 
 	/**
-	 * Remove any Authorization headers.
-	 * Prevent 401 error from GitHub API.
-	 * Might be coming from added header for Bitbucket.
-	 *
-	 * @param $args
-	 *
-	 * @return mixed
+	 * Create array of branches and download links as array.
+	 * @return bool
 	 */
-	public function never_authenticate_http( $args ) {
-		// Exit if on other APIs use HTTP Authorization
-		if ( isset( $args['headers']['Authorization'] ) &&
-		     false !== strpos( $args['headers']['Authorization'], 'JETPACK' )
-			) {
-			return $args;
+	public function get_branches() {
+		$branches = array();
+		$response = $this->get_transient( 'branches' );
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/branches' );
+
+			if ( $response ) {
+				foreach ( $response as $branch ) {
+					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
+				}
+				$this->type->branches = $branches;
+				$this->set_transient( 'branches', $branches );
+				return true;
+			}
 		}
 
-		if ( isset( $args['headers']['Authorization'] ) ) {
-			unset( $args['headers']['Authorization'] );
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
 		}
 
-		return $args;
+		$this->type->branches = $response;
+
+		return true;
+	}
+
+	/**
+	 * Calculate and store time until rate limit reset.
+	 *
+	 * @param $response
+	 */
+	private function _ratelimit_reset( $response ) {
+		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
+			$reset              = (integer) $response['headers']['x-ratelimit-reset'];
+			$wait               = date( 'i', $reset - time() );
+			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo . '-wait' => $wait ) );
+		}
 	}
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Fragen\GitHub_Updater;
+
 #
 #
 # Parsedown
