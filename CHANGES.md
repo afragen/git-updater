@@ -1,3 +1,6 @@
+#### 4.3.x
+* Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
+
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
 * use https://api.wordpress.org not http

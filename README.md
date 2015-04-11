@@ -246,6 +246,7 @@ There is a new setting for a personal GitHub Access Token. Create one with at le
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
+* Spanish by [Jose Miguel Bejarano](https://github.com/xDae)
 
 ## Issues
 
