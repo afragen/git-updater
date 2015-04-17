@@ -36,6 +36,7 @@ class Bitbucket_API extends Base {
 		}
 		add_site_option( 'github_updater', self::$options );
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( $this, 'add_custom_user_agent' ), 10, 2 );
 	}
 
 	/**

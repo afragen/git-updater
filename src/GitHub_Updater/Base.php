@@ -708,4 +708,18 @@ class Base {
 		<?php
 	}
 
+	/**
+	 *
+	 * Add custom user agent for GitHub Updater.
+	 *
+	 * @param $args
+	 *
+	 * @return mixed
+	 */
+	public function add_custom_user_agent( $args ) {
+		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+
+		return $args;
+	}
+
 }
