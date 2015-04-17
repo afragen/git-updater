@@ -364,9 +364,9 @@ class Base {
 		/**
 		 * Return $source if name already corrected.
 		 */
-		if ( ( isset( $upgrader->skin->options['plugin' ] ) &&
+		if ( ( ! empty( $upgrader->skin->options['plugin' ] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
-			( isset( $upgrader->skin->options['theme'] ) &&
+			( ! empty( $upgrader->skin->options['theme'] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
 		) {
 			return $source;
@@ -376,13 +376,13 @@ class Base {
 		 * Get correct repo name based upon $upgrader instance if present.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			if ( isset( $upgrader->skin->options['plugin'] ) &&
+			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
 			     stristr( basename( $source ), $upgrader->skin->options['plugin'] ) ) {
 				$repo = $upgrader->skin->options['plugin'];
 			}
 		}
 		if ( $upgrader instanceof \Theme_Upgrader ) {
-			if ( isset( $upgrader->skin->options['theme'] ) &&
+			if ( ! empty( $upgrader->skin->options['theme'] ) &&
 			     stristr( basename( $source ), $upgrader->skin->options['theme'] ) ) {
 				$repo = $upgrader->skin->options['theme'];
 			}
