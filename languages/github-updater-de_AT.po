@@ -1,21 +1,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-04-03 22:08-0800\n"
-"PO-Revision-Date: 2015-04-17 19:33+0100\n"
+"POT-Creation-Date: 2015-04-17 12:07-0800\n"
+"PO-Revision-Date: 2015-04-17 21:18+0100\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
+"Language: de_AT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8beta1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;"
-"esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;"
-"esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: de_AT\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: mu/ghu-loader.php:55
@@ -54,66 +54,73 @@ msgstr "%s wurde nicht überprüft. GitHub Updater Fehlercode:"
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "Github APIs Limite wird in %s Minutes zurückgesetzt."
 
-#: src/GitHub_Updater/Base.php:704
+#: src/GitHub_Updater/Base.php:702
+#, php-format
+msgid ""
+"It looks like you are running into GitHub API rate limits. Be sure and "
+"configure a %sPersonal Access Token%s to avoid this issue."
+msgstr ""
+"Es sieht so aus, als ob Sie die GitHub API Limite erreichen. Um dieses "
+"Problem zu verhindern, können Sie ein %spersönliches Zugriffstoken%s setzen."
+
+#: src/GitHub_Updater/Base.php:710
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
-"Wahrscheinlich hat es einen Fehler auf der GitHub Updater "
-"Einstellungsseite."
+"Wahrscheinlich hat es einen Fehler auf der GitHub Updater Einstellungsseite."
 
 #: src/GitHub_Updater/Install.php:65
 msgid "A repository URI is required."
 msgstr "Eine Repository-URI ist erforderlich."
 
-#: src/GitHub_Updater/Install.php:154 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:156 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr "Plugin installieren"
 
-#: src/GitHub_Updater/Install.php:157 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:159 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr "Theme installieren"
 
-#: src/GitHub_Updater/Install.php:174
+#: src/GitHub_Updater/Install.php:176
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:177
+#: src/GitHub_Updater/Install.php:179
 msgid "Theme"
 msgstr "Motiv"
 
-#: src/GitHub_Updater/Install.php:188
+#: src/GitHub_Updater/Install.php:190
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater Installatiert %s"
 
-#: src/GitHub_Updater/Install.php:195
+#: src/GitHub_Updater/Install.php:197
 #, php-format
 msgid "%s URI"
 msgstr "%s URI"
 
-#: src/GitHub_Updater/Install.php:203
+#: src/GitHub_Updater/Install.php:205
 msgid "Remote Repository Host"
 msgstr "Remoter Repository Host"
 
-#: src/GitHub_Updater/Install.php:211
+#: src/GitHub_Updater/Install.php:213
 msgid "Repository Branch"
 msgstr "Repository-Branch"
 
-#: src/GitHub_Updater/Install.php:219
+#: src/GitHub_Updater/Install.php:221
 msgid "Private Bitbucket Repository"
 msgstr "Privates Bitbucket Repository"
 
-#: src/GitHub_Updater/Install.php:227 src/GitHub_Updater/Settings.php:196
+#: src/GitHub_Updater/Install.php:229 src/GitHub_Updater/Settings.php:196
 msgid "GitHub Access Token"
 msgstr "GitHub Accesstoken"
 
-#: src/GitHub_Updater/Install.php:254
+#: src/GitHub_Updater/Install.php:256
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Branchnamen angeben oder leer lassen für `master`"
 
-#: src/GitHub_Updater/Install.php:296
+#: src/GitHub_Updater/Install.php:298
 msgid "Enter GitHub Access Token for private GitHub repositories."
-msgstr ""
-"Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."
+msgstr "Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."
 
 #: src/GitHub_Updater/Plugin.php:145
 #, php-format
@@ -182,8 +189,7 @@ msgstr "Theme:"
 
 #: src/GitHub_Updater/Settings.php:368
 msgid "Check to enable branch switching from the Plugins page."
-msgstr ""
-"Auswählen um Plugin Branch Wechsel zu aktivieren auf der Plugin Seite."
+msgstr "Auswählen um Plugin Branch Wechsel zu aktivieren auf der Plugin Seite."
 
 #: src/GitHub_Updater/Settings.php:375
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
@@ -194,8 +200,8 @@ msgstr ""
 #: src/GitHub_Updater/Settings.php:382
 msgid "Enter your personal GitHub Access Token to avoid API access limits."
 msgstr ""
-"Geben Sie Ihr persönliches GitHub Accesstoken zu Vermeidung der API-"
-"Limite ein."
+"Geben Sie Ihr persönliches GitHub Accesstoken zu Vermeidung der API-Limite "
+"ein."
 
 #: src/GitHub_Updater/Settings.php:389
 msgid ""
@@ -206,8 +212,7 @@ msgstr ""
 
 #: src/GitHub_Updater/Settings.php:396
 msgid "Enter your personal Bitbucket username and password."
-msgstr ""
-"Geben Sie Ihren persönlichen Bitbucket Benutzernamen und Passwort ein."
+msgstr "Geben Sie Ihren persönlichen Bitbucket Benutzernamen und Passwort ein."
 
 #: src/GitHub_Updater/Theme.php:207
 msgid "Theme is up-to-date!"
@@ -249,8 +254,8 @@ msgstr "Es ist eine neue Version von %s verfügbar."
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
-"Die aktuelle Version ist auf dem neuesten Stand. Versuchen Sie %seine "
-"andere Version%s"
+"Die aktuelle Version ist auf dem neuesten Stand. Versuchen Sie %seine andere "
+"Version%s"
 
 #: src/GitHub_Updater/Theme.php:378
 msgid "Choose a Version"
@@ -295,11 +300,11 @@ msgid ""
 msgstr ""
 "Ein Plugin, das Themes und Plugins, welche auf GitHub oder Bitbucket "
 "gehostet sind, automatisch aktualisiert. Es ermöglicht ebenfalls, Plugins "
-"oder Themes remote in WordPress zu installieren. Die Plugin-Klasse ist "
-"auf <a href=\"https://github.com/codepress/github-plugin-updater"
-"\">codepress/github-plugin-updater</a> basiert. Die Theme-Klasse ist auf "
-"Modifizierungen von <a href=\"https://github.com/WordPress-Phoenix/"
-"whitelabel-framework\">Whitelabel Framework</a> basiert."
+"oder Themes remote in WordPress zu installieren. Die Plugin-Klasse ist auf "
+"<a href=\"https://github.com/codepress/github-plugin-updater\">codepress/"
+"github-plugin-updater</a> basiert. Die Theme-Klasse ist auf Modifizierungen "
+"von <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
+"\">Whitelabel Framework</a> basiert."
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
