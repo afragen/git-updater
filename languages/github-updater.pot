@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-04-03 22:08-0800\n"
-"PO-Revision-Date: 2015-04-03 22:08-0800\n"
+"POT-Creation-Date: 2015-04-17 12:07-0800\n"
+"PO-Revision-Date: 2015-04-17 12:07-0800\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
@@ -51,7 +51,14 @@ msgstr ""
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:704
+#: src/GitHub_Updater/Base.php:702
+#, php-format
+msgid ""
+"It looks like you are running into GitHub API rate limits. Be sure and "
+"configure a %sPersonal Access Token%s to avoid this issue."
+msgstr ""
+
+#: src/GitHub_Updater/Base.php:710
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
@@ -59,53 +66,53 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:154 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:156 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:157 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:159 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:174
+#: src/GitHub_Updater/Install.php:176
 msgid "Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:177
+#: src/GitHub_Updater/Install.php:179
 msgid "Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:188
+#: src/GitHub_Updater/Install.php:190
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:195
+#: src/GitHub_Updater/Install.php:197
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:203
+#: src/GitHub_Updater/Install.php:205
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:211
+#: src/GitHub_Updater/Install.php:213
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:219
+#: src/GitHub_Updater/Install.php:221
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:227 src/GitHub_Updater/Settings.php:196
+#: src/GitHub_Updater/Install.php:229 src/GitHub_Updater/Settings.php:196
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:254
+#: src/GitHub_Updater/Install.php:256
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:296
+#: src/GitHub_Updater/Install.php:298
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
