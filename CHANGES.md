@@ -1,6 +1,7 @@
-#### 4.3.x
+#### 4.3.1
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
 * squish PHP notices
+* add custom user agent to `wp_remote_get` and tweak error message at request of GitHub ;-)
 
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
