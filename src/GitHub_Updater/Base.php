@@ -697,6 +697,12 @@ class Base {
 						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
 							self::$error_code[ $this->type->repo . '-wait' ]
 						);
+						echo '<br>';
+						printf(
+							__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
+							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
+							'</a>'
+						);
 					?>
 				<?php endif; ?>
 				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
