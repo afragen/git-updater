@@ -364,7 +364,13 @@ class Base {
 		/**
 		 * Return $source if name already corrected.
 		 */
-		if ( ( ! empty( $upgrader->skin->options['plugin' ] ) &&
+		foreach ( (array) $this->config as $git_repo ) {
+			if ( basename( $source ) === $git_repo->repo ) {
+				return $source;
+			}
+		}
+		if (
+			( ! empty( $upgrader->skin->options['plugin' ] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
 			( ! empty( $upgrader->skin->options['theme'] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
@@ -388,7 +394,6 @@ class Base {
 			}
 		}
 
-
 		/**
 		 * Get repo for automatic update process.
 		 */
@@ -407,6 +412,7 @@ class Base {
 					}
 				}
 			}
+
 			/**
 			 * Return already corrected $source or wp.org $source.
 			 */
