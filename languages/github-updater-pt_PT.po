@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-04-03 22:08-0800\n"
-"PO-Revision-Date: 2015-04-06 10:52-0000\n"
+"POT-Creation-Date: 2015-04-17 12:07-0800\n"
+"PO-Revision-Date: 2015-04-18 10:06-0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -53,7 +53,16 @@ msgstr "%s não foi verificado. Erro do GitHub Updater com o código:"
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "A taxa limite da API do GitHub será reposta em %s minutos."
 
-#: src/GitHub_Updater/Base.php:704
+#: src/GitHub_Updater/Base.php:702
+#, php-format
+msgid ""
+"It looks like you are running into GitHub API rate limits. Be sure and "
+"configure a %sPersonal Access Token%s to avoid this issue."
+msgstr ""
+"Parece que se está a aproximar dos limites da API do GitHub. Configure um "
+"%sToken pessoal de acesso%s para evitar que isto aconteça."
+
+#: src/GitHub_Updater/Base.php:710
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 "Provavelmente existe um erro na página de definições do GitHub Updater."
@@ -62,53 +71,53 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr "É necessário um URI do repositório."
 
-#: src/GitHub_Updater/Install.php:154 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:156 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr "Instalar Plugin"
 
-#: src/GitHub_Updater/Install.php:157 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:159 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr "Instalar Tema"
 
-#: src/GitHub_Updater/Install.php:174
+#: src/GitHub_Updater/Install.php:176
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:177
+#: src/GitHub_Updater/Install.php:179
 msgid "Theme"
 msgstr "Tema"
 
-#: src/GitHub_Updater/Install.php:188
+#: src/GitHub_Updater/Install.php:190
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater instalação de %s"
 
-#: src/GitHub_Updater/Install.php:195
+#: src/GitHub_Updater/Install.php:197
 #, php-format
 msgid "%s URI"
 msgstr "URI do %s"
 
-#: src/GitHub_Updater/Install.php:203
+#: src/GitHub_Updater/Install.php:205
 msgid "Remote Repository Host"
 msgstr "Alojamento remoto do repositório"
 
-#: src/GitHub_Updater/Install.php:211
+#: src/GitHub_Updater/Install.php:213
 msgid "Repository Branch"
 msgstr "Ramo do repositório"
 
-#: src/GitHub_Updater/Install.php:219
+#: src/GitHub_Updater/Install.php:221
 msgid "Private Bitbucket Repository"
 msgstr "Repositório privado do Bitbucket"
 
-#: src/GitHub_Updater/Install.php:227 src/GitHub_Updater/Settings.php:196
+#: src/GitHub_Updater/Install.php:229 src/GitHub_Updater/Settings.php:196
 msgid "GitHub Access Token"
 msgstr "Token de acesso do GitHub"
 
-#: src/GitHub_Updater/Install.php:254
+#: src/GitHub_Updater/Install.php:256
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Introduza o nome do ramo ou deixe vazio para `master`"
 
-#: src/GitHub_Updater/Install.php:296
+#: src/GitHub_Updater/Install.php:298
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 "Introduza o token de acesso do GitHub para repositórios privados do GitHub."
