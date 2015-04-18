@@ -27,6 +27,7 @@ class Bitbucket_API extends Base {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		parent::$hours = 12;
+		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
@@ -35,7 +36,6 @@ class Bitbucket_API extends Base {
 			self::$options['bitbucket_password'] = null;
 		}
 		add_site_option( 'github_updater', self::$options );
-		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 	}
 
 	/**

@@ -364,9 +364,15 @@ class Base {
 		/**
 		 * Return $source if name already corrected.
 		 */
-		if ( ( isset( $upgrader->skin->options['plugin' ] ) &&
+		foreach ( (array) $this->config as $git_repo ) {
+			if ( basename( $source ) === $git_repo->repo ) {
+				return $source;
+			}
+		}
+		if (
+			( ! empty( $upgrader->skin->options['plugin' ] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
-			( isset( $upgrader->skin->options['theme'] ) &&
+			( ! empty( $upgrader->skin->options['theme'] ) &&
 			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
 		) {
 			return $source;
@@ -376,18 +382,17 @@ class Base {
 		 * Get correct repo name based upon $upgrader instance if present.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			if ( isset( $upgrader->skin->options['plugin'] ) &&
+			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
 			     stristr( basename( $source ), $upgrader->skin->options['plugin'] ) ) {
 				$repo = $upgrader->skin->options['plugin'];
 			}
 		}
 		if ( $upgrader instanceof \Theme_Upgrader ) {
-			if ( isset( $upgrader->skin->options['theme'] ) &&
+			if ( ! empty( $upgrader->skin->options['theme'] ) &&
 			     stristr( basename( $source ), $upgrader->skin->options['theme'] ) ) {
 				$repo = $upgrader->skin->options['theme'];
 			}
 		}
-
 
 		/**
 		 * Get repo for automatic update process.
@@ -407,6 +412,7 @@ class Base {
 					}
 				}
 			}
+
 			/**
 			 * Return already corrected $source or wp.org $source.
 			 */
@@ -532,13 +538,15 @@ class Base {
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
+	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @param  array $args Existing HTTP Request arguments.
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
-	public function no_ssl_http_request_args( $args ) {
+	public function http_request_args( $args ) {
 		$args['sslverify'] = false;
+		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
 
 		return $args;
 	}
@@ -696,6 +704,12 @@ class Base {
 					<?php
 						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
 							self::$error_code[ $this->type->repo . '-wait' ]
+						);
+						echo '<br>';
+						printf(
+							__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
+							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
+							'</a>'
 						);
 					?>
 				<?php endif; ?>

@@ -186,7 +186,7 @@ Use `Requires WP:` to set the minimum required version of WordPress needed for y
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 0.0.0** and **PHP 5.3**
+At the moment the default values are **WordPress 3.8.0** and **PHP 5.3**
 
 ## Deleting Transients
 
@@ -210,14 +210,16 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401. If you don't have an Access Token set for a private GitHub repo you will get a 404 error.
 
-There is a new setting for a personal GitHub Access Token. Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Thanks [mlteal](https://github.com/mlteal).
+### Personal GitHub Access Token
+
+There is a new setting for a personal GitHub Access Token. I **strongly** encourage everyone to create a [personal access token](https://github.com/settings/tokens/new). Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Unauthenticated calls to the GitHub API are limited to 60 API calls per hour and in certain circumstances, like shared hosting, these limits will be more frequently hit. Thanks [mlteal](https://github.com/mlteal).
 
 ### 403 - Unauthorized Access
 
 #### GitHub
-* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
+* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and should go away in less than an hour. See above regarding the setting of a personal access token to eliminate this entirely.
 * a private GitHub repo without an Access Token designated in the Settings.
-* will tell you how long until GitHub API's rate limit will be reset
+* will tell you how long until GitHub API's rate limit will be reset.
 
 ### 401 - Incorrect Authentication
 
@@ -226,7 +228,7 @@ There is a new setting for a personal GitHub Access Token. Create one with at le
 * private Bitbucket repo not checked in Settings
 
 #### GitHub
-* using a GitHub Access Token for a public repo
+* using an incorrect private repo GitHub Access Token for a public repo
 * an incorrect Access Token for a private GitHub repo.
 
 ## Extras
@@ -246,6 +248,8 @@ There is a new setting for a personal GitHub Access Token. Create one with at le
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
+* Spanish by [Jose Miguel Bejarano](https://github.com/xDae)
+* German by [Linus Metzler](https://github.com/limenet)
 
 ## Issues
 
