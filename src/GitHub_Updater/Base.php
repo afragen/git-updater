@@ -532,13 +532,15 @@ class Base {
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
+	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @param  array $args Existing HTTP Request arguments.
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
-	public function no_ssl_http_request_args( $args ) {
+	public function http_request_args( $args ) {
 		$args['sslverify'] = false;
+		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
 
 		return $args;
 	}
@@ -712,20 +714,6 @@ class Base {
 			</p>
 		</div>
 		<?php
-	}
-
-	/**
-	 *
-	 * Add custom user agent for GitHub Updater.
-	 *
-	 * @param $args
-	 *
-	 * @return mixed
-	 */
-	public function add_custom_user_agent( $args ) {
-		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
-
-		return $args;
 	}
 
 }

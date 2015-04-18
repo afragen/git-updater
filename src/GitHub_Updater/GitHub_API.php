@@ -27,8 +27,6 @@ class GitHub_API extends Base {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		parent::$hours = 12;
-
-		add_filter( 'http_request_args', array( $this, 'add_custom_user_agent' ), 10, 2 );
 	}
 
 	/**

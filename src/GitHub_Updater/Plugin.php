@@ -96,7 +96,7 @@ class Plugin extends Base {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
+		add_filter( 'http_request_args', array( $this, 'http_request_args' ), 10, 2 );
 
 		Settings::$ghu_plugins = $this->config;
 	}
