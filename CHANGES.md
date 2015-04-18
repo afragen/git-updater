@@ -1,7 +1,9 @@
 #### 4.3.1
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
+* German translation by [Linus Metzler](https://github.com/limenet)
 * squish PHP notices
 * add custom user agent to `wp_remote_get` and tweak error message at request of GitHub ;-)
+* fixed edge case renaming bug
 
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking

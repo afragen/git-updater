@@ -249,6 +249,7 @@ There is a new setting for a personal GitHub Access Token. I **strongly** encour
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
 * Spanish by [Jose Miguel Bejarano](https://github.com/xDae)
+* German by [Linus Metzler](https://github.com/limenet)
 
 ## Issues
 
