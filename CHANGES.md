@@ -1,3 +1,6 @@
+#### 4.3.2
+* only add custom user agent once :P
+
 #### 4.3.1
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
 * German translation by [Linus Metzler](https://github.com/limenet)

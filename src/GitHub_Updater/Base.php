@@ -546,7 +546,9 @@ class Base {
 	 */
 	public function http_request_args( $args ) {
 		$args['sslverify'] = false;
-		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
+			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+		}
 
 		return $args;
 	}
