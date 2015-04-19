@@ -544,7 +544,7 @@ class Base {
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
-	public function http_request_args( $args ) {
+	public function http_request_args( $args, $url ) {
 		$args['sslverify'] = false;
 		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
 			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
