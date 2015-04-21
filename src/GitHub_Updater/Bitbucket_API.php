@@ -83,7 +83,7 @@ class Bitbucket_API extends Base {
 		$segments = apply_filters( 'github_updater_api_segments', $segments );
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
+			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
 		return 'https://bitbucket.org/api/' . $endpoint;
