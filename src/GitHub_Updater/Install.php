@@ -71,6 +71,8 @@ class Install extends Base {
 			/**
 			 * Transform URI to owner/repo
 			 */
+			$install_scheme = parse_url( $_POST['github_updater_repo'], PHP_URL_SCHEME );
+			$install_host   = parse_url( $_POST['github_updater_repo'], PHP_URL_HOST );
 			$_POST['github_updater_repo'] = parse_url( $_POST['github_updater_repo'], PHP_URL_PATH );
 			$_POST['github_updater_repo'] = trim( $_POST['github_updater_repo'], '/' );
 
@@ -80,9 +82,16 @@ class Install extends Base {
 			/**
 			 * Create GitHub endpoint.
 			 * Save Access Token if present.
+			 * Check for GitHub Enterprise.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-				self::$install['download_link'] = 'https://api.github.com/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
+				if ( 'github.com' === $install_host || empty( $install_host ) ) {
+					$github_base = 'https://api.github.com';
+				} else {
+					$github_base = $install_scheme . '://' . $install_host . '/api/v3';
+				}
+
+				self::$install['download_link'] = $github_base . '/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
 
 				if ( ! empty( self::$install['github_access_token'] ) ) {
 					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );

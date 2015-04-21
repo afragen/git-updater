@@ -126,6 +126,12 @@ GitHub Branch:     master
 
 `GitHub Branch` and `Bitbucket Branch` are available but not required.
 
+### Enterprise Support
+
+#### GitHub Enterprise Support
+
+Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub Enterprise installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
+
 ### Versions
 
 GitHub Updater reads the `Version` headers from both the local file and the remote file. For an update to show as available the remote version number **must** be greater than the local version number. It is **required** to have a `Version` header in your main plugin file or your theme's `style.css` file. It is better to use [Semantic Versioning](http://semver.org).

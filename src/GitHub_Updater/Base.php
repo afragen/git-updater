@@ -112,6 +112,7 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Plugin URI'    => 'GitHub Plugin URI',
 			'GitHub Branch'        => 'GitHub Branch',
+			'GitHub Enterprise'    => 'GitHub Enterprise',
 			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
 			'Bitbucket Branch'     => 'Bitbucket Branch',
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
@@ -135,6 +136,7 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Enterprise'   => 'GitHub Enterprise',
 			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
 			'Bitbucket Branch'    => 'Bitbucket Branch',
 			'GitLab Theme URI'    => 'GitLab Theme URI',
@@ -183,10 +185,11 @@ class Base {
 			}
 
 			foreach ( (array) self::$extra_headers as $value ) {
-				$repo_type     = null;
-				$repo_header   = null;
-				$repo_branch   = null;
-				$repo_base_uri = null;
+				$repo_type           = null;
+				$repo_header         = null;
+				$repo_branch         = null;
+				$repo_base_uri       = null;
+				$repo_enterprise_uri = null;
 
 				if ( empty( $headers[ $value ] ) ||
 				     false === stristr( $value, 'Plugin' )
@@ -203,6 +206,20 @@ class Base {
 					$repo_base_uri = $repo_base_uris[ $repo_type ];
 				}
 
+				if ( array_key_exists( $header_parts[0] . ' Enterprise', $headers ) &&
+				     ! empty( $headers[ $header_parts[0] . ' Enterprise' ] )
+				) {
+					$repo_enterprise_uri = $headers[ $header_parts[0] . ' Enterprise' ];
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							break;
+					}
+				}
+
 				$git_plugin['type']                    = $repo_type;
 				$owner_repo                            = parse_url( $headers[ $repo_header ], PHP_URL_PATH );
 				$owner_repo                            = trim( $owner_repo, '/' );  // strip surrounding slashes
@@ -213,6 +230,7 @@ class Base {
 				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $git_plugin['repo'] . '/';
 				$git_plugin['branch']                  = $headers[ $repo_branch ];
 				$git_plugin['slug']                    = $plugin;
+				$git_plugin['enterprise']              = $repo_enterprise_uri;
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
@@ -246,11 +264,12 @@ class Base {
 		);
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme     = array();
-			$repo_type     = null;
-			$repo_branch   = null;
-			$repo_base_uri = null;
-			$repo_uri      = null;
+			$git_theme           = array();
+			$repo_type           = null;
+			$repo_branch         = null;
+			$repo_base_uri       = null;
+			$repo_uri            = null;
+			$repo_enterprise_uri = null;
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
@@ -265,6 +284,17 @@ class Base {
 
 				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
 					$repo_type     = $repo_types[ $header_parts[0] ];
+					$repo_enterprise_uri = $theme->get( $header_parts[0] . ' Enterprise' );
+					if ( ! empty( $repo_enterprise_uri ) ) {
+						$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+						switch( $header_parts[0] ) {
+							case 'GitHub':
+								$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+								break;
+							case 'GitLab':
+								break;
+						}
+					}
 					$repo_branch   = $header_parts[0] . ' Branch';
 					$repo_base_uri = $repo_base_uris[ $repo_type ];
 				}
@@ -274,6 +304,7 @@ class Base {
 				$owner_repo                           = trim( $owner_repo, '/' );
 				$git_theme['uri']                     = $repo_base_uri . $owner_repo;
 				$owner_repo                           = explode( '/', $owner_repo );
+				$git_theme['enterprise']              = $repo_enterprise_uri;
 				$git_theme['owner']                   = $owner_repo[0];
 				$git_theme['repo']                    = $owner_repo[1];
 				$git_theme['name']                    = $theme->get( 'Name' );

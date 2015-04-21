@@ -94,6 +94,13 @@ class GitHub_API extends Base {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
 
+		/**
+		 * If using GitHub Enterprise header return this endpoint.
+		 */
+		if ( ! empty( $this->type->enterprise ) ) {
+			return $this->type->enterprise . $endpoint;
+		}
+
 		return 'https://api.github.com' . $endpoint;
 	}
 
@@ -204,8 +211,18 @@ class GitHub_API extends Base {
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+	public function construct_download_link( $rollback = false ) {
+		/**
+		 * Check if using GitHub Enterprise.
+		 */
+		if ( ! empty( $this->type->enterprise ) ) {
+			$github_base = $this->type->enterprise;
+		} else {
+			$github_base = 'https://api.github.com';
+		}
+
+		$download_link_base = $github_base . '/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+
 		$endpoint           = '';
 
 		/**
