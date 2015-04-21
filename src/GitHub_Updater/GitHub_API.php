@@ -211,7 +211,7 @@ class GitHub_API extends Base {
 	 * 
 	 * @return URI
 	 */
-	public function construct_download_link( $rollback = false ) {
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/**
 		 * Check if using GitHub Enterprise.
 		 */
