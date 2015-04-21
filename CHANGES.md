@@ -1,5 +1,7 @@
-#### 4.3.2
+#### 4.4.0
 * only add custom user agent once :P
+* add support of GitHub Enterprise via new `GitHub Enterprise` header
+* sanitize filter input
 
 #### 4.3.1
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
