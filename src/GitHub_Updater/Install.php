@@ -96,7 +96,9 @@ class Install extends Base {
 				if ( ! empty( self::$install['github_access_token'] ) ) {
 					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
 					parent::$options[ self::$install['repo'][1] ] = self::$install['github_access_token'];
-				} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+				} elseif ( ! empty( parent::$options['github_access_token'] ) &&
+				           ( 'github.com' === $install_host || empty( $install_host ) )
+				) {
 					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
 				}
 			}
