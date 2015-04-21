@@ -196,8 +196,8 @@ class Plugin extends Base {
 			}
 
 			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
-				                            '&TB_iframe=true&width=600&height=550' ) ),
+				network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
+				                            '&TB_iframe=true&width=600&height=550' ),
 				__( 'View details', 'github-updater' )
 			);
 		}
