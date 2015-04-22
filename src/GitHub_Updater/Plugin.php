@@ -236,6 +236,7 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$contributors = array();
 			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
 				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
 					return $response;
