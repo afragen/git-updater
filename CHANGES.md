@@ -2,6 +2,7 @@
 * only add custom user agent once :P
 * add support of GitHub Enterprise via new `GitHub Enterprise` header
 * sanitize filter input
+* add support for for parsing `readme.txt` for _View details_ information
 
 #### 4.3.1
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)

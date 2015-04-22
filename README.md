@@ -5,8 +5,9 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.2beta
+* Tested up to: 4.2
 * Stable tag: master
+* Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -190,9 +191,9 @@ There are now two **optional** headers for setting minimum requirements for both
 
 Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
 
-Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
 
-At the moment the default values are **WordPress 3.8.0** and **PHP 5.3**
+At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
 
 ## Deleting Transients
 
