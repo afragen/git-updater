@@ -322,10 +322,13 @@ class GitHub_API extends Base {
 
 		/**
 		 * Set plugin data from readme.txt.
-		 * Prefer changelog and description from CHANGES.md.
+		 * Prefer changelog from CHANGES.md.
 		 */
 		$readme = array();
 		foreach ( $this->type->sections as $section => $value ) {
+			if ( 'description' === $section ) {
+				continue;
+			}
 			$readme['sections/' . $section ] = $value;
 		}
 		foreach ( $readme as $key => $value ) {
@@ -337,7 +340,7 @@ class GitHub_API extends Base {
 
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
-		$this->type->sections     = (array) $this->type->sections + (array) $response['sections'];
+		$this->type->sections     = array_merge( (array) $this->type->sections, $response['sections'] );
 		$this->type->tested       = $response['tested_up_to'];
 		$this->type->requires     = $response['requires_at_least'];
 		$this->type->donate       = $response['donate_link'];
