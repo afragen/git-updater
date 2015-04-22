@@ -251,6 +251,7 @@ class Plugin extends Base {
 				$response->requires      = $plugin->requires;
 				$response->tested        = $plugin->tested;
 				$response->downloaded    = $plugin->downloaded;
+				$response->donate_link   = $plugin->donate;
 				$response->last_updated  = $plugin->last_updated;
 				$response->download_link = $plugin->download_link;
 				if ( ! $plugin->private ) {

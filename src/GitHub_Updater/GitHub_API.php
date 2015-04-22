@@ -340,6 +340,7 @@ class GitHub_API extends Base {
 		$this->type->sections = (array) $this->type->sections + (array) $response['sections'];
 		$this->type->tested   = $response['tested_up_to'];
 		$this->type->requires = $response['requires_at_least'];
+		$this->type->donate   = $response['donate_link'];
 
 		return true;
 	}
