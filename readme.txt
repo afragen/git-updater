@@ -7,3 +7,19 @@ Tested up to: 4.2
 Stable tag: master
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+== Description ==
+
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
+
+`GitHub Theme URI: afragen/test-child`
+`GitHub Theme URI: https://github.com/afragen/test-child`
+
+or
+
+`GitHub Plugin URI: afragen/github-updater`
+`GitHub Plugin URI: https://github.com/afragen/github-updater`
+
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
+
+Developers please note that your plugin/theme installation directory and remote repository names **must** be identical. This includes case sensitivity. Otherwise issues may arise where certain features fail to work properly. Please be consistent in your naming.
