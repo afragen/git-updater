@@ -65,6 +65,7 @@ class Plugin extends Base {
 				if ( $changelog ) {
 					$repo_api->get_remote_changes( $changelog );
 				}
+				$repo_api->get_remote_readme();
 				$plugin->download_link = $repo_api->construct_download_link();
 			}
 

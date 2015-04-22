@@ -123,7 +123,6 @@ class Bitbucket_API extends Base {
 		$this->type->branch               = ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master';
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->requires             = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 
 		return true;
 	}
@@ -257,14 +256,73 @@ class Bitbucket_API extends Base {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Parsedown;
+			$parser    = new \Parsedown;
 			$changelog = $parser->text( $response->data );
 			$this->set_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
 	}
-	
+
+	/**
+	 * Read and parse remote readme.txt.
+	 *
+	 * @return bool
+	 */
+	public function get_remote_readme() {
+		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) ) {
+			return false;
+		}
+
+		$response = $this->get_transient( 'readme' );
+
+		if ( ! $response ) {
+			if ( ! isset( $this->type->branch ) ) {
+				$this->type->branch = 'master';
+			}
+			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
+
+			if ( ! $response ) {
+				$response['message'] = 'No changelog found';
+				$response = (object) $response;
+			}
+
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
+
+		if ( $response && isset( $response->data ) ) {
+			$parser   = new Readme_Parser;
+			$response = $parser->parse_readme( $response->data );
+			$this->set_transient( 'readme', $response );
+		}
+
+		/**
+		 * Set plugin data from readme.txt.
+		 * Prefer changelog and description from CHANGES.md.
+		 */
+		$readme = array();
+		foreach ( $this->type->sections as $section => $value ) {
+			$readme['sections/' . $section ] = $value;
+		}
+		foreach ( $readme as $key => $value ) {
+			$key = explode( '/', $key );
+			if ( ! empty( $value ) && 'sections' === $key[0] ) {
+				unset( $response['sections'][ $key[1] ] );
+			}
+		}
+
+		unset( $response['sections']['screenshots'] );
+		unset( $response['sections']['installation'] );
+		$this->type->sections = (array) $this->type->sections + (array) $response['sections'];
+		$this->type->tested   = $response['tested_up_to'];
+		$this->type->requires = $response['requires_at_least'];
+
+		return true;
+	}
+
 	/**
 	 * Read the repository meta from API
 	 *
