@@ -338,7 +338,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		//unset( $response['sections']['screenshots'] );
+		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
 		$this->type->tested       = $response['tested_up_to'];
