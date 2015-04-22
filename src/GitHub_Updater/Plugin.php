@@ -254,6 +254,10 @@ class Plugin extends Base {
 				$response->donate_link   = $plugin->donate;
 				$response->last_updated  = $plugin->last_updated;
 				$response->download_link = $plugin->download_link;
+				foreach ( $plugin->contributors as $contributor ) {
+					$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
+				}
+				$response->contributors  = $contributors;
 				if ( ! $plugin->private ) {
 					$response->num_ratings = $plugin->num_ratings;
 					$response->rating      = $plugin->rating;

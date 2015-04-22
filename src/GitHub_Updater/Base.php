@@ -352,6 +352,7 @@ class Base {
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
 		$this->$type->donate                = null;
+		$this->$type->contributors          = array();
 		$this->$type->downloaded            = 0;
 		$this->$type->last_updated          = null;
 		$this->$type->rating                = 0;
