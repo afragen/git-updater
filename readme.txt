@@ -1,5 +1,5 @@
 === GitHub Updater ===
-Contributors: afragen,
+Contributors: afragen, garyj, sethmatics
 Donate link: http://bit.ly/github-updater
 Tags: plugin, theme, update, updater, github, bitbucket, remote install
 Requires at least: 3.8
