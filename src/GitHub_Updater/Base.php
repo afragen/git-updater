@@ -729,7 +729,6 @@ class Base {
 	 * @return array
 	 */
 	protected static function parse_header_uri( $repo_header ) {
-		$header               = array();
 		$header_parts         = parse_url( $repo_header );
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
@@ -762,14 +761,14 @@ class Base {
 			'GitLab'    => 'gitlab_' . $type,
 		);
 		$repo_base_uris = array(
-			'github'    => 'https://github.com/',
-			'bitbucket' => 'https://bitbucket.org/',
-			'gitlab'    => 'https://gitlab.com/',
+			'GitHub'    => 'https://github.com/',
+			'Bitbucket' => 'https://bitbucket.org/',
+			'GitLab'    => 'https://gitlab.com/',
 		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
 			$arr['type']       = $repo_types[ $repo ];
-			$arr['base_uri']   = $repo_base_uris[ strtolower( $repo ) ];
+			$arr['base_uri']   = $repo_base_uris[ $repo ];
 			$arr['branch']     = $repo . ' Branch';
 			$arr['enterprise'] = $repo . ' Enterprise';
 			$arr['bool']       = true;
