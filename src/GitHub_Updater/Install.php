@@ -71,13 +71,11 @@ class Install extends Base {
 			/**
 			 * Transform URI to owner/repo
 			 */
-			$install_scheme = parse_url( $_POST['github_updater_repo'], PHP_URL_SCHEME );
-			$install_host   = parse_url( $_POST['github_updater_repo'], PHP_URL_HOST );
-			$_POST['github_updater_repo'] = parse_url( $_POST['github_updater_repo'], PHP_URL_PATH );
-			$_POST['github_updater_repo'] = trim( $_POST['github_updater_repo'], '/' );
+			$headers                      = Base::parse_header_uri( $_POST['github_updater_repo'] );
+			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install = Settings::sanitize( $_POST );
-			self::$install['repo'] = explode( '/', self::$install['github_updater_repo'] );
+			self::$install                = Settings::sanitize( $_POST );
+			self::$install['repo']        = $headers['repo'];
 
 			/**
 			 * Create GitHub endpoint.
@@ -85,19 +83,19 @@ class Install extends Base {
 			 * Check for GitHub Enterprise.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-				if ( 'github.com' === $install_host || empty( $install_host ) ) {
+				if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
 					$github_base = 'https://api.github.com';
 				} else {
-					$github_base = $install_scheme . '://' . $install_host . '/api/v3';
+					$github_base = $headers['base_uri'] . '/api/v3';
 				}
 
 				self::$install['download_link'] = $github_base . '/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
 
 				if ( ! empty( self::$install['github_access_token'] ) ) {
 					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
-					parent::$options[ self::$install['repo'][1] ] = self::$install['github_access_token'];
+					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
 				} elseif ( ! empty( parent::$options['github_access_token'] ) &&
-				           ( 'github.com' === $install_host || empty( $install_host ) )
+				           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
 				) {
 					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
 				}
@@ -111,7 +109,7 @@ class Install extends Base {
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
 				self::$install['download_link'] = 'https://bitbucket.org/' . self::$install['github_updater_repo'] . '/get/' . self::$install['github_updater_branch'] . '.zip';
 				if ( isset( self::$install['is_private'] ) ) {
-					parent::$options[ self::$install['repo'][1] ] = 1;
+					parent::$options[ self::$install['repo'] ] = 1;
 				}
 
 				new Bitbucket_API( (object) $type );
@@ -122,7 +120,7 @@ class Install extends Base {
 			$nonce = wp_nonce_url( $url );
 
 			if ( 'plugin' === $type ) {
-				$plugin = self::$install['repo'][1];
+				$plugin = self::$install['repo'];
 
 				/**
 				 * Create a new instance of Plugin_Upgrader.
@@ -131,7 +129,7 @@ class Install extends Base {
 			}
 
 			if ( 'theme' === $type ) {
-				$theme = self::$install['repo'][1];
+				$theme = self::$install['repo'];
 
 				/**
 				 * Create a new instance of Theme_Upgrader.
