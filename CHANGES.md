@@ -3,6 +3,7 @@
 * add support of GitHub Enterprise via new `GitHub Enterprise` header
 * sanitize filter input
 * add support for for parsing `readme.txt` for _View details_ information
+* fixed _View details_ link to show for all cases when plugin using GitHub Updater
 * refactor creation of header parts and URIs
 
 #### 4.3.1
