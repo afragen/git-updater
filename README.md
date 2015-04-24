@@ -280,7 +280,10 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+**Includes**
+
+* [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+* [Mark Jaquith's](https://github.com/markjaquith) [WordPress-Plugin-Readme-Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser) for parsing `readme.txt` files.
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
