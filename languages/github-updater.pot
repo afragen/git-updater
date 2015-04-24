@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-04-17 12:07-0800\n"
-"PO-Revision-Date: 2015-04-17 12:07-0800\n"
+"POT-Creation-Date: 2015-04-24 09:27-0800\n"
+"PO-Revision-Date: 2015-04-24 09:27-0800\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.6\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -22,43 +22,37 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:321
-msgid ""
-"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
-"md</code> or <code>CHANGELOG.md</code> in your repository."
-msgstr ""
-
-#: src/GitHub_Updater/Base.php:422
+#: src/GitHub_Updater/Base.php:425
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:432
+#: src/GitHub_Updater/Base.php:435
 msgid "Rename successful"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:439
+#: src/GitHub_Updater/Base.php:442
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:689
+#: src/GitHub_Updater/Base.php:696
 #, php-format
 msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:697
+#: src/GitHub_Updater/Base.php:704
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:702
+#: src/GitHub_Updater/Base.php:709
 #, php-format
 msgid ""
 "It looks like you are running into GitHub API rate limits. Be sure and "
 "configure a %sPersonal Access Token%s to avoid this issue."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:710
+#: src/GitHub_Updater/Base.php:717
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
@@ -66,62 +60,62 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:156 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:165 src/GitHub_Updater/Settings.php:67
 msgid "Install Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:159 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:168 src/GitHub_Updater/Settings.php:68
 msgid "Install Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:176
+#: src/GitHub_Updater/Install.php:185
 msgid "Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:179
+#: src/GitHub_Updater/Install.php:188
 msgid "Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:190
+#: src/GitHub_Updater/Install.php:199
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:197
+#: src/GitHub_Updater/Install.php:206
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:205
+#: src/GitHub_Updater/Install.php:214
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:213
+#: src/GitHub_Updater/Install.php:222
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:221
+#: src/GitHub_Updater/Install.php:230
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:229 src/GitHub_Updater/Settings.php:196
+#: src/GitHub_Updater/Install.php:238 src/GitHub_Updater/Settings.php:196
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:256
+#: src/GitHub_Updater/Install.php:265
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:298
+#: src/GitHub_Updater/Install.php:307
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:145
+#: src/GitHub_Updater/Plugin.php:146
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:201
+#: src/GitHub_Updater/Plugin.php:196
 msgid "View details"
 msgstr ""
 

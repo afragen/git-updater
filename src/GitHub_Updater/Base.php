@@ -112,6 +112,7 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Plugin URI'    => 'GitHub Plugin URI',
 			'GitHub Branch'        => 'GitHub Branch',
+			'GitHub Enterprise'    => 'GitHub Enterprise',
 			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
 			'Bitbucket Branch'     => 'Bitbucket Branch',
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
@@ -135,6 +136,7 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
+			'GitHub Enterprise'   => 'GitHub Enterprise',
 			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
 			'Bitbucket Branch'    => 'Bitbucket Branch',
 			'GitLab Theme URI'    => 'GitLab Theme URI',
@@ -164,16 +166,6 @@ class Base {
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
-			$repo_types = array(
-				'GitHub'    => 'github_plugin',
-				'Bitbucket' => 'bitbucket_plugin',
-				'GitLab'    => 'gitlab_plugin',
-			);
-			$repo_base_uris = array(
-				'github_plugin'    => 'https://github.com/',
-				'bitbucket_plugin' => 'https://bitbucket.org/',
-				'gitlab_plugin'    => 'https://gitlab.com/',
-			);
 
 			if ( empty( $headers['GitHub Plugin URI'] ) &&
 			     empty( $headers['Bitbucket Plugin URI'] ) &&
@@ -183,10 +175,7 @@ class Base {
 			}
 
 			foreach ( (array) self::$extra_headers as $value ) {
-				$repo_type     = null;
-				$repo_header   = null;
-				$repo_branch   = null;
-				$repo_base_uri = null;
+				$repo_enterprise_uri = null;
 
 				if ( empty( $headers[ $value ] ) ||
 				     false === stristr( $value, 'Plugin' )
@@ -195,23 +184,33 @@ class Base {
 				}
 
 				$header_parts = explode( ' ', $value );
+				$repo_parts   = $this->_get_repo_parts( $header_parts[0], 'plugin' );
 
-				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
-					$repo_type     = $repo_types[ $header_parts[0] ];
-					$repo_header   = $value;
-					$repo_branch   = $header_parts[0] . ' Branch';
-					$repo_base_uri = $repo_base_uris[ $repo_type ];
+				if ( $repo_parts['bool'] ) {
+					$header = $this->parse_header_uri( $headers[ $value ] );
 				}
 
-				$git_plugin['type']                    = $repo_type;
-				$owner_repo                            = parse_url( $headers[ $repo_header ], PHP_URL_PATH );
-				$owner_repo                            = trim( $owner_repo, '/' );  // strip surrounding slashes
-				$git_plugin['uri']                     = $repo_base_uri . $owner_repo;
-				$owner_repo                            = explode( '/', $owner_repo );
-				$git_plugin['owner']                   = $owner_repo[0];
-				$git_plugin['repo']                    = $owner_repo[1];
-				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $git_plugin['repo'] . '/';
-				$git_plugin['branch']                  = $headers[ $repo_branch ];
+				if ( array_key_exists( $repo_parts['enterprise'], $headers ) &&
+				     ! empty( $headers[ $repo_parts['enterprise'] ] )
+				) {
+					$repo_enterprise_uri = $headers[ $repo_parts['enterprise'] ];
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							break;
+					}
+				}
+
+				$git_plugin['type']                    = $repo_parts['type'];
+				$git_plugin['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_plugin['enterprise']              = $repo_enterprise_uri;
+				$git_plugin['owner']                   = $header['owner'];
+				$git_plugin['repo']                    = $header['repo'];
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
 				$git_plugin['slug']                    = $plugin;
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
@@ -234,23 +233,11 @@ class Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
-		$repo_types = array(
-			'GitHub'    => 'github_theme',
-			'Bitbucket' => 'bitbucket_theme',
-			'GitLab'    => 'gitlab_theme',
-		);
-		$repo_base_uris = array(
-			'github_theme'    => 'https://github.com/',
-			'bitbucket_theme' => 'https://bitbucket.org/',
-			'gitlab_theme'    => 'https://gitlab.com/',
-		);
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme     = array();
-			$repo_type     = null;
-			$repo_branch   = null;
-			$repo_base_uri = null;
-			$repo_uri      = null;
+			$git_theme           = array();
+			$repo_uri            = null;
+			$repo_enterprise_uri = null;
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
@@ -262,27 +249,36 @@ class Base {
 				}
 
 				$header_parts = explode( ' ', $value );
+				$repo_parts   = $this->_get_repo_parts( $header_parts[0], 'theme' );
 
-				if ( array_key_exists( $header_parts[0], $repo_types ) ) {
-					$repo_type     = $repo_types[ $header_parts[0] ];
-					$repo_branch   = $header_parts[0] . ' Branch';
-					$repo_base_uri = $repo_base_uris[ $repo_type ];
+				if ( $repo_parts['bool'] ) {
+					$header = $this->parse_header_uri( $repo_uri );
 				}
 
-				$git_theme['type']                    = $repo_type;
-				$owner_repo                           = parse_url( $repo_uri, PHP_URL_PATH );
-				$owner_repo                           = trim( $owner_repo, '/' );
-				$git_theme['uri']                     = $repo_base_uri . $owner_repo;
-				$owner_repo                           = explode( '/', $owner_repo );
-				$git_theme['owner']                   = $owner_repo[0];
-				$git_theme['repo']                    = $owner_repo[1];
+				$repo_enterprise_uri = $theme->get( $repo_parts['enterprise'] );
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							break;
+					}
+				}
+
+				$git_theme['type']                    = $repo_parts['type'];
+				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_theme['enterprise']              = $repo_enterprise_uri;
+				$git_theme['owner']                   = $header['owner'];
+				$git_theme['repo']                    = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
-				$git_theme['branch']                  = $theme->get( $repo_branch );
+				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 			}
 
 			/**
@@ -318,9 +314,10 @@ class Base {
 		$this->$type->tags                  = array();
 		$this->$type->rollback              = array();
 		$this->$type->branches              = array();
-		$this->$type->sections['changelog'] = __( 'No changelog is available via GitHub Updater. Create a file <code>CHANGES.md</code> or <code>CHANGELOG.md</code> in your repository.', 'github-updater' );
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
+		$this->$type->donate                = null;
+		$this->$type->contributors          = array();
 		$this->$type->downloaded            = 0;
 		$this->$type->last_updated          = null;
 		$this->$type->rating                = 0;
@@ -544,9 +541,11 @@ class Base {
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
-	public function http_request_args( $args ) {
+	public function http_request_args( $args, $url ) {
 		$args['sslverify'] = false;
-		$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
+			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+		}
 
 		return $args;
 	}
@@ -722,4 +721,59 @@ class Base {
 		<?php
 	}
 
+	/**
+	 * Parse URI param returning array of parts.
+	 *
+	 * @param $repo_header
+	 *
+	 * @return array
+	 */
+	protected static function parse_header_uri( $repo_header ) {
+		$header_parts         = parse_url( $repo_header );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo           = explode( '/', $owner_repo );
+		$header['owner']      = $owner_repo[0];
+		$header['repo']       = $owner_repo[1];
+		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
+		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
+		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
+
+		$header = Settings::sanitize( $header );
+
+		return $header;
+	}
+
+	/**
+	 * Create repo parts.
+	 *
+	 * @param $repo
+	 * @param $type
+	 *
+	 * @return mixed
+	 */
+	private function _get_repo_parts( $repo, $type ) {
+		$arr['bool'] = false;
+		$repo_types  = array(
+			'GitHub'    => 'github_' . $type,
+			'Bitbucket' => 'bitbucket_'. $type,
+			'GitLab'    => 'gitlab_' . $type,
+		);
+		$repo_base_uris = array(
+			'GitHub'    => 'https://github.com/',
+			'Bitbucket' => 'https://bitbucket.org/',
+			'GitLab'    => 'https://gitlab.com/',
+		);
+
+		if ( array_key_exists( $repo, $repo_types ) ) {
+			$arr['type']       = $repo_types[ $repo ];
+			$arr['base_uri']   = $repo_base_uris[ $repo ];
+			$arr['branch']     = $repo . ' Branch';
+			$arr['enterprise'] = $repo . ' Enterprise';
+			$arr['bool']       = true;
+		}
+
+		return $arr;
+	}
 }

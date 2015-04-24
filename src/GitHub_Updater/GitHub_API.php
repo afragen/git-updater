@@ -77,7 +77,7 @@ class GitHub_API extends Base {
 		$segments = apply_filters( 'github_updater_api_segments', $segments );
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . $segment, '/' . $value, $endpoint );
+			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
@@ -92,6 +92,13 @@ class GitHub_API extends Base {
 		 */
 		if ( ! empty( $this->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+		}
+
+		/**
+		 * If using GitHub Enterprise header return this endpoint.
+		 */
+		if ( ! empty( $this->type->enterprise ) ) {
+			return $this->type->enterprise . remove_query_arg( 'access_token', $endpoint );
 		}
 
 		return 'https://api.github.com' . $endpoint;
@@ -131,7 +138,6 @@ class GitHub_API extends Base {
 		$this->type->branch               = ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master';
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->requires             = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 
 		return true;
 	}
@@ -205,7 +211,17 @@ class GitHub_API extends Base {
 	 * @return URI
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = 'https://api.github.com/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+		/**
+		 * Check if using GitHub Enterprise.
+		 */
+		if ( ! empty( $this->type->enterprise ) ) {
+			$github_base = $this->type->enterprise;
+		} else {
+			$github_base = 'https://api.github.com';
+		}
+
+		$download_link_base = $github_base . '/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
+
 		$endpoint           = '';
 
 		/**
@@ -234,7 +250,7 @@ class GitHub_API extends Base {
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
 			return $download_link_base . $endpoint;
-		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 			return $download_link_base . $endpoint;
 		}
@@ -243,8 +259,7 @@ class GitHub_API extends Base {
 	}
 
 	/**
-	 * Read the remote CHANGES.md file
-	 *
+	 * Read the remote CHANGES.md file.
 	 * Uses a transient to limit calls to the API.
 	 *
 	 * @param $changes
@@ -269,12 +284,69 @@ class GitHub_API extends Base {
 		$changelog = $this->get_transient( 'changelog' );
 
 		if ( ! $changelog ) {
-			$parser    = new Parsedown;
+			$parser    = new \Parsedown;
 			$changelog = $parser->text( base64_decode( $response->content ) );
 			$this->set_transient( 'changelog', $changelog );
 		}
 
 		$this->type->sections['changelog'] = $changelog;
+
+		return true;
+	}
+
+	/**
+	 * Read and parse remote readme.txt.
+	 *
+	 * @return bool
+	 */
+	public function get_remote_readme() {
+		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) ) {
+			return false;
+		}
+
+		$response = $this->get_transient( 'readme' );
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
+
+		if ( $response && isset( $response->content ) ) {
+			$parser   = new Readme_Parser;
+			$response = $parser->parse_readme( base64_decode( $response->content ) );
+			$this->set_transient( 'readme', $response );
+		}
+
+		/**
+		 * Set plugin data from readme.txt.
+		 * Prefer changelog from CHANGES.md.
+		 */
+		$readme = array();
+		foreach ( $this->type->sections as $section => $value ) {
+			if ( 'description' === $section ) {
+				continue;
+			}
+			$readme['sections/' . $section ] = $value;
+		}
+		foreach ( $readme as $key => $value ) {
+			$key = explode( '/', $key );
+			if ( ! empty( $value ) && 'sections' === $key[0] ) {
+				unset( $response['sections'][ $key[1] ] );
+			}
+		}
+
+		unset( $response['sections']['screenshots'] );
+		unset( $response['sections']['installation'] );
+		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
+		$this->type->tested       = $response['tested_up_to'];
+		$this->type->requires     = $response['requires_at_least'];
+		$this->type->donate       = $response['donate_link'];
+		$this->type->contributors = $response['contributors'];
+
+		return true;
 	}
 
 	/**

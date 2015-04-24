@@ -5,8 +5,9 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.2beta
+* Tested up to: 4.2
 * Stable tag: master
+* Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,17 +20,15 @@ This plugin is [not allowed in the wp.org repo](https://github.com/afragen/githu
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-`GitHub Theme URI: afragen/test-child`  
-`GitHub Theme URI: https://github.com/afragen/test-child`
-
-or 
-
 `GitHub Plugin URI: afragen/github-updater`  
 `GitHub Plugin URI: https://github.com/afragen/github-updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
+or 
 
-Developers please note that your plugin/theme installation directory and remote repository names **must** be identical. This includes case sensitivity. Otherwise issues may arise where certain features fail to work properly. Please be consistent in your naming.
+`GitHub Theme URI: afragen/test-child`  
+`GitHub Theme URI: https://github.com/afragen/test-child`
+
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
 
 ## Installation
 
@@ -126,6 +125,12 @@ GitHub Branch:     master
 
 `GitHub Branch` and `Bitbucket Branch` are available but not required.
 
+### Enterprise Support
+
+#### GitHub Enterprise Support
+
+Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub Enterprise installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
+
 ### Versions
 
 GitHub Updater reads the `Version` headers from both the local file and the remote file. For an update to show as available the remote version number **must** be greater than the local version number. It is **required** to have a `Version` header in your main plugin file or your theme's `style.css` file. It is better to use [Semantic Versioning](http://semver.org).
@@ -184,9 +189,9 @@ There are now two **optional** headers for setting minimum requirements for both
 
 Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
 
-Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
 
-At the moment the default values are **WordPress 3.8.0** and **PHP 5.3**
+At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
 
 ## Deleting Transients
 
