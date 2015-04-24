@@ -93,7 +93,7 @@ class Plugin extends Base {
 
 		$this->make_force_check_transient( 'plugins' );
 
-		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
@@ -165,45 +165,40 @@ class Plugin extends Base {
 
 	/**
 	 * Add 'View details' link to plugins page.
-	 * Only works if `Plugin URI' === `GitHub Plugin URI`
 	 *
-	 * @param $plugin_meta
+	 * @param $links
+	 * @param $file
 	 *
-	 * @return array
+	 * @return array $links
 	 */
-	public function plugin_row_meta( $plugin_meta ) {
+	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
+		$repo          = dirname ( $file );
 
 		/**
 		 * Sanity check for some commercial plugins.
 		 */
-		if ( ! isset( $plugin_meta[2] ) ) {
-			return $plugin_meta;
+		if ( ! isset( $links[2] ) ) {
+			return $links;
 		}
 
-		preg_match( $regex_pattern, $plugin_meta[2], $matches );
+		preg_match( $regex_pattern, $links[2], $matches );
 
-		if ( 'View details' !== $matches[2] ) {
-			$slug = trim( parse_url( $matches[1], PHP_URL_PATH ), '/' );
-			$repo = explode( '/', $slug );
-		}
-
-		if ( ! empty( $slug ) && isset( $repo[1] ) && array_key_exists( $repo[1], $this->config ) ) {
-			/**
-			 * Remove 'Visit plugin site' link in favor or 'View details' link.
-			 */
-			if ( false !== stristr( $plugin_meta[2], 'Visit plugin site' ) ) {
-				unset( $plugin_meta[2] );
+		/**
+		 * Remove 'Visit plugin site' link in favor or 'View details' link.
+		 */
+		if ( array_key_exists( $repo, $this->config ) ) {
+			if ( false !== stristr( $links[2], 'Visit plugin site' ) ) {
+				unset( $links[2] );
+				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
+					network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
+					                   '&TB_iframe=true&width=600&height=550' ),
+					__( 'View details', 'github-updater' )
+				);
 			}
-
-			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-				network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
-				                            '&TB_iframe=true&width=600&height=550' ),
-				__( 'View details', 'github-updater' )
-			);
 		}
 
-		return $plugin_meta;
+		return $links;
 	}
 
 	/**
