@@ -1,3 +1,6 @@
+#### 4.4.1
+* fix some PHP notices
+
 #### 4.4.0
 * only add custom user agent once :P
 * add support of GitHub Enterprise via new `GitHub Enterprise` header
