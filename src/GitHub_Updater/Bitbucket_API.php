@@ -289,14 +289,14 @@ class Bitbucket_API extends Base {
 
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
-			return false;
-		}
-
 		if ( $response && isset( $response->data ) ) {
 			$parser   = new Readme_Parser;
 			$response = $parser->parse_readme( $response->data );
 			$this->set_transient( 'readme', $response );
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
 		}
 
 		/**

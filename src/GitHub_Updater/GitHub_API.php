@@ -310,14 +310,14 @@ class GitHub_API extends Base {
 			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
-			return false;
-		}
-
 		if ( $response && isset( $response->content ) ) {
 			$parser   = new Readme_Parser;
 			$response = $parser->parse_readme( base64_decode( $response->content ) );
 			$this->set_transient( 'readme', $response );
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
 		}
 
 		/**
