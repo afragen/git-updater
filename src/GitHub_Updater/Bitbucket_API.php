@@ -283,7 +283,7 @@ class Bitbucket_API extends Base {
 			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
 
 			if ( ! $response ) {
-				$response['message'] = 'No changelog found';
+				$response['message'] = 'No readme found';
 				$response = (object) $response;
 			}
 
