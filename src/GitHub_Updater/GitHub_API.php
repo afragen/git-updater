@@ -249,10 +249,8 @@ class GitHub_API extends Base {
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-			return $download_link_base . $endpoint;
 		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-			return $download_link_base . $endpoint;
 		}
 
 		return $download_link_base . $endpoint;
