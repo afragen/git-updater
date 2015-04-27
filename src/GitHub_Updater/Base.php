@@ -663,7 +663,6 @@ class Base {
 
 	/**
 	 * Display message when API returns other than 200 or 404.
-	 * Usually 403 as API rate limit max out or private repo with no token set.
 	 *
 	 * @return bool
 	 */
@@ -686,7 +685,8 @@ class Base {
 	}
 
 	/**
-	 * Display error message.
+	 * Create error message.
+	 * Usually 403 as API rate limit max out or 401 as private repo with no token set.
 	 */
 	public function show_error_message() {
 		?>
@@ -883,5 +883,5 @@ class Base {
 
 		return $type['base_uri'] . $endpoint;
 	}
-	
+
 }
