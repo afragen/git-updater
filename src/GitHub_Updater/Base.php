@@ -785,11 +785,12 @@ class Base {
 	 * @return bool
 	 */
 	protected function validate_response( $response ) {
-		if ( $response || ! isset( $response->message ) ) {
+		if ( $response  ) {
 			return false;
+		} elseif ( empty( $response ) || ! isset( $response->message ) ) {
+			return true;
 		}
 
-		return true;
 	}
 
 	/**
