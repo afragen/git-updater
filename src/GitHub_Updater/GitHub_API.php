@@ -472,6 +472,10 @@ class GitHub_API extends Base {
 			}
 		}
 
+		if ( ! is_string( $response ) ) {
+			return false;
+		}
+
 		if ( false !== stristr( $response, $this->type->newest_tag ) ) {
 			if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 				$response = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $response );
@@ -481,8 +485,6 @@ class GitHub_API extends Base {
 
 			return $response;
 		}
-
-		return false;
 	}
 
 }
