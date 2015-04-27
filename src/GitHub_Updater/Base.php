@@ -656,14 +656,13 @@ class Base {
 
 		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
-		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
+		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
 
 	/**
 	 * Display message when API returns other than 200 or 404.
-	 * Usually 403 as API rate limit max out or private repo with no token set.
 	 *
 	 * @return bool
 	 */
@@ -686,7 +685,8 @@ class Base {
 	}
 
 	/**
-	 * Display error message.
+	 * Create error message.
+	 * Usually 403 as API rate limit max out or 401 as private repo with no token set.
 	 */
 	public function show_error_message() {
 		?>
@@ -776,4 +776,112 @@ class Base {
 
 		return $arr;
 	}
+
+	/**
+	 * Validate wp_remote_get response.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function validate_response( $response ) {
+		if ( $response || ! isset( $response->message ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Return repo data for API calls.
+	 *
+	 * @return array
+	 */
+	private function _return_repo_type() {
+		switch ( $this->type->type ) {
+			case ( stristr( $this->type->type, 'github' ) ):
+				$type['type']     = 'github';
+				$type['base_uri'] = 'https://api.github.com';
+				break;
+			case( stristr( $this->type->type, 'bitbucket' ) ):
+				$type['type']     = 'bitbucket';
+				$type['base_uri'] = 'https://bitbucket.org/api';
+				break;
+			case (stristr( $this->type->type, 'gitlab' ) ):
+				$type['type']     = 'gitlab';
+				$type['base_uri'] = null;
+				break;
+			default:
+				$type = array();
+		}
+
+		return $type;
+	}
+
+	/**
+	 * Call the API and return a json decoded body.
+	 * Create error messages.
+	 *
+	 * @see http://developer.github.com/v3/
+	 *
+	 * @param string $url
+	 *
+	 * @return boolean|object
+	 */
+	protected function api( $url ) {
+		$type          = $this->_return_repo_type();
+		$response      = wp_remote_get( $this->_get_api_url( $url ) );
+		$code          = (integer) wp_remote_retrieve_response_code( $response );
+		$allowed_codes = array( 200, 404 );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			self::$error_code = array_merge( self::$error_code, array( $this->type->repo => $code ) );
+			if ( 'github' === $type['type'] ) {
+				$this->_ratelimit_reset( $response );
+			}
+			$this->create_error_message();
+			return false;
+		}
+
+		return json_decode( wp_remote_retrieve_body( $response ) );
+	}
+
+	/**
+	 * Return API url.
+	 *
+	 * @param string $endpoint
+	 *
+	 * @return string
+	 */
+	private function _get_api_url( $endpoint ) {
+		$type     = $this->_return_repo_type();
+		$segments = array(
+			'owner' => $this->type->owner,
+			'repo'  => $this->type->repo,
+		);
+
+		/**
+		 * Add or filter the available segments that are used to replace placeholders.
+		 *
+		 * @param array $segments list of segments.
+		 */
+		$segments = apply_filters( 'github_updater_api_segments', $segments );
+
+		foreach ( $segments as $segment => $value ) {
+			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
+		}
+
+		if ( 'github' === $type['type'] ) {
+			$endpoint = GitHub_API::add_github_endpoints( $this, $endpoint );
+			if ( $this->type->enterprise ) {
+				return $endpoint;
+			}
+		}
+
+		return $type['base_uri'] . $endpoint;
+	}
+
 }
