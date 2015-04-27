@@ -32,14 +32,14 @@ class GitHub_API extends Base {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param $repo
+	 * @param $git plugin/theme object
 	 * @param $endpoint
 	 *
 	 * @return string
 	 */
-	protected static function add_github_endpoints( $repo, $endpoint ) {
-		if ( ! empty( parent::$options[ $repo->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $repo->type->repo ], $endpoint );
+	protected static function add_github_endpoints( $git, $endpoint ) {
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
 		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
@@ -48,15 +48,15 @@ class GitHub_API extends Base {
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitHub will use the Default branch.
 		 */
-		if ( ! empty( $repo->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $repo->type->branch, $endpoint );
+		if ( ! empty( $git->type->branch ) ) {
+			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
 
 		/**
 		 * If using GitHub Enterprise header return this endpoint.
 		 */
-		if ( ! empty( $repo->type->enterprise ) ) {
-			return $repo->type->enterprise . remove_query_arg( 'access_token', $endpoint );
+		if ( ! empty( $git->type->enterprise ) ) {
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
 		}
 
 		return $endpoint;
