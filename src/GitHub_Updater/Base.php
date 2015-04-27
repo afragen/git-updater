@@ -797,7 +797,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function return_repo_type() {
+	private function _return_repo_type() {
 		switch ( $this->type->type ) {
 			case ( stristr( $this->type->type, 'github' ) ):
 				$type['type']     = 'github';
@@ -829,8 +829,8 @@ class Base {
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
-		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$type          = $this->_return_repo_type();
+		$response      = wp_remote_get( $this->_get_api_url( $url ) );
 		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
@@ -856,8 +856,8 @@ class Base {
 	 *
 	 * @return string
 	 */
-	protected function get_api_url( $endpoint ) {
-		$type     = $this->return_repo_type();
+	private function _get_api_url( $endpoint ) {
+		$type     = $this->_return_repo_type();
 		$segments = array(
 			'owner' => $this->type->owner,
 			'repo'  => $this->type->repo,
