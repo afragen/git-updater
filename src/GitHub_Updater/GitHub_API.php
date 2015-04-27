@@ -437,7 +437,7 @@ class GitHub_API extends Base {
 	/**
 	 * Get uploaded release asset to use in place of tagged release.
 	 *
-	 * @return bool|mixed|object|\stdClass|string
+	 * @return bool|string
 	 */
 	protected function get_asset() {
 		if ( empty( $this->type->newest_tag ) ) {
@@ -454,7 +454,7 @@ class GitHub_API extends Base {
 			return false;
 		}
 
-		if ( $response instanceof stdClass ) {
+		if ( $response instanceof \stdClass ) {
 
 			if ( empty( $response->assets ) ) {
 				$response          = new \stdClass();
