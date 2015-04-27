@@ -247,6 +247,11 @@ class GitHub_API extends Base {
 			$endpoint = $branch_switch;
 		}
 
+		$asset = $this->get_asset();
+		if ( $asset && ! $branch_switch ) {
+			return $asset;
+		}
+
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
 			return $download_link_base . $endpoint;
@@ -427,6 +432,57 @@ class GitHub_API extends Base {
 			$wait               = date( 'i', $reset - time() );
 			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo . '-wait' => $wait ) );
 		}
+	}
+
+	/**
+	 * Get uploaded release asset to use in place of tagged release.
+	 *
+	 * @return bool|mixed|object|\stdClass|string
+	 */
+	protected function get_asset() {
+		if ( empty( $this->type->newest_tag ) ) {
+			return false;
+		}
+		$response = $this->get_transient( 'asset' );
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
+			$this->set_transient( 'asset' , $response );
+		}
+
+		if ( ! $response || isset( $response->message ) ) {
+			return false;
+		}
+
+		if ( $response instanceof stdClass ) {
+
+			if ( empty( $response->assets ) ) {
+				$response          = new \stdClass();
+				$response->message = false;
+				$this->set_transient( 'asset', $response );
+				return false;
+			}
+			foreach ( (array) $response->assets as $asset ) {
+				if ( isset ( $asset->browser_download_url ) &&
+				     false !== stristr( $asset->browser_download_url, $this->type->newest_tag )
+				) {
+					$this->set_transient( 'asset', $asset->browser_download_url );
+					$response = $asset->browser_download_url;
+				}
+			}
+		}
+
+		if ( false !== stristr( $response, $this->type->newest_tag ) ) {
+			if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+				$response = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $response );
+			} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
+				$response = add_query_arg( 'access_token', parent::$options['github_access_token'], $response );
+			}
+
+			return $response;
+		}
+
+		return false;
 	}
 
 }
