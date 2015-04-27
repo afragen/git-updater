@@ -1,5 +1,7 @@
-#### 4.4.1
+#### 4.5.0
 * fix some PHP notices
+* refactor of API calls to `Fragen\GitHub_Updater\Base`
+* add update by GitHub release asset in lieu of update by tag
 
 #### 4.4.0
 * only add custom user agent once :P
