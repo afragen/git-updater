@@ -39,57 +39,6 @@ class Bitbucket_API extends Base {
 	}
 
 	/**
-	 * Call the API and return a json decoded body.
-	 *
-	 * @param string $url
-	 *
-	 * @return boolean|object
-	 */
-	protected function api( $url ) {
-		$response      = wp_remote_get( $this->get_api_url( $url ) );
-		$code          = (integer) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = array( 200, 404 );
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-		if ( ! in_array( $code, $allowed_codes, false ) ) {
-			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo => $code ) );
-			$this->create_error_message();
-			return false;
-		}
-
-		return json_decode( wp_remote_retrieve_body( $response ) );
-	}
-
-	/**
-	 * Return API url.
-	 *
-	 * @param string $endpoint
-	 *
-	 * @return string
-	 */
-	protected function get_api_url( $endpoint ) {
-		$segments = array(
-			'owner' => $this->type->owner,
-			'repo'  => $this->type->repo,
-		);
-
-		/**
-		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @param array $segments List of segments.
-		 */
-		$segments = apply_filters( 'github_updater_api_segments', $segments );
-
-		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
-		}
-
-		return 'https://bitbucket.org/api/' . $endpoint;
-	}
-
-	/**
 	 * Read the remote file and parse headers.
 	 * Saves headers to transient.
 	 *
@@ -102,7 +51,7 @@ class Bitbucket_API extends Base {
 			if ( empty( $this->type->branch ) ) {
 				$this->type->branch = 'master';
 			}
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
 
 			if ( $response ) {
 				$contents = $response->data;
@@ -111,13 +60,10 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
-		if ( ! is_array( $response ) ) {
-			return false;
-		}
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->branch               = ! empty( $response['Bitbucket Branch'] ) ? $response['Bitbucket Branch'] : 'master';
@@ -139,7 +85,7 @@ class Bitbucket_API extends Base {
 		$response           = $this->get_transient( 'tags' );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/tags' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
 			$arr_resp = (array) $response;
 
 			if ( ! $response || ! $arr_resp ) {
@@ -151,7 +97,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -237,7 +183,7 @@ class Bitbucket_API extends Base {
 			if ( ! isset( $this->type->branch ) ) {
 				$this->type->branch = 'master';
 			}
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
 
 			if ( ! $response ) {
 				$response['message'] = 'No changelog found';
@@ -249,7 +195,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -280,10 +226,10 @@ class Bitbucket_API extends Base {
 			if ( ! isset( $this->type->branch ) ) {
 				$this->type->branch = 'master';
 			}
-			$response = $this->api( '1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
 
 			if ( ! $response ) {
-				$response['message'] = 'No changelog found';
+				$response['message'] = 'No readme found';
 				$response = (object) $response;
 			}
 
@@ -295,7 +241,7 @@ class Bitbucket_API extends Base {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -339,14 +285,14 @@ class Bitbucket_API extends Base {
 		$response = $this->get_transient( 'meta' );
 
 		if ( ! $response ) {
-			$response = $this->api( '2.0/repositories/:owner/:repo' );
+			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
 				$this->set_transient( 'meta', $response );
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -364,7 +310,7 @@ class Bitbucket_API extends Base {
 		$response = $this->get_transient( 'branches' );
 
 		if ( ! $response ) {
-			$response = $this->api( '1.0/repositories/:owner/:repo/branches' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -376,7 +322,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 

@@ -30,58 +30,16 @@ class GitHub_API extends Base {
 	}
 
 	/**
-	 * Call the API and return a json decoded body.
+	 * Create GitHub API endpoints.
 	 *
-	 * @see http://developer.github.com/v3/
-	 *
-	 * @param string $url
-	 *
-	 * @return boolean|object
-	 */
-	protected function api( $url ) {
-		$response      = wp_remote_get( $this->get_api_url( $url ) );
-		$code          = (integer) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = array( 200, 404 );
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-		if ( ! in_array( $code, $allowed_codes, false ) ) {
-			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo => $code ) );
-			$this->_ratelimit_reset( $response );
-			$this->create_error_message();
-			return false;
-		}
-
-		return json_decode( wp_remote_retrieve_body( $response ) );
-	}
-
-	/**
-	 * Return API url.
-	 *
-	 * @param string $endpoint
+	 * @param $git plugin/theme object
+	 * @param $endpoint
 	 *
 	 * @return string
 	 */
-	protected function get_api_url( $endpoint ) {
-		$segments = array(
-			'owner' => $this->type->owner,
-			'repo'  => $this->type->repo,
-		);
-
-		/**
-		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @param array $segments List of segments.
-		 */
-		$segments = apply_filters( 'github_updater_api_segments', $segments );
-
-		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
-		}
-
-		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
+	protected static function add_github_endpoints( $git, $endpoint ) {
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
 		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
@@ -90,18 +48,18 @@ class GitHub_API extends Base {
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitHub will use the Default branch.
 		 */
-		if ( ! empty( $this->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+		if ( ! empty( $git->type->branch ) ) {
+			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
 
 		/**
 		 * If using GitHub Enterprise header return this endpoint.
 		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			return $this->type->enterprise . remove_query_arg( 'access_token', $endpoint );
+		if ( ! empty( $git->type->enterprise ) ) {
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
 		}
 
-		return 'https://api.github.com' . $endpoint;
+		return $endpoint;
 	}
 
 	/**
@@ -126,13 +84,10 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
-		if ( ! is_array( $response ) ) {
-			return false;
-		}
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->branch               = ! empty( $response['GitHub Branch'] ) ? $response['GitHub Branch'] : 'master';
@@ -165,7 +120,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -208,7 +163,7 @@ class GitHub_API extends Base {
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 * 
-	 * @return URI
+	 * @return string URI
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/**
@@ -254,10 +209,8 @@ class GitHub_API extends Base {
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-			return $download_link_base . $endpoint;
 		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-			return $download_link_base . $endpoint;
 		}
 
 		return $download_link_base . $endpoint;
@@ -282,7 +235,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -321,7 +274,7 @@ class GitHub_API extends Base {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -372,7 +325,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( ! $response || empty( $response->items ) || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) || empty( $response->items ) ) {
 			return false;
 		}
 
@@ -412,7 +365,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
