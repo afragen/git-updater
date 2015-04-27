@@ -817,8 +817,10 @@ class Base {
 
 		return $type;
 	}
+
 	/**
 	 * Call the API and return a json decoded body.
+	 * Create error messages.
 	 *
 	 * @see http://developer.github.com/v3/
 	 *
@@ -864,7 +866,7 @@ class Base {
 		/**
 		 * Add or filter the available segments that are used to replace placeholders.
 		 *
-		 * @param array $segments List of segments.
+		 * @param array $segments list of segments.
 		 */
 		$segments = apply_filters( 'github_updater_api_segments', $segments );
 
@@ -881,6 +883,5 @@ class Base {
 
 		return $type['base_uri'] . $endpoint;
 	}
-
-
+	
 }
