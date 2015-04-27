@@ -212,7 +212,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_api',
 			__( 'Remote Repository Host', 'github-updater' ),
-			array( $this, 'api' ),
+			array( $this, 'install_api' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -271,7 +271,7 @@ class Install extends Base {
 	/**
 	 * API setting.
 	 */
-	public function api() {
+	public function install_api() {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
