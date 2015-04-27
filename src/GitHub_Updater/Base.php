@@ -776,4 +776,111 @@ class Base {
 
 		return $arr;
 	}
+
+	/**
+	 * Validate wp_remote_get response.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function validate_response( $response ) {
+		if ( $response || ! isset( $response->message ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Return repo data for API calls.
+	 *
+	 * @return array
+	 */
+	protected function return_repo_type() {
+		switch ( $this->type->type ) {
+			case ( stristr( $this->type->type, 'github' ) ):
+				$type['type']     = 'github';
+				$type['base_uri'] = 'https://api.github.com';
+				break;
+			case( stristr( $this->type->type, 'bitbucket' ) ):
+				$type['type']     = 'bitbucket';
+				$type['base_uri'] = 'https://bitbucket.org/api';
+				break;
+			case (stristr( $this->type->type, 'gitlab' ) ):
+				$type['type']     = 'gitlab';
+				$type['base_uri'] = null;
+				break;
+			default:
+				$type = array();
+		}
+
+		return $type;
+	}
+	/**
+	 * Call the API and return a json decoded body.
+	 *
+	 * @see http://developer.github.com/v3/
+	 *
+	 * @param string $url
+	 *
+	 * @return boolean|object
+	 */
+	protected function api( $url ) {
+		$type          = $this->return_repo_type();
+		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$code          = (integer) wp_remote_retrieve_response_code( $response );
+		$allowed_codes = array( 200, 404 );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+		if ( ! in_array( $code, $allowed_codes, false ) ) {
+			self::$error_code = array_merge( self::$error_code, array( $this->type->repo => $code ) );
+			if ( 'github' === $type['type'] ) {
+				$this->_ratelimit_reset( $response );
+			}
+			$this->create_error_message();
+			return false;
+		}
+
+		return json_decode( wp_remote_retrieve_body( $response ) );
+	}
+
+	/**
+	 * Return API url.
+	 *
+	 * @param string $endpoint
+	 *
+	 * @return string
+	 */
+	protected function get_api_url( $endpoint ) {
+		$type     = $this->return_repo_type();
+		$segments = array(
+			'owner' => $this->type->owner,
+			'repo'  => $this->type->repo,
+		);
+
+		/**
+		 * Add or filter the available segments that are used to replace placeholders.
+		 *
+		 * @param array $segments List of segments.
+		 */
+		$segments = apply_filters( 'github_updater_api_segments', $segments );
+
+		foreach ( $segments as $segment => $value ) {
+			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
+		}
+
+		if ( 'github' === $type['type'] ) {
+			$endpoint = GitHub_API::add_github_endpoints( $this, $endpoint );
+			if ( $this->type->enterprise ) {
+				return $endpoint;
+			}
+		}
+
+		return $type['base_uri'] . $endpoint;
+	}
+
+
 }
