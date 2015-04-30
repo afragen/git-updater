@@ -510,6 +510,21 @@ class Base {
 	}
 
 	/**
+	 * Set repo object file info.
+	 *
+	 * @param $response
+	 * @param $repo
+	 */
+	protected function set_file_info( $response, $repo ) {
+		$repo_parts = $this->_get_repo_parts( $repo, $this->type->type );
+		$this->type->transient            = $response;
+		$this->type->remote_version       = strtolower( $response['Version'] );
+		$this->type->branch               = ! empty( $response[ $repo_parts['branch'] ] ) ? $response[$repo_parts['branch'] ] : 'master';
+		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
+		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+	}
+
+	/**
 	 * Get filename of changelog and return
 	 *
 	 * @param $type
@@ -755,6 +770,8 @@ class Base {
 	 */
 	private function _get_repo_parts( $repo, $type ) {
 		$arr['bool'] = false;
+		$pattern     = '/' . strtolower( $repo ) . '_/';
+		$type        = preg_replace( $pattern, '', $type );
 		$repo_types  = array(
 			'GitHub'    => 'github_' . $type,
 			'Bitbucket' => 'bitbucket_'. $type,
@@ -775,22 +792,6 @@ class Base {
 		}
 
 		return $arr;
-	}
-
-	/**
-	 * Validate wp_remote_get response.
-	 *
-	 * @param $response
-	 *
-	 * @return bool
-	 */
-	protected function validate_response( $response ) {
-		if ( $response  ) {
-			return false;
-		} elseif ( empty( $response ) || ! isset( $response->message ) ) {
-			return true;
-		}
-
 	}
 
 	/**
@@ -817,6 +818,22 @@ class Base {
 		}
 
 		return $type;
+	}
+
+	/**
+	 * Validate wp_remote_get response.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function validate_response( $response ) {
+		if ( $response  ) {
+			return false;
+		} elseif ( empty( $response ) || ! isset( $response->message ) ) {
+			return true;
+		}
+
 	}
 
 	/**
