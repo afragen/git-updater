@@ -186,8 +186,8 @@ class Bitbucket_API extends Base {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
 
 			if ( ! $response ) {
-				$response['message'] = 'No changelog found';
-				$response = (object) $response;
+				$response          = new \stdClass();
+				$response->message = false;
 			}
 
 			if ( $response ) {
