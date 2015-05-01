@@ -525,6 +525,93 @@ class Base {
 	}
 
 	/**
+	 * Parse tags and set object data.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return bool
+	 */
+	protected function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+		if ( false !== $response ) {
+			switch ( $repo_type['type'] ) {
+				case 'github':
+					foreach ( (array) $response as $tag ) {
+						if ( isset( $tag->name ) ) {
+							$tags[]                 = $tag->name;
+							$rollback[ $tag->name ] = $tag->zipball_url;
+						}
+					}
+					break;
+				case 'bitbucket':
+					foreach ( (array) $response as $num => $tag ) {
+						$download_base = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'get/' ) );
+						if ( isset( $num ) ) {
+							$tags[]           = $num;
+							$rollback[ $num ] = $download_base . $num . '.zip';
+						}
+					}
+					break;
+				case 'gitlab':
+					break;
+			}
+
+		}
+		if ( empty( $tags ) ) {
+			return false;
+		}
+
+		usort( $tags, 'version_compare' );
+		krsort( $rollback );
+
+		$newest_tag             = null;
+		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
+		$newest_tag             = $tags[ $newest_tag_key ];
+
+		$this->type->newest_tag = $newest_tag;
+		$this->type->tags       = $tags;
+		$this->type->rollback   = $rollback;
+
+		return true;
+	}
+
+	/**
+	 * Set data from readme.txt.
+	 * Prefer changelog from CHANGES.md.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function set_readme_info( $response ) {
+		$readme = array();
+		foreach ( $this->type->sections as $section => $value ) {
+			if ( 'description' === $section ) {
+				continue;
+			}
+			$readme['sections/' . $section ] = $value;
+		}
+		foreach ( $readme as $key => $value ) {
+			$key = explode( '/', $key );
+			if ( ! empty( $value ) && 'sections' === $key[0] ) {
+				unset( $response['sections'][ $key[1] ] );
+			}
+		}
+
+		unset( $response['sections']['screenshots'] );
+		unset( $response['sections']['installation'] );
+		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
+		$this->type->tested       = $response['tested_up_to'];
+		$this->type->requires     = $response['requires_at_least'];
+		$this->type->donate       = $response['donate_link'];
+		$this->type->contributors = $response['contributors'];
+
+		return true;
+	}
+
+	/**
 	 * Get filename of changelog and return
 	 *
 	 * @param $type
@@ -546,23 +633,6 @@ class Base {
 		}
 
 			return false;
-	}
-
-	/**
-	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
-	 * Adds custom user agent for GitHub Updater.
-	 *
-	 * @param  array $args Existing HTTP Request arguments.
-	 *
-	 * @return array Amended HTTP Request arguments.
-	 */
-	public function http_request_args( $args, $url ) {
-		$args['sslverify'] = false;
-		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
-		}
-
-		return $args;
 	}
 
 	/**
@@ -677,66 +747,6 @@ class Base {
 	}
 
 	/**
-	 * Display message when API returns other than 200 or 404.
-	 *
-	 * @return bool
-	 */
-	protected function create_error_message() {
-		global $pagenow;
-		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
-		$settings_pages = array( 'settings.php', 'options-general.php' );
-
-		if (
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
-			( in_array( $pagenow, $settings_pages ) && 'github-updater' !== $_GET['page'] )
-		) {
-			return false;
-		}
-
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
-				add_action( 'network_admin_notices', array( $this, 'show_error_message' ) );
-		}
-	}
-
-	/**
-	 * Create error message.
-	 * Usually 403 as API rate limit max out or 401 as private repo with no token set.
-	 */
-	public function show_error_message() {
-		?>
-		<div class="error notice is-dismissible">
-			<p>
-				<?php
-					printf( __( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
-						'<strong>' . $this->type->name . '</strong>'
-					);
-					echo ' ' . self::$error_code[ $this->type->repo ];
-				?>
-				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
-					<br>
-					<?php
-						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
-							self::$error_code[ $this->type->repo . '-wait' ]
-						);
-						echo '<br>';
-						printf(
-							__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
-							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
-							'</a>'
-						);
-					?>
-				<?php endif; ?>
-				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
-					<br>
-					<?php _e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
-				<?php endif; ?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Parse URI param returning array of parts.
 	 *
 	 * @param $repo_header
@@ -792,114 +802,6 @@ class Base {
 		}
 
 		return $arr;
-	}
-
-	/**
-	 * Return repo data for API calls.
-	 *
-	 * @return array
-	 */
-	private function _return_repo_type() {
-		switch ( $this->type->type ) {
-			case ( stristr( $this->type->type, 'github' ) ):
-				$type['type']     = 'github';
-				$type['base_uri'] = 'https://api.github.com';
-				break;
-			case( stristr( $this->type->type, 'bitbucket' ) ):
-				$type['type']     = 'bitbucket';
-				$type['base_uri'] = 'https://bitbucket.org/api';
-				break;
-			case (stristr( $this->type->type, 'gitlab' ) ):
-				$type['type']     = 'gitlab';
-				$type['base_uri'] = null;
-				break;
-			default:
-				$type = array();
-		}
-
-		return $type;
-	}
-
-	/**
-	 * Validate wp_remote_get response.
-	 *
-	 * @param $response
-	 *
-	 * @return bool
-	 */
-	protected function validate_response( $response ) {
-		if ( $response  ) {
-			return false;
-		} elseif ( empty( $response ) || ! isset( $response->message ) ) {
-			return true;
-		}
-
-	}
-
-	/**
-	 * Call the API and return a json decoded body.
-	 * Create error messages.
-	 *
-	 * @see http://developer.github.com/v3/
-	 *
-	 * @param string $url
-	 *
-	 * @return boolean|object
-	 */
-	protected function api( $url ) {
-		$type          = $this->_return_repo_type();
-		$response      = wp_remote_get( $this->_get_api_url( $url ) );
-		$code          = (integer) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = array( 200, 404 );
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-		if ( ! in_array( $code, $allowed_codes, false ) ) {
-			self::$error_code = array_merge( self::$error_code, array( $this->type->repo => $code ) );
-			if ( 'github' === $type['type'] ) {
-				$this->_ratelimit_reset( $response );
-			}
-			$this->create_error_message();
-			return false;
-		}
-
-		return json_decode( wp_remote_retrieve_body( $response ) );
-	}
-
-	/**
-	 * Return API url.
-	 *
-	 * @param string $endpoint
-	 *
-	 * @return string
-	 */
-	private function _get_api_url( $endpoint ) {
-		$type     = $this->_return_repo_type();
-		$segments = array(
-			'owner' => $this->type->owner,
-			'repo'  => $this->type->repo,
-		);
-
-		/**
-		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @param array $segments list of segments.
-		 */
-		$segments = apply_filters( 'github_updater_api_segments', $segments );
-
-		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
-		}
-
-		if ( 'github' === $type['type'] ) {
-			$endpoint = GitHub_API::add_github_endpoints( $this, $endpoint );
-			if ( $this->type->enterprise ) {
-				return $endpoint;
-			}
-		}
-
-		return $type['base_uri'] . $endpoint;
 	}
 
 }

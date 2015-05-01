@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitHub_API extends Base {
+class GitHub_API extends Base_API {
 
 	/**
 	 * Constructor.
@@ -66,7 +66,9 @@ class GitHub_API extends Base {
 	 * Read the remote file and parse headers.
 	 * Saves headers to transient.
 	 *
-	 * Uses a transient to limit the calls to the API.
+	 * @param $file
+	 *
+	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
@@ -84,7 +86,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( Base_API::validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -94,21 +96,20 @@ class GitHub_API extends Base {
 	}
 
 	/**
-	 * Parse the remote info to find most recent tag if tags exist
+	 * Get remote info for tags.
 	 *
-	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @return string latest tag.
+	 * @return bool
 	 */
 	public function get_remote_tag() {
-		$response = $this->get_transient( 'tags' );
+		$repo_type = $this->return_repo_type();
+		$response  = $this->get_transient( 'tags' );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( ! $response ) {
-				$response['message'] = 'No tags found';
-				$response = (object) $response;
+				$response = new \stdClass();
+				$response->message = 'No tags found';
 			}
 
 			if ( $response ) {
@@ -116,40 +117,13 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
-		/**
-		 * Sort and get newest tag.
-		 */
-		$tags     = array();
-		$rollback = array();
-		if ( false !== $response ) {
-			foreach ( (array) $response as $tag ) {
-				if ( isset( $tag->name ) ) {
-					$tags[]                 = $tag->name;
-					$rollback[ $tag->name ] = $tag->zipball_url;
-				}
-			}
-		}
+		$this->parse_tags( $response, $repo_type );
 
-		/**
-		 * No tags are present, exit early.
-		 */
-		if ( empty( $tags ) ) {
-			return false;
-		}
-
-		usort( $tags, 'version_compare' );
-
-		$newest_tag             = null;
-		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
-		$newest_tag             = $tags[ $newest_tag_key ];
-
-		$this->type->newest_tag = $newest_tag;
-		$this->type->tags       = $tags;
-		$this->type->rollback   = $rollback;
+		return true;
 	}
 
 	/**
@@ -171,8 +145,7 @@ class GitHub_API extends Base {
 			$github_base = 'https://api.github.com';
 		}
 
-		$download_link_base = $github_base . '/repos/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/zipball/';
-
+		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
 		$endpoint           = '';
 
 		/**
@@ -231,7 +204,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -270,35 +243,11 @@ class GitHub_API extends Base {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
-		/**
-		 * Set plugin data from readme.txt.
-		 * Prefer changelog from CHANGES.md.
-		 */
-		$readme = array();
-		foreach ( $this->type->sections as $section => $value ) {
-			if ( 'description' === $section ) {
-				continue;
-			}
-			$readme['sections/' . $section ] = $value;
-		}
-		foreach ( $readme as $key => $value ) {
-			$key = explode( '/', $key );
-			if ( ! empty( $value ) && 'sections' === $key[0] ) {
-				unset( $response['sections'][ $key[1] ] );
-			}
-		}
-
-		unset( $response['sections']['screenshots'] );
-		unset( $response['sections']['installation'] );
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested_up_to'];
-		$this->type->requires     = $response['requires_at_least'];
-		$this->type->donate       = $response['donate_link'];
-		$this->type->contributors = $response['contributors'];
+		$this->set_readme_info( $response );
 
 		return true;
 	}
@@ -321,7 +270,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || empty( $response->items ) ) {
+		if ( Base_API::validate_response( $response ) || empty( $response->items ) ) {
 			return false;
 		}
 
@@ -361,7 +310,7 @@ class GitHub_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -375,11 +324,11 @@ class GitHub_API extends Base {
 	 *
 	 * @param $response
 	 */
-	private function _ratelimit_reset( $response ) {
+	protected static function _ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-			$reset              = (integer) $response['headers']['x-ratelimit-reset'];
-			$wait               = date( 'i', $reset - time() );
-			parent::$error_code = array_merge( parent::$error_code, array( $this->type->repo . '-wait' => $wait ) );
+			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
+			$wait                        = date( 'i', $reset - time() );
+			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array( 'git' => 'github', 'wait' => $wait ) );
 		}
 	}
 
@@ -399,7 +348,7 @@ class GitHub_API extends Base {
 			$this->set_transient( 'asset' , $response );
 		}
 
-		if ( ! $response || isset( $response->message ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 

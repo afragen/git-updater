@@ -236,6 +236,10 @@ There is a new setting for a personal GitHub Access Token. I **strongly** encour
 * using an incorrect private repo GitHub Access Token for a public repo
 * an incorrect Access Token for a private GitHub repo.
 
+### 429 - Too Many Requests
+
+I've seen this error code occasionally with Bitbucket.
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.

@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class Bitbucket_API extends Base {
+class Bitbucket_API extends Base_API {
 
 	/**
 	 * Constructor.
@@ -60,7 +60,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( Base_API::validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -70,15 +70,13 @@ class Bitbucket_API extends Base {
 	}
 
 	/**
-	 * Parse the remote info to find most recent tag if tags exist
+	 * Get the remote info to for tags.
 	 *
-	 * Uses a transient to limit the calls to the API.
-	 *
-	 * @return string latest tag.
+	 * @return bool
 	 */
 	public function get_remote_tag() {
-		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
-		$response           = $this->get_transient( 'tags' );
+		$repo_type = $this->return_repo_type();
+		$response  = $this->get_transient( 'tags' );
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
@@ -93,39 +91,13 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
-		/**
-		 * Sort and get newest tag.
-		 */
-		$tags     = array();
-		$rollback = array();
-		if ( false !== $response ) {
-			foreach ( (array) $response as $num => $tag ) {
-				if ( isset( $num ) ) {
-					$tags[]           = $num;
-					$rollback[ $num ] = $download_link_base . $num . '.zip';
-				}
-			}
-		}
+		$this->parse_tags( $response, $repo_type );
 
-		// no tags are present, exit early
-		if ( empty( $tags ) ) {
-			return false;
-		}
-
-		usort( $tags, 'version_compare' );
-		krsort( $rollback );
-
-		$newest_tag             = null;
-		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
-		$newest_tag             = $tags[ $newest_tag_key ];
-
-		$this->type->newest_tag = $newest_tag;
-		$this->type->tags       = $tags;
-		$this->type->rollback   = $rollback;
+		return true;
 	}
 
 	/**
@@ -137,7 +109,7 @@ class Bitbucket_API extends Base {
 	 * @return string URI
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = 'https://bitbucket.org/' . trailingslashit( $this->type->owner ) . $this->type->repo . '/get/';
+		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
 		$endpoint           = '';
 
 		/**
@@ -183,7 +155,7 @@ class Bitbucket_API extends Base {
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
-				$response->message = false;
+				$response->message = 'No changelog found';
 			}
 
 			if ( $response ) {
@@ -191,7 +163,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -225,8 +197,8 @@ class Bitbucket_API extends Base {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
 
 			if ( ! $response ) {
-				$response['message'] = 'No readme found';
-				$response = (object) $response;
+				$response = new \stdClass();
+				$response->message = 'No readme found';
 			}
 
 		}
@@ -237,35 +209,11 @@ class Bitbucket_API extends Base {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
-		/**
-		 * Set plugin data from readme.txt.
-		 * Prefer changelog from CHANGES.md.
-		 */
-		$readme = array();
-		foreach ( $this->type->sections as $section => $value ) {
-			if ( 'description' === $section ) {
-				continue;
-			}
-			$readme['sections/' . $section ] = $value;
-		}
-		foreach ( $readme as $key => $value ) {
-			$key = explode( '/', $key );
-			if ( ! empty( $value ) && 'sections' === $key[0] ) {
-				unset( $response['sections'][ $key[1] ] );
-			}
-		}
-
-		unset( $response['sections']['screenshots'] );
-		unset( $response['sections']['installation'] );
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested_up_to'];
-		$this->type->requires     = $response['requires_at_least'];
-		$this->type->donate       = $response['donate_link'];
-		$this->type->contributors = $response['contributors'];
+		$this->set_readme_info( $response );
 
 		return true;
 	}
@@ -288,7 +236,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -318,7 +266,7 @@ class Bitbucket_API extends Base {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ( Base_API::validate_response( $response ) ) {
 			return false;
 		}
 
