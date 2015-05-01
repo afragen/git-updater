@@ -25,7 +25,8 @@ class Install extends Base_API {
 	 */
 	private static $api = array(
 		'github'    => 'GitHub',
-		'bitbucket' => 'Bitbucket'
+		'bitbucket' => 'Bitbucket',
+		//'gitlab'    => 'GitLab',
 	);
 
 	/**
@@ -113,6 +114,13 @@ class Install extends Base_API {
 				}
 
 				new Bitbucket_API( (object) $type );
+			}
+
+			/**
+			 * Create GitLab endpoint.
+			 */
+			if ( 'gitlab' === self::$install['github_updater_api'] ) {
+				//add endpoint stuff here
 			}
 
 			update_site_option( 'github_updater', parent::$options );
