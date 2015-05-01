@@ -54,6 +54,9 @@ class Theme extends Base {
 				case 'bitbucket_theme':
 					$repo_api = new Bitbucket_API( $theme );
 					break;
+				case 'gitlab_theme':
+					//$repo_api = new GitLab_API( $theme );
+					break;
 			}
 
 			$this->{$theme->type} = $theme;
