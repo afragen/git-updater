@@ -199,7 +199,7 @@ class Install extends Base {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			array( 'Settings', 'sanitize' )
+			array( 'Fragen\\GitHub_Updater\\Settings', 'sanitize' )
 			);
 
 		add_settings_section(
