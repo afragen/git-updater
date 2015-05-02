@@ -11,7 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 
-class Messages extends Base_API {
+class Messages extends Base {
 
 	/**
 	 * Display message when API returns other than 200 or 404.

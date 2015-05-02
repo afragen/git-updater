@@ -21,6 +21,7 @@ abstract class API extends Base {
 	abstract public function get_remote_readme();
 	abstract public function get_repo_meta();
 	abstract public function get_remote_branches();
+	abstract public function construct_download_link();
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.

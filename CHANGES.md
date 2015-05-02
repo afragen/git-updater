@@ -1,8 +1,8 @@
 #### 4.5.0
 * fix some PHP notices
-* refactor of API calls to `Fragen\GitHub_Updater\Base`
-* add update by GitHub release asset in lieu of update by tag
-* refactor to simplify class structure, created `class Base_API` and `class Messages`
+* add update by GitHub release asset in lieu of update by tag when asset is present
+* refactor of API calls to `Fragen\GitHub_Updater\API`
+* refactor to simplify class structure, created `abstract class API` and `class Messages`
 
 #### 4.4.0
 * only add custom user agent once :P
