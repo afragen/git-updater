@@ -83,24 +83,6 @@ This way you get automatic updates and cannot deactivate the plugin.
 
 ## Usage
 
-### Themes
-
-There must be a `GitHub Theme URI` or `Bitbucket Theme URI` declaration in the `style.css` file.
-
-~~~css
-/*
-Theme Name:       Test
-Theme URI:        http://drfragen.info/
-Version:          0.1.0
-Description:      Child theme of TwentyTwelve.
-Author:           Andy Fragen
-Template:         twentytwelve
-Template Version: 1.0.0
-GitHub Theme URI: https://github.com/afragen/test-child
-GitHub Branch:    master
-*/
-~~~
-
 ### Plugins 
 
 There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
@@ -118,6 +100,24 @@ Domain Path:       /languages
 Text Domain:       github-updater
 GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     master
+*/
+~~~
+
+### Themes
+
+There must be a `GitHub Theme URI` or `Bitbucket Theme URI` declaration in the `style.css` file.
+
+~~~css
+/*
+Theme Name:       Test
+Theme URI:        http://drfragen.info/
+Version:          0.1.0
+Description:      Child theme of TwentyTwelve.
+Author:           Andy Fragen
+Template:         twentytwelve
+Template Version: 1.0.0
+GitHub Theme URI: https://github.com/afragen/test-child
+GitHub Branch:    master
 */
 ~~~
 
@@ -145,13 +145,15 @@ To specify a branch that you would like to use for updating, just add a branch h
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
-If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
+If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic version numbering similar to the following, `<major>.<minor>.<patch>.<development>`.
 
 In the GitHub Updater Settings there is a new setting to enable branch switching for plugins. When checked there will be a new ability from the Plugins page to switch between plugin branches.
 
 ## Tagging
 
-If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance. If you prefer to create a release asset for distribution, this will be used in preference to a tag.
+If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
+
+If you prefer to create a release asset for distribution, this will be used in preference to a tag.
 
 ## Bitbucket Support
 
@@ -284,7 +286,10 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+Includes
+
+* [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+* [Mark Jaquith's](https://github.com/markjaquith) [WordPress Plugin Readme Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser/tree/WordPress.org) for parsing `readme.txt`.
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
