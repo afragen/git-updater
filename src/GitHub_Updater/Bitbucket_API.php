@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class Bitbucket_API extends Base_API {
+class Bitbucket_API extends API {
 
 	/**
 	 * Constructor.
@@ -60,7 +60,7 @@ class Bitbucket_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) || ! is_array( $response ) ) {
+		if ( API::validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -91,7 +91,7 @@ class Bitbucket_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -128,7 +128,7 @@ class Bitbucket_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -174,7 +174,7 @@ class Bitbucket_API extends Base_API {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -188,7 +188,7 @@ class Bitbucket_API extends Base_API {
 	 *
 	 * Uses a transient to limit calls to the API
 	 *
-	 * @return base64 decoded repository meta data
+	 * @return bool
 	 */
 	public function get_repo_meta() {
 		$response = $this->get_transient( 'meta' );
@@ -201,20 +201,20 @@ class Bitbucket_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
 		$this->type->repo_meta = $response;
 		$this->_add_meta_repo_object();
-		$this->get_branches();
+		$this->get_remote_branches();
 	}
 
 	/**
 	 * Create array of branches and download links as array.
 	 * @return bool
 	 */
-	public function get_branches() {
+	public function get_remote_branches() {
 		$branches = array();
 		$response = $this->get_transient( 'branches' );
 
@@ -231,7 +231,7 @@ class Bitbucket_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 

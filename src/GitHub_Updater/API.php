@@ -10,7 +10,17 @@
 
 namespace Fragen\GitHub_Updater;
 
-class Base_API extends Base {
+abstract class API extends Base {
+
+	/**
+	 * The following functions must be in any repository API.
+	 */
+	abstract public function get_remote_info( $file );
+	abstract public function get_remote_tag();
+	abstract public function get_remote_changes( $changes );
+	abstract public function get_remote_readme();
+	abstract public function get_repo_meta();
+	abstract public function get_remote_branches();
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
@@ -138,7 +148,7 @@ class Base_API extends Base {
 	 *
 	 * @return bool true if invalid
 	 */
-	public static function validate_response( $response ) {
+	protected static function validate_response( $response ) {
 		if ( empty( $response ) || isset( $response->message ) ) {
 			return true;
 		}

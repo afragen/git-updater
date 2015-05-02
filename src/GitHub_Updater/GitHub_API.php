@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitHub_API extends Base_API {
+class GitHub_API extends API {
 
 	/**
 	 * Constructor.
@@ -53,7 +53,7 @@ class GitHub_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) || ! is_array( $response ) ) {
+		if ( API::validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -84,7 +84,7 @@ class GitHub_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -112,7 +112,7 @@ class GitHub_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -151,7 +151,7 @@ class GitHub_API extends Base_API {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -178,19 +178,20 @@ class GitHub_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) || empty( $response->items ) ) {
+		if ( API::validate_response( $response ) || empty( $response->items ) ) {
 			return false;
 		}
 
 		$this->type->repo_meta = $response->items[0];
 		$this->_add_meta_repo_object();
+		$this->get_remote_branches();
 	}
 
 	/**
 	 * Create array of branches and download links as array.
 	 * @return bool
 	 */
-	public function get_branches() {
+	public function get_remote_branches() {
 		$branches = array();
 		$response = $this->get_transient( 'branches' );
 
@@ -207,7 +208,7 @@ class GitHub_API extends Base_API {
 			}
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
@@ -347,7 +348,7 @@ class GitHub_API extends Base_API {
 			$this->set_transient( 'asset' , $response );
 		}
 
-		if ( Base_API::validate_response( $response ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
