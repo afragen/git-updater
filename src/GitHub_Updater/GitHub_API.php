@@ -30,39 +30,6 @@ class GitHub_API extends Base_API {
 	}
 
 	/**
-	 * Create GitHub API endpoints.
-	 *
-	 * @param $git object
-	 * @param $endpoint string
-	 *
-	 * @return string
-	 */
-	protected static function add_github_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
-
-		/**
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitHub will use the Default branch.
-		 */
-		if ( ! empty( $git->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
-		}
-
-		/**
-		 * If using GitHub Enterprise header return this endpoint.
-		 */
-		if ( ! empty( $git->type->enterprise ) ) {
-			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Read the remote file and parse headers.
 	 * Saves headers to transient.
 	 *
@@ -124,65 +91,6 @@ class GitHub_API extends Base_API {
 		$this->parse_tags( $response, $repo_type );
 
 		return true;
-	}
-
-	/**
-	 * Construct $this->type->download_link using Repository Contents API
-	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
-	 *
-	 * @param boolean $rollback for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
-	 * 
-	 * @return string URI
-	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/**
-		 * Check if using GitHub Enterprise.
-		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$github_base = $this->type->enterprise;
-		} else {
-			$github_base = 'https://api.github.com';
-		}
-
-		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
-		$endpoint           = '';
-
-		/**
-		 * Check for rollback.
-		 */
-		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
-			$endpoint .= $rollback;
-
-			/**
-			 * For users wanting to update against branch other than master
-			 * or if not using tags, else use newest_tag.
-			 */
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch;
-		} else {
-			$endpoint .= $this->type->newest_tag;
-		}
-
-		/**
-		 * Create endpoint for branch switching.
-		 */
-		if ( $branch_switch ) {
-			$endpoint = $branch_switch;
-		}
-
-		$asset = $this->get_asset();
-		if ( $asset && ! $branch_switch ) {
-			return $asset;
-		}
-
-		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
-
-		return $download_link_base . $endpoint;
 	}
 
 	/**
@@ -276,17 +184,6 @@ class GitHub_API extends Base_API {
 
 		$this->type->repo_meta = $response->items[0];
 		$this->_add_meta_repo_object();
-		$this->get_branches();
-	}
-
-	/**
-	 * Add remote data to type object
-	 */
-	private function _add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private      = $this->type->repo_meta->private;
 	}
 
 	/**
@@ -317,6 +214,108 @@ class GitHub_API extends Base_API {
 		$this->type->branches = $response;
 
 		return true;
+	}
+
+	/**
+	 * Add remote data to type object
+	 */
+	private function _add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta->pushed_at;
+		$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = $this->type->repo_meta->private;
+	}
+
+	/**
+	 * Create GitHub API endpoints.
+	 *
+	 * @param $git object
+	 * @param $endpoint string
+	 *
+	 * @return string
+	 */
+	protected static function add_github_endpoints( $git, $endpoint ) {
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
+		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+		}
+
+		/**
+		 * If a branch has been given, only check that for the remote info.
+		 * If it's not been given, GitHub will use the Default branch.
+		 */
+		if ( ! empty( $git->type->branch ) ) {
+			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+		}
+
+		/**
+		 * If using GitHub Enterprise header return this endpoint.
+		 */
+		if ( ! empty( $git->type->enterprise ) ) {
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
+		}
+
+		return $endpoint;
+	}
+
+	/**
+	 * Construct $this->type->download_link using Repository Contents API
+	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
+	 *
+	 * @param boolean $rollback for theme rollback
+	 * @param boolean $branch_switch for direct branch changing
+	 *
+	 * @return string URI
+	 */
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+		/**
+		 * Check if using GitHub Enterprise.
+		 */
+		if ( ! empty( $this->type->enterprise ) ) {
+			$github_base = $this->type->enterprise;
+		} else {
+			$github_base = 'https://api.github.com';
+		}
+
+		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
+		$endpoint           = '';
+
+		/**
+		 * Check for rollback.
+		 */
+		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
+			$endpoint .= $rollback;
+
+			/**
+			 * For users wanting to update against branch other than master
+			 * or if not using tags, else use newest_tag.
+			 */
+		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
+			$endpoint .= $this->type->branch;
+		} else {
+			$endpoint .= $this->type->newest_tag;
+		}
+
+		/**
+		 * Create endpoint for branch switching.
+		 */
+		if ( $branch_switch ) {
+			$endpoint = $branch_switch;
+		}
+
+		$asset = $this->get_asset();
+		if ( $asset && ! $branch_switch ) {
+			return $asset;
+		}
+
+		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
+		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+		}
+
+		return $download_link_base . $endpoint;
 	}
 
 	/**

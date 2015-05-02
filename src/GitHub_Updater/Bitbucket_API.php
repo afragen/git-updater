@@ -101,41 +101,6 @@ class Bitbucket_API extends Base_API {
 	}
 
 	/**
-	 * Construct $download_link
-	 *
-	 * @param boolean $rollback for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
-	 * 
-	 * @return string URI
-	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
-		$endpoint           = '';
-
-		/**
-		 * Check for rollback.
-		 */
-		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
-			$endpoint .= $rollback . '.zip';
-		
-		// for users wanting to update against branch other than master or not using tags, else use newest_tag
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch . '.zip';
-		} else {
-			$endpoint .= $this->type->newest_tag . '.zip';
-		}
-
-		/**
-		 * Create endpoint for branch switching.
-		 */
-		if ( $branch_switch ) {
-			$endpoint = $branch_switch . '.zip';
-		}
-
-		return $download_link_base . $endpoint;
-	}
-
-	/**
 	 * Read the remote CHANGES.md file
 	 *
 	 * Uses a transient to limit calls to the API.
@@ -283,6 +248,41 @@ class Bitbucket_API extends Base_API {
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
 		$this->type->private      = $this->type->repo_meta->is_private;
+	}
+
+	/**
+	 * Construct $download_link
+	 *
+	 * @param boolean $rollback for theme rollback
+	 * @param boolean $branch_switch for direct branch changing
+	 *
+	 * @return string URI
+	 */
+	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
+		$endpoint           = '';
+
+		/**
+		 * Check for rollback.
+		 */
+		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
+			$endpoint .= $rollback . '.zip';
+
+			// for users wanting to update against branch other than master or not using tags, else use newest_tag
+		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
+			$endpoint .= $this->type->branch . '.zip';
+		} else {
+			$endpoint .= $this->type->newest_tag . '.zip';
+		}
+
+		/**
+		 * Create endpoint for branch switching.
+		 */
+		if ( $branch_switch ) {
+			$endpoint = $branch_switch . '.zip';
+		}
+
+		return $download_link_base . $endpoint;
 	}
 
 	/**
