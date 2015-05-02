@@ -37,25 +37,25 @@ class Base_API extends Base {
 	protected function return_repo_type() {
 		switch ( $this->type->type ) {
 			case ( stristr( $this->type->type, 'github' ) ):
-				$type['type']          = 'github';
-				$type['base_uri']      = 'https://api.github.com';
-				$type['base_download'] = 'https://github.com';
+				$arr['repo']          = 'github';
+				$arr['base_uri']      = 'https://api.github.com';
+				$arr['base_download'] = 'https://github.com';
 				break;
 			case( stristr( $this->type->type, 'bitbucket' ) ):
-				$type['type']          = 'bitbucket';
-				$type['base_uri']      = 'https://bitbucket.org/api';
-				$type['base_download'] = 'https://bitbucket.org';
+				$arr['repo']          = 'bitbucket';
+				$arr['base_uri']      = 'https://bitbucket.org/api';
+				$arr['base_download'] = 'https://bitbucket.org';
 				break;
 			case (stristr( $this->type->type, 'gitlab' ) ):
-				$type['type']          = 'gitlab';
-				$type['base_uri']      = null;
-				$type['base_download'] = null;
+				$arr['repo']          = 'gitlab';
+				$arr['base_uri']      = null;
+				$arr['base_download'] = null;
 				break;
 			default:
-				$type = array();
+				$arr = array();
 		}
 
-		return $type;
+		return $arr;
 	}
 
 	/**
@@ -86,7 +86,7 @@ class Base_API extends Base {
 					'name' => $this->type->name,
 					)
 				) );
-			if ( 'github' === $type['type'] ) {
+			if ( 'github' === $type['repo'] ) {
 				GitHub_API::_ratelimit_reset( $response, $this->type->repo );
 			}
 			Messages::create_error_message();
@@ -121,7 +121,7 @@ class Base_API extends Base {
 			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
-		if ( 'github' === $type['type'] ) {
+		if ( 'github' === $type['repo'] ) {
 			$endpoint = GitHub_API::add_github_endpoints( $this, $endpoint );
 			if ( $this->type->enterprise ) {
 				return $endpoint;
