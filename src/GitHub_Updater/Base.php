@@ -510,6 +510,174 @@ class Base {
 	}
 
 	/**
+	 * Get filename of changelog and return
+	 *
+	 * @param $type
+	 *
+	 * @return bool or variable
+	 */
+	protected function get_changelog_filename( $type ) {
+		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changes    = null;
+
+		if ( is_dir( $this->$type->local_path ) ) {
+			$local_files = scandir( $this->$type->local_path );
+			$changes = array_intersect( (array) $local_files, $changelogs );
+			$changes = array_pop( $changes );
+		}
+
+		if ( ! empty( $changes ) ) {
+			return $changes;
+		}
+
+			return false;
+	}
+
+
+	/**
+	 * Function to check if plugin or theme object is able to be updated.
+	 *
+	 * @param $type
+	 *
+	 * @return bool
+	 */
+	public function can_update( $type ) {
+		global $wp_version;
+
+		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+
+		return $remote_is_newer && $wp_version_ok && $php_version_ok;
+	}
+
+	/**
+	 * Parse URI param returning array of parts.
+	 *
+	 * @param $repo_header
+	 *
+	 * @return array
+	 */
+	protected static function parse_header_uri( $repo_header ) {
+		$header_parts         = parse_url( $repo_header );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo           = explode( '/', $owner_repo );
+		$header['owner']      = $owner_repo[0];
+		$header['repo']       = $owner_repo[1];
+		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
+		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
+		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
+
+		$header = Settings::sanitize( $header );
+
+		return $header;
+	}
+
+	/**
+	 * Create repo parts.
+	 *
+	 * @param $repo
+	 * @param $type
+	 *
+	 * @return mixed
+	 */
+	private function _get_repo_parts( $repo, $type ) {
+		$arr['bool'] = false;
+		$pattern     = '/' . strtolower( $repo ) . '_/';
+		$type        = preg_replace( $pattern, '', $type );
+		$repo_types  = array(
+			'GitHub'    => 'github_' . $type,
+			'Bitbucket' => 'bitbucket_'. $type,
+			'GitLab'    => 'gitlab_' . $type,
+		);
+		$repo_base_uris = array(
+			'GitHub'    => 'https://github.com/',
+			'Bitbucket' => 'https://bitbucket.org/',
+			'GitLab'    => 'https://gitlab.com/',
+		);
+
+		if ( array_key_exists( $repo, $repo_types ) ) {
+			$arr['type']       = $repo_types[ $repo ];
+			$arr['base_uri']   = $repo_base_uris[ $repo ];
+			$arr['branch']     = $repo . ' Branch';
+			$arr['enterprise'] = $repo . ' Enterprise';
+			$arr['bool']       = true;
+		}
+
+		return $arr;
+	}
+
+	/**
+	 * Used to set_site_transient and checks/stores transient id in array
+	 *
+	 * @param $id
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function set_transient( $id, $response ) {
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+		set_site_transient( $transient, $response, ( self::$hours * HOUR_IN_SECONDS ) );
+
+		return true;
+	}
+
+	/**
+	 * Returns site_transient and checks/stores transient id in array
+	 *
+	 * @param $id
+	 *
+	 * @return mixed
+	 */
+	protected function get_transient( $id ) {
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+
+		return get_site_transient( $transient );
+	}
+
+	/**
+	 * Delete all transients from array of transient ids
+	 *
+	 * @param $type
+	 *
+	 * @return bool|void
+	 */
+	protected function delete_all_transients( $type ) {
+		$transients = get_site_transient( 'ghu-' . $type );
+		if ( ! $transients ) {
+			return false;
+		}
+
+		foreach ( $transients as $transient ) {
+			delete_site_transient( $transient );
+		}
+		delete_site_transient( 'ghu-' . $type );
+	}
+
+	/**
+	 * Create transient of $type transients for force-check
+	 *
+	 * @param $type
+	 * @return void|bool
+	 */
+	protected function make_force_check_transient( $type ) {
+		$transient = get_site_transient( 'ghu-' . $type );
+		if ( $transient ) {
+			return false;
+		}
+		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
+		self::$transients = array();
+	}
+
+	/**
 	 * Set repo object file info.
 	 *
 	 * @param $response
@@ -536,7 +704,7 @@ class Base {
 		$tags     = array();
 		$rollback = array();
 		if ( false !== $response ) {
-			switch ( $repo_type['type'] ) {
+			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
 						if ( isset( $tag->name ) ) {
@@ -612,101 +780,6 @@ class Base {
 	}
 
 	/**
-	 * Get filename of changelog and return
-	 *
-	 * @param $type
-	 *
-	 * @return bool or variable
-	 */
-	protected function get_changelog_filename( $type ) {
-		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
-		$changes    = null;
-
-		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path );
-			$changes = array_intersect( (array) $local_files, $changelogs );
-			$changes = array_pop( $changes );
-		}
-
-		if ( ! empty( $changes ) ) {
-			return $changes;
-		}
-
-			return false;
-	}
-
-	/**
-	 * Used to set_site_transient and checks/stores transient id in array
-	 *
-	 * @param $id
-	 * @param $response
-	 *
-	 * @return bool
-	 */
-	protected function set_transient( $id, $response ) {
-		$transient = 'ghu-' . md5( $this->type->repo . $id );
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
-		set_site_transient( $transient, $response, ( self::$hours * HOUR_IN_SECONDS ) );
-
-		return true;
-	}
-
-	/**
-	 * Returns site_transient and checks/stores transient id in array
-	 *
-	 * @param $id
-	 *
-	 * @return mixed
-	 */
-	protected function get_transient( $id ) {
-		$transient = 'ghu-' . md5( $this->type->repo . $id );
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
-
-		return get_site_transient( $transient );
-	}
-
-
-	/**
-	 * Delete all transients from array of transient ids
-	 *
-	 * @param $type
-	 *
-	 * @return bool|void
-	 */
-	protected function delete_all_transients( $type ) {
-		$transients = get_site_transient( 'ghu-' . $type );
-		if ( ! $transients ) {
-			return false;
-		}
-
-		foreach ( $transients as $transient ) {
-			delete_site_transient( $transient );
-		}
-		delete_site_transient( 'ghu-' . $type );
-	}
-
-
-	/**
-	 * Create transient of $type transients for force-check
-	 *
-	 * @param $type
-	 * @return void|bool
-	 */
-	protected function make_force_check_transient( $type ) {
-		$transient = get_site_transient( 'ghu-' . $type );
-		if ( $transient ) {
-			return false;
-		}
-		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
-		self::$transients = array();
-	}
-
-
-	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings
 	 * I'm really just making this up, more based upon popularity
 	 *
@@ -727,81 +800,6 @@ class Base {
 		}
 
 		return $rating;
-	}
-
-	/**
-	 * Function to check if plugin or theme object is able to be updated.
-	 *
-	 * @param $type
-	 *
-	 * @return bool
-	 */
-	public function can_update( $type ) {
-		global $wp_version;
-
-		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
-		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
-		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
-
-		return $remote_is_newer && $wp_version_ok && $php_version_ok;
-	}
-
-	/**
-	 * Parse URI param returning array of parts.
-	 *
-	 * @param $repo_header
-	 *
-	 * @return array
-	 */
-	protected static function parse_header_uri( $repo_header ) {
-		$header_parts         = parse_url( $repo_header );
-		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo           = explode( '/', $owner_repo );
-		$header['owner']      = $owner_repo[0];
-		$header['repo']       = $owner_repo[1];
-		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
-		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
-		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
-
-		$header = Settings::sanitize( $header );
-
-		return $header;
-	}
-
-	/**
-	 * Create repo parts.
-	 *
-	 * @param $repo
-	 * @param $type
-	 *
-	 * @return mixed
-	 */
-	private function _get_repo_parts( $repo, $type ) {
-		$arr['bool'] = false;
-		$pattern     = '/' . strtolower( $repo ) . '_/';
-		$type        = preg_replace( $pattern, '', $type );
-		$repo_types  = array(
-			'GitHub'    => 'github_' . $type,
-			'Bitbucket' => 'bitbucket_'. $type,
-			'GitLab'    => 'gitlab_' . $type,
-		);
-		$repo_base_uris = array(
-			'GitHub'    => 'https://github.com/',
-			'Bitbucket' => 'https://bitbucket.org/',
-			'GitLab'    => 'https://gitlab.com/',
-		);
-
-		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']       = $repo_types[ $repo ];
-			$arr['base_uri']   = $repo_base_uris[ $repo ];
-			$arr['branch']     = $repo . ' Branch';
-			$arr['enterprise'] = $repo . ' Enterprise';
-			$arr['bool']       = true;
-		}
-
-		return $arr;
 	}
 
 }
