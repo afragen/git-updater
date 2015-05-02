@@ -218,49 +218,6 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object
-	 */
-	private function _add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private      = $this->type->repo_meta->private;
-	}
-
-	/**
-	 * Create GitHub API endpoints.
-	 *
-	 * @param $git object
-	 * @param $endpoint string
-	 *
-	 * @return string
-	 */
-	protected static function add_github_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
-
-		/**
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitHub will use the Default branch.
-		 */
-		if ( ! empty( $git->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
-		}
-
-		/**
-		 * If using GitHub Enterprise header return this endpoint.
-		 */
-		if ( ! empty( $git->type->enterprise ) ) {
-			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Construct $this->type->download_link using Repository Contents API
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
@@ -317,6 +274,49 @@ class GitHub_API extends API {
 		}
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Add remote data to type object
+	 */
+	private function _add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta->pushed_at;
+		$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = $this->type->repo_meta->private;
+	}
+
+	/**
+	 * Create GitHub API endpoints.
+	 *
+	 * @param $git object
+	 * @param $endpoint string
+	 *
+	 * @return string
+	 */
+	protected static function add_github_endpoints( $git, $endpoint ) {
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
+		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+		}
+
+		/**
+		 * If a branch has been given, only check that for the remote info.
+		 * If it's not been given, GitHub will use the Default branch.
+		 */
+		if ( ! empty( $git->type->branch ) ) {
+			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+		}
+
+		/**
+		 * If using GitHub Enterprise header return this endpoint.
+		 */
+		if ( ! empty( $git->type->enterprise ) ) {
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
+		}
+
+		return $endpoint;
 	}
 
 	/**

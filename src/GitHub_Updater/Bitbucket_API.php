@@ -241,16 +241,6 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object
-	 */
-	private function _add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->updated_on;
-		$this->type->num_ratings  = $this->type->watchers;
-		$this->type->private      = $this->type->repo_meta->is_private;
-	}
-
-	/**
 	 * Construct $download_link
 	 *
 	 * @param boolean $rollback for theme rollback
@@ -283,6 +273,16 @@ class Bitbucket_API extends API {
 		}
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Add remote data to type object
+	 */
+	private function _add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta->updated_on;
+		$this->type->num_ratings  = $this->type->watchers;
+		$this->type->private      = $this->type->repo_meta->is_private;
 	}
 
 	/**
