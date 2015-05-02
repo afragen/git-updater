@@ -32,8 +32,8 @@ class GitHub_API extends Base_API {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param $git plugin/theme object
-	 * @param $endpoint
+	 * @param $git object
+	 * @param $endpoint string
 	 *
 	 * @return string
 	 */
