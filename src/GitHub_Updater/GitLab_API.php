@@ -21,6 +21,7 @@ class GitLab_API extends API {
 
 	/**
 	 * Holds loose class method name.
+	 *
 	 * @var null
 	 */
 	protected static $method = null;
@@ -42,7 +43,6 @@ class GitLab_API extends API {
 
 	/**
 	 * Read the remote file and parse headers.
-	 * Saves headers to transient.
 	 *
 	 * @param $file
 	 *
@@ -182,7 +182,7 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Read the repository meta from API
+	 * Read the repository meta from API.
 	 *
 	 * @return bool
 	 */
@@ -215,6 +215,7 @@ class GitLab_API extends API {
 
 	/**
 	 * Create array of branches and download links as array.
+	 *
 	 * @return bool
 	 */
 	public function get_remote_branches() {
@@ -246,8 +247,7 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API
-	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
+	 * Construct $this->type->download_link using GitLab API
 	 *
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
@@ -297,17 +297,6 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
-		/*$asset = $this->get_asset();
-		if ( $asset && ! $branch_switch ) {
-			return $asset;
-		}*/
-
-		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-			//$endpoint = add_query_arg( 'private_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['gitlab_private_token'] ) && empty( $this->type->enterprise ) ) {
-			//$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
-		}
-
 		return $download_link_base . $endpoint;
 	}
 
@@ -334,7 +323,6 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
 		}
 
-
 		switch ( self::$method ) {
 			case 'projects':
 			case 'meta':
@@ -360,7 +348,13 @@ class GitLab_API extends API {
 		return $endpoint;
 	}
 
+	/**
+	 * Get GitLab project ID.
+	 *
+	 * @return bool|null
+	 */
 	public function get_gitlab_id() {
+		$id       = null;
 		$response = $this->get_transient( 'projects' );
 
 		if ( ! $response ) {
@@ -382,72 +376,6 @@ class GitLab_API extends API {
 		}
 
 		return $id;
-	}
-
-	/**
-	 * Calculate and store time until rate limit reset.
-	 *
-	 * @param $response
-	 */
-	protected static function _ratelimit_reset( $response, $repo ) {
-		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
-			$wait                        = date( 'i', $reset - time() );
-			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array( 'git' => 'github', 'wait' => $wait ) );
-		}
-	}
-
-	/**
-	 * Get uploaded release asset to use in place of tagged release.
-	 *
-	 * @return bool|string
-	 */
-	protected function get_asset() {
-		if ( empty( $this->type->newest_tag ) ) {
-			return false;
-		}
-		$response = $this->get_transient( 'asset' );
-
-		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$this->set_transient( 'asset' , $response );
-		}
-
-		if ( API::validate_response( $response ) ) {
-			return false;
-		}
-
-		if ( $response instanceof \stdClass ) {
-
-			if ( empty( $response->assets ) ) {
-				$response          = new \stdClass();
-				$response->message = false;
-				$this->set_transient( 'asset', $response );
-				return false;
-			}
-			foreach ( (array) $response->assets as $asset ) {
-				if ( isset ( $asset->browser_download_url ) &&
-				     false !== stristr( $asset->browser_download_url, $this->type->newest_tag )
-				) {
-					$this->set_transient( 'asset', $asset->browser_download_url );
-					$response = $asset->browser_download_url;
-				}
-			}
-		}
-
-		if ( ! is_string( $response ) ) {
-			return false;
-		}
-
-		if ( false !== stristr( $response, $this->type->newest_tag ) ) {
-			if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-				$response = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $response );
-			} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
-				$response = add_query_arg( 'access_token', parent::$options['github_access_token'], $response );
-			}
-
-			return $response;
-		}
 	}
 
 }

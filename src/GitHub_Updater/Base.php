@@ -707,7 +707,7 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						if ( isset( $tag->name ) ) {
+						if ( isset( $tag->name ) && isset( $tag->zipball_url ) ) {
 							$tags[]                 = $tag->name;
 							$rollback[ $tag->name ] = $tag->zipball_url;
 						}

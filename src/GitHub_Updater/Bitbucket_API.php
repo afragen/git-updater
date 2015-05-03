@@ -40,9 +40,9 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Read the remote file and parse headers.
-	 * Saves headers to transient.
+	 * @param $file
 	 *
-	 * Uses a transient to limit the calls to the API.
+	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
 		$response = $this->get_transient( $file );
@@ -102,8 +102,6 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Read the remote CHANGES.md file
-	 *
-	 * Uses a transient to limit calls to the API.
 	 *
 	 * @param $changes
 	 *
@@ -186,8 +184,6 @@ class Bitbucket_API extends API {
 	/**
 	 * Read the repository meta from API
 	 *
-	 * Uses a transient to limit calls to the API
-	 *
 	 * @return bool
 	 */
 	public function get_repo_meta() {
@@ -212,6 +208,7 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Create array of branches and download links as array.
+	 *
 	 * @return bool
 	 */
 	public function get_remote_branches() {
@@ -241,7 +238,7 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Construct $download_link
+	 * Construct $this->type->download_link using Bitbucket API
 	 *
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing

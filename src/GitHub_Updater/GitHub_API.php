@@ -31,7 +31,6 @@ class GitHub_API extends API {
 
 	/**
 	 * Read the remote file and parse headers.
-	 * Saves headers to transient.
 	 *
 	 * @param $file
 	 *
@@ -95,7 +94,6 @@ class GitHub_API extends API {
 
 	/**
 	 * Read the remote CHANGES.md file.
-	 * Uses a transient to limit calls to the API.
 	 *
 	 * @param $changes
 	 *
@@ -161,8 +159,7 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Read the repository meta from API
-	 * Uses a transient to limit calls to the API
+	 * Read the repository meta from API.
 	 *
 	 * @return base64 decoded repository meta data
 	 */
@@ -189,6 +186,7 @@ class GitHub_API extends API {
 
 	/**
 	 * Create array of branches and download links as array.
+	 *
 	 * @return bool
 	 */
 	public function get_remote_branches() {
