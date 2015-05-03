@@ -85,7 +85,7 @@ This way you get automatic updates and cannot deactivate the plugin.
 
 ### Plugins 
 
-There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
+There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
 
 ~~~php
 /*
@@ -105,7 +105,7 @@ GitHub Branch:     master
 
 ### Themes
 
-There must be a `GitHub Theme URI` or `Bitbucket Theme URI` declaration in the `style.css` file.
+There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file.
 
 ~~~css
 /*
@@ -123,13 +123,17 @@ GitHub Branch:    master
 
 ### Optional Headers
 
-`GitHub Branch` and `Bitbucket Branch` are available but not required.
+`GitHub Branch`, `Bitbucket Branch`, and `GitLab Branch` are available but not required.
 
 ### Enterprise Support
 
 #### GitHub Enterprise Support
 
 Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub Enterprise installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
+
+#### GitLab Enterprise Support
+
+Add the `GitLab Enterprise` header to the plugin or theme that is hosted on your GitLab Enterprise installation. The settings should be similar to `GitLab Enterprise: https://gitlab.yourhost.com`.
 
 ### Versions
 
@@ -162,6 +166,16 @@ Instead of the `GitHub Plugin URI` header you will need to use the `Bitbucket Pl
 Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket Theme URI` header.
 
 The `Bitbucket Branch` header is supported for both plugins and themes.
+
+## GitLab Support
+
+Instead of the `GitHub Plugin URI` header you will need to use the `GitLab Plugin URI` header.
+
+Instead of the `GitHub Theme URI` header you will need to use the `GitLab Theme URI` header.
+
+The `GitLab Branch` header is supported for both plugins and themes.
+
+You must set a GitLab private token. Go to your GitLab profile page under Edit Account. From here you can retrieve or reset your GitLab private token.
 
 ## Private Repositories
 
