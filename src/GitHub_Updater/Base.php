@@ -723,6 +723,14 @@ class Base {
 					}
 					break;
 				case 'gitlab':
+					foreach ( (array) $response as $tag ) {
+						$download_link = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
+						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
+						if ( isset( $tag->name) ) {
+							$tags[] = $tag->name;
+							$rollback[ $tag->name ] = $download_link;
+						}
+					}
 					break;
 			}
 

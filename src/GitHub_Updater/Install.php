@@ -26,7 +26,7 @@ class Install extends Base {
 	private static $api = array(
 		'github'    => 'GitHub',
 		'bitbucket' => 'Bitbucket',
-		//'gitlab'    => 'GitLab',
+		'gitlab'    => 'GitLab',
 	);
 
 	/**
@@ -108,6 +108,7 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
+
 				self::$install['download_link'] = 'https://bitbucket.org/' . self::$install['github_updater_repo'] . '/get/' . self::$install['github_updater_branch'] . '.zip';
 				if ( isset( self::$install['is_private'] ) ) {
 					parent::$options[ self::$install['repo'] ] = 1;
@@ -120,8 +121,10 @@ class Install extends Base {
 			 * Create GitLab endpoint.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				//add endpoint stuff here
-			}
+				$gitlab_base = 'https://gitlab.com';
+				self::$install['download_link'] = implode( '/', array( $gitlab_base, self::$install['github_updater_repo'], 'repository/archive.zip' ) );
+				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
+ 			}
 
 			update_site_option( 'github_updater', parent::$options );
 			$url   = self::$install['download_link'];

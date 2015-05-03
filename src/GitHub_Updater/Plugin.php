@@ -54,7 +54,7 @@ class Plugin extends Base {
 					$repo_api = new Bitbucket_API( $plugin );
 					break;
 				case 'gitlab_plugin';
-					//$repo_api = new GitLab_API( $plugin );
+					$repo_api = new GitLab_API( $plugin );
 					break;
 			}
 

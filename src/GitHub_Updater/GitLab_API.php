@@ -11,13 +11,19 @@
 namespace Fragen\GitHub_Updater;
 
 /**
- * Get remote data from a GitHub repo.
+ * Get remote data from a GitLab repo.
  *
- * Class    GitHub_API
+ * Class    GitLab_API
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitHub_API extends API {
+class GitLab_API extends API {
+
+	/**
+	 * Holds loose class method name.
+	 * @var null
+	 */
+	protected static $method = null;
 
 	/**
 	 * Constructor.
@@ -27,6 +33,11 @@ class GitHub_API extends API {
 	public function __construct( $type ) {
 		$this->type  = $type;
 		parent::$hours = 12;
+
+		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
+			self::$options['gitlab_private_token'] = null;
+		}
+		add_site_option( 'github_updater', self::$options );
 	}
 
 	/**
@@ -41,8 +52,11 @@ class GitHub_API extends API {
 		$response = $this->get_transient( $file );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
-			if ( ! isset( $response->content ) ) {
+			$id           = $this->get_gitlab_id();
+			self::$method = 'file';
+
+			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
+			if ( empty( $response ) ) {
 				return false;
 			}
 
@@ -57,7 +71,7 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$this->set_file_info( $response, 'GitHub' );
+		$this->set_file_info( $response, 'GitLab' );
 
 		return true;
 	}
@@ -71,8 +85,11 @@ class GitHub_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = $this->get_transient( 'tags' );
 
+
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/tags' );
+			$id           = $this->get_gitlab_id();
+			self::$method = 'tags';
+			$response     = $this->api( '/projects/' . $id . '/repository/tags' );
 
 			if ( ! $response ) {
 				$response = new \stdClass();
@@ -95,7 +112,6 @@ class GitHub_API extends API {
 
 	/**
 	 * Read the remote CHANGES.md file.
-	 * Uses a transient to limit calls to the API.
 	 *
 	 * @param $changes
 	 *
@@ -105,7 +121,9 @@ class GitHub_API extends API {
 		$response = $this->get_transient( 'changes' );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
+			$id           = $this->get_gitlab_id();
+			self::$method = 'changes';
+			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $changes );
 
 			if ( $response ) {
 				$this->set_transient( 'changes', $response );
@@ -142,14 +160,17 @@ class GitHub_API extends API {
 		$response = $this->get_transient( 'readme' );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
+			$id           = $this->get_gitlab_id();
+			self::$method = 'readme';
+			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=readme.txt' );
+
+			if ( $response ) {
+				$parser   = new Readme_Parser;
+				$response = $parser->parse_readme( base64_decode( $response->content ) );
+				$this->set_transient( 'readme', $response );
+			}
 		}
 
-		if ( $response && isset( $response->content ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( base64_decode( $response->content ) );
-			$this->set_transient( 'readme', $response );
-		}
 
 		if ( API::validate_response( $response ) ) {
 			return false;
@@ -162,27 +183,32 @@ class GitHub_API extends API {
 
 	/**
 	 * Read the repository meta from API
-	 * Uses a transient to limit calls to the API
 	 *
-	 * @return base64 decoded repository meta data
+	 * @return bool
 	 */
 	public function get_repo_meta() {
+
 		$response   = $this->get_transient( 'meta' );
-		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {
-			$response = $this->api( '/search/repositories' . $meta_query );
+			self::$method = 'meta';
+			$projects     = $this->get_transient( 'projects' );
+			foreach ( $projects as $project ) {
+				if ( $this->type->repo === $project->name ) {
+					$response = $project;
+				}
+			}
 
 			if ( $response ) {
 				$this->set_transient( 'meta', $response );
 			}
 		}
 
-		if ( API::validate_response( $response ) || empty( $response->items ) ) {
+		if ( API::validate_response( $response ) ) {
 			return false;
 		}
 
-		$this->type->repo_meta = $response->items[0];
+		$this->type->repo_meta = $response;
 		$this->_add_meta_repo_object();
 		$this->get_remote_branches();
 	}
@@ -196,7 +222,9 @@ class GitHub_API extends API {
 		$response = $this->get_transient( 'branches' );
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/branches' );
+			$id           = $this->get_gitlab_id();
+			self::$method = 'branches';
+			$response     = $this->api( '/projects/' . $id . '/repository/branches' );
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -228,15 +256,15 @@ class GitHub_API extends API {
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/**
-		 * Check if using GitHub Enterprise.
+		 * Check if using GitLab Enterprise.
 		 */
 		if ( ! empty( $this->type->enterprise ) ) {
-			$github_base = $this->type->enterprise;
+			$gitlab_base = $this->type->enterprise;
 		} else {
-			$github_base = 'https://api.github.com';
+			$gitlab_base = 'https://gitlab.com';
 		}
 
-		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
+		$download_link_base = implode( '/', array( $gitlab_base, $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
 		$endpoint           = '';
 
 		/**
@@ -247,33 +275,37 @@ class GitHub_API extends API {
 		     $_GET['theme'] === $this->type->repo
 		) {
 			$endpoint .= $rollback;
+		} elseif ( ! empty( $this->type->branch ) ) {
+			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+		}
 
-			/**
-			 * For users wanting to update against branch other than master
-			 * or if not using tags, else use newest_tag.
-			 */
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch;
-		} else {
-			$endpoint .= $this->type->newest_tag;
+		/**
+		 * If a branch has been given, only check that for the remote info.
+		 * If it's not been given, GitHub will use the Default branch.
+		 * If branch is master and tags are used, use newest tag.
+		 */
+		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
+			remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
 		}
 
 		/**
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
-			$endpoint = $branch_switch;
+			remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
-		$asset = $this->get_asset();
+		/*$asset = $this->get_asset();
 		if ( $asset && ! $branch_switch ) {
 			return $asset;
-		}
+		}*/
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+			//$endpoint = add_query_arg( 'private_token', parent::$options[ $this->type->repo ], $endpoint );
+		} elseif ( ! empty( parent::$options['gitlab_private_token'] ) && empty( $this->type->enterprise ) ) {
+			//$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
 		}
 
 		return $download_link_base . $endpoint;
@@ -283,14 +315,14 @@ class GitHub_API extends API {
 	 * Add remote data to type object
 	 */
 	private function _add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private      = $this->type->repo_meta->private;
+		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
+		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = ! $this->type->repo_meta->public;
 	}
 
 	/**
-	 * Create GitHub API endpoints.
+	 * Create GitLab API endpoints.
 	 *
 	 * @param $git object
 	 * @param $endpoint string
@@ -298,29 +330,58 @@ class GitHub_API extends API {
 	 * @return string
 	 */
 	protected static function add_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
+		}
+
+
+		switch ( self::$method ) {
+			case 'projects':
+			case 'meta':
+			case 'tags':
+				break;
+			case 'file':
+			case 'changes':
+			case 'readme':
+				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+				break;
+			default:
+				break;
 		}
 
 		/**
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitHub will use the Default branch.
-		 */
-		if ( ! empty( $git->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
-		}
-
-		/**
-		 * If using GitHub Enterprise header return this endpoint.
+		 * If using GitLab Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {
-			remove_query_arg( 'access_token', $endpoint );
-			return $git->type->enterprise;
+			//remove_query_arg( 'private_token', $endpoint );
+			//return $git->type->enterprise;
 		}
 
 		return $endpoint;
+	}
+
+	public function get_gitlab_id() {
+		$response = $this->get_transient( 'projects' );
+
+		if ( ! $response ) {
+			self::$method = 'projects';
+			$response = $this->api( '/projects' );
+			if ( empty( $response ) ) {
+				return false;
+			}
+
+			if ( $response ) {
+				$this->set_transient( 'projects', $response );
+			}
+
+		}
+		foreach ( $response as $project ) {
+			if ( $this->type->repo === $project->name ) {
+				$id = $project->id;
+			}
+		}
+
+		return $id;
 	}
 
 	/**

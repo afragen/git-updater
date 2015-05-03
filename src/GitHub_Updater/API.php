@@ -59,8 +59,8 @@ abstract class API extends Base {
 				break;
 			case (stristr( $this->type->type, 'gitlab' ) ):
 				$arr['repo']          = 'gitlab';
-				$arr['base_uri']      = null;
-				$arr['base_download'] = null;
+				$arr['base_uri']      = 'https://gitlab.com/api/v3';
+				$arr['base_download'] = 'https://gitlab.com';
 				break;
 			default:
 				$arr = array();
@@ -132,11 +132,20 @@ abstract class API extends Base {
 			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
-		if ( 'github' === $type['repo'] ) {
-			$endpoint = GitHub_API::add_github_endpoints( $this, $endpoint );
-			if ( $this->type->enterprise ) {
-				return $endpoint;
-			}
+		switch ( $type['repo'] ) {
+			case 'github':
+				$endpoint = GitHub_API::add_endpoints( $this, $endpoint );
+				if ( $this->type->enterprise ) {
+					return $endpoint;
+				}
+				break;
+			case 'gitlab':
+				$endpoint = GitLab_API::add_endpoints( $this, $endpoint );
+				if ( $this->type->enterprise ) {
+					return $endpoint;
+				}
+				break;
+			default:
 		}
 
 		return $type['base_uri'] . $endpoint;

@@ -241,6 +241,26 @@ class Settings extends Base {
 		);
 
 		/**
+		 * Add setting for GitLab Private Token.
+		 */
+		add_settings_section(
+			'gitlab_settings',
+			__( 'GitLab Private Settings', 'github-updater' ),
+			array( $this, 'print_section_gitlab_token' ),
+			'github_updater_install_settings'
+		);
+
+		add_settings_field(
+			'gitlab_private_token',
+			__( 'GitLab Private Token', 'github-updater' ),
+			array( $this, 'token_callback_text' ),
+			'github_updater_install_settings',
+			'gitlab_settings',
+			array( 'id' => 'gitlab_private_token' )
+
+		);
+
+		/**
 		 * Show section for private Bitbucket repositories.
 		 */
 		if ( self::$bitbucket_private ) {
@@ -309,15 +329,23 @@ class Settings extends Base {
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . $token->name;
 			$setting_field['page']  = 'github_updater_install_settings';
-			if ( false !== strpos( $token->type, 'github' ) ) {
-				$setting_field['section']         = 'github_id';
-				$setting_field['callback_method'] = array( $this, 'token_callback_text' );
-				$setting_field['callback']        = $token->repo;
-			}
-			if ( false !== strpos( $token->type, 'bitbucket' ) ) {
-				$setting_field['section']         = 'bitbucket_id';
-				$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
-				$setting_field['callback']        = $token->repo;
+
+			switch ( $token->type ) {
+				case ( strpos( $token->type, 'github' ) ):
+					$setting_field['section']         = 'github_id';
+					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
+					$setting_field['callback']        = $token->repo;
+					break;
+				case( strpos( $token->type, 'bitbucket' ) ):
+					$setting_field['section']         = 'bitbucket_id';
+					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
+					$setting_field['callback']        = $token->repo;
+					break;
+				case ( strpos( $token->type, 'gitlab' ) ):
+					$setting_field['section']         = 'gitlab_id';
+					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
+					$setting_field['callback']        = $token->repo;
+					break;
 			}
 
 			add_settings_field(
@@ -338,6 +366,7 @@ class Settings extends Base {
 		unset( $ghu_unset_keys['bitbucket_password'] );
 		unset( $ghu_unset_keys['github_access_token'] );
 		unset( $ghu_unset_keys['branch_switch'] );
+		unset( $ghu_unset_keys['gitlab_private_token'] );
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -394,6 +423,13 @@ class Settings extends Base {
 	 */
 	public function print_section_bitbucket_username() {
 		_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitLab Private Token text.
+	 */
+	public function print_section_gitlab_token() {
+		_e( 'Enter your Gitlab Private Token.', 'github-updater' );
 	}
 
 	/**
