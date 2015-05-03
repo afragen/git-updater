@@ -90,7 +90,7 @@ class Messages extends Base {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php _e( 'You must set a GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				<?php _e( 'You must set a GitLab Private Token.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
