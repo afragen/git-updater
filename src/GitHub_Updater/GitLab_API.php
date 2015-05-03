@@ -38,6 +38,12 @@ class GitLab_API extends API {
 		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
 			self::$options['gitlab_private_token'] = null;
 		}
+		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
+			self::$options['gitlab_enterprise_token'] = null;
+		}
+		if ( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) ) {
+			Messages::create_error_message();
+		}
 		add_site_option( 'github_updater', self::$options );
 	}
 
@@ -341,8 +347,12 @@ class GitLab_API extends API {
 		 * If using GitLab Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {
-			//remove_query_arg( 'private_token', $endpoint );
-			//return $git->type->enterprise;
+			remove_query_arg( 'private_token', $endpoint );
+			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
+				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+			}
+
+			return $git->type->enterprise . $endpoint;
 		}
 
 		return $endpoint;

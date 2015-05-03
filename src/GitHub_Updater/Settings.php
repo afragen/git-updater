@@ -43,6 +43,8 @@ class Settings extends Base {
 	 */
 	private static $github_private    = false;
 	private static $bitbucket_private = false;
+	private static $gitlab            = false;
+	private static $gitlab_enterprise = false;
 
 	/**
 	 * Start up
@@ -213,6 +215,38 @@ class Settings extends Base {
 		}
 
 		/**
+		 * Add setting for GitLab Private Token.
+		 */
+		if ( self::$gitlab ) {
+			add_settings_section(
+				'gitlab_settings',
+				__( 'GitLab Private Settings', 'github-updater' ),
+				array( $this, 'print_section_gitlab_token' ),
+				'github_updater_install_settings'
+			);
+
+			add_settings_field(
+				'gitlab_private_token',
+				__( 'GitLab Private Token', 'github-updater' ),
+				array( $this, 'token_callback_text' ),
+				'github_updater_install_settings',
+				'gitlab_settings',
+				array( 'id' => 'gitlab_private_token' )
+			);
+		}
+
+		if ( self::$gitlab_enterprise ) {
+			add_settings_field(
+				'gitlab_enterprise_token',
+				__( 'GitLab Enterprise Private Token', 'github-updater' ),
+				array( $this, 'token_callback_text' ),
+				'github_updater_install_settings',
+				'gitlab_settings',
+				array( 'id' => 'gitlab_enterprise_token' )
+			);
+		}
+
+		/**
 		 * Add settings for Bitbucket Username and Password.
 		 */
 		add_settings_section(
@@ -238,26 +272,6 @@ class Settings extends Base {
 			'github_updater_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_password' )
-		);
-
-		/**
-		 * Add setting for GitLab Private Token.
-		 */
-		add_settings_section(
-			'gitlab_settings',
-			__( 'GitLab Private Settings', 'github-updater' ),
-			array( $this, 'print_section_gitlab_token' ),
-			'github_updater_install_settings'
-		);
-
-		add_settings_field(
-			'gitlab_private_token',
-			__( 'GitLab Private Token', 'github-updater' ),
-			array( $this, 'token_callback_text' ),
-			'github_updater_install_settings',
-			'gitlab_settings',
-			array( 'id' => 'gitlab_private_token' )
-
 		);
 
 		/**
@@ -316,6 +330,19 @@ class Settings extends Base {
 			}
 
 			/**
+			 * Set boolean if GitLab header found.
+			 */
+			if ( false !== strpos( $token->type, 'gitlab' ) && ! self::$gitlab ) {
+				self::$gitlab = true;
+			}
+			/**
+			 * Set boolean if GitLab Enterprise header found.
+			 */
+			if ( $token->enterprise && ! self::$gitlab_enterprise ) {
+				self::$gitlab_enterprise = true;
+			}
+
+			/**
 			 * Next if not a private repo.
 			 */
 			if ( ! $token->private ) {
@@ -343,7 +370,7 @@ class Settings extends Base {
 					break;
 				case ( strpos( $token->type, 'gitlab' ) ):
 					$setting_field['section']         = 'gitlab_id';
-					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
+					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
 			}
@@ -367,6 +394,9 @@ class Settings extends Base {
 		unset( $ghu_unset_keys['github_access_token'] );
 		unset( $ghu_unset_keys['branch_switch'] );
 		unset( $ghu_unset_keys['gitlab_private_token'] );
+		if ( ! self::$gitlab_enterprise ) {
+			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
+		}
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );

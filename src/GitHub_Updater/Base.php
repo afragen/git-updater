@@ -117,6 +117,7 @@ class Base {
 			'Bitbucket Branch'     => 'Bitbucket Branch',
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
 			'GitLab Branch'        => 'GitLab Branch',
+			'GitLab Enterprise'   => 'GitLab Enterprise',
 			'Requires WP'          => 'Requires WP',
 			'Requires PHP'         => 'Requires PHP',
 		);
@@ -141,6 +142,7 @@ class Base {
 			'Bitbucket Branch'    => 'Bitbucket Branch',
 			'GitLab Theme URI'    => 'GitLab Theme URI',
 			'GitLab Branch'       => 'GitLab Branch',
+			'GitLab Enterprise'   => 'GitLab Enterprise',
 			'Requires WP'         => 'Requires WP',
 			'Requires PHP'        => 'Requires PHP',
 		);
@@ -200,6 +202,7 @@ class Base {
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
+							//$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}

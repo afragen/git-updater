@@ -35,6 +35,14 @@ class Messages extends Base {
 			add_action( 'admin_notices', array( __CLASS__, 'show_error_message' ) );
 			add_action( 'network_admin_notices', array( __CLASS__, 'show_error_message' ) );
 		}
+
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) &&
+		     empty( parent::$options['gitlab_enterprise_token'] )
+		) {
+			add_action( 'admin_notices', array( __CLASS__, 'gitlab_enterprise_error' ) );
+			add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_enterprise_error' ) );
+
+		}
 	}
 
 	/**
@@ -76,6 +84,16 @@ class Messages extends Base {
 		<?php
 
 		}
+	}
+
+	public static function gitlab_enterprise_error() {
+		?>
+		<div class="error notice is-dismissible">
+			<p>
+				<?php _e( 'You must set a GitLab Enterprise Private Token.', 'github-updater' ); ?>
+			</p>
+		</div>
+		<?php
 	}
 
 }

@@ -314,8 +314,7 @@ class GitHub_API extends API {
 		 * If using GitHub Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {
-			remove_query_arg( 'access_token', $endpoint );
-			return $git->type->enterprise;
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
 		}
 
 		return $endpoint;
