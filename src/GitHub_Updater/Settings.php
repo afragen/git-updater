@@ -459,7 +459,7 @@ class Settings extends Base {
 	 * Print the GitLab Private Token text.
 	 */
 	public function print_section_gitlab_token() {
-		_e( 'Enter your Gitlab Private Token.', 'github-updater' );
+		_e( 'Enter your GitLab Private Token.', 'github-updater' );
 	}
 
 	/**

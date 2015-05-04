@@ -212,7 +212,7 @@ msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:462
-msgid "Enter your Gitlab Private Token."
+msgid "Enter your GitLab Private Token."
 msgstr ""
 
 #: src/GitHub_Updater/Theme.php:210
