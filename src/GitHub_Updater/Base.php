@@ -202,7 +202,7 @@ class Base {
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
-							//$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
@@ -266,6 +266,7 @@ class Base {
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
