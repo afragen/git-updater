@@ -16,9 +16,11 @@ class Messages extends Base {
 	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
+	 * @param string
+	 *
 	 * @return bool
 	 */
-	public static function create_error_message() {
+	public static function create_error_message( $type = '' ) {
 		global $pagenow;
 
 		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
@@ -36,12 +38,12 @@ class Messages extends Base {
 			add_action( 'network_admin_notices', array( __CLASS__, 'show_error_message' ) );
 		}
 
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) &&
-		     empty( parent::$options['gitlab_enterprise_token'] )
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) && 'gitlab' === $type &&
+		     ( empty( parent::$options['gitlab_enterprise_token'] ) ||
+		       empty( parent::$options['gitlab_private_token'] ) )
 		) {
-			add_action( 'admin_notices', array( __CLASS__, 'gitlab_enterprise_error' ) );
-			add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_enterprise_error' ) );
-
+			add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
+			add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
 		}
 	}
 
@@ -86,7 +88,7 @@ class Messages extends Base {
 		}
 	}
 
-	public static function gitlab_enterprise_error() {
+	public static function gitlab_error() {
 		?>
 		<div class="error notice is-dismissible">
 			<p>

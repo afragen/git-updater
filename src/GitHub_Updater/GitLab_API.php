@@ -45,7 +45,7 @@ class GitLab_API extends API {
 			empty( self::$options['gitlab_private_token'] ) ||
 			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
 		) {
-			Messages::create_error_message();
+			Messages::create_error_message( 'gitlab' );
 		}
 		add_site_option( 'github_updater', self::$options );
 	}
