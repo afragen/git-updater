@@ -32,7 +32,7 @@ abstract class API extends Base {
 	 * @return array Amended HTTP Request arguments.
 	 */
 	public static function http_request_args( $args, $url ) {
-		$args['sslverify'] = false;
+		$args['sslverify'] = true;
 		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
 			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
 		}
@@ -100,7 +100,7 @@ abstract class API extends Base {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::_ratelimit_reset( $response, $this->type->repo );
 			}
-			Messages::create_error_message();
+			Messages::create_error_message( $type['repo'] );
 			return false;
 		}
 
