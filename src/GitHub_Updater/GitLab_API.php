@@ -294,7 +294,7 @@ class GitLab_API extends API {
 		 * If branch is master and tags are used, use newest tag.
 		 */
 		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
-			remove_query_arg( 'ref', $endpoint );
+			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
 		}
 
@@ -302,7 +302,7 @@ class GitLab_API extends API {
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
-			remove_query_arg( 'ref', $endpoint );
+			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
@@ -350,7 +350,7 @@ class GitLab_API extends API {
 		 * If using GitLab Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {
-			remove_query_arg( 'private_token', $endpoint );
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
 			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
 				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
 			}
