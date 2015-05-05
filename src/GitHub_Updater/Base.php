@@ -117,7 +117,7 @@ class Base {
 			'Bitbucket Branch'     => 'Bitbucket Branch',
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
 			'GitLab Branch'        => 'GitLab Branch',
-			'GitLab Enterprise'   => 'GitLab Enterprise',
+			'GitLab Enterprise'    => 'GitLab Enterprise',
 			'Requires WP'          => 'Requires WP',
 			'Requires PHP'         => 'Requires PHP',
 		);
