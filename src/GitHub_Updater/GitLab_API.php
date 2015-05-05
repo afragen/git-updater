@@ -374,17 +374,15 @@ class GitLab_API extends API {
 			self::$method = 'projects';
 			$response = $this->api( '/projects' );
 			if ( empty( $response ) ) {
-				return false;
+				$id = rtrim( urlencode( $this->type->slug ), '.php' );
+				return $id;
 			}
-
-			if ( $response ) {
-				$this->set_transient( 'projects', $response );
-			}
-
 		}
+
 		foreach ( $response as $project ) {
 			if ( $this->type->repo === $project->name ) {
 				$id = $project->id;
+				$this->set_transient( 'projects', $response );
 			}
 		}
 
