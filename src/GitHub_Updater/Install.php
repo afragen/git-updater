@@ -121,7 +121,13 @@ class Install extends Base {
 			 * Create GitLab endpoint.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				$gitlab_base = 'https://gitlab.com';
+
+				if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
+					$gitlab_base = 'https://gitlab.com';
+				} else {
+					$gitlab_base = $headers['base_uri'];
+				}
+
 				self::$install['download_link'] = implode( '/', array( $gitlab_base, self::$install['github_updater_repo'], 'repository/archive.zip' ) );
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
  			}
