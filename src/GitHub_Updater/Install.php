@@ -84,6 +84,7 @@ class Install extends Base {
 			 * Check for GitHub Enterprise.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
+
 				if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
 					$github_base = 'https://api.github.com';
 				} else {
@@ -119,6 +120,7 @@ class Install extends Base {
 
 			/**
 			 * Create GitLab endpoint.
+			 * Check for GitLab Enterprise.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
 
@@ -130,7 +132,17 @@ class Install extends Base {
 
 				self::$install['download_link'] = implode( '/', array( $gitlab_base, self::$install['github_updater_repo'], 'repository/archive.zip' ) );
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
- 			}
+
+				if ( ! empty( self::$install['gitlab_private_token'] ) ) {
+					self::$install['download_link'] = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
+
+					if ( 'gitlab.com' === $headers['host'] ) {
+						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
+					} else {
+						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
+					}
+				}
+			}
 
 			update_site_option( 'github_updater', parent::$options );
 			$url   = self::$install['download_link'];
@@ -258,6 +270,18 @@ class Install extends Base {
 			$type
 		);
 
+		if ( empty( parent::$options['gitlab_private_token'] ) ||
+		     empty( parent::$options['gitlab_enterprise_token'] )
+		) {
+			add_settings_field(
+				'gitlab_private_token',
+				__( 'GitLab Private Token', 'github-updater' ),
+				array( $this, 'private_token' ),
+				'github_updater_install_' . $type,
+				$type
+			);
+		}
+
 	}
 
 	/**
@@ -303,7 +327,7 @@ class Install extends Base {
 	}
 
 	/**
-	 * Setting for private repo
+	 * Setting for private repo.
 	 */
 	public function is_private() {
 		?>
@@ -314,7 +338,7 @@ class Install extends Base {
 	}
 
 	/**
-	 * GitHub Access Token for remote install
+	 * GitHub Access Token for remote install.
 	 */
 	public function access_token() {
 		?>
@@ -325,6 +349,20 @@ class Install extends Base {
 			</p>
 		</label>
 		<?php
+	}
+
+	/**
+	 * GitLab Private Token for remote install.
+	 */
+	public function private_token() {
+		?>
+		<label for="gitlab_private_token">
+			<input type="text" style="width:50%;" name="gitlab_private_token" value="" >
+			<p class="description">
+				<?php _e( 'Enter GitLab Private Token for private GitLab repositories.', 'github-updater' ) ?>
+			</p>
+		</label>
+	<?php
 	}
 
 }
