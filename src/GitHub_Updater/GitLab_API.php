@@ -220,6 +220,8 @@ class GitLab_API extends API {
 		$this->type->repo_meta = $response;
 		$this->_add_meta_repo_object();
 		$this->get_remote_branches();
+
+		return true;
 	}
 
 	/**

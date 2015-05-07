@@ -161,7 +161,7 @@ class GitHub_API extends API {
 	/**
 	 * Read the repository meta from API.
 	 *
-	 * @return base64 decoded repository meta data
+	 * @return bool
 	 */
 	public function get_repo_meta() {
 		$response   = $this->get_transient( 'meta' );
@@ -182,6 +182,8 @@ class GitHub_API extends API {
 		$this->type->repo_meta = $response->items[0];
 		$this->_add_meta_repo_object();
 		$this->get_remote_branches();
+
+		return true;
 	}
 
 	/**
@@ -324,6 +326,7 @@ class GitHub_API extends API {
 	 * Calculate and store time until rate limit reset.
 	 *
 	 * @param $response
+	 * @param $repo
 	 */
 	protected static function _ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
