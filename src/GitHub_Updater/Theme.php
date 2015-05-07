@@ -94,9 +94,9 @@ class Theme extends Base {
 			 * Add update row to theme row, only in multisite for WP < 3.8
 			 */
 			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
-				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
+				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 				}
 			}
 
@@ -106,15 +106,15 @@ class Theme extends Base {
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
+			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
 		}
 
-		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		if ( ! is_multisite() ) {
-			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
+			add_filter('wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
 		Settings::$ghu_themes = $this->config;
