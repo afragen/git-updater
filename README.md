@@ -2,17 +2,17 @@
 
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
-* Tags: plugin, theme, update, updater, github, bitbucket, remote install
+* Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.2
+* Tested up to: 4.2.x
 * Stable tag: master
 * Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
+A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -125,15 +125,15 @@ GitHub Branch:    master
 
 `GitHub Branch`, `Bitbucket Branch`, and `GitLab Branch` are available but not required.
 
-### Enterprise Support
+### Self Hosted Support
 
-#### GitHub Enterprise Support
+#### GitHub Self Hosted Support
 
-Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub Enterprise installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
+Add the `GitHub Self-Hosted` header to the plugin or theme that is hosted on your GitHub self-hosted installation. The settings should be similar to `GitHub Self-Hosted: https://github.yourhost.com`.
 
-#### GitLab Enterprise Support
+#### GitLab Self Hosted Support
 
-Add the `GitLab Enterprise` header to the plugin or theme that is hosted on your GitLab Enterprise installation. The settings should be similar to `GitLab Enterprise: https://gitlab.yourhost.com`.
+Add the `GitLab Self-Hosted` header to the plugin or theme that is hosted on your GitLab self-hosted installation. The settings should be similar to `GitLab Self-Hosted: https://gitlab.yourhost.com`.
 
 ### Versions
 

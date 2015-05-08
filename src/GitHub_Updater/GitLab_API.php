@@ -38,12 +38,12 @@ class GitLab_API extends API {
 		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
 			self::$options['gitlab_private_token'] = null;
 		}
-		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
-			self::$options['gitlab_enterprise_token'] = null;
+		if ( ! isset( self::$options['gitlab_self_hosted_token'] ) ) {
+			self::$options['gitlab_self_hosted_token'] = null;
 		}
 		if (
 			empty( self::$options['gitlab_private_token'] ) ||
-			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
+			( empty( self::$options['gitlab_self_hosted_token'] ) && ! empty( $type->self_hosted ) )
 		) {
 			Messages::create_error_message( 'gitlab' );
 		}
@@ -267,10 +267,10 @@ class GitLab_API extends API {
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/**
-		 * Check if using GitLab Enterprise.
+		 * Check if using GitLab Self-Hosted.
 		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$gitlab_base = $this->type->enterprise;
+		if ( ! empty( $this->type->self_hosted ) ) {
+			$gitlab_base = $this->type->self_hosted;
 		} else {
 			$gitlab_base = 'https://gitlab.com';
 		}
@@ -349,15 +349,15 @@ class GitLab_API extends API {
 		}
 
 		/**
-		 * If using GitLab Enterprise header return this endpoint.
+		 * If using GitLab Self-Hosted header return this endpoint.
 		 */
-		if ( ! empty( $git->type->enterprise ) ) {
+		if ( ! empty( $git->type->self_hosted ) ) {
 			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+			if ( ! empty( parent::$options['gitlab_self_hosted_token'] ) ) {
+				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_self_hosted_token'], $endpoint );
 			}
 
-			return $git->type->enterprise . $endpoint;
+			return $git->type->self_hosted . $endpoint;
 		}
 
 		return $endpoint;

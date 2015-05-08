@@ -81,12 +81,13 @@ class Install extends Base {
 			/**
 			 * Create GitHub endpoint.
 			 * Save Access Token if present.
-			 * Check for GitHub Enterprise.
+			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
 
 				if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
-					$github_base = 'https://api.github.com';
+					$github_base     = 'https://api.github.com';
+					$headers['host'] = 'github.com';
 				} else {
 					$github_base = $headers['base_uri'] . '/api/v3';
 				}
@@ -120,12 +121,13 @@ class Install extends Base {
 
 			/**
 			 * Create GitLab endpoint.
-			 * Check for GitLab Enterprise.
+			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
 
 				if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
-					$gitlab_base = 'https://gitlab.com';
+					$gitlab_base     = 'https://gitlab.com';
+					$headers['host'] = 'gitlab.com';
 				} else {
 					$gitlab_base = $headers['base_uri'];
 				}
@@ -139,7 +141,7 @@ class Install extends Base {
 					if ( 'gitlab.com' === $headers['host'] ) {
 						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
 					} else {
-						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
+						parent::$options['gitlab_self_hosted_token'] = self::$install['gitlab_private_token'];
 					}
 				}
 			}
@@ -271,7 +273,7 @@ class Install extends Base {
 		);
 
 		if ( empty( parent::$options['gitlab_private_token'] ) ||
-		     empty( parent::$options['gitlab_enterprise_token'] )
+		     empty( parent::$options['gitlab_self_hosted_token'] )
 		) {
 			add_settings_field(
 				'gitlab_private_token',
