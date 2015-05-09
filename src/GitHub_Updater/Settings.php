@@ -241,7 +241,7 @@ class Settings extends Base {
 		if ( self::$gitlab_self_hosted ) {
 			add_settings_field(
 				'gitlab_self_hosted_token',
-				__( 'GitLab Community Edition or GitLab Enterprise Private Token', 'github-updater' ),
+				__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
 				array( $this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
@@ -464,7 +464,7 @@ class Settings extends Base {
 	 * Print the GitLab Private Token text.
 	 */
 	public function print_section_gitlab_token() {
-		_e( 'Enter your GitLab, GitLab Community Edition, or GitLab Enterprise Private Token.', 'github-updater' );
+		_e( 'Enter your GitLab, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
 	}
 
 	/**
