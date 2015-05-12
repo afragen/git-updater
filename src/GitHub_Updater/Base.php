@@ -118,6 +118,7 @@ class Base {
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
 			'GitLab Branch'        => 'GitLab Branch',
 			'GitLab Enterprise'    => 'GitLab Enterprise',
+			'GitLab CE'            => 'GitLab CE',
 			'Requires WP'          => 'Requires WP',
 			'Requires PHP'         => 'Requires PHP',
 		);
@@ -143,6 +144,7 @@ class Base {
 			'GitLab Theme URI'    => 'GitLab Theme URI',
 			'GitLab Branch'       => 'GitLab Branch',
 			'GitLab Enterprise'   => 'GitLab Enterprise',
+			'GitLab CE'           => 'GitLab CE',
 			'Requires WP'         => 'Requires WP',
 			'Requires PHP'        => 'Requires PHP',
 		);
@@ -192,11 +194,17 @@ class Base {
 					$header = $this->parse_header_uri( $headers[ $value ] );
 				}
 
-				if ( array_key_exists( $repo_parts['self_hosted'], $headers ) &&
-				     ! empty( $headers[ $repo_parts['self_hosted'] ] )
-				) {
-					$repo_self_hosted_uri = $headers[ $repo_parts['self_hosted'] ];
-					$repo_self_hosted_uri = trim( $repo_self_hosted_uri, '/' );
+				$self_hosted_parts = array( 'enterprise', 'gitlab_ce' );
+				foreach ( $self_hosted_parts as $part ) {
+					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
+					     ! empty( $headers[ $repo_parts[ $part ] ] )
+					) {
+						$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
@@ -258,9 +266,17 @@ class Base {
 					$header = $this->parse_header_uri( $repo_uri );
 				}
 
-				$repo_self_hosted_uri = $theme->get( $repo_parts['self_hosted'] );
-				if ( ! empty( $repo_self_hosted_uri ) ) {
-					$repo_self_hosted_uri = trim( $repo_self_hosted_uri, '/' );
+				$self_hosted_parts = array( 'enterprise', 'gitlab_ce' );
+				foreach ( $self_hosted_parts as $part ) {
+					$self_hosted = $theme->get( $repo_parts[ $part ] );
+
+					if ( ! empty( $self_hosted ) ) {
+						$repo_enterprise_uri = $self_hosted;
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
@@ -607,6 +623,7 @@ class Base {
 			$arr['base_uri']    = $repo_base_uris[ $repo ];
 			$arr['branch']      = $repo . ' Branch';
 			$arr['enterprise']  = $repo . ' Enterprise';
+			$arr['gitlab_ce']   = $repo . ' CE';
 			$arr['bool']        = true;
 		}
 
