@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-05 16:54-0800\n"
-"PO-Revision-Date: 2015-05-05 16:54-0800\n"
-"Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
+"POT-Creation-Date: 2015-05-11 20:14-0700\n"
+"PO-Revision-Date: 2015-05-11 20:14-0700\n"
+"Last-Translator: Andy Fragen <andy@thefragens.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
@@ -22,16 +22,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:429
+#: src/GitHub_Updater/Base.php:445
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:439
+#: src/GitHub_Updater/Base.php:455
 msgid "Rename successful"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:446
+#: src/GitHub_Updater/Base.php:462
 msgid "Unable to rename downloaded repository."
 msgstr ""
 
@@ -39,54 +39,62 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:176 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:179 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:199 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:196
+#: src/GitHub_Updater/Install.php:216
 msgid "Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:199
+#: src/GitHub_Updater/Install.php:219
 msgid "Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:210
+#: src/GitHub_Updater/Install.php:230
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:217
+#: src/GitHub_Updater/Install.php:237
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:225
+#: src/GitHub_Updater/Install.php:245
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:233
+#: src/GitHub_Updater/Install.php:253
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:241
+#: src/GitHub_Updater/Install.php:261
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:249 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:269 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:276
+#: src/GitHub_Updater/Install.php:280
+msgid "GitLab Private Token"
+msgstr ""
+
+#: src/GitHub_Updater/Install.php:308
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:318
+#: src/GitHub_Updater/Install.php:350
 msgid "Enter GitHub Access Token for private GitHub repositories."
+msgstr ""
+
+#: src/GitHub_Updater/Install.php:364
+msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr ""
 
 #: src/GitHub_Updater/Messages.php:61
@@ -111,7 +119,8 @@ msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
 #: src/GitHub_Updater/Messages.php:95
-msgid "You must set a GitLab Private Token."
+msgid ""
+"You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
 #: src/GitHub_Updater/Plugin.php:149
@@ -123,7 +132,7 @@ msgstr ""
 msgid "View details"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:524
+#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:527
 msgid "Settings"
 msgstr ""
 
@@ -154,65 +163,65 @@ msgstr ""
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:223
+#: src/GitHub_Updater/Settings.php:224
 msgid "GitLab Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:230
-msgid "GitLab Private Token"
+#: src/GitHub_Updater/Settings.php:233
+msgid "GitLab.com Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:241
-msgid "GitLab Enterprise Private Token"
+#: src/GitHub_Updater/Settings.php:244
+msgid "GitLab CE or GitLab Enterprise Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:254
+#: src/GitHub_Updater/Settings.php:257
 msgid "Bitbucket Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:261
+#: src/GitHub_Updater/Settings.php:264
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:270
+#: src/GitHub_Updater/Settings.php:273
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:283
+#: src/GitHub_Updater/Settings.php:286
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:295
+#: src/GitHub_Updater/Settings.php:298
 msgid "No private repositories are installed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:353
+#: src/GitHub_Updater/Settings.php:356
 msgid "Theme:"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:429
+#: src/GitHub_Updater/Settings.php:432
 msgid "Check to enable branch switching from the Plugins page."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:436
+#: src/GitHub_Updater/Settings.php:439
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:443
+#: src/GitHub_Updater/Settings.php:446
 msgid "Enter your personal GitHub Access Token to avoid API access limits."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:450
+#: src/GitHub_Updater/Settings.php:453
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:457
+#: src/GitHub_Updater/Settings.php:460
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:464
-msgid "Enter your GitLab Private Token."
+#: src/GitHub_Updater/Settings.php:467
+msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
 #: src/GitHub_Updater/Theme.php:210
@@ -289,8 +298,8 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-"themes. It also allows for remote installation of plugins or themes into "
+"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
+"and themes. It also allows for remote installation of plugins or themes into "
 "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
 "github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
 "based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
