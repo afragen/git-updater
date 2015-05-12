@@ -135,13 +135,13 @@ abstract class API extends Base {
 		switch ( $type['repo'] ) {
 			case 'github':
 				$endpoint = GitHub_API::add_endpoints( $this, $endpoint );
-				if ( $this->type->self_hosted ) {
+				if ( $this->type->enterprise ) {
 					return $endpoint;
 				}
 				break;
 			case 'gitlab':
 				$endpoint = GitLab_API::add_endpoints( $this, $endpoint );
-				if ( $this->type->self_hosted ) {
+				if ( $this->type->enterprise ) {
 					return $endpoint;
 				}
 				break;

@@ -41,10 +41,10 @@ class Settings extends Base {
 	 * Holds boolean on whether or not the repo is private
 	 * @var bool
 	 */
-	private static $github_private     = false;
-	private static $bitbucket_private  = false;
-	private static $gitlab             = false;
-	private static $gitlab_self_hosted = false;
+	private static $github_private    = false;
+	private static $bitbucket_private = false;
+	private static $gitlab            = false;
+	private static $gitlab_enterprise = false;
 
 	/**
 	 * Start up
@@ -215,10 +215,10 @@ class Settings extends Base {
 		}
 
 		/**
-		 * Add setting for GitLab, GitLab Community Edition
+		 * Add setting for GitLab.com, GitLab Community Edition
 		 * or GitLab Enterprise Private Token.
 		 */
-		if ( self::$gitlab || self::$gitlab_self_hosted ) {
+		if ( self::$gitlab || self::$gitlab_enterprise ) {
 			add_settings_section(
 				'gitlab_settings',
 				__( 'GitLab Private Settings', 'github-updater' ),
@@ -230,7 +230,7 @@ class Settings extends Base {
 		if ( self::$gitlab ) {
 			add_settings_field(
 				'gitlab_private_token',
-				__( 'GitLab Private Token', 'github-updater' ),
+				__( 'GitLab.com Private Token', 'github-updater' ),
 				array( $this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
@@ -238,14 +238,14 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$gitlab_self_hosted ) {
+		if ( self::$gitlab_enterprise ) {
 			add_settings_field(
-				'gitlab_self_hosted_token',
+				'gitlab_enterprise_token',
 				__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
 				array( $this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_self_hosted_token' )
+				array( 'id' => 'gitlab_enterprise_token' )
 			);
 		}
 
@@ -339,10 +339,10 @@ class Settings extends Base {
 				self::$gitlab = true;
 			}
 			/**
-			 * Set boolean if GitLab Self-Hosted header found.
+			 * Set boolean if GitLab CE/Enterprise header found.
 			 */
-			if ( $token->self_hosted && ! self::$gitlab_self_hosted ) {
-				self::$gitlab_self_hosted = true;
+			if ( $token->enterprise && ! self::$gitlab_enterprise ) {
+				self::$gitlab_enterprise = true;
 			}
 
 			/**
@@ -399,8 +399,8 @@ class Settings extends Base {
 		if ( self::$gitlab ) {
 			unset( $ghu_unset_keys['gitlab_private_token'] );
 		}
-		if ( self::$gitlab_self_hosted ) {
-			unset( $ghu_unset_keys['gitlab_self_hosted_token'] );
+		if ( self::$gitlab_enterprise ) {
+			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
 		}
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
@@ -464,7 +464,7 @@ class Settings extends Base {
 	 * Print the GitLab Private Token text.
 	 */
 	public function print_section_gitlab_token() {
-		_e( 'Enter your GitLab, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
+		_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
 	}
 
 	/**

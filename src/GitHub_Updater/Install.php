@@ -141,7 +141,7 @@ class Install extends Base {
 					if ( 'gitlab.com' === $headers['host'] ) {
 						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
 					} else {
-						parent::$options['gitlab_self_hosted_token'] = self::$install['gitlab_private_token'];
+						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
 					}
 				}
 			}
@@ -273,7 +273,7 @@ class Install extends Base {
 		);
 
 		if ( empty( parent::$options['gitlab_private_token'] ) ||
-		     empty( parent::$options['gitlab_self_hosted_token'] )
+		     empty( parent::$options['gitlab_enterprise_token'] )
 		) {
 			add_settings_field(
 				'gitlab_private_token',

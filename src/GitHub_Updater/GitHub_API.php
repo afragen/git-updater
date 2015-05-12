@@ -230,8 +230,8 @@ class GitHub_API extends API {
 		/**
 		 * Check if using GitHub Self-Hosted.
 		 */
-		if ( ! empty( $this->type->self_hosted ) ) {
-			$github_base = $this->type->self_hosted;
+		if ( ! empty( $this->type->enterprise ) ) {
+			$github_base = $this->type->enterprise;
 		} else {
 			$github_base = 'https://api.github.com';
 		}
@@ -272,7 +272,7 @@ class GitHub_API extends API {
 
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->self_hosted ) ) {
+		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
 
@@ -315,8 +315,8 @@ class GitHub_API extends API {
 		/**
 		 * If using GitHub Self-Hosted header return this endpoint.
 		 */
-		if ( ! empty( $git->type->self_hosted ) ) {
-			return $git->type->self_hosted . remove_query_arg( 'access_token', $endpoint );
+		if ( ! empty( $git->type->enterprise ) ) {
+			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
 		}
 
 		return $endpoint;
@@ -381,7 +381,7 @@ class GitHub_API extends API {
 		if ( false !== stristr( $response, $this->type->newest_tag ) ) {
 			if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
 				$response = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $response );
-			} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->self_hosted ) ) {
+			} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
 				$response = add_query_arg( 'access_token', parent::$options['github_access_token'], $response );
 			}
 

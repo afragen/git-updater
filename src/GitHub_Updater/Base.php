@@ -112,12 +112,12 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Plugin URI'    => 'GitHub Plugin URI',
 			'GitHub Branch'        => 'GitHub Branch',
-			'GitHub Self-Hosted'   => 'GitHub Self-Hosted',
+			'GitHub Enterprise'    => 'GitHub Enterprise',
 			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
 			'Bitbucket Branch'     => 'Bitbucket Branch',
 			'GitLab Plugin URI'    => 'GitLab Plugin URI',
 			'GitLab Branch'        => 'GitLab Branch',
-			'GitLab Self-Hosted'   => 'GitLab Self-Hosted',
+			'GitLab Enterprise'    => 'GitLab Enterprise',
 			'Requires WP'          => 'Requires WP',
 			'Requires PHP'         => 'Requires PHP',
 		);
@@ -137,12 +137,12 @@ class Base {
 		$ghu_extra_headers   = array(
 			'GitHub Theme URI'    => 'GitHub Theme URI',
 			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Self-Hosted'  => 'GitHub Self-Hosted',
+			'GitHub Enterprise'   => 'GitHub Enterprise',
 			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
 			'Bitbucket Branch'    => 'Bitbucket Branch',
 			'GitLab Theme URI'    => 'GitLab Theme URI',
 			'GitLab Branch'       => 'GitLab Branch',
-			'GitLab Self-Hosted'  => 'GitLab Self-Hosted',
+			'GitLab Enterprise'   => 'GitLab Enterprise',
 			'Requires WP'         => 'Requires WP',
 			'Requires PHP'        => 'Requires PHP',
 		);
@@ -177,7 +177,7 @@ class Base {
 			}
 
 			foreach ( (array) self::$extra_headers as $value ) {
-				$repo_self_hosted_uri = null;
+				$repo_enterprise_uri = null;
 
 				if ( empty( $headers[ $value ] ) ||
 				     false === stristr( $value, 'Plugin' )
@@ -199,17 +199,17 @@ class Base {
 					$repo_self_hosted_uri = trim( $repo_self_hosted_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
-							$repo_self_hosted_uri = $repo_self_hosted_uri . '/api/v3';
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
-							$repo_self_hosted_uri = $repo_self_hosted_uri . '/api/v3';
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
 
 				$git_plugin['type']                    = $repo_parts['type'];
 				$git_plugin['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
-				$git_plugin['self_hosted']             = $repo_self_hosted_uri;
+				$git_plugin['enterprise']              = $repo_enterprise_uri;
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
 				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
@@ -238,9 +238,9 @@ class Base {
 		$themes     = wp_get_themes( array( 'errors' => null ) );
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme            = array();
-			$repo_uri             = null;
-			$repo_self_hosted_uri = null;
+			$git_theme           = array();
+			$repo_uri            = null;
+			$repo_enterprise_uri = null;
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
@@ -263,17 +263,17 @@ class Base {
 					$repo_self_hosted_uri = trim( $repo_self_hosted_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
-							$repo_self_hosted_uri = $repo_self_hosted_uri . '/api/v3';
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
-							$repo_self_hosted_uri = $repo_self_hosted_uri . '/api/v3';
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
 
 				$git_theme['type']                    = $repo_parts['type'];
 				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
-				$git_theme['self_hosted']             = $repo_self_hosted_uri;
+				$git_theme['enterprise']              = $repo_enterprise_uri;
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
@@ -606,7 +606,7 @@ class Base {
 			$arr['type']        = $repo_types[ $repo ];
 			$arr['base_uri']    = $repo_base_uris[ $repo ];
 			$arr['branch']      = $repo . ' Branch';
-			$arr['self_hosted'] = $repo . ' Self-Hosted';
+			$arr['enterprise']  = $repo . ' Enterprise';
 			$arr['bool']        = true;
 		}
 

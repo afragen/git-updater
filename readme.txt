@@ -26,16 +26,20 @@ or
 
 The following headers are available for use depending upon your hosting source.
 
+### GitHub
 * GitHub Plugin URI
 * GitHub Theme URI
 * GitHub Branch
-* GitHub Self-Hosted
+* GitHub Enterprise
 
+###Bitbucket
 * Bitbucket Plugin URI
 * Bitbucket Theme URI
 * Bitbucket Branch
 
+###GitLab
 * GitLab Plugin URI
 * GitLab Theme URI
 * GitLab Branch
-* GitLab Self-Hosted
+* GitLab Enterprise
+* GitLab CE

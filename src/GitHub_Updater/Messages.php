@@ -39,7 +39,7 @@ class Messages extends Base {
 		}
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) && 'gitlab' === $type &&
-		     ( empty( parent::$options['gitlab_self_hosted_token'] ) ||
+		     ( empty( parent::$options['gitlab_enterprise_token'] ) ||
 		       empty( parent::$options['gitlab_private_token'] ) )
 		) {
 			add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
@@ -92,7 +92,7 @@ class Messages extends Base {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php _e( 'You must set a GitLab, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				<?php _e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
