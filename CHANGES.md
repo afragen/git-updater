@@ -3,7 +3,6 @@
 * add update by GitHub release asset in lieu of update by tag when asset is present
 * refactor to simplify class structure, created `abstract class API` and `class Messages`
 * add GitLab support!!
-* changed `Enterprise` to `Self-Hosted` in headers and elsewhere to be more consistent
 
 #### 4.4.0
 * only add custom user agent once :P
