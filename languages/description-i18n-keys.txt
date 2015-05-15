@@ -6,8 +6,8 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-"themes. It also allows for remote installation of plugins or themes into "
+"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
+"and themes. It also allows for remote installation of plugins or themes into "
 "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
 "github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
 "based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
