@@ -219,7 +219,7 @@ Be careful about refreshing the browser window after this as you may be continua
 
 If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
 
-The same applies for Bitbucket hosted plugins.
+The same applies for Bitbucket or GitLab hosted plugins.
 
 ## Remote Installation of Repositories
 
