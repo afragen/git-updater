@@ -20,16 +20,6 @@ namespace Fragen\GitHub_Updater;
 class Install extends Base {
 
 	/**
-	 * Remote Host APIs.
-	 * @var array
-	 */
-	private static $api = array(
-		'github'    => 'GitHub',
-		'bitbucket' => 'Bitbucket',
-		'gitlab'    => 'GitLab',
-	);
-
-	/**
 	 * Class options.
 	 * @var array
 	 */
@@ -318,7 +308,7 @@ class Install extends Base {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
-				<?php foreach ( self::$api as $key => $value ): ?>
+				<?php foreach ( parent::$git_servers as $key => $value ): ?>
 					<option value="<?php echo $key ?>" <?php selected( $key, true, true ) ?> >
 						<?php echo $value ?>
 					</option>

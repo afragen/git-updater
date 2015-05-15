@@ -69,6 +69,26 @@ class Base {
 	protected static $error_code = array();
 
 	/**
+	 * Holds git server types.
+	 * @var array
+	 */
+	protected static $git_servers = array(
+		'github'    => 'GitHub',
+		'bitbucket' => 'Bitbucket',
+		'gitlab'    => 'GitLab',
+	);
+
+	/**
+	 * Holds extra repo header types.
+	 * @var array
+	 */
+	protected static $extra_repo_headers = array(
+		'branch'     => 'Branch',
+		'enterprise' => 'Enterprise',
+		'gitlab_ce'  => 'CE',
+	);
+
+	/**
 	 * Constructor
 	 *
 	 * Loads options to private static variable.
@@ -84,13 +104,13 @@ class Base {
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new Plugin;
+			new Plugin();
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new Theme;
+			new Theme();
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
-			new Settings;
+			new Settings();
 		}
 	}
 
@@ -109,19 +129,18 @@ class Base {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers   = array(
-			'GitHub Plugin URI'    => 'GitHub Plugin URI',
-			'GitHub Branch'        => 'GitHub Branch',
-			'GitHub Enterprise'    => 'GitHub Enterprise',
-			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
-			'Bitbucket Branch'     => 'Bitbucket Branch',
-			'GitLab Plugin URI'    => 'GitLab Plugin URI',
-			'GitLab Branch'        => 'GitLab Branch',
-			'GitLab Enterprise'    => 'GitLab Enterprise',
-			'GitLab CE'            => 'GitLab CE',
-			'Requires WP'          => 'Requires WP',
-			'Requires PHP'         => 'Requires PHP',
+		$ghu_extra_headers = array(
+			'Requires WP'  => 'Requires WP',
+			'Requires PHP' => 'Requires PHP',
 		);
+
+		foreach ( self::$git_servers as $server ) {
+			$ghu_extra_headers[ $server . 'Plugin URI' ] = $server . ' Plugin URI';
+			foreach ( self::$extra_repo_headers as $header ) {
+				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			}
+		}
+
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -135,19 +154,18 @@ class Base {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers   = array(
-			'GitHub Theme URI'    => 'GitHub Theme URI',
-			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Enterprise'   => 'GitHub Enterprise',
-			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
-			'Bitbucket Branch'    => 'Bitbucket Branch',
-			'GitLab Theme URI'    => 'GitLab Theme URI',
-			'GitLab Branch'       => 'GitLab Branch',
-			'GitLab Enterprise'   => 'GitLab Enterprise',
-			'GitLab CE'           => 'GitLab CE',
-			'Requires WP'         => 'Requires WP',
-			'Requires PHP'        => 'Requires PHP',
+		$ghu_extra_headers = array(
+			'Requires WP'  => 'Requires WP',
+			'Requires PHP' => 'Requires PHP',
 		);
+
+		foreach ( self::$git_servers as $server ) {
+			$ghu_extra_headers[ $server . ' Theme URI' ] = $server . ' Theme URI';
+			foreach ( self::$extra_repo_headers as $header ) {
+				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			}
+		}
+
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -194,7 +212,7 @@ class Base {
 					$header = $this->parse_header_uri( $headers[ $value ] );
 				}
 
-				$self_hosted_parts = array( 'enterprise', 'gitlab_ce' );
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
 				foreach ( $self_hosted_parts as $part ) {
 					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
 					     ! empty( $headers[ $repo_parts[ $part ] ] )
@@ -266,7 +284,7 @@ class Base {
 					$header = $this->parse_header_uri( $repo_uri );
 				}
 
-				$self_hosted_parts = array( 'enterprise', 'gitlab_ce' );
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
 				foreach ( $self_hosted_parts as $part ) {
 					$self_hosted = $theme->get( $repo_parts[ $part ] );
 
@@ -619,12 +637,12 @@ class Base {
 		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']        = $repo_types[ $repo ];
-			$arr['base_uri']    = $repo_base_uris[ $repo ];
-			$arr['branch']      = $repo . ' Branch';
-			$arr['enterprise']  = $repo . ' Enterprise';
-			$arr['gitlab_ce']   = $repo . ' CE';
-			$arr['bool']        = true;
+			$arr['type']     = $repo_types[ $repo ];
+			$arr['base_uri'] = $repo_base_uris[ $repo ];
+			$arr['bool']     = true;
+			foreach ( self::$extra_repo_headers as $key => $value ) {
+				$arr[ $key ] = $repo . ' ' . $value;
+			}
 		}
 
 		return $arr;

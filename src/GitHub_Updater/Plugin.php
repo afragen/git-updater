@@ -120,7 +120,6 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$branch_keys   = array( 'GitHub Branch', 'Bitbucket Branch', 'GitLab Branch' );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$plugin        = dirname( $plugin_file );
 		$id            = $plugin . '-id';
@@ -133,8 +132,9 @@ class Plugin extends Base {
 		/**
 		 * Get current branch.
 		 */
-		foreach ( $branch_keys as $branch_key ) {
-			$branch = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
+		foreach ( parent::$git_servers as $server ) {
+			$branch_key = $server . ' Branch';
+			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
 			if ( 'master' !== $branch ) {
 				break;
 			}

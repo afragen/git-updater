@@ -280,9 +280,9 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI', 'GitLab Theme URI' );
-		foreach ( (array) $repositories as $repository ) {
-			$repo_uri = $theme->get( $repository );
+		foreach ( parent::$git_servers as $server ) {
+			$repo_header = $server . ' Theme URI';
+			$repo_uri    = $theme->get( $repo_header );
 			if ( empty( $repo_uri ) ) {
 				continue;
 			}
