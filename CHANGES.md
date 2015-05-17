@@ -1,9 +1,10 @@
 #### 4.5.0
 * fix some PHP notices
 * add update by GitHub release asset in lieu of update by tag when asset is present
+* install asset via remote install if asset URI used
 * refactor to simplify class structure, created `abstract class API` and `class Messages`
 * add GitLab support!!
-* refactor to set all git servers and extra headers from static arrays in `Base`
+* refactor to set all git servers and extra headers to static arrays in `Base`
 
 #### 4.4.0
 * only add custom user agent once :P

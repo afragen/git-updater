@@ -84,6 +84,13 @@ class Install extends Base {
 
 				self::$install['download_link'] = $github_base . '/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
 
+				/**
+				 * If asset is entered install it.
+				 */
+				if ( false !== stristr( $headers['path'], 'releases/download' ) ) {
+					self::$install['download_link'] = $headers['uri'];
+				}
+
 				if ( ! empty( self::$install['github_access_token'] ) ) {
 					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
 					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
