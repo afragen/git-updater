@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-15 09:24-0800\n"
-"PO-Revision-Date: 2015-05-15 09:26-0800\n"
+"POT-Creation-Date: 2015-05-17 11:17-0800\n"
+"PO-Revision-Date: 2015-05-17 11:20-0800\n"
 "Last-Translator: Valério Souza <valeriosza@gmail.com>\n"
 "Language-Team: Valério Souza <valeriosza@gmail.com>\n"
 "Language: pt_BR\n"
@@ -39,67 +39,67 @@ msgstr "Não é possível renomear o repositório baixado."
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:186 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "Instalar o Plugin"
 
-#: src/GitHub_Updater/Install.php:189 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "Instalar um novo tema"
 
-#: src/GitHub_Updater/Install.php:206
+#: src/GitHub_Updater/Install.php:213
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:209
+#: src/GitHub_Updater/Install.php:216
 #, fuzzy
 msgid "Theme"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Install.php:220
+#: src/GitHub_Updater/Install.php:227
 #, fuzzy, php-format
 msgid "GitHub Updater Install %s"
 msgstr "Instalar o GitHub Updater"
 
-#: src/GitHub_Updater/Install.php:227
+#: src/GitHub_Updater/Install.php:234
 #, fuzzy, php-format
 msgid "%s URI"
 msgstr "%sReverter para:%s"
 
-#: src/GitHub_Updater/Install.php:235
+#: src/GitHub_Updater/Install.php:242
 msgid "Remote Repository Host"
 msgstr "Repositório remoto Host"
 
-#: src/GitHub_Updater/Install.php:243
+#: src/GitHub_Updater/Install.php:250
 msgid "Repository Branch"
 msgstr "Ramo de repositório"
 
-#: src/GitHub_Updater/Install.php:251
+#: src/GitHub_Updater/Install.php:258
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Repositórios Privados do Bitbucket"
 
-#: src/GitHub_Updater/Install.php:259 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:270
+#: src/GitHub_Updater/Install.php:277
 #, fuzzy
 msgid "GitLab Private Token"
 msgstr "Configurações do GitHub Privado"
 
-#: src/GitHub_Updater/Install.php:298
+#: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Digite o nome de ramo ou deixe em branco para o 'mestre'"
 
-#: src/GitHub_Updater/Install.php:340
+#: src/GitHub_Updater/Install.php:347
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 "Digite seu Token de Acesso do GitHub. Deixe em branco para repositórios "
 "públicos."
 
-#: src/GitHub_Updater/Install.php:354
+#: src/GitHub_Updater/Install.php:361
 #, fuzzy
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr ""
@@ -114,7 +114,7 @@ msgstr "%1$s não foi verificada. GitHub Updater código de erro: %2$s"
 #: src/GitHub_Updater/Messages.php:69
 #, fuzzy, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
-msgstr "Limite de taxa do GitHub API irá repor em minutos de s $ %1."
+msgstr "Limite de taxa do GitHub API irá repor em minutos de %1$s."
 
 #: src/GitHub_Updater/Messages.php:74
 #, php-format

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-15 09:24-0800\n"
-"PO-Revision-Date: 2015-05-15 09:27-0800\n"
+"POT-Creation-Date: 2015-05-17 11:17-0800\n"
+"PO-Revision-Date: 2015-05-17 11:20-0800\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_CH\n"
@@ -39,62 +39,62 @@ msgstr "Kann das heruntergeladene Repository nicht umbenennen."
 msgid "A repository URI is required."
 msgstr "Eine Repository-URI ist erforderlich."
 
-#: src/GitHub_Updater/Install.php:186 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "Plugin installieren"
 
-#: src/GitHub_Updater/Install.php:189 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "Theme installieren"
 
-#: src/GitHub_Updater/Install.php:206
+#: src/GitHub_Updater/Install.php:213
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:209
+#: src/GitHub_Updater/Install.php:216
 msgid "Theme"
 msgstr "Motiv"
 
-#: src/GitHub_Updater/Install.php:220
+#: src/GitHub_Updater/Install.php:227
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater Installatiert %s"
 
-#: src/GitHub_Updater/Install.php:227
+#: src/GitHub_Updater/Install.php:234
 #, php-format
 msgid "%s URI"
 msgstr "%s URI"
 
-#: src/GitHub_Updater/Install.php:235
+#: src/GitHub_Updater/Install.php:242
 msgid "Remote Repository Host"
 msgstr "Remoter Repository Host"
 
-#: src/GitHub_Updater/Install.php:243
+#: src/GitHub_Updater/Install.php:250
 msgid "Repository Branch"
 msgstr "Repository-Branch"
 
-#: src/GitHub_Updater/Install.php:251
+#: src/GitHub_Updater/Install.php:258
 msgid "Private Bitbucket Repository"
 msgstr "Privates Bitbucket Repository"
 
-#: src/GitHub_Updater/Install.php:259 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr "GitHub Accesstoken"
 
-#: src/GitHub_Updater/Install.php:270
+#: src/GitHub_Updater/Install.php:277
 #, fuzzy
 msgid "GitLab Private Token"
 msgstr "GitHub Privat Einstellungen"
 
-#: src/GitHub_Updater/Install.php:298
+#: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Branchnamen angeben oder leer lassen für `master`"
 
-#: src/GitHub_Updater/Install.php:340
+#: src/GitHub_Updater/Install.php:347
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."
 
-#: src/GitHub_Updater/Install.php:354
+#: src/GitHub_Updater/Install.php:361
 #, fuzzy
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."

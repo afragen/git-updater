@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-15 09:24-0800\n"
-"PO-Revision-Date: 2015-05-15 09:26-0800\n"
+"POT-Creation-Date: 2015-05-17 11:17-0800\n"
+"PO-Revision-Date: 2015-05-17 11:19-0800\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
@@ -37,67 +37,68 @@ msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
 #: src/GitHub_Updater/Install.php:56
+#, fuzzy
 msgid "A repository URI is required."
-msgstr ""
+msgstr "Неможливо перейменувати скачане сховище."
 
-#: src/GitHub_Updater/Install.php:186 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "Встановити плагін"
 
-#: src/GitHub_Updater/Install.php:189 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "Інсталювати тему"
 
-#: src/GitHub_Updater/Install.php:206
+#: src/GitHub_Updater/Install.php:213
 msgid "Plugin"
 msgstr "Плагін"
 
-#: src/GitHub_Updater/Install.php:209
+#: src/GitHub_Updater/Install.php:216
 msgid "Theme"
 msgstr "тему:"
 
-#: src/GitHub_Updater/Install.php:220
+#: src/GitHub_Updater/Install.php:227
 #, fuzzy, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Install.php:227
+#: src/GitHub_Updater/Install.php:234
 #, fuzzy, php-format
 msgid "%s URI"
 msgstr "%sВідкат до:%s"
 
-#: src/GitHub_Updater/Install.php:235
+#: src/GitHub_Updater/Install.php:242
 msgid "Remote Repository Host"
 msgstr "Віддаленого сховища хост"
 
-#: src/GitHub_Updater/Install.php:243
+#: src/GitHub_Updater/Install.php:250
 msgid "Repository Branch"
 msgstr "Репозиторій відділення"
 
-#: src/GitHub_Updater/Install.php:251
+#: src/GitHub_Updater/Install.php:258
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Приватні сховища Bitbucket"
 
-#: src/GitHub_Updater/Install.php:259 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:270
+#: src/GitHub_Updater/Install.php:277
 #, fuzzy
 msgid "GitLab Private Token"
 msgstr "Налаштування приватного GitHub"
 
-#: src/GitHub_Updater/Install.php:298
+#: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Введіть ім'я відділення або Залиште пустим для 'майстер'"
 
-#: src/GitHub_Updater/Install.php:340
+#: src/GitHub_Updater/Install.php:347
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Введіть маркер доступу GitHub . Залиште порожнім для публічних сховищ."
 
-#: src/GitHub_Updater/Install.php:354
+#: src/GitHub_Updater/Install.php:361
 #, fuzzy
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
@@ -250,7 +251,7 @@ msgstr "Немає теґів для відкату назад."
 #: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:255
 #, fuzzy, php-format
 msgid "GitHub Updater shows a new version of %s available."
-msgstr "GitHub Updater показує, що доступна нова версія %1$s."
+msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
 
 #: src/GitHub_Updater/Theme.php:248
 #, fuzzy, php-format
