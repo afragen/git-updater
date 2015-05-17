@@ -833,7 +833,7 @@ class Base {
 	 *
 	 * @param $repo_meta
 	 *
-	 * @return float|int
+	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
 		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
@@ -847,7 +847,7 @@ class Base {
 			return 100;
 		}
 
-		return $rating;
+		return (integer) $rating;
 	}
 
 }
