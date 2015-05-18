@@ -35,7 +35,7 @@ class Theme extends Base {
 	 */
 	public function __construct() {
 
-		/**
+		/*
 		 * Get details of git sourced themes.
 		 */
 		$this->config = $this->get_theme_meta();
@@ -72,7 +72,7 @@ class Theme extends Base {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			/**
+			/*
 			 * Update theme transient with rollback data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
@@ -89,7 +89,7 @@ class Theme extends Base {
 				set_site_transient( 'update_themes', $updates_transient );
 			}
 
-			/**
+			/*
 			 * Remove WordPress update row in theme row, only in multisite.
 			 * Add update row to theme row, only in multisite for WP < 3.8
 			 */
@@ -128,7 +128,7 @@ class Theme extends Base {
 			return $false;
 		}
 
-		/**
+		/*
 		 * Early return $false for adding themes from repo
 		 */
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) {
@@ -356,7 +356,7 @@ class Theme extends Base {
 
 			return trim( ob_get_clean(), '1' );
 		} else {
-			/**
+			/*
 			 * If the theme is up to date, display the custom rollback/beta version updater
 			 */
 			ob_start();

@@ -183,7 +183,7 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch' )
 		);
 
-		/**
+		/*
 		 * Add settings for GitHub Personal Access Token
 		 */
 		add_settings_section(
@@ -202,7 +202,7 @@ class Settings extends Base {
 			array( 'id' => 'github_access_token' )
 		);
 
-		/**
+		/*
 		 * Show section for private GitHub repositories.
 		 */
 		if ( self::$github_private ) {
@@ -214,7 +214,7 @@ class Settings extends Base {
 			);
 		}
 
-		/**
+		/*
 		 * Add setting for GitLab.com, GitLab Community Edition
 		 * or GitLab Enterprise Private Token.
 		 */
@@ -249,7 +249,7 @@ class Settings extends Base {
 			);
 		}
 
-		/**
+		/*
 		 * Add settings for Bitbucket Username and Password.
 		 */
 		add_settings_section(
@@ -277,7 +277,7 @@ class Settings extends Base {
 			array( 'id' => 'bitbucket_password' )
 		);
 
-		/**
+		/*
 		 * Show section for private Bitbucket repositories.
 		 */
 		if ( self::$bitbucket_private ) {
@@ -289,7 +289,7 @@ class Settings extends Base {
 			);
 		}
 
-		/**
+		/*
 		 * Show if no private repositories are present.
 		 */
 		if ( ! self::$github_private && ! self::$bitbucket_private ) {
@@ -320,7 +320,7 @@ class Settings extends Base {
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
-			/**
+			/*
 			 * Check to see if it's a private repo and set variables
 			 */
 			if ( $token->private ) {
@@ -332,20 +332,21 @@ class Settings extends Base {
 				}
 			}
 
-			/**
+			/*
 			 * Set boolean if GitLab header found.
 			 */
 			if ( false !== strpos( $token->type, 'gitlab' ) && ! self::$gitlab ) {
 				self::$gitlab = true;
 			}
-			/**
+
+			/*
 			 * Set boolean if GitLab CE/Enterprise header found.
 			 */
 			if ( $token->enterprise && ! self::$gitlab_enterprise ) {
 				self::$gitlab_enterprise = true;
 			}
 
-			/**
+			/*
 			 * Next if not a private repo.
 			 */
 			if ( ! $token->private ) {
@@ -388,7 +389,7 @@ class Settings extends Base {
 			);
 		}
 
-		/**
+		/*
 		 * Unset options that are no longer present and update options.
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );

@@ -26,7 +26,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
+/*
  * Load normal plugin.
  */
 if ( ! class_exists( '\\Fragen\\GitHub_Updater\\Base' ) ) {
@@ -55,12 +55,12 @@ function ghu_mu_plugin_active( $actions ) {
 	return array_merge( array( 'mu-plugin' => __('Activated as mu-plugin', 'github-updater' ) ), $actions );
 }
 
-/**
+/*
  * Deactivate normal plugin as it's loaded as mu-plugin.
  */
 add_action( 'activated_plugin', 'ghu_deactivate', 10, 2 );
 
-/**
+/*
  * Remove links from Plugins page so user can't delete main plugin.
  */
 add_filter( 'network_admin_plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );

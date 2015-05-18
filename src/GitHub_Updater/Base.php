@@ -178,7 +178,7 @@ class Base {
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
-		/**
+		/*
 		 * Ensure get_plugins() function is available.
 		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
@@ -319,7 +319,7 @@ class Base {
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 			}
 
-			/**
+			/*
 			 * Exit if not git hosted theme.
 			 */
 			if ( empty( $git_theme ) ) {
@@ -389,14 +389,14 @@ class Base {
 		global $wp_filesystem;
 		$repo = null;
 
-		/**
+		/*
 		 * Check for upgrade process, return if both are false.
 		 */
 		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
-		/**
+		/*
 		 * Return $source if name already corrected.
 		 */
 		foreach ( (array) $this->config as $git_repo ) {
@@ -413,7 +413,7 @@ class Base {
 			return $source;
 		}
 
-		/**
+		/*
 		 * Get correct repo name based upon $upgrader instance if present.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
@@ -429,7 +429,7 @@ class Base {
 			}
 		}
 
-		/**
+		/*
 		 * Get repo for automatic update process.
 		 */
 		if ( empty( $repo ) ) {
@@ -448,7 +448,7 @@ class Base {
 				}
 			}
 
-			/**
+			/*
 			 * Return already corrected $source or wp.org $source.
 			 */
 			if ( empty( $repo ) ) {
@@ -466,7 +466,7 @@ class Base {
 			)
 		);
 
-		/**
+		/*
 		 * If we can rename, do so and return the new name.
 		 */
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
@@ -474,7 +474,7 @@ class Base {
 			return $corrected_source;
 		}
 
-		/**
+		/*
 		 * Otherwise, return an error.
 		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
@@ -525,12 +525,12 @@ class Base {
 			$all_headers = $default_theme_headers;
 		}
 
-		/**
+		/*
 		 * Make sure we catch CR-only line endings.
 		 */
 		$file_data = str_replace( "\r", "\n", $contents );
 
-		/**
+		/*
 		 * Merge extra headers and default headers.
 		 */
 		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );

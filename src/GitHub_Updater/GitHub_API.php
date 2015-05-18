@@ -227,7 +227,7 @@ class GitHub_API extends API {
 	 * @return string URI
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/**
+		/*
 		 * Check if using GitHub Self-Hosted.
 		 */
 		if ( ! empty( $this->type->enterprise ) ) {
@@ -239,7 +239,7 @@ class GitHub_API extends API {
 		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
 		$endpoint           = '';
 
-		/**
+		/*
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
@@ -248,7 +248,7 @@ class GitHub_API extends API {
 		) {
 			$endpoint .= $rollback;
 
-			/**
+			/*
 			 * For users wanting to update against branch other than master
 			 * or if not using tags, else use newest_tag.
 			 */
@@ -258,7 +258,7 @@ class GitHub_API extends API {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		/**
+		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
@@ -304,7 +304,7 @@ class GitHub_API extends API {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
 
-		/**
+		/*
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitHub will use the Default branch.
 		 */
@@ -312,7 +312,7 @@ class GitHub_API extends API {
 			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
 
-		/**
+		/*
 		 * If using GitHub Self-Hosted header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {

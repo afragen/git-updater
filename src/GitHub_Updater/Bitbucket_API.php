@@ -251,7 +251,7 @@ class Bitbucket_API extends API {
 		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
 		$endpoint           = '';
 
-		/**
+		/*
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
@@ -264,7 +264,7 @@ class Bitbucket_API extends API {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		/**
+		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
@@ -301,7 +301,7 @@ class Bitbucket_API extends API {
 		$bitbucket_private         = false;
 		$bitbucket_private_install = false;
 
-		/**
+		/*
 		 * Check whether attempting to update private Bitbucket repo.
 		 */
 		if ( isset( $this->type->repo ) &&
@@ -311,7 +311,7 @@ class Bitbucket_API extends API {
 			$bitbucket_private = true;
 		}
 
-		/**
+		/*
 		 * Check whether attempting to install private Bitbucket repo
 		 * and abort if Bitbucket user/pass not set.
 		 */

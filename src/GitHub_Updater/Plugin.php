@@ -33,7 +33,7 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 
-		/**
+		/*
 		 * Get details of git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
@@ -72,7 +72,7 @@ class Plugin extends Base {
 				$plugin->download_link = $repo_api->construct_download_link();
 			}
 
-			/**
+			/*
 			 * Update plugin transient with rollback (branch switching) data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
@@ -129,7 +129,7 @@ class Plugin extends Base {
 			return false;
 		}
 
-		/**
+		/*
 		 * Get current branch.
 		 */
 		foreach ( parent::$git_servers as $server ) {
@@ -140,7 +140,7 @@ class Plugin extends Base {
 			}
 		}
 
-		/**
+		/*
 		 * Create after_plugin_row_
 		 */
 		if ( isset( $this->config[ $plugin ] ) ) {
@@ -178,7 +178,7 @@ class Plugin extends Base {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname ( $file );
 
-		/**
+		/*
 		 * Sanity check for some commercial plugins.
 		 */
 		if ( ! isset( $links[2] ) ) {
@@ -187,7 +187,7 @@ class Plugin extends Base {
 
 		preg_match( $regex_pattern, $links[2], $matches );
 
-		/**
+		/*
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
 		if ( array_key_exists( $repo, $this->config ) ) {
@@ -290,14 +290,14 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 				);
 
-				/**
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
 					continue;
 				}
 
-				/**
+				/*
 				 * Don't overwrite if branch switching.
 				 */
 				if ( isset( $_GET['rollback'] ) &&

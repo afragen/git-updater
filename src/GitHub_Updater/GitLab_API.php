@@ -266,7 +266,7 @@ class GitLab_API extends API {
 	 * @return string URI
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/**
+		/*
 		 * Check if using GitLab CE/Enterprise.
 		 */
 		if ( ! empty( $this->type->enterprise ) ) {
@@ -278,7 +278,7 @@ class GitLab_API extends API {
 		$download_link_base = implode( '/', array( $gitlab_base, $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
 		$endpoint           = '';
 
-		/**
+		/*
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
@@ -290,7 +290,7 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
 
-		/**
+		/*
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitLab will use the Default branch.
 		 * If branch is master and tags are used, use newest tag.
@@ -300,7 +300,7 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
 		}
 
-		/**
+		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
@@ -348,7 +348,7 @@ class GitLab_API extends API {
 				break;
 		}
 
-		/**
+		/*
 		 * If using GitLab CE/Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise ) ) {

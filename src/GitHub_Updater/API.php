@@ -12,7 +12,7 @@ namespace Fragen\GitHub_Updater;
 
 abstract class API extends Base {
 
-	/**
+	/*
 	 * The following functions must be in any repository API.
 	 */
 	abstract public function get_remote_info( $file );
@@ -121,7 +121,7 @@ abstract class API extends Base {
 			'repo'  => $this->type->repo,
 		);
 
-		/**
+		/*
 		 * Add or filter the available segments that are used to replace placeholders.
 		 *
 		 * @param array $segments list of segments.

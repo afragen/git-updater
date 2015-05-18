@@ -48,7 +48,7 @@ class Install extends Base {
 				$_POST['github_updater_branch'] = 'master';
 			}
 
-			/**
+			/*
 			 * Exit early if no repo entered.
 			 */
 			if ( empty( $_POST['github_updater_repo'] ) ) {
@@ -59,7 +59,7 @@ class Install extends Base {
 				return false;
 			}
 
-			/**
+			/*
 			 * Transform URI to owner/repo
 			 */
 			$headers                      = Base::parse_header_uri( $_POST['github_updater_repo'] );
@@ -68,7 +68,7 @@ class Install extends Base {
 			self::$install                = Settings::sanitize( $_POST );
 			self::$install['repo']        = $headers['repo'];
 
-			/**
+			/*
 			 * Create GitHub endpoint.
 			 * Save Access Token if present.
 			 * Check for GitHub Self-Hosted.
@@ -84,7 +84,7 @@ class Install extends Base {
 
 				self::$install['download_link'] = $github_base . '/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
 
-				/**
+				/*
 				 * If asset is entered install it.
 				 */
 				if ( false !== stristr( $headers['path'], 'releases/download' ) ) {
@@ -101,7 +101,7 @@ class Install extends Base {
 				}
 			}
 
-			/**
+			/*
 			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
 			 * Save private setting if present.
 			 * Ensures `maybe_authenticate_http()` is available.
@@ -116,7 +116,7 @@ class Install extends Base {
 				new Bitbucket_API( (object) $type );
 			}
 
-			/**
+			/*
 			 * Create GitLab endpoint.
 			 * Check for GitLab Self-Hosted.
 			 */
@@ -150,7 +150,7 @@ class Install extends Base {
 			if ( 'plugin' === $type ) {
 				$plugin = self::$install['repo'];
 
-				/**
+				/*
 				 * Create a new instance of Plugin_Upgrader.
 				 */
 				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
@@ -159,13 +159,13 @@ class Install extends Base {
 			if ( 'theme' === $type ) {
 				$theme = self::$install['repo'];
 
-				/**
+				/*
 				 * Create a new instance of Theme_Upgrader.
 				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
 			}
 
-			/**
+			/*
 			 * Perform the action and install the plugin from the $source urldecode().
 			 * Flush cache so we can make sure that the installed plugins/themes list is always up to date.
 			 */
@@ -206,7 +206,7 @@ class Install extends Base {
 	 */
 	public function register_settings( $type ) {
 
-		/**
+		/*
 		 * Place translatable strings into variables.
 		 */
 		if ( 'plugin' === $type ) {
