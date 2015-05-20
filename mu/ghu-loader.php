@@ -68,7 +68,7 @@ add_filter( 'plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 
 // lets remove the checkbox as well
 function ghu_hide_checkbox( $plugin_file, $plugin_data, $status ){
-	$plugin_name = preg_split("/\/(.*).php$/", $input_line);
+	$plugin_name = preg_split("/\/(.*).php$/", $plugin_file);
 	printf('<script>jQuery("#%s .check-column").html("");</script>', $plugin_name[0] );
 
 }
