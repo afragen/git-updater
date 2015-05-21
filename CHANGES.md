@@ -5,6 +5,7 @@
 * refactor to simplify class structure, created `abstract class API` and `class Messages`
 * add GitLab support!!
 * refactor to set all git servers and extra headers to static arrays in `Base`
+* remove checkbox when loaded as mu-plugin, props @pbearne
 
 #### 4.4.0
 * only add custom user agent once :P
