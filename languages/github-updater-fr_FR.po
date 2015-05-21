@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-05-17 11:17-0800\n"
-"PO-Revision-Date: 2015-05-17 11:20-0800\n"
+"POT-Creation-Date: 2015-05-20 19:21-0800\n"
+"PO-Revision-Date: 2015-05-20 19:21-0800\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.6\n"
+"X-Generator: Poedit 1.8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: mu/ghu-loader.php:55
+#: mu/ghu-loader.php:66
 msgid "Activated as mu-plugin"
 msgstr "Installé en tant que plugin \"must-use\" (MU-plugin)."
 
@@ -140,7 +140,7 @@ msgstr "La version actuelle est à jour. Essayez %sune autre version%s"
 msgid "View details"
 msgstr "détails"
 
-#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:527
+#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:528
 msgid "Settings"
 msgstr "Réglages"
 
@@ -206,39 +206,39 @@ msgstr "Dépôts BitBucket privés"
 msgid "No private repositories are installed."
 msgstr "Aucun dépôt privé n'est installé."
 
-#: src/GitHub_Updater/Settings.php:356
+#: src/GitHub_Updater/Settings.php:357
 msgid "Theme:"
 msgstr "Thème :"
 
-#: src/GitHub_Updater/Settings.php:432
+#: src/GitHub_Updater/Settings.php:433
 msgid "Check to enable branch switching from the Plugins page."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:439
+#: src/GitHub_Updater/Settings.php:440
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Entrez votre jeton d'accès GitHub (GitHub Access Token). Laissez vide pour "
 "un dépôt public."
 
-#: src/GitHub_Updater/Settings.php:446
+#: src/GitHub_Updater/Settings.php:447
 #, fuzzy
 msgid "Enter your personal GitHub Access Token to avoid API access limits."
 msgstr ""
 "Entrez votre jeton d'accès GitHub (GitHub Access Token). Laissez vide pour "
 "un dépôt public."
 
-#: src/GitHub_Updater/Settings.php:453
+#: src/GitHub_Updater/Settings.php:454
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Cochez la case s'il s'agit d'un dépôt privé. Ne pas cocher s'il s'agit d'un "
 "dépôt public."
 
-#: src/GitHub_Updater/Settings.php:460
+#: src/GitHub_Updater/Settings.php:461
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Entrez votre nom d'utilisateur et mot de passe de Bitbucket."
 
-#: src/GitHub_Updater/Settings.php:467
+#: src/GitHub_Updater/Settings.php:468
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
