@@ -17,7 +17,7 @@ namespace Fragen\GitHub_Updater;
 class Readme_Parser extends \Automattic_Readme {
 
 	/**
-	 *
+	 * Constructor
 	 */
 	public function __construct() {
 

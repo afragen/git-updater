@@ -69,6 +69,26 @@ class Base {
 	protected static $error_code = array();
 
 	/**
+	 * Holds git server types.
+	 * @var array
+	 */
+	protected static $git_servers = array(
+		'github'    => 'GitHub',
+		'bitbucket' => 'Bitbucket',
+		'gitlab'    => 'GitLab',
+	);
+
+	/**
+	 * Holds extra repo header types.
+	 * @var array
+	 */
+	protected static $extra_repo_headers = array(
+		'branch'     => 'Branch',
+		'enterprise' => 'Enterprise',
+		'gitlab_ce'  => 'CE',
+	);
+
+	/**
 	 * Constructor
 	 *
 	 * Loads options to private static variable.
@@ -84,13 +104,13 @@ class Base {
 	 */
 	public static function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new Plugin;
+			new Plugin();
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new Theme;
+			new Theme();
 		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
-			new Settings;
+			new Settings();
 		}
 	}
 
@@ -109,17 +129,18 @@ class Base {
 	 * @return array
 	 */
 	public static function add_plugin_headers( $extra_headers ) {
-		$ghu_extra_headers   = array(
-			'GitHub Plugin URI'    => 'GitHub Plugin URI',
-			'GitHub Branch'        => 'GitHub Branch',
-			'GitHub Enterprise'    => 'GitHub Enterprise',
-			'Bitbucket Plugin URI' => 'Bitbucket Plugin URI',
-			'Bitbucket Branch'     => 'Bitbucket Branch',
-			'GitLab Plugin URI'    => 'GitLab Plugin URI',
-			'GitLab Branch'        => 'GitLab Branch',
-			'Requires WP'          => 'Requires WP',
-			'Requires PHP'         => 'Requires PHP',
+		$ghu_extra_headers = array(
+			'Requires WP'  => 'Requires WP',
+			'Requires PHP' => 'Requires PHP',
 		);
+
+		foreach ( self::$git_servers as $server ) {
+			$ghu_extra_headers[ $server . 'Plugin URI' ] = $server . ' Plugin URI';
+			foreach ( self::$extra_repo_headers as $header ) {
+				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			}
+		}
+
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -133,17 +154,18 @@ class Base {
 	 * @return array
 	 */
 	public static function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers   = array(
-			'GitHub Theme URI'    => 'GitHub Theme URI',
-			'GitHub Branch'       => 'GitHub Branch',
-			'GitHub Enterprise'   => 'GitHub Enterprise',
-			'Bitbucket Theme URI' => 'Bitbucket Theme URI',
-			'Bitbucket Branch'    => 'Bitbucket Branch',
-			'GitLab Theme URI'    => 'GitLab Theme URI',
-			'GitLab Branch'       => 'GitLab Branch',
-			'Requires WP'         => 'Requires WP',
-			'Requires PHP'        => 'Requires PHP',
+		$ghu_extra_headers = array(
+			'Requires WP'  => 'Requires WP',
+			'Requires PHP' => 'Requires PHP',
 		);
+
+		foreach ( self::$git_servers as $server ) {
+			$ghu_extra_headers[ $server . ' Theme URI' ] = $server . ' Theme URI';
+			foreach ( self::$extra_repo_headers as $header ) {
+				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			}
+		}
+
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
 
@@ -156,7 +178,7 @@ class Base {
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
-		/**
+		/*
 		 * Ensure get_plugins() function is available.
 		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
@@ -190,16 +212,23 @@ class Base {
 					$header = $this->parse_header_uri( $headers[ $value ] );
 				}
 
-				if ( array_key_exists( $repo_parts['enterprise'], $headers ) &&
-				     ! empty( $headers[ $repo_parts['enterprise'] ] )
-				) {
-					$repo_enterprise_uri = $headers[ $repo_parts['enterprise'] ];
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+				foreach ( $self_hosted_parts as $part ) {
+					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
+					     ! empty( $headers[ $repo_parts[ $part ] ] )
+					) {
+						$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
@@ -255,7 +284,15 @@ class Base {
 					$header = $this->parse_header_uri( $repo_uri );
 				}
 
-				$repo_enterprise_uri = $theme->get( $repo_parts['enterprise'] );
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+				foreach ( $self_hosted_parts as $part ) {
+					$self_hosted = $theme->get( $repo_parts[ $part ] );
+
+					if ( ! empty( $self_hosted ) ) {
+						$repo_enterprise_uri = $self_hosted;
+					}
+				}
+
 				if ( ! empty( $repo_enterprise_uri ) ) {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
@@ -263,6 +300,7 @@ class Base {
 							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
@@ -281,7 +319,7 @@ class Base {
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 			}
 
-			/**
+			/*
 			 * Exit if not git hosted theme.
 			 */
 			if ( empty( $git_theme ) ) {
@@ -351,14 +389,14 @@ class Base {
 		global $wp_filesystem;
 		$repo = null;
 
-		/**
+		/*
 		 * Check for upgrade process, return if both are false.
 		 */
 		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
 			return $source;
 		}
 
-		/**
+		/*
 		 * Return $source if name already corrected.
 		 */
 		foreach ( (array) $this->config as $git_repo ) {
@@ -375,7 +413,7 @@ class Base {
 			return $source;
 		}
 
-		/**
+		/*
 		 * Get correct repo name based upon $upgrader instance if present.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
@@ -391,7 +429,7 @@ class Base {
 			}
 		}
 
-		/**
+		/*
 		 * Get repo for automatic update process.
 		 */
 		if ( empty( $repo ) ) {
@@ -410,7 +448,7 @@ class Base {
 				}
 			}
 
-			/**
+			/*
 			 * Return already corrected $source or wp.org $source.
 			 */
 			if ( empty( $repo ) ) {
@@ -428,7 +466,7 @@ class Base {
 			)
 		);
 
-		/**
+		/*
 		 * If we can rename, do so and return the new name.
 		 */
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
@@ -436,7 +474,7 @@ class Base {
 			return $corrected_source;
 		}
 
-		/**
+		/*
 		 * Otherwise, return an error.
 		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
@@ -487,12 +525,12 @@ class Base {
 			$all_headers = $default_theme_headers;
 		}
 
-		/**
+		/*
 		 * Make sure we catch CR-only line endings.
 		 */
 		$file_data = str_replace( "\r", "\n", $contents );
 
-		/**
+		/*
 		 * Merge extra headers and default headers.
 		 */
 		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );
@@ -533,21 +571,82 @@ class Base {
 			return false;
 	}
 
+
 	/**
-	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
-	 * Adds custom user agent for GitHub Updater.
+	 * Function to check if plugin or theme object is able to be updated.
 	 *
-	 * @param  array $args Existing HTTP Request arguments.
+	 * @param $type
 	 *
-	 * @return array Amended HTTP Request arguments.
+	 * @return bool
 	 */
-	public function http_request_args( $args, $url ) {
-		$args['sslverify'] = false;
-		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+	public function can_update( $type ) {
+		global $wp_version;
+
+		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+
+		return $remote_is_newer && $wp_version_ok && $php_version_ok;
+	}
+
+	/**
+	 * Parse URI param returning array of parts.
+	 *
+	 * @param $repo_header
+	 *
+	 * @return array
+	 */
+	protected static function parse_header_uri( $repo_header ) {
+		$header_parts         = parse_url( $repo_header );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$header['path']       = $owner_repo;
+		$owner_repo           = explode( '/', $owner_repo );
+		$header['owner']      = $owner_repo[0];
+		$header['repo']       = $owner_repo[1];
+		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
+		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
+		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
+
+		$header = Settings::sanitize( $header );
+
+		return $header;
+	}
+
+	/**
+	 * Create repo parts.
+	 *
+	 * @param $repo
+	 * @param $type
+	 *
+	 * @return mixed
+	 */
+	private function _get_repo_parts( $repo, $type ) {
+		$arr['bool'] = false;
+		$pattern     = '/' . strtolower( $repo ) . '_/';
+		$type        = preg_replace( $pattern, '', $type );
+		$repo_types  = array(
+			'GitHub'    => 'github_' . $type,
+			'Bitbucket' => 'bitbucket_'. $type,
+			'GitLab'    => 'gitlab_' . $type,
+		);
+		$repo_base_uris = array(
+			'GitHub'    => 'https://github.com/',
+			'Bitbucket' => 'https://bitbucket.org/',
+			'GitLab'    => 'https://gitlab.com/',
+		);
+
+		if ( array_key_exists( $repo, $repo_types ) ) {
+			$arr['type']     = $repo_types[ $repo ];
+			$arr['base_uri'] = $repo_base_uris[ $repo ];
+			$arr['bool']     = true;
+			foreach ( self::$extra_repo_headers as $key => $value ) {
+				$arr[ $key ] = $repo . ' ' . $value;
+			}
 		}
 
-		return $args;
+		return $arr;
 	}
 
 	/**
@@ -584,7 +683,6 @@ class Base {
 		return get_site_transient( $transient );
 	}
 
-
 	/**
 	 * Delete all transients from array of transient ids
 	 *
@@ -604,7 +702,6 @@ class Base {
 		delete_site_transient( 'ghu-' . $type );
 	}
 
-
 	/**
 	 * Create transient of $type transients for force-check
 	 *
@@ -620,6 +717,115 @@ class Base {
 		self::$transients = array();
 	}
 
+	/**
+	 * Set repo object file info.
+	 *
+	 * @param $response
+	 * @param $repo
+	 */
+	protected function set_file_info( $response, $repo ) {
+		$repo_parts = $this->_get_repo_parts( $repo, $this->type->type );
+		$this->type->transient            = $response;
+		$this->type->remote_version       = strtolower( $response['Version'] );
+		$this->type->branch               = ! empty( $response[ $repo_parts['branch'] ] ) ? $response[$repo_parts['branch'] ] : 'master';
+		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
+		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+	}
+
+	/**
+	 * Parse tags and set object data.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return bool
+	 */
+	protected function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+		if ( false !== $response ) {
+			switch ( $repo_type['repo'] ) {
+				case 'github':
+					foreach ( (array) $response as $tag ) {
+						if ( isset( $tag->name ) && isset( $tag->zipball_url ) ) {
+							$tags[]                 = $tag->name;
+							$rollback[ $tag->name ] = $tag->zipball_url;
+						}
+					}
+					break;
+				case 'bitbucket':
+					foreach ( (array) $response as $num => $tag ) {
+						$download_base = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'get/' ) );
+						if ( isset( $num ) ) {
+							$tags[]           = $num;
+							$rollback[ $num ] = $download_base . $num . '.zip';
+						}
+					}
+					break;
+				case 'gitlab':
+					foreach ( (array) $response as $tag ) {
+						$download_link = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
+						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
+						if ( isset( $tag->name) ) {
+							$tags[] = $tag->name;
+							$rollback[ $tag->name ] = $download_link;
+						}
+					}
+					break;
+			}
+
+		}
+		if ( empty( $tags ) ) {
+			return false;
+		}
+
+		usort( $tags, 'version_compare' );
+		krsort( $rollback );
+
+		$newest_tag             = null;
+		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
+		$newest_tag             = $tags[ $newest_tag_key ];
+
+		$this->type->newest_tag = $newest_tag;
+		$this->type->tags       = $tags;
+		$this->type->rollback   = $rollback;
+
+		return true;
+	}
+
+	/**
+	 * Set data from readme.txt.
+	 * Prefer changelog from CHANGES.md.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function set_readme_info( $response ) {
+		$readme = array();
+		foreach ( $this->type->sections as $section => $value ) {
+			if ( 'description' === $section ) {
+				continue;
+			}
+			$readme['sections/' . $section ] = $value;
+		}
+		foreach ( $readme as $key => $value ) {
+			$key = explode( '/', $key );
+			if ( ! empty( $value ) && 'sections' === $key[0] ) {
+				unset( $response['sections'][ $key[1] ] );
+			}
+		}
+
+		unset( $response['sections']['screenshots'] );
+		unset( $response['sections']['installation'] );
+		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
+		$this->type->tested       = $response['tested_up_to'];
+		$this->type->requires     = $response['requires_at_least'];
+		$this->type->donate       = $response['donate_link'];
+		$this->type->contributors = $response['contributors'];
+
+		return true;
+	}
 
 	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings
@@ -627,7 +833,7 @@ class Base {
 	 *
 	 * @param $repo_meta
 	 *
-	 * @return float|int
+	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
 		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
@@ -641,139 +847,7 @@ class Base {
 			return 100;
 		}
 
-		return $rating;
+		return (integer) $rating;
 	}
 
-	/**
-	 * Function to check if plugin or theme object is able to be updated.
-	 *
-	 * @param $type
-	 *
-	 * @return bool
-	 */
-	public function can_update( $type ) {
-		global $wp_version;
-
-		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
-		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
-		$php_version_ok  = version_compare( phpversion(), $type->requires_php_version, '>=' );
-
-		return $remote_is_newer && $wp_version_ok && $php_version_ok;
-	}
-
-	/**
-	 * Display message when API returns other than 200 or 404.
-	 * Usually 403 as API rate limit max out or private repo with no token set.
-	 *
-	 * @return bool
-	 */
-	protected function create_error_message() {
-		global $pagenow;
-		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
-		$settings_pages = array( 'settings.php', 'options-general.php' );
-
-		if (
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
-			( in_array( $pagenow, $settings_pages ) && 'github-updater' !== $_GET['page'] )
-		) {
-			return false;
-		}
-
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-				add_action( 'admin_notices', array( $this, 'show_error_message' ) );
-				add_action( 'network_admin_notices', array( $this, 'show_error_message' ) );
-		}
-	}
-
-	/**
-	 * Display error message.
-	 */
-	public function show_error_message() {
-		?>
-		<div class="error notice is-dismissible">
-			<p>
-				<?php
-					printf( __( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
-						'<strong>' . $this->type->name . '</strong>'
-					);
-					echo ' ' . self::$error_code[ $this->type->repo ];
-				?>
-				<?php if ( 403 === self::$error_code[ $this->type->repo ] && false !== stristr( $this->type->type, 'github' ) ): ?>
-					<br>
-					<?php
-						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
-							self::$error_code[ $this->type->repo . '-wait' ]
-						);
-						echo '<br>';
-						printf(
-							__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
-							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
-							'</a>'
-						);
-					?>
-				<?php endif; ?>
-				<?php if ( 401 === self::$error_code[ $this->type->repo ] ) : ?>
-					<br>
-					<?php _e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
-				<?php endif; ?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Parse URI param returning array of parts.
-	 *
-	 * @param $repo_header
-	 *
-	 * @return array
-	 */
-	protected static function parse_header_uri( $repo_header ) {
-		$header_parts         = parse_url( $repo_header );
-		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo           = explode( '/', $owner_repo );
-		$header['owner']      = $owner_repo[0];
-		$header['repo']       = $owner_repo[1];
-		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
-		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
-		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
-
-		$header = Settings::sanitize( $header );
-
-		return $header;
-	}
-
-	/**
-	 * Create repo parts.
-	 *
-	 * @param $repo
-	 * @param $type
-	 *
-	 * @return mixed
-	 */
-	private function _get_repo_parts( $repo, $type ) {
-		$arr['bool'] = false;
-		$repo_types  = array(
-			'GitHub'    => 'github_' . $type,
-			'Bitbucket' => 'bitbucket_'. $type,
-			'GitLab'    => 'gitlab_' . $type,
-		);
-		$repo_base_uris = array(
-			'GitHub'    => 'https://github.com/',
-			'Bitbucket' => 'https://bitbucket.org/',
-			'GitLab'    => 'https://gitlab.com/',
-		);
-
-		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']       = $repo_types[ $repo ];
-			$arr['base_uri']   = $repo_base_uris[ $repo ];
-			$arr['branch']     = $repo . ' Branch';
-			$arr['enterprise'] = $repo . ' Enterprise';
-			$arr['bool']       = true;
-		}
-
-		return $arr;
-	}
 }

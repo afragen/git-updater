@@ -11,20 +11,21 @@
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-Description:       A plugin to automatically update GitHub or Bitbucket hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
-Version:           4.4.0
+Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
+Version:           4.5.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Domain Path:       /languages
 Text Domain:       github-updater
+Network:           true
 GitHub Plugin URI: https://github.com/afragen/github-updater
 GitHub Branch:     master
 Requires WP:       3.8
 Requires PHP:      5.3
 */
 
-/**
+/*
  * Exit if called directly.
  * PHP version check and exit.
  */
@@ -62,7 +63,7 @@ new $loader( $root, $extra_classes );
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
-/**
+/*
  * Calls Fragen\GitHub_Updater\Base::init() in init hook so other remote upgrader apps like
  * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
  * of GitHub_Updater's methods, especially renaming.

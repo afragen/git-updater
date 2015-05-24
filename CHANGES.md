@@ -1,8 +1,17 @@
+#### 4.5.0
+* fix some PHP notices
+* add update by GitHub release asset in lieu of update by tag when asset is present
+* install asset via remote install if asset URI used
+* refactor to simplify class structure, created `abstract class API` and `class Messages`
+* add GitLab support!!
+* refactor to set all git servers and extra headers to static arrays in `Base`
+* remove checkbox when loaded as mu-plugin, props @pbearne
+
 #### 4.4.0
 * only add custom user agent once :P
 * add support of GitHub Enterprise via new `GitHub Enterprise` header
 * sanitize filter input
-* add support for for parsing `readme.txt` for _View details_ information
+* add support for parsing `readme.txt` for _View details_ information using `WordPress_Plugin_Readme_Parser` by @markjaquith
 * fixed _View details_ link to show for all cases when plugin using GitHub Updater
 * refactor creation of header parts and URIs
 

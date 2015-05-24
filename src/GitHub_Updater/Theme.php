@@ -35,7 +35,7 @@ class Theme extends Base {
 	 */
 	public function __construct() {
 
-		/**
+		/*
 		 * Get details of git sourced themes.
 		 */
 		$this->config = $this->get_theme_meta();
@@ -54,6 +54,9 @@ class Theme extends Base {
 				case 'bitbucket_theme':
 					$repo_api = new Bitbucket_API( $theme );
 					break;
+				case 'gitlab_theme':
+					$repo_api = new GitLab_API( $theme );
+					break;
 			}
 
 			$this->{$theme->type} = $theme;
@@ -69,7 +72,7 @@ class Theme extends Base {
 				$theme->download_link = $repo_api->construct_download_link();
 			}
 
-			/**
+			/*
 			 * Update theme transient with rollback data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
@@ -86,14 +89,14 @@ class Theme extends Base {
 				set_site_transient( 'update_themes', $updates_transient );
 			}
 
-			/**
+			/*
 			 * Remove WordPress update row in theme row, only in multisite.
 			 * Add update row to theme row, only in multisite for WP < 3.8
 			 */
 			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
-				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
+				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_$theme->repo", array( $this, 'wp_theme_update_row' ), 10, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 				}
 			}
 
@@ -103,15 +106,15 @@ class Theme extends Base {
 
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'pre_set_site_transient_update_themes' ) );
+			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
 		}
 
-		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_filter( 'http_request_args', array( $this, 'http_request_args' ), 10, 2 );
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		if ( ! is_multisite() ) {
-			add_filter('wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
+			add_filter('wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
 		Settings::$ghu_themes = $this->config;
@@ -125,7 +128,7 @@ class Theme extends Base {
 			return $false;
 		}
 
-		/**
+		/*
 		 * Early return $false for adding themes from repo
 		 */
 		if ( isset( $response->fields ) && ! $response->fields['sections'] ) {
@@ -277,9 +280,9 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public static function remove_after_theme_row( $theme_key, $theme ) {
-		$repositories = array( 'GitHub Theme URI', 'Bitbucket Theme URI', 'GitLab Theme URI' );
-		foreach ( (array) $repositories as $repository ) {
-			$repo_uri = $theme->get( $repository );
+		foreach ( parent::$git_servers as $server ) {
+			$repo_header = $server . ' Theme URI';
+			$repo_uri    = $theme->get( $repo_header );
 			if ( empty( $repo_uri ) ) {
 				continue;
 			}
@@ -353,7 +356,7 @@ class Theme extends Base {
 
 			return trim( ob_get_clean(), '1' );
 		} else {
-			/**
+			/*
 			 * If the theme is up to date, display the custom rollback/beta version updater
 			 */
 			ob_start();

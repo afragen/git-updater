@@ -33,7 +33,7 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 
-		/**
+		/*
 		 * Get details of git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
@@ -53,6 +53,9 @@ class Plugin extends Base {
 				case 'bitbucket_plugin':
 					$repo_api = new Bitbucket_API( $plugin );
 					break;
+				case 'gitlab_plugin';
+					$repo_api = new GitLab_API( $plugin );
+					break;
 			}
 
 			$this->{$plugin->type} = $plugin;
@@ -69,7 +72,7 @@ class Plugin extends Base {
 				$plugin->download_link = $repo_api->construct_download_link();
 			}
 
-			/**
+			/*
 			 * Update plugin transient with rollback (branch switching) data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
@@ -88,16 +91,16 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			add_action( "after_plugin_row_$plugin->slug", array( $this, 'wp_plugin_update_row' ), 15, 3 );
+			add_action( "after_plugin_row_$plugin->slug", array( &$this, 'wp_plugin_update_row' ), 15, 3 );
 		}
 
 		$this->make_force_check_transient( 'plugins' );
 
-		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
-		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_filter( 'http_request_args', array( $this, 'http_request_args' ), 10, 2 );
+		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		Settings::$ghu_plugins = $this->config;
 	}
@@ -117,7 +120,6 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$branch_keys   = array( 'GitHub Branch', 'Bitbucket Branch', 'GitLab Branch' );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$plugin        = dirname( $plugin_file );
 		$id            = $plugin . '-id';
@@ -127,17 +129,18 @@ class Plugin extends Base {
 			return false;
 		}
 
-		/**
+		/*
 		 * Get current branch.
 		 */
-		foreach ( $branch_keys as $branch_key ) {
-			$branch = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
+		foreach ( parent::$git_servers as $server ) {
+			$branch_key = $server . ' Branch';
+			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
 			if ( 'master' !== $branch ) {
 				break;
 			}
 		}
 
-		/**
+		/*
 		 * Create after_plugin_row_
 		 */
 		if ( isset( $this->config[ $plugin ] ) ) {
@@ -175,7 +178,7 @@ class Plugin extends Base {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname ( $file );
 
-		/**
+		/*
 		 * Sanity check for some commercial plugins.
 		 */
 		if ( ! isset( $links[2] ) ) {
@@ -184,7 +187,7 @@ class Plugin extends Base {
 
 		preg_match( $regex_pattern, $links[2], $matches );
 
-		/**
+		/*
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
 		if ( array_key_exists( $repo, $this->config ) ) {
@@ -287,14 +290,14 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 				);
 
-				/**
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
 					continue;
 				}
 
-				/**
+				/*
 				 * Don't overwrite if branch switching.
 				 */
 				if ( isset( $_GET['rollback'] ) &&

@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-17 17:17-0800\n"
-"PO-Revision-Date: 2015-03-17 17:21-0800\n"
+"POT-Creation-Date: 2015-05-20 19:20-0800\n"
+"PO-Revision-Date: 2015-05-20 19:20-0800\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -19,212 +19,290 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: mu/ghu-loader.php:55
+#: mu/ghu-loader.php:66
 msgid "Activated as mu-plugin"
 msgstr "Активувати як mu-plugin"
 
-#: src/GitHub_Updater/Base.php:317
-msgid ""
-"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
-"md</code> or <code>CHANGELOG.md</code> in your repository."
-msgstr ""
-"Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES.md</"
-"code> або <code>CHANGELOG.md</code> у вашому сховищі."
-
-#: src/GitHub_Updater/Base.php:418
+#: src/GitHub_Updater/Base.php:463
 #, fuzzy, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Перейменування %s в %s"
 
-#: src/GitHub_Updater/Base.php:428
+#: src/GitHub_Updater/Base.php:473
 msgid "Rename successful"
 msgstr "Перейменування успішне"
 
-#: src/GitHub_Updater/Base.php:435
+#: src/GitHub_Updater/Base.php:480
 msgid "Unable to rename downloaded repository."
 msgstr "Неможливо перейменувати скачане сховище."
 
-#: src/GitHub_Updater/Base.php:688
-#, fuzzy, php-format
-msgid "%s was not checked. GitHub Updater Error Code:"
-msgstr "%1$s не перевірив. GitHub Updater код помилки: %2$s"
+#: src/GitHub_Updater/Install.php:56
+#, fuzzy
+msgid "A repository URI is required."
+msgstr "Неможливо перейменувати скачане сховище."
 
-#: src/GitHub_Updater/Base.php:696
-#, fuzzy, php-format
-msgid "GitHub API's rate limit will reset in %s minutes."
-msgstr "Обмеження частоти GitHub API буде скинути в %1$s хвилин."
-
-#: src/GitHub_Updater/Base.php:703
-msgid "There is probably an error on the GitHub Updater Settings page."
-msgstr ""
-
-#: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "Встановити плагін"
 
-#: src/GitHub_Updater/Install.php:144 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "Інсталювати тему"
 
-#: src/GitHub_Updater/Install.php:161
+#: src/GitHub_Updater/Install.php:213
 msgid "Plugin"
 msgstr "Плагін"
 
-#: src/GitHub_Updater/Install.php:164
+#: src/GitHub_Updater/Install.php:216
 msgid "Theme"
 msgstr "тему:"
 
-#: src/GitHub_Updater/Install.php:175
+#: src/GitHub_Updater/Install.php:227
 #, fuzzy, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Install.php:182
+#: src/GitHub_Updater/Install.php:234
 #, fuzzy, php-format
 msgid "%s URI"
 msgstr "%sВідкат до:%s"
 
-#: src/GitHub_Updater/Install.php:191
+#: src/GitHub_Updater/Install.php:242
 msgid "Remote Repository Host"
 msgstr "Віддаленого сховища хост"
 
-#: src/GitHub_Updater/Install.php:200
+#: src/GitHub_Updater/Install.php:250
 msgid "Repository Branch"
 msgstr "Репозиторій відділення"
 
-#: src/GitHub_Updater/Install.php:209
+#: src/GitHub_Updater/Install.php:258
 #, fuzzy
 msgid "Private Bitbucket Repository"
 msgstr "Приватні сховища Bitbucket"
 
-#: src/GitHub_Updater/Install.php:218
+#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:246
+#: src/GitHub_Updater/Install.php:277
+#, fuzzy
+msgid "GitLab Private Token"
+msgstr "Налаштування приватного GitHub"
+
+#: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Введіть ім'я відділення або Залиште пустим для 'майстер'"
 
-#: src/GitHub_Updater/Install.php:288
+#: src/GitHub_Updater/Install.php:347
 #, fuzzy
 msgid "Enter GitHub Access Token for private GitHub repositories."
+msgstr "Введіть маркер доступу GitHub . Залиште порожнім для публічних сховищ."
+
+#: src/GitHub_Updater/Install.php:361
+#, fuzzy
+msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
+#: src/GitHub_Updater/Messages.php:61
+#, fuzzy, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
+msgstr "%1$s не перевірив. GitHub Updater код помилки: %2$s"
+
+#: src/GitHub_Updater/Messages.php:69
+#, fuzzy, php-format
+msgid "GitHub API's rate limit will reset in %s minutes."
+msgstr "Обмеження частоти GitHub API буде скинути в %1$s хвилин."
+
+#: src/GitHub_Updater/Messages.php:74
+#, php-format
+msgid ""
+"It looks like you are running into GitHub API rate limits. Be sure and "
+"configure a %sPersonal Access Token%s to avoid this issue."
+msgstr ""
+
+#: src/GitHub_Updater/Messages.php:82
+msgid "There is probably an error on the GitHub Updater Settings page."
+msgstr ""
+
+#: src/GitHub_Updater/Messages.php:95
+msgid ""
+"You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
+msgstr ""
+
+#: src/GitHub_Updater/Plugin.php:149
+#, fuzzy, php-format
+msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
+msgstr "Поточна версія остання. Спробуйте"
+
+#: src/GitHub_Updater/Plugin.php:199
+#, fuzzy
+msgid "View details"
+msgstr "Переглянути подробиці версії %4$s"
+
+#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:528
 msgid "Settings"
 msgstr "Налаштування"
 
-#: src/GitHub_Updater/Settings.php:79 src/GitHub_Updater/Settings.php:87
+#: src/GitHub_Updater/Settings.php:81 src/GitHub_Updater/Settings.php:89
+#: src/GitHub_Updater/Settings.php:172
 msgid "GitHub Updater Settings"
 msgstr "Налаштування GitHub Updater"
 
 #. Plugin Name of the plugin/theme
-#: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:88
-#: src/GitHub_Updater/Settings.php:125
+#: src/GitHub_Updater/Settings.php:82 src/GitHub_Updater/Settings.php:90
+#: src/GitHub_Updater/Settings.php:127
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:129
+#: src/GitHub_Updater/Settings.php:131
 msgid "Saved."
 msgstr "Збережено."
 
-#: src/GitHub_Updater/Settings.php:174
+#: src/GitHub_Updater/Settings.php:179
+msgid "Enable Plugin Branch Switching"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:191
+msgid "Personal GitHub Access Token"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:211
 msgid "GitHub Private Settings"
 msgstr "Налаштування приватного GitHub"
 
-#: src/GitHub_Updater/Settings.php:185
+#: src/GitHub_Updater/Settings.php:224
+#, fuzzy
+msgid "GitLab Private Settings"
+msgstr "Налаштування приватного GitHub"
+
+#: src/GitHub_Updater/Settings.php:233
+#, fuzzy
+msgid "GitLab.com Private Token"
+msgstr "Налаштування приватного GitHub"
+
+#: src/GitHub_Updater/Settings.php:244
+msgid "GitLab CE or GitLab Enterprise Private Token"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:257
 msgid "Bitbucket Private Settings"
 msgstr "Налаштування приватного Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:192
+#: src/GitHub_Updater/Settings.php:264
 msgid "Bitbucket Username"
 msgstr "Bitbucket ім'я користувача"
 
-#: src/GitHub_Updater/Settings.php:201
+#: src/GitHub_Updater/Settings.php:273
 msgid "Bitbucket Password"
 msgstr "Bitbucket пароль"
 
-#: src/GitHub_Updater/Settings.php:214
+#: src/GitHub_Updater/Settings.php:286
 msgid "Bitbucket Private Repositories"
 msgstr "Приватні сховища Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:226
+#: src/GitHub_Updater/Settings.php:298
 msgid "No private repositories are installed."
 msgstr "Жодне приватне сховище не встановлене."
 
-#: src/GitHub_Updater/Settings.php:271
+#: src/GitHub_Updater/Settings.php:357
 msgid "Theme:"
 msgstr "тему:"
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:433
+msgid "Check to enable branch switching from the Plugins page."
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:440
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:338
+#: src/GitHub_Updater/Settings.php:447
+#, fuzzy
+msgid "Enter your personal GitHub Access Token to avoid API access limits."
+msgstr "Введіть маркер доступу GitHub. Залиште порожнім для публічних сховищ."
+
+#: src/GitHub_Updater/Settings.php:454
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Позначте, якщо сховище приватне. Залиште не позначеним для публічних сховищ."
 
-#: src/GitHub_Updater/Settings.php:345
+#: src/GitHub_Updater/Settings.php:461
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Введіть ваші особисті BitBucket ім&#39;я користувача та пароль."
 
-#: src/GitHub_Updater/Theme.php:205
+#: src/GitHub_Updater/Settings.php:468
+msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
+msgstr ""
+
+#: src/GitHub_Updater/Theme.php:210
 msgid "Theme is up-to-date!"
 msgstr "Тема не має оновлень!"
 
-#: src/GitHub_Updater/Theme.php:210
+#: src/GitHub_Updater/Theme.php:215
 #, fuzzy
 msgid "Rollback to:"
 msgstr "%sВідкат до:%s"
 
-#: src/GitHub_Updater/Theme.php:228
+#: src/GitHub_Updater/Theme.php:233
 msgid "No previous tags to rollback to."
 msgstr "Немає теґів для відкату назад."
 
-#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
+#: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:255
 #, fuzzy, php-format
 msgid "GitHub Updater shows a new version of %s available."
-msgstr "GitHub Updater показує, що доступна нова версія %1$s."
+msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
 
-#: src/GitHub_Updater/Theme.php:243
+#: src/GitHub_Updater/Theme.php:248
 #, fuzzy, php-format
 msgid "View version %s details."
 msgstr "Переглянути подробиці версії %4$s"
 
-#: src/GitHub_Updater/Theme.php:247
+#: src/GitHub_Updater/Theme.php:252
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичне оновлення недоступно для цієї теми."
 
-#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:262 src/GitHub_Updater/Theme.php:347
 #, fuzzy, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "%4$sПереглянути подробиці версії %5$s або %6$sоновити зараз%7$s ."
 
-#: src/GitHub_Updater/Theme.php:335
+#: src/GitHub_Updater/Theme.php:340
 #, fuzzy, php-format
 msgid "There is a new version of %s available now."
 msgstr "Нова версія"
 
-#: src/GitHub_Updater/Theme.php:362
+#: src/GitHub_Updater/Theme.php:367
 #, fuzzy, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: src/GitHub_Updater/Theme.php:376
+#: src/GitHub_Updater/Theme.php:381
 msgid "Choose a Version"
 msgstr "Вибрати версію"
 
-#: src/GitHub_Updater/Theme.php:379
+#: src/GitHub_Updater/Theme.php:384
 msgid "Install"
 msgstr "Встановити"
 
-#: vendor/WPUpdatePhp.php:96
+#: vendor/WPUpdatePhp.php:24
+#, fuzzy
+msgid "this plugin"
+msgstr "Плагін"
+
+#: vendor/WPUpdatePhp.php:92
 #, php-format
-msgid ""
-"Unfortunately, %1$s can not run on PHP versions older than %2$s. Read more "
-"information about %3$show you can update%4$s."
+msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+msgstr ""
+
+#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
+#, php-format
+msgid "Read more information about %show you can update%s."
+msgstr ""
+
+#: vendor/WPUpdatePhp.php:108
+#, php-format
+msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -234,8 +312,8 @@ msgstr "https://github.com/afragen/github-updater"
 #. Description of the plugin/theme
 #, fuzzy
 msgid ""
-"A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-"themes. It also allows for remote installation of plugins or themes into "
+"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
+"and themes. It also allows for remote installation of plugins or themes into "
 "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
 "github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
 "based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
@@ -251,6 +329,13 @@ msgstr ""
 msgid "Andy Fragen"
 msgstr "Енді Фраген"
 
+#~ msgid ""
+#~ "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
+#~ "md</code> or <code>CHANGELOG.md</code> in your repository."
+#~ msgstr ""
+#~ "Немає доступних змін через GitHub Updater. Створіть файл <code>CHANGES."
+#~ "md</code> або <code>CHANGELOG.md</code> у вашому сховищі."
+
 #~ msgid "%sView version %s details%s or %supdate now%s."
 #~ msgstr "%sПереглянути подробиці версії %s %s або %sоновити зараз%s ."
 
@@ -259,10 +344,6 @@ msgstr "Енді Фраген"
 
 #, fuzzy
 #~ msgid "View version"
-#~ msgstr "Переглянути подробиці версії %4$s"
-
-#, fuzzy
-#~ msgid "details"
 #~ msgstr "Переглянути подробиці версії %4$s"
 
 #~ msgid "or"

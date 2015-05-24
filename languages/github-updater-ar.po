@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-03-30 11:02-0800\n"
-"PO-Revision-Date: 2015-03-30 11:02-0800\n"
+"POT-Creation-Date: 2015-05-20 19:22-0800\n"
+"PO-Revision-Date: 2015-05-20 19:22-0800\n"
 "Last-Translator: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language-Team: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.6\n"
+"X-Generator: Poedit 1.8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -19,199 +19,265 @@ msgstr ""
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: mu/ghu-loader.php:55
+#: mu/ghu-loader.php:66
 msgid "Activated as mu-plugin"
 msgstr "تفعيل كإضافة تلقائية"
 
-#: src/GitHub_Updater/Base.php:317
-msgid ""
-"No changelog is available via GitHub Updater. Create a file <code>CHANGES."
-"md</code> or <code>CHANGELOG.md</code> in your repository."
-msgstr ""
-"ملف متابعة التغيرات غير متوافر من خلال GitHub Updater. قم بإنشاء ملف "
-"<code>CHANGES.md</code>  أو <code>CHANGELOG.md</code> في المستودع الخاص بك"
-
-#: src/GitHub_Updater/Base.php:418
+#: src/GitHub_Updater/Base.php:463
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "إعادة تسمية %s  إلى %s"
 
-#: src/GitHub_Updater/Base.php:428
+#: src/GitHub_Updater/Base.php:473
 msgid "Rename successful"
 msgstr "تمت إعادة التسمية بنجاح"
 
-#: src/GitHub_Updater/Base.php:435
+#: src/GitHub_Updater/Base.php:480
 msgid "Unable to rename downloaded repository."
 msgstr "غير قادر على إعادة تسمية المستودع الذي تم تنزيله"
 
-#: src/GitHub_Updater/Base.php:688
-#, php-format
-msgid "%s was not checked. GitHub Updater Error Code:"
-msgstr "‏%1$s  غير موجود . خطأ GitHub : "
+#: src/GitHub_Updater/Install.php:56
+msgid "A repository URI is required."
+msgstr ""
 
-#: src/GitHub_Updater/Base.php:696
-#, php-format
-msgid "GitHub API's rate limit will reset in %s minutes."
-msgstr "GitHub API's rate limit will reset in %1$s minutes."
-
-#: src/GitHub_Updater/Base.php:703
-msgid "There is probably an error on the GitHub Updater Settings page."
-msgstr "هناك خطأ ما في صفحة إعدادت GitHub "
-
-#: src/GitHub_Updater/Install.php:141 src/GitHub_Updater/Settings.php:67
+#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "تنصيب إضافة"
 
-#: src/GitHub_Updater/Install.php:144 src/GitHub_Updater/Settings.php:68
+#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "تنصيب موضوع"
 
-#: src/GitHub_Updater/Install.php:161
+#: src/GitHub_Updater/Install.php:213
 msgid "Plugin"
 msgstr "إضافة"
 
-#: src/GitHub_Updater/Install.php:164
+#: src/GitHub_Updater/Install.php:216
 msgid "Theme"
 msgstr "موضوع"
 
-#: src/GitHub_Updater/Install.php:175
+#: src/GitHub_Updater/Install.php:227
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "تحميل %s"
 
-#: src/GitHub_Updater/Install.php:182
+#: src/GitHub_Updater/Install.php:234
 #, php-format
 msgid "%s URI"
 msgstr "رابط %s"
 
-#: src/GitHub_Updater/Install.php:190
+#: src/GitHub_Updater/Install.php:242
 msgid "Remote Repository Host"
 msgstr "مستضيف المستودعات"
 
-#: src/GitHub_Updater/Install.php:198
+#: src/GitHub_Updater/Install.php:250
 msgid "Repository Branch"
 msgstr "الفرع"
 
-#: src/GitHub_Updater/Install.php:206
+#: src/GitHub_Updater/Install.php:258
 msgid "Private Bitbucket Repository"
 msgstr "مستودع Bitbucket  خاص"
 
-#: src/GitHub_Updater/Install.php:214
+#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr "رمز وصول GitHub "
 
-#: src/GitHub_Updater/Install.php:241
+#: src/GitHub_Updater/Install.php:277
+#, fuzzy
+msgid "GitLab Private Token"
+msgstr "إعدادت GitHub  الخاصة"
+
+#: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
 msgstr "إدخل اسم الفرع أو اتركه فارغاً لاستخدام `master`"
 
-#: src/GitHub_Updater/Install.php:283
+#: src/GitHub_Updater/Install.php:347
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "أدخل رمز وصول GitHub  من مستوعات GitHub  الخاصة"
 
-#: src/GitHub_Updater/Settings.php:66 src/GitHub_Updater/Settings.php:405
+#: src/GitHub_Updater/Install.php:361
+#, fuzzy
+msgid "Enter GitLab Private Token for private GitLab repositories."
+msgstr "أدخل رمز وصول GitHub  من مستوعات GitHub  الخاصة"
+
+#: src/GitHub_Updater/Messages.php:61
+#, php-format
+msgid "%s was not checked. GitHub Updater Error Code:"
+msgstr "‏%1$s  غير موجود . خطأ GitHub : "
+
+#: src/GitHub_Updater/Messages.php:69
+#, php-format
+msgid "GitHub API's rate limit will reset in %s minutes."
+msgstr "GitHub API's rate limit will reset in %1$s minutes."
+
+#: src/GitHub_Updater/Messages.php:74
+#, php-format
+msgid ""
+"It looks like you are running into GitHub API rate limits. Be sure and "
+"configure a %sPersonal Access Token%s to avoid this issue."
+msgstr ""
+
+#: src/GitHub_Updater/Messages.php:82
+msgid "There is probably an error on the GitHub Updater Settings page."
+msgstr "هناك خطأ ما في صفحة إعدادت GitHub "
+
+#: src/GitHub_Updater/Messages.php:95
+msgid ""
+"You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
+msgstr ""
+
+#: src/GitHub_Updater/Plugin.php:149
+#, fuzzy, php-format
+msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
+msgstr "النسخة الحالية محدثة . قم بتجربة %sanother version%s"
+
+#: src/GitHub_Updater/Plugin.php:199
+#, fuzzy
+msgid "View details"
+msgstr "تفاصيل"
+
+#: src/GitHub_Updater/Settings.php:68 src/GitHub_Updater/Settings.php:528
 msgid "Settings"
 msgstr "الإعدادت"
 
-#: src/GitHub_Updater/Settings.php:79 src/GitHub_Updater/Settings.php:87
+#: src/GitHub_Updater/Settings.php:81 src/GitHub_Updater/Settings.php:89
+#: src/GitHub_Updater/Settings.php:172
 msgid "GitHub Updater Settings"
 msgstr "إعدادت GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:88
-#: src/GitHub_Updater/Settings.php:125
+#. Plugin Name of the plugin/theme
+#: src/GitHub_Updater/Settings.php:82 src/GitHub_Updater/Settings.php:90
+#: src/GitHub_Updater/Settings.php:127
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:129
+#: src/GitHub_Updater/Settings.php:131
 msgid "Saved."
 msgstr "تم الحفظ"
 
-#: src/GitHub_Updater/Settings.php:174
+#: src/GitHub_Updater/Settings.php:179
+msgid "Enable Plugin Branch Switching"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:191
+#, fuzzy
+msgid "Personal GitHub Access Token"
+msgstr "رمز وصول GitHub "
+
+#: src/GitHub_Updater/Settings.php:211
 msgid "GitHub Private Settings"
 msgstr "إعدادت GitHub  الخاصة"
 
-#: src/GitHub_Updater/Settings.php:185
+#: src/GitHub_Updater/Settings.php:224
+#, fuzzy
+msgid "GitLab Private Settings"
+msgstr "إعدادت GitHub  الخاصة"
+
+#: src/GitHub_Updater/Settings.php:233
+#, fuzzy
+msgid "GitLab.com Private Token"
+msgstr "إعدادت GitHub  الخاصة"
+
+#: src/GitHub_Updater/Settings.php:244
+msgid "GitLab CE or GitLab Enterprise Private Token"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:257
 msgid "Bitbucket Private Settings"
 msgstr "إعدادت Bitbucket  الخاصة"
 
-#: src/GitHub_Updater/Settings.php:192
+#: src/GitHub_Updater/Settings.php:264
 msgid "Bitbucket Username"
 msgstr "اسم المستخدم (Bitbucket )"
 
-#: src/GitHub_Updater/Settings.php:201
+#: src/GitHub_Updater/Settings.php:273
 msgid "Bitbucket Password"
 msgstr "كلمة المرور (Bitbucket )"
 
-#: src/GitHub_Updater/Settings.php:214
+#: src/GitHub_Updater/Settings.php:286
 msgid "Bitbucket Private Repositories"
 msgstr "مستودعات Bitbucket الخاصة"
 
-#: src/GitHub_Updater/Settings.php:226
+#: src/GitHub_Updater/Settings.php:298
 msgid "No private repositories are installed."
 msgstr "لم يتم إضافة أي مستودعات خاصة"
 
-#: src/GitHub_Updater/Settings.php:271
+#: src/GitHub_Updater/Settings.php:357
 msgid "Theme:"
 msgstr "الموضوع :"
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:433
+msgid "Check to enable branch switching from the Plugins page."
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:440
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "أدخل رمز وصول GitHub  . قم بتركه فارغاً من أجل المستودعات العامة"
 
-#: src/GitHub_Updater/Settings.php:338
+#: src/GitHub_Updater/Settings.php:447
+#, fuzzy
+msgid "Enter your personal GitHub Access Token to avoid API access limits."
+msgstr "أدخل رمز وصول GitHub  . قم بتركه فارغاً من أجل المستودعات العامة"
+
+#: src/GitHub_Updater/Settings.php:454
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr "قم بالاختيار إذا كان المستودع خاص , قم بتركه من أجل المستودعات العامة"
 
-#: src/GitHub_Updater/Settings.php:345
+#: src/GitHub_Updater/Settings.php:461
 msgid "Enter your personal Bitbucket username and password."
 msgstr "أدخل اسم المستخدم و كلمة السر لحساب Bitbucket  الخاص بك"
 
-#: src/GitHub_Updater/Theme.php:205
+#: src/GitHub_Updater/Settings.php:468
+msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
+msgstr ""
+
+#: src/GitHub_Updater/Theme.php:210
 msgid "Theme is up-to-date!"
 msgstr "الموضوع محدث"
 
-#: src/GitHub_Updater/Theme.php:210
+#: src/GitHub_Updater/Theme.php:215
 msgid "Rollback to:"
 msgstr "التراجع ل :"
 
-#: src/GitHub_Updater/Theme.php:228
+#: src/GitHub_Updater/Theme.php:233
 msgid "No previous tags to rollback to."
 msgstr "لا يوجد أية tags  لتراجع "
 
-#: src/GitHub_Updater/Theme.php:236 src/GitHub_Updater/Theme.php:250
+#: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:255
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "نسخة  %1$s   جديدة متوافرة "
 
-#: src/GitHub_Updater/Theme.php:243
+#: src/GitHub_Updater/Theme.php:248
 #, php-format
 msgid "View version %s details."
 msgstr "رؤية تفاصيل نسخة %s"
 
-#: src/GitHub_Updater/Theme.php:247
+#: src/GitHub_Updater/Theme.php:252
 msgid "Automatic update is unavailable for this theme."
 msgstr "التحديث التلقائي غير متوافر لهذا الموضوع"
 
-#: src/GitHub_Updater/Theme.php:257 src/GitHub_Updater/Theme.php:342
+#: src/GitHub_Updater/Theme.php:262 src/GitHub_Updater/Theme.php:347
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "رؤية نسخة %1$s  وتفاصيل %2$s أو %3$s  وقم بالتحديث الأن %4$s."
 
-#: src/GitHub_Updater/Theme.php:335
+#: src/GitHub_Updater/Theme.php:340
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "هناك نسخة جديدة من %s متوافرة الأن"
 
-#: src/GitHub_Updater/Theme.php:362
+#: src/GitHub_Updater/Theme.php:367
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "النسخة الحالية محدثة . قم بتجربة %sanother version%s"
 
-#: src/GitHub_Updater/Theme.php:376
+#: src/GitHub_Updater/Theme.php:381
 msgid "Choose a Version"
 msgstr "قم باختيار نسخة"
 
-#: src/GitHub_Updater/Theme.php:379
+#: src/GitHub_Updater/Theme.php:384
 msgid "Install"
 msgstr "تنصيب"
 
@@ -219,41 +285,51 @@ msgstr "تنصيب"
 msgid "this plugin"
 msgstr "هذه الإضافة"
 
-#: vendor/WPUpdatePhp.php:91
+#: vendor/WPUpdatePhp.php:92
 #, php-format
 msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
 msgstr "للأسف , %1$s  لا يمكن أن يعمل على نسخة PHP أقدم من %2$s."
 
-#: vendor/WPUpdatePhp.php:93 vendor/WPUpdatePhp.php:109
+#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
 #, php-format
 msgid "Read more information about %show you can update%s."
 msgstr "اقرأ المزيد عن %s وكيفية التحديث %s."
 
-#: vendor/WPUpdatePhp.php:107
+#: vendor/WPUpdatePhp.php:108
 #, php-format
 msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr "%1$s  ينصح باستخدام نسخة PHP  أحدث من %2$s."
 
-#~ msgid "https://github.com/afragen/github-updater"
-#~ msgstr "https://github.com/afragen/github-updater"
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/afragen/github-updater"
+msgstr "https://github.com/afragen/github-updater"
+
+#. Description of the plugin/theme
+#, fuzzy
+msgid ""
+"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
+"and themes. It also allows for remote installation of plugins or themes into "
+"WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
+"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
+"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
+"\">Whitelabel Framework</a> modifications."
+msgstr ""
+"إضافة لتحديث التقائي للإضافات والموضوعات المستضافة على GitHub  أو   "
+"Bitbucket  , الإضافة تسمح أيضاً بتنزيل الإضافات والموضوعات  مباشرة لوردبريس , "
+"برمجة الإضافة معتمدة على <a href=\"https://github.com/codepress/github-plugin-"
+"updater\">codepress/github-plugin-updater</a>. ,ايضاً <a href=\"https://github."
+"com/WordPress-Phoenix/whitelabel-framework\">Whitelabel Framework</a> "
+
+#. Author of the plugin/theme
+msgid "Andy Fragen"
+msgstr "Andy Fragen"
 
 #~ msgid ""
-#~ "A plugin to automatically update GitHub or Bitbucket hosted plugins and "
-#~ "themes. It also allows for remote installation of plugins or themes into "
-#~ "WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
-#~ "github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
-#~ "based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
-#~ "framework\">Whitelabel Framework</a> modifications."
+#~ "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
+#~ "md</code> or <code>CHANGELOG.md</code> in your repository."
 #~ msgstr ""
-#~ "إضافة لتحديث التقائي للإضافات والموضوعات المستضافة على GitHub  أو   "
-#~ "Bitbucket  , الإضافة تسمح أيضاً بتنزيل الإضافات والموضوعات  مباشرة "
-#~ "لوردبريس , برمجة الإضافة معتمدة على <a href=\"https://github.com/"
-#~ "codepress/github-plugin-updater\">codepress/github-plugin-updater</a>. ,"
-#~ "ايضاً <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
-#~ "\">Whitelabel Framework</a> "
-
-#~ msgid "Andy Fragen"
-#~ msgstr "Andy Fragen"
+#~ "ملف متابعة التغيرات غير متوافر من خلال GitHub Updater. قم بإنشاء ملف "
+#~ "<code>CHANGES.md</code>  أو <code>CHANGELOG.md</code> في المستودع الخاص بك"
 
 #, fuzzy
 #~ msgid "%sView version %s details%s or %supdate now%s."
@@ -269,9 +345,6 @@ msgstr "%1$s  ينصح باستخدام نسخة PHP  أحدث من %2$s."
 
 #~ msgid "View version"
 #~ msgstr "رؤية الإصدار"
-
-#~ msgid "details"
-#~ msgstr "تفاصيل"
 
 #~ msgid "or"
 #~ msgstr "أو"
