@@ -155,7 +155,7 @@ In the GitHub Updater Settings there is a new setting to enable branch switching
 
 ## Tagging
 
-If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
+If the branch header, i.e. `GitHub Branch` or `Bitbucket Branch`, is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
 
 If you prefer to create a release asset for distribution, this will be used in preference to a tag.
 
