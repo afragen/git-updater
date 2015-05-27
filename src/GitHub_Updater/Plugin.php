@@ -275,9 +275,6 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
-		}
 
 		foreach ( (array) $this->config as $plugin ) {
 

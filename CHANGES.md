@@ -1,3 +1,6 @@
+#### 4.5.1
+* fix bug so updates display without having to randomly refresh.
+
 #### 4.5.0
 * fix some PHP notices
 * add update by GitHub release asset in lieu of update by tag when asset is present
