@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-05-30 14:47+0100\n"
-"PO-Revision-Date: 2015-05-30 15:05+0100\n"
+"PO-Revision-Date: 2015-05-30 17:51+0100\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_DE\n"
@@ -53,12 +53,12 @@ msgstr "Plugin"
 
 #: src/GitHub_Updater/Install.php:216
 msgid "Theme"
-msgstr "Motiv"
+msgstr "Theme"
 
 #: src/GitHub_Updater/Install.php:227
 #, php-format
 msgid "GitHub Updater Install %s"
-msgstr "GitHub Updater Installatiert %s"
+msgstr "GitHub Updater Installiert %s"
 
 #: src/GitHub_Updater/Install.php:234
 #, php-format
