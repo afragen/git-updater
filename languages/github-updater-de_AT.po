@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-20 19:21-0800\n"
-"PO-Revision-Date: 2015-05-20 19:21-0800\n"
+"POT-Creation-Date: 2015-05-30 17:52+0100\n"
+"PO-Revision-Date: 2015-05-30 17:53+0100\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_AT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8\n"
+"X-Generator: Poedit 1.8.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -53,12 +53,12 @@ msgstr "Plugin"
 
 #: src/GitHub_Updater/Install.php:216
 msgid "Theme"
-msgstr "Motiv"
+msgstr "Theme"
 
 #: src/GitHub_Updater/Install.php:227
 #, php-format
 msgid "GitHub Updater Install %s"
-msgstr "GitHub Updater Installatiert %s"
+msgstr "GitHub Updater Installiert %s"
 
 #: src/GitHub_Updater/Install.php:234
 #, php-format
@@ -82,9 +82,8 @@ msgid "GitHub Access Token"
 msgstr "GitHub Accesstoken"
 
 #: src/GitHub_Updater/Install.php:277
-#, fuzzy
 msgid "GitLab Private Token"
-msgstr "GitHub Privat Einstellungen"
+msgstr "Privates GitLab Token"
 
 #: src/GitHub_Updater/Install.php:305
 msgid "Enter branch name or leave empty for `master`"
@@ -95,9 +94,8 @@ msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."
 
 #: src/GitHub_Updater/Install.php:361
-#, fuzzy
 msgid "Enter GitLab Private Token for private GitLab repositories."
-msgstr "Geben Sie Ihr GitHub Accesstoken für private GitHub Repositories ein."
+msgstr "Geben Sie Ihr GitLab Accesstoken für private GitLab Repositories ein."
 
 #: src/GitHub_Updater/Messages.php:61
 #, php-format
@@ -127,6 +125,8 @@ msgstr ""
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
+"Sie müssen ein privates GitLab.com, GitLab CE oder GitLab Enterprise Token "
+"eingeben."
 
 #: src/GitHub_Updater/Plugin.php:149
 #, php-format
@@ -147,7 +147,6 @@ msgstr "Einstellungen"
 msgid "GitHub Updater Settings"
 msgstr "GitHub Updater Einstellungen"
 
-#. Plugin Name of the plugin/theme
 #: src/GitHub_Updater/Settings.php:82 src/GitHub_Updater/Settings.php:90
 #: src/GitHub_Updater/Settings.php:127
 msgid "GitHub Updater"
@@ -170,18 +169,16 @@ msgid "GitHub Private Settings"
 msgstr "GitHub Privat Einstellungen"
 
 #: src/GitHub_Updater/Settings.php:224
-#, fuzzy
 msgid "GitLab Private Settings"
-msgstr "GitHub Privat Einstellungen"
+msgstr "GitLab Privat Einstellungen"
 
 #: src/GitHub_Updater/Settings.php:233
-#, fuzzy
 msgid "GitLab.com Private Token"
-msgstr "GitHub Privat Einstellungen"
+msgstr "Privates GitLab.com Token"
 
 #: src/GitHub_Updater/Settings.php:244
 msgid "GitLab CE or GitLab Enterprise Private Token"
-msgstr ""
+msgstr "Privates GitLab CE oder GitLab Enterprise Token"
 
 #: src/GitHub_Updater/Settings.php:257
 msgid "Bitbucket Private Settings"
@@ -237,6 +234,7 @@ msgstr "Geben Sie Ihren persönlichen Bitbucket Benutzernamen und Passwort ein."
 #: src/GitHub_Updater/Settings.php:468
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
+"Geben Sie Ihre GitLab.com, GitLab CE oder GitLab Unternehmen Privat Token."
 
 #: src/GitHub_Updater/Theme.php:210
 msgid "Theme is up-to-date!"
@@ -309,31 +307,27 @@ msgstr "Lesen Sie mehr Informationen über %swie Sie aktualisieren können%s."
 msgid "%1$s recommends a PHP version greater than %2$s."
 msgstr "%1$s empfiehlt eine PHP-Version neuer als %2$s."
 
-#. Plugin URI of the plugin/theme
-msgid "https://github.com/afragen/github-updater"
-msgstr "https://github.com/afragen/github-updater"
+#~ msgid "https://github.com/afragen/github-updater"
+#~ msgstr "https://github.com/afragen/github-updater"
 
-#. Description of the plugin/theme
-#, fuzzy
-msgid ""
-"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
-"and themes. It also allows for remote installation of plugins or themes into "
-"WordPress. Plugin class based upon <a href=\"https://github.com/codepress/"
-"github-plugin-updater\">codepress/github-plugin-updater</a>. Theme class "
-"based upon <a href=\"https://github.com/WordPress-Phoenix/whitelabel-"
-"framework\">Whitelabel Framework</a> modifications."
-msgstr ""
-"Ein Plugin, das Themes und Plugins, welche auf GitHub oder Bitbucket "
-"gehostet sind, automatisch aktualisiert. Es ermöglicht ebenfalls, Plugins "
-"oder Themes remote in WordPress zu installieren. Die Plugin-Klasse ist auf "
-"<a href=\"https://github.com/codepress/github-plugin-updater\">codepress/"
-"github-plugin-updater</a> basiert. Die Theme-Klasse ist auf Modifizierungen "
-"von <a href=\"https://github.com/WordPress-Phoenix/whitelabel-framework"
-"\">Whitelabel Framework</a> basiert."
+#~ msgid ""
+#~ "A plugin to automatically update GitHub, Bitbucket or GitLab hosted "
+#~ "plugins and themes. It also allows for remote installation of plugins or "
+#~ "themes into WordPress. Plugin class based upon <a href=\"https://github."
+#~ "com/codepress/github-plugin-updater\">codepress/github-plugin-updater</"
+#~ "a>. Theme class based upon <a href=\"https://github.com/WordPress-Phoenix/"
+#~ "whitelabel-framework\">Whitelabel Framework</a> modifications."
+#~ msgstr ""
+#~ "Ein Plugin, das Themes und Plugins, welche auf GitHub, Bitbucket oder "
+#~ "GitLab gehostet sind, automatisch aktualisiert. Es ermöglicht ebenfalls, "
+#~ "Plugins oder Themes remote in WordPress zu installieren. Die Plugin-"
+#~ "Klasse ist auf <a href=\"https://github.com/codepress/github-plugin-"
+#~ "updater\">codepress/github-plugin-updater</a> basiert. Die Theme-Klasse "
+#~ "ist auf Modifizierungen von <a href=\"https://github.com/WordPress-"
+#~ "Phoenix/whitelabel-framework\">Whitelabel Framework</a> basiert."
 
-#. Author of the plugin/theme
-msgid "Andy Fragen"
-msgstr "Andy Fragen"
+#~ msgid "Andy Fragen"
+#~ msgstr "Andy Fragen"
 
 #~ msgid ""
 #~ "No changelog is available via GitHub Updater. Create a file <code>CHANGES."
