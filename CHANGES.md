@@ -1,3 +1,6 @@
+#### 4.5.2
+* refactor of renaming code to use fewer loops for faster code.
+
 #### 4.5.1
 * fix bug so updates display without having to randomly refresh.
 
