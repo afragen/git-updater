@@ -387,67 +387,76 @@ class Base {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		$repo        = null;
-		$source_base = basename( $source );
+		$repo = null;
 
 		/*
 		 * Check for upgrade process, return if both are false.
-		 * Return if $upgrader and $this don't match.
 		 */
+		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
+			return $source;
+		}
+
+		/*
+		 * Return $source if name already corrected.
+		 */
+		foreach ( (array) $this->config as $git_repo ) {
+			if ( basename( $source ) === $git_repo->repo ) {
+				return $source;
+			}
+		}
 		if (
-			( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ||
-			( $upgrader instanceof \Plugin_Upgrader && ( ! $this instanceof Plugin ) ) ||
-			( $upgrader instanceof \Theme_Upgrader  && ( ! $this instanceof Theme ) )
+			( ! empty( $upgrader->skin->options['plugin' ] ) &&
+			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
+			( ! empty( $upgrader->skin->options['theme'] ) &&
+			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
 		) {
 			return $source;
 		}
 
-		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-			$repo = $this->parse_repo( $upgrader->skin->options['url'], 'plugin' );
-			if ( empty( $repo ) &&
-			     isset( $this->config[ $source_base ] ) &&
-			     $source_base === $this->config[ $source_base ]->repo
-			) {
-				$repo = $source_base;
+		/*
+		 * Get correct repo name based upon $upgrader instance if present.
+		 */
+		if ( $upgrader instanceof \Plugin_Upgrader ) {
+			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
+			     stristr( basename( $source ), $upgrader->skin->options['plugin'] ) ) {
+				$repo = $upgrader->skin->options['plugin'];
+			}
+		}
+		if ( $upgrader instanceof \Theme_Upgrader ) {
+			if ( ! empty( $upgrader->skin->options['theme'] ) &&
+			     stristr( basename( $source ), $upgrader->skin->options['theme'] ) ) {
+				$repo = $upgrader->skin->options['theme'];
 			}
 		}
 
-		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-			$repo = $this->parse_repo( $upgrader->skin->options['url'], 'theme' );
-			if ( empty( $repo ) &&
-			     isset( $this->config[ $source_base ] ) &&
-			     $source_base === $this->config[ $source_base ]->repo
-			) {
-				$repo = $source_base;
-			}
-		}
-
-		if ( $source_base === $repo ) {
-			return $source;
-		}
-
 		/*
-		 * Correct rename for remote install.
+		 * Get repo for automatic update process.
 		 */
-		if ( isset( self::$options['github_updater_install_repo'] ) &&
-		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
-
-		) {
-			$corrected_source = trailingslashit( $remote_source ). trailingslashit( self::$options['github_updater_install_repo'] );
-		}
-
-		/*
-		 * The following when multiple selections are made.
-		 */
-		if ( is_array( $repo ) ) {
-			foreach ( $repo as $part ) {
-				if ( '.' === dirname( $part ) && $part === $source_base ) {
-					return $source;
-				} elseif ( dirname( $part ) === $source_base ) {
-					return $source;
+		if ( empty( $repo ) ) {
+			foreach ( (array) $this->config as $git_repo ) {
+				if ( $upgrader instanceof \Plugin_Upgrader && ( false !== stristr( $git_repo->type, 'plugin' ) ) ) {
+					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+				}
+				if ( $upgrader instanceof \Theme_Upgrader && ( false !== stristr( $git_repo->type, 'theme' ) ) ) {
+					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+						$repo = $git_repo->repo;
+						break;
+					}
 				}
 			}
+
+			/*
+			 * Return already corrected $source or wp.org $source.
+			 */
+			if ( empty( $repo ) ) {
+				return $source;
+			}
 		}
+
+		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
 
 		$upgrader->skin->feedback(
 			sprintf(
@@ -470,52 +479,6 @@ class Base {
 		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new \WP_Error();
-	}
-
-	/**
-	 * Parse URL for renaming.
-	 *
-	 * @param $url
-	 * @param $type
-	 *
-	 * @return array|bool|null|string
-	 */
-	private function parse_repo( $url, $type ) {
-		$slug      = null;
-		$url_parts = parse_url( $url, PHP_URL_QUERY );
-		parse_str( $url_parts );
-		$url_parts = htmlspecialchars_decode( urldecode( $url_parts ) );
-		$url_parts = explode( '&', $url_parts );
-
-		foreach ( $url_parts as $part ) {
-			list( $k, $v ) = explode( '=', $part );
-			$result[ $k ] = $v;
-		}
-
-		$actions = array( 'update-selected', 'update-selected-themes' );
-		if ( in_array( $result['action'], $actions ) ) {
-			$type = $type . 's';
-		}
-		if ( ! isset( $result[ $type ] ) || ! isset( $result['action'] ) ) {
-			return false;
-		}
-		switch ( $type )  {
-			case 'plugin':
-			case 'plugins':
-				$slug = dirname( $result[ $type ] );
-				break;
-			case 'theme':
-			case 'themes':
-				$slug = $result[ $type ];
-				break;
-		}
-
-		if ( stripos( $slug, ',' ) ) {
-			$slug = explode( ',', $slug );
-			return $slug;
-		} else {
-			return $slug;
-		}
 	}
 
 	/**
