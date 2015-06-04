@@ -410,30 +410,10 @@ class Base {
 				return $source;
 			}
 		}
-		if (
-			( ! empty( $upgrader->skin->options['plugin' ] ) &&
-			  ( $source_base === $upgrader->skin->options['plugin'] ) ) ||
-			( ! empty( $upgrader->skin->options['theme'] ) &&
-			  ( $source_base === $upgrader->skin->options['theme'] ) )
-		) {
-			return $source;
-		}
 
 		/*
-		 * Get correct repo name based upon $upgrader instance if present.
 		 * Get repo for automatic update process.
 		 */
-		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
-			     stristr( $source_base, $upgrader->skin->options['plugin'] ) ) {
-				$repo = $upgrader->skin->options['plugin'];
-			}
-		}
-		if ( $upgrader instanceof \Theme_Upgrader ) {
-			if ( ! empty( $upgrader->skin->options['theme'] ) &&
-			     stristr( $source_base, $upgrader->skin->options['theme'] ) ) {
-				$repo = $upgrader->skin->options['theme'];
-			}
 		if ( isset( self::$options['github_updater_install_repo'] ) &&
 		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
 
@@ -442,30 +422,10 @@ class Base {
 		}
 
 		/*
-		 * Get repo for automatic update process.
+		 * Return already corrected $source or wp.org $source.
 		 */
 		if ( empty( $repo ) ) {
-			foreach ( (array) $this->config as $git_repo ) {
-				if ( $upgrader instanceof \Plugin_Upgrader && ( false !== stristr( $git_repo->type, 'plugin' ) ) ) {
-					if ( stristr( $source_base, $git_repo->repo ) ) {
-						$repo = $git_repo->repo;
-						break;
-					}
-				}
-				if ( $upgrader instanceof \Theme_Upgrader && ( false !== stristr( $git_repo->type, 'theme' ) ) ) {
-					if ( stristr( $source_base, $git_repo->repo ) ) {
-						$repo = $git_repo->repo;
-						break;
-					}
-				}
-			}
-
-			/*
-			 * Return already corrected $source or wp.org $source.
-			 */
-			if ( empty( $repo ) ) {
-				return $source;
-			}
+			return $source;
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
