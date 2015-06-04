@@ -388,11 +388,17 @@ class Base {
 
 		global $wp_filesystem;
 		$repo = null;
+		$source_base = basename( $source );
 
 		/*
-		 * Check for upgrade process, return if both are false.
+		 * Check for upgrade process, return if both are false or
+		 * not of same updater.
 		 */
-		if ( ( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ) {
+		if (
+			( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ||
+			( $upgrader instanceof \Plugin_Upgrader && ( ! $this instanceof Plugin ) ) ||
+			( $upgrader instanceof \Theme_Upgrader  && ( ! $this instanceof Theme ) )
+		) {
 			return $source;
 		}
 
@@ -400,15 +406,15 @@ class Base {
 		 * Return $source if name already corrected.
 		 */
 		foreach ( (array) $this->config as $git_repo ) {
-			if ( basename( $source ) === $git_repo->repo ) {
+			if ( $source_base === $git_repo->repo ) {
 				return $source;
 			}
 		}
 		if (
 			( ! empty( $upgrader->skin->options['plugin' ] ) &&
-			  ( basename( $source ) === $upgrader->skin->options['plugin'] ) ) ||
+			  ( $source_base === $upgrader->skin->options['plugin'] ) ) ||
 			( ! empty( $upgrader->skin->options['theme'] ) &&
-			  ( basename( $source ) === $upgrader->skin->options['theme'] ) )
+			  ( $source_base === $upgrader->skin->options['theme'] ) )
 		) {
 			return $source;
 		}
@@ -418,13 +424,13 @@ class Base {
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
 			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
-			     stristr( basename( $source ), $upgrader->skin->options['plugin'] ) ) {
+			     stristr( $source_base, $upgrader->skin->options['plugin'] ) ) {
 				$repo = $upgrader->skin->options['plugin'];
 			}
 		}
 		if ( $upgrader instanceof \Theme_Upgrader ) {
 			if ( ! empty( $upgrader->skin->options['theme'] ) &&
-			     stristr( basename( $source ), $upgrader->skin->options['theme'] ) ) {
+			     stristr( $source_base, $upgrader->skin->options['theme'] ) ) {
 				$repo = $upgrader->skin->options['theme'];
 			}
 		}
@@ -435,13 +441,13 @@ class Base {
 		if ( empty( $repo ) ) {
 			foreach ( (array) $this->config as $git_repo ) {
 				if ( $upgrader instanceof \Plugin_Upgrader && ( false !== stristr( $git_repo->type, 'plugin' ) ) ) {
-					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+					if ( stristr( $source_base, $git_repo->repo ) ) {
 						$repo = $git_repo->repo;
 						break;
 					}
 				}
 				if ( $upgrader instanceof \Theme_Upgrader && ( false !== stristr( $git_repo->type, 'theme' ) ) ) {
-					if ( stristr( basename( $source ), $git_repo->repo ) ) {
+					if ( stristr( $source_base, $git_repo->repo ) ) {
 						$repo = $git_repo->repo;
 						break;
 					}
@@ -461,7 +467,7 @@ class Base {
 		$upgrader->skin->feedback(
 			sprintf(
 				__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
-				'<span class="code">' . basename( $source ) . '</span>',
+				'<span class="code">' . $source_base . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
 		);
