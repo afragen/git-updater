@@ -143,6 +143,7 @@ class Install extends Base {
 				}
 			}
 
+			parent::$options['github_updater_install_repo'] = self::$install['repo'];
 			update_site_option( 'github_updater', parent::$options );
 			$url   = self::$install['download_link'];
 			$nonce = wp_nonce_url( $url );

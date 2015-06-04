@@ -421,6 +421,7 @@ class Base {
 
 		/*
 		 * Get correct repo name based upon $upgrader instance if present.
+		 * Get repo for automatic update process.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
 			if ( ! empty( $upgrader->skin->options['plugin'] ) &&
@@ -433,6 +434,11 @@ class Base {
 			     stristr( $source_base, $upgrader->skin->options['theme'] ) ) {
 				$repo = $upgrader->skin->options['theme'];
 			}
+		if ( isset( self::$options['github_updater_install_repo'] ) &&
+		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
+
+		) {
+			$repo = self::$options['github_updater_install_repo'];
 		}
 
 		/*
