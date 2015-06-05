@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-20 19:21-0800\n"
-"PO-Revision-Date: 2015-05-20 19:21-0800\n"
+"POT-Creation-Date: 2015-06-04 20:12-0800\n"
+"PO-Revision-Date: 2015-06-04 20:12-0800\n"
 "Last-Translator: esoj <yo@josemiguel.org>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8\n"
+"X-Generator: Poedit 1.8.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -22,16 +22,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Activado como mu-plugin"
 
-#: src/GitHub_Updater/Base.php:463
+#: src/GitHub_Updater/Base.php:435
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Renombrado %1$s a %2$s"
 
-#: src/GitHub_Updater/Base.php:473
+#: src/GitHub_Updater/Base.php:445
 msgid "Rename successful"
 msgstr "Renombrado satisfactoriamente"
 
-#: src/GitHub_Updater/Base.php:480
+#: src/GitHub_Updater/Base.php:452
 msgid "Unable to rename downloaded repository."
 msgstr "No se ha podido renombrar el repositorio descargado."
 
@@ -39,62 +39,62 @@ msgstr "No se ha podido renombrar el repositorio descargado."
 msgid "A repository URI is required."
 msgstr "Se requiere una URI del repositorio."
 
-#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:194 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "Instalar Plugin"
 
-#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:197 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "Instalar tema"
 
-#: src/GitHub_Updater/Install.php:213
+#: src/GitHub_Updater/Install.php:214
 msgid "Plugin"
 msgstr "Plugin"
 
-#: src/GitHub_Updater/Install.php:216
+#: src/GitHub_Updater/Install.php:217
 msgid "Theme"
 msgstr "Tema"
 
-#: src/GitHub_Updater/Install.php:227
+#: src/GitHub_Updater/Install.php:228
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater Intala %s"
 
-#: src/GitHub_Updater/Install.php:234
+#: src/GitHub_Updater/Install.php:235
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:242
+#: src/GitHub_Updater/Install.php:243
 msgid "Remote Repository Host"
 msgstr "Host del repositorio remoto"
 
-#: src/GitHub_Updater/Install.php:250
+#: src/GitHub_Updater/Install.php:251
 msgid "Repository Branch"
 msgstr "Rama del repositorio"
 
-#: src/GitHub_Updater/Install.php:258
+#: src/GitHub_Updater/Install.php:259
 msgid "Private Bitbucket Repository"
 msgstr "Repositorio privado de Bitbucket"
 
-#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:267 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr "GitHub Access Token"
 
-#: src/GitHub_Updater/Install.php:277
+#: src/GitHub_Updater/Install.php:278
 #, fuzzy
 msgid "GitLab Private Token"
 msgstr "Opciones privadas de GitHub"
 
-#: src/GitHub_Updater/Install.php:305
+#: src/GitHub_Updater/Install.php:306
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Introduce la rama del repositorio o dejar en blanco para `master '"
 
-#: src/GitHub_Updater/Install.php:347
+#: src/GitHub_Updater/Install.php:348
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Introduzca el Token de acceso para repositorios privados de GitHub."
 
-#: src/GitHub_Updater/Install.php:361
+#: src/GitHub_Updater/Install.php:362
 #, fuzzy
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Introduzca el Token de acceso para repositorios privados de GitHub."

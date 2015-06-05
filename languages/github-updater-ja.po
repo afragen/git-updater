@@ -1,102 +1,103 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-05-20 19:15-0800\n"
-"PO-Revision-Date: 2015-05-29 18:11+0900\n"
+"POT-Creation-Date: 2015-06-04 20:12-0800\n"
+"PO-Revision-Date: 2015-06-04 20:12-0800\n"
 "Last-Translator: ishihara <ishihara@grow-group.jp>\n"
 "Language-Team: \n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.8.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-WPHeader: github-updater.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
 "esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
 "_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"X-Poedit-SearchPathExcluded-0: *.js\n"
 "X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
 
 #: mu/ghu-loader.php:66
 msgid "Activated as mu-plugin"
 msgstr "mu-plugin として有効化しました。"
 
-#: src/GitHub_Updater/Base.php:463
+#: src/GitHub_Updater/Base.php:435
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "%1$s から %2$sにリネームしています。"
 
-#: src/GitHub_Updater/Base.php:473
+#: src/GitHub_Updater/Base.php:445
 msgid "Rename successful"
 msgstr "リネームに成功しました。"
 
-#: src/GitHub_Updater/Base.php:480
+#: src/GitHub_Updater/Base.php:452
 msgid "Unable to rename downloaded repository."
-msgstr "ダウンロードしたリポジトリの名前を変更することができません。"
+msgstr "ダウンロードしたリポジトリの名前を変更することができません。"
 
 #: src/GitHub_Updater/Install.php:56
 msgid "A repository URI is required."
-msgstr "リポジトリURIが必要です。"
+msgstr "リポジトリURIが必要です。"
 
-#: src/GitHub_Updater/Install.php:193 src/GitHub_Updater/Settings.php:69
+#: src/GitHub_Updater/Install.php:194 src/GitHub_Updater/Settings.php:69
 msgid "Install Plugin"
 msgstr "プラグインをインストール"
 
-#: src/GitHub_Updater/Install.php:196 src/GitHub_Updater/Settings.php:70
+#: src/GitHub_Updater/Install.php:197 src/GitHub_Updater/Settings.php:70
 msgid "Install Theme"
 msgstr "テーマをインストール"
 
-#: src/GitHub_Updater/Install.php:213
+#: src/GitHub_Updater/Install.php:214
 msgid "Plugin"
 msgstr "プラグイン"
 
-#: src/GitHub_Updater/Install.php:216
+#: src/GitHub_Updater/Install.php:217
 msgid "Theme"
 msgstr "テーマ"
 
-#: src/GitHub_Updater/Install.php:227
+#: src/GitHub_Updater/Install.php:228
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Updater インストール %s"
 
-#: src/GitHub_Updater/Install.php:234
+#: src/GitHub_Updater/Install.php:235
 #, php-format
 msgid "%s URI"
 msgstr "%s URI"
 
-#: src/GitHub_Updater/Install.php:242
+#: src/GitHub_Updater/Install.php:243
 msgid "Remote Repository Host"
 msgstr "リモートリポジトリホスト"
 
-#: src/GitHub_Updater/Install.php:250
+#: src/GitHub_Updater/Install.php:251
 msgid "Repository Branch"
 msgstr "リポジトリのブランチ"
 
-#: src/GitHub_Updater/Install.php:258
+#: src/GitHub_Updater/Install.php:259
 msgid "Private Bitbucket Repository"
 msgstr "プライベートなBitbucketのリポジトリ"
 
-#: src/GitHub_Updater/Install.php:266 src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Install.php:267 src/GitHub_Updater/Settings.php:198
 msgid "GitHub Access Token"
 msgstr "Github アクセストークン"
 
-#: src/GitHub_Updater/Install.php:277
+#: src/GitHub_Updater/Install.php:278
 msgid "GitLab Private Token"
 msgstr "GitLab プライベート トークン"
 
-#: src/GitHub_Updater/Install.php:305
+#: src/GitHub_Updater/Install.php:306
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 "ブランチ名を入力、または’master’ に設定するために空のままにしてください。"
 
-#: src/GitHub_Updater/Install.php:347
+#: src/GitHub_Updater/Install.php:348
 msgid "Enter GitHub Access Token for private GitHub repositories."
-msgstr "プライベートリポジトリ用のGitHubアクセストークンを入力します。"
+msgstr "プライベートリポジトリ用のGitHubアクセストークンを入力します。"
 
-#: src/GitHub_Updater/Install.php:361
+#: src/GitHub_Updater/Install.php:362
 msgid "Enter GitLab Private Token for private GitLab repositories."
-msgstr "プライベートリポジトリの GitLab プライベートトークンを入力"
+msgstr "プライベートリポジトリの GitLab プライベートトークンを入力"
 
 #: src/GitHub_Updater/Messages.php:61
 #, php-format
@@ -119,14 +120,14 @@ msgstr ""
 
 #: src/GitHub_Updater/Messages.php:82
 msgid "There is probably an error on the GitHub Updater Settings page."
-msgstr "GitHubのアップデータの設定ページにエラーがある可能性があります。"
+msgstr "GitHubのアップデータの設定ページにエラーがある可能性があります。"
 
 #: src/GitHub_Updater/Messages.php:95
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
-"あなたはGitLab.com、GitLab CE、またはGitLabエンタープライズプライベートトーク"
-"ンを設定する必要があります。"
+"あなたはGitLab.com、GitLab CE、またはGitLabエンタープライズプライベートトーク"
+"ンを設定する必要があります。"
 
 #: src/GitHub_Updater/Plugin.php:149
 #, php-format
@@ -199,7 +200,7 @@ msgstr "Bitbucket プライベート リポジトリ"
 #: src/GitHub_Updater/Settings.php:298
 msgid "No private repositories are installed."
 msgstr ""
-"プライベートリポジトリを持つプラグイン・テーマがインストールされていません。"
+"プライベートリポジトリを持つプラグイン・テーマがインストールされていません。"
 
 #: src/GitHub_Updater/Settings.php:357
 msgid "Theme:"
@@ -208,7 +209,7 @@ msgstr "テーマ :"
 #: src/GitHub_Updater/Settings.php:433
 msgid "Check to enable branch switching from the Plugins page."
 msgstr ""
-"プラグインページからブランチ切り替えを可能にするために確認してください。"
+"プラグインページからブランチ切り替えを可能にするために確認してください。"
 
 #: src/GitHub_Updater/Settings.php:440
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
@@ -225,7 +226,7 @@ msgstr ""
 #: src/GitHub_Updater/Settings.php:454
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
-msgstr "プライベートリポジトリ場合には、チェックしてください。"
+msgstr "プライベートリポジトリ場合には、チェックしてください。"
 
 #: src/GitHub_Updater/Settings.php:461
 msgid "Enter your personal Bitbucket username and password."
@@ -234,7 +235,7 @@ msgstr "あなた個人のBitbucket ユーザーネーム、パスワードを�
 #: src/GitHub_Updater/Settings.php:468
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
-"GitLab.com、GitLab CE、またはGitLabエンタープライズプライベートトークンを入力"
+"GitLab.com、GitLab CE、またはGitLabエンタープライズプライベートトークンを入力"
 
 #: src/GitHub_Updater/Theme.php:210
 msgid "Theme is up-to-date!"
@@ -246,12 +247,12 @@ msgstr "ロールバック : "
 
 #: src/GitHub_Updater/Theme.php:233
 msgid "No previous tags to rollback to."
-msgstr "ロールバックする以前のタグはありません。"
+msgstr "ロールバックする以前のタグはありません。"
 
 #: src/GitHub_Updater/Theme.php:241 src/GitHub_Updater/Theme.php:255
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
-msgstr "GitHubのアップデータは、利用可能な%sの新しいバージョンを表示しています"
+msgstr "GitHubのアップデータは、利用可能な%sの新しいバージョンを表示しています"
 
 #: src/GitHub_Updater/Theme.php:248
 #, php-format
@@ -260,7 +261,7 @@ msgstr "バージョン %s の詳細を見る"
 
 #: src/GitHub_Updater/Theme.php:252
 msgid "Automatic update is unavailable for this theme."
-msgstr "自動更新はこのテーマでは利用できません。"
+msgstr "自動更新はこのテーマでは利用できません。"
 
 #: src/GitHub_Updater/Theme.php:262 src/GitHub_Updater/Theme.php:347
 #, php-format
@@ -270,7 +271,7 @@ msgstr "バージョン%1$sの詳細を見る%2$sもしくは %3$supdate now%4$s
 #: src/GitHub_Updater/Theme.php:340
 #, php-format
 msgid "There is a new version of %s available now."
-msgstr "利用可能な %s の新しいバージョンが追加されました。"
+msgstr "利用可能な %s の新しいバージョンが追加されました。"
 
 #: src/GitHub_Updater/Theme.php:367
 #, php-format

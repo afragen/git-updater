@@ -1,3 +1,6 @@
+#### 4.5.3
+* updated language files -- oops
+
 #### 4.5.2
 * cleanup and refactor of renaming code.
 * added Romanian translation by [Corneliu Cirlan](https://github.com/corneliucirlan)
