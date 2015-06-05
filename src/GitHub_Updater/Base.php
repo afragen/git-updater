@@ -412,7 +412,7 @@ class Base {
 		}
 
 		/*
-		 * Get repo for automatic update process.
+		 * Get repo for remote install update process.
 		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) &&
 		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
@@ -422,10 +422,28 @@ class Base {
 		}
 
 		/*
-		 * Return already corrected $source or wp.org $source.
+		 * Correct repo name for automatic updates.
 		 */
 		if ( empty( $repo ) ) {
-			return $source;
+			foreach ( (array) $this->config as $git_repo ) {
+				if ( false !== stristr( $source_base, $git_repo->repo ) ) {
+					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+				}
+			}
+
+			/*
+			 * Return already corrected $source or wp.org $source.
+			 */
+			if ( empty( $repo ) ) {
+				return $source;
+			}
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );

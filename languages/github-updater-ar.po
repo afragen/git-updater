@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-06-04 20:12-0800\n"
-"PO-Revision-Date: 2015-06-04 20:12-0800\n"
+"POT-Creation-Date: 2015-06-04 21:23-0800\n"
+"PO-Revision-Date: 2015-06-04 21:23-0800\n"
 "Last-Translator: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language-Team: Hyyan Abo Fakher <tiribthea4hyyan@gmail.com>\n"
 "Language: ar\n"
@@ -23,16 +23,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "تفعيل كإضافة تلقائية"
 
-#: src/GitHub_Updater/Base.php:435
+#: src/GitHub_Updater/Base.php:453
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "إعادة تسمية %s  إلى %s"
 
-#: src/GitHub_Updater/Base.php:445
+#: src/GitHub_Updater/Base.php:463
 msgid "Rename successful"
 msgstr "تمت إعادة التسمية بنجاح"
 
-#: src/GitHub_Updater/Base.php:452
+#: src/GitHub_Updater/Base.php:470
 msgid "Unable to rename downloaded repository."
 msgstr "غير قادر على إعادة تسمية المستودع الذي تم تنزيله"
 

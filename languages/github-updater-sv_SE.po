@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-06-04 20:10-0800\n"
-"PO-Revision-Date: 2015-06-04 20:10-0800\n"
+"POT-Creation-Date: 2015-06-04 21:21-0800\n"
+"PO-Revision-Date: 2015-06-04 21:21-0800\n"
 "Last-Translator: Andréas Lundgren\n"
 "Language-Team: Andréas Lundgren\n"
 "Language: sv_SE\n"
@@ -22,16 +22,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Aktiverad som mu-tillägg"
 
-#: src/GitHub_Updater/Base.php:435
+#: src/GitHub_Updater/Base.php:453
 #, fuzzy, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Döper om %s till %s"
 
-#: src/GitHub_Updater/Base.php:445
+#: src/GitHub_Updater/Base.php:463
 msgid "Rename successful"
 msgstr "Namnbytet lyckades"
 
-#: src/GitHub_Updater/Base.php:452
+#: src/GitHub_Updater/Base.php:470
 msgid "Unable to rename downloaded repository."
 msgstr "Kunde inte döpa om den"
 
