@@ -402,31 +402,6 @@ class Base {
 			return $source;
 		}
 
-		foreach ( (array) $this->config as $git_repo ) {
-
-			/*
-			 * Return $source if name already corrected.
-			 */
-			if ( $source_base === $git_repo->repo ) {
-				return $source;
-			}
-
-			/*
-			 * Correct repo name for automatic updates.
-			 */
-			if ( false !== stristr( $source_base, $git_repo->repo ) ) {
-				if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-					$repo = $git_repo->repo;
-					break;
-				}
-				if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-					$repo = $git_repo->repo;
-					break;
-				}
-			}
-
-		}
-
 		/*
 		 * Get repo for remote install update process.
 		 */
@@ -438,10 +413,47 @@ class Base {
 		}
 
 		/*
-		 * Return already corrected $source or wp.org $source.
+		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			return $source;
+			foreach ( (array) $this->config as $git_repo ) {
+
+				/*
+				 * Return $source if name already corrected.
+				 */
+				if ( $source_base === $git_repo->repo ) {
+					return $source;
+				}
+
+				/*
+				 * Correct repo name for automatic updates.
+				 */
+				if ( false !== stristr( $source_base, '.git' ) ) {
+					//for GitLab
+					$chopped_source_base = rtrim( $source_base, '.git' );
+				} else {
+					$lchop               = substr( $source_base, ( $pos = strpos( $source_base, '-' ) ) !== false ? $pos + 1 : 0 );
+					$chopped_source_base = substr( $lchop, 0, ( $pos = strrpos( $lchop, '-') ) !== false ? $pos : strlen( $lchop ) );
+				}
+
+				if ( $chopped_source_base === $git_repo->repo ) {
+					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+						$repo = $git_repo->repo;
+						break;
+					}
+				}
+
+			}
+			/*
+			 * Return already corrected $source or wp.org $source.
+			 */
+			if ( empty( $repo ) ) {
+				return $source;
+			}
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
