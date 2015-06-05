@@ -1,3 +1,8 @@
+#### 4.5.2
+* cleanup and refactor of renaming code.
+* added Romanian translation by [Corneliu Cirlan](https://github.com/corneliucirlan)
+* added Japanese translation by [ishihara](https://github.com/1shiharat)
+
 #### 4.5.1
 * fix bug so updates display without having to randomly refresh.
 
