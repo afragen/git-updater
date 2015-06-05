@@ -427,13 +427,14 @@ class Base {
 
 				/*
 				 * Correct repo name for automatic updates.
+				 * Chop `<owner>-` and `-<hash>` from remote update $source_base.
+				 * Chop `.git` from GitLab remote update $source_base.
 				 */
 				if ( false !== stristr( $source_base, '.git' ) ) {
-					//for GitLab
 					$chopped_source_base = rtrim( $source_base, '.git' );
 				} else {
-					$lchop               = substr( $source_base, ( $pos = strpos( $source_base, '-' ) ) !== false ? $pos + 1 : 0 );
-					$chopped_source_base = substr( $lchop, 0, ( $pos = strrpos( $lchop, '-') ) !== false ? $pos : strlen( $lchop ) );
+					$lchop               = substr( $source_base, false !== ( $pos = strpos( $source_base, '-' ) ) ? $pos + 1 : 0 );
+					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
 				}
 
 				if ( $chopped_source_base === $git_repo->repo ) {
