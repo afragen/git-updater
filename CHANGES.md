@@ -1,3 +1,6 @@
+#### 4.5.4
+* hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.
+
 #### 4.5.3
 * updated language files -- oops
 
