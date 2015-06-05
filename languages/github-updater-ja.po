@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-06-04 21:22-0800\n"
-"PO-Revision-Date: 2015-06-04 21:22-0800\n"
+"POT-Creation-Date: 2015-06-05 10:02-0800\n"
+"PO-Revision-Date: 2015-06-05 10:02-0800\n"
 "Last-Translator: ishihara <ishihara@grow-group.jp>\n"
 "Language-Team: \n"
 "Language: ja\n"
@@ -23,16 +23,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "mu-plugin として有効化しました。"
 
-#: src/GitHub_Updater/Base.php:453
+#: src/GitHub_Updater/Base.php:464
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "%1$s から %2$sにリネームしています。"
 
-#: src/GitHub_Updater/Base.php:463
+#: src/GitHub_Updater/Base.php:474
 msgid "Rename successful"
 msgstr "リネームに成功しました。"
 
-#: src/GitHub_Updater/Base.php:470
+#: src/GitHub_Updater/Base.php:481
 msgid "Unable to rename downloaded repository."
 msgstr "ダウンロードしたリポジトリの名前を変更することができません。"
 
