@@ -403,15 +403,6 @@ class Base {
 		}
 
 		/*
-		 * Return $source if name already corrected.
-		 */
-		foreach ( (array) $this->config as $git_repo ) {
-			if ( $source_base === $git_repo->repo ) {
-				return $source;
-			}
-		}
-
-		/*
 		 * Get repo for remote install update process.
 		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) &&
@@ -422,11 +413,31 @@ class Base {
 		}
 
 		/*
-		 * Correct repo name for automatic updates.
+		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
 			foreach ( (array) $this->config as $git_repo ) {
-				if ( false !== stristr( $source_base, $git_repo->repo ) ) {
+
+				/*
+				 * Return $source if name already corrected.
+				 */
+				if ( $source_base === $git_repo->repo ) {
+					return $source;
+				}
+
+				/*
+				 * Correct repo name for automatic updates.
+				 * Chop `<owner>-` and `-<hash>` from remote update $source_base.
+				 * Chop `.git` from GitLab remote update $source_base.
+				 */
+				if ( false !== stristr( $source_base, '.git' ) ) {
+					$chopped_source_base = rtrim( $source_base, '.git' );
+				} else {
+					$lchop               = substr( $source_base, false !== ( $pos = strpos( $source_base, '-' ) ) ? $pos + 1 : 0 );
+					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
+				}
+
+				if ( $chopped_source_base === $git_repo->repo ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 						$repo = $git_repo->repo;
 						break;
@@ -436,8 +447,8 @@ class Base {
 						break;
 					}
 				}
-			}
 
+			}
 			/*
 			 * Return already corrected $source or wp.org $source.
 			 */

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-06-04 21:22-0800\n"
-"PO-Revision-Date: 2015-06-04 21:22-0800\n"
+"POT-Creation-Date: 2015-06-05 10:02-0800\n"
+"PO-Revision-Date: 2015-06-05 10:02-0800\n"
 "Last-Translator: Enea Overclokk <info@overclokk.net>\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
@@ -22,16 +22,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Attivato come mu-plugin"
 
-#: src/GitHub_Updater/Base.php:453
+#: src/GitHub_Updater/Base.php:464
 #, fuzzy, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Rinominato %s a %s"
 
-#: src/GitHub_Updater/Base.php:463
+#: src/GitHub_Updater/Base.php:474
 msgid "Rename successful"
 msgstr "Rinominato con successo"
 
-#: src/GitHub_Updater/Base.php:470
+#: src/GitHub_Updater/Base.php:481
 msgid "Unable to rename downloaded repository."
 msgstr "Impossibile rinominare il repository scaricato."
 
