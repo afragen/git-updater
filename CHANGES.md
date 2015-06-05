@@ -1,9 +1,7 @@
-#### 4.5.6
-* strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
-* I think this is the end of renaming for a while.
-
 #### 4.5.5
 * back to simplifying the renaming code, always remember to test renaming on live server.
+* strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
+* I think this is the end of renaming for a while.
 
 #### 4.5.4
 * hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.
