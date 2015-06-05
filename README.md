@@ -275,6 +275,8 @@ I've seen this error code occasionally with Bitbucket.
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
 * Spanish by [Jose Miguel Bejarano](https://github.com/xDae)
 * German by [Linus Metzler](https://github.com/limenet)
+* Romanian by [Corneliu Cirlan](https://github.com/corneliucirlan)
+* Japanese by [ishihara](https://github.com/1shiharat)
 
 ## Issues
 
