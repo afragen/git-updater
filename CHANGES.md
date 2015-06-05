@@ -1,3 +1,6 @@
+#### 4.5.5
+* back to simplifying the renaming code, always remember to test renaming on live server.
+
 #### 4.5.4
 * hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.
 

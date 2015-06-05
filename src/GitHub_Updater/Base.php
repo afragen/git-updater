@@ -402,13 +402,29 @@ class Base {
 			return $source;
 		}
 
-		/*
-		 * Return $source if name already corrected.
-		 */
 		foreach ( (array) $this->config as $git_repo ) {
+
+			/*
+			 * Return $source if name already corrected.
+			 */
 			if ( $source_base === $git_repo->repo ) {
 				return $source;
 			}
+
+			/*
+			 * Correct repo name for automatic updates.
+			 */
+			if ( false !== stristr( $source_base, $git_repo->repo ) ) {
+				if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+					$repo = $git_repo->repo;
+					break;
+				}
+				if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+					$repo = $git_repo->repo;
+					break;
+				}
+			}
+
 		}
 
 		/*
@@ -422,28 +438,10 @@ class Base {
 		}
 
 		/*
-		 * Correct repo name for automatic updates.
+		 * Return already corrected $source or wp.org $source.
 		 */
 		if ( empty( $repo ) ) {
-			foreach ( (array) $this->config as $git_repo ) {
-				if ( false !== stristr( $source_base, $git_repo->repo ) ) {
-					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						$repo = $git_repo->repo;
-						break;
-					}
-					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-						$repo = $git_repo->repo;
-						break;
-					}
-				}
-			}
-
-			/*
-			 * Return already corrected $source or wp.org $source.
-			 */
-			if ( empty( $repo ) ) {
-				return $source;
-			}
+			return $source;
 		}
 
 		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
