@@ -68,4 +68,5 @@ new $instantiate;
  * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
  * of GitHub_Updater's methods, especially renaming.
  */
-add_action( 'init', array( 'Fragen\\GitHub_Updater\\Base', 'init' ) );
+add_action( 'admin_init', array( 'Fragen\\GitHub_Updater\\Base', 'init' ) );
+add_action( 'init', array( 'Fragen\\GitHub_Updater\\Base', 'init_settings' ) );

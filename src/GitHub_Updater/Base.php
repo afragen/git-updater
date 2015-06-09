@@ -109,6 +109,13 @@ class Base {
 		if ( current_user_can( 'update_themes' ) ) {
 			new Theme();
 		}
+	}
+
+	/**
+	 * Instantiate Fragen\GitHub_Updater\Settings on admin
+	 * 
+	 */
+	public static function init_settings(){
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new Settings();
 		}
