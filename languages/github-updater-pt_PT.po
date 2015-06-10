@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-06-05 10:02-0800\n"
-"PO-Revision-Date: 2015-06-05 10:02-0800\n"
+"POT-Creation-Date: 2015-06-08 20:21-0800\n"
+"PO-Revision-Date: 2015-06-08 20:21-0800\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -22,16 +22,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Activado como um plugin obrigatório"
 
-#: src/GitHub_Updater/Base.php:464
+#: src/GitHub_Updater/Base.php:467
 #, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Renomear %1$s para %2$s"
 
-#: src/GitHub_Updater/Base.php:474
+#: src/GitHub_Updater/Base.php:477
 msgid "Rename successful"
 msgstr "Renomeado com sucesso"
 
-#: src/GitHub_Updater/Base.php:481
+#: src/GitHub_Updater/Base.php:484
 msgid "Unable to rename downloaded repository."
 msgstr "Não foi possível renomear o repositório descarregado."
 
