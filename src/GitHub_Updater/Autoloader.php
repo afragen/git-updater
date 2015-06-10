@@ -41,7 +41,9 @@ class Autoloader {
 	 */
 	public function __construct( array $roots, array $static_map = null ) {
 		$this->roots = $roots;
-		if ( null !== $static_map ) $this->map = $static_map;
+		if ( null !== $static_map ) {
+			$this->map = $static_map;
+		}
 		spl_autoload_register( array( $this, 'autoload' ) );
 	}
 
