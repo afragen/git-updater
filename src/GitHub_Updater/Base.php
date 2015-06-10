@@ -387,8 +387,9 @@ class Base {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		$repo = null;
-		$source_base = basename( $source );
+		$repo                = null;
+		$source_base         = basename( $source );
+		$chopped_source_base = null;
 
 		/*
 		 * Check for upgrade process, return if both are false or
@@ -432,8 +433,10 @@ class Base {
 				 */
 				if ( false !== stristr( $source_base, '.git' ) ) {
 					$chopped_source_base = rtrim( $source_base, '.git' );
-				} else {
-					$lchop               = substr( $source_base, false !== ( $pos = strpos( $source_base, '-' ) ) ? $pos + 1 : 0 );
+				}
+
+				if ( false !== stristr( $source_base, $git_repo->repo ) && empty( $chopped_source_base ) ) {
+					$lchop = str_replace( $git_repo->owner . '-', '', $source_base );
 					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
 				}
 

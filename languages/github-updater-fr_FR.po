@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-06-05 10:02-0800\n"
-"PO-Revision-Date: 2015-06-05 10:02-0800\n"
+"POT-Creation-Date: 2015-06-08 20:22-0800\n"
+"PO-Revision-Date: 2015-06-08 20:22-0800\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -23,16 +23,16 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Installé en tant que plugin \"must-use\" (MU-plugin)."
 
-#: src/GitHub_Updater/Base.php:464
+#: src/GitHub_Updater/Base.php:467
 #, fuzzy, php-format
 msgid "Renaming %1$s to %2$s"
 msgstr "Renommage de %s en %s"
 
-#: src/GitHub_Updater/Base.php:474
+#: src/GitHub_Updater/Base.php:477
 msgid "Rename successful"
 msgstr "Le renommage a réussi"
 
-#: src/GitHub_Updater/Base.php:481
+#: src/GitHub_Updater/Base.php:484
 msgid "Unable to rename downloaded repository."
 msgstr "Impossible de renommer le dépôt téléchargé."
 

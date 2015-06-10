@@ -277,6 +277,7 @@ I've seen this error code occasionally with Bitbucket.
 * German by [Linus Metzler](https://github.com/limenet)
 * Romanian by [Corneliu Cirlan](https://github.com/corneliucirlan)
 * Japanese by [ishihara](https://github.com/1shiharat)
+* Russian by [Anatoly Yumashev](https://github.com/yumashev)
 
 ## Issues
 
