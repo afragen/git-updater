@@ -1,3 +1,7 @@
+#### 4.5.6
+* bugfix for renaming code to properly strip `<owner>-`
+* most of Russian translation by [Anatoly Yumashev](https://github.com/yumashev)
+
 #### 4.5.5
 * back to simplifying the renaming code, always remember to test renaming on live server.
 * strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
