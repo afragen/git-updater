@@ -389,7 +389,8 @@ class Base {
 		global $wp_filesystem;
 		$repo                = null;
 		$source_base         = basename( $source );
-		$chopped_source_base = null;
+		//$chopped_source_base = null;
+
 
 		/*
 		 * Check for upgrade process, return if both are false or
@@ -417,12 +418,12 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			foreach ( (array) $this->config as $git_repo ) {
-
+			$updates = $this->_get_repo_updates();
+			foreach ( $updates as $update ) {
 				/*
 				 * Return $source if name already corrected.
 				 */
-				if ( $source_base === $git_repo->repo ) {
+				if ( $source_base === $update ) {
 					return $source;
 				}
 
@@ -431,27 +432,28 @@ class Base {
 				 * Chop `<owner>-` and `-<hash>` from remote update $source_base.
 				 * Chop `.git` from GitLab remote update $source_base.
 				 */
-				if ( false !== stristr( $source_base, '.git' ) ) {
+				/*if ( false !== stristr( $source_base, '.git' ) ) {
 					$chopped_source_base = rtrim( $source_base, '.git' );
 				}
 
 				if ( false !== stristr( $source_base, $git_repo->repo ) && empty( $chopped_source_base ) ) {
 					$lchop = str_replace( $git_repo->owner . '-', '', $source_base );
 					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
-				}
+				}*/
 
-				if ( $chopped_source_base === $git_repo->repo ) {
+				if ( false !== stristr( $source_base, $update ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						$repo = $git_repo->repo;
+						$repo = $update;
 						break;
 					}
 					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-						$repo = $git_repo->repo;
+						$repo = $update;
 						break;
 					}
 				}
 
 			}
+
 			/*
 			 * Return already corrected $source or wp.org $source.
 			 */
@@ -483,6 +485,37 @@ class Base {
 		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new \WP_Error();
+	}
+
+	/**
+	 * Get dashboard update requested repos and return sanitized array of slugs.
+	 *
+	 * @return array
+	 */
+	private function _get_repo_updates() {
+		$updating         = array();
+		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
+		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
+		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
+		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+
+		if ( ! empty( $plugins_updating ) ) {
+			$plugins_updating = explode( ',', $plugins_updating );
+		}
+		if ( ! empty( $themes_updating) ) {
+			$themes_updating = explode( ',', $themes_updating );
+		}
+
+		foreach ( array_merge( $plugin_updating, $plugins_updating ) as $updates ) {
+			$plugin_repo = explode( '/', $updates );
+			$updating[] = $plugin_repo[0];
+		}
+
+		foreach ( array_merge( $theme_updating, $themes_updating ) as $updates ) {
+			$updating[] = $updates;
+		}
+
+		return Settings::sanitize( $updating );
 	}
 
 	/**
