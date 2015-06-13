@@ -515,6 +515,11 @@ class Base {
 			$updating[] = $updates;
 		}
 
+		/*
+		 * Reverse the array to allow for more specific match first.
+		 */
+		rsort( $updating );
+
 		return Settings::sanitize( $updating );
 	}
 
