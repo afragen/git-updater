@@ -429,7 +429,7 @@ class Base {
 				if ( false !== stristr( $source_base, $update ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 						$repo = $update;
-						//$repo = array_search( $update, $updates, true );
+						$repo = array_search( $update, $updates, true );
 						break;
 					}
 					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
