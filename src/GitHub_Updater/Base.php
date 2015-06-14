@@ -510,8 +510,10 @@ class Base {
 				continue;
 			}
 			foreach ( $updates as $key => $value ) {
+				$git   = str_replace( $pattern, '', $repo->type );
+				$value = str_replace( $git . '-', '', $value );
+				$value = str_replace( $repo->owner . '-', '', $value );
 				if ( $repo->repo === $value ) {
-					$git = str_replace( $pattern, '', $repo->type );
 					unset( $updates[ $key ] );
 					$updates[ $git . '-' . $repo->owner . '-' . $value ] = $value;
 				}
