@@ -1,5 +1,5 @@
 #### 4.5.7
-* newer method for renaming based upon selected repos from the dashboard. Should be faster as only loops through repos for updating not all GHU repos. Yes, I tested on staging server. :smiley:
+* newer method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :smiley:
 
 #### 4.5.6
 * bugfix for renaming code to properly strip `<owner>-`

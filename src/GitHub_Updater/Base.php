@@ -501,6 +501,9 @@ class Base {
 			$updates[] = $update;
 		}
 
+		/*
+		 * Add `git-owner-repo` to index for future renaming option.
+		 */
 		$pattern = '_plugin';
 		foreach ( $this->config as $repo ) {
 			if ( false === stristr( $repo->type, $pattern ) ) {
