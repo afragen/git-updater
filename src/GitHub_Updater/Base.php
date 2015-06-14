@@ -387,10 +387,8 @@ class Base {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		$repo                = null;
-		$source_base         = basename( $source );
-		//$chopped_source_base = null;
-
+		$repo        = null;
+		$source_base = basename( $source );
 
 		/*
 		 * Check for upgrade process, return if both are false or
@@ -418,28 +416,15 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			$updates = $this->_get_repo_updates();
+			$updates = $this->_get_updating_repos();
 			foreach ( $updates as $update ) {
+
 				/*
 				 * Return $source if name already corrected.
 				 */
 				if ( $source_base === $update ) {
 					return $source;
 				}
-
-				/*
-				 * Correct repo name for automatic updates.
-				 * Chop `<owner>-` and `-<hash>` from remote update $source_base.
-				 * Chop `.git` from GitLab remote update $source_base.
-				 */
-				/*if ( false !== stristr( $source_base, '.git' ) ) {
-					$chopped_source_base = rtrim( $source_base, '.git' );
-				}
-
-				if ( false !== stristr( $source_base, $git_repo->repo ) && empty( $chopped_source_base ) ) {
-					$lchop = str_replace( $git_repo->owner . '-', '', $source_base );
-					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
-				}*/
 
 				if ( false !== stristr( $source_base, $update ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
@@ -489,11 +474,11 @@ class Base {
 	}
 
 	/**
-	 * Get dashboard update requested repos and return sanitized array of slugs.
+	 * Get dashboard update requested repos and return array of slugs.
 	 *
 	 * @return array
 	 */
-	private function _get_repo_updates() {
+	private function _get_updating_repos() {
 		$updates          = array();
 		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
 		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
@@ -533,9 +518,9 @@ class Base {
 		/*
 		 * Reverse the array to allow for more specific match first.
 		 */
-		rsort( $updates );
+		arsort( $updates );
 
-		return Settings::sanitize( $updates );
+		return $updates;
 	}
 
 	/**
