@@ -444,6 +444,7 @@ class Base {
 				if ( false !== stristr( $source_base, $update ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 						$repo = $update;
+						//$repo = key( $updates );
 						break;
 					}
 					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
@@ -513,6 +514,20 @@ class Base {
 
 		foreach ( array_merge( $theme_updating, $themes_updating ) as $update ) {
 			$updates[] = $update;
+		}
+
+		$pattern = '_plugin';
+		foreach ( $this->config as $repo ) {
+			if ( false === stristr( $repo->type, $pattern ) ) {
+				continue;
+			}
+			foreach ( $updates as $key => $value ) {
+				if ( $repo->repo === $value ) {
+					$git = str_replace( $pattern, '', $repo->type );
+					unset( $updates[ $key ] );
+					$updates[ $git . '-' . $repo->owner . '-' . $value ] = $value;
+				}
+			}
 		}
 
 		/*
