@@ -114,7 +114,7 @@ class Theme extends Base {
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		if ( ! is_multisite() ) {
-			add_filter('wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
+			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
 		Settings::$ghu_themes = $this->config;

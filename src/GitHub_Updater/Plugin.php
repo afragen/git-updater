@@ -143,27 +143,25 @@ class Plugin extends Base {
 		/*
 		 * Create after_plugin_row_
 		 */
-		if ( isset( $this->config[ $plugin ] ) ) {
-			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
+		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
-				$branch,
-				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
-				'</a>'
+		printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+			$branch,
+			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'</a>'
+		);
+
+		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+		foreach ( $branches as $branch => $uri ) {
+
+			printf( '<li><a href="%s%s">%s</a></li>',
+				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
 			);
-
-			print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-			foreach ( $branches as $branch => $uri ) {
-
-				printf( '<li><a href="%s%s">%s</a></li>',
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
-					'&rollback=' . urlencode( $branch ),
-					esc_attr( $branch )
-				);
-			}
-			print( '</ul>' );
-			echo '</div></td></tr>';
 		}
+		print( '</ul>' );
+		echo '</div></td></tr>';
 	}
 
 	/**
@@ -284,6 +282,7 @@ class Plugin extends Base {
 	public function pre_set_site_transient_update_plugins( $transient ) {
 
 		foreach ( (array) $this->config as $plugin ) {
+			$response = null;
 
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
