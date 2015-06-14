@@ -234,6 +234,13 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			/*
+			 * Fix for extended naming.
+			 */
+			$repos = $this->get_repo_slugs( $plugin->repo );
+			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
+				$response->slug = $repos['repo'];
+			}
 			$contributors = array();
 			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
 				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {

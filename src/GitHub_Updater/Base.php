@@ -238,6 +238,7 @@ class Base {
 				$git_plugin['enterprise']              = $repo_enterprise_uri;
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
+				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
 				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
 				$git_plugin['slug']                    = $plugin;
@@ -340,6 +341,9 @@ class Base {
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
 			self::$options['branch_switch']      = null;
+		}
+		if ( ! isset( self::$options['extended_naming'] ) ) {
+			self::$options['extended_naming'] = null;
 		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
