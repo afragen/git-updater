@@ -175,6 +175,8 @@ class Plugin extends Base {
 	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname ( $file );
+		$slugs         = $this->get_repo_slugs( $repo );
+		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
 		/*
 		 * Sanity check for some commercial plugins.
