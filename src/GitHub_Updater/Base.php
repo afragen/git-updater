@@ -623,14 +623,18 @@ class Base {
 	 * @return bool or variable
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
-		$changes    = null;
+		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changes     = null;
+		$local_files = null;
 
 		if ( is_dir( $this->$type->local_path ) ) {
 			$local_files = scandir( $this->$type->local_path );
-			$changes = array_intersect( (array) $local_files, $changelogs );
-			$changes = array_pop( $changes );
+		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
+			$local_files = scandir( $this->$type->local_path_extended );
 		}
+
+		$changes = array_intersect( (array) $local_files, $changelogs );
+		$changes = array_pop( $changes );
 
 		if ( ! empty( $changes ) ) {
 			return $changes;
