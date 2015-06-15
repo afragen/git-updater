@@ -311,6 +311,7 @@ class Base {
 				$git_theme['enterprise']              = $repo_enterprise_uri;
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
+				$git_theme['extended_repo']           = null;
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
