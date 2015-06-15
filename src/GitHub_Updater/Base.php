@@ -442,9 +442,7 @@ class Base {
 						}
 						break;
 					}
-					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme &&
-					     ! $source_base === $update
-					) {
+					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
 						$repo = $update;
 						break;
 					}
