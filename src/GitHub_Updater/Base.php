@@ -409,10 +409,7 @@ class Base {
 		/*
 		 * Get repo for remote install update process.
 		 */
-		if ( isset( self::$options['github_updater_install_repo'] ) &&
-		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
-
-		) {
+		if ( ! empty( self::$options['github_updater_install_repo'] ) ) {
 			$repo = self::$options['github_updater_install_repo'];
 		}
 

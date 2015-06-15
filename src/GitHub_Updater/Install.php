@@ -143,9 +143,8 @@ class Install extends Base {
 				}
 			}
 
-			if ( empty( parent::$options['extended_naming'] ) ) {
-				parent::$options['github_updater_install_repo'] = self::$install['repo'];
-			} else {
+			parent::$options['github_updater_install_repo'] = self::$install['repo'];
+			if ( ! empty( parent::$options['extended_naming'] ) && 'plugin' === $type ) {
 				parent::$options['github_updater_install_repo'] = implode( '-', array( self::$install['github_updater_api'], $headers['owner'], self::$install['repo'] ) );
 			}
 
