@@ -241,12 +241,8 @@ class Base {
 				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
 				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
 				$git_plugin['slug']                    = $plugin;
-
-				if ( empty( self::$options['extended_naming'] ) ) {
-					$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
-				} else {
-					$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
-				}
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
