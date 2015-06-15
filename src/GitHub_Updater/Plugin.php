@@ -121,11 +121,11 @@ class Plugin extends Base {
 		}
 
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$plugin        = dirname( $plugin_file );
-		$id            = $plugin . '-id';
-		$branches      = isset( $this->config[ $plugin ] ) ? $this->config[ $plugin ]->branches : null;
-
-		if ( ! $branches ) {
+		$plugin        = $this->get_repo_slugs( dirname( $plugin_file ) );
+		if ( ! empty( $plugin ) ) {
+			$id            = $plugin['repo'] . '-id';
+			$branches      = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+		} else {
 			return false;
 		}
 
