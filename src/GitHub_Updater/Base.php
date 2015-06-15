@@ -421,27 +421,36 @@ class Base {
 		 */
 		if ( empty( $repo ) ) {
 			$updates = $this->_get_updating_repos();
-			foreach ( $updates as $update ) {
+			foreach ( $updates as $extended => $update ) {
 
 				/*
-				 * Return $source if name already corrected.
+				 * Return for already corrected $source.
 				 */
-				if ( $source_base === $update ) {
+				if ( ( $source_base === $update &&
+				       empty(self::$options['extended_naming'] ) ) ||
+				     ( $source_base === $extended &&
+				       ! empty( self::$options['extended_naming'] ) ) &&
+				     ! is_int( $extended )
+				) {
 					return $source;
 				}
 
-				if ( false !== stristr( $source_base, $update ) ) {
+				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						$repo = $update;
-						$repo = array_search( $update, $updates, true );
+						if ( empty( self::$options['extended_naming'] ) ) {
+							$repo = $update;
+						} else {
+							$repo = $extended;
+						}
 						break;
 					}
-					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme &&
+					     ! $source_base === $update
+					) {
 						$repo = $update;
 						break;
 					}
 				}
-
 			}
 
 			/*
@@ -508,19 +517,11 @@ class Base {
 		/*
 		 * Add `git-owner-repo` to index for future renaming option.
 		 */
-		$pattern = '_plugin';
-		foreach ( $this->config as $repo ) {
-			if ( false === stristr( $repo->type, $pattern ) ) {
-				continue;
-			}
-			foreach ( $updates as $key => $value ) {
-				$git   = str_replace( $pattern, '', $repo->type );
-				$value = str_replace( $git . '-', '', $value );
-				$value = str_replace( $repo->owner . '-', '', $value );
-				if ( $repo->repo === $value ) {
-					unset( $updates[ $key ] );
-					$updates[ $git . '-' . $repo->owner . '-' . $value ] = $value;
-				}
+		foreach ( $updates as $key => $value ) {
+			$repo = $this->get_repo_slugs( $value );
+			if ( $repo['repo'] === $value || $repo['extended_repo'] === $value ) {
+				unset( $updates[ $key ] );
+				$updates[ $repo['extended_repo'] ] = $repo['repo'];
 			}
 		}
 
@@ -530,6 +531,25 @@ class Base {
 		arsort( $updates );
 
 		return $updates;
+	}
+
+	/**
+	 * Set array with normal and extended repo names.
+	 *
+	 * @param $slug
+	 *
+	 * @return array
+	 */
+	protected function get_repo_slugs( $slug ) {
+		$arr = array();
+		foreach ( $this->config as $repo ) {
+			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
+				$arr['repo']          = $repo->repo;
+				$arr['extended_repo'] = $repo->extended_repo;
+			}
+		}
+
+		return $arr;
 	}
 
 	/**
@@ -689,9 +709,10 @@ class Base {
 		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']     = $repo_types[ $repo ];
-			$arr['base_uri'] = $repo_base_uris[ $repo ];
-			$arr['bool']     = true;
+			$arr['type']       = $repo_types[ $repo ];
+			$arr['git_server'] = strtolower( $repo );
+			$arr['base_uri']   = $repo_base_uris[ $repo ];
+			$arr['bool']       = true;
 			foreach ( self::$extra_repo_headers as $key => $value ) {
 				$arr[ $key ] = $repo . ' ' . $value;
 			}
