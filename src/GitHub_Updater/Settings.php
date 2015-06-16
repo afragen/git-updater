@@ -167,6 +167,9 @@ class Settings extends Base {
 
 		$this->ghu_tokens();
 
+		/*
+		 * Add basic plugin settings.
+		 */
 		add_settings_section(
 			'github_updater_settings',
 			__( 'GitHub Updater Settings', 'github-updater' ),
