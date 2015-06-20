@@ -444,6 +444,8 @@ class Base {
 				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 						if ( empty( self::$options['extended_naming'] ) ||
+						     ( $this->config[ $update ]->dot_org &&
+						       'master' === $this->config[ $update ]->branch ) ||
 						     ( $this->tag && 'master' === $this->tag &&
 						       $this->config[ $update ]->dot_org )
 						) {
