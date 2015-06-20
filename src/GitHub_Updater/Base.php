@@ -183,8 +183,10 @@ class Base {
 		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins     = get_plugins();
-		$git_plugins = array();
+		$plugins        = get_plugins();
+		$git_plugins    = array();
+		$update_plugins = get_site_transient( 'update_plugins' );
+		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
@@ -249,6 +251,10 @@ class Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
+				$git_plugin['dot_org']                 = false;
+			}
+			if ( isset( $all_plugins[ $plugin ]->id) ) {
+				$git_plugin['dot_org']                 = true;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -428,7 +434,8 @@ class Base {
 				if ( ( $source_base === $update &&
 				       empty(self::$options['extended_naming'] ) ) ||
 				     ( $source_base === $extended &&
-				       ! empty( self::$options['extended_naming'] ) ) &&
+				       ! empty( self::$options['extended_naming'] ) &&
+				       ( $this->tag && 'master' !== $this->tag ) ) &&
 				     ! is_int( $extended )
 				) {
 					return $source;
@@ -436,9 +443,12 @@ class Base {
 
 				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						if ( empty( self::$options['extended_naming'] ) ) {
+						if ( $this->config[ $update ]->dot_org &&
+						     ( ( $this->tag && 'master' === $this->tag ) ||
+						       ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) )
+						) {
 							$repo = $update;
-						} else {
+						} elseif ( ! empty( self::$options['extended_naming'] ) ) {
 							$repo = $extended;
 						}
 						break;

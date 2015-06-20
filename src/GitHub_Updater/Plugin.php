@@ -298,16 +298,15 @@ class Plugin extends Base {
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					continue;
 				}
 
 				/*
 				 * Don't overwrite if branch switching.
 				 */
-				if ( isset( $_GET['rollback'] ) &&
-				     ( isset( $_GET['plugin'] ) &&
-				       $plugin->slug === $_GET['plugin'] )
+				if ( $this->tag &&
+				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
 				}
