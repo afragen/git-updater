@@ -20,7 +20,7 @@ Domain Path:       /languages
 Text Domain:       github-updater
 Network:           true
 GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     long-rename2
+GitHub Branch:     is-dot-org
 Requires WP:       3.8
 Requires PHP:      5.3
 */
