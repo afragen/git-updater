@@ -443,12 +443,12 @@ class Base {
 
 				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						if ( $this->config[ $update ]->dot_org &&
-						     ( ( $this->tag && 'master' === $this->tag ) ||
-						       ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) )
+						if ( empty( self::$options['extended_naming'] ) ||
+						     ( $this->tag && 'master' === $this->tag &&
+						       $this->config[ $update ]->dot_org )
 						) {
 							$repo = $update;
-						} elseif ( ! empty( self::$options['extended_naming'] ) ) {
+						} else {
 							$repo = $extended;
 						}
 						break;
