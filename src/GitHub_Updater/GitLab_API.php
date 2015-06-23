@@ -64,7 +64,12 @@ class GitLab_API extends API {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
 
+			if ( empty( $this->type->branch ) ) {
+				$this->type->branch = 'master';
+			}
+
 			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
+
 			if ( empty( $response ) ) {
 				return false;
 			}
@@ -282,8 +287,8 @@ class GitLab_API extends API {
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
-		     'upgrade-theme' === $_GET['action'] &&
-		     $_GET['theme'] === $this->type->repo
+		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
+		     ( isset( $_GET['theme'] ) && $_GET['theme'] === $this->type->repo )
 		) {
 			$endpoint .= $rollback;
 		} elseif ( ! empty( $this->type->branch ) ) {
@@ -307,6 +312,23 @@ class GitLab_API extends API {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
+
+		if ( ! empty( parent::$options[ 'gitlab_private_token' ] ) ) {
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
+		}
+
+		/*
+		 * If using GitLab CE/Enterprise header return this endpoint.
+        */
+		if ( ! empty( $this->type->enterprise ) ) {
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
+			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
+				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+			}
+
+			return $this->type->enterprise . $endpoint;
+		}
+
 
 		return $download_link_base . $endpoint;
 	}
