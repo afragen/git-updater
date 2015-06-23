@@ -245,8 +245,8 @@ class GitHub_API extends API {
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
-		     'upgrade-theme' === $_GET['action'] &&
-		     $_GET['theme'] === $this->type->repo
+		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
+		     ( isset( $_GET['theme'] ) && $_GET['theme'] === $this->type->repo )
 		) {
 			$endpoint .= $rollback;
 

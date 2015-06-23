@@ -140,6 +140,8 @@ class Install extends Base {
 					} else {
 						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
 					}
+				} elseif ( ! empty( parent::$options['gitlab_private_token'] ) ) {
+					self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], self::$install['download_link'] );
 				}
 			}
 
