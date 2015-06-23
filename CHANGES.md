@@ -1,3 +1,7 @@
+#### 4.5.7
+* hotfix GitLab private updating/installing
+* fix some PHP notices
+
 #### 4.5.6
 * bugfix for renaming code to properly strip `<owner>-`
 * most of Russian translation by [Anatoly Yumashev](https://github.com/yumashev)

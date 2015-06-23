@@ -254,7 +254,10 @@ class Bitbucket_API extends API {
 		/*
 		 * Check for rollback.
 		 */
-		if ( ! empty( $_GET['rollback'] ) && 'upgrade-theme' === $_GET['action'] && $_GET['theme'] === $this->type->repo ) {
+		if ( ! empty( $_GET['rollback'] ) &&
+		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
+		     ( isset( $_GET['theme'] ) && $_GET['theme'] === $this->type->repo )
+		) {
 			$endpoint .= $rollback . '.zip';
 
 			// for users wanting to update against branch other than master or not using tags, else use newest_tag
