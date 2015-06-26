@@ -325,6 +325,7 @@ class Base {
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 			}
 
@@ -335,7 +336,7 @@ class Base {
 				continue;
 			}
 
-			$git_themes[ $theme->stylesheet ] = (object) $git_theme;
+			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
 
 		return $git_themes;
