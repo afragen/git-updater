@@ -186,15 +186,6 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch' )
 		);
 
-		add_settings_field(
-			'extended_naming',
-			__( 'Enable Extended Directory Naming', 'github-updater' ),
-			array( $this, 'token_callback_checkbox' ),
-			'github_updater_install_settings',
-			'github_updater_settings',
-			array( 'id' => 'extended_naming' )
-		);
-
 		/*
 		 * Add settings for GitHub Personal Access Token
 		 */
@@ -407,7 +398,6 @@ class Settings extends Base {
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['github_access_token'] );
 		unset( $ghu_unset_keys['branch_switch'] );
-		unset( $ghu_unset_keys['extended_naming'] );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
 		if ( self::$gitlab ) {
@@ -443,7 +433,17 @@ class Settings extends Base {
 	 * Print the GitHub Updater text
 	 */
 	public function print_section_ghu_settings() {
-		_e( 'Check to enable branch switching from the Plugins page. <br> Extended Naming adds the `git-owner` to the directory name to prevent possible conflicts with WP.org plugins.', 'github-updater' );
+		if ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) {
+			_e( 'Extended Naming is <strong>active</strong>.', 'github-updater' );
+		}
+		if ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+		       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
+		) {
+			_e( 'Extended Naming is <strong>not active</strong>.', 'github-updater' );
+		}
+		printf( '<br>' . __( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
+		printf( '<br>' . __( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
+		print( '<p>' . __( 'Check to enable branch switching from the Plugins page.', 'github-updater' ) . '</p>');
 	}
 
 	/**

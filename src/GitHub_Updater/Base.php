@@ -351,9 +351,6 @@ class Base {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
 			self::$options['branch_switch']      = null;
 		}
-		if ( ! isset( self::$options['extended_naming'] ) ) {
-			self::$options['extended_naming'] = null;
-		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
@@ -433,19 +430,21 @@ class Base {
 				 * Return for already corrected $source.
 				 */
 				if ( ( $source_base === $update &&
-				       empty(self::$options['extended_naming'] ) ) ||
+				       ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+				         ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ) ||
 				     ( $source_base === $extended &&
-				       ! empty( self::$options['extended_naming'] ) &&
-				       ( $this->tag && 'master' !== $this->tag ) ) &&
-				     ! is_int( $extended )
+				       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+				       ( $this->tag && 'master' !== $this->tag ) &&
+				     ! is_int( $extended ) )
 				) {
 					return $source;
 				}
 
 				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						if ( empty( self::$options['extended_naming'] ) ||
-						     ( $this->config[ $update ]->dot_org &&
+						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
+							( $this->config[ $update ]->dot_org &&
 						       'master' === $this->config[ $update ]->branch ) ||
 						     ( $this->tag && 'master' === $this->tag &&
 						       $this->config[ $update ]->dot_org )
