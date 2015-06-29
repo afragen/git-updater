@@ -121,11 +121,11 @@ class Plugin extends Base {
 		}
 
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$plugin        = dirname( $plugin_file );
-		$id            = $plugin . '-id';
-		$branches      = isset( $this->config[ $plugin ] ) ? $this->config[ $plugin ]->branches : null;
-
-		if ( ! $branches ) {
+		$plugin        = $this->get_repo_slugs( dirname( $plugin_file ) );
+		if ( ! empty( $plugin ) ) {
+			$id       = $plugin['repo'] . '-id';
+			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+		} else {
 			return false;
 		}
 
@@ -143,27 +143,25 @@ class Plugin extends Base {
 		/*
 		 * Create after_plugin_row_
 		 */
-		if ( isset( $this->config[ $plugin ] ) ) {
-			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
+		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
-				$branch,
-				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
-				'</a>'
+		printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+			$branch,
+			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'</a>'
+		);
+
+		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+		foreach ( $branches as $branch => $uri ) {
+
+			printf( '<li><a href="%s%s">%s</a></li>',
+				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
 			);
-
-			print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-			foreach ( $branches as $branch => $uri ) {
-
-				printf( '<li><a href="%s%s">%s</a></li>',
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
-					'&rollback=' . urlencode( $branch ),
-					esc_attr( $branch )
-				);
-			}
-			print( '</ul>' );
-			echo '</div></td></tr>';
 		}
+		print( '</ul>' );
+		echo '</div></td></tr>';
 	}
 
 	/**
@@ -177,6 +175,8 @@ class Plugin extends Base {
 	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname ( $file );
+		$slugs         = $this->get_repo_slugs( $repo );
+		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
 		/*
 		 * Sanity check for some commercial plugins.
@@ -234,6 +234,13 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			/*
+			 * Fix for extended naming.
+			 */
+			$repos = $this->get_repo_slugs( $plugin->repo );
+			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
+				$response->slug = $repos['repo'];
+			}
 			$contributors = array();
 			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
 				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
@@ -277,6 +284,7 @@ class Plugin extends Base {
 	public function pre_set_site_transient_update_plugins( $transient ) {
 
 		foreach ( (array) $this->config as $plugin ) {
+			$response = null;
 
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
@@ -290,16 +298,15 @@ class Plugin extends Base {
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					continue;
 				}
 
 				/*
 				 * Don't overwrite if branch switching.
 				 */
-				if ( isset( $_GET['rollback'] ) &&
-				     ( isset( $_GET['plugin'] ) &&
-				       $plugin->slug === $_GET['plugin'] )
+				if ( $this->tag &&
+				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
 				}

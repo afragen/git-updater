@@ -183,8 +183,10 @@ class Base {
 		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins     = get_plugins();
-		$git_plugins = array();
+		$plugins        = get_plugins();
+		$git_plugins    = array();
+		$update_plugins = get_site_transient( 'update_plugins' );
+		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
@@ -238,15 +240,21 @@ class Base {
 				$git_plugin['enterprise']              = $repo_enterprise_uri;
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
-				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
 				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
 				$git_plugin['slug']                    = $plugin;
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
+				$git_plugin['dot_org']                 = false;
+			}
+			if ( isset( $all_plugins[ $plugin ]->id) ) {
+				$git_plugin['dot_org']                 = true;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -310,12 +318,14 @@ class Base {
 				$git_theme['enterprise']              = $repo_enterprise_uri;
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
+				$git_theme['extended_repo']           = null;
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 			}
 
@@ -326,7 +336,7 @@ class Base {
 				continue;
 			}
 
-			$git_themes[ $theme->stylesheet ] = (object) $git_theme;
+			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
 
 		return $git_themes;
@@ -387,9 +397,8 @@ class Base {
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
 		global $wp_filesystem;
-		$repo                = null;
-		$source_base         = basename( $source );
-		$chopped_source_base = null;
+		$repo        = null;
+		$source_base = basename( $source );
 
 		/*
 		 * Check for upgrade process, return if both are false or
@@ -406,10 +415,7 @@ class Base {
 		/*
 		 * Get repo for remote install update process.
 		 */
-		if ( isset( self::$options['github_updater_install_repo'] ) &&
-		     false !== stristr( $source_base, self::$options['github_updater_install_repo'] )
-
-		) {
+		if ( ! empty( self::$options['github_updater_install_repo'] ) ) {
 			$repo = self::$options['github_updater_install_repo'];
 		}
 
@@ -417,41 +423,44 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			foreach ( (array) $this->config as $git_repo ) {
+			$updates = $this->_get_updating_repos();
+			foreach ( $updates as $extended => $update ) {
 
 				/*
-				 * Return $source if name already corrected.
+				 * Return for already corrected $source.
 				 */
-				if ( $source_base === $git_repo->repo ) {
+				if ( ( $source_base === $update &&
+				       ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+				         ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ) ||
+				     ( $source_base === $extended &&
+				       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+				       ( $this->tag && 'master' !== $this->tag ) &&
+				     ! is_int( $extended ) )
+				) {
 					return $source;
 				}
 
-				/*
-				 * Correct repo name for automatic updates.
-				 * Chop `<owner>-` and `-<hash>` from remote update $source_base.
-				 * Chop `.git` from GitLab remote update $source_base.
-				 */
-				if ( false !== stristr( $source_base, '.git' ) ) {
-					$chopped_source_base = rtrim( $source_base, '.git' );
-				}
-
-				if ( false !== stristr( $source_base, $git_repo->repo ) && empty( $chopped_source_base ) ) {
-					$lchop = str_replace( $git_repo->owner . '-', '', $source_base );
-					$chopped_source_base = substr( $lchop, 0, false !== ( $pos = strrpos( $lchop, '-') ) ? $pos : strlen( $lchop ) );
-				}
-
-				if ( $chopped_source_base === $git_repo->repo ) {
+				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-						$repo = $git_repo->repo;
+						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
+						     ( $this->config[ $update ]->dot_org &&
+						       ( ( $this->tag && 'master' === $this->tag ) ||
+						         ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ) )
+						) {
+							$repo = $update;
+						} else {
+							$repo = $extended;
+						}
 						break;
 					}
 					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-						$repo = $git_repo->repo;
+						$repo = $update;
 						break;
 					}
 				}
-
 			}
+
 			/*
 			 * Return already corrected $source or wp.org $source.
 			 */
@@ -483,6 +492,72 @@ class Base {
 		 */
 		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new \WP_Error();
+	}
+
+	/**
+	 * Get dashboard update requested repos and return array of slugs.
+	 *
+	 * @return array
+	 */
+	private function _get_updating_repos() {
+		$updates          = array();
+		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
+		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
+		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
+		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+
+		if ( ! empty( $plugins_updating ) ) {
+			$plugins_updating = explode( ',', $plugins_updating );
+		}
+		if ( ! empty( $themes_updating) ) {
+			$themes_updating = explode( ',', $themes_updating );
+		}
+
+		foreach ( array_merge( $plugin_updating, $plugins_updating ) as $update ) {
+			$plugin_repo = explode( '/', $update );
+			$updates[] = $plugin_repo[0];
+		}
+
+		foreach ( array_merge( $theme_updating, $themes_updating ) as $update ) {
+			$updates[] = $update;
+		}
+
+		/*
+		 * Add `git-owner-repo` to index for future renaming option.
+		 */
+		foreach ( $updates as $key => $value ) {
+			$repo = $this->get_repo_slugs( $value );
+			if ( $repo['repo'] === $value || $repo['extended_repo'] === $value ) {
+				unset( $updates[ $key ] );
+				$updates[ $repo['extended_repo'] ] = $repo['repo'];
+			}
+		}
+
+		/*
+		 * Reverse the array to allow for more specific match first.
+		 */
+		arsort( $updates );
+
+		return $updates;
+	}
+
+	/**
+	 * Set array with normal and extended repo names.
+	 *
+	 * @param $slug
+	 *
+	 * @return array
+	 */
+	protected function get_repo_slugs( $slug ) {
+		$arr = array();
+		foreach ( $this->config as $repo ) {
+			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
+				$arr['repo']          = $repo->repo;
+				$arr['extended_repo'] = $repo->extended_repo;
+			}
+		}
+
+		return $arr;
 	}
 
 	/**
@@ -559,14 +634,18 @@ class Base {
 	 * @return bool or variable
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
-		$changes    = null;
+		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changes     = null;
+		$local_files = null;
 
 		if ( is_dir( $this->$type->local_path ) ) {
 			$local_files = scandir( $this->$type->local_path );
-			$changes = array_intersect( (array) $local_files, $changelogs );
-			$changes = array_pop( $changes );
+		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
+			$local_files = scandir( $this->$type->local_path_extended );
 		}
+
+		$changes = array_intersect( (array) $local_files, $changelogs );
+		$changes = array_pop( $changes );
 
 		if ( ! empty( $changes ) ) {
 			return $changes;
@@ -605,6 +684,7 @@ class Base {
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo           = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
 		$header['path']       = $owner_repo;
 		$owner_repo           = explode( '/', $owner_repo );
 		$header['owner']      = $owner_repo[0];
@@ -642,9 +722,10 @@ class Base {
 		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']     = $repo_types[ $repo ];
-			$arr['base_uri'] = $repo_base_uris[ $repo ];
-			$arr['bool']     = true;
+			$arr['type']       = $repo_types[ $repo ];
+			$arr['git_server'] = strtolower( $repo );
+			$arr['base_uri']   = $repo_base_uris[ $repo ];
+			$arr['bool']       = true;
 			foreach ( self::$extra_repo_headers as $key => $value ) {
 				$arr[ $key ] = $repo . ' ' . $value;
 			}

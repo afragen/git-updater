@@ -167,7 +167,9 @@ class GitLab_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) ) {
+		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
+		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
+		) {
 			return false;
 		}
 
@@ -319,7 +321,7 @@ class GitLab_API extends API {
 
 		/*
 		 * If using GitLab CE/Enterprise header return this endpoint.
-        */
+		 */
 		if ( ! empty( $this->type->enterprise ) ) {
 			$endpoint = remove_query_arg( 'private_token', $endpoint );
 			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {

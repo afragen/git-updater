@@ -167,6 +167,9 @@ class Settings extends Base {
 
 		$this->ghu_tokens();
 
+		/*
+		 * Add basic plugin settings.
+		 */
 		add_settings_section(
 			'github_updater_settings',
 			__( 'GitHub Updater Settings', 'github-updater' ),
@@ -420,7 +423,7 @@ class Settings extends Base {
 	public static function sanitize( $input ) {
 		$new_input = array();
 		foreach ( (array) $input as $id => $value ) {
-			$new_input[ $id ] = sanitize_text_field( $input[ $id ] );
+			$new_input[ sanitize_key( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
 		return $new_input;
@@ -430,7 +433,17 @@ class Settings extends Base {
 	 * Print the GitHub Updater text
 	 */
 	public function print_section_ghu_settings() {
-		_e( 'Check to enable branch switching from the Plugins page.', 'github-updater' );
+		if ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) {
+			_e( 'Extended Naming is <strong>active</strong>.', 'github-updater' );
+		}
+		if ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
+		       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
+		) {
+			_e( 'Extended Naming is <strong>not active</strong>.', 'github-updater' );
+		}
+		printf( '<br>' . __( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
+		printf( '<br>' . __( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
+		print( '<p>' . __( 'Check to enable branch switching from the Plugins page.', 'github-updater' ) . '</p>');
 	}
 
 	/**

@@ -54,8 +54,8 @@ class Autoloader {
 	 */
 	protected function autoload( $class ) {
 		// Check for a static mapping first of all
-		if ( isset( $this->map[$class] ) && file_exists( $this->map[$class] ) ) {
-			include $this->map[$class];
+		if ( isset( $this->map[ $class ] ) && file_exists( $this->map[ $class ] ) ) {
+			include $this->map[ $class ];
 			return;
 		}
 
