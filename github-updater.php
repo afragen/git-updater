@@ -70,4 +70,4 @@ new $instantiate;
  */
 add_action( 'init', array( 'Fragen\\GitHub_Updater\\Base', 'init' ) );
 
-define( 'GITHUB_UPDATER_EXTENDED_NAMING', false );
+define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );

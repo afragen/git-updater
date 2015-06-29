@@ -444,10 +444,9 @@ class Base {
 					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
-							( $this->config[ $update ]->dot_org &&
-						       'master' === $this->config[ $update ]->branch ) ||
-						     ( $this->tag && 'master' === $this->tag &&
-						       $this->config[ $update ]->dot_org )
+						     ( $this->config[ $update ]->dot_org &&
+						       ( ( $this->tag && 'master' === $this->tag ) ||
+						         ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ) )
 						) {
 							$repo = $update;
 						} else {
