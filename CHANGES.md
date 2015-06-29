@@ -1,6 +1,7 @@
 #### 4.6.0
 * newer method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :smiley:
 * added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.
+* strip `.git` from the end of the plugin or theme URI for those who haven't gotten to the README yet.
 
 #### 4.5.6
 * bugfix for renaming code to properly strip `<owner>-`
