@@ -684,6 +684,7 @@ class Base {
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo           = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
 		$header['path']       = $owner_repo;
 		$owner_repo           = explode( '/', $owner_repo );
 		$header['owner']      = $owner_repo[0];
