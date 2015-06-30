@@ -318,7 +318,7 @@ class Base {
 				$git_theme['enterprise']              = $repo_enterprise_uri;
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
-				$git_theme['extended_repo']           = null;
+				$git_theme['extended_repo']           = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
@@ -389,8 +389,8 @@ class Base {
 	 * @global object $wp_filesystem
 	 *
 	 * @param string $source
-	 * @param string $remote_source Optional.
-	 * @param object $upgrader      Optional.
+	 * @param string $remote_source
+	 * @param object $upgrader
 	 *
 	 * @return string
 	 */
@@ -398,6 +398,7 @@ class Base {
 
 		global $wp_filesystem;
 		$repo        = null;
+		$matched     = false;
 		$source_base = basename( $source );
 
 		/*
@@ -427,25 +428,30 @@ class Base {
 			foreach ( $updates as $extended => $update ) {
 
 				/*
-				 * Return for already corrected $source.
+				 * Plugin renaming.
 				 */
-				if ( ( $source_base === $update &&
-				       ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
-				         ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ) ||
-				     ( $source_base === $extended &&
-				       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-				       ( $this->tag && 'master' !== $this->tag ) &&
-				     ! is_int( $extended ) )
-				) {
-					return $source;
-				}
+				if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 
-				if ( false !== stristr( $source_base, $update ) && ! is_int( $extended ) ) {
-					if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+					if ( $upgrader->skin instanceof \Plugin_Upgrader_Skin &&
+					     $update === dirname( $upgrader->skin->plugin ) ||
+					     $extended === dirname( $upgrader->skin->plugin )
+					) {
+						$matched = true;
+					} elseif ( $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin ) {
+						foreach ( self::$git_servers as $git ) {
+							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
+							if ( $update === $header['repo'] ) {
+								$matched = true;
+								continue;
+							}
+						}
+					}
+
+					if ( $matched ) {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
 						     ( $this->config[ $update ]->dot_org &&
-						       ( ( $this->tag && 'master' === $this->tag ) ||
+						       ( 'master' === $this->tag ||
 						         ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ) )
 						) {
 							$repo = $update;
@@ -454,10 +460,19 @@ class Base {
 						}
 						break;
 					}
-					if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-						$repo = $update;
-						break;
-					}
+				}
+
+				/*
+				 * Theme renaming.
+				 */
+				if ( ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) &&
+				     ( ( $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin &&
+				         $update === $upgrader->skin->theme_info->stylesheet ) ||
+				       ( $upgrader->skin instanceof \Theme_Upgrader_Skin &&
+				         $update === $upgrader->skin->theme ) )
+				) {
+					$repo = $update;
+					break;
 				}
 			}
 
@@ -532,11 +547,6 @@ class Base {
 				$updates[ $repo['extended_repo'] ] = $repo['repo'];
 			}
 		}
-
-		/*
-		 * Reverse the array to allow for more specific match first.
-		 */
-		arsort( $updates );
 
 		return $updates;
 	}
