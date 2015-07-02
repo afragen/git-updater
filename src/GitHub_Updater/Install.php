@@ -343,6 +343,9 @@ class Install extends Base {
 		?>
 		<label for="is_private">
 			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
+			<p class="description">
+				<?php _e( 'Check for private Bitbucket repositories.', 'github-updater' ) ?>
+			</p>
 		</label>
 		<?php
 	}
