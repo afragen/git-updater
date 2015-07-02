@@ -340,7 +340,7 @@ class Install extends Base {
 	public function is_private() {
 		?>
 		<label for="is_private">
-			<input type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
+			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
 		</label>
 		<?php
 	}
@@ -351,7 +351,7 @@ class Install extends Base {
 	public function access_token() {
 		?>
 		<label for="github_access_token">
-			<input type="text" style="width:50%;" name="github_access_token" value="" >
+			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="" >
 			<p class="description">
 				<?php _e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
 			</p>
@@ -365,7 +365,7 @@ class Install extends Base {
 	public function private_token() {
 		?>
 		<label for="gitlab_private_token">
-			<input type="text" style="width:50%;" name="gitlab_private_token" value="" >
+			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_private_token" value="" >
 			<p class="description">
 				<?php _e( 'Enter GitLab Private Token for private GitLab repositories.', 'github-updater' ) ?>
 			</p>
