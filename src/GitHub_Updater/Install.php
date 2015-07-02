@@ -34,7 +34,7 @@ class Install extends Base {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		$this->install( $type );
 
-		wp_enqueue_script( 'settings', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/settings.js' ), array(), false, true );
+		wp_enqueue_script( 'ghu_install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
 	}
 
 	/**
