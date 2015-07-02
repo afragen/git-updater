@@ -247,17 +247,17 @@ class Install extends Base {
 		);
 
 		add_settings_field(
-			$type . '_api',
-			__( 'Remote Repository Host', 'github-updater' ),
-			array( $this, 'install_api' ),
+			$type . '_branch',
+			__( 'Repository Branch', 'github-updater' ),
+			array( $this, 'branch' ),
 			'github_updater_install_' . $type,
 			$type
 		);
 
 		add_settings_field(
-			$type . '_branch',
-			__( 'Repository Branch', 'github-updater' ),
-			array( $this, 'branch' ),
+			$type . '_api',
+			__( 'Remote Repository Host', 'github-updater' ),
+			array( $this, 'install_api' ),
 			'github_updater_install_' . $type,
 			$type
 		);
