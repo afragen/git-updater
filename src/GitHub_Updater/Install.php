@@ -280,7 +280,7 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['gitlab_private_token'] ) ||
+		if ( empty( parent::$options['gitlab_private_token'] ) &&
 		     empty( parent::$options['gitlab_enterprise_token'] )
 		) {
 			add_settings_field(
