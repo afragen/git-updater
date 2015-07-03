@@ -6,32 +6,27 @@
  * @since  4.6.0
  * @access public
  */
-jQuery(document).ready( function($) {
+jQuery( document ).ready( function( $ ) {
 	// Hide non-default (Bitbucket & GitLab) settings on page load
-	$( 'input.bitbucket_setting' ).parents( 'tr' ).hide();
-	$( 'input.gitlab_setting' ).parents( 'tr' ).hide();
+	$.each( [ 'bitbucket', 'gitlab' ], function() {
+		$( 'input.'.concat( this, '_setting') ).parents( 'tr').hide();
+	});
 
 	// When the api selector changes
-	$( 'select[name="github_updater_api"]' ).on( 'change', function() {
+	$( 'select[ name="github_updater_api" ]' ).on( 'change', function() {
+
+		// create difference array
+		var hideMe = $( [ 'github', 'bitbucket', 'gitlab'] ).not( [ this.value ] ).get();
 
 		/*
 		 * Show/hide all settings that have the selected api's class.
 		 * this.value equals either 'github', 'bitbucket', or 'gitlab'.
 		 */
-		if( 'github' === this.value ) {
-			$( 'input.bitbucket_setting' ).parents( 'tr' ).hide();
-			$( 'input.gitlab_setting' ).parents( 'tr' ).hide();
-			$( 'input.github_setting' ).parents( 'tr' ).show();
-		} else if ( 'bitbucket' === this.value ) {
-			$( 'input.github_setting' ).parents( 'tr' ).hide();
-			$( 'input.gitlab_setting' ).parents( 'tr' ).hide();
-			$( 'input.bitbucket_setting' ).parents( 'tr' ).show();
+		$.each( hideMe, function() {
+			$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+		});
 
-		} else if ( 'gitlab' === this.value ) {
-			$( 'input.bitbucket_setting' ).parents( 'tr').hide();
-			$( 'input.github_setting' ).parents( 'tr' ).hide();
-			$( 'input.gitlab_setting' ).parents( 'tr' ).show();
-		}
+		$( 'input.'.concat( this.value, '_setting' ) ).parents( 'tr' ).show();
 
 	});
 });
