@@ -179,7 +179,7 @@ You must set a GitLab private token. Go to your GitLab profile page under Edit A
 
 ## Private Repositories
 
-Public repositories will not show up in the Settings page.
+Only private repositories will show up in the Settings page.
 
 ![Settings Tab](./assets/screenshot-1.png)
 
