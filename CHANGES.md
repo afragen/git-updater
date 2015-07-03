@@ -3,6 +3,8 @@
 * added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.
 * strip `.git` from the end of the plugin or theme URI for those who haven't gotten to the README yet.
 * added javascript show/hide options on the Install page.
+* fixed boolean logic to _not_ display GitLab Private Token input on Install if it's already set.
+* updated screenshots in README
 
 #### 4.5.7
 * hotfix GitLab private updating/installing
