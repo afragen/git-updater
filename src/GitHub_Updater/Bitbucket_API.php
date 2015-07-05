@@ -60,7 +60,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) || ! is_array( $response ) ) {
+		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -91,7 +91,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -126,7 +126,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -174,7 +174,7 @@ class Bitbucket_API extends API {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -199,7 +199,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -232,7 +232,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 

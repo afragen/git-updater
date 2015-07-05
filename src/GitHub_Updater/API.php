@@ -158,7 +158,7 @@ abstract class API extends Base {
 	 *
 	 * @return bool true if invalid
 	 */
-	protected static function validate_response( $response ) {
+	protected function validate_response( $response ) {
 		if ( empty( $response ) || isset( $response->message ) ) {
 			return true;
 		}

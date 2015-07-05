@@ -81,7 +81,7 @@ class GitLab_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) || ! is_array( $response ) ) {
+		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -115,7 +115,7 @@ class GitLab_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -144,7 +144,7 @@ class GitLab_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -188,7 +188,7 @@ class GitLab_API extends API {
 		}
 
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -220,7 +220,7 @@ class GitLab_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -255,7 +255,7 @@ class GitLab_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -353,7 +353,7 @@ class GitLab_API extends API {
 	 *
 	 * @return string
 	 */
-	protected static function add_endpoints( $git, $endpoint ) {
+	protected function add_endpoints( $git, $endpoint ) {
 		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
 			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
 		}

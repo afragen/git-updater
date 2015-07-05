@@ -96,13 +96,21 @@ class Base {
 	public function __construct() {
 		self::$options = get_site_option( 'github_updater', array() );
 		$this->add_headers();
+
+		/*
+		 * Calls Fragen\GitHub_Updater\Base->init() in init hook so other remote upgrader apps like
+		 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
+		 * of GitHub_Updater's methods, especially renaming.
+		 */
+		add_action( 'init', array( &$this, 'init' ) );
+
 	}
 
 	/**
 	 * Instantiate Fragen\GitHub_Updater\Plugin and Fragen\GitHub_Updater\Theme
 	 * for proper user capabilities.
 	 */
-	public static function init() {
+	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
 			new Plugin();
 		}
@@ -117,9 +125,9 @@ class Base {
 	/**
 	 * Add extra headers via filter hooks
 	 */
-	public static function add_headers() {
-		add_filter( 'extra_plugin_headers', array( __CLASS__, 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( __CLASS__, 'add_theme_headers' ) );
+	public function add_headers() {
+		add_filter( 'extra_plugin_headers', array( &$this, 'add_plugin_headers' ) );
+		add_filter( 'extra_theme_headers', array( &$this, 'add_theme_headers' ) );
 	}
 
 	/**
@@ -128,7 +136,7 @@ class Base {
 	 * @param $extra_headers
 	 * @return array
 	 */
-	public static function add_plugin_headers( $extra_headers ) {
+	public function add_plugin_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
 			'Requires WP'  => 'Requires WP',
 			'Requires PHP' => 'Requires PHP',
@@ -153,7 +161,7 @@ class Base {
 	 * @param $extra_headers
 	 * @return array
 	 */
-	public static function add_theme_headers( $extra_headers ) {
+	public function add_theme_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
 			'Requires WP'  => 'Requires WP',
 			'Requires PHP' => 'Requires PHP',
@@ -689,7 +697,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected static function parse_header_uri( $repo_header ) {
+	protected function parse_header_uri( $repo_header ) {
 		$header_parts         = parse_url( $repo_header );
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
