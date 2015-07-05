@@ -338,4 +338,11 @@ class Bitbucket_API extends API {
 		return $args;
 	}
 
+	/**
+	 * Added due to abstract class designation, not used for Bitbucket.
+	 * @param $git
+	 * @param $endpoint
+	 */
+	protected function add_endpoints( $git, $endpoint ){}
+
 }
