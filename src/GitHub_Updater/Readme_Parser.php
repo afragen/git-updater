@@ -19,9 +19,7 @@ class Readme_Parser extends \Automattic_Readme {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
-
-	}
+	public function __construct() {}
 
 	/**
 	 * @param $file_contents
