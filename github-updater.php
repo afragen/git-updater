@@ -62,10 +62,3 @@ new $loader( $root, $extra_classes );
 // Instantiate class GitHub_Updater
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
-
-/*
- * Calls Fragen\GitHub_Updater\Base::init() in init hook so other remote upgrader apps like
- * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
- * of GitHub_Updater's methods, especially renaming.
- */
-//add_action( 'init', array( &$instantiate, 'init' ) );
