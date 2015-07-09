@@ -6,6 +6,7 @@
 * fixed boolean logic to _not_ display GitLab Private Token input on Install if it's already set.
 * updated screenshots in README
 * switched a number of methods to be non-static, anticipation of testing.
+* [broken: renaming during updates from upgrade services](https://github.com/afragen/github-updater/issues/262)
 
 #### 4.5.7
 * hotfix GitLab private updating/installing
