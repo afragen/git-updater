@@ -98,7 +98,7 @@ class Base {
 		$this->add_headers();
 
 		/*
-		 * Calls Fragen\GitHub_Updater\Base->init() in init hook so other remote upgrader apps like
+		 * Calls $this->init() in init hook so other remote upgrader apps like
 		 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
 		 * of GitHub_Updater's methods, especially renaming.
 		 */
