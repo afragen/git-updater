@@ -33,6 +33,8 @@ class Install extends Base {
 	public function __construct( $type ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		$this->install( $type );
+
+		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
 	}
 
 	/**
@@ -146,6 +148,12 @@ class Install extends Base {
 			}
 
 			parent::$options['github_updater_install_repo'] = self::$install['repo'];
+			if ( ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+			     'plugin' === $type
+			) {
+				parent::$options['github_updater_install_repo'] = implode( '-', array( self::$install['github_updater_api'], $headers['owner'], self::$install['repo'] ) );
+			}
+
 			update_site_option( 'github_updater', parent::$options );
 			$url   = self::$install['download_link'];
 			$nonce = wp_nonce_url( $url );
@@ -241,17 +249,17 @@ class Install extends Base {
 		);
 
 		add_settings_field(
-			$type . '_api',
-			__( 'Remote Repository Host', 'github-updater' ),
-			array( $this, 'install_api' ),
+			$type . '_branch',
+			__( 'Repository Branch', 'github-updater' ),
+			array( $this, 'branch' ),
 			'github_updater_install_' . $type,
 			$type
 		);
 
 		add_settings_field(
-			$type . '_branch',
-			__( 'Repository Branch', 'github-updater' ),
-			array( $this, 'branch' ),
+			$type . '_api',
+			__( 'Remote Repository Host', 'github-updater' ),
+			array( $this, 'install_api' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -272,7 +280,7 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['gitlab_private_token'] ) ||
+		if ( empty( parent::$options['gitlab_private_token'] ) &&
 		     empty( parent::$options['gitlab_enterprise_token'] )
 		) {
 			add_settings_field(
@@ -334,7 +342,10 @@ class Install extends Base {
 	public function is_private() {
 		?>
 		<label for="is_private">
-			<input type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
+			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
+			<p class="description">
+				<?php _e( 'Check for private Bitbucket repositories.', 'github-updater' ) ?>
+			</p>
 		</label>
 		<?php
 	}
@@ -345,7 +356,7 @@ class Install extends Base {
 	public function access_token() {
 		?>
 		<label for="github_access_token">
-			<input type="text" style="width:50%;" name="github_access_token" value="" >
+			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="" >
 			<p class="description">
 				<?php _e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
 			</p>
@@ -359,7 +370,7 @@ class Install extends Base {
 	public function private_token() {
 		?>
 		<label for="gitlab_private_token">
-			<input type="text" style="width:50%;" name="gitlab_private_token" value="" >
+			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_private_token" value="" >
 			<p class="description">
 				<?php _e( 'Enter GitLab Private Token for private GitLab repositories.', 'github-updater' ) ?>
 			</p>

@@ -1,3 +1,13 @@
+#### 4.6.0
+* newer, much more precise method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :-)
+* added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.
+* strip `.git` from the end of the plugin or theme URI for those who haven't gotten to the README yet.
+* added javascript show/hide options on the Install page.
+* fixed boolean logic to _not_ display GitLab Private Token input on Install if it's already set.
+* updated screenshots in README
+* switched a number of methods to be non-static, anticipation of testing.
+* [broken: renaming during updates from upgrade services](https://github.com/afragen/github-updater/issues/262)
+
 #### 4.5.7
 * hotfix GitLab private updating/installing
 * fix some PHP notices
@@ -9,7 +19,7 @@
 #### 4.5.5
 * back to simplifying the renaming code, always remember to test renaming on live server.
 * strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
-* I think this is the end of renaming for a while.
+* I think this is the end of renaming for a while. :P
 
 #### 4.5.4
 * hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.

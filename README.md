@@ -5,7 +5,7 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.2.x
+* Tested up to: 4.3 alpha
 * Stable tag: master
 * Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
@@ -85,7 +85,7 @@ This way you get automatic updates and cannot deactivate the plugin.
 
 ### Plugins 
 
-There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
+There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header.
 
 ~~~php
 /*
@@ -105,7 +105,7 @@ GitHub Branch:     master
 
 ### Themes
 
-There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file.
+There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
 
 ~~~css
 /*
@@ -179,7 +179,7 @@ You must set a GitLab private token. Go to your GitLab profile page under Edit A
 
 ## Private Repositories
 
-Public repositories will not show up in the Settings page.
+Only private repositories will show up in the Settings page.
 
 ![Settings Tab](./assets/screenshot-1.png)
 
@@ -255,6 +255,12 @@ There is a new setting for a personal GitHub Access Token. I **strongly** encour
 ### 429 - Too Many Requests
 
 I've seen this error code occasionally with Bitbucket.
+
+## Extended Naming
+
+There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
+
+To set Extended Naming add `define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );` in your `wp-config.php` or your theme's `functions.php`.
 
 ## Extras
 

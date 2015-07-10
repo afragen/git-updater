@@ -34,17 +34,23 @@ class Messages extends Base {
 		}
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			add_action( 'admin_notices', array( __CLASS__, 'show_error_message' ) );
-			add_action( 'network_admin_notices', array( __CLASS__, 'show_error_message' ) );
+			switch ( $type ) {
+				case 'gitlab':
+					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) ||
+					       empty( parent::$options['gitlab_private_token'] ) )
+					) {
+						add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
+						add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
+					}
+					break;
+				case 'git':
+				default:
+					add_action( 'admin_notices', array( __CLASS__, 'show_error_message' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'show_error_message' ) );
+					break;
+			}
 		}
 
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) && 'gitlab' === $type &&
-		     ( empty( parent::$options['gitlab_enterprise_token'] ) ||
-		       empty( parent::$options['gitlab_private_token'] ) )
-		) {
-			add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
-			add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
-		}
 	}
 
 	/**

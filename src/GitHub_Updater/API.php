@@ -22,6 +22,7 @@ abstract class API extends Base {
 	abstract public function get_repo_meta();
 	abstract public function get_remote_branches();
 	abstract public function construct_download_link();
+	abstract protected function add_endpoints( $git, $endpoint );
 
 	/**
 	 * Fixes {@link https://github.com/UCF/Theme-Updater/issues/3}.
@@ -158,7 +159,7 @@ abstract class API extends Base {
 	 *
 	 * @return bool true if invalid
 	 */
-	protected static function validate_response( $response ) {
+	protected function validate_response( $response ) {
 		if ( empty( $response ) || isset( $response->message ) ) {
 			return true;
 		}

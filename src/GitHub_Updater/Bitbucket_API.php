@@ -60,7 +60,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) || ! is_array( $response ) ) {
+		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
 			return false;
 		}
 
@@ -91,7 +91,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -126,7 +126,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -147,7 +147,9 @@ class Bitbucket_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) ) {
+		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
+		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
+		) {
 			return false;
 		}
 
@@ -172,7 +174,7 @@ class Bitbucket_API extends API {
 			$this->set_transient( 'readme', $response );
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -197,7 +199,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -230,7 +232,7 @@ class Bitbucket_API extends API {
 			}
 		}
 
-		if ( API::validate_response( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -335,5 +337,12 @@ class Bitbucket_API extends API {
 
 		return $args;
 	}
+
+	/**
+	 * Added due to abstract class designation, not used for Bitbucket.
+	 * @param $git
+	 * @param $endpoint
+	 */
+	protected function add_endpoints( $git, $endpoint ){}
 
 }

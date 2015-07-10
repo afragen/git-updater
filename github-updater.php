@@ -12,7 +12,7 @@
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
-Version:           4.5.7
+Version:           4.5.7.5
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -62,10 +62,3 @@ new $loader( $root, $extra_classes );
 // Instantiate class GitHub_Updater
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
-
-/*
- * Calls Fragen\GitHub_Updater\Base::init() in init hook so other remote upgrader apps like
- * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
- * of GitHub_Updater's methods, especially renaming.
- */
-add_action( 'init', array( 'Fragen\\GitHub_Updater\\Base', 'init' ) );
