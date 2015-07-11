@@ -41,7 +41,7 @@ class Plugin extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
