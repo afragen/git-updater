@@ -414,8 +414,8 @@ class Base {
 		 * not of same updater.
 		 */
 		if ( ( ! $upgrader instanceof \Plugin_Upgrader && ! $upgrader instanceof \Theme_Upgrader ) ||
-			( $upgrader instanceof \Plugin_Upgrader && ! $this instanceof Plugin ) ||
-			( $upgrader instanceof \Theme_Upgrader  && ! $this instanceof Theme )
+		     ( $upgrader instanceof \Plugin_Upgrader && ! $this instanceof Plugin ) ||
+		     ( $upgrader instanceof \Theme_Upgrader  && ! $this instanceof Theme )
 		) {
 			return $source;
 		}
