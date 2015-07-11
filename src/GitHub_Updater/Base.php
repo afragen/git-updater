@@ -404,6 +404,7 @@ class Base {
 	 */
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		global $wp_filesystem;
 		$repo        = null;
 		$matched     = false;
@@ -419,6 +420,23 @@ class Base {
 		) {
 			return $source;
 		}
+
+		/*
+		 * Re-create $upgrader object for iThemes Sync
+		 * and possibly other remote upgrade services.
+		 */
+			if ( $upgrader instanceof \Plugin_Upgrader && ! $upgrader->skin instanceof \Plugin_Upgrader_Skin ) {
+				$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+				$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
+				$upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+				$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
+			}
+			if ( $upgrader instanceof \Theme_Upgrader && ! $upgrader->skin instanceof \Theme_Upgrader_Skin ) {
+				$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+				$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
+				$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+				$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
+			}
 
 		/*
 		 * Get repo for remote install update process.
@@ -437,7 +455,7 @@ class Base {
 				/*
 				 * Plugin renaming.
 				 */
-				if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+				if ( $upgrader instanceof \Plugin_Upgrader ) {
 
 					if ( $upgrader->skin instanceof \Plugin_Upgrader_Skin &&
 					     $update === dirname( $upgrader->skin->plugin ) ||
@@ -472,7 +490,7 @@ class Base {
 				/*
 				 * Theme renaming.
 				 */
-				if ( ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) &&
+				if ( $upgrader instanceof \Theme_Upgrader &&
 				     ( ( $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin &&
 				         $update === $upgrader->skin->theme_info->stylesheet ) ||
 				       ( $upgrader->skin instanceof \Theme_Upgrader_Skin &&
@@ -527,6 +545,19 @@ class Base {
 		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
 		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
 		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+
+		//iThemes Sync $_REQUEST
+		if ( empty( $plugins_updating ) && empty( $plugin_updating ) &&
+		     empty( $themes_updating ) && empty( $theme_updating )
+		) {
+			$request = json_decode( stripslashes( $_REQUEST['request'] ), true );
+			$args = $request['arguments'];
+			if ( isset( $args['plugin'] ) ) {
+				$plugin_updating = $args['plugin'];
+			} elseif ( isset( $args['theme'] ) ) {
+				$theme_updating = $args['theme'];
+			}
+		}
 
 		if ( ! empty( $plugins_updating ) ) {
 			$plugins_updating = explode( ',', $plugins_updating );
