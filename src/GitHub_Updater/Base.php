@@ -476,13 +476,6 @@ class Base {
 						}
 					}
 
-					/*if (
-						$upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin ||
-					    $upgrader->skin instanceof \Automatic_Upgrader_Skin
-					) {*/
-
-					//}
-
 					if ( $matched ) {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
