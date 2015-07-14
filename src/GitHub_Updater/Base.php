@@ -193,8 +193,11 @@ class Base {
 
 		$plugins        = get_plugins();
 		$git_plugins    = array();
-		wp_update_plugins();
 		$update_plugins = get_site_transient( 'update_plugins' );
+		if ( empty( $update_plugins) ) {
+			wp_update_plugins();
+			$update_plugins = get_site_transient( 'update_plugins' );
+		}
 		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
