@@ -282,7 +282,6 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		wp_update_plugins();
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
