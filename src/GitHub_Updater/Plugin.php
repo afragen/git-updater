@@ -41,7 +41,7 @@ class Plugin extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
@@ -282,7 +282,6 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
@@ -298,7 +297,7 @@ class Plugin extends Base {
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org ) {
 					continue;
 				}
 

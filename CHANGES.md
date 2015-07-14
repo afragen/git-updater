@@ -1,3 +1,7 @@
+#### 4.6.1
+* fix for remote updating via iThemes Sync
+* fix for renaming when AJAX updating of plugins
+
 #### 4.6.0
 * newer, much more precise method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :-)
 * added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.

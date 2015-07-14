@@ -194,6 +194,10 @@ class Base {
 		$plugins        = get_plugins();
 		$git_plugins    = array();
 		$update_plugins = get_site_transient( 'update_plugins' );
+		if ( empty( $update_plugins) ) {
+			wp_update_plugins();
+			$update_plugins = get_site_transient( 'update_plugins' );
+		}
 		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
@@ -261,7 +265,7 @@ class Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['dot_org']                 = false;
 			}
-			if ( isset( $all_plugins[ $plugin ]->id) ) {
+			if ( isset( $all_plugins[ $plugin ]->id) && 'master' === $git_plugin['branch'] ) {
 				$git_plugin['dot_org']                 = true;
 			}
 
@@ -404,6 +408,7 @@ class Base {
 	 */
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		global $wp_filesystem;
 		$repo        = null;
 		$matched     = false;
@@ -413,13 +418,33 @@ class Base {
 		 * Check for upgrade process, return if both are false or
 		 * not of same updater.
 		 */
-		if (
-			( ! $upgrader instanceof \Plugin_Upgrader ) && ( ! $upgrader instanceof \Theme_Upgrader ) ||
-			( $upgrader instanceof \Plugin_Upgrader && ( ! $this instanceof Plugin ) ) ||
-			( $upgrader instanceof \Theme_Upgrader  && ( ! $this instanceof Theme ) )
+		if ( ( ! $upgrader instanceof \Plugin_Upgrader && ! $upgrader instanceof \Theme_Upgrader ) ||
+		     ( $upgrader instanceof \Plugin_Upgrader && ! $this instanceof Plugin ) ||
+		     ( $upgrader instanceof \Theme_Upgrader  && ! $this instanceof Theme )
 		) {
 			return $source;
 		}
+
+		/*
+		 * Re-create $upgrader object for iThemes Sync
+		 * and possibly other remote upgrade services.
+		 */
+			if ( $upgrader instanceof \Plugin_Upgrader &&
+			     $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin
+			) {
+				$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+				$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
+				$upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+				$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
+			}
+			if ( $upgrader instanceof \Theme_Upgrader &&
+			     $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin
+			) {
+				$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+				$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
+				$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+				$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
+			}
 
 		/*
 		 * Get repo for remote install update process.
@@ -438,17 +463,17 @@ class Base {
 				/*
 				 * Plugin renaming.
 				 */
-				if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+				if ( $upgrader instanceof \Plugin_Upgrader ) {
 
 					if ( $upgrader->skin instanceof \Plugin_Upgrader_Skin &&
 					     $update === dirname( $upgrader->skin->plugin ) ||
 					     $extended === dirname( $upgrader->skin->plugin )
 					) {
 						$matched = true;
-					} elseif ( $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin ) {
+					} else {
 						foreach ( self::$git_servers as $git ) {
 							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
-							if ( $update === $header['repo'] ) {
+							if ( $update === $header['repo'] && ! $this->config[ $update ]->dot_org ) {
 								$matched = true;
 								continue;
 							}
@@ -459,8 +484,7 @@ class Base {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
 						     ( $this->config[ $update ]->dot_org &&
-						       ( 'master' === $this->tag ||
-						         ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ) )
+						       ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) )
 						) {
 							$repo = $update;
 						} else {
@@ -473,7 +497,7 @@ class Base {
 				/*
 				 * Theme renaming.
 				 */
-				if ( ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) &&
+				if ( $upgrader instanceof \Theme_Upgrader &&
 				     ( ( $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin &&
 				         $update === $upgrader->skin->theme_info->stylesheet ) ||
 				       ( $upgrader->skin instanceof \Theme_Upgrader_Skin &&
@@ -524,10 +548,27 @@ class Base {
 	 */
 	private function _get_updating_repos() {
 		$updates          = array();
+		$remote_request   = false;
 		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
 		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
 		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
 		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+
+		if ( empty( $plugins_updating ) && empty( $plugin_updating ) &&
+		     empty( $themes_updating ) && empty( $theme_updating ) ) {
+			$remote_request = true;
+		}
+
+		//iThemes Sync $_REQUEST
+		if ( $remote_request ) {
+			$request = json_decode( stripslashes( $_REQUEST['request'] ), true );
+			$args = $request['arguments'];
+			if ( isset( $args['plugin'] ) ) {
+				$plugin_updating = $args['plugin'];
+			} elseif ( isset( $args['theme'] ) ) {
+				$theme_updating = $args['theme'];
+			}
+		}
 
 		if ( ! empty( $plugins_updating ) ) {
 			$plugins_updating = explode( ',', $plugins_updating );
