@@ -466,7 +466,7 @@ class Base {
 					     $extended === dirname( $upgrader->skin->plugin )
 					) {
 						$matched = true;
-					} elseif ( $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin ) {
+					} else {
 						foreach ( self::$git_servers as $git ) {
 							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
 							if ( $update === $header['repo'] ) {
@@ -475,6 +475,13 @@ class Base {
 							}
 						}
 					}
+
+					/*if (
+						$upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin ||
+					    $upgrader->skin instanceof \Automatic_Upgrader_Skin
+					) {*/
+
+					//}
 
 					if ( $matched ) {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
