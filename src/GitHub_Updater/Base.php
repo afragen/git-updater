@@ -193,6 +193,7 @@ class Base {
 
 		$plugins        = get_plugins();
 		$git_plugins    = array();
+		wp_update_plugins();
 		$update_plugins = get_site_transient( 'update_plugins' );
 		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
 
@@ -469,7 +470,10 @@ class Base {
 					} else {
 						foreach ( self::$git_servers as $git ) {
 							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
-							if ( $update === $header['repo'] ) {
+							if ( $update === $header['repo'] &&
+							     ( ! $this->config[ $update ]->dot_org &&
+							       'master' === $this->config[ $update ]->branch )
+							     ) {
 								$matched = true;
 								continue;
 							}
