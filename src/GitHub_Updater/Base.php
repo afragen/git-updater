@@ -265,7 +265,7 @@ class Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['dot_org']                 = false;
 			}
-			if ( isset( $all_plugins[ $plugin ]->id) ) {
+			if ( isset( $all_plugins[ $plugin ]->id) && 'master' === $git_plugin['branch'] ) {
 				$git_plugin['dot_org']                 = true;
 			}
 
@@ -473,10 +473,7 @@ class Base {
 					} else {
 						foreach ( self::$git_servers as $git ) {
 							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
-							if ( $update === $header['repo'] &&
-							     ( ! $this->config[ $update ]->dot_org &&
-							       'master' === $this->config[ $update ]->branch )
-							     ) {
+							if ( $update === $header['repo'] && ! $this->config[ $update ]->dot_org ) {
 								$matched = true;
 								continue;
 							}
@@ -487,8 +484,7 @@ class Base {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
 						     ( $this->config[ $update ]->dot_org &&
-						       ( 'master' === $this->tag ||
-						         ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ) )
+						       ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) )
 						) {
 							$repo = $update;
 						} else {

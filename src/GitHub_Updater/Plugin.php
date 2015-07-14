@@ -297,7 +297,7 @@ class Plugin extends Base {
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org ) {
 					continue;
 				}
 
