@@ -101,17 +101,14 @@ class Base {
 		$this->add_headers();
 
 		/*
-		 * Calls $this->init() in init hook so other remote upgrader apps like
-		 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-		 * of GitHub_Updater's methods, especially renaming.
+		 * Calls $this->init() in init hook for user capabilities.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'init' ), 15 );
 	}
 
 	/**
-	 * Instantiate Fragen\GitHub_Updater\Plugin and Fragen\GitHub_Updater\Theme
-	 * for proper user capabilities.
+	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
