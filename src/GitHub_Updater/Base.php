@@ -106,7 +106,7 @@ class Base {
 		 * of GitHub_Updater's methods, especially renaming.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
-
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'init' ), 15 );
 	}
 
 	/**
