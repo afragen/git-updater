@@ -21,13 +21,15 @@ class Install extends Base {
 
 	/**
 	 * Class options.
+	 *
 	 * @var array
 	 */
 	protected static $install = array();
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
+	 *
 	 * @param $type
 	 */
 	public function __construct( $type ) {
@@ -39,6 +41,7 @@ class Install extends Base {
 
 	/**
 	 * Install remote plugin or theme.
+	 *
 	 * @param $type
 	 *
 	 * @return bool
@@ -191,6 +194,7 @@ class Install extends Base {
 
 	/**
 	 * Create Install Plugin or Install Theme page.
+	 *
 	 * @param $type
 	 */
 	public function create_form( $type ) {
@@ -213,6 +217,7 @@ class Install extends Base {
 
 	/**
 	 * Add settings sections.
+	 *
 	 * @param $type
 	 */
 	public function register_settings( $type ) {

@@ -32,7 +32,7 @@ class GitLab_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type  = $type;
+		$this->type    = $type;
 		parent::$hours = 12;
 
 		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
@@ -265,12 +265,12 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Construct $this->type->download_link using GitLab API
+	 * Construct $this->type->download_link using GitLab API.
 	 *
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
-	 * @return string URI
+	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/*
@@ -336,7 +336,7 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object
+	 * Add remote data to type object.
 	 */
 	private function _add_meta_repo_object() {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );

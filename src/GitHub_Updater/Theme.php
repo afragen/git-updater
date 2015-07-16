@@ -24,7 +24,7 @@ namespace Fragen\GitHub_Updater;
 class Theme extends Base {
 
 	/**
-	 * Rollback variable
+	 * Rollback variable.
 	 *
 	 * @var number
 	 */
@@ -120,8 +120,15 @@ class Theme extends Base {
 		Settings::$ghu_themes = $this->config;
 	}
 
+
 	/**
-	 * Put changelog in plugins_api, return WP.org data as appropriate
+	 * Put changelog in plugins_api, return WP.org data as appropriate.
+	 *
+	 * @param $false
+	 * @param $action
+	 * @param $response
+	 *
+	 * @return mixed
 	 */
 	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) {
@@ -273,9 +280,10 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Remove default after_theme_row_$stylesheet
+	 * Remove default after_theme_row_$stylesheet.
 	 *
 	 * @author @grappler
+	 *
 	 * @param $theme_key
 	 * @param $theme
 	 */
@@ -295,6 +303,7 @@ class Theme extends Base {
 	 * Call update theme messaging if needed for single site installation
 	 *
 	 * @author Seth Carstens
+	 *
 	 * @param $prepared_themes
 	 *
 	 * @return mixed
@@ -319,7 +328,9 @@ class Theme extends Base {
 	 * Create theme update messaging
 	 *
 	 * @author Seth Carstens
+	 *
 	 * @param object $theme
+	 *
 	 * @return string (content buffer)
 	 */
 	private function _append_theme_actions_content( $theme ) {
@@ -390,11 +401,12 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update
+	 * Hook into pre_set_site_transient_update_themes to update.
 	 *
-	 * Finds newest tag and compares to current tag
+	 * Finds newest tag and compares to current tag.
 	 *
 	 * @param array $data
+	 *
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $data ) {

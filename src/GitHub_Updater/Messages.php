@@ -94,6 +94,9 @@ class Messages extends Base {
 		}
 	}
 
+	/**
+	 * Generate error message for missing GitLab Private Token.
+	 */
 	public static function gitlab_error() {
 		?>
 		<div class="error notice is-dismissible">

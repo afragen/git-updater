@@ -29,47 +29,50 @@ class Base {
 	protected $config;
 
 	/**
-	 * Class Object for API
+	 * Class Object for API.
 	 *
 	 * @var object
 	 */
  	protected $repo_api;
 
 	/**
-	 * Variable for setting update transient hours
+	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
 	 */
 	protected static $hours;
 
 	/**
-	 * Variable for holding transient ids
+	 * Variable for holding transient ids.
 	 *
 	 * @var array
 	 */
 	protected static $transients = array();
 
 	/**
-	 * Variable for holding extra theme and plugin headers
+	 * Variable for holding extra theme and plugin headers.
 	 *
 	 * @var array
 	 */
 	protected static $extra_headers = array();
 
 	/**
-	 * Holds the values to be used in the fields callbacks
+	 * Holds the values to be used in the fields callbacks.
+	 *
 	 * @var array
 	 */
 	protected static $options;
 
 	/**
 	 * Holds HTTP error code from API call.
+	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
 	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
+	 *
 	 * @var array
 	 */
 	protected static $git_servers = array(
@@ -80,6 +83,7 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
+	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
@@ -89,8 +93,7 @@ class Base {
 	);
 
 	/**
-	 * Constructor
-	 *
+	 * Constructor.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
@@ -123,7 +126,7 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers via filter hooks
+	 * Add extra headers via filter hooks.
 	 */
 	public function add_headers() {
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_plugin_headers' ) );
@@ -131,9 +134,10 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to get_plugins();
+	 * Add extra headers to get_plugins().
 	 *
 	 * @param $extra_headers
+	 *
 	 * @return array
 	 */
 	public function add_plugin_headers( $extra_headers ) {
@@ -156,9 +160,10 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to wp_get_themes()
+	 * Add extra headers to wp_get_themes().
 	 *
 	 * @param $extra_headers
+	 *
 	 * @return array
 	 */
 	public function add_theme_headers( $extra_headers ) {
@@ -277,7 +282,7 @@ class Base {
 
 	/**
 	 * Reads in WP_Theme class of each theme.
-	 * Populates variable array
+	 * Populates variable array.
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
@@ -355,7 +360,7 @@ class Base {
 	}
 
 	/**
-	 * Set default values for plugin/theme
+	 * Set default values for plugin/theme.
 	 *
 	 * @param $type
 	 */
@@ -404,7 +409,7 @@ class Base {
 	 * @param string $remote_source
 	 * @param object $upgrader
 	 *
-	 * @return string
+	 * @return string $source|$corrected_source
 	 */
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
@@ -686,7 +691,7 @@ class Base {
 	}
 
 	/**
-	 * Get filename of changelog and return
+	 * Get filename of changelog and return.
 	 *
 	 * @param $type
 	 *
@@ -794,7 +799,7 @@ class Base {
 	}
 
 	/**
-	 * Used to set_site_transient and checks/stores transient id in array
+	 * Used to set_site_transient and checks/stores transient id in array.
 	 *
 	 * @param $id
 	 * @param $response
@@ -812,7 +817,7 @@ class Base {
 	}
 
 	/**
-	 * Returns site_transient and checks/stores transient id in array
+	 * Returns site_transient and checks/stores transient id in array.
 	 *
 	 * @param $id
 	 *
@@ -828,7 +833,7 @@ class Base {
 	}
 
 	/**
-	 * Delete all transients from array of transient ids
+	 * Delete all transients from array of transient ids.
 	 *
 	 * @param $type
 	 *
@@ -847,9 +852,10 @@ class Base {
 	}
 
 	/**
-	 * Create transient of $type transients for force-check
+	 * Create transient of $type transients for force-check.
 	 *
 	 * @param $type
+	 *
 	 * @return void|bool
 	 */
 	protected function make_force_check_transient( $type ) {
@@ -865,6 +871,7 @@ class Base {
 	 * Set repo object file info.
 	 *
 	 * @param $response
+	 *
 	 * @param $repo
 	 */
 	protected function set_file_info( $response, $repo ) {
@@ -972,8 +979,8 @@ class Base {
 	}
 
 	/**
-	 * Create some sort of rating from 0 to 100 for use in star ratings
-	 * I'm really just making this up, more based upon popularity
+	 * Create some sort of rating from 0 to 100 for use in star ratings.
+	 * I'm really just making this up, more based upon popularity.
 	 *
 	 * @param $repo_meta
 	 *

@@ -29,7 +29,6 @@ abstract class API extends Base {
 	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @param  array $args Existing HTTP Request arguments.
-	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
 	public static function http_request_args( $args, $url ) {
@@ -77,7 +76,6 @@ abstract class API extends Base {
 	 * @see http://developer.github.com/v3/
 	 *
 	 * @param string $url
-	 *
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
@@ -112,7 +110,6 @@ abstract class API extends Base {
 	 * Return API url.
 	 *
 	 * @param string $endpoint
-	 *
 	 * @return string
 	 */
 	private function _get_api_url( $endpoint ) {
@@ -156,7 +153,6 @@ abstract class API extends Base {
 	 * Validate wp_remote_get response.
 	 *
 	 * @param $response
-	 *
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {

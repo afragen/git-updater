@@ -25,7 +25,7 @@ class Bitbucket_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type  = $type;
+		$this->type    = $type;
 		parent::$hours = 12;
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 
@@ -40,6 +40,7 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Read the remote file and parse headers.
+	 *
 	 * @param $file
 	 *
 	 * @return bool
@@ -247,7 +248,7 @@ class Bitbucket_API extends API {
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
-	 * @return string URI
+	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
@@ -280,7 +281,7 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object
+	 * Add remote data to type object.
 	 */
 	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
@@ -296,7 +297,7 @@ class Bitbucket_API extends API {
 	 * @param  $args
 	 * @param  $url
 	 *
-	 * @return mixed
+	 * @return mixed $args
 	 */
 	public function maybe_authenticate_http( $args, $url ) {
 		if ( ! isset( $this->type ) || false === stristr( $url, 'bitbucket' ) ) {
@@ -340,9 +341,10 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Added due to abstract class designation, not used for Bitbucket.
+	 *
 	 * @param $git
 	 * @param $endpoint
 	 */
-	protected function add_endpoints( $git, $endpoint ){}
+	protected function add_endpoints( $git, $endpoint ) {}
 
 }
