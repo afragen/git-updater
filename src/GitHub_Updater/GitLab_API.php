@@ -209,6 +209,9 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			self::$method = 'meta';
 			$projects     = $this->get_transient( 'projects' );
+			if ( ! $projects ) {
+				return false;
+			}
 			foreach ( $projects as $project ) {
 				if ( $this->type->repo === $project->name ) {
 					$response = $project;
