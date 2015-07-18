@@ -20,7 +20,7 @@ Domain Path:       /languages
 Text Domain:       github-updater
 Network:           true
 GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     develop
+GitHub Branch:     remote_update
 Requires WP:       3.8
 Requires PHP:      5.3
 */
@@ -62,3 +62,6 @@ new $loader( $root, $extra_classes );
 // Instantiate class GitHub_Updater
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
+
+var_dump( get_site_transient('ghu_request'));
+var_dump( get_site_transient('ghu_ithemes'));

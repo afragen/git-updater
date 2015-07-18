@@ -101,10 +101,10 @@ class Base {
 		$this->add_headers();
 
 		/*
-		 * Calls $this->init() in init hook for user capabilities.
+		 * Calls in init hook for user capabilities.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'init' ), 15 );
+		add_action( 'plugins_loaded', array( &$this, 'remote_update' ) );
 	}
 
 	/**
@@ -120,6 +120,15 @@ class Base {
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new Settings();
 		}
+	}
+
+	/**
+	 * Load class for remote updating compatibility.
+	 *
+	 * @return \Fragen\GitHub_Updater\Remote_Update
+	 */
+	public function remote_update() {
+		return new Remote_Update();
 	}
 
 	/**
@@ -459,7 +468,7 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			$updates = $this->_get_updating_repos();
+			$updates = $this->get_updating_repos();
 			foreach ( $updates as $extended => $update ) {
 
 				/*
@@ -548,43 +557,28 @@ class Base {
 	 *
 	 * @return array
 	 */
-	private function _get_updating_repos() {
-		$updates          = array();
-		$remote_request   = false;
-		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
-		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
-		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
-		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+	protected function get_updating_repos() {
+		$updates            = array();
+		$request            = apply_filters( 'github_updater_remote_update_request', $_REQUEST );
 
-		if ( empty( $plugins_updating ) && empty( $plugin_updating ) &&
-		     empty( $themes_updating ) && empty( $theme_updating ) ) {
-			$remote_request = true;
+		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
+		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
+		$request['themes']  = isset( $request['themes'] ) ? $request['themes'] : array();
+		$request['theme']   = isset( $request['theme'] ) ? (array) $request['theme'] : array();
+
+		if ( ! empty( $request['plugins'] ) ) {
+			$request['plugins'] = explode( ',', $request['plugins'] );
+		}
+		if ( ! empty( $request['themes']) ) {
+			$request['themes'] = explode( ',', $request['themes'] );
 		}
 
-		//iThemes Sync $_REQUEST
-		if ( $remote_request ) {
-			$request = json_decode( stripslashes( $_REQUEST['request'] ), true );
-			$args = $request['arguments'];
-			if ( isset( $args['plugin'] ) ) {
-				$plugin_updating = $args['plugin'];
-			} elseif ( isset( $args['theme'] ) ) {
-				$theme_updating = $args['theme'];
-			}
-		}
-
-		if ( ! empty( $plugins_updating ) ) {
-			$plugins_updating = explode( ',', $plugins_updating );
-		}
-		if ( ! empty( $themes_updating) ) {
-			$themes_updating = explode( ',', $themes_updating );
-		}
-
-		foreach ( array_merge( $plugin_updating, $plugins_updating ) as $update ) {
+		foreach ( array_merge( $request['plugin'], $request['plugins'] ) as $update ) {
 			$plugin_repo = explode( '/', $update );
 			$updates[] = $plugin_repo[0];
 		}
 
-		foreach ( array_merge( $theme_updating, $themes_updating ) as $update ) {
+		foreach ( array_merge( $request['theme'], $request['themes'] ) as $update ) {
 			$updates[] = $update;
 		}
 
