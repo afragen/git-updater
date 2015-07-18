@@ -449,21 +449,12 @@ class Base {
 			$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
 		}
 		if ( $upgrader instanceof \Theme_Upgrader &&
-		     $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin
+		     isset( $upgrader->skin->theme_info )
 		) {
 			$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
 			$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
 			$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
 			$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
-		}
-
-		$incomplete = false;
-		if ( $upgrader instanceof \__PHP_Incomplete_Class &&
-		     isset( $upgrader->Theme_Upgrader )
-		) {
-			$incomplete = 'incomplete';
-			set_site_transient('ghu_incomplete', $incomplete, 9999);
-
 		}
 
 		set_site_transient('ghu_upgrader', $upgrader, 9999);
@@ -570,7 +561,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function get_updating_repos( $upgrader = null ) {
+	protected function get_updating_repos( $upgrader ) {
 		$updates            = array();
 		$request            = apply_filters( 'github_updater_remote_update_request', $_REQUEST, $upgrader );
 
