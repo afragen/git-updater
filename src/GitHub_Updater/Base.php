@@ -593,6 +593,8 @@ class Base {
 			}
 		}
 
+		set_site_transient('ghu_request_post', $request, 9999 );
+		set_site_transient('ghu_updates_post', $updates, 9999 );
 		return $updates;
 	}
 
