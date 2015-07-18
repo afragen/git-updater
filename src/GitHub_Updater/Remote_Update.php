@@ -40,18 +40,18 @@ class Remote_Update extends Base {
 	 */
 	public static function iThemes_Sync( $request ) {
 		set_site_transient( 'ghu_request', $request, 9999 );
-		$request = json_decode( stripslashes( $request['request'] ), true );
-		$args    = $request['arguments'];
-		if ( isset( $args['plugin'] ) ) {
-			$request['plugin'] = $args['plugin'];
-		} elseif ( isset( $args['theme'] ) ) {
-			$request['theme']  = $args['theme'];
-		}
 		if ( empty( $request['plugin'] ) &&
 		     empty( $request['plugins'] ) &&
 		     empty( $request['theme'] ) &&
 		     empty( $request['themes'] )
 		) {
+			$request = json_decode( stripslashes( $request['request'] ), true );
+			$args    = $request['arguments'];
+			if ( isset( $args['plugin'] ) ) {
+				$request['plugin'] = $args['plugin'];
+			} elseif ( isset( $args['theme'] ) ) {
+				$request['theme']  = $args['theme'];
+			}
 		}
 
 		set_site_transient('ghu_ithemes', $request, 9999 );
