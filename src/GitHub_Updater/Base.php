@@ -469,7 +469,6 @@ class Base {
 		 */
 		if ( empty( $repo ) ) {
 			$updates = $this->get_updating_repos();
-			set_site_transient('ghu_updates', $updates, 9999);
 			foreach ( $updates as $extended => $update ) {
 
 				/*
@@ -520,7 +519,6 @@ class Base {
 					break;
 				}
 			}
-			set_site_transient('ghu_skin', $upgrader->skin, 9999);
 
 			/*
 			 * Return already corrected $source or wp.org $source.

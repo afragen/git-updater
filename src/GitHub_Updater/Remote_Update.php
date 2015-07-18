@@ -48,7 +48,6 @@ class Remote_Update extends Base {
 				$request['theme']  = $args['theme'];
 			}
 		}
-		set_site_transient('ghu_request', $request, 9999);
 
 		return $request;
 	}

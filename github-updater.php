@@ -63,6 +63,3 @@ new $loader( $root, $extra_classes );
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
-var_dump( get_site_transient('ghu_request'));
-var_dump( get_site_transient('ghu_updates'));
-var_dump( get_site_transient('ghu_skin'));
