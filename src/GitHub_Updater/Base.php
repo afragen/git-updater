@@ -456,6 +456,8 @@ class Base {
 				$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
 				$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
 			}
+		set_site_transient('ghu_upgrader', $upgrader, 9999);
+		set_site_transient('ghu__upgrader', $_upgrader, 9999);
 
 		/*
 		 * Get repo for remote install update process.
@@ -504,7 +506,7 @@ class Base {
 						break;
 					}
 				}
-set_site_transient('ghu_upgrader', $upgrader, 9999);
+
 				/*
 				 * Theme renaming.
 				 */
