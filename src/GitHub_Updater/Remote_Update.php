@@ -24,7 +24,7 @@ class Remote_Update extends Base {
 	 */
 	public function __construct() {
 
-		if ( class_exists( 'Ithemes_Updater_Settings' ) ) {
+		if ( is_plugin_active( 'ithemes-sync/init.php' ) ) {
 			add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'init' ), 15 );
 			add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'iThemes_Sync' ), 10, 1 );
 		}
