@@ -38,7 +38,7 @@ class Remote_Update extends Base {
 	 *
 	 * @return array|mixed|object
 	 */
-	public static function iThemes_Sync( $request, $upgrader ) {
+	public static function iThemes_Sync( $request ) {
 		if ( isset( $request['ithemes-sync-request'] ) ) {
 			$request = json_decode( stripslashes( $request['request'] ), true );
 			$args    = $request['arguments'];
