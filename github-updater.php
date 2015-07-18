@@ -69,3 +69,4 @@ var_dump( get_site_transient('ghu_request_post'));
 var_dump( get_site_transient('ghu_updates_post'));
 var_dump( get_site_transient('ghu_upgrader'));
 var_dump( get_site_transient('ghu__upgrader'));
+var_dump( get_site_transient('ghu_incomplete'));
