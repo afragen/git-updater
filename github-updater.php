@@ -65,6 +65,7 @@ new $instantiate;
 
 var_dump( get_site_transient('ghu_request'));
 var_dump( get_site_transient('ghu_ithemes'));
+var_dump( get_site_transient('ghu_it_upgrader'));
 var_dump( get_site_transient('ghu_request_post'));
 var_dump( get_site_transient('ghu_updates_post'));
 var_dump( get_site_transient('ghu_upgrader'));
