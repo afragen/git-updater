@@ -472,7 +472,7 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			$updates = $this->get_updating_repos( $upgrader );
+			$updates = $this->get_updating_repos();
 			foreach ( $updates as $extended => $update ) {
 
 				/*
@@ -561,9 +561,9 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function get_updating_repos( $upgrader ) {
+	protected function get_updating_repos() {
 		$updates            = array();
-		$request            = apply_filters( 'github_updater_remote_update_request', $_REQUEST, $upgrader );
+		$request            = apply_filters( 'github_updater_remote_update_request', $_REQUEST );
 
 		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
 		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
