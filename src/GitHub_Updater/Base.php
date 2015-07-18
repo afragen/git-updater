@@ -441,7 +441,7 @@ class Base {
 		 * and possibly other remote upgrade services.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader &&
-		     $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin
+		     isset( $upgrader->skin->plugin_info )
 		) {
 			$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
 			$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
@@ -456,10 +456,6 @@ class Base {
 			$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
 			$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
 		}
-
-		set_site_transient('ghu_upgrader', $upgrader, 9999);
-		set_site_transient('ghu__upgrader', $_upgrader, 9999);
-		set_site_transient('ghu_skin', $upgrader->skin, 9999);
 
 		/*
 		 * Get repo for remote install update process.

@@ -39,8 +39,6 @@ class Remote_Update extends Base {
 	 * @return array|mixed|object
 	 */
 	public static function iThemes_Sync( $request, $upgrader ) {
-		set_site_transient( 'ghu_it_upgrader', $upgrader, 9999 );
-		set_site_transient( 'ghu_request', $request, 9999 );
 		if ( isset( $request['ithemes-sync-request'] ) ) {
 			$request = json_decode( stripslashes( $request['request'] ), true );
 			$args    = $request['arguments'];
@@ -51,7 +49,6 @@ class Remote_Update extends Base {
 			}
 		}
 
-		set_site_transient('ghu_ithemes', $request, 9999 );
 		return $request;
 	}
 }
