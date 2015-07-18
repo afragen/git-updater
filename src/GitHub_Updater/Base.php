@@ -504,7 +504,7 @@ class Base {
 						break;
 					}
 				}
-
+set_site_transient('ghu_upgrader', $upgrader, 9999);
 				/*
 				 * Theme renaming.
 				 */
