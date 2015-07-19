@@ -128,7 +128,9 @@ class Base {
 	 * @return \Fragen\GitHub_Updater\Remote_Update
 	 */
 	public function remote_update() {
-		return new Remote_Update();
+		if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
+			return new Remote_Update();
+		}
 	}
 
 	/**
@@ -594,8 +596,6 @@ class Base {
 			}
 		}
 
-		set_site_transient('ghu_request_post', $request, 9999 );
-		set_site_transient('ghu_updates_post', $updates, 9999 );
 		return $updates;
 	}
 
