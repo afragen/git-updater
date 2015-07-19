@@ -104,7 +104,7 @@ class Base {
 		 * Calls in init hook for user capabilities.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
-		add_action( 'admin_init', array( &$this, 'remote_update' ) );
+		//add_action( 'admin_init', array( &$this, 'remote_update' ) );
 	}
 
 	/**
