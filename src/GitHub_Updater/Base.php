@@ -568,28 +568,27 @@ class Base {
 	 * @return array
 	 */
 	protected function get_updating_repos() {
-		$updates        = array();
-		$get            = array_map( 'wp_filter_kses', $_GET );
-		$get            = apply_filters( 'github_updater_remote_update_request', $get );
+		$updates            = array();
+		$request            = apply_filters( 'github_updater_remote_update_request', $request );
 
-		$get['plugins'] = isset( $get['plugins'] ) ? $get['plugins'] : array();
-		$get['plugin']  = isset( $get['plugin'] ) ? (array) $get['plugin'] : array();
-		$get['themes']  = isset( $get['themes'] ) ? $get['themes'] : array();
-		$get['theme']   = isset( $get['theme'] ) ? (array) $get['theme'] : array();
+		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
+		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
+		$request['themes']  = isset( $request['themes'] ) ? $request['themes'] : array();
+		$request['theme']   = isset( $request['theme'] ) ? (array) $request['theme'] : array();
 
-		if ( ! empty( $get['plugins'] ) ) {
-			$get['plugins'] = explode( ',', $get['plugins'] );
+		if ( ! empty( $request['plugins'] ) ) {
+			$request['plugins'] = explode( ',', $request['plugins'] );
 		}
-		if ( ! empty( $get['themes']) ) {
-			$get['themes'] = explode( ',', $get['themes'] );
+		if ( ! empty( $request['themes']) ) {
+			$request['themes'] = explode( ',', $request['themes'] );
 		}
 
-		foreach ( array_merge( $get['plugin'], $get['plugins'] ) as $update ) {
+		foreach ( array_merge( $request['plugin'], $request['plugins'] ) as $update ) {
 			$plugin_repo = explode( '/', $update );
 			$updates[] = $plugin_repo[0];
 		}
 
-		foreach ( array_merge( $get['theme'], $get['themes'] ) as $update ) {
+		foreach ( array_merge( $request['theme'], $request['themes'] ) as $update ) {
 			$updates[] = $update;
 		}
 
