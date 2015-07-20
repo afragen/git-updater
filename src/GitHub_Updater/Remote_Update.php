@@ -52,38 +52,37 @@ class Remote_Update extends Base {
 	}
 
 	/**
-	 * Correct $_REQUEST for iThemes Sync.
+	 * Correct $_GET for iThemes Sync.
 	 *
-	 * @param $request
+	 * @param $get
 	 *
 	 * @return array|mixed|object
 	 */
-	public static function iThemes_Sync( $request ) {
-		set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
-		set_site_transient( 'ghu_it_request', $request, 9999 );
-		$request            = array_map( 'wp_filter_kses', $_REQUEST );
-		set_site_transient( 'ghu_it_request_post', $request, 9999 );
-		if ( isset( $request['ithemes-sync-request'] ) ) {
-			$request  = json_decode( stripslashes( $request['request'] ), true );
-			$args = esc_attr( $request['arguments'] );
+	public static function iThemes_Sync( $get ) {
+		//set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
+		//set_site_transient( 'ghu_it_request', $get, 9999 );
+		//set_site_transient( 'ghu_it_request_post', $get, 9999 );
+		if ( isset( $get['ithemes-sync-request'] ) ) {
+			$get  = json_decode( stripslashes( $get['request'] ), true );
+			$args = $get['arguments'];
 			if ( isset( $args['plugin'] ) ) {
-				$request['plugin'] = $args['plugin'];
+				$get['plugin'] = $args['plugin'];
 			} elseif ( isset( $args['theme'] ) ) {
-				$request['theme']  = $args['theme'];
+				$get['theme']  = $args['theme'];
 			}
 		}
 
-		return $request;
+		return $get;
 	}
 
-	public static function ManageWP( $request ) {
+	public static function ManageWP( $get ) {
 		set_site_transient( 'ghu_remote_service', 'ManageWP active', 9999 );
-		return $request;
+		return $get;
 	}
 
-	public static function MainWP( $request ) {
+	public static function MainWP( $get ) {
 		set_site_transient( 'ghu_remote_service', 'MainWP active', 9999 );
-		return $request;
+		return $get;
 	}
 
 	public static function InfiniteWP( $request ) {
@@ -91,9 +90,9 @@ class Remote_Update extends Base {
 		return $request;
 	}
 
-	public static function WP_Remote( $request ) {
+	public static function WP_Remote( $get ) {
 		set_site_transient( 'ghu_remote_service', 'WP-Remote active', 9999 );
-		return $request;
+		return $get;
 	}
 
 }
