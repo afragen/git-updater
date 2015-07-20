@@ -85,9 +85,9 @@ class Remote_Update extends Base {
 		return $get;
 	}
 
-	public static function InfiniteWP( $request ) {
+	public static function InfiniteWP( $get ) {
 		set_site_transient( 'ghu_remote_service', 'InfiniteWP active', 9999 );
-		return $request;
+		return $get;
 	}
 
 	public static function WP_Remote( $get ) {
