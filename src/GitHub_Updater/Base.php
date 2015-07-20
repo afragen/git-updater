@@ -569,7 +569,7 @@ class Base {
 	 */
 	protected function get_updating_repos() {
 		$updates            = array();
-		$request            = apply_filters( 'github_updater_remote_update_request', $request );
+		$request            = apply_filters( 'github_updater_remote_update_request', $_REQUEST );
 
 		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
 		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
