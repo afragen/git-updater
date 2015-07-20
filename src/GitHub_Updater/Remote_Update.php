@@ -36,10 +36,16 @@ class Remote_Update extends Base {
 				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'iThemes_Sync' ) );
 				break;
 			case is_plugin_active( 'worker/init.php' ): // ManageWP - Worker
+				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'ManageWP' ) );
 				break;
 			case is_plugin_active( 'mainwp/mainwp.php' ): // MainWP
+				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'MainWP' ) );
 				break;
 			case is_plugin_active( 'iwp-client/init.php' ): // InfiniteWP
+				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'InfiniteWP' ) );
+				break;
+			case is_plugin_active( 'wpremote/plugin.php' ): // WP-Remote
+				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'WP_Remote' ) );
 				break;
 		}
 
@@ -65,6 +71,25 @@ class Remote_Update extends Base {
 
 		return $get;
 	}
+
+	public static function ManageWP( $get ) {
+		//var_dump( 'ManageWP active' );
+		return $get;
+	}
+
+	public static function MainWP( $get ) {
+		//var_dump( 'MainWP active' );
+		return $get;
+	}
+
+	public static function InfiniteWP( $get ) {
+		//var_dump( 'InfiniteWP active' );
+		return $get;
+	}
+
+	public static function WP_Remote( $request ) {
+		//var_dump( 'WP-Remote active' );
 		return $request;
 	}
+
 }
