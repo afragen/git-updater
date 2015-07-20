@@ -59,6 +59,7 @@ class Remote_Update extends Base {
 	 * @return array|mixed|object
 	 */
 	public static function iThemes_Sync( $get ) {
+		set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
 		if ( isset( $get['ithemes-sync-request'] ) ) {
 			$get  = json_decode( stripslashes( $get['request'] ), true );
 			$args = esc_attr( $get['arguments'] );
@@ -73,22 +74,22 @@ class Remote_Update extends Base {
 	}
 
 	public static function ManageWP( $get ) {
-		//var_dump( 'ManageWP active' );
+		set_site_transient( 'ghu_remote_service', 'ManageWP active', 9999 );
 		return $get;
 	}
 
 	public static function MainWP( $get ) {
-		//var_dump( 'MainWP active' );
+		set_site_transient( 'ghu_remote_service', 'MainWP active', 9999 );
 		return $get;
 	}
 
 	public static function InfiniteWP( $get ) {
-		//var_dump( 'InfiniteWP active' );
+		set_site_transient( 'ghu_remote_service', 'InfiniteWP active', 9999 );
 		return $get;
 	}
 
 	public static function WP_Remote( $request ) {
-		//var_dump( 'WP-Remote active' );
+		set_site_transient( 'ghu_remote_service', 'WP-Remote active', 9999 );
 		return $request;
 	}
 
