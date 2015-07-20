@@ -10,6 +10,12 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * Install <author>/<repo> directly from GitHub Updater.

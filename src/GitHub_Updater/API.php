@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 abstract class API extends Base {
 
 	/*

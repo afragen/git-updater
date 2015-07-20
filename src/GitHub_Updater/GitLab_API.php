@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Get remote data from a GitLab repo.
  *

@@ -10,7 +10,18 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
+/**
+ * Class Messages
+ *
+ * @package Fragen\GitHub_Updater
+ */
 class Messages extends Base {
 
 	/**

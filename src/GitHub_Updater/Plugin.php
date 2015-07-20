@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
