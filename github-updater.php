@@ -64,3 +64,5 @@ $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
 //var_dump( get_site_transient( 'ghu_remote_service' ) );
+//var_dump( get_site_transient( 'ghu_it_request' ) );
+//var_dump( get_site_transient( 'ghu_it_request_post' ) );
