@@ -1,5 +1,6 @@
 #### 4.6.2
 * refactor remote update services to new `class Remote_Update`
+* general security fixes, don't call files directly...
 
 #### 4.6.1
 * fix for remote updating via iThemes Sync
