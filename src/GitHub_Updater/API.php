@@ -17,6 +17,11 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * Class API
+ *
+ * @package Fragen\GitHub_Updater
+ */
 abstract class API extends Base {
 
 	/*
