@@ -46,23 +46,25 @@ class Remote_Update extends Base {
 	}
 
 	/**
-	 * Correct $_REQUEST for iThemes Sync.
+	 * Correct $_GET for iThemes Sync.
 	 *
-	 * @param $request
+	 * @param $get
 	 *
 	 * @return array|mixed|object
 	 */
-	public static function iThemes_Sync( $request ) {
-		if ( isset( $request['ithemes-sync-request'] ) ) {
-			$request = json_decode( stripslashes( $request['request'] ), true );
-			$args    = $request['arguments'];
+	public static function iThemes_Sync( $get ) {
+		if ( isset( $get['ithemes-sync-request'] ) ) {
+			$get  = json_decode( stripslashes( $get['request'] ), true );
+			$args = esc_attr( $get['arguments'] );
 			if ( isset( $args['plugin'] ) ) {
-				$request['plugin'] = $args['plugin'];
+				$get['plugin'] = $args['plugin'];
 			} elseif ( isset( $args['theme'] ) ) {
-				$request['theme']  = $args['theme'];
+				$get['theme']  = $args['theme'];
 			}
 		}
 
+		return $get;
+	}
 		return $request;
 	}
 }
