@@ -52,47 +52,44 @@ class Remote_Update extends Base {
 	}
 
 	/**
-	 * Correct $_GET for iThemes Sync.
+	 * Correct $_REQUEST for iThemes Sync.
 	 *
-	 * @param $get
+	 * @param $request
 	 *
 	 * @return array|mixed|object
 	 */
-	public static function iThemes_Sync( $get ) {
-		//set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
-		//set_site_transient( 'ghu_it_request', $get, 9999 );
-		//set_site_transient( 'ghu_it_request_post', $get, 9999 );
-		if ( isset( $get['ithemes-sync-request'] ) ) {
-			$get  = json_decode( stripslashes( $get['request'] ), true );
-			$args = $get['arguments'];
+	public static function iThemes_Sync( $request ) {
+		if ( isset( $request['ithemes-sync-request'] ) ) {
+			$request  = json_decode( stripslashes( $request['request'] ), true );
+			$args = $request['arguments'];
 			if ( isset( $args['plugin'] ) ) {
-				$get['plugin'] = $args['plugin'];
+				$request['plugin'] = $args['plugin'];
 			} elseif ( isset( $args['theme'] ) ) {
-				$get['theme']  = $args['theme'];
+				$request['theme']  = $args['theme'];
 			}
 		}
 
-		return $get;
+		return $request;
 	}
 
-	public static function ManageWP( $get ) {
+	public static function ManageWP( $request ) {
 		set_site_transient( 'ghu_remote_service', 'ManageWP active', 9999 );
-		return $get;
+		return $request;
 	}
 
-	public static function MainWP( $get ) {
+	public static function MainWP( $request ) {
 		set_site_transient( 'ghu_remote_service', 'MainWP active', 9999 );
-		return $get;
+		return $request;
 	}
 
-	public static function InfiniteWP( $get ) {
+	public static function InfiniteWP( $request ) {
 		set_site_transient( 'ghu_remote_service', 'InfiniteWP active', 9999 );
-		return $get;
+		return $request;
 	}
 
-	public static function WP_Remote( $get ) {
+	public static function WP_Remote( $request ) {
 		set_site_transient( 'ghu_remote_service', 'WP-Remote active', 9999 );
-		return $get;
+		return $request;
 	}
 
 }
