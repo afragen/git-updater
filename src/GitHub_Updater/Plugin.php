@@ -44,7 +44,7 @@ class Plugin extends Base {
 		 * Get details of git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
-		
+
 		if ( empty( $this->config ) ) {
 			return false;
 		}
