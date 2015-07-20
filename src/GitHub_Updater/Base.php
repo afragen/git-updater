@@ -33,14 +33,14 @@ class Base {
 	 *
 	 * @var object
 	 */
-	protected $config;
+	protected $config = null;
 
 	/**
 	 * Class Object for API.
 	 *
 	 * @var object
 	 */
- 	protected $repo_api;
+ 	protected $repo_api = null;
 
 	/**
 	 * Variable for setting update transient hours.
