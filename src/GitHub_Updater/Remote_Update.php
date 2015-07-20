@@ -59,6 +59,7 @@ class Remote_Update extends Base {
 	 * @return array|mixed|object
 	 */
 	public static function iThemes_Sync( $request ) {
+		set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
 		if ( isset( $request['ithemes-sync-request'] ) ) {
 			$request  = json_decode( stripslashes( $request['request'] ), true );
 			$args = $request['arguments'];
