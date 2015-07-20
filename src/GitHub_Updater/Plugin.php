@@ -55,28 +55,28 @@ class Plugin extends Base {
 		foreach ( (array) $this->config as $plugin ) {
 			switch( $plugin->type ) {
 				case 'github_plugin':
-					$repo_api = new GitHub_API( $plugin );
+					$this->repo_api = new GitHub_API( $plugin );
 					break;
 				case 'bitbucket_plugin':
-					$repo_api = new Bitbucket_API( $plugin );
+					$this->repo_api = new Bitbucket_API( $plugin );
 					break;
 				case 'gitlab_plugin';
-					$repo_api = new GitLab_API( $plugin );
+					$this->repo_api = new GitLab_API( $plugin );
 					break;
 			}
 
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-				$repo_api->get_repo_meta();
-				$repo_api->get_remote_tag();
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
 				if ( $changelog ) {
-					$repo_api->get_remote_changes( $changelog );
+					$this->repo_api->get_remote_changes( $changelog );
 				}
-				$repo_api->get_remote_readme();
-				$plugin->download_link = $repo_api->construct_download_link();
+				$this->repo_api->get_remote_readme();
+				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -92,7 +92,7 @@ class Plugin extends Base {
 					'plugin'      => $plugin->slug,
 					'new_version' => $this->tag,
 					'url'         => $plugin->uri,
-					'package'     => $repo_api->construct_download_link( false, $this->tag ),
+					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );

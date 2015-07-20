@@ -56,27 +56,27 @@ class Theme extends Base {
 		foreach ( (array) $this->config as $theme ) {
 			switch( $theme->type ) {
 				case 'github_theme':
-					$repo_api = new GitHub_API( $theme );
+					$this->repo_api = new GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new Bitbucket_API( $theme );
+					$this->repo_api = new Bitbucket_API( $theme );
 					break;
 				case 'gitlab_theme':
-					$repo_api = new GitLab_API( $theme );
+					$this->repo_api = new GitLab_API( $theme );
 					break;
 			}
 
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $repo_api->get_remote_info( 'style.css' ) ) {
-				$repo_api->get_repo_meta();
-				$repo_api->get_remote_tag();
+			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
 				if ( $changelog ) {
-					$repo_api->get_remote_changes( $changelog );
+					$this->repo_api->get_remote_changes( $changelog );
 				}
-				$theme->download_link = $repo_api->construct_download_link();
+				$theme->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -90,7 +90,7 @@ class Theme extends Base {
 				$rollback          = array(
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
-					'package'     => $repo_api->construct_download_link( $this->tag, false ),
+					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
@@ -342,7 +342,7 @@ class Theme extends Base {
 	 */
 	private function _append_theme_actions_content( $theme ) {
 
-		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
+		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
@@ -389,10 +389,10 @@ class Theme extends Base {
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
-				<select style="width: 60%;" 
+				<select style="width: 60%;"
 					onchange="if(jQuery(this).val() != '') {
-						jQuery(this).next().show(); 
-						jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val()); 
+						jQuery(this).next().show();
+						jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val());
 					}
 					else jQuery(this).next().hide();
 				">
@@ -422,7 +422,7 @@ class Theme extends Base {
 			if ( empty( $theme->uri ) ) {
 				continue;
 			}
-			
+
 			$update = array(
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
