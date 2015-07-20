@@ -54,6 +54,7 @@ class Theme extends Base {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
+			$this->repo_api = null;
 			switch( $theme->type ) {
 				case 'github_theme':
 					$this->repo_api = new GitHub_API( $theme );
@@ -64,6 +65,10 @@ class Theme extends Base {
 				case 'gitlab_theme':
 					$this->repo_api = new GitLab_API( $theme );
 					break;
+			}
+
+			if ( is_null( $this->repo_api ) ) {
+				continue;
 			}
 
 			$this->{$theme->type} = $theme;

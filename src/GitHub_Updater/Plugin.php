@@ -53,6 +53,7 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$this->repo_api = null;
 			switch( $plugin->type ) {
 				case 'github_plugin':
 					$this->repo_api = new GitHub_API( $plugin );
@@ -63,6 +64,10 @@ class Plugin extends Base {
 				case 'gitlab_plugin';
 					$this->repo_api = new GitLab_API( $plugin );
 					break;
+			}
+
+			if ( is_null( $this->repo_api ) ) {
+				continue;
 			}
 
 			$this->{$plugin->type} = $plugin;
