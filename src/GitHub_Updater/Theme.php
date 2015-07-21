@@ -129,6 +129,8 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
+		$ghu_update_themes = get_site_transient( 'ghu_update_themes' );
+		set_site_transient( 'update_themes', $ghu_update_themes );
 		Settings::$ghu_themes = $this->config;
 	}
 
@@ -442,7 +444,7 @@ class Theme extends Base {
 			}
 		}
 
-		set_site_transient( 'update_themes', $transient );
+		set_site_transient( 'ghu_update_themes', $transient );
 
 		return $transient;
 	}
