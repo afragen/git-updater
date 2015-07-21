@@ -103,9 +103,9 @@ class Theme extends Base {
 
 			/*
 			 * Remove WordPress update row in theme row, only in multisite.
-			 * Add update row to theme row, only in multisite for WP < 3.8
+			 * Add update row to theme row, only in multisite.
 			 */
-			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
+			if ( is_multisite() ) {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
