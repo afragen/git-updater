@@ -318,4 +318,4 @@ GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 ## Pull Requests
 
-Please fork and submit pull requests against the `develop` branch.
+Pull requests are welcome. Please fork and submit pull requests against the `develop` branch.
