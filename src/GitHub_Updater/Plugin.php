@@ -114,8 +114,6 @@ class Plugin extends Base {
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
-		$ghu_update_plugins = get_site_transient( 'ghu_update_plugins' );
-		set_site_transient( 'update_plugins', $ghu_update_plugins );
 		Settings::$ghu_plugins = $this->config;
 	}
 
