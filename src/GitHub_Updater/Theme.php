@@ -417,11 +417,11 @@ class Theme extends Base {
 	 *
 	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param array $data
+	 * @param array $transient
 	 *
 	 * @return array|object
 	 */
-	public function pre_set_site_transient_update_themes( $data ) {
+	public function pre_set_site_transient_update_themes( $transient ) {
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
@@ -435,14 +435,16 @@ class Theme extends Base {
 			);
 
 			if ( $this->can_update( $theme ) ) {
-				$data->response[ $theme->repo ] = $update;
+				$transient->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
-				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
-				$data->up_to_date[ $theme->repo ]['response'] = $update;
+				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
+				$transient->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
 
-		return $data;
+		set_site_transient( 'update_themes', $transient );
+
+		return $transient;
 	}
 
 }

@@ -326,6 +326,8 @@ class Plugin extends Base {
 			}
 		}
 
+		set_site_transient( 'update_plugins', $transient );
+
 		return $transient;
 	}
 
