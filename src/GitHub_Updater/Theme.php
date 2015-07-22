@@ -300,6 +300,7 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
+
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
@@ -321,6 +322,7 @@ class Theme extends Base {
 	 * @return mixed
 	 */
 	public function customize_theme_update_html( $prepared_themes ) {
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $prepared_themes[ $theme->repo ] ) ) {
 				continue;
