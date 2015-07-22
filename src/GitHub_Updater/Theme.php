@@ -422,7 +422,7 @@ class Theme extends Base {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $transient ) {
-
+		
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
 				continue;
@@ -441,8 +441,6 @@ class Theme extends Base {
 				$transient->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
-
-		set_site_transient( 'ghu_update_themes', $transient );
 
 		return $transient;
 	}

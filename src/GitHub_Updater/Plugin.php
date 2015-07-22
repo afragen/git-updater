@@ -294,6 +294,7 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
+
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
@@ -325,8 +326,6 @@ class Plugin extends Base {
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
-
-		set_site_transient( 'ghu_update_plugins', $transient );
 
 		return $transient;
 	}
