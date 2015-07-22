@@ -62,5 +62,3 @@ new $loader( $root, $extra_classes );
 // Instantiate class GitHub_Updater
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
-
-//var_dump( get_site_transient( 'ghu_remote_service' ) );
