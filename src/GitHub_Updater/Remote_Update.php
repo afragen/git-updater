@@ -35,14 +35,14 @@ class Remote_Update extends Base {
 				add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'init' ), 15 );
 				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'iThemes_Sync' ) );
 				break;
+			case is_plugin_active( 'iwp-client/init.php' ): // InfiniteWP
+				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'InfiniteWP' ) );
+				break;
 			case is_plugin_active( 'worker/init.php' ): // ManageWP - Worker
 				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'ManageWP' ) );
 				break;
 			case is_plugin_active( 'mainwp/mainwp.php' ): // MainWP
 				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'MainWP' ) );
-				break;
-			case is_plugin_active( 'iwp-client/init.php' ): // InfiniteWP
-				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'InfiniteWP' ) );
 				break;
 			case is_plugin_active( 'wpremote/plugin.php' ): // WP-Remote
 				add_filter( 'github_updater_remote_update_request', array( __CLASS__, 'WP_Remote' ) );
@@ -59,7 +59,6 @@ class Remote_Update extends Base {
 	 * @return array|mixed|object
 	 */
 	public static function iThemes_Sync( $request ) {
-		set_site_transient( 'ghu_remote_service', 'iThemes Sync active', 9999 );
 		if ( isset( $request['ithemes-sync-request'] ) ) {
 			$request  = json_decode( stripslashes( $request['request'] ), true );
 			$args = $request['arguments'];
@@ -73,23 +72,29 @@ class Remote_Update extends Base {
 		return $request;
 	}
 
+	/**
+	 * $_REQUEST for InfiniteWP already correct. However, updating for child themes not functioning.
+	 *
+	 * @param $request
+	 *
+	 * @return mixed
+	 */
+	public static function InfiniteWP( $request ) {
+		return $request;
+	}
+
 	public static function ManageWP( $request ) {
-		set_site_transient( 'ghu_remote_service', 'ManageWP active', 9999 );
+		set_site_transient( 'ghu_remote_service', 'ManageWP active', 3600 );
 		return $request;
 	}
 
 	public static function MainWP( $request ) {
-		set_site_transient( 'ghu_remote_service', 'MainWP active', 9999 );
-		return $request;
-	}
-
-	public static function InfiniteWP( $request ) {
-		set_site_transient( 'ghu_remote_service', 'InfiniteWP active', 9999 );
+		set_site_transient( 'ghu_remote_service', 'MainWP active', 3600 );
 		return $request;
 	}
 
 	public static function WP_Remote( $request ) {
-		set_site_transient( 'ghu_remote_service', 'WP-Remote active', 9999 );
+		set_site_transient( 'ghu_remote_service', 'WP-Remote active', 3600 );
 		return $request;
 	}
 
