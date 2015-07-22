@@ -116,6 +116,10 @@ class Theme extends Base {
 
 		$this->make_force_check_transient( 'themes' );
 
+		if ( ! is_multisite() ) {
+			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
+		}
+
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
@@ -124,10 +128,6 @@ class Theme extends Base {
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
-
-		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
-		}
 
 		Settings::$ghu_themes = $this->config;
 	}
@@ -422,7 +422,7 @@ class Theme extends Base {
 	 * @return array|object
 	 */
 	public function pre_set_site_transient_update_themes( $transient ) {
-		
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
 				continue;
