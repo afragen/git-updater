@@ -1,3 +1,8 @@
+#### 4.6.2
+* refactor remote update services to new `class Remote_Update`
+* general security fixes, don't call files directly...
+* fix/test for remote updating via InfiniteWP. Child themes are not identified by IWP as needing updates, otherwise it seems to work as expected.
+
 #### 4.6.1
 * fix for remote updating via iThemes Sync
 * fix for renaming when AJAX updating of plugins

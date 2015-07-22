@@ -3,6 +3,13 @@
 // namespace must be unique to each plugin
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  *
  * To use with different plugins be sure to create a new namespace.

@@ -10,7 +10,18 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
+/**
+ * Class Messages
+ *
+ * @package Fragen\GitHub_Updater
+ */
 class Messages extends Base {
 
 	/**
@@ -94,6 +105,9 @@ class Messages extends Base {
 		}
 	}
 
+	/**
+	 * Generate error message for missing GitLab Private Token.
+	 */
 	public static function gitlab_error() {
 		?>
 		<div class="error notice is-dismissible">

@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Get remote data from a GitLab repo.
  *
@@ -32,7 +39,7 @@ class GitLab_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type  = $type;
+		$this->type    = $type;
 		parent::$hours = 12;
 
 		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
@@ -209,6 +216,12 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			self::$method = 'meta';
 			$projects     = $this->get_transient( 'projects' );
+
+			// exit if transient is empty
+			if ( ! $projects ) {
+				return false;
+			}
+
 			foreach ( $projects as $project ) {
 				if ( $this->type->repo === $project->name ) {
 					$response = $project;
@@ -265,12 +278,12 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Construct $this->type->download_link using GitLab API
+	 * Construct $this->type->download_link using GitLab API.
 	 *
 	 * @param boolean $rollback for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
-	 * @return string URI
+	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		/*
@@ -336,7 +349,7 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object
+	 * Add remote data to type object.
 	 */
 	private function _add_meta_repo_object() {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );

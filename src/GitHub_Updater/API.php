@@ -10,6 +10,18 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
+ * Class API
+ *
+ * @package Fragen\GitHub_Updater
+ */
 abstract class API extends Base {
 
 	/*
@@ -113,7 +125,7 @@ abstract class API extends Base {
 	 *
 	 * @param string $endpoint
 	 *
-	 * @return string
+	 * @return string $endpoint
 	 */
 	private function _get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();

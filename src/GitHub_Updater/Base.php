@@ -11,6 +11,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Update a WordPress plugin or theme from a Git-based repo.
  *
@@ -29,47 +36,50 @@ class Base {
 	protected $config;
 
 	/**
-	 * Class Object for API
+	 * Class Object for API.
 	 *
 	 * @var object
 	 */
  	protected $repo_api;
 
 	/**
-	 * Variable for setting update transient hours
+	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
 	 */
 	protected static $hours;
 
 	/**
-	 * Variable for holding transient ids
+	 * Variable for holding transient ids.
 	 *
 	 * @var array
 	 */
 	protected static $transients = array();
 
 	/**
-	 * Variable for holding extra theme and plugin headers
+	 * Variable for holding extra theme and plugin headers.
 	 *
 	 * @var array
 	 */
 	protected static $extra_headers = array();
 
 	/**
-	 * Holds the values to be used in the fields callbacks
+	 * Holds the values to be used in the fields callbacks.
+	 *
 	 * @var array
 	 */
 	protected static $options;
 
 	/**
 	 * Holds HTTP error code from API call.
+	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
 	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
+	 *
 	 * @var array
 	 */
 	protected static $git_servers = array(
@@ -80,6 +90,7 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
+	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
@@ -89,8 +100,7 @@ class Base {
 	);
 
 	/**
-	 * Constructor
-	 *
+	 * Constructor.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
@@ -98,17 +108,14 @@ class Base {
 		$this->add_headers();
 
 		/*
-		 * Calls $this->init() in init hook so other remote upgrader apps like
-		 * InfiniteWP, ManageWP, MainWP, and iThemes Sync will load and use all
-		 * of GitHub_Updater's methods, especially renaming.
+		 * Calls in init hook for user capabilities.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
-
+		add_action( 'init', array( &$this, 'remote_update' ) );
 	}
 
 	/**
-	 * Instantiate Fragen\GitHub_Updater\Plugin and Fragen\GitHub_Updater\Theme
-	 * for proper user capabilities.
+	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
@@ -123,7 +130,18 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers via filter hooks
+	 * Load class for remote updating compatibility.
+	 *
+	 * @return \Fragen\GitHub_Updater\Remote_Update
+	 */
+	public function remote_update() {
+		if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
+			return new Remote_Update();
+		}
+	}
+
+	/**
+	 * Add extra headers via filter hooks.
 	 */
 	public function add_headers() {
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_plugin_headers' ) );
@@ -131,9 +149,10 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to get_plugins();
+	 * Add extra headers to get_plugins().
 	 *
 	 * @param $extra_headers
+	 *
 	 * @return array
 	 */
 	public function add_plugin_headers( $extra_headers ) {
@@ -156,9 +175,10 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to wp_get_themes()
+	 * Add extra headers to wp_get_themes().
 	 *
 	 * @param $extra_headers
+	 *
 	 * @return array
 	 */
 	public function add_theme_headers( $extra_headers ) {
@@ -277,7 +297,7 @@ class Base {
 
 	/**
 	 * Reads in WP_Theme class of each theme.
-	 * Populates variable array
+	 * Populates variable array.
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
@@ -355,7 +375,7 @@ class Base {
 	}
 
 	/**
-	 * Set default values for plugin/theme
+	 * Set default values for plugin/theme.
 	 *
 	 * @param $type
 	 */
@@ -404,7 +424,7 @@ class Base {
 	 * @param string $remote_source
 	 * @param object $upgrader
 	 *
-	 * @return string
+	 * @return string $source|$corrected_source
 	 */
 	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
 
@@ -429,22 +449,22 @@ class Base {
 		 * Re-create $upgrader object for iThemes Sync
 		 * and possibly other remote upgrade services.
 		 */
-			if ( $upgrader instanceof \Plugin_Upgrader &&
-			     $upgrader->skin instanceof \Bulk_Plugin_Upgrader_Skin
-			) {
-				$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
-				$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
-				$upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
-				$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
-			}
-			if ( $upgrader instanceof \Theme_Upgrader &&
-			     $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin
-			) {
-				$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
-				$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
-				$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
-				$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
-			}
+		if ( $upgrader instanceof \Plugin_Upgrader &&
+		     isset( $upgrader->skin->plugin_info )
+		) {
+			$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+			$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
+			$upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
+			$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
+		}
+		if ( $upgrader instanceof \Theme_Upgrader &&
+		     isset( $upgrader->skin->theme_info )
+		) {
+			$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+			$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
+			$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
+			$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
+		}
 
 		/*
 		 * Get repo for remote install update process.
@@ -457,7 +477,7 @@ class Base {
 		 * Get/set $repo for updating.
 		 */
 		if ( empty( $repo ) ) {
-			$updates = $this->_get_updating_repos();
+			$updates = $this->get_updating_repos();
 			foreach ( $updates as $extended => $update ) {
 
 				/*
@@ -473,9 +493,9 @@ class Base {
 					} else {
 						foreach ( self::$git_servers as $git ) {
 							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
-							if ( $update === $header['repo'] && ! $this->config[ $update ]->dot_org ) {
+							if ( $update === $header['repo'] ) {
 								$matched = true;
-								continue;
+								break;
 							}
 						}
 					}
@@ -484,7 +504,8 @@ class Base {
 						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
 						     ( $this->config[ $update ]->dot_org &&
-						       ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) )
+						       ( ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ||
+						         ( $this->tag && 'master' === $this->tag) ) )
 						) {
 							$repo = $update;
 						} else {
@@ -543,46 +564,33 @@ class Base {
 
 	/**
 	 * Get dashboard update requested repos and return array of slugs.
+	 * Really does need $_REQUEST for remote update services.
 	 *
 	 * @return array
 	 */
-	private function _get_updating_repos() {
-		$updates          = array();
-		$remote_request   = false;
-		$plugins_updating = isset( $_REQUEST['plugins'] ) ? $_REQUEST['plugins'] : array();
-		$plugin_updating  = isset( $_REQUEST['plugin'] ) ? (array) $_REQUEST['plugin'] : array();
-		$themes_updating  = isset( $_REQUEST['themes'] ) ? $_REQUEST['themes'] : array();
-		$theme_updating   = isset( $_REQUEST['theme'] ) ? (array) $_REQUEST['theme'] : array();
+	protected function get_updating_repos() {
+		$updates            = array();
+		$request            = array_map( 'wp_filter_kses', $_REQUEST );
+		$request            = apply_filters( 'github_updater_remote_update_request', $request );
 
-		if ( empty( $plugins_updating ) && empty( $plugin_updating ) &&
-		     empty( $themes_updating ) && empty( $theme_updating ) ) {
-			$remote_request = true;
+		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
+		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
+		$request['themes']  = isset( $request['themes'] ) ? $request['themes'] : array();
+		$request['theme']   = isset( $request['theme'] ) ? (array) $request['theme'] : array();
+
+		if ( ! empty( $request['plugins'] ) ) {
+			$request['plugins'] = explode( ',', $request['plugins'] );
+		}
+		if ( ! empty( $request['themes']) ) {
+			$request['themes'] = explode( ',', $request['themes'] );
 		}
 
-		//iThemes Sync $_REQUEST
-		if ( $remote_request ) {
-			$request = json_decode( stripslashes( $_REQUEST['request'] ), true );
-			$args = $request['arguments'];
-			if ( isset( $args['plugin'] ) ) {
-				$plugin_updating = $args['plugin'];
-			} elseif ( isset( $args['theme'] ) ) {
-				$theme_updating = $args['theme'];
-			}
-		}
-
-		if ( ! empty( $plugins_updating ) ) {
-			$plugins_updating = explode( ',', $plugins_updating );
-		}
-		if ( ! empty( $themes_updating) ) {
-			$themes_updating = explode( ',', $themes_updating );
-		}
-
-		foreach ( array_merge( $plugin_updating, $plugins_updating ) as $update ) {
+		foreach ( array_merge( $request['plugin'], $request['plugins'] ) as $update ) {
 			$plugin_repo = explode( '/', $update );
 			$updates[] = $plugin_repo[0];
 		}
 
-		foreach ( array_merge( $theme_updating, $themes_updating ) as $update ) {
+		foreach ( array_merge( $request['theme'], $request['themes'] ) as $update ) {
 			$updates[] = $update;
 		}
 
@@ -686,7 +694,7 @@ class Base {
 	}
 
 	/**
-	 * Get filename of changelog and return
+	 * Get filename of changelog and return.
 	 *
 	 * @param $type
 	 *
@@ -794,7 +802,7 @@ class Base {
 	}
 
 	/**
-	 * Used to set_site_transient and checks/stores transient id in array
+	 * Used to set_site_transient and checks/stores transient id in array.
 	 *
 	 * @param $id
 	 * @param $response
@@ -812,7 +820,7 @@ class Base {
 	}
 
 	/**
-	 * Returns site_transient and checks/stores transient id in array
+	 * Returns site_transient and checks/stores transient id in array.
 	 *
 	 * @param $id
 	 *
@@ -828,7 +836,7 @@ class Base {
 	}
 
 	/**
-	 * Delete all transients from array of transient ids
+	 * Delete all transients from array of transient ids.
 	 *
 	 * @param $type
 	 *
@@ -847,9 +855,10 @@ class Base {
 	}
 
 	/**
-	 * Create transient of $type transients for force-check
+	 * Create transient of $type transients for force-check.
 	 *
 	 * @param $type
+	 *
 	 * @return void|bool
 	 */
 	protected function make_force_check_transient( $type ) {
@@ -865,6 +874,7 @@ class Base {
 	 * Set repo object file info.
 	 *
 	 * @param $response
+	 *
 	 * @param $repo
 	 */
 	protected function set_file_info( $response, $repo ) {
@@ -972,8 +982,8 @@ class Base {
 	}
 
 	/**
-	 * Create some sort of rating from 0 to 100 for use in star ratings
-	 * I'm really just making this up, more based upon popularity
+	 * Create some sort of rating from 0 to 100 for use in star ratings.
+	 * I'm really just making this up, more based upon popularity.
 	 *
 	 * @param $repo_meta
 	 *

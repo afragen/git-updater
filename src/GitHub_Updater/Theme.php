@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Update a WordPress theme from a GitHub repo.
  *
@@ -24,7 +31,7 @@ namespace Fragen\GitHub_Updater;
 class Theme extends Base {
 
 	/**
-	 * Rollback variable
+	 * Rollback variable.
 	 *
 	 * @var number
 	 */
@@ -47,29 +54,34 @@ class Theme extends Base {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
+			$this->repo_api = null;
 			switch( $theme->type ) {
 				case 'github_theme':
-					$repo_api = new GitHub_API( $theme );
+					$this->repo_api = new GitHub_API( $theme );
 					break;
 				case 'bitbucket_theme':
-					$repo_api = new Bitbucket_API( $theme );
+					$this->repo_api = new Bitbucket_API( $theme );
 					break;
 				case 'gitlab_theme':
-					$repo_api = new GitLab_API( $theme );
+					$this->repo_api = new GitLab_API( $theme );
 					break;
+			}
+
+			if ( is_null( $this->repo_api ) ) {
+				continue;
 			}
 
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $repo_api->get_remote_info( 'style.css' ) ) {
-				$repo_api->get_repo_meta();
-				$repo_api->get_remote_tag();
+			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
 				if ( $changelog ) {
-					$repo_api->get_remote_changes( $changelog );
+					$this->repo_api->get_remote_changes( $changelog );
 				}
-				$theme->download_link = $repo_api->construct_download_link();
+				$theme->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -83,7 +95,7 @@ class Theme extends Base {
 				$rollback          = array(
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
-					'package'     => $repo_api->construct_download_link( $this->tag, false ),
+					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
@@ -91,9 +103,9 @@ class Theme extends Base {
 
 			/*
 			 * Remove WordPress update row in theme row, only in multisite.
-			 * Add update row to theme row, only in multisite for WP < 3.8
+			 * Add update row to theme row, only in multisite.
 			 */
-			if ( is_multisite() || ( get_bloginfo( 'version' ) < 3.8 ) ) {
+			if ( is_multisite() ) {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
@@ -104,6 +116,10 @@ class Theme extends Base {
 
 		$this->make_force_check_transient( 'themes' );
 
+		if ( ! is_multisite() ) {
+			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
+		}
+
 		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
 		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
@@ -113,15 +129,18 @@ class Theme extends Base {
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
-		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
-		}
-
 		Settings::$ghu_themes = $this->config;
 	}
 
+
 	/**
-	 * Put changelog in plugins_api, return WP.org data as appropriate
+	 * Put changelog in plugins_api, return WP.org data as appropriate.
+	 *
+	 * @param $false
+	 * @param $action
+	 * @param $response
+	 *
+	 * @return mixed
 	 */
 	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) {
@@ -273,13 +292,15 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Remove default after_theme_row_$stylesheet
+	 * Remove default after_theme_row_$stylesheet.
 	 *
 	 * @author @grappler
+	 *
 	 * @param $theme_key
 	 * @param $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
+
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
@@ -295,11 +316,13 @@ class Theme extends Base {
 	 * Call update theme messaging if needed for single site installation
 	 *
 	 * @author Seth Carstens
+	 *
 	 * @param $prepared_themes
 	 *
 	 * @return mixed
 	 */
 	public function customize_theme_update_html( $prepared_themes ) {
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $prepared_themes[ $theme->repo ] ) ) {
 				continue;
@@ -319,12 +342,14 @@ class Theme extends Base {
 	 * Create theme update messaging
 	 *
 	 * @author Seth Carstens
+	 *
 	 * @param object $theme
+	 *
 	 * @return string (content buffer)
 	 */
 	private function _append_theme_actions_content( $theme ) {
 
-		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );                
+		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
@@ -371,10 +396,10 @@ class Theme extends Base {
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
-				<select style="width: 60%;" 
+				<select style="width: 60%;"
 					onchange="if(jQuery(this).val() != '') {
-						jQuery(this).next().show(); 
-						jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val()); 
+						jQuery(this).next().show();
+						jQuery(this).next().attr('href','<?php echo $rollback_url ?>'+jQuery(this).val());
 					}
 					else jQuery(this).next().hide();
 				">
@@ -390,35 +415,37 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update
+	 * Hook into pre_set_site_transient_update_themes to update.
 	 *
-	 * Finds newest tag and compares to current tag
+	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param array $data
+	 * @param array $transient
+	 *
 	 * @return array|object
 	 */
-	public function pre_set_site_transient_update_themes( $data ) {
+	public function pre_set_site_transient_update_themes( $transient ) {
 
 		foreach ( (array) $this->config as $theme ) {
 			if ( empty( $theme->uri ) ) {
 				continue;
 			}
-			
+
 			$update = array(
+				'theme'       => $theme->repo,
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
 			);
 
 			if ( $this->can_update( $theme ) ) {
-				$data->response[ $theme->repo ] = $update;
+				$transient->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
-				$data->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
-				$data->up_to_date[ $theme->repo ]['response'] = $update;
+				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
+				$transient->up_to_date[ $theme->repo ]['response'] = $update;
 			}
 		}
 
-		return $data;
+		return $transient;
 	}
 
 }

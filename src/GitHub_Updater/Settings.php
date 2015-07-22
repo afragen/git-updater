@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Add a settings page.
  *
@@ -20,25 +27,29 @@ namespace Fragen\GitHub_Updater;
 class Settings extends Base {
 
 	/**
-	 * Holds the plugin basename
+	 * Holds the plugin basename.
+	 *
 	 * @var string
 	 */
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
 	 * Listing of plugins.
+	 *
 	 * @var array
 	 */
 	static $ghu_plugins = array();
 
 	/**
 	 * Listing of themes.
+	 *
 	 * @var array
 	 */
 	static $ghu_themes = array();
 
 	/**
-	 * Holds boolean on whether or not the repo is private
+	 * Holds boolean on whether or not the repo is private.
+	 *
 	 * @var bool
 	 */
 	private static $github_private    = false;
@@ -72,7 +83,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Add options page
+	 * Add options page.
 	 */
 	public function add_plugin_page() {
 		if ( is_multisite() ) {
@@ -114,7 +125,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Options page callback
+	 * Options page callback.
 	 */
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
@@ -154,8 +165,8 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Register and add settings
-	 * Check to see if it's a private repo
+	 * Register and add settings.
+	 * Check to see if it's a private repo.
 	 */
 	public function page_init() {
 
@@ -187,7 +198,7 @@ class Settings extends Base {
 		);
 
 		/*
-		 * Add settings for GitHub Personal Access Token
+		 * Add settings for GitHub Personal Access Token.
 		 */
 		add_settings_section(
 			'github_access_token',
@@ -218,7 +229,7 @@ class Settings extends Base {
 		}
 
 		/*
-		 * Add setting for GitLab.com, GitLab Community Edition
+		 * Add setting for GitLab.com, GitLab Community Edition.
 		 * or GitLab Enterprise Private Token.
 		 */
 		if ( self::$gitlab || self::$gitlab_enterprise ) {
@@ -324,7 +335,7 @@ class Settings extends Base {
 			$ghu_options_keys[ $token->repo ] = null;
 
 			/*
-			 * Check to see if it's a private repo and set variables
+			 * Check to see if it's a private repo and set variables.
 			 */
 			if ( $token->private ) {
 				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
@@ -418,6 +429,7 @@ class Settings extends Base {
 	 * Sanitize each setting field as needed.
 	 *
 	 * @param array $input Contains all settings fields as array keys
+	 *
 	 * @return array
 	 */
 	public static function sanitize( $input ) {
@@ -430,7 +442,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub Updater text
+	 * Print the GitHub Updater text.
 	 */
 	public function print_section_ghu_settings() {
 		if ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) {
@@ -533,7 +545,9 @@ class Settings extends Base {
 	 * Applied to the list of links to display on the plugins page (beside the activate/deactivate links).
 	 *
 	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
+	 *
 	 * @param $links
+	 *
 	 * @return array
 	 */
 	public function plugin_action_links( $links ) {

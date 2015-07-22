@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
@@ -37,7 +44,7 @@ class Plugin extends Base {
 		 * Get details of git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
-		
+
 		if ( empty( $this->config ) ) {
 			return false;
 		}
@@ -46,30 +53,35 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$this->repo_api = null;
 			switch( $plugin->type ) {
 				case 'github_plugin':
-					$repo_api = new GitHub_API( $plugin );
+					$this->repo_api = new GitHub_API( $plugin );
 					break;
 				case 'bitbucket_plugin':
-					$repo_api = new Bitbucket_API( $plugin );
+					$this->repo_api = new Bitbucket_API( $plugin );
 					break;
 				case 'gitlab_plugin';
-					$repo_api = new GitLab_API( $plugin );
+					$this->repo_api = new GitLab_API( $plugin );
 					break;
+			}
+
+			if ( is_null( $this->repo_api ) ) {
+				continue;
 			}
 
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-				$repo_api->get_repo_meta();
-				$repo_api->get_remote_tag();
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
 				if ( $changelog ) {
-					$repo_api->get_remote_changes( $changelog );
+					$this->repo_api->get_remote_changes( $changelog );
 				}
-				$repo_api->get_remote_readme();
-				$plugin->download_link = $repo_api->construct_download_link();
+				$this->repo_api->get_remote_readme();
+				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -85,7 +97,7 @@ class Plugin extends Base {
 					'plugin'      => $plugin->slug,
 					'new_version' => $this->tag,
 					'url'         => $plugin->uri,
-					'package'     => $repo_api->construct_download_link( false, $this->tag ),
+					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
@@ -282,6 +294,7 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
+
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
