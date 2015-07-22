@@ -431,6 +431,7 @@ class Theme extends Base {
 			}
 
 			$update = array(
+				'theme'       => $theme->repo,
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
