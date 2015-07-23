@@ -405,8 +405,8 @@ class Theme extends Base {
 					else jQuery(this).next().hide();
 				">
 				<option value=""><?php _e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-				<option><?php echo $theme->branch; ?></option>
-				<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo'<option>' . $version . '</option>'; }?></select>
+					<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
+					<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?></select>
 				<a style="display: none;" class="button-primary" href="?"><?php _e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
