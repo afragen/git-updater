@@ -93,6 +93,7 @@ class Theme extends Base {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
 				$rollback          = array(
+					'theme'       => $theme->repo,
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
