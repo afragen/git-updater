@@ -266,7 +266,7 @@ class Bitbucket_API extends API {
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
-		     ( isset( $_GET['theme'] ) && $_GET['theme'] === $this->type->repo )
+		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
 			$endpoint .= $rollback . '.zip';
 
