@@ -213,7 +213,7 @@ class Theme extends Base {
 		$theme_name    = wp_kses( $theme['Name'], $themes_allowedtags );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$install_url   = self_admin_url( "theme-install.php" );
-		$details_url   = add_query_arg(
+		$details_url   = esc_attr( add_query_arg(
 				array(
 					'tab'       => 'theme-information',
 					'theme'     => $theme_key,
@@ -221,7 +221,7 @@ class Theme extends Base {
 					'width'     => 270,
 					'height'    => 400
 				),
-				$install_url );
+				$install_url ) );
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
@@ -273,7 +273,7 @@ class Theme extends Base {
 				echo '</em>';
 			} else {
 				printf( __( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-					$theme_name
+					esc_attr( $theme_name )
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s"> ',
 					esc_url( $details_url ),
