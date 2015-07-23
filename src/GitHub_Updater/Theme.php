@@ -88,7 +88,7 @@ class Theme extends Base {
 			 * Update theme transient with rollback data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
-			     ( isset( $_GET['theme'] ) && $_GET['theme'] === $theme->repo )
+			     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
 			) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_themes');
