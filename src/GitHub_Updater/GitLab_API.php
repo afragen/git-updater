@@ -305,7 +305,7 @@ class GitLab_API extends API {
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
 		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint .= $rollback;
+			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
 		} elseif ( ! empty( $this->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
