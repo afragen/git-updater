@@ -252,6 +252,20 @@ class Theme extends Base {
 			} else {
 				_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
+
+			echo '&nbsp;<strong>';
+			_e( 'Branches:', 'github-updater' );
+			echo '</strong>&nbsp;';
+
+			foreach ( array_keys( $this->config[ $theme_key ]->branches ) as $branch ) {
+				echo '<option>' . $branch . '</option>&nbsp;';
+				printf( '<a href="%s%s">%s</a>',
+					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
+					'&rollback=' . urlencode( $branch ),
+					$branch
+				);
+			}
+
 		}
 
 		if ( isset( $current->response[ $theme_key ] ) ) {

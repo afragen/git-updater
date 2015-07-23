@@ -1,3 +1,7 @@
+#### 4.6.3
+* fix rollback for GitLab themes
+* add pseudo-branch switcher for up-to-date themes
+
 #### 4.6.2
 * refactor remote update services to new `class Remote_Update`
 * general security fixes, don't call files directly...
