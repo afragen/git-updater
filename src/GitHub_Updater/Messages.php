@@ -75,7 +75,7 @@ class Messages extends Base {
 			<div class="error notice is-dismissible">
 				<p>
 					<?php
-					printf( __( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
+					printf( esc_html__( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
 						'<strong>' . $repo['name'] . '</strong>'
 					);
 					echo ' ' . $repo['code'];
@@ -83,12 +83,12 @@ class Messages extends Base {
 					<?php if ( 403 === $repo['code'] && 'github' === $repo['git'] ): ?>
 						<br>
 						<?php
-						printf( __( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
+						printf( esc_html__( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
 							$repo['wait']
 						);
 						echo '<br>';
 						printf(
-							__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
+							esc_html__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater' ),
 							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
 							'</a>'
 						);
@@ -96,7 +96,7 @@ class Messages extends Base {
 					<?php endif; ?>
 					<?php if ( 401 === $repo['code'] ) : ?>
 						<br>
-						<?php _e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
+						<?php esc_html_e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
 					<?php endif; ?>
 				</p>
 			</div>
@@ -112,7 +112,7 @@ class Messages extends Base {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php _e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php

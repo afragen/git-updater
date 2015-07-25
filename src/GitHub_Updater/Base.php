@@ -541,7 +541,7 @@ class Base {
 
 		$upgrader->skin->feedback(
 			sprintf(
-				__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
+				esc_html__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
 				'<span class="code">' . $source_base . '</span>',
 				'<span class="code">' . basename( $corrected_source ) . '</span>'
 			)
@@ -551,14 +551,14 @@ class Base {
 		 * If we can rename, do so and return the new name.
 		 */
 		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( __( 'Rename successful', 'github-updater' ) . '&#8230;' );
+			$upgrader->skin->feedback( esc_html__( 'Rename successful', 'github-updater' ) . '&#8230;' );
 			return $corrected_source;
 		}
 
 		/*
 		 * Otherwise, return an error.
 		 */
-		$upgrader->skin->feedback( __( 'Unable to rename downloaded repository.', 'github-updater' ) );
+		$upgrader->skin->feedback( esc_html__( 'Unable to rename downloaded repository.', 'github-updater' ) );
 		return new \WP_Error();
 	}
 

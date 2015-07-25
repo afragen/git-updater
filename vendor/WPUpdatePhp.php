@@ -21,7 +21,7 @@ class WPUpdatePhp {
 	public function __construct( $minimum_version, $recommended_version = null ) {
 		$this->minimum_version = $minimum_version;
 		$this->recommended_version = $recommended_version;
-		$this->plugin_name = __( 'this plugin', 'github-updater' );
+		$this->plugin_name = esc_html__( 'this plugin', 'github-updater' );
 	}
 
 	/**
@@ -89,9 +89,9 @@ class WPUpdatePhp {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-			<?php printf( __( 'Unfortunately, %1$s can not run on PHP versions older than %2$s.', 'github-updater' ), $this->plugin_name, $this->minimum_version ); ?>
+			<?php printf( esc_html__( 'Unfortunately, %1$s can not run on PHP versions older than %2$s.', 'github-updater' ), $this->plugin_name, $this->minimum_version ); ?>
 			<br>
-			<?php printf( __( 'Read more information about %show you can update%s.', 'github-updater' ), '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
+			<?php printf( esc_html__( 'Read more information about %show you can update%s.', 'github-updater' ), '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
 			</p>
 		</div>
 		<?php
@@ -105,9 +105,9 @@ class WPUpdatePhp {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php printf( __( '%1$s recommends a PHP version greater than %2$s.', 'github-updater' ), ucfirst( $this->plugin_name ), $this->recommended_version ); ?>
+				<?php printf( esc_html__( '%1$s recommends a PHP version greater than %2$s.', 'github-updater' ), ucfirst( $this->plugin_name ), $this->recommended_version ); ?>
 				<br>
-				<?php printf( __( 'Read more information about %show you can update%s.', 'github-updater' ), '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
+				<?php printf( esc_html__( 'Read more information about %show you can update%s.', 'github-updater' ), '<a href="http://www.wpupdatephp.com/update/">', '</a>' ); ?>
 			</p>
 		</div>
 		<?php

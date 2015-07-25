@@ -157,7 +157,7 @@ class Plugin extends Base {
 		 */
 		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-		printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
 			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
 			'</a>'
@@ -206,9 +206,9 @@ class Plugin extends Base {
 			if ( false !== stristr( $links[2], 'Visit plugin site' ) ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-					network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
-					                   '&TB_iframe=true&width=600&height=550' ),
-					__( 'View details', 'github-updater' )
+					esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
+					                   '&TB_iframe=true&width=600&height=550' ) ),
+					esc_html__( 'View details', 'github-updater' )
 				);
 			}
 		}
