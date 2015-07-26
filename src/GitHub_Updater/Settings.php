@@ -455,7 +455,7 @@ class Settings extends Base {
 		}
 		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
 		printf( '<br>' . esc_html__( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
-		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins page.', 'github-updater' ) . '</p>');
+		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>');
 	}
 
 	/**
