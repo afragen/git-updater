@@ -201,6 +201,7 @@ class Theme extends Base {
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
+		$options            = get_site_option( 'github_updater' );
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
 				'a'       => array( 'href' => array(), 'title' => array() ),
@@ -253,19 +254,22 @@ class Theme extends Base {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
 
-			echo '&nbsp;<strong>';
-			esc_html_e( 'Branches:', 'github-updater' );
-			echo '</strong>&nbsp;';
+			if ( ! empty( $options['branch_switch'] ) ) {
+				echo '`&nbsp;<strong>';
+				esc_html_e( 'Branches:', 'github-updater' );
+				echo '</strong>&nbsp;`';
+				esc_html_e( $this->config[ $theme_key ]->branch );
+				echo '`&nbsp;';
 
-			foreach ( array_keys( $this->config[ $theme_key ]->branches ) as $branch ) {
-				echo '<option>' . $branch . '</option>&nbsp;';
-				printf( '<a href="%s%s">%s</a>',
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
-					'&rollback=' . urlencode( $branch ),
-					$branch
-				);
+				foreach ( array_keys( $this->config[ $theme_key ]->branches ) as $branch ) {
+					echo '<option>' . $branch . '</option>&nbsp;';
+					printf( '<a href="%s%s">%s</a>',
+						wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
+						'&rollback=' . urlencode( $branch ),
+						$branch
+					);
+				}
 			}
-
 		}
 
 		if ( isset( $current->response[ $theme_key ] ) ) {

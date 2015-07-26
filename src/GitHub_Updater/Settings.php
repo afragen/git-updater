@@ -190,7 +190,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'branch_switch',
-			esc_html__( 'Enable Plugin Branch Switching', 'github-updater' ),
+			esc_html__( 'Enable Branch Switching', 'github-updater' ),
 			array( $this, 'token_callback_checkbox' ),
 			'github_updater_install_settings',
 			'github_updater_settings',
