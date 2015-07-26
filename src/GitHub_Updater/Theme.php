@@ -110,6 +110,7 @@ class Theme extends Base {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher'), 10, 2 );
 				}
 			}
 
@@ -198,10 +199,12 @@ class Theme extends Base {
 	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
+	 * @param $theme_key
+	 * @param $theme
+	 *
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
-		$options            = get_site_option( 'github_updater' );
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
 				'a'       => array( 'href' => array(), 'title' => array() ),
@@ -253,23 +256,6 @@ class Theme extends Base {
 			} else {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
-
-			if ( ! empty( $options['branch_switch'] ) ) {
-				echo '`&nbsp;<strong>';
-				esc_html_e( 'Branches:', 'github-updater' );
-				echo '</strong>&nbsp;`';
-				esc_html_e( $this->config[ $theme_key ]->branch );
-				echo '`&nbsp;';
-
-				foreach ( array_keys( $this->config[ $theme_key ]->branches ) as $branch ) {
-					echo '<option>' . $branch . '</option>&nbsp;';
-					printf( '<a href="%s%s">%s</a>',
-						wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
-						'&rollback=' . urlencode( $branch ),
-						$branch
-					);
-				}
-			}
 		}
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
@@ -307,6 +293,59 @@ class Theme extends Base {
 
 			do_action( "in_theme_update_message-$theme_key", $theme, $r );
 		}
+		echo '</div></td></tr>';
+	}
+
+	/**
+	 * Create branch switcher row for themes.
+	 *
+	 * @param $theme_key
+	 * @param $theme
+	 *
+	 * @return bool|void
+	 */
+	public function theme_branch_switcher(  $theme_key, $theme ) {
+		$options = get_site_option( 'github_updater' );
+		if ( empty( $options['branch_switch'] ) ) {
+			return false;
+		}
+
+		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$id            = $theme_key . '-id';
+		$branches      = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+
+		/*
+		 * Get current branch.
+		 */
+		foreach ( parent::$git_servers as $server ) {
+			$branch_key = $server . ' Branch';
+			$branch     = $theme->get( $branch_key ) ? $theme->get( $branch_key ) : 'master';
+			if ( 'master' !== $branch ) {
+				break;
+			}
+		}
+
+
+		/*
+		 * Create after_theme_row_
+		 */
+		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+
+		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+			$branch,
+			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'</a>'
+		);
+
+		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+		foreach ( $branches as $branch => $uri ) {
+			printf( '<li><a href="%s%s">%s</a></li>',
+				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . urlencode( $theme_key ) ), 'upgrade-theme_' . $theme_key ),
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
+			);
+		}
+		print( '</ul>' );
 		echo '</div></td></tr>';
 	}
 

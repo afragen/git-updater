@@ -162,7 +162,7 @@ class Base {
 		);
 
 		foreach ( self::$git_servers as $server ) {
-			$ghu_extra_headers[ $server . 'Plugin URI' ] = $server . ' Plugin URI';
+			$ghu_extra_headers[ $server . ' Plugin URI' ] = $server . ' Plugin URI';
 			foreach ( self::$extra_repo_headers as $header ) {
 				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
 			}

@@ -103,7 +103,7 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			add_action( "after_plugin_row_$plugin->slug", array( &$this, 'wp_plugin_update_row' ), 15, 3 );
+			add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 		}
 
 		$this->make_force_check_transient( 'plugins' );
@@ -126,7 +126,7 @@ class Plugin extends Base {
 	 *
 	 * @return bool
 	 */
-	public function wp_plugin_update_row( $plugin_file, $plugin_data ) {
+	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -165,7 +165,6 @@ class Plugin extends Base {
 
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
-
 			printf( '<li><a href="%s%s">%s</a></li>',
 				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
 				'&rollback=' . urlencode( $branch ),
