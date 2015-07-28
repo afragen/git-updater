@@ -273,7 +273,7 @@ class Base {
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
 				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
-				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
+				$git_plugin['branch']                  = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
 				$git_plugin['slug']                    = $plugin;
 				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -878,10 +878,8 @@ class Base {
 	 * @param $repo
 	 */
 	protected function set_file_info( $response, $repo ) {
-		$repo_parts = $this->_get_repo_parts( $repo, $this->type->type );
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->branch               = ! empty( $response[ $repo_parts['branch'] ] ) ? $response[$repo_parts['branch'] ] : 'master';
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
 	}
