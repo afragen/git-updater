@@ -621,6 +621,7 @@ class Base {
 			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;
+				break;
 			}
 		}
 
