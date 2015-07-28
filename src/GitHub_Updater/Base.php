@@ -414,6 +414,59 @@ class Base {
 	}
 
 	/**
+	 * Use upgrader_post_install hook to ensure correct directory name.
+	 *
+	 * @param $response
+	 * @param $extra_hook
+	 * @param $result
+	 *
+	 * @return mixed
+	 */
+	public function upgrader_post_install( $response, $extra_hook, $result ) {
+		global $wp_filesystem;
+
+		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
+		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
+		) {
+			return $result;
+		}
+
+		$repo = $this->get_repo_slugs( $result['destination_name'] );
+
+		/*
+		 * Not GitHub Updater plugin/theme.
+		 */
+		if ( $repo['repo'] !== $result['destination_name'] &&
+		     $repo['extended_repo'] !== $result['destination_name']
+		) {
+			return $result;
+		}
+
+		$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+
+		/*
+		 * Extended naming.
+		 * Only for plugins and not for 'master' === branch && .org hosted.
+		 */
+		if ( isset( $extra_hook['plugin'] ) &&
+			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
+		       ( $this->tag && 'master' !== $this->tag ) )
+		) {
+			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
+			printf(
+				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;',
+				'<strong>' . $this->config[ $repo['repo'] ]->extended_repo . '</strong>'
+			);
+		}
+
+		$wp_filesystem->move( $result['destination'], $proper_destination );
+		$result['destination'] = $proper_destination;
+
+		return $result;
+	}
+
+	/**
 	 * Rename the zip folder to be the same as the existing repository folder.
 	 *
 	 * Github delivers zip files as <User>-<Repo>-<Branch|Hash>.zip
