@@ -412,8 +412,6 @@ class Base {
 	 */
 	public function upgrader_post_install( $true, $extra_hook, $result ) {
 		global $wp_filesystem;
-		$is_active       = false;
-		$network_active  = false;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
 		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
@@ -426,8 +424,6 @@ class Base {
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
 			$slug           = dirname( $extra_hook['plugin'] );
-			$is_active      = is_plugin_active( $extra_hook['plugin'] );
-			$network_active = is_plugin_active_for_network( $extra_hook['plugin'] );
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
 			$slug = $extra_hook['theme'];
 		}
@@ -461,17 +457,6 @@ class Base {
 
 		$wp_filesystem->move( $result['destination'], $proper_destination );
 		$result['destination'] = $proper_destination;
-
-		// Reactivate plugin.
-		if ( $is_active && isset( $extra_hook['plugin'] ) ) {
-			$plugin_file = basename( $extra_hook['plugin'] );
-			$activate    = activate_plugin( $proper_destination . $plugin_file, null, $network_active );
-
-			// Output the update message
-			$fail		 = '<br>' . esc_html__('The plugin has been updated, but could not be reactivated. Please reactivate it manually.', 'github-updater');
-			$success	 = '<br>' . esc_html__('Plugin reactivated successfully.', 'github-updater');
-			echo is_wp_error( $activate ) ? $fail : $success;
-		}
 
 		return $result;
 	}
