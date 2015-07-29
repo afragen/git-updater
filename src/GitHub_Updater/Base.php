@@ -413,6 +413,7 @@ class Base {
 	public function upgrader_post_install( $response, $extra_hook, $result ) {
 		global $wp_filesystem;
 		$is_active       = false;
+		$network_active  = false;
 		$extended_naming = false;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
@@ -425,10 +426,11 @@ class Base {
 		 * Use $extra_hook to derive repo, safer.
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug      = dirname( $extra_hook['plugin'] );
-			$is_active = is_plugin_active( $extra_hook['plugin'] );
+			$slug           = dirname( $extra_hook['plugin'] );
+			$is_active      = is_plugin_active( $extra_hook['plugin'] );
+			$network_active = is_plugin_active_for_network( $extra_hook['plugin'] );
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
-			$slug      = $extra_hook['theme'];
+			$slug = $extra_hook['theme'];
 		}
 
 		$repo = $this->get_repo_slugs( $slug );
@@ -466,9 +468,9 @@ class Base {
 		if ( $is_active && isset( $extra_hook['plugin'] ) ) {
 			$plugin_file = basename( $extra_hook['plugin'] );
 			if ( $extended_naming ) {
-				activate_plugin( $this->config[ $repo['repo'] ]->local_path_extended . $plugin_file );
+				activate_plugin( $this->config[ $repo['repo'] ]->local_path_extended . $plugin_file, null, $network_active );
 			} else {
-				activate_plugin( $this->config[ $repo['repo'] ]->local_path . $plugin_file );
+				activate_plugin( $this->config[ $repo['repo'] ]->local_path . $plugin_file, null, $network_active );
 			}
 		}
 
