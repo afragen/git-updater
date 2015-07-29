@@ -688,7 +688,8 @@ class Base {
 	 * @return bool
 	 */
 	protected function set_transient( $id, $response ) {
-		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		$salt = isset( $this->type->repo ) ? $this->type->repo : 'github-updater';
+		$transient = 'ghu-' . md5( $salt . $id );
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
 		}
@@ -705,7 +706,8 @@ class Base {
 	 * @return mixed
 	 */
 	protected function get_transient( $id ) {
-		$transient = 'ghu-' . md5( $this->type->repo . $id );
+		$salt = isset( $this->type->repo ) ? $this->type->repo : 'github-updater';
+		$transient = 'ghu-' . md5( $salt . $id );
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
 		}
@@ -744,7 +746,7 @@ class Base {
 		if ( $transient ) {
 			return false;
 		}
-		set_site_transient( 'ghu-' . $type , self::$transients, self::$hours * HOUR_IN_SECONDS );
+		$this->set_transient( 'ghu-' . $type, self::$transients );
 		self::$transients = array();
 	}
 
@@ -755,7 +757,7 @@ class Base {
 	 *
 	 * @param $repo
 	 */
-	protected function set_file_info( $response, $repo ) {
+	protected function set_file_info( $response ) {
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
