@@ -49,7 +49,7 @@ class Theme extends Base {
 	 *
 	 * @param bool|false $force_meta_update whether we should force meta updating
 	 */
-	public function __construct($force_meta_update = false) {
+	public function __construct( $force_meta_update = false ) {
 
 		$this->force_meta_update = $force_meta_update;
 

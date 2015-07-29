@@ -47,7 +47,7 @@ class Plugin extends Base {
 	 *
 	 * @param bool|false $force_meta_update whether we should force meta updating
 	 */
-	public function __construct($force_meta_update = false) {
+	public function __construct( $force_meta_update = false ) {
 
 		$this->force_meta_update = $force_meta_update;
 
@@ -58,7 +58,7 @@ class Plugin extends Base {
 		/*
 		 * Get details of git sourced plugins.
 		 */
-		$this->config = $this->get_plugin_meta($this->force_meta_update);
+		$this->config = $this->get_plugin_meta( $this->force_meta_update );
 
 		if ( empty( $this->config ) ) {
 			return false;
@@ -85,7 +85,7 @@ class Plugin extends Base {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ($this->force_meta_update && $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+			if ( $this->force_meta_update && $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );

@@ -111,7 +111,6 @@ class Base {
 		 * Calls in init hook for user capabilities.
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
-		add_action( 'init', array( &$this, 'remote_update' ) );
 		add_action( 'init', array( &$this, 'background_update' ));
 	}
 
@@ -119,12 +118,12 @@ class Base {
 	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
-		if ( current_user_can( 'update_plugins' ) ) {
+		/*if ( current_user_can( 'update_plugins' ) ) {
 			new Plugin();
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			new Theme();
-		}
+		}*/
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new Settings();
 		}
@@ -134,31 +133,19 @@ class Base {
 	 * Piggyback on built-in plugin update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ));
-		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ));
-		add_action( 'load-plugins.php', array( &$this, 'forced_meta_update' ));
-		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ));
-		add_action( 'load-update-core.php', array( &$this, 'forced_meta_update' ));
+		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
+		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
+		add_action( 'load-plugins.php', array( &$this, 'forced_meta_update' ) );
+		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ) );
+		add_action( 'load-update-core.php', array( &$this, 'forced_meta_update' ) );
 	}
 
 	/**
-	 * Performs actual metadata fetching
+	 * Performs actual metadata fetching.
 	 */
 	function forced_meta_update() {
-		//error_log("Inside forced update!");
-		new Plugin(true);
-		new Theme(true);
-	}
-
-	/**
-	 * Load class for remote updating compatibility.
-	 *
-	 * @return \Fragen\GitHub_Updater\Remote_Update
-	 */
-	public function remote_update() {
-		if ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) {
-			return new Remote_Update();
-		}
+		new Plugin( true );
+		new Theme( true );
 	}
 
 	/**
@@ -227,7 +214,7 @@ class Base {
 	 * @param bool|false $force whether we should force meta updating from WP.org
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
-	protected function get_plugin_meta($force = false) {
+	protected function get_plugin_meta( $force = false ) {
 		/*
 		 * Ensure get_plugins() function is available.
 		 */
@@ -237,7 +224,7 @@ class Base {
 		$git_plugins    = array();
 		$update_plugins = get_site_transient( 'update_plugins' );
 
-		if ( empty( $update_plugins) && $force ) {
+		if ( empty( $update_plugins ) && $force ) {
 			wp_update_plugins();
 			$update_plugins = get_site_transient( 'update_plugins' );
 		}
