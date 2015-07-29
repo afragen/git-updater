@@ -87,7 +87,7 @@ class Theme extends Base {
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
+			if ( $this->force_meta_update && $this->repo_api->get_remote_info( 'style.css' ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
