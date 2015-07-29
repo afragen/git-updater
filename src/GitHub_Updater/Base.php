@@ -412,6 +412,8 @@ class Base {
 	 */
 	public function upgrader_post_install( $response, $extra_hook, $result ) {
 		global $wp_filesystem;
+		$is_active       = false;
+		$extended_naming = false;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
 		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
@@ -423,9 +425,10 @@ class Base {
 		 * Use $extra_hook to derive repo, safer.
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug = dirname( $extra_hook['plugin'] );
+			$slug      = dirname( $extra_hook['plugin'] );
+			$is_active = is_plugin_active( $extra_hook['plugin'] );
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
-			$slug = $extra_hook['theme'];
+			$slug      = $extra_hook['theme'];
 		}
 
 		$repo = $this->get_repo_slugs( $slug );
@@ -433,9 +436,7 @@ class Base {
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $repo['repo'] !== $slug &&
-		     $repo['extended_repo'] !== $slug
-		) {
+		if ( $repo['repo'] !== $slug && $repo['extended_repo'] !== $slug ) {
 			return $result;
 		}
 
@@ -450,6 +451,7 @@ class Base {
 		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
+			$extended_naming = true;
 			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
 			printf(
 				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;',
@@ -459,6 +461,16 @@ class Base {
 
 		$wp_filesystem->move( $result['destination'], $proper_destination );
 		$result['destination'] = $proper_destination;
+
+		// Reactivate plugin.
+		if ( $is_active && isset( $extra_hook['plugin'] ) ) {
+			$plugin_file = basename( $extra_hook['plugin'] );
+			if ( $extended_naming ) {
+				activate_plugin( $this->config[ $repo['repo'] ]->local_path_extended . $plugin_file );
+			} else {
+				activate_plugin( $this->config[ $repo['repo'] ]->local_path . $plugin_file );
+			}
+		}
 
 		return $result;
 	}
