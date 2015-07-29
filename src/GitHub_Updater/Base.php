@@ -414,7 +414,6 @@ class Base {
 		global $wp_filesystem;
 		$is_active       = false;
 		$network_active  = false;
-		$extended_naming = false;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
 		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
@@ -453,7 +452,6 @@ class Base {
 		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
-			$extended_naming = true;
 			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
 			printf(
 				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;',
@@ -467,11 +465,8 @@ class Base {
 		// Reactivate plugin.
 		if ( $is_active && isset( $extra_hook['plugin'] ) ) {
 			$plugin_file = basename( $extra_hook['plugin'] );
-			if ( $extended_naming ) {
-				activate_plugin( $this->config[ $repo['repo'] ]->local_path_extended . $plugin_file, null, $network_active );
-			} else {
-				activate_plugin( $this->config[ $repo['repo'] ]->local_path . $plugin_file, null, $network_active );
-			}
+			activate_plugin( $proper_destination . $plugin_file, null, $network_active );
+			print( '<br>' . esc_html__( 'Plugin reactivated.', 'github-updater' ) . '<br>' );
 		}
 
 		return $result;
