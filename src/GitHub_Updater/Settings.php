@@ -34,20 +34,6 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Listing of plugins.
-	 *
-	 * @var array
-	 */
-	static $ghu_plugins = array();
-
-	/**
-	 * Listing of themes.
-	 *
-	 * @var array
-	 */
-	static $ghu_themes = array();
-
-	/**
 	 * Holds boolean on whether or not the repo is private.
 	 *
 	 * @var bool
@@ -328,8 +314,10 @@ class Settings extends Base {
 	 * @return void
 	 */
 	public function ghu_tokens() {
-		$ghu_options_keys = array();
-		$ghu_tokens       = array_merge( self::$ghu_plugins, self::$ghu_themes );
+		$ghu_options_keys  = array();
+		$ghu_plugins       = $this->get_transient( 'ghu_plugins' ) ? $this->get_transient( 'ghu_plugins' ) : array();
+		$ghu_themes        = $this->get_transient( 'ghu_themes' ) ? $this->get_transient( 'ghu_themes' ) : array();
+		$ghu_tokens        = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '';

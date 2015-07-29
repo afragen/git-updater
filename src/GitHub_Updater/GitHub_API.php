@@ -63,7 +63,7 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$this->set_file_info( $response, 'GitHub' );
+		$this->set_file_info( $response );
 
 		return true;
 	}

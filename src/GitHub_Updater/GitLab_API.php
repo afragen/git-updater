@@ -92,7 +92,7 @@ class GitLab_API extends API {
 			return false;
 		}
 
-		$this->set_file_info( $response, 'GitLab' );
+		$this->set_file_info( $response );
 
 		return true;
 	}

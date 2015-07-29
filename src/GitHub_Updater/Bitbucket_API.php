@@ -72,7 +72,7 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
-		$this->set_file_info( $response, 'Bitbucket' );
+		$this->set_file_info( $response );
 
 		return true;
 	}
@@ -91,6 +91,7 @@ class Bitbucket_API extends API {
 			$arr_resp = (array) $response;
 
 			if ( ! $response || ! $arr_resp ) {
+				$response = new \stdClass();
 				$response->message = 'No tags found';
 			}
 

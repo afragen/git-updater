@@ -114,7 +114,7 @@ class Plugin extends Base {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
-		Settings::$ghu_plugins = $this->config;
+		$this->set_transient( 'ghu_plugins', $this->config );
 	}
 
 
@@ -229,14 +229,13 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
+		$wp_repo_data = $this->get_transient( 'wporg' );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
-
-			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
+			$this->set_transient( 'wporg', $wp_repo_data );
 		}
 
 		$wp_repo_body = unserialize( $wp_repo_data['body'] );
