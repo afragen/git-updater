@@ -431,13 +431,20 @@ class Base {
 			return $result;
 		}
 
-		$repo = $this->get_repo_slugs( $result['destination_name'] );
+		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
+			$slug = dirname( $extra_hook['plugin'] );
+		}
+		if ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
+			$slug = $extra_hook['theme'];
+		}
+
+		$repo = $this->get_repo_slugs( $slug );
 
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $repo['repo'] !== $result['destination_name'] &&
-		     $repo['extended_repo'] !== $result['destination_name']
+		if ( $repo['repo'] !== $slug &&
+		     $repo['extended_repo'] !== $slug
 		) {
 			return $result;
 		}
