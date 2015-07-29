@@ -115,7 +115,9 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
+			if ( $this->force_meta_update ) {
+				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
+			}
 		}
 
 		$this->make_force_check_transient( 'plugins' );
