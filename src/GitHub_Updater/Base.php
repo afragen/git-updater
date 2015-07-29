@@ -112,6 +112,7 @@ class Base {
 		 */
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'remote_update' ) );
+		add_action( 'init', array( &$this, 'background_update' ));
 	}
 
 	/**
@@ -127,6 +128,26 @@ class Base {
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new Settings();
 		}
+	}
+
+	/**
+	 * Piggyback on built-in plugin update function to get metadata.
+	 */
+	public function background_update() {
+		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ));
+		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ));
+		add_action( 'load-plugins.php', array( &$this, 'forced_meta_update' ));
+		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ));
+		add_action( 'load-update-core.php', array( &$this, 'forced_meta_update' ));
+	}
+
+	/**
+	 * Performs actual metadata fetching
+	 */
+	function forced_meta_update() {
+		error_log("Inside forced update!");
+		new Plugin(true);
+		new Theme(true);
 	}
 
 	/**
@@ -203,9 +224,10 @@ class Base {
 	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
+	 * @param bool|false $force whether we should force meta updating from WP.org
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
-	protected function get_plugin_meta() {
+	protected function get_plugin_meta($force = false) {
 		/*
 		 * Ensure get_plugins() function is available.
 		 */
@@ -214,7 +236,8 @@ class Base {
 		$plugins        = get_plugins();
 		$git_plugins    = array();
 		$update_plugins = get_site_transient( 'update_plugins' );
-		if ( empty( $update_plugins) ) {
+
+		if ( empty( $update_plugins) && $force ) {
 			wp_update_plugins();
 			$update_plugins = get_site_transient( 'update_plugins' );
 		}
@@ -298,6 +321,8 @@ class Base {
 	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array.
+	 *
+	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
