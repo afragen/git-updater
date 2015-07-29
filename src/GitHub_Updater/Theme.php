@@ -38,9 +38,24 @@ class Theme extends Base {
 	protected $tag = false;
 
 	/**
-	 * Constructor.
+	 * Force meta update toggle
+	 *
+	 * @var bool
 	 */
-	public function __construct() {
+	protected $force_meta_update = false;
+
+	/**
+	 * Constructor
+	 *
+	 * @param bool|false $force_meta_update whether we should force meta updating
+	 */
+	public function __construct($force_meta_update = false) {
+
+		$this->force_meta_update = $force_meta_update;
+
+		if ( isset( $_GET['force-check'] ) ) {
+			$this->delete_all_transients( 'themes' );
+		}
 
 		/*
 		 * Get details of git sourced themes.
@@ -49,9 +64,7 @@ class Theme extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-		if ( isset( $_GET['force-check'] ) ) {
-			$this->delete_all_transients( 'themes' );
-		}
+
 
 		foreach ( (array) $this->config as $theme ) {
 			$this->repo_api = null;
@@ -74,7 +87,7 @@ class Theme extends Base {
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
+			if ( $this->force_meta_update && $this->repo_api->get_remote_info( 'style.css' ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
