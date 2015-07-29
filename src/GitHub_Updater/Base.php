@@ -296,7 +296,7 @@ class Base {
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
 				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
-				$git_plugin['branch']                  = $headers[ $repo_parts['branch'] ];
+				$git_plugin['branch']                  = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
 				$git_plugin['slug']                    = $plugin;
 				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -308,7 +308,7 @@ class Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['dot_org']                 = false;
 			}
-			if ( isset( $all_plugins[ $plugin ]->id) && 'master' === $git_plugin['branch'] ) {
+			if ( isset( $all_plugins[ $plugin ]->id )  ) {
 				$git_plugin['dot_org']                 = true;
 			}
 
@@ -439,198 +439,63 @@ class Base {
 	}
 
 	/**
-	 * Rename the zip folder to be the same as the existing repository folder.
+	 * Use upgrader_post_install hook to ensure correct directory name.
 	 *
-	 * Github delivers zip files as <User>-<Repo>-<Branch|Hash>.zip
+	 * @param $true
+	 * @param $extra_hook
+	 * @param $result
 	 *
-	 * @global object $wp_filesystem
-	 *
-	 * @param string $source
-	 * @param string $remote_source
-	 * @param object $upgrader
-	 *
-	 * @return string $source|$corrected_source
+	 * @return mixed
 	 */
-	public function upgrader_source_selection( $source, $remote_source , $upgrader ) {
-
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	public function upgrader_post_install( $true, $extra_hook, $result ) {
 		global $wp_filesystem;
-		$repo        = null;
-		$matched     = false;
-		$source_base = basename( $source );
 
-		/*
-		 * Check for upgrade process, return if both are false or
-		 * not of same updater.
-		 */
-		if ( ( ! $upgrader instanceof \Plugin_Upgrader && ! $upgrader instanceof \Theme_Upgrader ) ||
-		     ( $upgrader instanceof \Plugin_Upgrader && ! $this instanceof Plugin ) ||
-		     ( $upgrader instanceof \Theme_Upgrader  && ! $this instanceof Theme )
+		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
+		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
 		) {
-			return $source;
+			return $result;
 		}
 
 		/*
-		 * Re-create $upgrader object for iThemes Sync
-		 * and possibly other remote upgrade services.
+		 * Use $extra_hook to derive repo, safer.
 		 */
-		if ( $upgrader instanceof \Plugin_Upgrader &&
-		     isset( $upgrader->skin->plugin_info )
+		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
+			$slug           = dirname( $extra_hook['plugin'] );
+		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
+			$slug = $extra_hook['theme'];
+		}
+
+		$repo = $this->get_repo_slugs( $slug );
+
+		/*
+		 * Not GitHub Updater plugin/theme.
+		 */
+		if ( $repo['repo'] !== $slug && $repo['extended_repo'] !== $slug ) {
+			return $result;
+		}
+
+		$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+
+		/*
+		 * Extended naming.
+		 * Only for plugins and not for 'master' === branch && .org hosted.
+		 */
+		if ( isset( $extra_hook['plugin'] ) &&
+			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
+		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
-			$_upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
-			$_upgrader->skin->plugin_info = $upgrader->skin->plugin_info;
-			$upgrader = new \Plugin_Upgrader( $skin = new \Bulk_Plugin_Upgrader_Skin() );
-			$upgrader->skin->plugin_info = $_upgrader->skin->plugin_info;
-		}
-		if ( $upgrader instanceof \Theme_Upgrader &&
-		     isset( $upgrader->skin->theme_info )
-		) {
-			$_upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
-			$_upgrader->skin->theme_info = $upgrader->skin->theme_info;
-			$upgrader = new \Theme_Upgrader( $skin = new \Bulk_Theme_Upgrader_Skin() );
-			$upgrader->skin->theme_info = $_upgrader->skin->theme_info;
+			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
+			printf(
+				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
+				'<strong>' . $this->config[ $repo['repo'] ]->extended_repo . '</strong>'
+			);
 		}
 
-		/*
-		 * Get repo for remote install update process.
-		 */
-		if ( ! empty( self::$options['github_updater_install_repo'] ) ) {
-			$repo = self::$options['github_updater_install_repo'];
-		}
+		$wp_filesystem->move( $result['destination'], $proper_destination );
+		$result['destination'] = $proper_destination;
 
-		/*
-		 * Get/set $repo for updating.
-		 */
-		if ( empty( $repo ) ) {
-			$updates = $this->get_updating_repos();
-			foreach ( $updates as $extended => $update ) {
-
-				/*
-				 * Plugin renaming.
-				 */
-				if ( $upgrader instanceof \Plugin_Upgrader ) {
-
-					if ( $upgrader->skin instanceof \Plugin_Upgrader_Skin &&
-					     $update === dirname( $upgrader->skin->plugin ) ||
-					     $extended === dirname( $upgrader->skin->plugin )
-					) {
-						$matched = true;
-					} else {
-						foreach ( self::$git_servers as $git ) {
-							$header = $this->parse_header_uri( $upgrader->skin->plugin_info[ $git . ' Plugin URI' ] );
-							if ( $update === $header['repo'] ) {
-								$matched = true;
-								break;
-							}
-						}
-					}
-
-					if ( $matched ) {
-						if ( ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
-						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
-						     ( $this->config[ $update ]->dot_org &&
-						       ( ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ||
-						         ( $this->tag && 'master' === $this->tag) ) )
-						) {
-							$repo = $update;
-						} else {
-							$repo = $extended;
-						}
-						break;
-					}
-				}
-
-				/*
-				 * Theme renaming.
-				 */
-				if ( $upgrader instanceof \Theme_Upgrader &&
-				     ( ( $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin &&
-				         $update === $upgrader->skin->theme_info->stylesheet ) ||
-				       ( $upgrader->skin instanceof \Theme_Upgrader_Skin &&
-				         $update === $upgrader->skin->theme ) )
-				) {
-					$repo = $update;
-					break;
-				}
-			}
-
-			/*
-			 * Return already corrected $source or wp.org $source.
-			 */
-			if ( empty( $repo ) ) {
-				return $source;
-			}
-		}
-
-		$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $repo );
-
-		$upgrader->skin->feedback(
-			sprintf(
-				esc_html__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
-				'<span class="code">' . $source_base . '</span>',
-				'<span class="code">' . basename( $corrected_source ) . '</span>'
-			)
-		);
-
-		/*
-		 * If we can rename, do so and return the new name.
-		 */
-		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( esc_html__( 'Rename successful', 'github-updater' ) . '&#8230;' );
-			return $corrected_source;
-		}
-
-		/*
-		 * Otherwise, return an error.
-		 */
-		$upgrader->skin->feedback( esc_html__( 'Unable to rename downloaded repository.', 'github-updater' ) );
-		return new \WP_Error();
-	}
-
-	/**
-	 * Get dashboard update requested repos and return array of slugs.
-	 * Really does need $_REQUEST for remote update services.
-	 *
-	 * @return array
-	 */
-	protected function get_updating_repos() {
-		$updates            = array();
-		$request            = array_map( 'wp_filter_kses', $_REQUEST );
-		$request            = apply_filters( 'github_updater_remote_update_request', $request );
-
-		$request['plugins'] = isset( $request['plugins'] ) ? $request['plugins'] : array();
-		$request['plugin']  = isset( $request['plugin'] ) ? (array) $request['plugin'] : array();
-		$request['themes']  = isset( $request['themes'] ) ? $request['themes'] : array();
-		$request['theme']   = isset( $request['theme'] ) ? (array) $request['theme'] : array();
-
-		if ( ! empty( $request['plugins'] ) ) {
-			$request['plugins'] = explode( ',', $request['plugins'] );
-		}
-		if ( ! empty( $request['themes']) ) {
-			$request['themes'] = explode( ',', $request['themes'] );
-		}
-
-		foreach ( array_merge( $request['plugin'], $request['plugins'] ) as $update ) {
-			$plugin_repo = explode( '/', $update );
-			$updates[] = $plugin_repo[0];
-		}
-
-		foreach ( array_merge( $request['theme'], $request['themes'] ) as $update ) {
-			$updates[] = $update;
-		}
-
-		/*
-		 * Add `git-owner-repo` to index for future renaming option.
-		 */
-		foreach ( $updates as $key => $value ) {
-			$repo = $this->get_repo_slugs( $value );
-			if ( $repo['repo'] === $value || $repo['extended_repo'] === $value ) {
-				unset( $updates[ $key ] );
-				$updates[ $repo['extended_repo'] ] = $repo['repo'];
-			}
-		}
-
-		return $updates;
+		return $result;
 	}
 
 	/**
@@ -646,6 +511,7 @@ class Base {
 			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;
+				break;
 			}
 		}
 
@@ -903,10 +769,8 @@ class Base {
 	 * @param $repo
 	 */
 	protected function set_file_info( $response, $repo ) {
-		$repo_parts = $this->_get_repo_parts( $repo, $this->type->type );
 		$this->type->transient            = $response;
 		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->branch               = ! empty( $response[ $repo_parts['branch'] ] ) ? $response[$repo_parts['branch'] ] : 'master';
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
 	}

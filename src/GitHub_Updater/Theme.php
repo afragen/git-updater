@@ -141,7 +141,7 @@ class Theme extends Base {
 		}
 
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		Settings::$ghu_themes = $this->config;
@@ -414,6 +414,7 @@ class Theme extends Base {
 	 *
 	 * @author Seth Carstens
 	 *
+	 * @access private
 	 * @param object $theme
 	 *
 	 * @return string (content buffer)

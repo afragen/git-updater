@@ -123,7 +123,7 @@ class Plugin extends Base {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		Settings::$ghu_plugins = $this->config;
@@ -321,7 +321,7 @@ class Plugin extends Base {
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( $plugin->dot_org ) {
+				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					continue;
 				}
 
