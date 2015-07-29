@@ -468,8 +468,8 @@ class Base {
 			$activate    = activate_plugin( $proper_destination . $plugin_file, null, $network_active );
 
 			// Output the update message
-			$fail		 = '<br>' . esc_html__('The plugin has been updated, but could not be reactivated. Please reactivate it manually.', 'github-updater') . '<br>';
-			$success	 = '<br>' . esc_html__('Plugin reactivated successfully.', 'github-updater') . '<br>';
+			$fail		 = '<br>' . esc_html__('The plugin has been updated, but could not be reactivated. Please reactivate it manually.', 'github-updater');
+			$success	 = '<br>' . esc_html__('Plugin reactivated successfully.', 'github-updater');
 			echo is_wp_error( $activate ) ? $fail : $success;
 		}
 
