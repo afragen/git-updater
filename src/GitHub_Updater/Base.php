@@ -404,15 +404,14 @@ class Base {
 	/**
 	 * Use upgrader_post_install hook to ensure correct directory name.
 	 *
-	 * @param $response
+	 * @param $true
 	 * @param $extra_hook
 	 * @param $result
 	 *
 	 * @return mixed
 	 */
-	public function upgrader_post_install( $response, $extra_hook, $result ) {
+	public function upgrader_post_install( $true, $extra_hook, $result ) {
 		global $wp_filesystem;
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$is_active       = false;
 		$network_active  = false;
 
