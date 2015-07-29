@@ -118,12 +118,12 @@ class Base {
 	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
-		/*if ( current_user_can( 'update_plugins' ) ) {
+		if ( current_user_can( 'update_plugins' ) ) {
 			new Plugin();
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			new Theme();
-		}*/
+		}
 		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
 			new Settings();
 		}
