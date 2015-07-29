@@ -450,7 +450,7 @@ class Base {
 		) {
 			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
 			printf(
-				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;',
+				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
 				'<strong>' . $this->config[ $repo['repo'] ]->extended_repo . '</strong>'
 			);
 		}
