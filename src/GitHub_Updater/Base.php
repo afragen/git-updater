@@ -412,6 +412,7 @@ class Base {
 	 */
 	public function upgrader_post_install( $response, $extra_hook, $result ) {
 		global $wp_filesystem;
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$is_active       = false;
 		$network_active  = false;
 
