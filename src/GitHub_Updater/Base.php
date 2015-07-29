@@ -431,10 +431,12 @@ class Base {
 			return $result;
 		}
 
+		/*
+		 * Use $extra_hook to derive repo, safer.
+		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
 			$slug = dirname( $extra_hook['plugin'] );
-		}
-		if ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
+		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
 			$slug = $extra_hook['theme'];
 		}
 
