@@ -72,6 +72,8 @@ class Settings extends Base {
 	 * Define tabs for Settings page.
 	 * By defining in a method, strings can be translated.
 	 *
+	 * @access private
+	 *
 	 * @return array
 	 */
 	private function _settings_tabs() {

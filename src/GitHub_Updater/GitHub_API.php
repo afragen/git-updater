@@ -290,6 +290,7 @@ class GitHub_API extends API {
 
 	/**
 	 * Add remote data to type object.
+	 * @access private
 	 */
 	private function _add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );

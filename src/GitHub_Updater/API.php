@@ -123,6 +123,7 @@ abstract class API extends Base {
 	/**
 	 * Return API url.
 	 *
+	 * @access private
 	 * @param string $endpoint
 	 *
 	 * @return string $endpoint

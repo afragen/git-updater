@@ -401,6 +401,7 @@ class Theme extends Base {
 	 *
 	 * @author Seth Carstens
 	 *
+	 * @access private
 	 * @param object $theme
 	 *
 	 * @return string (content buffer)
