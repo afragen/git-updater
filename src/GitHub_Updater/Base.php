@@ -145,7 +145,7 @@ class Base {
 	 * Performs actual metadata fetching
 	 */
 	function forced_meta_update() {
-		error_log("Inside forced update!");
+		//error_log("Inside forced update!");
 		new Plugin(true);
 		new Theme(true);
 	}
