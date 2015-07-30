@@ -150,7 +150,7 @@ class Base {
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			self:: $plugin = Base::instance( self::$plugin, new Plugin() );
+			self::$plugin = Base::instance( self::$plugin, new Plugin() );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			self::$theme = Base::instance( self::$theme, new Theme() );
@@ -177,8 +177,11 @@ class Base {
 	 * Performs actual metadata fetching.
 	 */
 	function forced_meta_update() {
-		new Plugin( true );
-		new Theme( true );
+		self::$plugin = Base::instance( self::$plugin, new Plugin( true ) );
+		self::$theme = Base::instance( self::$theme, new Theme( true ) );
+
+		//new Plugin( true );
+		//new Theme( true );
 	}
 
 	/**
