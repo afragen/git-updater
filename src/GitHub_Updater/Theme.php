@@ -266,8 +266,8 @@ class Theme extends Base {
 					$theme_name
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					esc_url( $details_url ),
-					esc_attr( $theme_name )
+					$details_url,
+					$theme_name
 				);
 				printf( esc_html__( 'View version %s details.', 'github-updater' ),
 					$r['new_version']
@@ -277,11 +277,11 @@ class Theme extends Base {
 				echo '</em>';
 			} else {
 				printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-					esc_attr( $theme_name )
+					$theme_name
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					esc_url( $details_url ),
-					esc_attr( $theme_name )
+					$details_url,
+					$theme_name
 				);
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$r['new_version'],
@@ -387,9 +387,9 @@ class Theme extends Base {
 			}
 
 			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
-				$prepared_themes[ $theme->repo ]['update'] = $this->_append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
 			} else {
-				$prepared_themes[ $theme->repo ]['description'] .= $this->_append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 		}
 
@@ -406,16 +406,16 @@ class Theme extends Base {
 	 *
 	 * @return string (content buffer)
 	 */
-	private function _append_theme_actions_content( $theme ) {
+	protected function append_theme_actions_content( $theme ) {
 
-		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );
+		$details_url            = esc_url( self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" ) );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
 		 * If the theme is outdated, display the custom theme updater content.
 		 * If theme is not present in theme_update transient response ( theme is not up to date )
 		 */
-		if ( empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
+		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
@@ -425,7 +425,7 @@ class Theme extends Base {
 						$theme->name
 					);
 					printf( ' <a href="%s" class="thickbox" title="%s">',
-						esc_url( $details_url ),
+						$details_url,
 						esc_attr( $theme->name )
 					);
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
