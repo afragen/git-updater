@@ -104,14 +104,14 @@ class Base {
 	 *
 	 * @var object Plugin
 	 */
-	protected static $plugin;
+	protected static $plugin = false;
 
 	/**
 	 * Holds instance of class Theme.
 	 *
 	 * @var object Theme
 	 */
-	protected static $theme;
+	protected static $theme = false;
 
 	/**
 	 * Constructor.
@@ -128,17 +128,17 @@ class Base {
 	}
 
 	/**
-	 * The Plugin|Theme object can be created/obtained via this
+	 * The Plugin/Theme object can be created/obtained via this
 	 * method - this prevents unnecessary work in rebuilding the object.
 	 *
 	 * @param $object object variable
-	 * @param $class string Plugin|Theme
+	 * @param $class object Plugin|Theme
 	 *
-	 * @return object Plugin | Theme
+	 * @return object Plugin|Theme
 	 */
 	public static function instance( $object, $class ) {
 		if ( false === $object ) {
-			$object = new $class();
+			$object = $class;
 		}
 
 		return $object;
@@ -149,10 +149,10 @@ class Base {
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			self::$plugin = Base::instance( self::$plugin, 'Plugin' );
+			self:: $plugin = Base::instance( self::$plugin, new Plugin() );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			self::$theme = Base::instance( self::$theme, 'Theme' );
+			self::$theme = Base::instance( self::$theme, new Theme() );
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
@@ -456,7 +456,7 @@ class Base {
 		 * Use $extra_hook to derive repo, safer.
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug           = dirname( $extra_hook['plugin'] );
+			$slug = dirname( $extra_hook['plugin'] );
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
 			$slug = $extra_hook['theme'];
 		}
@@ -466,7 +466,7 @@ class Base {
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $repo['repo'] !== $slug && $repo['extended_repo'] !== $slug ) {
+		if ( $slug !== $repo['repo'] && $slug !== $repo['extended_repo'] ) {
 			return $result;
 		}
 
