@@ -113,7 +113,6 @@ class Theme extends Base {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher'), 10, 2 );
 				}
 			}
-
 		}
 
 		$this->make_force_check_transient( 'themes' );
