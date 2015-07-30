@@ -100,6 +100,20 @@ class Base {
 	);
 
 	/**
+	 * Holds instance of class Plugin.
+	 *
+	 * @var object Plugin
+	 */
+	protected static $plugin;
+
+	/**
+	 * Holds instance of class Theme.
+	 *
+	 * @var object Theme
+	 */
+	protected static $theme;
+
+	/**
 	 * Constructor.
 	 * Loads options to private static variable.
 	 */
@@ -114,16 +128,35 @@ class Base {
 	}
 
 	/**
+	 * The Plugin|Theme object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object.
+	 *
+	 * @param $object object variable
+	 * @param $class string Plugin|Theme
+	 *
+	 * @return object Plugin | Theme
+	 */
+	public static function instance( $object, $class ) {
+		if ( false === $object ) {
+			$object = new $class();
+		}
+
+		return $object;
+	}
+
+	/**
 	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new Plugin();
+			self::$plugin = Base::instance( self::$plugin, 'Plugin' );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new Theme();
+			self::$theme = Base::instance( self::$theme, 'Theme' );
 		}
-		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
+		if ( is_admin() &&
+		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
+		) {
 			new Settings();
 		}
 	}
