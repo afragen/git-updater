@@ -149,7 +149,7 @@ class Base {
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			self:: $plugin = Base::instance( self::$plugin, new Plugin() );
+			self::$plugin = Base::instance( self::$plugin, new Plugin() );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			self::$theme = Base::instance( self::$theme, new Theme() );
