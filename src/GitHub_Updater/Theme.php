@@ -122,16 +122,11 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
-		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
-		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
-		}
-
-		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
+		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 
-		$this->set_transient( 'ghu_themes', $this->config );
 	}
 
 
