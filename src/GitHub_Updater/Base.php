@@ -100,6 +100,20 @@ class Base {
 	);
 
 	/**
+	 * Holds instance of class Plugin.
+	 *
+	 * @var object Plugin
+	 */
+	protected static $plugin = false;
+
+	/**
+	 * Holds instance of class Theme.
+	 *
+	 * @var object Theme
+	 */
+	protected static $theme = false;
+
+	/**
 	 * Constructor.
 	 * Loads options to private static variable.
 	 */
@@ -115,16 +129,35 @@ class Base {
 	}
 
 	/**
+	 * The Plugin/Theme object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object.
+	 *
+	 * @param $object object variable
+	 * @param $class object Plugin|Theme
+	 *
+	 * @return object Plugin|Theme
+	 */
+	public static function instance( $object, $class ) {
+		if ( false === $object ) {
+			$object = $class;
+		}
+
+		return $object;
+	}
+
+	/**
 	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			new Plugin();
+			self:: $plugin = Base::instance( self::$plugin, new Plugin() );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			new Theme();
+			self::$theme = Base::instance( self::$theme, new Theme() );
 		}
-		if ( is_admin() && ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) ) {
+		if ( is_admin() &&
+		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
+		) {
 			new Settings();
 		}
 	}
@@ -447,7 +480,7 @@ class Base {
 		 * Use $extra_hook to derive repo, safer.
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug           = dirname( $extra_hook['plugin'] );
+			$slug = dirname( $extra_hook['plugin'] );
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
 			$slug = $extra_hook['theme'];
 		}
@@ -457,7 +490,7 @@ class Base {
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $repo['repo'] !== $slug && $repo['extended_repo'] !== $slug ) {
+		if ( $slug !== $repo['repo'] && $slug !== $repo['extended_repo'] ) {
 			return $result;
 		}
 

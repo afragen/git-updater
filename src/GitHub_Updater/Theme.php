@@ -126,7 +126,6 @@ class Theme extends Base {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher'), 10, 2 );
 				}
 			}
-
 		}
 
 		$this->make_force_check_transient( 'themes' );
@@ -135,16 +134,11 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 
-		$update = array( 'do-core-reinstall', 'do-core-upgrade' );
-		if ( empty( $_GET['action'] ) || ! in_array( $_GET['action'], $update, true ) ) {
-			add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
-		}
-
-		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
+		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 
-		$this->set_transient( 'ghu_themes', $this->config );
 	}
 
 
@@ -279,8 +273,8 @@ class Theme extends Base {
 					$theme_name
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					esc_url( $details_url ),
-					esc_attr( $theme_name )
+					$details_url,
+					$theme_name
 				);
 				printf( esc_html__( 'View version %s details.', 'github-updater' ),
 					$r['new_version']
@@ -290,11 +284,11 @@ class Theme extends Base {
 				echo '</em>';
 			} else {
 				printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-					esc_attr( $theme_name )
+					$theme_name
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					esc_url( $details_url ),
-					esc_attr( $theme_name )
+					$details_url,
+					$theme_name
 				);
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$r['new_version'],
@@ -400,9 +394,9 @@ class Theme extends Base {
 			}
 
 			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
-				$prepared_themes[ $theme->repo ]['update'] = $this->_append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
 			} else {
-				$prepared_themes[ $theme->repo ]['description'] .= $this->_append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 		}
 
@@ -419,16 +413,16 @@ class Theme extends Base {
 	 *
 	 * @return string (content buffer)
 	 */
-	private function _append_theme_actions_content( $theme ) {
+	protected function append_theme_actions_content( $theme ) {
 
-		$details_url            = self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" );
+		$details_url            = esc_url( self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" ) );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
 		 * If the theme is outdated, display the custom theme updater content.
 		 * If theme is not present in theme_update transient response ( theme is not up to date )
 		 */
-		if ( empty( $theme_update_transient->up_to_date[$theme->repo] ) ) {
+		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
@@ -438,7 +432,7 @@ class Theme extends Base {
 						$theme->name
 					);
 					printf( ' <a href="%s" class="thickbox" title="%s">',
-						esc_url( $details_url ),
+						$details_url,
 						esc_attr( $theme->name )
 					);
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),

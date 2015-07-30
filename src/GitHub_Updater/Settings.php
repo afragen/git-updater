@@ -314,10 +314,10 @@ class Settings extends Base {
 	 * @return void
 	 */
 	public function ghu_tokens() {
-		$ghu_options_keys  = array();
-		$ghu_plugins       = $this->get_transient( 'ghu_plugins' ) ? $this->get_transient( 'ghu_plugins' ) : array();
-		$ghu_themes        = $this->get_transient( 'ghu_themes' ) ? $this->get_transient( 'ghu_themes' ) : array();
-		$ghu_tokens        = array_merge( $ghu_plugins, $ghu_themes );
+		$ghu_options_keys = array();
+		$ghu_plugins      = isset( self::$plugin ) ? self::$plugin->config : array();
+		$ghu_themes       = isset( self::$theme ) ? self::$theme->config : array();
+		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '';
