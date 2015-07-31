@@ -741,6 +741,8 @@ class Base {
 			delete_site_transient( $transient );
 		}
 		delete_site_transient( 'ghu-' . $type );
+
+		return true;
 	}
 
 	/**
@@ -757,6 +759,8 @@ class Base {
 		}
 		$this->set_transient( 'ghu-' . $type, self::$transients );
 		self::$transients = array();
+
+		return false;
 	}
 
 	/**

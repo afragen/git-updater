@@ -171,6 +171,8 @@ class Plugin extends Base {
 		}
 		print( '</ul>' );
 		echo '</div></td></tr>';
+
+		return true;
 	}
 
 	/**

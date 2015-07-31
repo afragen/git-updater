@@ -62,6 +62,7 @@ class Messages extends Base {
 			}
 		}
 
+		return true;
 	}
 
 	/**

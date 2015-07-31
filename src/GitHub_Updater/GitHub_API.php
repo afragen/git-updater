@@ -397,6 +397,8 @@ class GitHub_API extends API {
 
 			return $response;
 		}
+
+		return false;
 	}
 
 }

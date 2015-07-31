@@ -148,6 +148,8 @@ class Bitbucket_API extends API {
 		}
 
 		$this->type->sections['changelog'] = $changelog;
+
+		return true;
 	}
 
 	/**
