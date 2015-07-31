@@ -2,7 +2,7 @@
 * fix rollback for GitLab themes
 * add branch switcher for themes
 * escape all printed strings
-* changed from using `upgrader_source_selection` hook to `upgrader_post_install`, this greatly simplifies things and hopefully puts an end to any renaming issues.
+* changed from using `upgrader_source_selection` hook to `upgrader_post_install`, this greatly simplifies renaming
 * removed `class Remote_Update` as it's no longer needed when using `upgrader_post_install` hook
 * fixed `set_transient()` and `get_transient()` to be more versatile.
 

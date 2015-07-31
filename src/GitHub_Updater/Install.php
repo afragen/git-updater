@@ -196,6 +196,8 @@ class Install extends Base {
 		if ( ! isset( $_POST['option_page'] ) || ! ( 'github_updater_install' === $_POST['option_page'] ) ) {
 			$this->create_form( $type );
 		}
+
+		return true;
 	}
 
 	/**

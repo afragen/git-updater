@@ -149,7 +149,6 @@ class Settings extends Base {
 			?>
 		</div>
 		<?php
-
 	}
 
 	/**
