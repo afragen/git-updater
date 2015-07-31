@@ -131,14 +131,34 @@ class Base {
 	 * The Plugin/Theme object can be created/obtained via this
 	 * method - this prevents unnecessary work in rebuilding the object.
 	 *
-	 * @param $object object variable
-	 * @param $class object Plugin|Theme
+	 * @param $class string Plugin|Theme
 	 *
 	 * @return object Plugin|Theme
 	 */
-	public static function instance( $object, $class ) {
+	public static function instance( $class ) {
+		switch ( $class ) {
+			case 'Plugin':
+				$object = self::$plugin;
+				$static = $class;
+				$class  = 'Fragen\\GitHub_Updater\\Plugin';
+				break;
+			case 'Theme':
+				$object = self::$theme;
+				$static = $class;
+				$class = 'Fragen\\GitHub_Updater\\Theme';
+				break;
+		}
 		if ( false === $object ) {
-			$object = $class;
+			switch ( strtolower( $static ) ) {
+				case 'plugin':
+					$object       = new $class();
+					self::$plugin = $object;
+					break;
+				case 'theme':
+					$object      = new $class();
+					self::$theme = $object;
+					break;
+			}
 		}
 
 		return $object;
@@ -149,10 +169,10 @@ class Base {
 	 */
 	public function init() {
 		if ( current_user_can( 'update_plugins' ) ) {
-			self::$plugin = Base::instance( self::$plugin, new Plugin() );
+			self::$plugin = Base::instance( 'Plugin' );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			self::$theme = Base::instance( self::$theme, new Theme() );
+			self::$theme = Base::instance( 'Theme' );
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
