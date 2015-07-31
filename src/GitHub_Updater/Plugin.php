@@ -29,6 +29,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Plugin extends Base {
 
 	/**
+	 * Plugin object.
+	 *
+	 * @var bool|Plugin
+	 */
+	protected static $object = false;
+
+	/**
 	 * Rollback variable
 	 *
 	 * @var string branch
@@ -129,6 +136,21 @@ class Plugin extends Base {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
+	/**
+	 * The Plugin object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Plugin
+	 */
+	public static function instance( $force_meta_update = false ) {
+		$class = __CLASS__;
+		if ( false === self::$object ) {
+			self::$object = new $class( $force_meta_update );
+		}
+
+		return self::$object;
+	}
 
 	/**
 	 * Add branch switch row to plugins page.

@@ -100,20 +100,6 @@ class Base {
 	);
 
 	/**
-	 * Holds instance of class Plugin.
-	 *
-	 * @var object Plugin
-	 */
-	protected static $plugin = false;
-
-	/**
-	 * Holds instance of class Theme.
-	 *
-	 * @var object Theme
-	 */
-	protected static $theme = false;
-
-	/**
 	 * Constructor.
 	 * Loads options to private static variable.
 	 */
@@ -129,37 +115,37 @@ class Base {
 	}
 
 	/**
-	 * The Plugin/Theme object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object.
-	 *
-	 * @param $object object variable
-	 * @param $class object Plugin|Theme
-	 *
-	 * @return object Plugin|Theme
-	 */
-	public static function instance( $object, $class ) {
-		if ( false === $object ) {
-			$object = $class;
-		}
-
-		return $object;
-	}
-
-	/**
 	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
+	 *
+	 * @return bool
 	 */
 	public function init() {
-		if ( current_user_can( 'update_plugins' ) ) {
-			self::$plugin = Base::instance( self::$plugin, new Plugin() );
+		global $pagenow;
+
+		// Exit if admin-ajax.php
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return false;
 		}
-		if ( current_user_can( 'update_themes' ) ) {
-			self::$theme = Base::instance( self::$theme, new Theme() );
+
+		$force_update = false;
+		$admin_pages  = array( 'plugins.php', 'themes.php', 'update-core.php', 'options-general.php', 'settings.php' );
+		if ( in_array( $pagenow, $admin_pages ) ) {
+			$force_update = true;
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
+
 		) {
 			new Settings();
 		}
+		if ( current_user_can( 'update_plugins' ) ) {
+			Plugin::$object = Plugin::instance( $force_update );
+		}
+		if ( current_user_can( 'update_themes' ) ) {
+			Theme::$object = Theme::instance( $force_update );
+		}
+
+		return true;
 	}
 
 	/**
@@ -169,6 +155,7 @@ class Base {
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
 		add_action( 'load-plugins.php', array( &$this, 'forced_meta_update' ) );
+		add_action( 'load-themes.php', array( &$this, 'forced_meta_update' ) );
 		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ) );
 		add_action( 'load-update-core.php', array( &$this, 'forced_meta_update' ) );
 	}
@@ -177,11 +164,8 @@ class Base {
 	 * Performs actual metadata fetching.
 	 */
 	function forced_meta_update() {
-		self::$plugin = Base::instance( self::$plugin, new Plugin( true ) );
-		self::$theme = Base::instance( self::$theme, new Theme( true ) );
-
-		//new Plugin( true );
-		//new Theme( true );
+		Plugin::$object = Plugin::instance( true );
+		Theme::$object  = Theme::instance( true );
 	}
 
 	/**

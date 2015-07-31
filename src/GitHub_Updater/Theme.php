@@ -31,6 +31,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Theme extends Base {
 
 	/**
+	 * Theme object.
+	 *
+	 * @var bool|Theme
+	 */
+	protected static $object = false;
+
+	/**
 	 * Rollback variable.
 	 *
 	 * @var number
@@ -138,9 +145,23 @@ class Theme extends Base {
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
-
 	}
 
+	/**
+	 * The Theme object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Theme
+	 */
+	public static function instance( $force_meta_update = false ) {
+		$class = __CLASS__;
+		if ( false === self::$object ) {
+			self::$object = new $class( $force_meta_update );
+		}
+
+		return self::$object;
+	}
 
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate.
