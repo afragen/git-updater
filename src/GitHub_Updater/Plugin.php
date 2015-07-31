@@ -122,7 +122,10 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( $this->force_meta_update ) {
+			if ( $this->force_meta_update &&
+			     ( ( is_multisite() && is_network_admin() ) ||
+			       ! is_multisite() )
+			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
