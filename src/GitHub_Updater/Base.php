@@ -122,11 +122,6 @@ class Base {
 	public function init() {
 		global $pagenow;
 
-		// Exit if admin-ajax.php
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			return false;
-		}
-
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
 		$admin_pages  = array( 'plugins.php', 'themes.php', 'update-core.php', 'options-general.php', 'settings.php' );
