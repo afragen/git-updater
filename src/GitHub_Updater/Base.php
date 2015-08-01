@@ -509,7 +509,8 @@ class Base {
 		}
 
 		$wp_filesystem->move( $result['destination'], $proper_destination );
-		$result['destination'] = $proper_destination;
+		$result['destination']       = $proper_destination;
+		$result['clear_destination'] = true;
 
 		return $result;
 	}
