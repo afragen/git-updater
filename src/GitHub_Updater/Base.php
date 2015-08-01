@@ -110,8 +110,8 @@ class Base {
 		/*
 		 * Calls in init hook for user capabilities.
 		 */
-		add_action( 'init', array( &$this, 'background_update' ) );
-		add_action( 'init', array( &$this, 'init' ) );
+		add_action( 'init', array( &$this, 'background_update' ), 0 );
+		add_action( 'init', array( &$this, 'init' ), 15 );
 	}
 
 	/**
@@ -120,29 +120,22 @@ class Base {
 	 * @return bool
 	 */
 	public function init() {
-		global $pagenow;
-
 		// Exit if admin-ajax.php
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			return false;
 		}
 
-		$force_update = false;
-		$admin_pages  = array( 'plugins.php', 'themes.php', 'update-core.php', 'options-general.php', 'settings.php' );
-		if ( in_array( $pagenow, $admin_pages ) ) {
-			$force_update = true;
+		if ( current_user_can( 'update_plugins' ) ) {
+			Plugin::$object = Plugin::instance();
+		}
+		if ( current_user_can( 'update_themes' ) ) {
+			Theme::$object = Theme::instance();
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
 
 		) {
 			new Settings();
-		}
-		if ( current_user_can( 'update_plugins' ) ) {
-			Plugin::$object = Plugin::instance( $force_update );
-		}
-		if ( current_user_can( 'update_themes' ) ) {
-			Theme::$object = Theme::instance( $force_update );
 		}
 
 		return true;

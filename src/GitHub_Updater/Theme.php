@@ -156,8 +156,9 @@ class Theme extends Base {
 	 */
 	public static function instance( $force_meta_update = false ) {
 		$class = __CLASS__;
-		if ( false === self::$object ) {
-			self::$object = new $class( $force_meta_update );
+		if ( false === self::$object && $force_meta_update ) {
+			self::$object = new $class( true );
+			set_site_transient( 'ghu_theme', self::$object, self::$hours * HOUR_IN_SECONDS );
 		}
 
 		return self::$object;
