@@ -124,7 +124,12 @@ class Base {
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
-		$admin_pages  = array( 'plugins.php', 'themes.php', 'update-core.php', 'options-general.php', 'settings.php' );
+		$admin_pages  = array(
+			'plugins.php', 'plugin-install.php',
+			'themes.php', 'themes-install.php',
+			'update-core.php', 'update.php',
+			'options-general.php', 'settings.php',
+		);
 		if ( in_array( $pagenow, $admin_pages ) ) {
 			$force_meta_update = true;
 		}
