@@ -130,7 +130,9 @@ class Base {
 			'update-core.php', 'update.php',
 			'options-general.php', 'settings.php',
 		);
-		if ( in_array( $pagenow, $admin_pages ) ) {
+		if ( in_array( $pagenow, $admin_pages ) ||
+		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+		) {
 			$force_meta_update = true;
 		}
 
