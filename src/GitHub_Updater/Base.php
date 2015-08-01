@@ -159,6 +159,7 @@ class Base {
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
 		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ) );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update' ) );
 	}
 
 	/**
