@@ -721,8 +721,7 @@ class Base {
 	 * @return bool
 	 */
 	protected function set_transient( $id, $response ) {
-		$salt = isset( $this->type->repo ) ? $this->type->repo : 'github-updater';
-		$transient = 'ghu-' . md5( $salt . $id );
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
 		}
@@ -739,8 +738,7 @@ class Base {
 	 * @return mixed
 	 */
 	protected function get_transient( $id ) {
-		$salt = isset( $this->type->repo ) ? $this->type->repo : 'github-updater';
-		$transient = 'ghu-' . md5( $salt . $id );
+		$transient = 'ghu-' . md5( $this->type->repo . $id );
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
 		}
@@ -781,10 +779,10 @@ class Base {
 		if ( $transient ) {
 			return false;
 		}
-		set_site_transient( 'ghu-' . $type, self::$transients, self::$hours * HOUR_IN_SECONDS );
+		set_site_transient( 'ghu-' . $type, self::$transients, ( self::$hours * HOUR_IN_SECONDS ) );
 		self::$transients = array();
 
-		return false;
+		return true;
 	}
 
 	/**

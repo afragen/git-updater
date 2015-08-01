@@ -149,7 +149,7 @@ class Plugin extends Base {
 		$class = __CLASS__;
 		if ( false === self::$object && $force_meta_update ) {
 			self::$object = new $class( true );
-			set_site_transient( 'ghu_plugin', self::$object, self::$hours * HOUR_IN_SECONDS );
+			set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 		}
 
 		return self::$object;
@@ -268,13 +268,14 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
+		$transient = 'ghu-' . md5( $response->slug . 'wporg' );
+		$wp_repo_data = get_site_transient( $transient );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
-			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
+			set_site_transient( $transient, $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
 		$wp_repo_body = unserialize( $wp_repo_data['body'] );
