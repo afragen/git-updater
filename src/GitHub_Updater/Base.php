@@ -779,7 +779,7 @@ class Base {
 		if ( $transient ) {
 			return false;
 		}
-		$this->set_transient( 'ghu-' . $type, self::$transients );
+		set_site_transient( 'ghu-' . $type, self::$transients );
 		self::$transients = array();
 
 		return false;
@@ -789,8 +789,6 @@ class Base {
 	 * Set repo object file info.
 	 *
 	 * @param $response
-	 *
-	 * @param $repo
 	 */
 	protected function set_file_info( $response ) {
 		$this->type->transient            = $response;
