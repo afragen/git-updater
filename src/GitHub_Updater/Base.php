@@ -110,8 +110,8 @@ class Base {
 		/*
 		 * Calls in init hook for user capabilities.
 		 */
-		add_action( 'init', array( &$this, 'background_update' ), 0 );
-		add_action( 'init', array( &$this, 'init' ), 15 );
+		add_action( 'init', array( &$this, 'init' ) );
+		add_action( 'init', array( &$this, 'background_update' ) );
 	}
 
 	/**
@@ -120,16 +120,25 @@ class Base {
 	 * @return bool
 	 */
 	public function init() {
+		global $pagenow;
+
 		// Exit if admin-ajax.php
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			return false;
 		}
 
+		// Set $force_meta_update = true on appropriate admin pages.
+		$force_meta_update = false;
+		$admin_pages  = array( 'plugins.php', 'themes.php', 'update-core.php' );
+		if ( in_array( $pagenow, $admin_pages ) ) {
+			$force_meta_update = true;
+		}
+
 		if ( current_user_can( 'update_plugins' ) ) {
-			Plugin::$object = Plugin::instance();
+			Plugin::$object = Plugin::instance( $force_meta_update );
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			Theme::$object = Theme::instance();
+			Theme::$object = Theme::instance( $force_meta_update );
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )
@@ -142,15 +151,12 @@ class Base {
 	}
 
 	/**
-	 * Piggyback on built-in plugin update function to get metadata.
+	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
-		add_action( 'load-plugins.php', array( &$this, 'forced_meta_update' ) );
-		add_action( 'load-themes.php', array( &$this, 'forced_meta_update' ) );
 		add_action( 'load-update.php', array( &$this, 'forced_meta_update' ) );
-		add_action( 'load-update-core.php', array( &$this, 'forced_meta_update' ) );
 	}
 
 	/**
