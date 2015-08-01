@@ -126,7 +126,7 @@ class Base {
 		$force_meta_update = false;
 		$admin_pages  = array(
 			'plugins.php', 'plugin-install.php',
-			'themes.php', 'themes-install.php',
+			'themes.php', 'theme-install.php',
 			'update-core.php', 'update.php',
 			'options-general.php', 'settings.php',
 		);
@@ -781,7 +781,7 @@ class Base {
 		if ( $transient ) {
 			return false;
 		}
-		set_site_transient( 'ghu-' . $type, self::$transients );
+		set_site_transient( 'ghu-' . $type, self::$transients, self::$hours * HOUR_IN_SECONDS );
 		self::$transients = array();
 
 		return false;

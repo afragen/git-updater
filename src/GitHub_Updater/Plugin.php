@@ -268,13 +268,13 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		$wp_repo_data = $this->get_transient( 'wporg' );
+		$wp_repo_data = get_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ) );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
 			if ( is_wp_error( $wp_repo_data ) ) {
 				return false;
 			}
-			$this->set_transient( 'wporg', $wp_repo_data );
+			set_site_transient( 'ghu-' . md5( $response->slug . 'wporg' ), $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
 		}
 
 		$wp_repo_body = unserialize( $wp_repo_data['body'] );
