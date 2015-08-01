@@ -456,9 +456,12 @@ class Base {
 	 */
 	public function upgrader_post_install( $true, $extra_hook, $result ) {
 		global $wp_filesystem;
+		$slug = null;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
-		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) )
+		     ( $this instanceof Plugin && in_array( 'theme', $extra_hook ) ) ||
+		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) ) ||
+		     ( $this instanceof Theme && in_array( 'plugin', $extra_hook ) )
 		) {
 			return $result;
 		}
@@ -477,11 +480,18 @@ class Base {
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $slug !== $repo['repo'] && $slug !== $repo['extended_repo'] ) {
+		if ( $slug !== $repo['repo'] &&
+		     $slug !== $repo['extended_repo'] &&
+		     ! in_array( 'install', $extra_hook )
+		) {
 			return $result;
 		}
 
-		$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+		if ( isset( self::$options['github_updater_install_repo'] ) ) {
+			$proper_destination = trailingslashit( $result['local_destination'] ) . self::$options['github_updater_install_repo'];
+		} else {
+			$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+		}
 
 		/*
 		 * Extended naming.
@@ -513,7 +523,8 @@ class Base {
 	 * @return array
 	 */
 	protected function get_repo_slugs( $slug ) {
-		$arr = array();
+		$arr['repo']          = null;
+		$arr['extended_repo'] = null;
 		foreach ( $this->config as $repo ) {
 			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
 				$arr['repo']          = $repo->repo;
