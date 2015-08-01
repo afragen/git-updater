@@ -129,6 +129,7 @@ class Base {
 			'themes.php', 'theme-install.php',
 			'update-core.php', 'update.php',
 			'options-general.php', 'settings.php',
+			'index.php', // needed for iThemes Sync
 		);
 		if ( in_array( $pagenow, $admin_pages ) ||
 		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
