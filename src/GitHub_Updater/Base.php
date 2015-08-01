@@ -481,10 +481,7 @@ class Base {
 		/*
 		 * Not GitHub Updater plugin/theme.
 		 */
-		if ( $slug !== $repo['repo'] &&
-		     $slug !== $repo['extended_repo'] &&
-		     ! in_array( 'install', $extra_hook )
-		) {
+		if ( ! isset( $_POST['github_updater_repo'] ) && empty( $repo ) ) {
 			return $result;
 		}
 
@@ -525,8 +522,7 @@ class Base {
 	 * @return array
 	 */
 	protected function get_repo_slugs( $slug ) {
-		$arr['repo']          = null;
-		$arr['extended_repo'] = null;
+		$arr = array();
 		foreach ( $this->config as $repo ) {
 			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
 				$arr['repo']          = $repo->repo;
