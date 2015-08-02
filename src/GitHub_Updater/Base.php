@@ -450,9 +450,10 @@ class Base {
 	/**
 	 * Use upgrader_post_install hook to ensure correct directory name.
 	 *
+	 * @global \WP_Filesystem_Direct $wp_filesystem
 	 * @param $true
-	 * @param $extra_hook
-	 * @param $result
+	 * @param array $extra_hook
+	 * @param array $result
 	 *
 	 * @return mixed
 	 */
