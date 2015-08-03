@@ -143,6 +143,7 @@ class Base {
 				$admin_pages = array_merge( $admin_pages, array( 'index.php' ) );
 			}
 		}
+		$admin_pages = array_unique( $admin_pages );
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ||
 		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
