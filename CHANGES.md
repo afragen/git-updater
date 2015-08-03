@@ -4,8 +4,9 @@
 * escape all printed strings
 * changed from using `upgrader_source_selection` hook to `upgrader_post_install`, this greatly simplifies renaming
 * removed `class Remote_Update` as it's no longer needed when using `upgrader_post_install` hook
-* fixed `set_transient()` and `get_transient()` to be more versatile.
-* modified the process loading so takes less overhead in dashboard. Much thanks @khromov
+* added **Remote Management** settings tab more cleanly support those services that currenly integrate with GitHub Updater
+* modified the process loading so faster for admin level users. Much thanks @khromov
+
 
 #### 4.6.2
 * refactor remote update services to new `class Remote_Update`

@@ -256,6 +256,12 @@ There is a new setting for a personal GitHub Access Token. I **strongly** encour
 
 I've seen this error code occasionally with Bitbucket.
 
+## Remote Management Services
+
+Currently, GitHub Updater works with both iThemes Sync and InfiniteWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
+
+Please go the Remote Management tab of the Settings page and check which remote management service you wish to use. There will be a small amount of overhead related to using any of these services which may impact performance, but only for **admin** level users.
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
