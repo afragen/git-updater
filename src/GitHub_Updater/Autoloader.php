@@ -3,6 +3,13 @@
 // namespace must be unique to each plugin
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  *
  * To use with different plugins be sure to create a new namespace.
@@ -41,7 +48,9 @@ class Autoloader {
 	 */
 	public function __construct( array $roots, array $static_map = null ) {
 		$this->roots = $roots;
-		if ( null !== $static_map ) $this->map = $static_map;
+		if ( null !== $static_map ) {
+			$this->map = $static_map;
+		}
 		spl_autoload_register( array( $this, 'autoload' ) );
 	}
 
@@ -52,8 +61,8 @@ class Autoloader {
 	 */
 	protected function autoload( $class ) {
 		// Check for a static mapping first of all
-		if ( isset( $this->map[$class] ) && file_exists( $this->map[$class] ) ) {
-			include $this->map[$class];
+		if ( isset( $this->map[ $class ] ) && file_exists( $this->map[ $class ] ) ) {
+			include $this->map[ $class ];
 			return;
 		}
 

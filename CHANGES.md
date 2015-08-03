@@ -1,3 +1,73 @@
+#### 4.6.2
+* refactor remote update services to new `class Remote_Update`
+* general security fixes, don't call files directly...
+* fix/test for remote updating via InfiniteWP. Child themes are not identified by IWP as needing updates, otherwise it seems to work as expected.
+
+#### 4.6.1
+* fix for remote updating via iThemes Sync
+* fix for renaming when AJAX updating of plugins
+
+#### 4.6.0
+* newer, much more precise method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :-)
+* added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.
+* strip `.git` from the end of the plugin or theme URI for those who haven't gotten to the README yet.
+* added javascript show/hide options on the Install page.
+* fixed boolean logic to _not_ display GitLab Private Token input on Install if it's already set.
+* updated screenshots in README
+* switched a number of methods to be non-static, anticipation of testing.
+* [broken: renaming during updates from upgrade services](https://github.com/afragen/github-updater/issues/262)
+
+#### 4.5.7
+* hotfix GitLab private updating/installing
+* fix some PHP notices
+
+#### 4.5.6
+* bugfix for renaming code to properly strip `<owner>-`
+* most of Russian translation by [Anatoly Yumashev](https://github.com/yumashev)
+
+#### 4.5.5
+* back to simplifying the renaming code, always remember to test renaming on live server.
+* strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
+* I think this is the end of renaming for a while. :P
+
+#### 4.5.4
+* hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.
+
+#### 4.5.3
+* updated language files -- oops
+
+#### 4.5.2
+* cleanup and refactor of renaming code.
+* added Romanian translation by [Corneliu Cirlan](https://github.com/corneliucirlan)
+* added Japanese translation by [ishihara](https://github.com/1shiharat)
+
+#### 4.5.1
+* fix bug so updates display without having to randomly refresh.
+
+#### 4.5.0
+* fix some PHP notices
+* add update by GitHub release asset in lieu of update by tag when asset is present
+* install asset via remote install if asset URI used
+* refactor to simplify class structure, created `abstract class API` and `class Messages`
+* add GitLab support!!
+* refactor to set all git servers and extra headers to static arrays in `Base`
+* remove checkbox when loaded as mu-plugin, props @pbearne
+
+#### 4.4.0
+* only add custom user agent once :P
+* add support of GitHub Enterprise via new `GitHub Enterprise` header
+* sanitize filter input
+* add support for parsing `readme.txt` for _View details_ information using `WordPress_Plugin_Readme_Parser` by @markjaquith
+* fixed _View details_ link to show for all cases when plugin using GitHub Updater
+* refactor creation of header parts and URIs
+
+#### 4.3.1
+* Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
+* German translation by [Linus Metzler](https://github.com/limenet)
+* squish PHP notices
+* add custom user agent to `wp_remote_get` and tweak error message at request of GitHub ;-)
+* fixed edge case renaming bug
+
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
 * use https://api.wordpress.org not http

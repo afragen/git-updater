@@ -10,6 +10,13 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Update a WordPress plugin from a GitHub repo.
  *
@@ -33,42 +40,51 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 
-		/**
+		/*
 		 * Get details of git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
-		
+
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-		if ( isset( $_GET['force-check'] ) && '1' === $_GET['force-check'] ) {
+		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$this->repo_api = null;
 			switch( $plugin->type ) {
 				case 'github_plugin':
-					$repo_api = new GitHub_API( $plugin );
+					$this->repo_api = new GitHub_API( $plugin );
 					break;
 				case 'bitbucket_plugin':
-					$repo_api = new Bitbucket_API( $plugin );
+					$this->repo_api = new Bitbucket_API( $plugin );
 					break;
+				case 'gitlab_plugin';
+					$this->repo_api = new GitLab_API( $plugin );
+					break;
+			}
+
+			if ( is_null( $this->repo_api ) ) {
+				continue;
 			}
 
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-				$repo_api->get_repo_meta();
-				$repo_api->get_remote_tag();
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
 				if ( $changelog ) {
-					$repo_api->get_remote_changes( $changelog );
+					$this->repo_api->get_remote_changes( $changelog );
 				}
-				$plugin->download_link = $repo_api->construct_download_link();
+				$this->repo_api->get_remote_readme();
+				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 
-			/**
+			/*
 			 * Update plugin transient with rollback (branch switching) data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
@@ -81,22 +97,22 @@ class Plugin extends Base {
 					'plugin'      => $plugin->slug,
 					'new_version' => $this->tag,
 					'url'         => $plugin->uri,
-					'package'     => $repo_api->construct_download_link( false, $this->tag ),
+					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			add_action( "after_plugin_row_$plugin->slug", array( $this, 'wp_plugin_update_row' ), 15, 3 );
+			add_action( "after_plugin_row_$plugin->slug", array( &$this, 'wp_plugin_update_row' ), 15, 3 );
 		}
 
 		$this->make_force_check_transient( 'plugins' );
 
-		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ) );
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'pre_set_site_transient_update_plugins' ) );
-		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
-		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
-		add_filter( 'http_request_args', array( $this, 'no_ssl_http_request_args' ), 10, 2 );
+		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 
 		Settings::$ghu_plugins = $this->config;
 	}
@@ -116,93 +132,88 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$branch_keys   = array( 'GitHub Branch', 'Bitbucket Branch', 'GitLab Branch' );
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$plugin        = dirname( $plugin_file );
-		$id            = $plugin . '-id';
-		$branches      = isset( $this->config[ $plugin ] ) ? $this->config[ $plugin ]->branches : null;
-
-		if ( ! $branches ) {
+		$plugin        = $this->get_repo_slugs( dirname( $plugin_file ) );
+		if ( ! empty( $plugin ) ) {
+			$id       = $plugin['repo'] . '-id';
+			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+		} else {
 			return false;
 		}
 
-		/**
+		/*
 		 * Get current branch.
 		 */
-		foreach ( $branch_keys as $branch_key ) {
-			$branch = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
+		foreach ( parent::$git_servers as $server ) {
+			$branch_key = $server . ' Branch';
+			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
 			if ( 'master' !== $branch ) {
 				break;
 			}
 		}
 
-		/**
+		/*
 		 * Create after_plugin_row_
 		 */
-		if ( isset( $this->config[ $plugin ] ) ) {
-			echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
+		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 
-			printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
-				$branch,
-				'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
-				'</a>'
+		printf( __( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
+			$branch,
+			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'</a>'
+		);
+
+		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
+		foreach ( $branches as $branch => $uri ) {
+
+			printf( '<li><a href="%s%s">%s</a></li>',
+				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
 			);
-
-			print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-			foreach ( $branches as $branch => $uri ) {
-
-				printf( '<li><a href="%s%s">%s</a></li>',
-					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
-					'&rollback=' . urlencode( $branch ),
-					esc_attr( $branch )
-				);
-			}
-			print( '</ul>' );
-			echo '</div></td></tr>';
 		}
+		print( '</ul>' );
+		echo '</div></td></tr>';
 	}
 
 	/**
 	 * Add 'View details' link to plugins page.
-	 * Only works if `Plugin URI' === `GitHub Plugin URI`
 	 *
-	 * @param $plugin_meta
+	 * @param $links
+	 * @param $file
 	 *
-	 * @return array
+	 * @return array $links
 	 */
-	public function plugin_row_meta( $plugin_meta ) {
+	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
+		$repo          = dirname ( $file );
+		$slugs         = $this->get_repo_slugs( $repo );
+		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
-		/**
+		/*
 		 * Sanity check for some commercial plugins.
 		 */
-		if ( ! isset( $plugin_meta[2] ) ) {
-			return $plugin_meta;
+		if ( ! isset( $links[2] ) ) {
+			return $links;
 		}
 
-		preg_match( $regex_pattern, $plugin_meta[2], $matches );
+		preg_match( $regex_pattern, $links[2], $matches );
 
-		if ( 'View details' !== $matches[2] ) {
-			$slug = trim( parse_url( $matches[1], PHP_URL_PATH ), '/' );
-			$repo = explode( '/', $slug );
-		}
-
-		if ( ! empty( $slug ) && isset( $repo[1] ) && array_key_exists( $repo[1], $this->config ) ) {
-			/**
-			 * Remove 'Visit plugin site' link in favor or 'View details' link.
-			 */
-			if ( false !== stristr( $plugin_meta[2], 'Visit plugin site' ) ) {
-				unset( $plugin_meta[2] );
+		/*
+		 * Remove 'Visit plugin site' link in favor or 'View details' link.
+		 */
+		if ( array_key_exists( $repo, $this->config ) ) {
+			if ( false !== stristr( $links[2], 'Visit plugin site' ) ) {
+				unset( $links[2] );
+				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
+					network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
+					                   '&TB_iframe=true&width=600&height=550' ),
+					__( 'View details', 'github-updater' )
+				);
 			}
-
-			$plugin_meta[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo[1] .
-				                            '&TB_iframe=true&width=600&height=550' ) ),
-				__( 'View details', 'github-updater' )
-			);
 		}
 
-		return $plugin_meta;
+		return $links;
 	}
 
 	/**
@@ -235,6 +246,14 @@ class Plugin extends Base {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			/*
+			 * Fix for extended naming.
+			 */
+			$repos = $this->get_repo_slugs( $plugin->repo );
+			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
+				$response->slug = $repos['repo'];
+			}
+			$contributors = array();
 			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
 				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
 					return $response;
@@ -250,8 +269,13 @@ class Plugin extends Base {
 				$response->requires      = $plugin->requires;
 				$response->tested        = $plugin->tested;
 				$response->downloaded    = $plugin->downloaded;
+				$response->donate_link   = $plugin->donate;
 				$response->last_updated  = $plugin->last_updated;
 				$response->download_link = $plugin->download_link;
+				foreach ( $plugin->contributors as $contributor ) {
+					$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
+				}
+				$response->contributors  = $contributors;
 				if ( ! $plugin->private ) {
 					$response->num_ratings = $plugin->num_ratings;
 					$response->rating      = $plugin->rating;
@@ -270,11 +294,9 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient_update_plugins( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
-		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$response = null;
 
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
@@ -285,19 +307,18 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 				);
 
-				/**
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
-				if ( isset( $transient->response[ $plugin->slug]->id ) && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org ) {
 					continue;
 				}
 
-				/**
+				/*
 				 * Don't overwrite if branch switching.
 				 */
-				if ( isset( $_GET['rollback'] ) &&
-				     ( isset( $_GET['plugin'] ) &&
-				       $plugin->slug === $_GET['plugin'] )
+				if ( $this->tag &&
+				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
 				}

@@ -1,19 +1,18 @@
 ![GitHub Updater](./assets/GitHub_Updater_logo.png)
 
-This fork includes additional support for SSH2 bugs in Wordpress.
-
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
-* Tags: plugin, theme, update, updater, github, bitbucket, remote install
+* Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.2beta
+* Tested up to: 4.3
 * Stable tag: master
+* Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub or Bitbucket hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
+A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -21,17 +20,15 @@ This plugin is [not allowed in the wp.org repo](https://github.com/afragen/githu
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-`GitHub Theme URI: afragen/test-child`  
-`GitHub Theme URI: https://github.com/afragen/test-child`
-
-or 
-
 `GitHub Plugin URI: afragen/github-updater`  
 `GitHub Plugin URI: https://github.com/afragen/github-updater`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required.
+or 
 
-Developers please note that your plugin/theme installation directory and remote repository names **must** be identical. This includes case sensitivity. Otherwise issues may arise where certain features fail to work properly. Please be consistent in your naming.
+`GitHub Theme URI: afragen/test-child`  
+`GitHub Theme URI: https://github.com/afragen/test-child`
+
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
 
 ## Installation
 
@@ -86,27 +83,9 @@ This way you get automatic updates and cannot deactivate the plugin.
 
 ## Usage
 
-### Themes
-
-There must be a `GitHub Theme URI` or `Bitbucket Theme URI` declaration in the `style.css` file.
-
-~~~css
-/*
-Theme Name:       Test
-Theme URI:        http://drfragen.info/
-Version:          0.1.0
-Description:      Child theme of TwentyTwelve.
-Author:           Andy Fragen
-Template:         twentytwelve
-Template Version: 1.0.0
-GitHub Theme URI: https://github.com/afragen/test-child
-GitHub Branch:    master
-*/
-~~~
-
 ### Plugins 
 
-There must be a `GitHub Plugin URI` or `Bitbucket Plugin URI` declaration in the plugin's header. The plugin's primary file **must** be named similarly to the repo name.
+There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header.
 
 ~~~php
 /*
@@ -124,9 +103,37 @@ GitHub Branch:     master
 */
 ~~~
 
+### Themes
+
+There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
+
+~~~css
+/*
+Theme Name:       Test
+Theme URI:        http://drfragen.info/
+Version:          0.1.0
+Description:      Child theme of TwentyTwelve.
+Author:           Andy Fragen
+Template:         twentytwelve
+Template Version: 1.0.0
+GitHub Theme URI: https://github.com/afragen/test-child
+GitHub Branch:    master
+*/
+~~~
+
 ### Optional Headers
 
-`GitHub Branch` and `Bitbucket Branch` are available but not required.
+`GitHub Branch`, `Bitbucket Branch`, and `GitLab Branch` are available but not required.
+
+### Enterprise and Self-Hosted Support
+
+#### GitHub Enterprise Support
+
+Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub self-hosted installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
+
+#### GitLab CE/Enterprise Support
+
+Add the `GitLab CE` or `GitLab Enterprise` header to the plugin or theme that is hosted on your GitLab self-hosted installation. The settings should be similar to `GitLab CE: https://gitlab.yourhost.com` or `GitLab Enterprise: https://gitlab.yourhost.com`.
 
 ### Versions
 
@@ -142,13 +149,15 @@ To specify a branch that you would like to use for updating, just add a branch h
 
 The default state is either `GitHub Branch: master` or nothing at all. They are equivalent.
 
-If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic versioning similar to the following, `<major>.<minor>.<patch>.<development>`.
+If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic version numbering similar to the following, `<major>.<minor>.<patch>.<development>`.
 
-In the GitHub Updater Settings there is a new setting to enable branch switching for plugins. When checked there will be a new ability from the Plugins page to switch between plugin branches.
+In the GitHub Updater Settings there is a new setting to enable branch switching for plugins. When checked there will be a new ability from the Plugins page to switch between plugin branches. Switching to the current branch will reinstall the current branch.
 
 ## Tagging
 
-If `GitHub Branch` or `Bitbucket Branch` is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
+If the branch header, i.e. `GitHub Branch` or `Bitbucket Branch`, is not specified (or is set to `master`), then the latest tag will be used. GitHub Updater will preferentially use a tag over a branch in this instance.
+
+If you prefer to create a release asset for distribution, this will be used in preference to a tag.
 
 ## Bitbucket Support
 
@@ -158,9 +167,19 @@ Instead of the `GitHub Theme URI` header you will need to use the `Bitbucket The
 
 The `Bitbucket Branch` header is supported for both plugins and themes.
 
+## GitLab Support
+
+Instead of the `GitHub Plugin URI` header you will need to use the `GitLab Plugin URI` header.
+
+Instead of the `GitHub Theme URI` header you will need to use the `GitLab Theme URI` header.
+
+The `GitLab Branch` header is supported for both plugins and themes.
+
+You must set a GitLab private token. Go to your GitLab profile page under Edit Account. From here you can retrieve or reset your GitLab private token.
+
 ## Private Repositories
 
-Public repositories will not show up in the Settings page.
+Only private repositories will show up in the Settings page.
 
 ![Settings Tab](./assets/screenshot-1.png)
 
@@ -186,9 +205,9 @@ There are now two **optional** headers for setting minimum requirements for both
 
 Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
 
-Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
 
-At the moment the default values are **WordPress 0.0.0** and **PHP 5.3**
+At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
 
 ## Deleting Transients
 
@@ -200,7 +219,7 @@ Be careful about refreshing the browser window after this as you may be continua
 
 If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
 
-The same applies for Bitbucket hosted plugins.
+The same applies for Bitbucket or GitLab hosted plugins.
 
 ## Remote Installation of Repositories
 
@@ -212,14 +231,16 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 GitHub Updater now reports a small error message on certain pages in the dashboard. The error codes are HTTP status codes. Most often the code will be either 403 or 401. If you don't have an Access Token set for a private GitHub repo you will get a 404 error.
 
-There is a new setting for a personal GitHub Access Token. Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Thanks [mlteal](https://github.com/mlteal).
+### Personal GitHub Access Token
+
+There is a new setting for a personal GitHub Access Token. I **strongly** encourage everyone to create a [personal access token](https://github.com/settings/tokens/new). Create one with at least `public_repo` access and your rate limit will be increased to 5000 API hits per hour. Unauthenticated calls to the GitHub API are limited to 60 API calls per hour and in certain circumstances, like shared hosting, these limits will be more frequently hit. Thanks [mlteal](https://github.com/mlteal).
 
 ### 403 - Unauthorized Access
 
 #### GitHub
-* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and will go away in less than an hour.
+* usually this means that you have reached GitHub API's rate limit of 60 hits per hour. This is informative and should go away in less than an hour. See above regarding the setting of a personal access token to eliminate this entirely.
 * a private GitHub repo without an Access Token designated in the Settings.
-* will tell you how long until GitHub API's rate limit will be reset
+* will tell you how long until GitHub API's rate limit will be reset.
 
 ### 401 - Incorrect Authentication
 
@@ -228,8 +249,18 @@ There is a new setting for a personal GitHub Access Token. Create one with at le
 * private Bitbucket repo not checked in Settings
 
 #### GitHub
-* using a GitHub Access Token for a public repo
+* using an incorrect private repo GitHub Access Token for a public repo
 * an incorrect Access Token for a private GitHub repo.
+
+### 429 - Too Many Requests
+
+I've seen this error code occasionally with Bitbucket.
+
+## Extended Naming
+
+There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
+
+To set Extended Naming add `define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );` in your `wp-config.php` or your theme's `functions.php`.
 
 ## Extras
 
@@ -248,6 +279,11 @@ There is a new setting for a personal GitHub Access Token. Create one with at le
 * Ukrainian by [Andrii Ryzhkv](https://github.com/andriiryzhkov)
 * Swedish by [Andréas Lundgren](https://github.com/Adevade)
 * Arabic by [Hyyan Abo FAkher](https://github.com/hyyan)
+* Spanish by [Jose Miguel Bejarano](https://github.com/xDae)
+* German by [Linus Metzler](https://github.com/limenet)
+* Romanian by [Corneliu Cirlan](https://github.com/corneliucirlan)
+* Japanese by [ishihara](https://github.com/1shiharat)
+* Russian by [Anatoly Yumashev](https://github.com/yumashev)
 
 ## Issues
 
@@ -273,10 +309,13 @@ This plugin's theme updater class was based upon [Whitelabel Framework's updater
 
 The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
-Includes [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+Includes
+
+* [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
+* [Mark Jaquith's](https://github.com/markjaquith) [WordPress Plugin Readme Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser/tree/WordPress.org) for parsing `readme.txt`.
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 ## Pull Requests
 
-Please fork and submit pull requests against the `develop` branch.
+Pull requests are welcome. Please fork and submit pull requests against the `develop` branch.
