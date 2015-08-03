@@ -71,6 +71,13 @@ class Base {
 	protected static $options;
 
 	/**
+	 * Holds the values for remote management settings.
+	 *
+	 * @var mixed
+	 */
+	protected static $options_remote;
+
+	/**
 	 * Holds HTTP error code from API call.
 	 *
 	 * @var array ( $this->type-repo => $code )
@@ -104,7 +111,8 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		self::$options = get_site_option( 'github_updater', array() );
+		self::$options        = get_site_option( 'github_updater', array() );
+		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 		$this->add_headers();
 
 		/*
@@ -129,9 +137,14 @@ class Base {
 			'themes.php', 'theme-install.php',
 			'update-core.php', 'update.php',
 			'options-general.php', 'settings.php',
-			//'index.php', // needed for iThemes Sync
 		);
-		if ( in_array( $pagenow, $admin_pages ) ||
+		foreach ( array_keys( Settings::$remote_management ) as $key ) {
+			if ( ! empty( self::$options_remote[ $key ] ) ) {
+				$admin_pages = array_merge( $admin_pages, array( 'index.php' ) );
+			}
+		}
+
+		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ||
 		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
 		) {
 			$force_meta_update = true;

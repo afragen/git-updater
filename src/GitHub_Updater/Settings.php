@@ -43,6 +43,11 @@ class Settings extends Base {
 	private static $gitlab            = false;
 	private static $gitlab_enterprise = false;
 
+	protected static $remote_management = array(
+		'ithemes_sync' => 'iThemes Sync',
+		'infinitewp'   => 'InfiniteWP',
+	);
+
 	/**
 	 * Start up
 	 */
@@ -50,6 +55,7 @@ class Settings extends Base {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
+		add_action( 'admin_init', array( $this, 'remote_management_page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
 	}
@@ -64,9 +70,10 @@ class Settings extends Base {
 	 */
 	private function _settings_tabs() {
 		return array(
-				'github_updater_settings'       => esc_html__( 'Settings', 'github-updater' ),
-				'github_updater_install_plugin' => esc_html__( 'Install Plugin', 'github-updater' ),
-				'github_updater_install_theme'  => esc_html__( 'Install Theme', 'github-updater' ),
+				'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
+				'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
+				'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
 			);
 	}
 
@@ -147,6 +154,15 @@ class Settings extends Base {
 				new Install( 'theme' );
 			}
 			?>
+			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
+				<form method="post" action="<?php esc_attr_e( $action ); ?>">
+					<?php
+						settings_fields( 'github_updater_remote_management' );
+						do_settings_sections( 'github_updater_remote_settings' );
+						submit_button();
+					?>
+				</form>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -303,7 +319,9 @@ class Settings extends Base {
 		}
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+			$options = get_site_option( 'github_updater' );
+			$options = array_merge( $options, self::sanitize( $_POST['github_updater'] ) );
+			update_site_option( 'github_updater', $options );
 		}
 	}
 
@@ -423,6 +441,42 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Settings for Remote Management.
+	 */
+	public function remote_management_page_init() {
+
+		register_setting(
+			'github_updater_remote_management',
+			'github_updater_remote_settings',
+			array( $this, 'sanitize' )
+		);
+
+		add_settings_section(
+			'remote_management',
+			esc_html__( 'Remote Management', 'github-updater' ),
+			array( $this, 'print_section_remote_management' ),
+			'github_updater_remote_settings'
+		);
+
+		foreach ( self::$remote_management as $id => $name ) {
+			add_settings_field(
+				$id,
+				esc_html__( $name ),
+				array( $this, 'token_callback_checkbox_remote' ),
+				'github_updater_remote_settings',
+				'remote_management',
+				array( 'id' => $id )
+			);
+		}
+
+		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
+			$options = array( 'ithemes_sync' => null, 'infinitewp' => null, 'managewp' => null, 'mainwp' => null );
+			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			update_site_option( 'github_updater_remote_management', $options );
+		}
+	}
+
+	/**
 	 * Sanitize each setting field as needed.
 	 *
 	 * @param array $input Contains all settings fields as array keys
@@ -491,6 +545,13 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Print the Remote Management text.
+	 */
+	public function print_section_remote_management() {
+		esc_html_e( 'Use of Remote Management services will result increase some page load speeds only for `admin` level users.', 'github-updater' );
+	}
+
+	/**
 	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $args
@@ -519,6 +580,21 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Get the settings option array and print one of its values.
+	 *
+	 * @param $args
+	 *
+	 * @return bool|void
+	 */
+	public function token_callback_checkbox_remote( $args ) {
+		?>
+		<label for="<?php esc_attr_e( $args['id'] ); ?>">
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
+		</label>
+		<?php
+	}
+
+	/**
 	 * Update network settings.
 	 * Used when plugin is network activated to save settings.
 	 *
@@ -526,7 +602,15 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_network_setting() {
-		update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+
+		if ( 'github_updater' === $_POST['option_page'] ) {
+			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+		}
+		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
+			$options = array( 'ithemes_sync' => null, 'infinitewp' => null, 'managewp' => null, 'mainwp' => null );
+			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			update_site_option( 'github_updater_remote_management', $options );
+		}
 		wp_redirect( add_query_arg(
 			array(
 				'page'    => 'github-updater',
