@@ -30,7 +30,7 @@ Requires PHP:      5.3
  * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+  die;
 }
 
 require_once ( plugin_dir_path( __FILE__ ) . '/vendor/WPUpdatePhp.php' );
@@ -38,7 +38,7 @@ $updatePhp = new WPUpdatePhp( '5.3.0' );
 $updatePhp->set_plugin_name( 'GitHub Updater' );
 
 if ( ! $updatePhp->does_it_meet_required_php_version() ) {
-	return false;
+  return false;
 }
 
 // Load textdomain
@@ -49,10 +49,10 @@ $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array(
-	'Parsedown'         => __DIR__ . '/vendor/Parsedown.php',
-	'WPUpdatePHP'       => __DIR__ . '/vendor/WPUpdatePhp.php',
-	'Automattic_Readme' => __DIR__ . '/vendor/parse-readme.php',
-	);
+  'Parsedown'         => __DIR__ . '/vendor/Parsedown.php',
+  'WPUpdatePHP'       => __DIR__ . '/vendor/WPUpdatePhp.php',
+  'Automattic_Readme' => __DIR__ . '/vendor/parse-readme.php',
+  );
 
 // Load Autoloader
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );

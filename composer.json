@@ -1,12 +1,12 @@
 {
-  "name": "afragen/github-updater",
+  "name": "gios-asu/github-updater",
   "type": "wordpress-plugin",
   "keywords": ["wordpress", "plugin", "updater"],
   "license": "GPLv2",
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/afragen/github-updater"
+      "url": "https://github.com/gios-asu/github-updater"
     }
   ],
   "require": {
