@@ -155,6 +155,7 @@ class Settings extends Base {
 			}
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
+				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 						settings_fields( 'github_updater_remote_management' );
@@ -615,6 +616,7 @@ class Settings extends Base {
 			array(
 				'page'    => 'github-updater',
 				'updated' => 'true',
+				'tab'     => $_GET['tab'],
 			),
 			network_admin_url( 'settings.php' )
 		) );
