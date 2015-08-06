@@ -470,10 +470,10 @@ class Settings extends Base {
 			);
 		}
 
-		foreach ( self::$remote_management as $key => $value ) {
-			$options[ $key ] = null;
-		}
 		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
+			foreach ( self::$remote_management as $key => $value ) {
+				$options[ $key ] = null;
+			}
 			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 			update_site_option( 'github_updater_remote_management', $options );
 		}
