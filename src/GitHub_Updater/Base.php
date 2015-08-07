@@ -139,11 +139,11 @@ class Base {
 			'options-general.php', 'settings.php',
 		);
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
-			if ( ! empty( self::$options_remote[ $key ] ) ) {
+			// Remote management only needs to be active for admin pages.
+			if ( is_admin() && ! empty( self::$options_remote[ $key ] ) ) {
 				$admin_pages = array_merge( $admin_pages, array( 'index.php' ) );
 			}
 		}
-		$admin_pages = array_unique( $admin_pages );
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ||
 		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
