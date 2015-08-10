@@ -553,7 +553,7 @@ class Base {
 						       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING ) ) ||
 						     ( $this->config[ $update ]->dot_org &&
 						       ( ( ! $this->tag && 'master' === $this->config[ $update ]->branch ) ||
-						         ( $this->tag && 'master' === $this->tag) ) )
+						         ( $this->tag && 'master' === $this->tag ) ) )
 						) {
 							$repo = $update;
 						} else {

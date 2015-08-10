@@ -551,7 +551,7 @@ class Settings extends Base {
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
-		esc_html_e( 'Use of Remote Management services will result increase some page load speeds only for `admin` level users.', 'github-updater' );
+		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
 	}
 
 	/**
