@@ -485,7 +485,7 @@ class Theme extends Base {
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
-				<select style="width: 60%;"
+				<label><select style="width: 60%;"
 					onchange="if(jQuery(this).val() != '') {
 						jQuery(this).next().show();
 						jQuery(this).next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
@@ -494,7 +494,7 @@ class Theme extends Base {
 				">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 					<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
-					<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?></select>
+					<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?></select></label>
 				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
