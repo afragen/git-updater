@@ -258,13 +258,16 @@ class Base {
 
 		$plugins        = get_plugins();
 		$git_plugins    = array();
+		$all_plugins    = array();
 		$update_plugins = get_site_transient( 'update_plugins' );
 
 		if ( empty( $update_plugins ) && $force ) {
 			wp_update_plugins();
 			$update_plugins = get_site_transient( 'update_plugins' );
 		}
-		$all_plugins    = $update_plugins ? array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update ) : array();
+		if ( isset( $update_plugins->response, $update_plugins->no_update ) ) {
+			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
+		}
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
