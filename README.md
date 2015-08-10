@@ -274,7 +274,7 @@ To set Extended Naming add `define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );` i
 
 There are 2 added filter hooks specifically for developers wanting to distribute private themes/plugins to clients without the client having to interact with the Settings page.
 
-The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return a key/value pair where the key is the plugin/theme repo slug and the value is the token. Only one key/value pair may be returned.
+The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return a **single** key/value pair where the key is the plugin/theme repo slug and the value is the token.
 
 ~~~php
 add_filter( 'github_updater_token_distribution',
