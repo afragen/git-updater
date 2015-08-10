@@ -262,6 +262,8 @@ Currently, GitHub Updater works with both iThemes Sync and InfiniteWP. If you de
 
 Please go the Remote Management tab of the Settings page and check which remote management service you wish to use. There may be a small amount of overhead related to using any of these services which may impact performance, but only for **admin** level users in the dashboard.
 
+![Remote Management Tab](./assets/screenshot-3.png)
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
