@@ -67,7 +67,7 @@ class Theme extends Base {
 		/*
 		 * Get details of git sourced themes.
 		 */
-		$this->config = $this->get_theme_meta( $this->force_meta_update );
+		$this->config = $this->get_theme_meta();
 		if ( empty( $this->config ) ) {
 			return false;
 		}
