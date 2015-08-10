@@ -1022,7 +1022,7 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						if ( isset( $tag->name ) && isset( $tag->zipball_url ) ) {
+						if ( isset( $tag->name, $tag->zipball_url ) ) {
 							$tags[]                 = $tag->name;
 							$rollback[ $tag->name ] = $tag->zipball_url;
 						}
@@ -1041,7 +1041,7 @@ class Base {
 					foreach ( (array) $response as $tag ) {
 						$download_link = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
 						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
-						if ( isset( $tag->name) ) {
+						if ( isset( $tag->name ) ) {
 							$tags[] = $tag->name;
 							$rollback[ $tag->name ] = $download_link;
 						}
