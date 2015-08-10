@@ -270,6 +270,25 @@ There's a hidden preference to use extended naming for plugin directories. Exten
 
 To set Extended Naming add `define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );` in your `wp-config.php` or your theme's `functions.php`.
 
+## Developer Hooks
+
+There are 2 added filter hooks specifically for developers wanting to distribute private themes/plugins to clients without the client having to interact with the Settings page.
+
+The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return a key/value pair where the key is the plugin/theme repo slug and the value is the token. Only one key/value pair may be returned.
+
+~~~php
+add_filter( 'github_updater_token_distribution',
+	function () {
+		return array( 'my-private-theme' => 'kjasdp984298asdvhaljsg984aljhgosrpfiu' );
+	} );
+~~~
+
+The second hook will simply make the Settings page unavailable.
+
+~~~php
+add_filter( 'github_updater_hide_settings', '__return_true' );
+~~~
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
