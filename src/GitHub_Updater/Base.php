@@ -680,7 +680,7 @@ class Base {
 	/**
 	 * Use upgrader_post_install hook to ensure correct directory name.
 	 *
-	 * @global \WP_Filesystem_Direct $wp_filesystem
+	 * @global $wp_filesystem \WP_Filesystem_Direct
 	 * @param $true
 	 * @param array $extra_hook
 	 * @param array $result
