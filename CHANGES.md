@@ -1,4 +1,4 @@
-#### 4.7.0
+#### 5.0.0
 * fix rollback for GitLab themes
 * add branch switcher for themes
 * escape all printed strings
