@@ -129,8 +129,8 @@ class Settings extends Base {
 		?>
 		<div class="wrap">
 			<h2>
-				<img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" >
-				<div style="clear:both;"><?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?></div>
+				<img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" ><br>
+				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
