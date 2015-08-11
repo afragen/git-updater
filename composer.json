@@ -1,7 +1,7 @@
 {
   "name": "afragen/github-updater",
   "type": "wordpress-plugin",
-  "keywords": ["wordpress", "plugin", "updater"],
+  "keywords": ["wordpress", "plugin", "theme", "updater", "install"],
   "license": "GPLv2",
   "repositories": [
     {
