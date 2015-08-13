@@ -132,7 +132,7 @@ class Plugin extends Base {
 		$this->make_force_check_transient( 'plugins' );
 
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'plugins_api_result', array( &$this, 'plugins_api' ), 99, 3 );
+		add_filter( 'plugins_api_result', array( &$this, 'plugins_api_result' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
