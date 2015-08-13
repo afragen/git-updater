@@ -132,7 +132,7 @@ class Plugin extends Base {
 		$this->make_force_check_transient( 'plugins' );
 
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
+		add_filter( 'plugins_api_result', array( &$this, 'plugins_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
@@ -262,7 +262,8 @@ class Plugin extends Base {
 	 *
 	 * @return mixed
 	 */
-	public function plugins_api( $false, $action, $response ) {
+	public function plugins_api_result( $false, $action, $response ) {
+		$match = false;
 		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
 		}
@@ -289,6 +290,9 @@ class Plugin extends Base {
 			$repos = $this->get_repo_slugs( $plugin->repo );
 			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
 				$response->slug = $repos['repo'];
+				$match = true;
+			} else {
+				continue;
 			}
 			$contributors = array();
 			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
@@ -318,6 +322,10 @@ class Plugin extends Base {
 					$response->rating      = $plugin->rating;
 				}
 			}
+		}
+
+		if ( ! $match ) {
+			return $false;
 		}
 
 		return $response;
