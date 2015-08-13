@@ -121,6 +121,8 @@ class Base {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'token_distribution' ) );
+
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 	}
 
 	/**
