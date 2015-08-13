@@ -7,7 +7,7 @@
 * added **Remote Management** settings tab more cleanly support those services that currently integrate with GitHub Updater
 * modified the process loading so faster for admin level users. Much thanks @khromov
 * added hooks for devs to set GitHub Access Tokens and hide the Settings page. Please be sure your client will never need access to the Settings page. Thanks @oncecoupled
-
+* fixed [#267](https://github.com/afragen/github-updater/issues/267) thanks @stevehenty and @rocketgenius
 
 #### 4.6.2
 * refactor remote update services to new `class Remote_Update`
