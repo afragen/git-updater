@@ -335,14 +335,22 @@ class Settings extends Base {
 		$ghu_options_keys = array();
 		$plugin = get_site_transient( 'ghu_plugin' );
 		$theme  = get_site_transient( 'ghu_theme' );
+
 		if ( ! $plugin ) {
-			$plugin = Plugin::instance( true );
+			$plugin = Plugin::instance( );
 		}
 		if ( ! $theme ) {
-			$theme = Theme::instance( true );
+			$theme = Theme::instance( );
 		}
+
 		$ghu_plugins = $plugin->config;
 		$ghu_themes  = $theme->config;
+
+		//FIXME: Temporary until we refactor the Plugins class
+		if(!is_array($ghu_themes)) {
+			$ghu_themes = array();
+		}
+
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -418,6 +426,8 @@ class Settings extends Base {
 				array( 'id' => $setting_field['callback'] )
 			);
 		}
+
+		//var_dump($ghu_tokens);die();
 
 		/*
 		 * Unset options that are no longer present and update options.

@@ -150,10 +150,21 @@ class Base {
 		}
 
 		if ( current_user_can( 'update_plugins' ) ) {
-			Plugin::$object = Plugin::instance( $force_meta_update );
+
+			//Get current object instance
+			Plugin::$object = Plugin::instance();
+
+			//If we should potentially update plugin meta, let's do it!
+			if($force_meta_update) {
+				Plugin::$object->remote_plugin_meta_update();
+			}
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			Theme::$object = Theme::instance( $force_meta_update );
+			Theme::$object = Theme::instance();
+			if($force_meta_update) {
+				//TODO: Implement
+				//Theme::$object->remote_update();
+			}
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) )

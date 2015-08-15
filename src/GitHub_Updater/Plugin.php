@@ -43,29 +43,47 @@ class Plugin extends Base {
 	protected $tag = false;
 
 	/**
-	 * Force meta update toggle
-	 *
-	 * @var bool
-	 */
-	protected $force_meta_update = false;
-
-	/**
 	 * Constructor
 	 *
 	 * @param bool|false $force_meta_update whether we should force meta updating
 	 */
-	public function __construct( $force_meta_update = false ) {
+	public function __construct() {
 
-		$this->force_meta_update = $force_meta_update;
-
+		//FIXME: Should probably be somewhere more generic, possibly in Base.php,
+		// and rename to force-check-plugins and force-check-themes to catch both in the same conditional?
 		if ( isset( $_GET['force-check'] ) ) {
+			$this->delete_all_transients( 'plugins' );
+		}
+
+		//Get existing metadata from transient
+		$this->config = $this->get_plugin_meta();
+
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
+		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		//add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3);
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+	}
+
+	/**
+	 * Grabs remote plugin data
+	 *
+	 * @return bool
+	 */
+	public function remote_plugin_meta_update($clear_data = false) {
+
+		/*
+		 * Delete current plugin transients before attempting remote update
+		 */
+		if($clear_data) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
 		/*
 		 * Get details of git sourced plugins.
 		 */
-		$this->config = $this->get_plugin_meta( $this->force_meta_update );
+		$this->config = $this->get_plugin_meta( true );
 
 		if ( empty( $this->config ) ) {
 			return false;
@@ -92,7 +110,7 @@ class Plugin extends Base {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $this->force_meta_update && $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
@@ -107,23 +125,23 @@ class Plugin extends Base {
 			 * Update plugin transient with rollback (branch switching) data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
-			     ( isset( $_GET['plugin'] ) && $_GET['plugin'] === $plugin->slug )
+					( isset( $_GET['plugin'] ) && $_GET['plugin'] === $plugin->slug )
 			) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient('update_plugins');
 				$rollback          = array(
-					'slug'        => $plugin->repo,
-					'plugin'      => $plugin->slug,
-					'new_version' => $this->tag,
-					'url'         => $plugin->uri,
-					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
+						'slug'        => $plugin->repo,
+						'plugin'      => $plugin->slug,
+						'new_version' => $this->tag,
+						'url'         => $plugin->uri,
+						'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( $this->force_meta_update &&
-			     ( ! is_multisite() || is_network_admin() )
+			//FIXME: This needs to bre refactored into the constructor instead of being in remote_plugin_meta_update()
+			if ( ! is_multisite() || is_network_admin()
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
@@ -131,12 +149,8 @@ class Plugin extends Base {
 
 		$this->make_force_check_transient( 'plugins' );
 
-		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
-		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
-		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
-		//add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3);
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+		//Update the instance
+		set_site_transient( 'ghu_plugin', self::instance(), ( self::$hours * HOUR_IN_SECONDS ) );
 	}
 
 	/**
@@ -146,11 +160,10 @@ class Plugin extends Base {
 	 *
 	 * @return Plugin
 	 */
-	public static function instance( $force_meta_update = false ) {
+	public static function instance( ) {
 		$class = __CLASS__;
-		if ( false === self::$object && $force_meta_update ) {
-			self::$object = new $class( true );
-			set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+		if ( false === self::$object ) {
+			self::$object = new $class( );
 		}
 
 		return self::$object;
