@@ -92,7 +92,7 @@ class GitLab_API extends API {
 			return false;
 		}
 
-		$this->set_file_info( $response, 'GitLab' );
+		$this->set_file_info( $response );
 
 		return true;
 	}
@@ -303,9 +303,9 @@ class GitLab_API extends API {
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
-		     ( isset( $_GET['theme'] ) && $_GET['theme'] === $this->type->repo )
+		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint .= $rollback;
+			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
 		} elseif ( ! empty( $this->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
@@ -350,6 +350,7 @@ class GitLab_API extends API {
 
 	/**
 	 * Add remote data to type object.
+	 * @access private
 	 */
 	private function _add_meta_repo_object() {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
@@ -412,7 +413,7 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			self::$method = 'projects';
 			$response = $this->api( '/projects' );
-			if ( empty( $response ) ) {
+			if ( empty( $response ) && isset( $this->type->slug ) ) {
 				$id = rtrim( urlencode( $this->type->slug ), '.php' );
 				return $id;
 			}

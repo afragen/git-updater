@@ -1,3 +1,14 @@
+#### 5.0.0
+* fix rollback for GitLab themes
+* add branch switcher for themes
+* escape all printed strings
+* changed from using `upgrader_source_selection` hook to `upgrader_post_install`, this greatly simplifies renaming
+* removed `class Remote_Update` as it's no longer needed when using `upgrader_post_install` hook
+* added **Remote Management** settings tab more cleanly support those services that currently integrate with GitHub Updater
+* modified the process loading so faster for admin level users. Much thanks @khromov
+* added hooks for devs to set GitHub Access Tokens and hide the Settings page. Please be sure your client will never need access to the Settings page. Thanks @oncecoupled
+* fixed [#267](https://github.com/afragen/github-updater/issues/267) thanks @stevehenty and @rocketgenius
+
 #### 4.6.2
 * refactor remote update services to new `class Remote_Update`
 * general security fixes, don't call files directly...

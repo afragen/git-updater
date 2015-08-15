@@ -34,20 +34,6 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Listing of plugins.
-	 *
-	 * @var array
-	 */
-	static $ghu_plugins = array();
-
-	/**
-	 * Listing of themes.
-	 *
-	 * @var array
-	 */
-	static $ghu_themes = array();
-
-	/**
 	 * Holds boolean on whether or not the repo is private.
 	 *
 	 * @var bool
@@ -57,6 +43,11 @@ class Settings extends Base {
 	private static $gitlab            = false;
 	private static $gitlab_enterprise = false;
 
+	protected static $remote_management = array(
+		'ithemes_sync' => 'iThemes Sync',
+		'infinitewp'   => 'InfiniteWP',
+	);
+
 	/**
 	 * Start up
 	 */
@@ -64,6 +55,7 @@ class Settings extends Base {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
+		add_action( 'admin_init', array( $this, 'remote_management_page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
 	}
@@ -72,13 +64,16 @@ class Settings extends Base {
 	 * Define tabs for Settings page.
 	 * By defining in a method, strings can be translated.
 	 *
+	 * @access private
+	 *
 	 * @return array
 	 */
 	private function _settings_tabs() {
 		return array(
-				'github_updater_settings'       => __( 'Settings', 'github-updater' ),
-				'github_updater_install_plugin' => __( 'Install Plugin', 'github-updater' ),
-				'github_updater_install_theme'  => __( 'Install Theme', 'github-updater' ),
+				'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
+				'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
+				'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
 			);
 	}
 
@@ -89,16 +84,16 @@ class Settings extends Base {
 		if ( is_multisite() ) {
 			add_submenu_page(
 				'settings.php',
-				__( 'GitHub Updater Settings', 'github-updater' ),
-				__( 'GitHub Updater', 'github-updater' ),
+				esc_html__( 'GitHub Updater Settings', 'github-updater' ),
+				esc_html__( 'GitHub Updater', 'github-updater' ),
 				'manage_network',
 				'github-updater',
 				array( $this, 'create_admin_page' )
 			);
 		} else {
 			add_options_page(
-				__( 'GitHub Updater Settings', 'github-updater' ),
-				__( 'GitHub Updater', 'github-updater' ),
+				esc_html__( 'GitHub Updater Settings', 'github-updater' ),
+				esc_html__( 'GitHub Updater', 'github-updater' ),
 				'manage_options',
 				'github-updater',
 				array( $this, 'create_admin_page' )
@@ -134,15 +129,15 @@ class Settings extends Base {
 		?>
 		<div class="wrap">
 			<h2>
-				<img src="<?php echo $logo; ?>" alt="GitHub Updater logo" >
-				<div style="clear:both;"><?php _e( 'GitHub Updater', 'github-updater' ); ?></div>
+				<img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" ><br>
+				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
-				<div class="updated"><p><strong><?php _e( 'Saved.', 'github-updater' ); ?></strong></p></div>
+				<div class="updated"><p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p></div>
 			<?php endif; ?>
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
-				<form method="post" action="<?php echo $action; ?>">
+				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 						settings_fields( 'github_updater' );
 						do_settings_sections( 'github_updater_install_settings' );
@@ -159,9 +154,18 @@ class Settings extends Base {
 				new Install( 'theme' );
 			}
 			?>
+			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
+				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
+				<form method="post" action="<?php esc_attr_e( $action ); ?>">
+					<?php
+						settings_fields( 'github_updater_remote_management' );
+						do_settings_sections( 'github_updater_remote_settings' );
+						submit_button();
+					?>
+				</form>
+			<?php endif; ?>
 		</div>
 		<?php
-
 	}
 
 	/**
@@ -183,14 +187,14 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'github_updater_settings',
-			__( 'GitHub Updater Settings', 'github-updater' ),
+			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
 			array( $this, 'print_section_ghu_settings'),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'branch_switch',
-			__( 'Enable Plugin Branch Switching', 'github-updater' ),
+			esc_html__( 'Enable Branch Switching', 'github-updater' ),
 			array( $this, 'token_callback_checkbox' ),
 			'github_updater_install_settings',
 			'github_updater_settings',
@@ -202,14 +206,14 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'github_access_token',
-			__( 'Personal GitHub Access Token', 'github-updater' ),
+			esc_html__( 'Personal GitHub Access Token', 'github-updater' ),
 			array( $this, 'print_section_github_access_token' ),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
-			__( 'GitHub Access Token', 'github-updater' ),
+			esc_html__( 'GitHub Access Token', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'github_access_token',
@@ -222,7 +226,7 @@ class Settings extends Base {
 		if ( self::$github_private ) {
 			add_settings_section(
 				'github_id',                                       // ID
-				__( 'GitHub Private Settings', 'github-updater' ), // Title
+				esc_html__( 'GitHub Private Settings', 'github-updater' ), // Title
 				array( $this, 'print_section_github_info' ),
 				'github_updater_install_settings'                  // Page
 			);
@@ -235,7 +239,7 @@ class Settings extends Base {
 		if ( self::$gitlab || self::$gitlab_enterprise ) {
 			add_settings_section(
 				'gitlab_settings',
-				__( 'GitLab Private Settings', 'github-updater' ),
+				esc_html__( 'GitLab Private Settings', 'github-updater' ),
 				array( $this, 'print_section_gitlab_token' ),
 				'github_updater_install_settings'
 			);
@@ -244,7 +248,7 @@ class Settings extends Base {
 		if ( self::$gitlab ) {
 			add_settings_field(
 				'gitlab_private_token',
-				__( 'GitLab.com Private Token', 'github-updater' ),
+				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
 				array( $this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
@@ -255,7 +259,7 @@ class Settings extends Base {
 		if ( self::$gitlab_enterprise ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
-				__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
+				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
 				array( $this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
@@ -268,14 +272,14 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'bitbucket_user',
-			__( 'Bitbucket Private Settings', 'github-updater' ),
+			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
 			array( $this, 'print_section_bitbucket_username' ),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_username',
-			__( 'Bitbucket Username', 'github-updater' ),
+			esc_html__( 'Bitbucket Username', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
@@ -284,7 +288,7 @@ class Settings extends Base {
 
 		add_settings_field(
 			'bitbucket_password',
-			__( 'Bitbucket Password', 'github-updater' ),
+			esc_html__( 'Bitbucket Password', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
@@ -297,7 +301,7 @@ class Settings extends Base {
 		if ( self::$bitbucket_private ) {
 			add_settings_section(
 				'bitbucket_id',
-				__( 'Bitbucket Private Repositories', 'github-updater' ),
+				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
 				array( $this, 'print_section_bitbucket_info' ),
 				'github_updater_install_settings'
 			);
@@ -309,14 +313,16 @@ class Settings extends Base {
 		if ( ! self::$github_private && ! self::$bitbucket_private ) {
 			add_settings_section(
 				null,
-				__( 'No private repositories are installed.', 'github-updater' ),
+				esc_html__( 'No private repositories are installed.', 'github-updater' ),
 				array(),
 				'github_updater_install_settings'
 			);
 		}
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+			$options = get_site_option( 'github_updater' );
+			$options = array_merge( $options, self::sanitize( $_POST['github_updater'] ) );
+			update_site_option( 'github_updater', $options );
 		}
 	}
 
@@ -327,7 +333,17 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_tokens       = array_merge( self::$ghu_plugins, self::$ghu_themes );
+		$plugin = get_site_transient( 'ghu_plugin' );
+		$theme  = get_site_transient( 'ghu_theme' );
+		if ( ! $plugin ) {
+			$plugin = Plugin::instance( true );
+		}
+		if ( ! $theme ) {
+			$theme = Theme::instance( true );
+		}
+		$ghu_plugins = $plugin->config;
+		$ghu_themes  = $theme->config;
+		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '';
@@ -368,7 +384,7 @@ class Settings extends Base {
 			}
 
 			if ( false !== strpos( $token->type, 'theme') ) {
-				$type = __( 'Theme:', 'github-updater' ) . '&nbsp;';
+				$type = esc_html__( 'Theme:', 'github-updater' ) . '&nbsp;';
 			}
 
 			$setting_field['id']    = $token->repo;
@@ -426,6 +442,44 @@ class Settings extends Base {
 	}
 
 	/**
+	 * Settings for Remote Management.
+	 */
+	public function remote_management_page_init() {
+
+		register_setting(
+			'github_updater_remote_management',
+			'github_updater_remote_settings',
+			array( $this, 'sanitize' )
+		);
+
+		add_settings_section(
+			'remote_management',
+			esc_html__( 'Remote Management', 'github-updater' ),
+			array( $this, 'print_section_remote_management' ),
+			'github_updater_remote_settings'
+		);
+
+		foreach ( self::$remote_management as $id => $name ) {
+			add_settings_field(
+				$id,
+				esc_html__( $name ),
+				array( $this, 'token_callback_checkbox_remote' ),
+				'github_updater_remote_settings',
+				'remote_management',
+				array( 'id' => $id )
+			);
+		}
+
+		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
+			foreach ( self::$remote_management as $key => $value ) {
+				$options[ $key ] = null;
+			}
+			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			update_site_option( 'github_updater_remote_management', $options );
+		}
+	}
+
+	/**
 	 * Sanitize each setting field as needed.
 	 *
 	 * @param array $input Contains all settings fields as array keys
@@ -446,51 +500,58 @@ class Settings extends Base {
 	 */
 	public function print_section_ghu_settings() {
 		if ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) {
-			_e( 'Extended Naming is <strong>active</strong>.', 'github-updater' );
+			printf( esc_html__( 'Extended Naming is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
 		}
 		if ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
 		       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
 		) {
-			_e( 'Extended Naming is <strong>not active</strong>.', 'github-updater' );
+			printf( esc_html__( 'Extended Naming is %snot active%s.', 'github-updater' ), '<strong>', '</strong>' );
 		}
-		printf( '<br>' . __( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
-		printf( '<br>' . __( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
-		print( '<p>' . __( 'Check to enable branch switching from the Plugins page.', 'github-updater' ) . '</p>');
+		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
+		printf( '<br>' . esc_html__( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
+		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>');
 	}
 
 	/**
 	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
-		_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the GitHub Personal Access Token text.
 	 */
 	public function print_section_github_access_token() {
-		_e( 'Enter your personal GitHub Access Token to avoid API access limits.', 'github-updater' );
+		esc_html_e( 'Enter your personal GitHub Access Token to avoid API access limits.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket repo text.
 	 */
 	public function print_section_bitbucket_info() {
-		_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+		esc_html_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket user/pass text.
 	 */
 	public function print_section_bitbucket_username() {
-		_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+		esc_html_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
 	}
 
 	/**
 	 * Print the GitLab Private Token text.
 	 */
 	public function print_section_gitlab_token() {
-		_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
+		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
+	}
+
+	/**
+	 * Print the Remote Management text.
+	 */
+	public function print_section_remote_management() {
+		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
 	}
 
 	/**
@@ -502,8 +563,8 @@ class Settings extends Base {
 		$name = isset( parent::$options[ $args['id' ] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
 		$type = stristr( $args['id'], 'password' ) ? 'password' : 'text';
 		?>
-		<label for="<?php echo $args['id']; ?>">
-			<input type="<?php echo $type; ?>" style="width:50%;" name="github_updater[<?php echo $args['id']; ?>]" value="<?php echo $name; ?>" >
+		<label for="<?php esc_attr( $args['id'] ); ?>">
+			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" >
 		</label>
 		<?php
 	}
@@ -515,8 +576,23 @@ class Settings extends Base {
 	 */
 	public function token_callback_checkbox( $args ) {
 		?>
-		<label for="<?php echo $args['id']; ?>">
-			<input type="checkbox" name="github_updater[<?php echo $args['id']; ?>]" value="1" <?php checked('1', parent::$options[ $args['id'] ], true); ?> >
+		<label for="<?php esc_attr_e( $args['id'] ); ?>">
+			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options[ $args['id'] ], true); ?> >
+		</label>
+		<?php
+	}
+
+	/**
+	 * Get the settings option array and print one of its values.
+	 *
+	 * @param $args
+	 *
+	 * @return bool|void
+	 */
+	public function token_callback_checkbox_remote( $args ) {
+		?>
+		<label for="<?php esc_attr_e( $args['id'] ); ?>">
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
 		</label>
 		<?php
 	}
@@ -529,11 +605,20 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_network_setting() {
-		update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+
+		if ( 'github_updater' === $_POST['option_page'] ) {
+			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+		}
+		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
+			$options = array( 'ithemes_sync' => null, 'infinitewp' => null, 'managewp' => null, 'mainwp' => null );
+			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			update_site_option( 'github_updater_remote_management', $options );
+		}
 		wp_redirect( add_query_arg(
 			array(
 				'page'    => 'github-updater',
 				'updated' => 'true',
+				'tab'     => $_GET['tab'],
 			),
 			network_admin_url( 'settings.php' )
 		) );
@@ -552,7 +637,7 @@ class Settings extends Base {
 	 */
 	public function plugin_action_links( $links ) {
 		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
-		$link          = array( '<a href="' . network_admin_url( $settings_page ) . '?page=github-updater">' . __( 'Settings', 'github-updater' ) . '</a>' );
+		$link          = array( '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' );
 
 		return array_merge( $links, $link );
 	}
