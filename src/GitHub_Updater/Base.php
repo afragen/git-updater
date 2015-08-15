@@ -145,9 +145,7 @@ class Base {
 			}
 		}
 
-		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ||
-		     ( defined( 'DOING_AJAX' ) && DOING_AJAX )
-		) {
+		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
 		}
 
