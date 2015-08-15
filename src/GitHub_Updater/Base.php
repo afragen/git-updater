@@ -169,17 +169,31 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
-		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
+		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
+		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update' ) );
 	}
 
 	/**
-	 * Performs actual metadata fetching.
+	 * Performs actual metadata fetching for plugins.
 	 */
-	function forced_meta_update() {
-		Plugin::$object = Plugin::instance( true );
-		Theme::$object  = Theme::instance( true );
+	function forced_meta_update_plugins() {
+
+		//Initialize instances
+		Plugin::$object = Plugin::instance( );
+
+		//Perform meta update, woo!
+		Plugin::$object->remote_plugin_meta_update();
+	}
+
+	/**
+	 * Performs actual metadata fetching for themes.
+	 */
+	function forced_meta_update_themes() {
+		Theme::$object  = Theme::instance( );
+
+		//TODO: Make work with themes as well
+		//Plugin::$object->remote_theme_meta_update();
 	}
 
 	/**
