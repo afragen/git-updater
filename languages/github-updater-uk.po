@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-08-15 08:51-0700\n"
-"PO-Revision-Date: 2015-08-15 08:51-0700\n"
+"POT-Creation-Date: 2015-08-18 14:36-0700\n"
+"PO-Revision-Date: 2015-08-18 14:36-0700\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
@@ -314,26 +314,6 @@ msgstr "Вибрати версію"
 msgid "Install"
 msgstr "Встановити"
 
-#: vendor/WPUpdatePhp.php:24
-#, fuzzy
-msgid "this plugin"
-msgstr "Плагін"
-
-#: vendor/WPUpdatePhp.php:92
-#, php-format
-msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-msgstr ""
-
-#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
-#, php-format
-msgid "Read more information about %show you can update%s."
-msgstr ""
-
-#: vendor/WPUpdatePhp.php:108
-#, php-format
-msgid "%1$s recommends a PHP version greater than %2$s."
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
@@ -348,6 +328,10 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Енді Фраген"
+
+#, fuzzy
+#~ msgid "this plugin"
+#~ msgstr "Плагін"
 
 #, fuzzy
 #~ msgid "Renaming %1$s to %2$s"

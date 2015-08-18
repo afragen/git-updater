@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-08-15 08:52-0700\n"
-"PO-Revision-Date: 2015-08-15 08:53-0700\n"
+"POT-Creation-Date: 2015-08-18 14:38-0700\n"
+"PO-Revision-Date: 2015-08-18 14:38-0700\n"
 "Last-Translator: Enea Overclokk <info@overclokk.net>\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
@@ -322,29 +322,6 @@ msgstr "Scegli una versione"
 msgid "Install"
 msgstr "Installa"
 
-#: vendor/WPUpdatePhp.php:24
-#, fuzzy
-msgid "this plugin"
-msgstr "Plugin"
-
-#: vendor/WPUpdatePhp.php:92
-#, fuzzy, php-format
-msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-msgstr ""
-"Purtroppo %1$s non può essere eseguito su versioni di PHP più vecchie di "
-"%2$s. Puoi leggere ulteriori informazioni su %3$s come è possibile aggiornare"
-"%4$s."
-
-#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
-#, php-format
-msgid "Read more information about %show you can update%s."
-msgstr ""
-
-#: vendor/WPUpdatePhp.php:108
-#, php-format
-msgid "%1$s recommends a PHP version greater than %2$s."
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
@@ -359,6 +336,17 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#, fuzzy
+#~ msgid "this plugin"
+#~ msgstr "Plugin"
+
+#, fuzzy
+#~ msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+#~ msgstr ""
+#~ "Purtroppo %1$s non può essere eseguito su versioni di PHP più vecchie di "
+#~ "%2$s. Puoi leggere ulteriori informazioni su %3$s come è possibile "
+#~ "aggiornare%4$s."
 
 #, fuzzy
 #~ msgid "Renaming %1$s to %2$s"
