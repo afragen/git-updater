@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-08-15 08:53-0700\n"
-"PO-Revision-Date: 2015-08-15 08:53-0700\n"
+"POT-Creation-Date: 2015-08-18 14:38-0700\n"
+"PO-Revision-Date: 2015-08-18 14:38-0700\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -321,28 +321,6 @@ msgstr "Choisissez une version"
 msgid "Install"
 msgstr "Installer"
 
-#: vendor/WPUpdatePhp.php:24
-#, fuzzy
-msgid "this plugin"
-msgstr "Plugin"
-
-#: vendor/WPUpdatePhp.php:92
-#, fuzzy, php-format
-msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-msgstr ""
-"Malheureusement, %1$s ne fonctionne pas sur les versions de PHP antérieures "
-"à la v.%2$s. En savoir plus sur %3$sles possibilités de mise à jour%4$s."
-
-#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
-#, php-format
-msgid "Read more information about %show you can update%s."
-msgstr ""
-
-#: vendor/WPUpdatePhp.php:108
-#, php-format
-msgid "%1$s recommends a PHP version greater than %2$s."
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
@@ -357,6 +335,17 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#, fuzzy
+#~ msgid "this plugin"
+#~ msgstr "Plugin"
+
+#, fuzzy
+#~ msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+#~ msgstr ""
+#~ "Malheureusement, %1$s ne fonctionne pas sur les versions de PHP "
+#~ "antérieures à la v.%2$s. En savoir plus sur %3$sles possibilités de mise "
+#~ "à jour%4$s."
 
 #, fuzzy
 #~ msgid "Renaming %1$s to %2$s"

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-08-15 08:53-0700\n"
-"PO-Revision-Date: 2015-08-15 08:53-0700\n"
+"POT-Creation-Date: 2015-08-18 14:38-0700\n"
+"PO-Revision-Date: 2015-08-18 14:38-0700\n"
 "Last-Translator: esoj <yo@josemiguel.org>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: es\n"
@@ -316,27 +316,6 @@ msgstr "Elige una versión"
 msgid "Install"
 msgstr "Instalar"
 
-#: vendor/WPUpdatePhp.php:24
-msgid "this plugin"
-msgstr "este plungon"
-
-#: vendor/WPUpdatePhp.php:92
-#, php-format
-msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-msgstr ""
-"Desafortunadamente, %1$s no se pueden ejecutar en versiones de PHP "
-"anteriores a %2$s."
-
-#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
-#, php-format
-msgid "Read more information about %show you can update%s."
-msgstr "Más información sobre %show cómo puede actualizar %s."
-
-#: vendor/WPUpdatePhp.php:108
-#, php-format
-msgid "%1$s recommends a PHP version greater than %2$s."
-msgstr "%1$s recomiendo una versión de PHP mayor que %2$s."
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr ""
@@ -351,6 +330,20 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
+
+#~ msgid "this plugin"
+#~ msgstr "este plungon"
+
+#~ msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+#~ msgstr ""
+#~ "Desafortunadamente, %1$s no se pueden ejecutar en versiones de PHP "
+#~ "anteriores a %2$s."
+
+#~ msgid "Read more information about %show you can update%s."
+#~ msgstr "Más información sobre %show cómo puede actualizar %s."
+
+#~ msgid "%1$s recommends a PHP version greater than %2$s."
+#~ msgstr "%1$s recomiendo una versión de PHP mayor que %2$s."
 
 #~ msgid "Renaming %1$s to %2$s"
 #~ msgstr "Renombrado %1$s a %2$s"

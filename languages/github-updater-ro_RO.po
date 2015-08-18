@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-08-15 08:52-0700\n"
-"PO-Revision-Date: 2015-08-15 08:52-0700\n"
+"POT-Creation-Date: 2015-08-18 14:37-0700\n"
+"PO-Revision-Date: 2015-08-18 14:37-0700\n"
 "Last-Translator: \n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
@@ -314,25 +314,6 @@ msgstr "Alege o Versiune"
 msgid "Install"
 msgstr "Instaleaza"
 
-#: vendor/WPUpdatePhp.php:24
-msgid "this plugin"
-msgstr "acest modul"
-
-#: vendor/WPUpdatePhp.php:92
-#, php-format
-msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-msgstr "Din pacate, %1$s nu poate rula pe versiuni PHP mai vechi ca %2$s."
-
-#: vendor/WPUpdatePhp.php:94 vendor/WPUpdatePhp.php:110
-#, php-format
-msgid "Read more information about %show you can update%s."
-msgstr "Citeste mai multe informatii despre %scum poti actualiza%s."
-
-#: vendor/WPUpdatePhp.php:108
-#, php-format
-msgid "%1$s recommends a PHP version greater than %2$s."
-msgstr "%1$s recomanda o versiune PHP mai mare ca %2$s."
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
@@ -347,6 +328,18 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "this plugin"
+#~ msgstr "acest modul"
+
+#~ msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
+#~ msgstr "Din pacate, %1$s nu poate rula pe versiuni PHP mai vechi ca %2$s."
+
+#~ msgid "Read more information about %show you can update%s."
+#~ msgstr "Citeste mai multe informatii despre %scum poti actualiza%s."
+
+#~ msgid "%1$s recommends a PHP version greater than %2$s."
+#~ msgstr "%1$s recomanda o versiune PHP mai mare ca %2$s."
 
 #~ msgid "Renaming %1$s to %2$s"
 #~ msgstr "Redenumire %1$s in %2$s"
