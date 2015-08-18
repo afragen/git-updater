@@ -1,0 +1,17 @@
+{
+  "name": "wpupdatephp/wp-update-php",
+  "description": "Library to be bundled with WordPress plugins to enforce users to upgrade to PHP 5.4 hosting",
+  "support": {
+    "issues": "https://github.com/wpupdatephp/wp-update-php/issues",
+    "source": "https://github.com/wpupdatephp/wp-update-php"
+  },
+  "require-dev": {
+    "phpspec/phpspec": "~2.0"
+  },
+  "autoload": {
+    "psr-0": {
+      "": "src"
+    }
+  },
+  "license": "GPL-2.0+"
+}

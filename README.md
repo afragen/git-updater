@@ -340,6 +340,7 @@ Includes
 
 * [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
 * [Mark Jaquith's](https://github.com/markjaquith) [WordPress Plugin Readme Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser/tree/WordPress.org) for parsing `readme.txt`.
+* [Coen Jacobs'](https://github.com/coenjacobs) [WPupdatePHP library](https://github.com/WPupdatePHP/wp-update-php)
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
