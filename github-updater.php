@@ -49,7 +49,7 @@ $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array(
-	'Parsedown'         => __DIR__ . '/vendor/Parsedown.php',
+	'Parsedown'         => __DIR__ . '/vendor/parsedown/Parsedown.php',
 	'WPUpdatePHP'       => __DIR__ . '/vendor/WPUpdatePhp.php',
 	'Automattic_Readme' => __DIR__ . '/vendor/parse-readme.php',
 	);
