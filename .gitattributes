@@ -3,3 +3,8 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 composer.json export-ignore
+
+/vendor/parsedown/test export-ignore
+/vendor/parsedown/.travis.yml export-ignore
+/vendor/parsedown/composer.json export-ignore
+/vendor/parsedown/phpunit.xml.dist export-ignore

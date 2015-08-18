@@ -1,7 +1,2 @@
 .DS_Store
 .idea
-/vendor/parsedown/test
-/vendor/parsedown/.travis.yml
-/vendor/parsedown/composer.json
-/vendor/parsedown/phpunit.xml.dist
-
