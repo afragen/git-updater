@@ -1,3 +1,7 @@
+#### 5.0.1
+* updated to current `erusev/parsedown` release, fixes PHP7 issue
+* updated to current `WPupdatePHP/wp-update-php/release-1-1-0` branch
+
 #### 5.0.0
 * fix rollback for GitLab themes
 * add branch switcher for themes
