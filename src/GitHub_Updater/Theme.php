@@ -45,21 +45,11 @@ class Theme extends Base {
 	protected $tag = false;
 
 	/**
-	 * Force meta update toggle
-	 *
-	 * @var bool
-	 */
-	protected $force_meta_update = false;
-
-	/**
 	 * Constructor
 	 *
 	 * @param bool|false $force_meta_update whether we should force meta updating
 	 */
-	public function __construct( $force_meta_update = false ) {
-
-		$this->force_meta_update = $force_meta_update;
-
+	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'themes' );
 		}
@@ -68,11 +58,35 @@ class Theme extends Base {
 		 * Get details of git sourced themes.
 		 */
 		$this->config = $this->get_theme_meta();
+
 		if ( empty( $this->config ) ) {
 			return false;
 		}
 
+		$this->load_filters();
+	}
 
+	/**
+	 * The Theme object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Theme
+	 */
+	public static function instance() {
+		$class = __CLASS__;
+		if ( false === self::$object  ) {
+			self::$object = new $class();
+		}
+
+		return self::$object;
+	}
+
+	/**
+	 * Get remote theme meta to populate $config theme objects.
+	 * Calls to remote APIs to get data.
+	 */
+	public function get_remote_theme_meta() {
 		foreach ( (array) $this->config as $theme ) {
 			$this->repo_api = null;
 			switch( $theme->type ) {
@@ -94,7 +108,7 @@ class Theme extends Base {
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $this->force_meta_update && $this->repo_api->get_remote_info( 'style.css' ) ) {
+			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
@@ -134,33 +148,20 @@ class Theme extends Base {
 				}
 			}
 		}
-
 		$this->make_force_check_transient( 'themes' );
-
-		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
-		}
-
-		add_filter( 'themes_api_result', array( &$this, 'themes_api_result' ), 99, 3 );
-		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 	}
 
 	/**
-	 * The Theme object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Theme
+	 * Load add_filter commands for themes.
 	 */
-	public static function instance( $force_meta_update = false ) {
-		$class = __CLASS__;
-		if ( false === self::$object && $force_meta_update ) {
-			self::$object = new $class( true );
-			set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+	public function load_filters() {
+		if ( ! is_multisite() ) {
+			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
-
-		return self::$object;
+		add_filter( 'themes_api_result', array( &$this, 'themes_api_result' ), 99, 3 );
+		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
 	/**

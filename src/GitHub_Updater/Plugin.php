@@ -43,21 +43,10 @@ class Plugin extends Base {
 	protected $tag = false;
 
 	/**
-	 * Force meta update toggle
-	 *
-	 * @var bool
-	 */
-	protected $force_meta_update = false;
-
-	/**
 	 * Constructor
 	 *
-	 * @param bool|false $force_meta_update whether we should force meta updating
 	 */
-	public function __construct( $force_meta_update = false ) {
-
-		$this->force_meta_update = $force_meta_update;
-
+	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
@@ -65,12 +54,36 @@ class Plugin extends Base {
 		/*
 		 * Get details of git sourced plugins.
 		 */
-		$this->config = $this->get_plugin_meta( $this->force_meta_update );
+		$this->config = $this->get_plugin_meta();
 
 		if ( empty( $this->config ) ) {
 			return false;
 		}
 
+		$this->load_filters();
+	}
+
+	/**
+	 * The Plugin object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Plugin
+	 */
+	public static function instance() {
+		$class = __CLASS__;
+		if ( false === self::$object ) {
+			self::$object = new $class();
+		}
+
+		return self::$object;
+	}
+
+	/**
+	 * Get remote plugin meta to populate $config plugin objects. 
+	 * Calls to remote APIs to get data. 
+	 */
+	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
 			$this->repo_api = null;
 			switch( $plugin->type ) {
@@ -92,7 +105,7 @@ class Plugin extends Base {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $this->force_meta_update && $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
@@ -122,36 +135,22 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( $this->force_meta_update &&
-			     ( ! is_multisite() || is_network_admin() )
-			) {
+			if ( ! is_multisite() || is_network_admin() ) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-
 		$this->make_force_check_transient( 'plugins' );
+		set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+	}
 
+	/**
+	 * Load add_filter commands for plugins.
+	 */
+	public function load_filters() {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'plugins_api_result', array( &$this, 'plugins_api_result' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
-	}
-
-	/**
-	 * The Plugin object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Plugin
-	 */
-	public static function instance( $force_meta_update = false ) {
-		$class = __CLASS__;
-		if ( false === self::$object && $force_meta_update ) {
-			self::$object = new $class( true );
-			set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
-		}
-
-		return self::$object;
 	}
 
 	/**

@@ -153,10 +153,16 @@ class Base {
 		}
 
 		if ( current_user_can( 'update_plugins' ) ) {
-			Plugin::$object = Plugin::instance( $force_meta_update );
+			Plugin::$object = Plugin::instance();
+			if ( $force_meta_update ) {
+				Plugin::$object->get_remote_plugin_meta();
+			}
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			Theme::$object = Theme::instance( $force_meta_update );
+			Theme::$object = Theme::instance();
+			if ( $force_meta_update ) {
+				Theme::$object->get_remote_theme_meta();
+			}
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) &&
@@ -172,17 +178,34 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update' ) );
-		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update' ) );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update' ) );
+		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
+		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
 	}
 
 	/**
-	 * Performs actual metadata fetching.
+	 * Performs actual plugin metadata fetching.
 	 */
-	function forced_meta_update() {
-		Plugin::$object = Plugin::instance( true );
-		Theme::$object  = Theme::instance( true );
+	public function forced_meta_update_plugins() {
+		Plugin::$object = Plugin::instance();
+		Plugin::$object->get_remote_plugin_meta();
+	}
+
+	/**
+	 * Performs actual theme metadata fetching.
+	 */
+	public function forced_meta_update_themes() {
+		Theme::$object = Theme::instance();
+		Theme::$object->get_remote_theme_meta();
+	}
+
+	/**
+	 * Calls $this->forced_meta_update_plugins() and $this->forced_meta_update_themes()
+	 * for remote management services.
+	 */
+	public function forced_meta_update_remote_management() {
+		$this->forced_meta_update_plugins();
+		$this->forced_meta_update_themes();
 	}
 
 	/**
@@ -265,10 +288,9 @@ class Base {
 	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
-	 * @param bool|false $force whether we should force meta updating from WP.org
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
-	protected function get_plugin_meta( $force = false ) {
+	protected function get_plugin_meta() {
 		/*
 		 * Ensure get_plugins() function is available.
 		 */
@@ -279,7 +301,7 @@ class Base {
 		$all_plugins    = array();
 		$update_plugins = get_site_transient( 'update_plugins' );
 
-		if ( empty( $update_plugins ) && $force ) {
+		if ( empty( $update_plugins ) ) {
 			wp_update_plugins();
 			$update_plugins = get_site_transient( 'update_plugins' );
 		}
