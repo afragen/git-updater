@@ -174,6 +174,7 @@ class Install extends Base {
 				 * Create a new instance of Plugin_Upgrader.
 				 */
 				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
+				add_filter( 'install_plugin_complete_actions', array( &$this, 'install_plugin_complete_actions' ), 10, 3 );
 			}
 
 			if ( 'theme' === $type ) {
@@ -183,6 +184,7 @@ class Install extends Base {
 				 * Create a new instance of Theme_Upgrader.
 				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
+				add_filter( 'install_theme_complete_actions', array( &$this, 'install_theme_complete_actions' ), 10, 3 );
 			}
 
 			/*
@@ -192,6 +194,7 @@ class Install extends Base {
 			$upgrader->install( $url );
 			wp_cache_flush();
 		}
+
 
 		if ( ! isset( $_POST['option_page'] ) || ! ( 'github_updater_install' === $_POST['option_page'] ) ) {
 			$this->create_form( $type );
@@ -389,6 +392,55 @@ class Install extends Base {
 			</p>
 		</label>
 	<?php
+	}
+
+	/**
+	 * Remove activation links after plugin installation as no method to get $plugin_file.
+	 *
+	 * @param $install_actions
+	 * @param $api
+	 * @param $plugin_file
+	 *
+	 * @return mixed
+	 */
+	public function install_plugin_complete_actions( $install_actions, $api, $plugin_file ) {
+		unset( $install_actions['activate_plugin'] );
+		unset( $install_actions['network_activate'] );
+
+		return $install_actions;
+	}
+
+	/**
+	 * Fix activation links after theme installation, no method to get proper theme name.
+	 *
+	 * @param $install_actions
+	 * @param $api
+	 * @param $theme_info
+	 *
+	 * @return mixed
+	 */
+	public function install_theme_complete_actions( $install_actions, $api, $theme_info ) {
+		$stylesheet = self::$install['repo'];
+		$activate_link = add_query_arg( array(
+			'action'     => 'activate',
+			//'template'   => urlencode( $template ),
+			'stylesheet' => urlencode( $stylesheet ),
+		), admin_url('themes.php') );
+		$activate_link = wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet );
+
+		if ( isset( $install_actions['preview'] ) ) {
+			unset( $install_actions['preview'] );
+		}
+
+		$install_actions['activate'] = '<a href="' . esc_url( $activate_link ) . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . sprintf( esc_attr__( 'Activate &#8220;%s&#8221;', 'github-updater' ), $stylesheet ) . '</span></a>';
+
+		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
+			$install_actions['network_enable'] = '<a href="' . esc_url( wp_nonce_url( 'themes.php?action=enable&amp;theme=' . urlencode( $stylesheet ), 'enable-theme_' . $stylesheet ) ) . '" target="_parent">' . esc_attr__( 'Network Enable', 'github-updater' ) . '</a>';
+			unset( $install_actions['activate'] );
+		}
+		ksort( $install_actions );
+
+		return $install_actions;
 	}
 
 }
