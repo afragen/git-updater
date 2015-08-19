@@ -1,3 +1,7 @@
+#### 5.1.0
+* refactor of Plugin and Theme constructors to move code to call APIs to get remote data to separate functions
+* fix [#281](https://github.com/afragen/github-updater/issues/281)
+
 #### 5.0.1
 * updated to current `erusev/parsedown` release, fixes PHP7 issue
 * updated to current `WPupdatePHP/wp-update-php/release-1-1-0` branch
