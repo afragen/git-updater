@@ -420,22 +420,28 @@ class Install extends Base {
 	 * @return mixed
 	 */
 	public function install_theme_complete_actions( $install_actions, $api, $theme_info ) {
+		if ( isset( $install_actions['preview'] ) ) {
+			unset( $install_actions['preview'] );
+		}
+
 		$stylesheet = self::$install['repo'];
 		$activate_link = add_query_arg( array(
 			'action'     => 'activate',
 			//'template'   => urlencode( $template ),
 			'stylesheet' => urlencode( $stylesheet ),
-		), admin_url('themes.php') );
-		$activate_link = wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet );
+			), admin_url('themes.php') );
+		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
-		if ( isset( $install_actions['preview'] ) ) {
-			unset( $install_actions['preview'] );
-		}
-
-		$install_actions['activate'] = '<a href="' . esc_url( $activate_link ) . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . sprintf( esc_attr__( 'Activate &#8220;%s&#8221;', 'github-updater' ), $stylesheet ) . '</span></a>';
+		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . sprintf( esc_attr__( 'Activate &#8220;%s&#8221;', 'github-updater' ), $stylesheet ) . '</span></a>';
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
-			$install_actions['network_enable'] = '<a href="' . esc_url( wp_nonce_url( 'themes.php?action=enable&amp;theme=' . urlencode( $stylesheet ), 'enable-theme_' . $stylesheet ) ) . '" target="_parent">' . esc_attr__( 'Network Enable', 'github-updater' ) . '</a>';
+			$network_activate_link = add_query_arg( array(
+				'action' => 'enable',
+				'theme'  => urlencode( $stylesheet ),
+				), network_admin_url( 'themes.php' ) );
+			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
+
+			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr__( 'Network Enable', 'github-updater' ) . '</a>';
 			unset( $install_actions['activate'] );
 		}
 		ksort( $install_actions );
