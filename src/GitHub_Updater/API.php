@@ -110,7 +110,7 @@ abstract class API extends Base {
 					)
 				) );
 			if ( 'github' === $type['repo'] ) {
-				GitHub_API::_ratelimit_reset( $response, $this->type->repo );
+				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
 			Messages::create_error_message( $type['repo'] );
 			return false;

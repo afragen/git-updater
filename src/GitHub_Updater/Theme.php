@@ -83,6 +83,87 @@ class Theme extends Base {
 	}
 
 	/**
+	 * Reads in WP_Theme class of each theme.
+	 * Populates variable array.
+	 *
+	 * @return array Indexed array of associative arrays of theme details.
+	 */
+	protected function get_theme_meta() {
+		$git_themes = array();
+		$themes     = wp_get_themes( array( 'errors' => null ) );
+
+		foreach ( (array) $themes as $theme ) {
+			$git_theme           = array();
+			$repo_uri            = null;
+			$repo_enterprise_uri = null;
+
+			foreach ( (array) self::$extra_headers as $value ) {
+
+				$repo_uri = $theme->get( $value );
+				if ( empty( $repo_uri ) ||
+				     false === stristr( $value, 'Theme' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+				$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
+
+				if ( $repo_parts['bool'] ) {
+					$header = $this->parse_header_uri( $repo_uri );
+				}
+
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+				foreach ( $self_hosted_parts as $part ) {
+					$self_hosted = $theme->get( $repo_parts[ $part ] );
+
+					if ( ! empty( $self_hosted ) ) {
+						$repo_enterprise_uri = $self_hosted;
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							break;
+					}
+				}
+
+				$git_theme['type']                    = $repo_parts['type'];
+				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_theme['enterprise']              = $repo_enterprise_uri;
+				$git_theme['owner']                   = $header['owner'];
+				$git_theme['repo']                    = $header['repo'];
+				$git_theme['extended_repo']           = $header['repo'];
+				$git_theme['name']                    = $theme->get( 'Name' );
+				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
+				$git_theme['author']                  = $theme->get( 'Author' );
+				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
+				$git_theme['sections']['description'] = $theme->get( 'Description' );
+				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['local_path_extended']     = null;
+				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
+			}
+
+			/*
+			 * Exit if not git hosted theme.
+			 */
+			if ( empty( $git_theme ) ) {
+				continue;
+			}
+
+			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
+		}
+
+		return $git_themes;
+	}
+
+	/**
 	 * Get remote theme meta to populate $config theme objects.
 	 * Calls to remote APIs to get data.
 	 */
