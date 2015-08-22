@@ -518,10 +518,6 @@ class Base {
 	public function can_update( $type ) {
 		global $wp_version;
 
-		if ( ! isset( $type->remote_version ) ) {
-			return false;
-		}
-
 		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
 		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );

@@ -55,15 +55,13 @@ class Theme extends Base {
 		}
 
 		/*
-		 * Get details of git sourced themes.
+		 * Get details of installed git sourced themes.
 		 */
 		$this->config = $this->get_theme_meta();
 
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-
-		$this->load_filters();
 	}
 
 	/**
@@ -231,6 +229,7 @@ class Theme extends Base {
 		}
 		$this->make_force_check_transient( 'themes' );
 		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+		$this->load_filters();
 	}
 
 	/**
