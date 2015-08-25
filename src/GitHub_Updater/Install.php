@@ -195,7 +195,6 @@ class Install extends Base {
 			wp_cache_flush();
 		}
 
-
 		if ( ! isset( $_POST['option_page'] ) || ! ( 'github_updater_install' === $_POST['option_page'] ) ) {
 			$this->create_form( $type );
 		}
