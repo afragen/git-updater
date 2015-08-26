@@ -110,7 +110,7 @@ There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI`
 ~~~css
 /*
 Theme Name:       Test
-Theme URI:        http://drfragen.info/
+Theme URI:        http://thefragens.net/
 Version:          0.1.0
 Description:      Child theme of TwentyTwelve.
 Author:           Andy Fragen
