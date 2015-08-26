@@ -91,7 +91,7 @@ There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin U
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-Description:       A plugin to automatically update GitHub hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
+Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
 Version:           1.0.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
