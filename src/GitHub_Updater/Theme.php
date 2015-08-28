@@ -157,6 +157,10 @@ class Theme extends Base {
 
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
+		/*
+		 * Load post-processing filters. Renaming filters, etc.
+		 */
+		$this->load_post_filters();
 
 		return $git_themes;
 	}
@@ -229,18 +233,24 @@ class Theme extends Base {
 		}
 		$this->make_force_check_transient( 'themes' );
 		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
-		$this->load_filters();
+		$this->load_pre_filters();
 	}
 
 	/**
-	 * Load add_filter commands for themes.
+	 * Load pre-update filters.
 	 */
-	public function load_filters() {
+	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
 		add_filter( 'themes_api_result', array( &$this, 'themes_api_result' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+	}
+
+	/**
+	 * Load post-update filters.
+	 */
+	public function load_post_filters() {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 

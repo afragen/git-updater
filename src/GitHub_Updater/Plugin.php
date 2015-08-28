@@ -172,6 +172,10 @@ class Plugin extends Base {
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
 		}
+		/*
+		 * Load post-processing filters. Renaming filters etc.
+		 */
+		$this->load_post_filters();
 
 		return $git_plugins;
 	}
@@ -238,16 +242,22 @@ class Plugin extends Base {
 		}
 		$this->make_force_check_transient( 'plugins' );
 		set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
-		$this->load_filters();
+		$this->load_pre_filters();
 	}
 
 	/**
-	 * Load add_filter commands for plugins.
+	 * Load pre-update filters.
 	 */
-	public function load_filters() {
+	public function load_pre_filters() {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'plugins_api_result', array( &$this, 'plugins_api_result' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+	}
+
+	/**
+	 * Load post-update filters.
+	 */
+	public function load_post_filters() {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
