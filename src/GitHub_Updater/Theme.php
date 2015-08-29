@@ -99,6 +99,7 @@ class Theme extends Base {
 			$git_theme           = array();
 			$repo_uri            = null;
 			$repo_enterprise_uri = null;
+			$repo_enterprise_api = null;
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
@@ -129,10 +130,10 @@ class Theme extends Base {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
-							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
-							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
@@ -140,6 +141,7 @@ class Theme extends Base {
 				$git_theme['type']                    = $repo_parts['type'];
 				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
 				$git_theme['enterprise']              = $repo_enterprise_uri;
+				$git_theme['enterprise_api']          = $repo_enterprise_api;
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
 				$git_theme['extended_repo']           = $header['repo'];
