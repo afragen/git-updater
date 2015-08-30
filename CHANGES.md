@@ -2,7 +2,7 @@
 * refactor of Plugin and Theme constructors moving code calling APIs getting remote data to separate functions
 * fixed [#281](https://github.com/afragen/github-updater/issues/281), removed 'Activate Plugin/Theme' buttons post-install
 * fixed [#284](https://github.com/afragen/github-updater/issues/284) for GitLab CE/Enterprise install and update
-* fix to re-activate plugins after update or branch switch
+* fix to re-activate plugins after update
 
 #### 5.0.1
 * updated to current `erusev/parsedown` release, fixes PHP7 issue
