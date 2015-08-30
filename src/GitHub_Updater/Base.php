@@ -336,7 +336,9 @@ class Base {
 	 */
 	public function upgrader_post_install( $true, $extra_hook, $result ) {
 		global $wp_filesystem;
-		$slug = null;
+		$slug              = null;
+		$is_plugin_active  = false;
+		$is_network_active = false;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
 		     ( $this instanceof Plugin && in_array( 'theme', $extra_hook ) ) ||
@@ -350,7 +352,9 @@ class Base {
 		 * Use $extra_hook to derive repo, safer.
 		 */
 		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug = dirname( $extra_hook['plugin'] );
+			$slug              = dirname( $extra_hook['plugin'] );
+			$is_plugin_active  = is_plugin_active( $extra_hook['plugin'] ) ? true : false;
+			$is_network_active = is_plugin_active_for_network( $extra_hook['plugin'] ) ? true : false;
 		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
 			$slug = $extra_hook['theme'];
 		}
@@ -389,6 +393,13 @@ class Base {
 		$wp_filesystem->move( $result['destination'], $proper_destination );
 		$result['destination']       = $proper_destination;
 		$result['clear_destination'] = true;
+
+		/*
+		 * Reactivate plugin if active.
+		 */
+		if ( $is_plugin_active ) {
+			activate_plugin( WP_PLUGIN_DIR . '/' . $extra_hook['plugin'], null, $is_network_active );
+		}
 
 		return $result;
 	}

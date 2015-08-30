@@ -59,6 +59,11 @@ class Plugin extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
+
+		/*
+		 * Load post-processing filters. Renaming filters etc.
+		 */
+		$this->load_post_filters();
 	}
 
 	/**
@@ -113,6 +118,7 @@ class Plugin extends Base {
 
 			foreach ( (array) self::$extra_headers as $value ) {
 				$repo_enterprise_uri = null;
+				$repo_enterprise_api = null;
 
 				if ( empty( $headers[ $value ] ) ||
 				     false === stristr( $value, 'Plugin' )
@@ -140,10 +146,10 @@ class Plugin extends Base {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
 					switch( $header_parts[0] ) {
 						case 'GitHub':
-							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
 						case 'GitLab':
-							$repo_enterprise_uri = $repo_enterprise_uri . '/api/v3';
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
 				}
@@ -151,6 +157,7 @@ class Plugin extends Base {
 				$git_plugin['type']                    = $repo_parts['type'];
 				$git_plugin['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
 				$git_plugin['enterprise']              = $repo_enterprise_uri;
+				$git_plugin['enterprise_api']          = $repo_enterprise_api;
 				$git_plugin['owner']                   = $header['owner'];
 				$git_plugin['repo']                    = $header['repo'];
 				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
