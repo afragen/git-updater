@@ -406,15 +406,23 @@ class Base {
 
 	/**
 	 * Set array with normal and extended repo names.
+	 * Fix name even if installed without renaming originally.
 	 *
 	 * @param $slug
 	 *
 	 * @return array
 	 */
 	protected function get_repo_slugs( $slug ) {
-		$arr = array();
+		$arr    = array();
+		$rename = explode( '-', $slug );
+		array_pop( $rename );
+		$rename = implode( '-', $rename );
+
 		foreach ( $this->config as $repo ) {
-			if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
+			if ( $slug === $repo->repo ||
+			     $slug === $repo->extended_repo ||
+			     $rename === $repo->owner . '-' . $repo->repo
+			) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;
 				break;
