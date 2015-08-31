@@ -152,7 +152,8 @@ class Theme extends Base {
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
 				$git_theme['local_path_extended']     = null;
-				$git_theme['branch']                  = ! empty( $theme->get( $repo_parts['branch'] ) ) ? $theme->get( $repo_parts['branch'] ) : 'master';
+				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
+				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
 			}
 
 			/*
