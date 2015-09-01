@@ -39,7 +39,7 @@ class Messages extends Base {
 
 		if (
 			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
-			( in_array( $pagenow, $settings_pages ) && 'github-updater' !== $_GET['page'] )
+			( in_array( $pagenow, $settings_pages ) && ( ! isset($_GET['page']) || 'github-updater' !== $_GET['page'] ) )
 		) {
 			return false;
 		}
