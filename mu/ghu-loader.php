@@ -14,7 +14,7 @@ use Fragen\GitHub_Updater;
 Plugin Name:       GitHub Updater MU loader
 Plugin URI:        https://github.com/afragen/github-updater
 Description:       A plugin to load GitHub Updater as a must-use plugin. Disables normal plugin activation and deletion.
-Version:           1.5.0
+Version:           1.5.1
 Author:            Andy Fragen
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -79,4 +79,5 @@ add_filter( 'plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 add_action( 'after_plugin_row_' . $ghu_plugin_file,
 	function() {
 		print('<script>jQuery("#github-updater .check-column").html("");</script>');
+		print('<script>jQuery("#github-updater").attr("class", "active");</script>');
 	} );
