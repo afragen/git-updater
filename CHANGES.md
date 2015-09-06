@@ -6,6 +6,7 @@
 * fix to correctly rename plugin/theme on update if installed from upload.
 * add filter to `pre_http_response` to bypass certain plugins check using `wp_remote_get` with each page load in GitHub Updater. Bypass is only for 12 hours.
 * cosmetic fix to display GitHub Updater as active when activating as mu-plugin
+* fix to `theme_api` 'View version details' CSS; better scrolling for changelog info
 
 #### 5.0.1
 * updated to current `erusev/parsedown` release, fixes PHP7 issue
