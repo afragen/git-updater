@@ -251,7 +251,7 @@ class Theme extends Base {
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
-		add_filter( 'themes_api_result', array( &$this, 'themes_api_result' ), 99, 3 );
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
 	}
 
@@ -271,7 +271,7 @@ class Theme extends Base {
 	 *
 	 * @return mixed
 	 */
-	public function themes_api_result( $false, $action, $response ) {
+	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) {
 			return $false;
 		}
@@ -302,6 +302,7 @@ class Theme extends Base {
 				if ( $theme->private ) {
 					add_action( 'admin_head', array( $this, 'remove_rating_in_private_repo' ) );
 				}
+				break;
 			}
 		}
 		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
