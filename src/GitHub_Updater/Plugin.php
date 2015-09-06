@@ -291,7 +291,7 @@ class Plugin extends Base {
 				$timeout = $this->set_transient( 'ghu_http_block_' . $domain, $now );
 			}
 			if ( ( self::$hours * HOUR_IN_SECONDS ) > ( $now - $timeout ) ) {
-				return new \WP_Error( 'http_request_failed', __( 'GitHub Updater has blocked this request for 12 hours.' ) );
+				return new \WP_Error( 'http_request_blocked', __( 'GitHub Updater has blocked this request for 12 hours.', 'github-updater' ) );
 			}
 		}
 
