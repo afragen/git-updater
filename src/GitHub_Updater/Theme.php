@@ -305,7 +305,7 @@ class Theme extends Base {
 				break;
 			}
 		}
-		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
+		add_action( 'admin_head', array( $this, 'fix_display_in_themes_api' ) );
 
 		return $response;
 	}
@@ -313,8 +313,13 @@ class Theme extends Base {
 	/**
 	 * Fix for new issue in 3.9 :-(
 	 */
-	public function fix_display_none_in_themes_api() {
-		echo '<style> #theme-installer div.install-theme-info { display: block !important; } </style>';
+	public function fix_display_in_themes_api() {
+		?>
+		<style>
+			#theme-installer div.install-theme-info { display: block !important; }
+			#theme-installer.wp-full-overlay.single-theme, .wp-full-overlay-sidebar { position: relative; }
+		</style>
+		<?php
 	}
 
 	/**
