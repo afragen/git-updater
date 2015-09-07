@@ -399,7 +399,7 @@ class Settings extends Base {
 					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case( strpos( $token->type, 'bitbucket' ) ):
+				case ( strpos( $token->type, 'bitbucket' ) ):
 					$setting_field['section']         = 'bitbucket_id';
 					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
