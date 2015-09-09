@@ -40,14 +40,15 @@ Run the composer command: ```composer require afragen/github-updater```
 ### Upload
 
 1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
-2. Go to the __Plugins -> Add New__ screen and click the __Upload__ tab.
-3. Upload the zipped archive directly.
-4. Go to the Plugins screen and click __Activate__.
+2. Unzip the archive, rename the folder correctly to `github-updater`, then re-zip the file.
+3. Go to the __Plugins -> Add New__ screen and click the __Upload__ tab.
+4. Upload the zipped archive directly.
+5. Go to the Plugins screen and click __Activate__.
 
 ### Manual
 
 1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
-2. Unzip the archive.
+2. Unzip the archive, rename the folder to `github-upddater`.
 3. Copy the folder to your `/wp-content/plugins/` directory.
 4. Go to the Plugins screen and click __Activate__.
 
@@ -223,7 +224,7 @@ The same applies for Bitbucket or GitLab hosted plugins.
 
 ## Remote Installation of Repositories
 
-From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format.
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format. The URI is case sensitive, so make sure the repo name is correctly entered.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 

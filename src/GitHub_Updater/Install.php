@@ -316,6 +316,9 @@ class Install extends Base {
 		?>
 		<label for="github_updater_repo">
 			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus >
+			<p class="description">
+				<?php esc_html_e( 'URI is case sensitive.', 'github-updater') ?>
+			</p>
 		</label>
 		<?php
 	}
