@@ -43,8 +43,7 @@ class Plugin extends Base {
 	protected $tag = false;
 
 	/**
-	 * Constructor
-	 *
+	 * Constructor.
 	 */
 	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {

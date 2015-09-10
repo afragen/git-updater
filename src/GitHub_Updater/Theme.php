@@ -45,9 +45,7 @@ class Theme extends Base {
 	protected $tag = false;
 
 	/**
-	 * Constructor
-	 *
-	 * @param bool|false $force_meta_update whether we should force meta updating
+	 * Constructor.
 	 */
 	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {
