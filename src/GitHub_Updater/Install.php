@@ -434,7 +434,7 @@ class Install extends Base {
 			), admin_url('themes.php') );
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
-		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . sprintf( esc_attr__( 'Activate &#8220;%s&#8221;', 'github-updater' ), $stylesheet ) . '</span></a>';
+		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'github-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
 			$network_activate_link = add_query_arg( array(
