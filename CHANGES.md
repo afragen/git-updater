@@ -1,5 +1,5 @@
 #### 5.1.1
-* hotfix to comment out `pre_http_response` filter. Updating of plugin doesn't work. I need to re-think this one.
+* hotfix to comment out `pre_http_request` filter. Updating of plugin doesn't work. I need to re-think this one.
 
 #### 5.1.0
 * refactor of Plugin and Theme constructors moving code calling APIs getting remote data to separate functions
