@@ -9,6 +9,7 @@
 * fix to `theme_api` 'View version details' CSS; better scrolling for changelog info
 * fix annoying PHP notice in `vendor/parse-readme.php` when _Upgrade Notice_ malformed
 * fix `API::return_repo_type` to add 'type' to array; allows easier instance creation of API classes
+* update POT file
 
 #### 5.0.1
 * updated to current `erusev/parsedown` release, fixes PHP7 issue

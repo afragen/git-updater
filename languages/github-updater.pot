@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-08-24 20:25-0700\n"
+"POT-Creation-Date: 2015-09-09 19:25-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:384
+#: src/GitHub_Updater/Base.php:388
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -78,67 +78,70 @@ msgstr ""
 msgid "GitLab Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:331
+#: src/GitHub_Updater/Install.php:320
+msgid "URI is case sensitive."
+msgstr ""
+
+#: src/GitHub_Updater/Install.php:334
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:362
+#: src/GitHub_Updater/Install.php:365
 msgid "Check for private Bitbucket repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:376
+#: src/GitHub_Updater/Install.php:379
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:390
+#: src/GitHub_Updater/Install.php:393
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:434
+#: src/GitHub_Updater/Install.php:437
 msgid "Activate"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:434
-#, php-format
-msgid "Activate &#8220;%s&#8221;"
-msgstr ""
-
-#: src/GitHub_Updater/Install.php:443
+#: src/GitHub_Updater/Install.php:446
 msgid "Network Enable"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:79
+#: src/GitHub_Updater/Messages.php:80
 #, php-format
 msgid "%s was not checked. GitHub Updater Error Code:"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:87
+#: src/GitHub_Updater/Messages.php:88
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:92
+#: src/GitHub_Updater/Messages.php:93
 #, php-format
 msgid ""
 "It looks like you are running into GitHub API rate limits. Be sure and "
 "configure a %sPersonal Access Token%s to avoid this issue."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:100
+#: src/GitHub_Updater/Messages.php:101
 msgid "There is probably an error on the GitHub Updater Settings page."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:116
+#: src/GitHub_Updater/Messages.php:117
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:293 src/GitHub_Updater/Theme.php:443
+#: src/GitHub_Updater/Plugin.php:293
+msgid "GitHub Updater has blocked this request for 12 hours."
+msgstr ""
+
+#: src/GitHub_Updater/Plugin.php:339 src/GitHub_Updater/Theme.php:465
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:345
+#: src/GitHub_Updater/Plugin.php:391
 msgid "View details"
 msgstr ""
 
@@ -266,52 +269,52 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:343
+#: src/GitHub_Updater/Theme.php:365
 msgid "Theme is up-to-date!"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:348
+#: src/GitHub_Updater/Theme.php:370
 msgid "Rollback to:"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:366
+#: src/GitHub_Updater/Theme.php:388
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:374 src/GitHub_Updater/Theme.php:388
+#: src/GitHub_Updater/Theme.php:396 src/GitHub_Updater/Theme.php:410
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:381
+#: src/GitHub_Updater/Theme.php:403
 #, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:385
+#: src/GitHub_Updater/Theme.php:407
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:395 src/GitHub_Updater/Theme.php:540
+#: src/GitHub_Updater/Theme.php:417 src/GitHub_Updater/Theme.php:562
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:533
+#: src/GitHub_Updater/Theme.php:555
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:560
+#: src/GitHub_Updater/Theme.php:582
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:574
+#: src/GitHub_Updater/Theme.php:596
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:577
+#: src/GitHub_Updater/Theme.php:599
 msgid "Install"
 msgstr ""
 
