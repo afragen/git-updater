@@ -58,24 +58,28 @@ abstract class API extends Base {
 	 * @return array
 	 */
 	protected function return_repo_type() {
+		$arr = array();
 		switch ( $this->type->type ) {
 			case ( stristr( $this->type->type, 'github' ) ):
 				$arr['repo']          = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
 				$arr['base_download'] = 'https://github.com';
 				break;
-			case( stristr( $this->type->type, 'bitbucket' ) ):
+			case ( stristr( $this->type->type, 'bitbucket' ) ):
 				$arr['repo']          = 'bitbucket';
 				$arr['base_uri']      = 'https://bitbucket.org/api';
 				$arr['base_download'] = 'https://bitbucket.org';
 				break;
-			case (stristr( $this->type->type, 'gitlab' ) ):
+			case ( stristr( $this->type->type, 'gitlab' ) ):
 				$arr['repo']          = 'gitlab';
 				$arr['base_uri']      = 'https://gitlab.com/api/v3';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
-			default:
-				$arr = array();
+		}
+		if ( false !== stristr( $this->type->type, 'plugin' ) ) {
+			$arr['type'] = 'plugin';
+		} elseif ( false !== stristr( $this->type->type, 'theme' ) ) {
+			$arr['type'] = 'theme';
 		}
 
 		return $arr;
@@ -110,7 +114,7 @@ abstract class API extends Base {
 					)
 				) );
 			if ( 'github' === $type['repo'] ) {
-				GitHub_API::_ratelimit_reset( $response, $this->type->repo );
+				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
 			Messages::create_error_message( $type['repo'] );
 			return false;
@@ -147,14 +151,16 @@ abstract class API extends Base {
 
 		switch ( $type['repo'] ) {
 			case 'github':
-				$endpoint = GitHub_API::add_endpoints( $this, $endpoint );
-				if ( $this->type->enterprise ) {
+				$api      = new GitHub_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
+				if ( $this->type->enterprise_api ) {
 					return $endpoint;
 				}
 				break;
 			case 'gitlab':
-				$endpoint = GitLab_API::add_endpoints( $this, $endpoint );
-				if ( $this->type->enterprise ) {
+				$api      = new GitLab_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
+				if ( $this->type->enterprise_api ) {
 					return $endpoint;
 				}
 				break;

@@ -340,10 +340,7 @@ class GitLab_API extends API {
 			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
 				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
 			}
-
-			return $this->type->enterprise . $endpoint;
 		}
-
 
 		return $download_link_base . $endpoint;
 	}
@@ -389,13 +386,13 @@ class GitLab_API extends API {
 		/*
 		 * If using GitLab CE/Enterprise header return this endpoint.
 		 */
-		if ( ! empty( $git->type->enterprise ) ) {
+		if ( ! empty( $git->type->enterprise_api ) ) {
 			$endpoint = remove_query_arg( 'private_token', $endpoint );
 			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
 				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
 			}
 
-			return $git->type->enterprise . $endpoint;
+			return $git->type->enterprise_api . $endpoint;
 		}
 
 		return $endpoint;

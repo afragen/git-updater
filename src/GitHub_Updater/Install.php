@@ -174,6 +174,7 @@ class Install extends Base {
 				 * Create a new instance of Plugin_Upgrader.
 				 */
 				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
+				add_filter( 'install_plugin_complete_actions', array( &$this, 'install_plugin_complete_actions' ), 10, 3 );
 			}
 
 			if ( 'theme' === $type ) {
@@ -183,6 +184,7 @@ class Install extends Base {
 				 * Create a new instance of Theme_Upgrader.
 				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
+				add_filter( 'install_theme_complete_actions', array( &$this, 'install_theme_complete_actions' ), 10, 3 );
 			}
 
 			/*
@@ -293,7 +295,7 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['gitlab_private_token'] ) &&
+		if ( empty( parent::$options['gitlab_private_token'] ) ||
 		     empty( parent::$options['gitlab_enterprise_token'] )
 		) {
 			add_settings_field(
@@ -314,6 +316,9 @@ class Install extends Base {
 		?>
 		<label for="github_updater_repo">
 			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus >
+			<p class="description">
+				<?php esc_html_e( 'URI is case sensitive.', 'github-updater') ?>
+			</p>
 		</label>
 		<?php
 	}
@@ -389,6 +394,61 @@ class Install extends Base {
 			</p>
 		</label>
 	<?php
+	}
+
+	/**
+	 * Remove activation links after plugin installation as no method to get $plugin_file.
+	 *
+	 * @param $install_actions
+	 * @param $api
+	 * @param $plugin_file
+	 *
+	 * @return mixed
+	 */
+	public function install_plugin_complete_actions( $install_actions, $api, $plugin_file ) {
+		unset( $install_actions['activate_plugin'] );
+		unset( $install_actions['network_activate'] );
+
+		return $install_actions;
+	}
+
+	/**
+	 * Fix activation links after theme installation, no method to get proper theme name.
+	 *
+	 * @param $install_actions
+	 * @param $api
+	 * @param $theme_info
+	 *
+	 * @return mixed
+	 */
+	public function install_theme_complete_actions( $install_actions, $api, $theme_info ) {
+		if ( isset( $install_actions['preview'] ) ) {
+			unset( $install_actions['preview'] );
+		}
+
+		$stylesheet = self::$install['repo'];
+		$activate_link = add_query_arg( array(
+			'action'     => 'activate',
+			//'template'   => urlencode( $template ),
+			'stylesheet' => urlencode( $stylesheet ),
+			), admin_url('themes.php') );
+		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
+
+		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'github-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
+
+		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
+			$network_activate_link = add_query_arg( array(
+				'action' => 'enable',
+				'theme'  => urlencode( $stylesheet ),
+				), network_admin_url( 'themes.php' ) );
+			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
+
+			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr__( 'Network Enable', 'github-updater' ) . '</a>';
+			unset( $install_actions['activate'] );
+		}
+		ksort( $install_actions );
+
+		return $install_actions;
 	}
 
 }

@@ -43,34 +43,154 @@ class Plugin extends Base {
 	protected $tag = false;
 
 	/**
-	 * Force meta update toggle
-	 *
-	 * @var bool
+	 * Constructor.
 	 */
-	protected $force_meta_update = false;
-
-	/**
-	 * Constructor
-	 *
-	 * @param bool|false $force_meta_update whether we should force meta updating
-	 */
-	public function __construct( $force_meta_update = false ) {
-
-		$this->force_meta_update = $force_meta_update;
-
+	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
 		/*
-		 * Get details of git sourced plugins.
+		 * Get details of installed git sourced plugins.
 		 */
-		$this->config = $this->get_plugin_meta( $this->force_meta_update );
+		$this->config = $this->get_plugin_meta();
 
 		if ( empty( $this->config ) ) {
 			return false;
 		}
 
+		/*
+		 * Load post-processing filters. Renaming filters etc.
+		 */
+		$this->load_post_filters();
+	}
+
+	/**
+	 * The Plugin object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Plugin
+	 */
+	public static function instance() {
+		$class = __CLASS__;
+		if ( false === self::$object ) {
+			self::$object = new $class();
+		}
+
+		return self::$object;
+	}
+
+	/**
+	 * Get details of Git-sourced plugins from those that are installed.
+	 *
+	 * @return array Indexed array of associative arrays of plugin details.
+	 */
+	protected function get_plugin_meta() {
+		/*
+		 * Ensure get_plugins() function is available.
+		 */
+		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+
+		$plugins        = get_plugins();
+		$git_plugins    = array();
+		$all_plugins    = array();
+		$update_plugins = get_site_transient( 'update_plugins' );
+
+		if ( empty( $update_plugins ) ) {
+			wp_update_plugins();
+			$update_plugins = get_site_transient( 'update_plugins' );
+		}
+		if ( isset( $update_plugins->response, $update_plugins->no_update ) ) {
+			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
+		}
+
+		foreach ( (array) $plugins as $plugin => $headers ) {
+			$git_plugin = array();
+
+			if ( empty( $headers['GitHub Plugin URI'] ) &&
+			     empty( $headers['Bitbucket Plugin URI'] ) &&
+			     empty( $headers['GitLab Plugin URI'] )
+			) {
+				continue;
+			}
+
+			foreach ( (array) self::$extra_headers as $value ) {
+				$repo_enterprise_uri = null;
+				$repo_enterprise_api = null;
+
+				if ( empty( $headers[ $value ] ) ||
+				     false === stristr( $value, 'Plugin' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+				$repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );
+
+				if ( $repo_parts['bool'] ) {
+					$header = $this->parse_header_uri( $headers[ $value ] );
+				}
+
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+				foreach ( $self_hosted_parts as $part ) {
+					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
+					     ! empty( $headers[ $repo_parts[ $part ] ] )
+					) {
+						$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
+							break;
+					}
+				}
+
+				$git_plugin['type']                    = $repo_parts['type'];
+				$git_plugin['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_plugin['enterprise']              = $repo_enterprise_uri;
+				$git_plugin['enterprise_api']          = $repo_enterprise_api;
+				$git_plugin['owner']                   = $header['owner'];
+				$git_plugin['repo']                    = $header['repo'];
+				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
+				$git_plugin['branch']                  = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
+				$git_plugin['slug']                    = $plugin;
+				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
+
+				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
+				$git_plugin['author']                  = $plugin_data['AuthorName'];
+				$git_plugin['name']                    = $plugin_data['Name'];
+				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
+				$git_plugin['sections']['description'] = $plugin_data['Description'];
+				$git_plugin['dot_org']                 = false;
+			}
+			if ( isset( $all_plugins[ $plugin ]->id )  ) {
+				$git_plugin['dot_org']                 = true;
+			}
+
+			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
+		}
+		/*
+		 * Load post-processing filters. Renaming filters etc.
+		 */
+		$this->load_post_filters();
+
+		return $git_plugins;
+	}
+
+	/**
+	 * Get remote plugin meta to populate $config plugin objects. 
+	 * Calls to remote APIs to get data. 
+	 */
+	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
 			$this->repo_api = null;
 			switch( $plugin->type ) {
@@ -92,7 +212,7 @@ class Plugin extends Base {
 			$this->{$plugin->type} = $plugin;
 			$this->set_defaults( $plugin->type );
 
-			if ( $this->force_meta_update && $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $plugin->type );
@@ -122,36 +242,59 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( $this->force_meta_update &&
-			     ( ! is_multisite() || is_network_admin() )
-			) {
+			if ( ! is_multisite() || is_network_admin() ) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-
 		$this->make_force_check_transient( 'plugins' );
+		set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+		$this->load_pre_filters();
+	}
 
+	/**
+	 * Load pre-update filters.
+	 */
+	public function load_pre_filters() {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'plugins_api_result', array( &$this, 'plugins_api_result' ), 99, 3 );
+		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'pre_http_request', array( &$this, 'pre_http_request_block' ), 5, 3 );
+	}
+
+	/**
+	 * Load post-update filters.
+	 */
+	public function load_post_filters() {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
 	/**
-	 * The Plugin object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
+	 * Some plugins have updater checks that run with every pre_set_site_transient_update_plugins
+	 * call. This can cause those plugins to use wp_remote_get much too frequently.
 	 *
-	 * @return Plugin
+	 * The identified plugins in this method will be bypassed for 12 hours, improving performance.
+	 *
+	 * @param $false
+	 * @param $r
+	 * @param $url
+	 *
+	 * @return \WP_Error
 	 */
-	public static function instance( $force_meta_update = false ) {
-		$class = __CLASS__;
-		if ( false === self::$object && $force_meta_update ) {
-			self::$object = new $class( true );
-			set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+	public function pre_http_request_block( $false, $r, $url ) {
+		$stop_request = array( 'tri.be', 'theeventscalendar.com' );
+		$domain       = parse_url( $url, PHP_URL_HOST );
+		$now          = time();
+		if ( in_array( $domain, $stop_request ) ) {
+			$timeout = $this->get_transient( 'ghu_http_block_' . $domain );
+			if ( ! $timeout ) {
+				$timeout = $this->set_transient( 'ghu_http_block_' . $domain, $now );
+			}
+			if ( ( self::$hours * HOUR_IN_SECONDS ) > ( $now - $timeout ) ) {
+				return new \WP_Error( 'http_request_blocked', __( 'GitHub Updater has blocked this request for 12 hours.', 'github-updater' ) );
+			}
 		}
 
-		return self::$object;
+		return $false;
 	}
 
 	/**
@@ -262,7 +405,7 @@ class Plugin extends Base {
 	 *
 	 * @return mixed
 	 */
-	public function plugins_api_result( $false, $action, $response ) {
+	public function plugins_api( $false, $action, $response ) {
 		$match = false;
 		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
@@ -322,6 +465,7 @@ class Plugin extends Base {
 					$response->rating      = $plugin->rating;
 				}
 			}
+			break;
 		}
 
 		if ( ! $match ) {

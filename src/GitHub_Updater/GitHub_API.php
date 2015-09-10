@@ -325,8 +325,8 @@ class GitHub_API extends API {
 		/*
 		 * If using GitHub Self-Hosted header return this endpoint.
 		 */
-		if ( ! empty( $git->type->enterprise ) ) {
-			return $git->type->enterprise . remove_query_arg( 'access_token', $endpoint );
+		if ( ! empty( $git->type->enterprise_api ) ) {
+			return $git->type->enterprise_api . remove_query_arg( 'access_token', $endpoint );
 		}
 
 		return $endpoint;
@@ -338,7 +338,7 @@ class GitHub_API extends API {
 	 * @param $response
 	 * @param $repo
 	 */
-	protected static function _ratelimit_reset( $response, $repo ) {
+	protected static function ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );

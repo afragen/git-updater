@@ -336,10 +336,12 @@ class Settings extends Base {
 		$plugin = get_site_transient( 'ghu_plugin' );
 		$theme  = get_site_transient( 'ghu_theme' );
 		if ( ! $plugin ) {
-			$plugin = Plugin::instance( true );
+			$plugin = Plugin::instance();
+			$plugin->get_remote_plugin_meta();
 		}
 		if ( ! $theme ) {
-			$theme = Theme::instance( true );
+			$theme = Theme::instance();
+			$theme->get_remote_theme_meta();
 		}
 		$ghu_plugins = $plugin->config;
 		$ghu_themes  = $theme->config;
@@ -397,7 +399,7 @@ class Settings extends Base {
 					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case( strpos( $token->type, 'bitbucket' ) ):
+				case ( strpos( $token->type, 'bitbucket' ) ):
 					$setting_field['section']         = 'bitbucket_id';
 					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
@@ -489,7 +491,7 @@ class Settings extends Base {
 	public static function sanitize( $input ) {
 		$new_input = array();
 		foreach ( (array) $input as $id => $value ) {
-			$new_input[ sanitize_key( $id ) ] = sanitize_text_field( $input[ $id ] );
+			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
 		return $new_input;

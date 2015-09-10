@@ -45,34 +45,137 @@ class Theme extends Base {
 	protected $tag = false;
 
 	/**
-	 * Force meta update toggle
-	 *
-	 * @var bool
+	 * Constructor.
 	 */
-	protected $force_meta_update = false;
-
-	/**
-	 * Constructor
-	 *
-	 * @param bool|false $force_meta_update whether we should force meta updating
-	 */
-	public function __construct( $force_meta_update = false ) {
-
-		$this->force_meta_update = $force_meta_update;
-
+	public function __construct() {
 		if ( isset( $_GET['force-check'] ) ) {
 			$this->delete_all_transients( 'themes' );
 		}
 
 		/*
-		 * Get details of git sourced themes.
+		 * Get details of installed git sourced themes.
 		 */
 		$this->config = $this->get_theme_meta();
+
 		if ( empty( $this->config ) ) {
 			return false;
 		}
 
+		/*
+		 * Load post-processing filters. Renaming filters, etc.
+		 */
+		$this->load_post_filters();
+	}
 
+	/**
+	 * The Theme object can be created/obtained via this
+	 * method - this prevents unnecessary work in rebuilding the object and
+	 * querying to construct a list of categories, etc.
+	 *
+	 * @return Theme
+	 */
+	public static function instance() {
+		$class = __CLASS__;
+		if ( false === self::$object  ) {
+			self::$object = new $class();
+		}
+
+		return self::$object;
+	}
+
+	/**
+	 * Reads in WP_Theme class of each theme.
+	 * Populates variable array.
+	 *
+	 * @return array Indexed array of associative arrays of theme details.
+	 */
+	protected function get_theme_meta() {
+		$git_themes = array();
+		$themes     = wp_get_themes( array( 'errors' => null ) );
+
+		foreach ( (array) $themes as $theme ) {
+			$git_theme           = array();
+			$repo_uri            = null;
+			$repo_enterprise_uri = null;
+			$repo_enterprise_api = null;
+
+			foreach ( (array) self::$extra_headers as $value ) {
+
+				$repo_uri = $theme->get( $value );
+				if ( empty( $repo_uri ) ||
+				     false === stristr( $value, 'Theme' )
+				) {
+					continue;
+				}
+
+				$header_parts = explode( ' ', $value );
+				$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
+
+				if ( $repo_parts['bool'] ) {
+					$header = $this->parse_header_uri( $repo_uri );
+				}
+
+				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+				foreach ( $self_hosted_parts as $part ) {
+					$self_hosted = $theme->get( $repo_parts[ $part ] );
+
+					if ( ! empty( $self_hosted ) ) {
+						$repo_enterprise_uri = $self_hosted;
+					}
+				}
+
+				if ( ! empty( $repo_enterprise_uri ) ) {
+					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
+					switch( $header_parts[0] ) {
+						case 'GitHub':
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
+							break;
+						case 'GitLab':
+							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
+							break;
+					}
+				}
+
+				$git_theme['type']                    = $repo_parts['type'];
+				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_theme['enterprise']              = $repo_enterprise_uri;
+				$git_theme['enterprise_api']          = $repo_enterprise_api;
+				$git_theme['owner']                   = $header['owner'];
+				$git_theme['repo']                    = $header['repo'];
+				$git_theme['extended_repo']           = $header['repo'];
+				$git_theme['name']                    = $theme->get( 'Name' );
+				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
+				$git_theme['author']                  = $theme->get( 'Author' );
+				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
+				$git_theme['sections']['description'] = $theme->get( 'Description' );
+				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['local_path_extended']     = null;
+				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
+				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+			}
+
+			/*
+			 * Exit if not git hosted theme.
+			 */
+			if ( empty( $git_theme ) ) {
+				continue;
+			}
+
+			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
+		}
+		/*
+		 * Load post-processing filters. Renaming filters, etc.
+		 */
+		$this->load_post_filters();
+
+		return $git_themes;
+	}
+
+	/**
+	 * Get remote theme meta to populate $config theme objects.
+	 * Calls to remote APIs to get data.
+	 */
+	public function get_remote_theme_meta() {
 		foreach ( (array) $this->config as $theme ) {
 			$this->repo_api = null;
 			switch( $theme->type ) {
@@ -94,7 +197,7 @@ class Theme extends Base {
 			$this->{$theme->type} = $theme;
 			$this->set_defaults( $theme->type );
 
-			if ( $this->force_meta_update && $this->repo_api->get_remote_info( 'style.css' ) ) {
+			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
 				$this->repo_api->get_repo_meta();
 				$this->repo_api->get_remote_tag();
 				$changelog = $this->get_changelog_filename( $theme->type );
@@ -134,33 +237,27 @@ class Theme extends Base {
 				}
 			}
 		}
-
 		$this->make_force_check_transient( 'themes' );
-
-		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
-		}
-
-		add_filter( 'themes_api_result', array( &$this, 'themes_api_result' ), 99, 3 );
-		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+		$this->load_pre_filters();
 	}
 
 	/**
-	 * The Theme object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Theme
+	 * Load pre-update filters.
 	 */
-	public static function instance( $force_meta_update = false ) {
-		$class = __CLASS__;
-		if ( false === self::$object && $force_meta_update ) {
-			self::$object = new $class( true );
-			set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
+	public function load_pre_filters() {
+		if ( ! is_multisite() ) {
+			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
+		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
+		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+	}
 
-		return self::$object;
+	/**
+	 * Load post-update filters.
+	 */
+	public function load_post_filters() {
+		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
 	/**
@@ -172,7 +269,7 @@ class Theme extends Base {
 	 *
 	 * @return mixed
 	 */
-	public function themes_api_result( $false, $action, $response ) {
+	public function themes_api( $false, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) {
 			return $false;
 		}
@@ -203,9 +300,10 @@ class Theme extends Base {
 				if ( $theme->private ) {
 					add_action( 'admin_head', array( $this, 'remove_rating_in_private_repo' ) );
 				}
+				break;
 			}
 		}
-		add_action( 'admin_head', array( $this, 'fix_display_none_in_themes_api' ) );
+		add_action( 'admin_head', array( $this, 'fix_display_in_themes_api' ) );
 
 		return $response;
 	}
@@ -213,8 +311,13 @@ class Theme extends Base {
 	/**
 	 * Fix for new issue in 3.9 :-(
 	 */
-	public function fix_display_none_in_themes_api() {
-		echo '<style> #theme-installer div.install-theme-info { display: block !important; } </style>';
+	public function fix_display_in_themes_api() {
+		?>
+		<style>
+			#theme-installer div.install-theme-info { display: block !important; }
+			#theme-installer.wp-full-overlay.single-theme, .wp-full-overlay-sidebar { position: relative; }
+		</style>
+		<?php
 	}
 
 	/**

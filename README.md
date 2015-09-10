@@ -40,14 +40,15 @@ Run the composer command: ```composer require afragen/github-updater```
 ### Upload
 
 1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
-2. Go to the __Plugins -> Add New__ screen and click the __Upload__ tab.
-3. Upload the zipped archive directly.
-4. Go to the Plugins screen and click __Activate__.
+2. Unzip the archive, rename the folder correctly to `github-updater`, then re-zip the file.
+3. Go to the __Plugins -> Add New__ screen and click the __Upload__ tab.
+4. Upload the zipped archive directly.
+5. Go to the Plugins screen and click __Activate__.
 
 ### Manual
 
 1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
-2. Unzip the archive.
+2. Unzip the archive, rename the folder to `github-upddater`.
 3. Copy the folder to your `/wp-content/plugins/` directory.
 4. Go to the Plugins screen and click __Activate__.
 
@@ -91,7 +92,7 @@ There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin U
 /*
 Plugin Name:       GitHub Updater
 Plugin URI:        https://github.com/afragen/github-updater
-Description:       A plugin to automatically update GitHub hosted plugins and themes into WordPress. Plugin class based upon <a href="https://github.com/codepress/github-plugin-updater">codepress/github-plugin-updater</a>. Theme class based upon <a href="https://github.com/WordPress-Phoenix/whitelabel-framework">Whitelabel Framework</a> modifications.
+Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
 Version:           1.0.0
 Author:            Andy Fragen
 License:           GNU General Public License v2
@@ -110,7 +111,7 @@ There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI`
 ~~~css
 /*
 Theme Name:       Test
-Theme URI:        http://drfragen.info/
+Theme URI:        http://thefragens.net/
 Version:          0.1.0
 Description:      Child theme of TwentyTwelve.
 Author:           Andy Fragen
@@ -223,7 +224,7 @@ The same applies for Bitbucket or GitLab hosted plugins.
 
 ## Remote Installation of Repositories
 
-From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format.
+From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format. The URI is case sensitive, so make sure the repo name is correctly entered.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
