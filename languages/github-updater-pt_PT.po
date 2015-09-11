@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-09-09 19:26-0700\n"
-"PO-Revision-Date: 2015-09-09 19:26-0700\n"
+"PO-Revision-Date: 2015-09-11 14:01+0100\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -79,7 +79,7 @@ msgstr "Token privado do GitLab"
 
 #: src/GitHub_Updater/Install.php:320
 msgid "URI is case sensitive."
-msgstr ""
+msgstr "O URI é sensível a maiúsculas e minúsculas."
 
 #: src/GitHub_Updater/Install.php:334
 msgid "Enter branch name or leave empty for `master`"
@@ -101,11 +101,11 @@ msgstr ""
 
 #: src/GitHub_Updater/Install.php:437
 msgid "Activate"
-msgstr ""
+msgstr "Activar"
 
 #: src/GitHub_Updater/Install.php:446
 msgid "Network Enable"
-msgstr ""
+msgstr "Activar na rede"
 
 #: src/GitHub_Updater/Messages.php:80
 #, php-format
@@ -140,7 +140,7 @@ msgstr ""
 
 #: src/GitHub_Updater/Plugin.php:293
 msgid "GitHub Updater has blocked this request for 12 hours."
-msgstr ""
+msgstr "O GitHub Updater bloqueou este pedido por 12 horas."
 
 #: src/GitHub_Updater/Plugin.php:339 src/GitHub_Updater/Theme.php:465
 #, php-format
