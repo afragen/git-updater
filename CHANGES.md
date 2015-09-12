@@ -1,3 +1,6 @@
+#### 5.1.2
+* add message to re-activate current, active theme if it has been updated, because it's now broken. :P
+
 #### 5.1.1
 * hotfix to comment out `pre_http_request` filter. Updating of plugin doesn't work. I need to re-think this one.
 

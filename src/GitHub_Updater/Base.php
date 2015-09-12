@@ -339,6 +339,7 @@ class Base {
 		$slug              = null;
 		$is_plugin_active  = false;
 		$is_network_active = false;
+		$active_theme      = wp_get_theme()->stylesheet;
 
 		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
 		     ( $this instanceof Plugin && in_array( 'theme', $extra_hook ) ) ||
@@ -399,6 +400,18 @@ class Base {
 		 */
 		if ( $is_plugin_active ) {
 			activate_plugin( WP_PLUGIN_DIR . '/' . $extra_hook['plugin'], null, $is_network_active );
+		}
+
+		/*
+		 * Reminder to reactivate your current, active theme.
+		 * It's now broken. :P
+		 */
+		if ( isset( $extra_hook['theme'] ) && $active_theme === $slug ) {
+			printf(
+				'<strong>' . esc_html__( 'GitHub Updater has updated your current, active theme. You must %sre-activate%s this theme.', 'github-updater' ) . '</strong><br>',
+				'<a href="' . admin_url( 'themes.php' ) . '" target="_parent">',
+				'</a>'
+			);
 		}
 
 		return $result;
