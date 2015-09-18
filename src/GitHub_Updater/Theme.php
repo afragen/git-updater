@@ -257,6 +257,7 @@ class Theme extends Base {
 	 * Load post-update filters.
 	 */
 	public function load_post_filters() {
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 	}
 
