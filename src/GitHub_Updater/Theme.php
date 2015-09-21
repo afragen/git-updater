@@ -278,8 +278,8 @@ class Theme extends Base {
 
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		global $wp_filesystem;
-		$repo        = null;
-		$source_base = basename( $source );
+		$repo         = null;
+		$source_base  = basename( $source );
 		$active_theme = wp_get_theme()->stylesheet;
 
 		/*

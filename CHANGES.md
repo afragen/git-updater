@@ -2,6 +2,7 @@
 * add `upgrader_source_selection` filter back for correct updating of current, active theme.
 * fix [#293](https://github.com/afragen/github-updater/issues/293) and [#297](https://github.com/afragen/github-updater/issues/297)
 * remove `pre_http_request` filter blocking
+* fix javascript for theme rollback - @scarstens
 
 #### 5.1.1
 * hotfix to comment out `pre_http_request` filter. Updating of plugin doesn't work. I need to re-think this one.
