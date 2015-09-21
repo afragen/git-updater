@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-09-09 19:27-0700\n"
-"PO-Revision-Date: 2015-09-09 19:27-0700\n"
+"POT-Creation-Date: 2015-09-21 16:51-0700\n"
+"PO-Revision-Date: 2015-09-21 16:51-0700\n"
 "Last-Translator: ishihara <ishihara@grow-group.jp>\n"
 "Language-Team: \n"
 "Language: ja\n"
@@ -105,6 +105,7 @@ msgid "Activate"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:446
+msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
@@ -138,16 +139,12 @@ msgstr ""
 "あなたはGitLab.com、GitLab CE、またはGitLabエンタープライズプライベートトーク"
 "ンを設定する必要があります。"
 
-#: src/GitHub_Updater/Plugin.php:293
-msgid "GitHub Updater has blocked this request for 12 hours."
-msgstr ""
-
-#: src/GitHub_Updater/Plugin.php:339 src/GitHub_Updater/Theme.php:465
+#: src/GitHub_Updater/Plugin.php:309 src/GitHub_Updater/Theme.php:533
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "現在のブランチは `%1$s`です。%2$sanother branch%3$s."
 
-#: src/GitHub_Updater/Plugin.php:391
+#: src/GitHub_Updater/Plugin.php:361
 msgid "View details"
 msgstr "詳細を見る"
 
@@ -284,52 +281,65 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:310
+#, php-format
+msgid "Renaming %1$s to %2$s"
+msgstr "%1$s から %2$sにリネームしています。"
+
+#: src/GitHub_Updater/Theme.php:320
+msgid "Rename successful"
+msgstr "リネームに成功しました。"
+
+#: src/GitHub_Updater/Theme.php:327
+msgid "Unable to rename downloaded repository."
+msgstr "ダウンロードしたリポジトリの名前を変更することができません。"
+
+#: src/GitHub_Updater/Theme.php:433
 msgid "Theme is up-to-date!"
 msgstr "テーマは最新のものです。"
 
-#: src/GitHub_Updater/Theme.php:370
+#: src/GitHub_Updater/Theme.php:438
 msgid "Rollback to:"
 msgstr "ロールバック : "
 
-#: src/GitHub_Updater/Theme.php:388
+#: src/GitHub_Updater/Theme.php:456
 msgid "No previous tags to rollback to."
 msgstr "ロールバックする以前のタグはありません。"
 
-#: src/GitHub_Updater/Theme.php:396 src/GitHub_Updater/Theme.php:410
+#: src/GitHub_Updater/Theme.php:464 src/GitHub_Updater/Theme.php:478
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHubのアップデータは、利用可能な%sの新しいバージョンを表示しています"
 
-#: src/GitHub_Updater/Theme.php:403
+#: src/GitHub_Updater/Theme.php:471
 #, php-format
 msgid "View version %s details."
 msgstr "バージョン %s の詳細を見る"
 
-#: src/GitHub_Updater/Theme.php:407
+#: src/GitHub_Updater/Theme.php:475
 msgid "Automatic update is unavailable for this theme."
 msgstr "自動更新はこのテーマでは利用できません。"
 
-#: src/GitHub_Updater/Theme.php:417 src/GitHub_Updater/Theme.php:562
+#: src/GitHub_Updater/Theme.php:485 src/GitHub_Updater/Theme.php:630
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "バージョン%1$sの詳細を見る%2$sもしくは %3$supdate now%4$s."
 
-#: src/GitHub_Updater/Theme.php:555
+#: src/GitHub_Updater/Theme.php:623
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "利用可能な %s の新しいバージョンが追加されました。"
 
-#: src/GitHub_Updater/Theme.php:582
+#: src/GitHub_Updater/Theme.php:650
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "現在のバージョンは最新です。%sanother version%s に変更する"
 
-#: src/GitHub_Updater/Theme.php:596
+#: src/GitHub_Updater/Theme.php:664
 msgid "Choose a Version"
 msgstr "バージョンを選択"
 
-#: src/GitHub_Updater/Theme.php:599
+#: src/GitHub_Updater/Theme.php:667
 msgid "Install"
 msgstr "インストール"
 
@@ -360,15 +370,6 @@ msgstr "Andy Fragen"
 
 #~ msgid "%1$s recommends a PHP version greater than %2$s."
 #~ msgstr "%1$s recommends a PHP version greater than %2$s."
-
-#~ msgid "Renaming %1$s to %2$s"
-#~ msgstr "%1$s から %2$sにリネームしています。"
-
-#~ msgid "Rename successful"
-#~ msgstr "リネームに成功しました。"
-
-#~ msgid "Unable to rename downloaded repository."
-#~ msgstr "ダウンロードしたリポジトリの名前を変更することができません。"
 
 #~ msgid ""
 #~ "A plugin to automatically update GitHub, Bitbucket or GitLab hosted "
