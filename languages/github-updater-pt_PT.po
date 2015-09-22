@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-09-21 16:51-0700\n"
-"PO-Revision-Date: 2015-09-21 16:51-0700\n"
+"PO-Revision-Date: 2015-09-22 09:31+0100\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -104,7 +104,6 @@ msgid "Activate"
 msgstr "Activar"
 
 #: src/GitHub_Updater/Install.php:446
-#, fuzzy
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr "Activar na rede"
