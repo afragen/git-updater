@@ -258,7 +258,6 @@ class Plugin extends Base {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
-		//add_filter( 'pre_http_request', array( &$this, 'pre_http_request_block' ), 5, 3 );
 	}
 
 	/**
@@ -266,35 +265,6 @@ class Plugin extends Base {
 	 */
 	public function load_post_filters() {
 		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
-	}
-
-	/**
-	 * Some plugins have updater checks that run with every pre_set_site_transient_update_plugins
-	 * call. This can cause those plugins to use wp_remote_get much too frequently.
-	 *
-	 * The identified plugins in this method will be bypassed for 12 hours, improving performance.
-	 *
-	 * @param $false
-	 * @param $r
-	 * @param $url
-	 *
-	 * @return \WP_Error
-	 */
-	public function pre_http_request_block( $false, $r, $url ) {
-		$stop_request = array( 'tri.be', 'theeventscalendar.com' );
-		$domain       = parse_url( $url, PHP_URL_HOST );
-		$now          = time();
-		if ( in_array( $domain, $stop_request ) ) {
-			$timeout = $this->get_transient( 'ghu_http_block_' . $domain );
-			if ( ! $timeout ) {
-				$timeout = $this->set_transient( 'ghu_http_block_' . $domain, $now );
-			}
-			if ( ( self::$hours * HOUR_IN_SECONDS ) > ( $now - $timeout ) ) {
-				return new \WP_Error( 'http_request_blocked', __( 'GitHub Updater has blocked this request for 12 hours.', 'github-updater' ) );
-			}
-		}
-
-		return $false;
 	}
 
 	/**

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/github-updater\n"
-"POT-Creation-Date: 2015-09-09 19:27-0700\n"
-"PO-Revision-Date: 2015-09-09 19:27-0700\n"
+"POT-Creation-Date: 2015-09-21 16:52-0700\n"
+"PO-Revision-Date: 2015-09-21 16:52-0700\n"
 "Last-Translator: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language-Team: fxbenard | FxB <fx@fxbenard.com>\n"
 "Language: fr_FR\n"
@@ -106,6 +106,7 @@ msgid "Activate"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:446
+msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
@@ -139,16 +140,12 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:293
-msgid "GitHub Updater has blocked this request for 12 hours."
-msgstr ""
-
-#: src/GitHub_Updater/Plugin.php:339 src/GitHub_Updater/Theme.php:465
+#: src/GitHub_Updater/Plugin.php:309 src/GitHub_Updater/Theme.php:533
 #, fuzzy, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "La version actuelle est à jour. Essayez %sune autre version%s"
 
-#: src/GitHub_Updater/Plugin.php:391
+#: src/GitHub_Updater/Plugin.php:361
 #, fuzzy
 msgid "View details"
 msgstr "détails"
@@ -287,53 +284,66 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:310
+#, fuzzy, php-format
+msgid "Renaming %1$s to %2$s"
+msgstr "Renommage de %s en %s"
+
+#: src/GitHub_Updater/Theme.php:320
+msgid "Rename successful"
+msgstr "Le renommage a réussi"
+
+#: src/GitHub_Updater/Theme.php:327
+msgid "Unable to rename downloaded repository."
+msgstr "Impossible de renommer le dépôt téléchargé."
+
+#: src/GitHub_Updater/Theme.php:433
 msgid "Theme is up-to-date!"
 msgstr "Le thème est à jour !"
 
-#: src/GitHub_Updater/Theme.php:370
+#: src/GitHub_Updater/Theme.php:438
 msgid "Rollback to:"
 msgstr "Revenir à la version :"
 
-#: src/GitHub_Updater/Theme.php:388
+#: src/GitHub_Updater/Theme.php:456
 msgid "No previous tags to rollback to."
 msgstr "Aucun tag précédent."
 
-#: src/GitHub_Updater/Theme.php:396 src/GitHub_Updater/Theme.php:410
+#: src/GitHub_Updater/Theme.php:464 src/GitHub_Updater/Theme.php:478
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater indique qu'une nouvelle version de %s est disponible."
 
-#: src/GitHub_Updater/Theme.php:403
+#: src/GitHub_Updater/Theme.php:471
 #, php-format
 msgid "View version %s details."
 msgstr "Voir les détails de la version %s."
 
-#: src/GitHub_Updater/Theme.php:407
+#: src/GitHub_Updater/Theme.php:475
 msgid "Automatic update is unavailable for this theme."
 msgstr "La mise à jour automatique n'est pas disponible pour ce thème."
 
-#: src/GitHub_Updater/Theme.php:417 src/GitHub_Updater/Theme.php:562
+#: src/GitHub_Updater/Theme.php:485 src/GitHub_Updater/Theme.php:630
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 "Voir les détails de la version %1$s %2$s ou %3$smettre à jour maintenant%4$s."
 
-#: src/GitHub_Updater/Theme.php:555
+#: src/GitHub_Updater/Theme.php:623
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Une nouvelle version de %s est disponible."
 
-#: src/GitHub_Updater/Theme.php:582
+#: src/GitHub_Updater/Theme.php:650
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La version actuelle est à jour. Essayez %sune autre version%s"
 
-#: src/GitHub_Updater/Theme.php:596
+#: src/GitHub_Updater/Theme.php:664
 msgid "Choose a Version"
 msgstr "Choisissez une version"
 
-#: src/GitHub_Updater/Theme.php:599
+#: src/GitHub_Updater/Theme.php:667
 msgid "Install"
 msgstr "Installer"
 
@@ -362,16 +372,6 @@ msgstr "Andy Fragen"
 #~ "Malheureusement, %1$s ne fonctionne pas sur les versions de PHP "
 #~ "antérieures à la v.%2$s. En savoir plus sur %3$sles possibilités de mise "
 #~ "à jour%4$s."
-
-#, fuzzy
-#~ msgid "Renaming %1$s to %2$s"
-#~ msgstr "Renommage de %s en %s"
-
-#~ msgid "Rename successful"
-#~ msgstr "Le renommage a réussi"
-
-#~ msgid "Unable to rename downloaded repository."
-#~ msgstr "Impossible de renommer le dépôt téléchargé."
 
 #, fuzzy
 #~ msgid ""

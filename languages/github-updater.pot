@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-09-09 19:25-0700\n"
+"POT-Creation-Date: 2015-09-21 16:49-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -103,6 +103,7 @@ msgid "Activate"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:446
+msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
@@ -132,16 +133,12 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:293
-msgid "GitHub Updater has blocked this request for 12 hours."
-msgstr ""
-
-#: src/GitHub_Updater/Plugin.php:339 src/GitHub_Updater/Theme.php:465
+#: src/GitHub_Updater/Plugin.php:309 src/GitHub_Updater/Theme.php:533
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:391
+#: src/GitHub_Updater/Plugin.php:361
 msgid "View details"
 msgstr ""
 
@@ -269,52 +266,65 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:310
+#, php-format
+msgid "Renaming %1$s to %2$s"
+msgstr ""
+
+#: src/GitHub_Updater/Theme.php:320
+msgid "Rename successful"
+msgstr ""
+
+#: src/GitHub_Updater/Theme.php:327
+msgid "Unable to rename downloaded repository."
+msgstr ""
+
+#: src/GitHub_Updater/Theme.php:433
 msgid "Theme is up-to-date!"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:370
+#: src/GitHub_Updater/Theme.php:438
 msgid "Rollback to:"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:388
+#: src/GitHub_Updater/Theme.php:456
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:396 src/GitHub_Updater/Theme.php:410
+#: src/GitHub_Updater/Theme.php:464 src/GitHub_Updater/Theme.php:478
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:403
+#: src/GitHub_Updater/Theme.php:471
 #, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:407
+#: src/GitHub_Updater/Theme.php:475
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:417 src/GitHub_Updater/Theme.php:562
+#: src/GitHub_Updater/Theme.php:485 src/GitHub_Updater/Theme.php:630
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:555
+#: src/GitHub_Updater/Theme.php:623
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:582
+#: src/GitHub_Updater/Theme.php:650
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:596
+#: src/GitHub_Updater/Theme.php:664
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:599
+#: src/GitHub_Updater/Theme.php:667
 msgid "Install"
 msgstr ""
 

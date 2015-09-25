@@ -443,7 +443,7 @@ class Install extends Base {
 				), network_admin_url( 'themes.php' ) );
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
 
-			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr__( 'Network Enable', 'github-updater' ) . '</a>';
+			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'github-updater' ) . '</a>';
 			unset( $install_actions['activate'] );
 		}
 		ksort( $install_actions );
