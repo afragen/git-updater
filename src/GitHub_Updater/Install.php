@@ -90,7 +90,7 @@ class Install extends Base {
 					$github_base     = 'https://api.github.com';
 					$headers['host'] = 'github.com';
 				} else {
-					$github_base = $headers['base_uri'];
+					$github_base = $headers['base_uri'] . '/api/v3';
 				}
 
 				self::$install['download_link'] = $github_base . '/repos/' . self::$install['github_updater_repo'] . '/zipball/' . self::$install['github_updater_branch'];
