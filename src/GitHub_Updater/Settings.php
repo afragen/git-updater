@@ -381,7 +381,7 @@ class Settings extends Base {
 			/*
 			 * Next if not a private repo.
 			 */
-			if ( ! $token->private ) {
+			if ( ! $token->private && ! parent::$options[ $token->repo ] ) {
 				continue;
 			}
 
