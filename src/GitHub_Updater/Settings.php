@@ -39,6 +39,7 @@ class Settings extends Base {
 	 * @var bool
 	 */
 	private static $github_private    = false;
+	private static $github_enterprise = false;
 	private static $bitbucket_private = false;
 	private static $gitlab            = false;
 	private static $gitlab_enterprise = false;
@@ -213,12 +214,23 @@ class Settings extends Base {
 
 		add_settings_field(
 			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
+			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
 			array( $this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'github_access_token',
 			array( 'id' => 'github_access_token' )
 		);
+
+		if ( self::$github_enterprise ) {
+			add_settings_field(
+				'github_enterprise_token',
+				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
+				array( $this, 'token_callback_text' ),
+				'github_updater_install_settings',
+				'github_access_token',
+				array( 'id' => 'github_enterprise_token' )
+			);
+		}
 
 		/*
 		 * Show section for private GitHub repositories.
@@ -353,6 +365,28 @@ class Settings extends Base {
 			$ghu_options_keys[ $token->repo ] = null;
 
 			/*
+			 * Set boolean for Enterprise headers.
+			 */
+			if ( $token->enterprise ) {
+				/*
+				 * Set boolean if GitHub Enterprise header found.
+				 */
+				if ( false !== strpos( $token->type, 'github' ) &&
+				     ! self::$github_enterprise
+				) {
+					self::$github_enterprise = true;
+				}
+				/*
+				 * Set boolean if GitLab CE/Enterprise header found.
+				 */
+				if ( false !== strpos( $token->type, 'gitlab' ) &&
+				     ! self::$gitlab_enterprise
+				) {
+					self::$gitlab_enterprise = true;
+				}
+			}
+
+			/*
 			 * Check to see if it's a private repo and set variables.
 			 */
 			if ( $token->private ) {
@@ -369,13 +403,6 @@ class Settings extends Base {
 			 */
 			if ( false !== strpos( $token->type, 'gitlab' ) && ! self::$gitlab ) {
 				self::$gitlab = true;
-			}
-
-			/*
-			 * Set boolean if GitLab CE/Enterprise header found.
-			 */
-			if ( $token->enterprise && ! self::$gitlab_enterprise ) {
-				self::$gitlab_enterprise = true;
 			}
 
 			/*
@@ -426,6 +453,9 @@ class Settings extends Base {
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['github_access_token'] );
+		if ( self::$github_enterprise ) {
+			unset( $ghu_unset_keys['github_enterprise_token'] );
+		}
 		unset( $ghu_unset_keys['branch_switch'] );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
@@ -525,7 +555,7 @@ class Settings extends Base {
 	 * Print the GitHub Personal Access Token text.
 	 */
 	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub Access Token to avoid API access limits.', 'github-updater' );
+		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
 	}
 
 	/**
