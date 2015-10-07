@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-09-21 16:52-0700\n"
-"PO-Revision-Date: 2015-09-21 16:52-0700\n"
+"PO-Revision-Date: 2015-10-07 16:51+0200\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_AT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 1.8.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -25,7 +25,7 @@ msgstr "Aktiviert als mu-Plugin"
 #: src/GitHub_Updater/Base.php:388
 #, php-format
 msgid "Rename successful using extended name to %1$s"
-msgstr ""
+msgstr "Umbenennen erfolgreich, der erweiterte Name %1$s wird nun verwendet"
 
 #: src/GitHub_Updater/Install.php:67
 msgid "A repository URI is required."
@@ -79,16 +79,15 @@ msgstr "Privates GitLab Token"
 
 #: src/GitHub_Updater/Install.php:320
 msgid "URI is case sensitive."
-msgstr ""
+msgstr "URI unterscheidet zwischen Groß- und Kleinschreibung."
 
 #: src/GitHub_Updater/Install.php:334
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Branchnamen angeben oder leer lassen für `master`"
 
 #: src/GitHub_Updater/Install.php:365
-#, fuzzy
 msgid "Check for private Bitbucket repositories."
-msgstr "Privates Bitbucket Repository"
+msgstr "Auswählen für private Bitbucket Repositories"
 
 #: src/GitHub_Updater/Install.php:379
 msgid "Enter GitHub Access Token for private GitHub repositories."
@@ -100,12 +99,12 @@ msgstr "Geben Sie Ihr GitLab Accesstoken für private GitLab Repositories ein."
 
 #: src/GitHub_Updater/Install.php:437
 msgid "Activate"
-msgstr ""
+msgstr "Aktivieren"
 
 #: src/GitHub_Updater/Install.php:446
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
-msgstr ""
+msgstr "Netzwerk/Multisite Aktivieren"
 
 #: src/GitHub_Updater/Messages.php:80
 #, php-format
@@ -154,7 +153,7 @@ msgstr "Einstellungen"
 
 #: src/GitHub_Updater/Settings.php:76 src/GitHub_Updater/Settings.php:459
 msgid "Remote Management"
-msgstr ""
+msgstr "Fernwartung/-management"
 
 #: src/GitHub_Updater/Settings.php:87 src/GitHub_Updater/Settings.php:95
 #: src/GitHub_Updater/Settings.php:190
@@ -172,9 +171,8 @@ msgid "Saved."
 msgstr "Gespeichert."
 
 #: src/GitHub_Updater/Settings.php:197
-#, fuzzy
 msgid "Enable Branch Switching"
-msgstr "Plugin Branch Wechsel aktivieren"
+msgstr "Wechsel des Pluginbranches Aktivieren"
 
 #: src/GitHub_Updater/Settings.php:209
 msgid "Personal GitHub Access Token"
@@ -223,12 +221,12 @@ msgstr "Theme:"
 #: src/GitHub_Updater/Settings.php:505
 #, php-format
 msgid "Extended Naming is %sactive%s."
-msgstr ""
+msgstr "Erweitertes Benennen ist %saktiv%s."
 
 #: src/GitHub_Updater/Settings.php:510
 #, php-format
 msgid "Extended Naming is %snot active%s."
-msgstr ""
+msgstr "Erweitertes Benennen ist %snicht aktiv%s."
 
 #: src/GitHub_Updater/Settings.php:512
 #, php-format
@@ -236,16 +234,19 @@ msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
 "with WP.org plugins."
 msgstr ""
+"Erweitertes Benennen benennt Pluginverzeichnisse %s um, um mögliche "
+"Konflikte mit WP.org Plugins zu vermeiden."
 
 #: src/GitHub_Updater/Settings.php:513
 #, php-format
 msgid "Activate Extended Naming by setting %s"
-msgstr ""
+msgstr "Erweitertes Benennen Aktivieren durch setzen von %s"
 
 #: src/GitHub_Updater/Settings.php:514
-#, fuzzy
 msgid "Check to enable branch switching from the Plugins or Themes page."
-msgstr "Auswählen um Plugin Branch Wechsel zu aktivieren auf der Plugin Seite."
+msgstr ""
+"Auswählen, um das Wechseln des Pluginbranches auf der Plugins oder Themes "
+"Seite zu aktivieren."
 
 #: src/GitHub_Updater/Settings.php:521
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
@@ -280,6 +281,8 @@ msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
 msgstr ""
+"Verwenden von Fernwartung/-managementdiensten kann eine höhere "
+"Seiteladezeiten zur Folge haben für `Admin`-Level Benutzer auf dem Dashboard"
 
 #: src/GitHub_Updater/Theme.php:310
 #, php-format
@@ -355,6 +358,9 @@ msgid ""
 "and themes. It also allows for remote installation of plugins or themes into "
 "WordPress."
 msgstr ""
+"Ein Plugin um Plugins welche auf GitHub, Bitbucket oder GitLab gehostet sind "
+"automatisch zu aktualisieren. Fernwartung/-management ist untersützt und "
+"erlaubt das Installieren von Plugins oder Themes in WordPress."
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
