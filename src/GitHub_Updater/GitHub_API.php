@@ -279,10 +279,23 @@ class GitHub_API extends API {
 			return $asset;
 		}
 
+		/*
+		 * Add personal access token to endpoint.
+		 */
+		if ( empty( $this->type->enterprise ) ) {
+			if ( ! empty( parent::$options['github_access_token'] ) ) {
+				$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+			}
+		} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $endpoint );
+		}
+
+		/*
+		 * Add repo specific access token to endpoint.
+		 */
 		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
+			$endpoint = remove_query_arg( 'access_token', $endpoint );
 			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
 		}
 
 		return $download_link_base . $endpoint;
