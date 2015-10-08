@@ -406,9 +406,9 @@ class Settings extends Base {
 			}
 
 			/*
-			 * Next if not a private or enterprise repo.
+			 * Next if not a private repo or token field not empty.
 			 */
-			if ( ! $token->private && ! $token->enterprise ) {
+			if ( ! $token->private && empty( parent::$options[ $token->repo ] ) ) {
 				continue;
 			}
 
