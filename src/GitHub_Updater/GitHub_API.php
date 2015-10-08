@@ -279,7 +279,7 @@ class GitHub_API extends API {
 			return $asset;
 		}
 
-		$endpoint = $this->_add_access_token( $this, $endpoint );
+		$endpoint = $this->_add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
 	}
@@ -292,7 +292,7 @@ class GitHub_API extends API {
 	 *
 	 * @return string
 	 */
-	private function _add_access_token( $git, $endpoint ) {
+	private function _add_access_token_endpoint( $git, $endpoint ) {
 		// Add GitHub.com access token.
 		if ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
@@ -325,8 +325,6 @@ class GitHub_API extends API {
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
 
-		$endpoint = $this->_add_access_token( $git, $endpoint );
-
 		/*
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitHub will use the Default branch.
@@ -334,6 +332,8 @@ class GitHub_API extends API {
 		if ( ! empty( $git->type->branch ) ) {
 			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
+
+		$endpoint = $this->_add_access_token_endpoint( $git, $endpoint );
 
 		/*
 		 * If using GitHub Enterprise header return this endpoint.
