@@ -235,12 +235,12 @@ class Settings extends Base {
 		/*
 		 * Show section for private GitHub repositories.
 		 */
-		if ( self::$github_private ) {
+		if ( self::$github_private || self::$github_enterprise ) {
 			add_settings_section(
-				'github_id',                                       // ID
-				esc_html__( 'GitHub Private Settings', 'github-updater' ), // Title
+				'github_id',
+				esc_html__( 'GitHub Private Settings', 'github-updater' ),
 				array( $this, 'print_section_github_info' ),
-				'github_updater_install_settings'                  // Page
+				'github_updater_install_settings'
 			);
 		}
 
