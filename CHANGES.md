@@ -1,3 +1,9 @@
+#### 5.2.0
+* fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
+* add setting for GitHub Enterprise personal access token
+* new `function _add_access_token()` for `class GitHub_API`
+* update `erusev/parsedown` to current release
+
 #### 5.1.2
 * add `upgrader_source_selection` filter back for correct updating of current, active theme.
 * fix [#293](https://github.com/afragen/github-updater/issues/293) and [#297](https://github.com/afragen/github-updater/issues/297)

@@ -132,6 +132,8 @@ GitHub Branch:    master
 
 Add the `GitHub Enterprise` header to the plugin or theme that is hosted on your GitHub self-hosted installation. The settings should be similar to `GitHub Enterprise: https://github.yourhost.com`.
 
+GitHub Enterprise **requires** authentication with either a personal access token or a repository-dependent access token.
+
 #### GitLab CE/Enterprise Support
 
 Add the `GitLab CE` or `GitLab Enterprise` header to the plugin or theme that is hosted on your GitLab self-hosted installation. The settings should be similar to `GitLab CE: https://gitlab.yourhost.com` or `GitLab Enterprise: https://gitlab.yourhost.com`.

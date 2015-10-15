@@ -102,6 +102,9 @@ class Install extends Base {
 					self::$install['download_link'] = $headers['uri'];
 				}
 
+				/*
+				 * Add access token if present.
+				 */
 				if ( ! empty( self::$install['github_access_token'] ) ) {
 					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
 					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
@@ -109,6 +112,8 @@ class Install extends Base {
 				           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
 				) {
 					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
+				} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
+					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], self::$install['download_link'] );
 				}
 			}
 

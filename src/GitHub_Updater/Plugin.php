@@ -170,6 +170,7 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
+				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
 			}
 			if ( isset( $all_plugins[ $plugin ]->id )  ) {

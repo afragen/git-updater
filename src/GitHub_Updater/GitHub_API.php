@@ -239,8 +239,8 @@ class GitHub_API extends API {
 		/*
 		 * Check if using GitHub Self-Hosted.
 		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$github_base = $this->type->enterprise;
+		if ( ! empty( $this->type->enterprise_api ) ) {
+			$github_base = $this->type->enterprise_api;
 		} else {
 			$github_base = 'https://api.github.com';
 		}
@@ -279,24 +279,40 @@ class GitHub_API extends API {
 			return $asset;
 		}
 
-		if ( ! empty( parent::$options[ $this->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $this->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) && empty( $this->type->enterprise ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
+		$endpoint = $this->_add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
 	}
 
 	/**
-	 * Add remote data to type object.
-	 * @access private
+	 * Add appropriate access token to endpoint.
+	 *
+	 * @param $git
+	 * @param $endpoint
+	 *
+	 * @return string
 	 */
-	private function _add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private      = $this->type->repo_meta->private;
+	private function _add_access_token_endpoint( $git, $endpoint ) {
+		// Add GitHub.com access token.
+		if ( ! empty( parent::$options['github_access_token'] ) ) {
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
+		}
+
+		// Add GitHub Enterprise access token.
+		if ( ! empty( $git->type->enterprise ) &&
+		     ! empty( parent::$options['github_enterprise_token'] )
+		) {
+			$endpoint = remove_query_arg( 'access_token', $endpoint );
+			$endpoint = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $endpoint );
+		}
+
+		// Add repo access token.
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = remove_query_arg( 'access_token', $endpoint );
+			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
+		}
+
+		return $endpoint;
 	}
 
 	/**
@@ -308,11 +324,6 @@ class GitHub_API extends API {
 	 * @return string $endpoint
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		} elseif ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
 
 		/*
 		 * If a branch has been given, only check that for the remote info.
@@ -322,14 +333,27 @@ class GitHub_API extends API {
 			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
 
+		$endpoint = $this->_add_access_token_endpoint( $git, $endpoint );
+
 		/*
-		 * If using GitHub Self-Hosted header return this endpoint.
+		 * If using GitHub Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
-			return $git->type->enterprise_api . remove_query_arg( 'access_token', $endpoint );
+			return $git->type->enterprise_api . $endpoint;
 		}
 
 		return $endpoint;
+	}
+
+	/**
+	 * Add remote data to type object.
+	 * @access private
+	 */
+	private function _add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta->pushed_at;
+		$this->type->num_ratings  = $this->type->repo_meta->watchers;
+		$this->type->private      = $this->type->repo_meta->private;
 	}
 
 	/**
