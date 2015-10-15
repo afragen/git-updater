@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-10-14 18:47-0700\n"
-"PO-Revision-Date: 2015-10-14 18:47-0700\n"
+"PO-Revision-Date: 2015-10-15 08:42+0100\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -180,14 +180,12 @@ msgid "Personal GitHub Access Token"
 msgstr "Token pessoal de acesso do GitHub"
 
 #: src/GitHub_Updater/Settings.php:217
-#, fuzzy
 msgid "GitHub.com Access Token"
-msgstr "Token de acesso do GitHub"
+msgstr "Token de acesso do GitHub.com"
 
 #: src/GitHub_Updater/Settings.php:227
-#, fuzzy
 msgid "GitHub Enterprise Access Token"
-msgstr "Token de acesso do GitHub"
+msgstr "Token de acesso do GitHub Empresarial"
 
 #: src/GitHub_Updater/Settings.php:241
 msgid "GitHub Private Settings"
@@ -266,13 +264,12 @@ msgstr ""
 "públicos."
 
 #: src/GitHub_Updater/Settings.php:558
-#, fuzzy
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
 "API access limits."
 msgstr ""
-"Introduza o seu Token pessoal de acesso do GitHub para evitar o limite de "
-"acessos da API."
+"Introduza o seu Token pessoal de acesso do GitHub.com ou do GitHub "
+"Empresarial para evitar o limite de acessos da API."
 
 #: src/GitHub_Updater/Settings.php:565
 msgid ""
@@ -378,41 +375,3 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
-
-#~ msgid "GitHub Updater has blocked this request for 12 hours."
-#~ msgstr "O GitHub Updater bloqueou este pedido por 12 horas."
-
-#~ msgid "this plugin"
-#~ msgstr "este plugin"
-
-#~ msgid "Unfortunately, %1$s can not run on PHP versions older than %2$s."
-#~ msgstr "Infelizmente, o %1$s não corre em versões do PHP anteriores a %2$s."
-
-#~ msgid "Read more information about %show you can update%s."
-#~ msgstr "Leia mais informações sobre %scomo pode actualizar%s."
-
-#~ msgid "%1$s recommends a PHP version greater than %2$s."
-#~ msgstr "%1$s recomenda uma versão de PHP superior a %2$s."
-
-#~ msgid "Enable Plugin Branch Switching"
-#~ msgstr "Permitir mudar ramo do plugin"
-
-#~ msgid "Check to enable branch switching from the Plugins page."
-#~ msgstr ""
-#~ "Seleccione a opção para permitir alternar entre ramos na página de "
-#~ "plugins."
-
-#~ msgid ""
-#~ "A plugin to automatically update GitHub, Bitbucket or GitLab hosted "
-#~ "plugins and themes. It also allows for remote installation of plugins or "
-#~ "themes into WordPress. Plugin class based upon <a href=\"https://github."
-#~ "com/codepress/github-plugin-updater\">codepress/github-plugin-updater</"
-#~ "a>. Theme class based upon <a href=\"https://github.com/WordPress-Phoenix/"
-#~ "whitelabel-framework\">Whitelabel Framework</a> modifications."
-#~ msgstr ""
-#~ "Um plugin para actualizar automaticamente plugins e temas alojados no "
-#~ "GitHub, Bitbucket ou GitLab. Permite a instalação remota de plugins ou "
-#~ "temas no WordPress. Classe de plugin baseada em <a href=\"https://github."
-#~ "com/codepress/github-plugin-updater\">codepress/github-plugin-updater</"
-#~ "a>. Classe de tema baseada em modificações de <a href=\"https://github."
-#~ "com/WordPress-Phoenix/whitelabel-framework\">Whitelabel Framework</a>."
