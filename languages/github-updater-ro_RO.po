@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-09-21 16:51-0700\n"
-"PO-Revision-Date: 2015-09-21 16:51-0700\n"
+"POT-Creation-Date: 2015-10-14 18:46-0700\n"
+"PO-Revision-Date: 2015-10-14 18:46-0700\n"
 "Last-Translator: \n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 1.8.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-WPHeader: github-updater.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -34,78 +34,78 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr "URL pentru repozitoriu obligatoriu"
 
-#: src/GitHub_Updater/Install.php:218 src/GitHub_Updater/Settings.php:74
+#: src/GitHub_Updater/Install.php:223 src/GitHub_Updater/Settings.php:75
 msgid "Install Plugin"
 msgstr "Instaleaza Modul"
 
-#: src/GitHub_Updater/Install.php:221 src/GitHub_Updater/Settings.php:75
+#: src/GitHub_Updater/Install.php:226 src/GitHub_Updater/Settings.php:76
 msgid "Install Theme"
 msgstr "Instaleaza Tema"
 
-#: src/GitHub_Updater/Install.php:239
+#: src/GitHub_Updater/Install.php:244
 msgid "Plugin"
 msgstr "Modul"
 
-#: src/GitHub_Updater/Install.php:242
+#: src/GitHub_Updater/Install.php:247
 msgid "Theme"
 msgstr "Tema"
 
-#: src/GitHub_Updater/Install.php:253
+#: src/GitHub_Updater/Install.php:258
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "Instalare Github Updater %s"
 
-#: src/GitHub_Updater/Install.php:260
+#: src/GitHub_Updater/Install.php:265
 #, php-format
 msgid "%s URI"
 msgstr "%s URI"
 
-#: src/GitHub_Updater/Install.php:268
+#: src/GitHub_Updater/Install.php:273
 msgid "Repository Branch"
 msgstr "Ramura repozitoriu"
 
-#: src/GitHub_Updater/Install.php:276
+#: src/GitHub_Updater/Install.php:281
 msgid "Remote Repository Host"
 msgstr "Gazda repozitoriu distant"
 
-#: src/GitHub_Updater/Install.php:284
+#: src/GitHub_Updater/Install.php:289
 msgid "Private Bitbucket Repository"
 msgstr "Repozitoriu Bitbucket Privat"
 
-#: src/GitHub_Updater/Install.php:292 src/GitHub_Updater/Settings.php:216
+#: src/GitHub_Updater/Install.php:297
 msgid "GitHub Access Token"
 msgstr "Jeton de Acces Github"
 
-#: src/GitHub_Updater/Install.php:303
+#: src/GitHub_Updater/Install.php:308
 msgid "GitLab Private Token"
 msgstr "Jeton Privat Github"
 
-#: src/GitHub_Updater/Install.php:320
+#: src/GitHub_Updater/Install.php:325
 msgid "URI is case sensitive."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:334
+#: src/GitHub_Updater/Install.php:339
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Introdu numele ramurei sau lasa gol pentru 'master'"
 
-#: src/GitHub_Updater/Install.php:365
+#: src/GitHub_Updater/Install.php:370
 #, fuzzy
 msgid "Check for private Bitbucket repositories."
 msgstr "Repozitoriu Bitbucket Privat"
 
-#: src/GitHub_Updater/Install.php:379
+#: src/GitHub_Updater/Install.php:384
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Introdu Jeton de Acces GitHub pentru repozitoriile GitHub private."
 
-#: src/GitHub_Updater/Install.php:393
+#: src/GitHub_Updater/Install.php:398
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Introdu Jeton de Acces GitLab pentru repozitoriile GitLab private."
 
-#: src/GitHub_Updater/Install.php:437
+#: src/GitHub_Updater/Install.php:442
 msgid "Activate"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:446
+#: src/GitHub_Updater/Install.php:451
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
@@ -140,139 +140,152 @@ msgstr ""
 "Trebuie sa setezi un Jeton Privat pentru GitLab.com, GitLab CE sau GitHub "
 "Enterprise."
 
-#: src/GitHub_Updater/Plugin.php:309 src/GitHub_Updater/Theme.php:533
+#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:533
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "Ramura curenta este `%1$s`, incerca %2$salta ramura%3$s."
 
-#: src/GitHub_Updater/Plugin.php:361
+#: src/GitHub_Updater/Plugin.php:362
 msgid "View details"
 msgstr "Vezi detalii"
 
-#: src/GitHub_Updater/Settings.php:73 src/GitHub_Updater/Settings.php:642
+#: src/GitHub_Updater/Settings.php:74 src/GitHub_Updater/Settings.php:672
 msgid "Settings"
 msgstr "Setari"
 
-#: src/GitHub_Updater/Settings.php:76 src/GitHub_Updater/Settings.php:459
+#: src/GitHub_Updater/Settings.php:77 src/GitHub_Updater/Settings.php:489
 msgid "Remote Management"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:87 src/GitHub_Updater/Settings.php:95
-#: src/GitHub_Updater/Settings.php:190
+#: src/GitHub_Updater/Settings.php:88 src/GitHub_Updater/Settings.php:96
+#: src/GitHub_Updater/Settings.php:191
 msgid "GitHub Updater Settings"
 msgstr "Setari GitHub Updater"
 
 #. Plugin Name of the plugin/theme
-#: src/GitHub_Updater/Settings.php:88 src/GitHub_Updater/Settings.php:96
-#: src/GitHub_Updater/Settings.php:133
+#: src/GitHub_Updater/Settings.php:89 src/GitHub_Updater/Settings.php:97
+#: src/GitHub_Updater/Settings.php:134
 msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
-#: src/GitHub_Updater/Settings.php:137
+#: src/GitHub_Updater/Settings.php:138
 msgid "Saved."
 msgstr "Salvat."
 
-#: src/GitHub_Updater/Settings.php:197
+#: src/GitHub_Updater/Settings.php:198
 #, fuzzy
 msgid "Enable Branch Switching"
 msgstr "Actieaza schimbarea ramurelor pentru Module"
 
-#: src/GitHub_Updater/Settings.php:209
+#: src/GitHub_Updater/Settings.php:210
 msgid "Personal GitHub Access Token"
 msgstr "Jeton Personal de Acces GitHub"
 
-#: src/GitHub_Updater/Settings.php:229
+#: src/GitHub_Updater/Settings.php:217
+#, fuzzy
+msgid "GitHub.com Access Token"
+msgstr "Jeton de Acces Github"
+
+#: src/GitHub_Updater/Settings.php:227
+#, fuzzy
+msgid "GitHub Enterprise Access Token"
+msgstr "Jeton de Acces Github"
+
+#: src/GitHub_Updater/Settings.php:241
 msgid "GitHub Private Settings"
 msgstr "Setari Private GitHub"
 
-#: src/GitHub_Updater/Settings.php:242
+#: src/GitHub_Updater/Settings.php:254
 msgid "GitLab Private Settings"
 msgstr "Setari Private GitLab"
 
-#: src/GitHub_Updater/Settings.php:251
+#: src/GitHub_Updater/Settings.php:263
 msgid "GitLab.com Private Token"
 msgstr "Jetor Privat GitLab.com"
 
-#: src/GitHub_Updater/Settings.php:262
+#: src/GitHub_Updater/Settings.php:274
 msgid "GitLab CE or GitLab Enterprise Private Token"
 msgstr "Jeton Privat GitLab CE sau GltLab Enterprise"
 
-#: src/GitHub_Updater/Settings.php:275
+#: src/GitHub_Updater/Settings.php:287
 msgid "Bitbucket Private Settings"
 msgstr "Setari Private Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:282
+#: src/GitHub_Updater/Settings.php:294
 msgid "Bitbucket Username"
 msgstr "Utilizator Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:291
+#: src/GitHub_Updater/Settings.php:303
 msgid "Bitbucket Password"
 msgstr "Parola Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:304
+#: src/GitHub_Updater/Settings.php:316
 msgid "Bitbucket Private Repositories"
 msgstr "Repozitorii Private Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:316
+#: src/GitHub_Updater/Settings.php:328
 msgid "No private repositories are installed."
 msgstr "Nici un repozitoriu privat instalat."
 
-#: src/GitHub_Updater/Settings.php:389
+#: src/GitHub_Updater/Settings.php:416
 msgid "Theme:"
 msgstr "Teme:"
 
-#: src/GitHub_Updater/Settings.php:505
+#: src/GitHub_Updater/Settings.php:535
 #, php-format
 msgid "Extended Naming is %sactive%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:510
+#: src/GitHub_Updater/Settings.php:540
 #, php-format
 msgid "Extended Naming is %snot active%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:512
+#: src/GitHub_Updater/Settings.php:542
 #, php-format
 msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
 "with WP.org plugins."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:513
+#: src/GitHub_Updater/Settings.php:543
 #, php-format
 msgid "Activate Extended Naming by setting %s"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:514
+#: src/GitHub_Updater/Settings.php:544
 #, fuzzy
 msgid "Check to enable branch switching from the Plugins or Themes page."
 msgstr " Bifeaza pentru a activa schimbarea ramurelor de pe pagina Modulelor."
 
-#: src/GitHub_Updater/Settings.php:521
+#: src/GitHub_Updater/Settings.php:551
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Introdu Jetonul de Acces GitHub. Lasa gol pentru repozitorii publice."
 
-#: src/GitHub_Updater/Settings.php:528
-msgid "Enter your personal GitHub Access Token to avoid API access limits."
+#: src/GitHub_Updater/Settings.php:558
+#, fuzzy
+msgid ""
+"Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
+"API access limits."
 msgstr ""
 "Introdu Jetonul Personal de Acces GitHub pentru a evita limitele de acces "
 "API."
 
-#: src/GitHub_Updater/Settings.php:535
+#: src/GitHub_Updater/Settings.php:565
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr "Bifeaza daca repozitoriu privat. Lasa nebifat pentru cele publice."
 
-#: src/GitHub_Updater/Settings.php:542
+#: src/GitHub_Updater/Settings.php:572
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Introdu utilizatorul si parola pentru Bitbuchet"
 
-#: src/GitHub_Updater/Settings.php:549
+#: src/GitHub_Updater/Settings.php:579
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 "Introdu Jetonul Personal pentru GitLab.com, GitLab CE sau GitLab Enterprise"
 
-#: src/GitHub_Updater/Settings.php:556
+#: src/GitHub_Updater/Settings.php:586
 msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
