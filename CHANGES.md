@@ -1,3 +1,6 @@
+#### 5.2.1
+* fix parsing of `readme.txt` for donate link
+
 #### 5.2.0
 * fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
 * add setting for GitHub Enterprise personal access token
