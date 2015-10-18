@@ -354,6 +354,7 @@ class Theme extends Base {
 				$response->slug         = $theme->repo;
 				$response->name         = $theme->name;
 				$response->homepage     = $theme->uri;
+				$response->donate_link  = $theme->donate_link;
 				$response->version      = $theme->remote_version;
 				$response->sections     = $theme->sections;
 				$response->description  = implode( "\n", $theme->sections );

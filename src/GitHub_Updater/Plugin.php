@@ -419,12 +419,12 @@ class Plugin extends Base {
 				$response->name          = $plugin->name;
 				$response->author        = $plugin->author;
 				$response->homepage      = $plugin->uri;
+				$response->donate_link   = $plugin->donate_link;
 				$response->version       = $plugin->remote_version;
 				$response->sections      = $plugin->sections;
 				$response->requires      = $plugin->requires;
 				$response->tested        = $plugin->tested;
 				$response->downloaded    = $plugin->downloaded;
-				$response->donate_link   = $plugin->donate;
 				$response->last_updated  = $plugin->last_updated;
 				$response->download_link = $plugin->download_link;
 				foreach ( $plugin->contributors as $contributor ) {

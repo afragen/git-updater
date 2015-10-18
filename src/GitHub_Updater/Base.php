@@ -307,7 +307,7 @@ class Base {
 		$this->$type->branches              = array();
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
-		$this->$type->donate                = null;
+		$this->$type->donate_link           = null;
 		$this->$type->contributors          = array();
 		$this->$type->downloaded            = 0;
 		$this->$type->last_updated          = null;
@@ -782,7 +782,7 @@ class Base {
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
 		$this->type->tested       = $response['tested_up_to'];
 		$this->type->requires     = $response['requires_at_least'];
-		$this->type->donate       = $response['donate_link'];
+		$this->type->donate_link  = $response['donate_link'];
 		$this->type->contributors = $response['contributors'];
 
 		return true;
