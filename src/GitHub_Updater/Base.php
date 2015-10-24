@@ -615,8 +615,8 @@ class Base {
 	 * @return bool
 	 */
 	protected function set_transient( $id, $response ) {
-		$repo             = isset( $this->type ) ? $this->type->repo : 'ghu';
-		$transient        = 'ghu-' . md5( $repo );
+		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
+		$transient             = 'ghu-' . md5( $repo );
 		$this->response[ $id ] = $response;
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
