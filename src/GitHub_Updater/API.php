@@ -24,6 +24,12 @@ if ( ! defined( 'WPINC' ) ) {
  */
 abstract class API extends Base {
 
+	/**
+	 * Variable to hold all repository remote info.
+	 * @var array
+	 */
+	protected $response = array();
+
 	/*
 	 * The following functions must be in any repository API.
 	 */
