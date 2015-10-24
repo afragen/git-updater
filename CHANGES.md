@@ -1,5 +1,6 @@
-#### 5.2.1
+#### 5.3.0
 * fix parsing of `readme.txt` for donate link
+* refactor transient storage resulting in significantly few database calls, more performant.
 
 #### 5.2.0
 * fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
