@@ -646,14 +646,19 @@ class Settings extends Base {
 			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 			update_site_option( 'github_updater_remote_management', $options );
 		}
-		wp_redirect( add_query_arg(
+
+		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
+		parse_str( $query, $arr );
+
+		$location = add_query_arg(
 			array(
 				'page'    => 'github-updater',
 				'updated' => 'true',
-				'tab'     => $_GET['tab'],
+				'tab'     => $arr['tab'],
 			),
 			network_admin_url( 'settings.php' )
-		) );
+		);
+		wp_redirect( $location );
 		exit;
 	}
 
