@@ -67,6 +67,7 @@ Then go to your Plugins screen and click __Activate__.
 1. Choose a method from above for installation.
 1. **DO NOT** activate!
 1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`.
+1. You should use full filepaths when creating your symlink.
 
 #### in Linux
 ```
