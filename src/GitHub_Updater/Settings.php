@@ -44,6 +44,10 @@ class Settings extends Base {
 	private static $gitlab            = false;
 	private static $gitlab_enterprise = false;
 
+	/**
+	 * Supported remote management services.
+	 * @var array
+	 */
 	protected static $remote_management = array(
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
@@ -503,10 +507,13 @@ class Settings extends Base {
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
+			$options = array();
 			foreach ( self::$remote_management as $key => $value ) {
 				$options[ $key ] = null;
 			}
-			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			if ( isset( $_POST['github_updater_remote_management'] ) ) {
+				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 	}
@@ -616,12 +623,18 @@ class Settings extends Base {
 
 	/**
 	 * Get the settings option array and print one of its values.
+	 * For remote management settings.
 	 *
 	 * @param $args
 	 *
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
+		if ( empty( parent::$options_remote ) ) {
+			foreach ( self::$remote_management as $key => $value ) {
+				parent::$options_remote[ $key ] = null;
+			}
+		}
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
@@ -642,8 +655,13 @@ class Settings extends Base {
 			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		}
 		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array( 'ithemes_sync' => null, 'infinitewp' => null, 'managewp' => null, 'mainwp' => null );
-			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			$options = array();
+			foreach ( self::$remote_management as $key => $value ) {
+				$options[ $key ] = null;
+			}
+			if ( isset( $_POST['github_updater_remote_management'] ) ) {
+				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
