@@ -649,6 +649,9 @@ class Settings extends Base {
 
 		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
 		parse_str( $query, $arr );
+		if ( empty( $arr['tab'] ) ) {
+			$arr['tab'] = 'github_updater_settings';
+		}
 
 		$location = add_query_arg(
 			array(
