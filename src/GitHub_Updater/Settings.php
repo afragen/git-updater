@@ -508,7 +508,7 @@ class Settings extends Base {
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
 			$options = array();
-			foreach ( self::$remote_management as $key => $value ) {
+			foreach ( array_keys( self::$remote_management ) as $key ) {
 				$options[ $key ] = null;
 			}
 			if ( isset( $_POST['github_updater_remote_management'] ) ) {
@@ -527,7 +527,7 @@ class Settings extends Base {
 	 */
 	public static function sanitize( $input ) {
 		$new_input = array();
-		foreach ( (array) $input as $id => $value ) {
+		foreach ( array_keys( (array) $input ) as $id ) {
 			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
@@ -631,7 +631,7 @@ class Settings extends Base {
 	 */
 	public function token_callback_checkbox_remote( $args ) {
 		if ( empty( parent::$options_remote ) ) {
-			foreach ( self::$remote_management as $key => $value ) {
+			foreach ( array_keys( self::$remote_management ) as $key ) {
 				parent::$options_remote[ $key ] = null;
 			}
 		}
@@ -656,7 +656,7 @@ class Settings extends Base {
 		}
 		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
 			$options = array();
-			foreach ( self::$remote_management as $key => $value ) {
+			foreach ( array_keys( self::$remote_management ) as $key ) {
 				$options[ $key ] = null;
 			}
 			if ( isset( $_POST['github_updater_remote_management'] ) ) {
