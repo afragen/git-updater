@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-10-14 18:48-0700\n"
-"PO-Revision-Date: 2015-10-14 18:48-0700\n"
+"POT-Creation-Date: 2015-11-02 18:23-0800\n"
+"PO-Revision-Date: 2015-11-02 18:23-0800\n"
 "Last-Translator: esoj <yo@josemiguel.org>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.5\n"
+"X-Generator: Poedit 1.8.6\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
@@ -31,11 +31,11 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr "Se requiere una URI del repositorio."
 
-#: src/GitHub_Updater/Install.php:223 src/GitHub_Updater/Settings.php:75
+#: src/GitHub_Updater/Install.php:223 src/GitHub_Updater/Settings.php:79
 msgid "Install Plugin"
 msgstr "Instalar Plugin"
 
-#: src/GitHub_Updater/Install.php:226 src/GitHub_Updater/Settings.php:76
+#: src/GitHub_Updater/Install.php:226 src/GitHub_Updater/Settings.php:80
 msgid "Install Theme"
 msgstr "Instalar tema"
 
@@ -135,7 +135,7 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:533
+#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:534
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "La rama actual es `%1$s`, intenta %2$sanother branch%3$s."
@@ -144,126 +144,126 @@ msgstr "La rama actual es `%1$s`, intenta %2$sanother branch%3$s."
 msgid "View details"
 msgstr "Ver detalles"
 
-#: src/GitHub_Updater/Settings.php:74 src/GitHub_Updater/Settings.php:672
+#: src/GitHub_Updater/Settings.php:78 src/GitHub_Updater/Settings.php:698
 msgid "Settings"
 msgstr "Opciones"
 
-#: src/GitHub_Updater/Settings.php:77 src/GitHub_Updater/Settings.php:489
+#: src/GitHub_Updater/Settings.php:81 src/GitHub_Updater/Settings.php:493
 msgid "Remote Management"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:88 src/GitHub_Updater/Settings.php:96
-#: src/GitHub_Updater/Settings.php:191
+#: src/GitHub_Updater/Settings.php:92 src/GitHub_Updater/Settings.php:100
+#: src/GitHub_Updater/Settings.php:195
 msgid "GitHub Updater Settings"
 msgstr "Opciones de GitHub Updater"
 
 #. Plugin Name of the plugin/theme
-#: src/GitHub_Updater/Settings.php:89 src/GitHub_Updater/Settings.php:97
-#: src/GitHub_Updater/Settings.php:134
+#: src/GitHub_Updater/Settings.php:93 src/GitHub_Updater/Settings.php:101
+#: src/GitHub_Updater/Settings.php:138
 #, fuzzy
 msgid "GitHub Updater"
 msgstr "%s no se pudo comprobar. Código del error de GitHub Updater:"
 
-#: src/GitHub_Updater/Settings.php:138
+#: src/GitHub_Updater/Settings.php:142
 msgid "Saved."
 msgstr "Guardado."
 
-#: src/GitHub_Updater/Settings.php:198
+#: src/GitHub_Updater/Settings.php:202
 #, fuzzy
 msgid "Enable Branch Switching"
 msgstr "Activar el cambio de rama en los plugins"
 
-#: src/GitHub_Updater/Settings.php:210
+#: src/GitHub_Updater/Settings.php:214
 msgid "Personal GitHub Access Token"
 msgstr "Token de acceso personal de GitHub"
 
-#: src/GitHub_Updater/Settings.php:217
+#: src/GitHub_Updater/Settings.php:221
 #, fuzzy
 msgid "GitHub.com Access Token"
 msgstr "GitHub Access Token"
 
-#: src/GitHub_Updater/Settings.php:227
+#: src/GitHub_Updater/Settings.php:231
 #, fuzzy
 msgid "GitHub Enterprise Access Token"
 msgstr "GitHub Access Token"
 
-#: src/GitHub_Updater/Settings.php:241
+#: src/GitHub_Updater/Settings.php:245
 msgid "GitHub Private Settings"
 msgstr "Opciones privadas de GitHub"
 
-#: src/GitHub_Updater/Settings.php:254
+#: src/GitHub_Updater/Settings.php:258
 #, fuzzy
 msgid "GitLab Private Settings"
 msgstr "Opciones privadas de GitHub"
 
-#: src/GitHub_Updater/Settings.php:263
+#: src/GitHub_Updater/Settings.php:267
 #, fuzzy
 msgid "GitLab.com Private Token"
 msgstr "Opciones privadas de GitHub"
 
-#: src/GitHub_Updater/Settings.php:274
+#: src/GitHub_Updater/Settings.php:278
 msgid "GitLab CE or GitLab Enterprise Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:287
+#: src/GitHub_Updater/Settings.php:291
 msgid "Bitbucket Private Settings"
 msgstr "Opciones privadas de Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:294
+#: src/GitHub_Updater/Settings.php:298
 msgid "Bitbucket Username"
 msgstr "Nombre de usuario de Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:303
+#: src/GitHub_Updater/Settings.php:307
 msgid "Bitbucket Password"
 msgstr "Contraseña de Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:316
+#: src/GitHub_Updater/Settings.php:320
 msgid "Bitbucket Private Repositories"
 msgstr "Repositorios privados de Bitbucket"
 
-#: src/GitHub_Updater/Settings.php:328
+#: src/GitHub_Updater/Settings.php:332
 msgid "No private repositories are installed."
 msgstr "No se han instalado repositorios privados."
 
-#: src/GitHub_Updater/Settings.php:416
+#: src/GitHub_Updater/Settings.php:420
 msgid "Theme:"
 msgstr "Tema:"
 
-#: src/GitHub_Updater/Settings.php:535
+#: src/GitHub_Updater/Settings.php:542
 #, php-format
 msgid "Extended Naming is %sactive%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:540
+#: src/GitHub_Updater/Settings.php:547
 #, php-format
 msgid "Extended Naming is %snot active%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:542
+#: src/GitHub_Updater/Settings.php:549
 #, php-format
 msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
 "with WP.org plugins."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:543
+#: src/GitHub_Updater/Settings.php:550
 #, php-format
 msgid "Activate Extended Naming by setting %s"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:544
+#: src/GitHub_Updater/Settings.php:551
 #, fuzzy
 msgid "Check to enable branch switching from the Plugins or Themes page."
 msgstr ""
 "Activar para permitir el cambio rama desde la página de opciones del Plugin."
 
-#: src/GitHub_Updater/Settings.php:551
+#: src/GitHub_Updater/Settings.php:558
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Escriba su Token de acceso de GitHub. Dejar en blanco para los repositorios "
 "públicos."
 
-#: src/GitHub_Updater/Settings.php:558
+#: src/GitHub_Updater/Settings.php:565
 #, fuzzy
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
@@ -272,22 +272,22 @@ msgstr ""
 "Escriba su Token de acceso personal de GitHub para evitar los límites de "
 "acceso a la API."
 
-#: src/GitHub_Updater/Settings.php:565
+#: src/GitHub_Updater/Settings.php:572
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Marque la casilla si es un repositorio privado. Deja sin marcar para "
 "repositorios públicos."
 
-#: src/GitHub_Updater/Settings.php:572
+#: src/GitHub_Updater/Settings.php:579
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Introduzca su nombre de usuario y contraseña de Bitbucket."
 
-#: src/GitHub_Updater/Settings.php:579
+#: src/GitHub_Updater/Settings.php:586
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:586
+#: src/GitHub_Updater/Settings.php:593
 msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
@@ -306,52 +306,52 @@ msgstr "Renombrado satisfactoriamente"
 msgid "Unable to rename downloaded repository."
 msgstr "No se ha podido renombrar el repositorio descargado."
 
-#: src/GitHub_Updater/Theme.php:433
+#: src/GitHub_Updater/Theme.php:434
 msgid "Theme is up-to-date!"
 msgstr "El tema está actualizado!"
 
-#: src/GitHub_Updater/Theme.php:438
+#: src/GitHub_Updater/Theme.php:439
 msgid "Rollback to:"
 msgstr "Retroceder a:"
 
-#: src/GitHub_Updater/Theme.php:456
+#: src/GitHub_Updater/Theme.php:457
 msgid "No previous tags to rollback to."
 msgstr "No hay etiquetas anteriores donde revertir."
 
-#: src/GitHub_Updater/Theme.php:464 src/GitHub_Updater/Theme.php:478
+#: src/GitHub_Updater/Theme.php:465 src/GitHub_Updater/Theme.php:479
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater muestra una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:471
+#: src/GitHub_Updater/Theme.php:472
 #, php-format
 msgid "View version %s details."
 msgstr "Ver detalles de la versión de %s"
 
-#: src/GitHub_Updater/Theme.php:475
+#: src/GitHub_Updater/Theme.php:476
 msgid "Automatic update is unavailable for this theme."
 msgstr "Este tema no permite actualizaciones automáticas."
 
-#: src/GitHub_Updater/Theme.php:485 src/GitHub_Updater/Theme.php:630
+#: src/GitHub_Updater/Theme.php:486 src/GitHub_Updater/Theme.php:631
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Ver %1$s details%2$s de la versión o %3$sactualiza ahora%4$s."
 
-#: src/GitHub_Updater/Theme.php:623
+#: src/GitHub_Updater/Theme.php:624
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Existe una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:650
+#: src/GitHub_Updater/Theme.php:651
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La versión actual está actualizada. Intenta con %sanother version%s"
 
-#: src/GitHub_Updater/Theme.php:664
+#: src/GitHub_Updater/Theme.php:665
 msgid "Choose a Version"
 msgstr "Elige una versión"
 
-#: src/GitHub_Updater/Theme.php:667
+#: src/GitHub_Updater/Theme.php:668
 msgid "Install"
 msgstr "Instalar"
 
