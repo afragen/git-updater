@@ -152,6 +152,14 @@ class Base {
 			$force_meta_update = true;
 		}
 
+		//for ajax plugin updating
+		if ( 'admin-ajax.php' === $pagenow &&
+		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
+		) {
+			$force_meta_update = true;
+			add_filter( 'wp_ajax_update_plugin_result', array( $this, 'wp_ajax_update_plugin_result' ), 10, 1 );
+		}
+
 		if ( current_user_can( 'update_plugins' ) ) {
 			Plugin::$object = Plugin::instance();
 			if ( $force_meta_update ) {
@@ -225,6 +233,14 @@ class Base {
 		}
 	}
 
+	/**
+	 * Return updated $result for shiny updates.
+	 *
+	 * @return bool
+	 */
+	public function wp_ajax_update_plugin_result() {
+		return isset( $_POST['ghu_result'] ) ? $_POST['ghu_result'] : false;
+	}
 	/**
 	 * Add extra headers via filter hooks.
 	 */
@@ -392,6 +408,7 @@ class Base {
 
 		$wp_filesystem->move( $result['destination'], $proper_destination );
 		$result['destination']       = $proper_destination;
+		$result['destination_name']  = $slug;
 		$result['clear_destination'] = true;
 
 		/*
@@ -399,6 +416,13 @@ class Base {
 		 */
 		if ( $is_plugin_active ) {
 			activate_plugin( WP_PLUGIN_DIR . '/' . $extra_hook['plugin'], null, $is_network_active );
+		}
+
+		/*
+		 * Add $result to $_POST for use in shiny updates.
+		 */
+		if ( isset( $_POST['plugin'] ) ) {
+			$_POST['ghu_result'][ $_POST['plugin'] ] = $result;
 		}
 
 		return $result;

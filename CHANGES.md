@@ -3,6 +3,7 @@
 * refactor transient storage resulting in significantly few database calls, more performant.
 * move `{get|set}_transient` functions to `abstract class API`
 * fix settings page saving errors.
+* fix for shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
 
 #### 5.2.0
 * fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
