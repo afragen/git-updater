@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-11-02 18:23-0800\n"
-"PO-Revision-Date: 2015-11-02 18:23-0800\n"
+"POT-Creation-Date: 2015-11-08 09:54-0800\n"
+"PO-Revision-Date: 2015-11-08 09:54-0800\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_AT\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Aktiviert als mu-Plugin"
 
-#: src/GitHub_Updater/Base.php:388
+#: src/GitHub_Updater/Base.php:404
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr "Umbenennen erfolgreich, der erweiterte Name %1$s wird nun verwendet"
