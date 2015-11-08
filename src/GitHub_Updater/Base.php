@@ -152,7 +152,7 @@ class Base {
 			$force_meta_update = true;
 		}
 
-		//for ajax plugin updating
+		// Added for ajax plugin updating.
 		if ( 'admin-ajax.php' === $pagenow &&
 		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
 		) {
@@ -236,7 +236,7 @@ class Base {
 	/**
 	 * Return updated $result for shiny updates.
 	 *
-	 * @return bool
+	 * @return array|bool
 	 */
 	public function wp_ajax_update_plugin_result() {
 		return isset( $_POST['ghu_result'] ) ? $_POST['ghu_result'] : false;
