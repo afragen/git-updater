@@ -157,7 +157,7 @@ class Base {
 		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
 		) {
 			$force_meta_update = true;
-			add_filter( 'wp_ajax_update_plugin_result', array( $this, 'wp_ajax_update_plugin_result' ), 10, 1 );
+			add_filter( 'wp_ajax_update_plugin_result', array( &$this, 'wp_ajax_update_plugin_result' ), 10, 1 );
 		}
 
 		if ( current_user_can( 'update_plugins' ) ) {
@@ -241,6 +241,7 @@ class Base {
 	public function wp_ajax_update_plugin_result() {
 		return isset( $_POST['ghu_result'] ) ? $_POST['ghu_result'] : false;
 	}
+
 	/**
 	 * Add extra headers via filter hooks.
 	 */
