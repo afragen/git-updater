@@ -234,15 +234,6 @@ class Base {
 	}
 
 	/**
-	 * Return updated $result for shiny updates.
-	 *
-	 * @return array|bool
-	 */
-	public function wp_ajax_update_plugin_result() {
-		return isset( $_POST['ghu_result'] ) ? $_POST['ghu_result'] : false;
-	}
-
-	/**
 	 * Add extra headers via filter hooks.
 	 */
 	public function add_headers() {
@@ -342,38 +333,78 @@ class Base {
 	}
 
 	/**
-	 * Use upgrader_post_install hook to ensure correct directory name.
-	 *
-	 * @global $wp_filesystem \WP_Filesystem_Direct
-	 * @param $true
-	 * @param array $extra_hook
-	 * @param array $result
-	 *
-	 * @return mixed
+	 * Load post-update filters.
 	 */
-	public function upgrader_post_install( $true, $extra_hook, $result ) {
-		global $wp_filesystem;
-		$slug              = null;
-		$is_plugin_active  = false;
-		$is_network_active = false;
+	public function load_post_filters() {
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+	}
 
-		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
-		     ( $this instanceof Plugin && in_array( 'theme', $extra_hook ) ) ||
-		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) ) ||
-		     ( $this instanceof Theme && in_array( 'plugin', $extra_hook ) )
+	/**
+	 * Used for renaming of sources to ensure correct directory name.
+	 *
+	 * @param $source
+	 * @param $remote_source
+	 * @param $upgrader
+	 *
+	 * @return string
+	 */
+	public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
+		global $wp_filesystem, $plugins, $themes;
+		$slug = null;
+		$repo = null;
+
+		/*
+		 * Exit for mismatch.
+		 */
+		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Theme ||
+		     $upgrader instanceof \Theme_Upgrader && $this instanceof Plugin
 		) {
-			return $result;
+			return $source;
 		}
 
 		/*
-		 * Use $extra_hook to derive repo, safer.
+		 * Rename plugins.
 		 */
-		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug              = dirname( $extra_hook['plugin'] );
-			$is_plugin_active  = is_plugin_active( $extra_hook['plugin'] ) ? true : false;
-			$is_network_active = is_plugin_active_for_network( $extra_hook['plugin'] ) ? true : false;
-		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
-			$slug = $extra_hook['theme'];
+		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+			if ( $plugins ) {
+				foreach ( array_reverse( $plugins ) as $plugin ) {
+					$slug = dirname( $plugin );
+					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
+						$new_source = trailingslashit( $remote_source ) . trailingslashit( dirname( $plugin ) );
+						break;
+					}
+				}
+			}
+			if ( ! $plugins ) {
+				if ( isset( $upgrader->skin->plugin ) ) {
+					$slug = dirname( $upgrader->skin->plugin );
+				}
+				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
+					$slug = sanitize_text_field( $_POST['slug'] );
+				}
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+		}
+
+		/*
+		 * Rename themes.
+		 */
+		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+			if ( $themes ) {
+				foreach ( $themes as $theme ) {
+					$slug = $theme;
+					if ( false !== stristr( basename( $source ), $theme ) ) {
+						$new_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
+						break;
+					}
+				}
+			}
+			if ( ! $themes ) {
+				if ( isset( $upgrader->skin->theme ) ) {
+					$slug = $upgrader->skin->theme;
+				}
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
 		}
 
 		$repo = $this->get_repo_slugs( $slug );
@@ -382,51 +413,44 @@ class Base {
 		 * Not GitHub Updater plugin/theme.
 		 */
 		if ( ! isset( $_POST['github_updater_repo'] ) && empty( $repo ) ) {
-			return $result;
+			return $source;
 		}
 
+		/*
+		 * Remote install source.
+		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
-			$proper_destination = trailingslashit( $result['local_destination'] ) . self::$options['github_updater_install_repo'];
-		} else {
-			$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+			$new_source = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
+		}
+
+		/*
+		 * Revert extended naming if previously present.
+		 */
+		if ( $this instanceof Plugin &&
+		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		     $slug !== $repo['repo']
+		) {
+			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['repo'] );
 		}
 
 		/*
 		 * Extended naming.
 		 * Only for plugins and not for 'master' === branch && .org hosted.
 		 */
-		if ( isset( $extra_hook['plugin'] ) &&
-			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		if ( $this instanceof Plugin &&
+		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
-			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
-			printf(
-				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
-				'<strong>' . $this->config[ $repo['repo'] ]->extended_repo . '</strong>'
+			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['extended_repo'] );;
+			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
+					'<strong>' . $repo['extended_repo'] . '</strong>'
 			);
 		}
 
-		$wp_filesystem->move( $result['destination'], $proper_destination );
-		$result['destination']       = $proper_destination;
-		$result['destination_name']  = $slug;
-		$result['clear_destination'] = true;
+		$wp_filesystem->move( $source, $new_source );
 
-		/*
-		 * Reactivate plugin if active.
-		 */
-		if ( $is_plugin_active ) {
-			activate_plugin( WP_PLUGIN_DIR . '/' . $extra_hook['plugin'], null, $is_network_active );
-		}
-
-		/*
-		 * Add $result to $_POST for use in shiny updates.
-		 */
-		if ( isset( $_POST['plugin'] ) ) {
-			$_POST['ghu_result'][ $_POST['plugin'] ] = $result;
-		}
-
-		return $result;
+		return $new_source;
 	}
 
 	/**
