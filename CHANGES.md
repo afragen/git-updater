@@ -4,6 +4,7 @@
 * move `{get|set}_transient` functions to `abstract class API`
 * fix settings page saving errors.
 * fix for shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
+* overhaul of renaming code back to using `upgrader_source_selection`
 
 #### 5.2.0
 * fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
