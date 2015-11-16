@@ -336,7 +336,7 @@ class Base {
 	 * Load post-update filters.
 	 */
 	public function load_post_filters() {
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 3 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 	}
 
 	/**
@@ -348,7 +348,7 @@ class Base {
 	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
+	public function upgrader_source_selection( $source, $remote_source, $upgrader, $extra_hook = null) {
 		global $wp_filesystem, $plugins, $themes;
 		$slug = null;
 		$repo = null;
@@ -366,7 +366,15 @@ class Base {
 		 * Rename plugins.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-			if ( $plugins ) {
+			if ( isset( $extra_hook['plugin'] ) ) {
+				$slug       = dirname( $extra_hook['plugin'] );
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+
+			/*
+			 * Pre-WordPress 4.4
+			 */
+			if ( $plugins && empty( $extra_hook ) ) {
 				foreach ( array_reverse( $plugins ) as $plugin ) {
 					$slug = dirname( $plugin );
 					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
@@ -375,7 +383,7 @@ class Base {
 					}
 				}
 			}
-			if ( ! $plugins ) {
+			if ( ! $plugins && empty( $extra_hook ) ) {
 				if ( isset( $upgrader->skin->plugin ) ) {
 					$slug = dirname( $upgrader->skin->plugin );
 				}
@@ -390,7 +398,15 @@ class Base {
 		 * Rename themes.
 		 */
 		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-			if ( $themes ) {
+			if ( isset( $extra_hook['theme'] ) ) {
+				$slug       = $extra_hook['theme'];
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+
+			/*
+			 * Pre-WordPress 4.4
+			 */
+			if ( $themes && empty( $extra_hook ) ) {
 				foreach ( $themes as $theme ) {
 					$slug = $theme;
 					if ( false !== stristr( basename( $source ), $theme ) ) {
@@ -399,7 +415,7 @@ class Base {
 					}
 				}
 			}
-			if ( ! $themes ) {
+			if ( ! $themes && empty( $extra_hook ) ) {
 				if ( isset( $upgrader->skin->theme ) ) {
 					$slug = $upgrader->skin->theme;
 				}
