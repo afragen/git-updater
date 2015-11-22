@@ -342,16 +342,20 @@ class Base {
 	/**
 	 * Used for renaming of sources to ensure correct directory name.
 	 *
+	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
+	 *
 	 * @param $source
 	 * @param $remote_source
 	 * @param $upgrader
+	 * @param $hook_extra
 	 *
 	 * @return string
 	 */
-	public function upgrader_source_selection( $source, $remote_source, $upgrader, $extra_hook = null) {
+	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null) {
 		global $wp_filesystem, $plugins, $themes;
-		$slug = null;
-		$repo = null;
+		$slug       = null;
+		$repo       = null;
+		$new_source = null;
 
 		/*
 		 * Exit for mismatch.
@@ -366,15 +370,15 @@ class Base {
 		 * Rename plugins.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
-			if ( isset( $extra_hook['plugin'] ) ) {
-				$slug       = dirname( $extra_hook['plugin'] );
+			if ( isset( $hook_extra['plugin'] ) ) {
+				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
 			}
 
 			/*
 			 * Pre-WordPress 4.4
 			 */
-			if ( $plugins && empty( $extra_hook ) ) {
+			if ( $plugins && empty( $hook_extra ) ) {
 				foreach ( array_reverse( $plugins ) as $plugin ) {
 					$slug = dirname( $plugin );
 					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
@@ -383,7 +387,7 @@ class Base {
 					}
 				}
 			}
-			if ( ! $plugins && empty( $extra_hook ) ) {
+			if ( ! $plugins && empty( $hook_extra ) ) {
 				if ( isset( $upgrader->skin->plugin ) ) {
 					$slug = dirname( $upgrader->skin->plugin );
 				}
@@ -398,15 +402,15 @@ class Base {
 		 * Rename themes.
 		 */
 		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
-			if ( isset( $extra_hook['theme'] ) ) {
-				$slug       = $extra_hook['theme'];
+			if ( isset( $hook_extra['theme'] ) ) {
+				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
 			}
 
 			/*
 			 * Pre-WordPress 4.4
 			 */
-			if ( $themes && empty( $extra_hook ) ) {
+			if ( $themes && empty( $hook_extra ) ) {
 				foreach ( $themes as $theme ) {
 					$slug = $theme;
 					if ( false !== stristr( basename( $source ), $theme ) ) {
@@ -415,7 +419,7 @@ class Base {
 					}
 				}
 			}
-			if ( ! $themes && empty( $extra_hook ) ) {
+			if ( ! $themes && empty( $hook_extra ) ) {
 				if ( isset( $upgrader->skin->theme ) ) {
 					$slug = $upgrader->skin->theme;
 				}
