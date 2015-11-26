@@ -5,7 +5,7 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 3.8
 * Requires PHP: 5.3
-* Tested up to: 4.3
+* Tested up to: 4.4
 * Stable tag: master
 * Donate link: http://bit.ly/github-updater
 * License: GPLv2 or later
@@ -67,6 +67,7 @@ Then go to your Plugins screen and click __Activate__.
 1. Choose a method from above for installation.
 1. **DO NOT** activate!
 1. Symlink `wp-content/plugins/github-updater/mu/ghu-loader.php` in `wp-content/mu-plugins`.
+1. You should use full filepaths when creating your symlink.
 
 #### in Linux
 ```
@@ -154,7 +155,7 @@ The default state is either `GitHub Branch: master` or nothing at all. They are 
 
 If you want to update against branch of your repository other than `master` and have that branch push updates out to users make sure you specify the testing branch in a header, i.e. `GitHub Branch: develop`. When you want users to update against the release branch just have them manually change the header to `GitHub Branch: master` or remove it completely. Tags will be ignored when a branch other than `master` is specified. In this case I would suggest semantic version numbering similar to the following, `<major>.<minor>.<patch>.<development>`.
 
-In the GitHub Updater Settings there is a new setting to enable branch switching for plugins. When checked there will be a new ability from the Plugins page to switch between plugin branches. Switching to the current branch will reinstall the current branch. Plugins may need to be re-activated after branch switching.
+In the GitHub Updater Settings there is a new setting to enable branch switching for plugins and themes. When checked there will be a new ability from the Plugins and Themes pages to switch between branches. Switching to the current branch will reinstall the current branch.
 
 ## Tagging
 
@@ -335,9 +336,9 @@ See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELO
 
 ## Credits
 
-This plugin's theme updater class was based upon [Whitelabel Framework's updater-plugin.php](https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/admin/updater-plugin.php), which was based upon https://github.com/UCF/Theme-Updater.
+This plugin's theme updater class was originally based upon [Whitelabel Framework's updater-plugin.php](https://github.com/WordPress-Phoenix/whitelabel-framework/blob/master/inc/admin/updater-plugin.php), which was based upon https://github.com/UCF/Theme-Updater.
 
-The plugin updater class was based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
+The plugin updater class was originally based upon [codepress/github-plugin-updater](https://github.com/codepress/github-plugin-updater).
 
 Includes
 

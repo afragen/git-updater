@@ -24,6 +24,12 @@ if ( ! defined( 'WPINC' ) ) {
  */
 abstract class API extends Base {
 
+	/**
+	 * Variable to hold all repository remote info.
+	 * @var array
+	 */
+	protected $response = array();
+
 	/*
 	 * The following functions must be in any repository API.
 	 */
@@ -183,6 +189,41 @@ abstract class API extends Base {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns site_transient and checks/stores transient id in array.
+	 *
+	 * @return array
+	 */
+	protected function get_transient() {
+		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		$transient = 'ghu-' . md5( $repo );
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+
+		return get_site_transient( $transient );
+	}
+
+	/**
+	 * Used to set_site_transient and checks/stores transient id in array.
+	 *
+	 * @param $id
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function set_transient( $id, $response ) {
+		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
+		$transient             = 'ghu-' . md5( $repo );
+		$this->response[ $id ] = $response;
+		if ( ! in_array( $transient, self::$transients, true ) ) {
+			self::$transients[] = $transient;
+		}
+		set_site_transient( $transient, $this->response, ( self::$hours * HOUR_IN_SECONDS ) );
+
+		return true;
 	}
 
 }

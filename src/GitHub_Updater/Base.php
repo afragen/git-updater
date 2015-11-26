@@ -152,6 +152,14 @@ class Base {
 			$force_meta_update = true;
 		}
 
+		// Added for ajax plugin updating.
+		if ( 'admin-ajax.php' === $pagenow &&
+		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
+		) {
+			$force_meta_update = true;
+			add_filter( 'wp_ajax_update_plugin_result', array( &$this, 'wp_ajax_update_plugin_result' ), 10, 1 );
+		}
+
 		if ( current_user_can( 'update_plugins' ) ) {
 			Plugin::$object = Plugin::instance();
 			if ( $force_meta_update ) {
@@ -307,7 +315,7 @@ class Base {
 		$this->$type->branches              = array();
 		$this->$type->requires              = null;
 		$this->$type->tested                = null;
-		$this->$type->donate                = null;
+		$this->$type->donate_link           = null;
 		$this->$type->contributors          = array();
 		$this->$type->downloaded            = 0;
 		$this->$type->last_updated          = null;
@@ -325,38 +333,98 @@ class Base {
 	}
 
 	/**
-	 * Use upgrader_post_install hook to ensure correct directory name.
-	 *
-	 * @global $wp_filesystem \WP_Filesystem_Direct
-	 * @param $true
-	 * @param array $extra_hook
-	 * @param array $result
-	 *
-	 * @return mixed
+	 * Load post-update filters.
 	 */
-	public function upgrader_post_install( $true, $extra_hook, $result ) {
-		global $wp_filesystem;
-		$slug              = null;
-		$is_plugin_active  = false;
-		$is_network_active = false;
+	public function load_post_filters() {
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
+	}
 
-		if ( ( $this instanceof Plugin && isset( $extra_hook['theme'] ) ) ||
-		     ( $this instanceof Plugin && in_array( 'theme', $extra_hook ) ) ||
-		     ( $this instanceof Theme && isset( $extra_hook['plugin'] ) ) ||
-		     ( $this instanceof Theme && in_array( 'plugin', $extra_hook ) )
+	/**
+	 * Used for renaming of sources to ensure correct directory name.
+	 *
+	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
+	 *
+	 * @param $source
+	 * @param $remote_source
+	 * @param $upgrader
+	 * @param $hook_extra
+	 *
+	 * @return string
+	 */
+	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null) {
+		global $wp_filesystem, $plugins, $themes;
+		$slug       = null;
+		$repo       = null;
+		$new_source = null;
+
+		/*
+		 * Exit for mismatch.
+		 */
+		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Theme ||
+		     $upgrader instanceof \Theme_Upgrader && $this instanceof Plugin
 		) {
-			return $result;
+			return $source;
 		}
 
 		/*
-		 * Use $extra_hook to derive repo, safer.
+		 * Rename plugins.
 		 */
-		if ( $this instanceof Plugin && isset( $extra_hook['plugin'] ) ) {
-			$slug              = dirname( $extra_hook['plugin'] );
-			$is_plugin_active  = is_plugin_active( $extra_hook['plugin'] ) ? true : false;
-			$is_network_active = is_plugin_active_for_network( $extra_hook['plugin'] ) ? true : false;
-		} elseif ( $this instanceof Theme && isset( $extra_hook['theme'] ) ) {
-			$slug = $extra_hook['theme'];
+		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+			if ( isset( $hook_extra['plugin'] ) ) {
+				$slug       = dirname( $hook_extra['plugin'] );
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+
+			/*
+			 * Pre-WordPress 4.4
+			 */
+			if ( $plugins && empty( $hook_extra ) ) {
+				foreach ( array_reverse( $plugins ) as $plugin ) {
+					$slug = dirname( $plugin );
+					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
+						$new_source = trailingslashit( $remote_source ) . trailingslashit( dirname( $plugin ) );
+						break;
+					}
+				}
+			}
+			if ( ! $plugins && empty( $hook_extra ) ) {
+				if ( isset( $upgrader->skin->plugin ) ) {
+					$slug = dirname( $upgrader->skin->plugin );
+				}
+				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
+					$slug = sanitize_text_field( $_POST['slug'] );
+				}
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+		}
+
+		/*
+		 * Rename themes.
+		 */
+		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+			if ( isset( $hook_extra['theme'] ) ) {
+				$slug       = $hook_extra['theme'];
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
+
+			/*
+			 * Pre-WordPress 4.4
+			 */
+			if ( $themes && empty( $hook_extra ) ) {
+				foreach ( $themes as $theme ) {
+					$slug = $theme;
+					if ( false !== stristr( basename( $source ), $theme ) ) {
+						$new_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
+						break;
+					}
+				}
+			}
+			if ( ! $themes && empty( $hook_extra ) ) {
+				if ( isset( $upgrader->skin->theme ) ) {
+					$slug = $upgrader->skin->theme;
+				}
+				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+			}
 		}
 
 		$repo = $this->get_repo_slugs( $slug );
@@ -365,43 +433,44 @@ class Base {
 		 * Not GitHub Updater plugin/theme.
 		 */
 		if ( ! isset( $_POST['github_updater_repo'] ) && empty( $repo ) ) {
-			return $result;
+			return $source;
 		}
 
+		/*
+		 * Remote install source.
+		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
-			$proper_destination = trailingslashit( $result['local_destination'] ) . self::$options['github_updater_install_repo'];
-		} else {
-			$proper_destination = $this->config[ $repo['repo'] ]->local_path;
+			$new_source = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
+		}
+
+		/*
+		 * Revert extended naming if previously present.
+		 */
+		if ( $this instanceof Plugin &&
+		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		     $slug !== $repo['repo']
+		) {
+			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['repo'] );
 		}
 
 		/*
 		 * Extended naming.
 		 * Only for plugins and not for 'master' === branch && .org hosted.
 		 */
-		if ( isset( $extra_hook['plugin'] ) &&
-			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
+		if ( $this instanceof Plugin &&
+		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
-			$proper_destination = $this->config[ $repo['repo'] ]->local_path_extended;
-			printf(
-				esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
-				'<strong>' . $this->config[ $repo['repo'] ]->extended_repo . '</strong>'
+			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['extended_repo'] );;
+			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
+					'<strong>' . $repo['extended_repo'] . '</strong>'
 			);
 		}
 
-		$wp_filesystem->move( $result['destination'], $proper_destination );
-		$result['destination']       = $proper_destination;
-		$result['clear_destination'] = true;
+		$wp_filesystem->move( $source, $new_source );
 
-		/*
-		 * Reactivate plugin if active.
-		 */
-		if ( $is_plugin_active ) {
-			activate_plugin( WP_PLUGIN_DIR . '/' . $extra_hook['plugin'], null, $is_network_active );
-		}
-
-		return $result;
+		return $new_source;
 	}
 
 	/**
@@ -607,42 +676,6 @@ class Base {
 	}
 
 	/**
-	 * Used to set_site_transient and checks/stores transient id in array.
-	 *
-	 * @param $id
-	 * @param $response
-	 *
-	 * @return bool
-	 */
-	protected function set_transient( $id, $response ) {
-		$repo      = isset( $this->type ) ? $this->type->repo : 'ghu';
-		$transient = 'ghu-' . md5( $repo . $id );
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
-		set_site_transient( $transient, $response, ( self::$hours * HOUR_IN_SECONDS ) );
-
-		return true;
-	}
-
-	/**
-	 * Returns site_transient and checks/stores transient id in array.
-	 *
-	 * @param $id
-	 *
-	 * @return mixed
-	 */
-	protected function get_transient( $id ) {
-		$repo      = isset( $this->type ) ? $this->type->repo : 'ghu';
-		$transient = 'ghu-' . md5( $repo . $id );
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
-
-		return get_site_transient( $transient );
-	}
-
-	/**
 	 * Delete all transients from array of transient ids.
 	 *
 	 * @param $type
@@ -782,7 +815,7 @@ class Base {
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
 		$this->type->tested       = $response['tested_up_to'];
 		$this->type->requires     = $response['requires_at_least'];
-		$this->type->donate       = $response['donate_link'];
+		$this->type->donate_link  = $response['donate_link'];
 		$this->type->contributors = $response['contributors'];
 
 		return true;

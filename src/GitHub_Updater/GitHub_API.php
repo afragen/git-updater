@@ -32,8 +32,9 @@ class GitHub_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type    = $type;
-		parent::$hours = 12;
+		parent::$hours  = 12;
+		$this->type     = $type;
+		$this->response = $this->get_transient();
 	}
 
 	/**
@@ -44,7 +45,7 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = $this->get_transient( $file );
+		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
@@ -75,7 +76,7 @@ class GitHub_API extends API {
 	 */
 	public function get_remote_tag() {
 		$repo_type = $this->return_repo_type();
-		$response  = $this->get_transient( 'tags' );
+		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
@@ -107,7 +108,7 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = $this->get_transient( 'changes' );
+		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
@@ -121,7 +122,7 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$changelog = $this->get_transient( 'changelog' );
+		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
 
 		if ( ! $changelog ) {
 			$parser    = new \Parsedown;
@@ -146,7 +147,7 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$response = $this->get_transient( 'readme' );
+		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
@@ -173,7 +174,7 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response   = $this->get_transient( 'meta' );
+		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( ! $response ) {
@@ -202,7 +203,7 @@ class GitHub_API extends API {
 	 */
 	public function get_remote_branches() {
 		$branches = array();
-		$response = $this->get_transient( 'branches' );
+		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/branches' );
@@ -379,7 +380,7 @@ class GitHub_API extends API {
 		if ( empty( $this->type->newest_tag ) ) {
 			return false;
 		}
-		$response = $this->get_transient( 'asset' );
+		$response = isset( $this->response['asset'] ) ? $this->response['asset'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/releases/latest' );

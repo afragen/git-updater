@@ -44,6 +44,10 @@ class Settings extends Base {
 	private static $gitlab            = false;
 	private static $gitlab_enterprise = false;
 
+	/**
+	 * Supported remote management services.
+	 * @var array
+	 */
 	protected static $remote_management = array(
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
@@ -503,10 +507,13 @@ class Settings extends Base {
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
-			foreach ( self::$remote_management as $key => $value ) {
+			$options = array();
+			foreach ( array_keys( self::$remote_management ) as $key ) {
 				$options[ $key ] = null;
 			}
-			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			if ( isset( $_POST['github_updater_remote_management'] ) ) {
+				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 	}
@@ -520,7 +527,7 @@ class Settings extends Base {
 	 */
 	public static function sanitize( $input ) {
 		$new_input = array();
-		foreach ( (array) $input as $id => $value ) {
+		foreach ( array_keys( (array) $input ) as $id ) {
 			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
@@ -616,12 +623,18 @@ class Settings extends Base {
 
 	/**
 	 * Get the settings option array and print one of its values.
+	 * For remote management settings.
 	 *
 	 * @param $args
 	 *
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
+		if ( empty( parent::$options_remote ) ) {
+			foreach ( array_keys( self::$remote_management ) as $key ) {
+				parent::$options_remote[ $key ] = null;
+			}
+		}
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
@@ -642,18 +655,31 @@ class Settings extends Base {
 			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		}
 		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array( 'ithemes_sync' => null, 'infinitewp' => null, 'managewp' => null, 'mainwp' => null );
-			$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			$options = array();
+			foreach ( array_keys( self::$remote_management ) as $key ) {
+				$options[ $key ] = null;
+			}
+			if ( isset( $_POST['github_updater_remote_management'] ) ) {
+				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
-		wp_redirect( add_query_arg(
+
+		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
+		parse_str( $query, $arr );
+		if ( empty( $arr['tab'] ) ) {
+			$arr['tab'] = 'github_updater_settings';
+		}
+
+		$location = add_query_arg(
 			array(
 				'page'    => 'github-updater',
 				'updated' => 'true',
-				'tab'     => $_GET['tab'],
+				'tab'     => $arr['tab'],
 			),
 			network_admin_url( 'settings.php' )
-		) );
+		);
+		wp_redirect( $location );
 		exit;
 	}
 

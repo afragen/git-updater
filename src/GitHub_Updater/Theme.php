@@ -254,81 +254,6 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Load post-update filters.
-	 */
-	public function load_post_filters() {
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection_active_theme' ), 10, 3 );
-		add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
-	}
-
-
-	/**
-	 * Rename the zip folder to be the same as the existing repository folder.
-	 * This method needed for correct updating/re-activation of current, active theme only.
-	 *
-	 * @global object $wp_filesystem
-	 *
-	 * @param string $source
-	 * @param string $remote_source
-	 * @param object $upgrader
-	 *
-	 * @return string $source|$corrected_source
-	 */
-	public function upgrader_source_selection_active_theme( $source, $remote_source , $upgrader ) {
-
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		global $wp_filesystem;
-		$repo         = null;
-		$source_base  = basename( $source );
-		$active_theme = wp_get_theme()->stylesheet;
-
-		/*
-		 * Check for upgrade process, return if not correct upgrader.
-		 */
-		if ( ! ( $upgrader instanceof \Theme_Upgrader  && $this instanceof Theme ) ) {
-			return $source;
-		}
-
-		/*
-		 * Set $repo for updating only for current active theme.
-		 * Get theme slug from appropriate $upgrader instance.
-		 */
-		if ( $upgrader->skin instanceof \Theme_Upgrader_Skin ) {
-			$repo = $upgrader->skin->theme;
-		}
-		if ( $upgrader->skin instanceof \Bulk_Theme_Upgrader_Skin ) {
-			$repo = $upgrader->skin->theme_info->stylesheet;
-		}
-		if ( $active_theme === $repo ) {
-			$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $active_theme );
-		} else {
-			return $source;
-		}
-
-		$upgrader->skin->feedback(
-			sprintf(
-				esc_html__( 'Renaming %1$s to %2$s', 'github-updater' ) . '&#8230;',
-				'<span class="code">' . $source_base . '</span>',
-				'<span class="code">' . basename( $corrected_source ) . '</span>'
-			)
-		);
-
-		/*
-		 * If we can rename, do so and return the new name.
-		 */
-		if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
-			$upgrader->skin->feedback( esc_html__( 'Rename successful', 'github-updater' ) . '&#8230;' );
-			return $corrected_source;
-		}
-
-		/*
-		 * Otherwise, return an error.
-		 */
-		$upgrader->skin->feedback( esc_html__( 'Unable to rename downloaded repository.', 'github-updater' ) );
-		return new \WP_Error();
-	}
-
-	/**
 	 * Put changelog in themes_api, return WP.org data as appropriate.
 	 *
 	 * @param $false
@@ -354,6 +279,7 @@ class Theme extends Base {
 				$response->slug         = $theme->repo;
 				$response->name         = $theme->name;
 				$response->homepage     = $theme->uri;
+				$response->donate_link  = $theme->donate_link;
 				$response->version      = $theme->remote_version;
 				$response->sections     = $theme->sections;
 				$response->description  = implode( "\n", $theme->sections );

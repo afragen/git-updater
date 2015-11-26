@@ -39,8 +39,9 @@ class GitLab_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type    = $type;
-		parent::$hours = 12;
+		$this->type     = $type;
+		parent::$hours  = 12;
+		$this->response = $this->get_transient();
 
 		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
 			self::$options['gitlab_private_token'] = null;
@@ -65,7 +66,7 @@ class GitLab_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = $this->get_transient( $file );
+		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
@@ -104,7 +105,7 @@ class GitLab_API extends API {
 	 */
 	public function get_remote_tag() {
 		$repo_type = $this->return_repo_type();
-		$response  = $this->get_transient( 'tags' );
+		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 
 		if ( ! $response ) {
@@ -139,7 +140,7 @@ class GitLab_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = $this->get_transient( 'changes' );
+		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
@@ -155,7 +156,7 @@ class GitLab_API extends API {
 			return false;
 		}
 
-		$changelog = $this->get_transient( 'changelog' );
+		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
 
 		if ( ! $changelog ) {
 			$parser    = new \Parsedown;
@@ -180,7 +181,7 @@ class GitLab_API extends API {
 			return false;
 		}
 
-		$response = $this->get_transient( 'readme' );
+		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
@@ -210,12 +211,11 @@ class GitLab_API extends API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-
-		$response   = $this->get_transient( 'meta' );
+		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
 			self::$method = 'meta';
-			$projects     = $this->get_transient( 'projects' );
+			$projects     = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
 
 			// exit if transient is empty
 			if ( ! $projects ) {
@@ -251,7 +251,7 @@ class GitLab_API extends API {
 	 */
 	public function get_remote_branches() {
 		$branches = array();
-		$response = $this->get_transient( 'branches' );
+		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
@@ -405,7 +405,7 @@ class GitLab_API extends API {
 	 */
 	public function get_gitlab_id() {
 		$id       = null;
-		$response = $this->get_transient( 'projects' );
+		$response = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
 
 		if ( ! $response ) {
 			self::$method = 'projects';

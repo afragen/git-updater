@@ -32,8 +32,10 @@ class Bitbucket_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type    = $type;
-		parent::$hours = 12;
+		$this->type     = $type;
+		parent::$hours  = 12;
+		$this->response = $this->get_transient();
+
 		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
@@ -53,7 +55,7 @@ class Bitbucket_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = $this->get_transient( $file );
+		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
 			if ( empty( $this->type->branch ) ) {
@@ -84,7 +86,7 @@ class Bitbucket_API extends API {
 	 */
 	public function get_remote_tag() {
 		$repo_type = $this->return_repo_type();
-		$response  = $this->get_transient( 'tags' );
+		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
@@ -117,7 +119,7 @@ class Bitbucket_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = $this->get_transient( 'changes' );
+		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
 
 		if ( ! $response ) {
 			if ( ! isset( $this->type->branch ) ) {
@@ -139,7 +141,7 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
-		$changelog = $this->get_transient( 'changelog' );
+		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
 
 		if ( ! $changelog ) {
 			$parser    = new \Parsedown;
@@ -164,7 +166,7 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
-		$response = $this->get_transient( 'readme' );
+		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
 		if ( ! $response ) {
 			if ( ! isset( $this->type->branch ) ) {
@@ -200,7 +202,7 @@ class Bitbucket_API extends API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response = $this->get_transient( 'meta' );
+		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
@@ -228,7 +230,7 @@ class Bitbucket_API extends API {
 	 */
 	public function get_remote_branches() {
 		$branches = array();
-		$response = $this->get_transient( 'branches' );
+		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );

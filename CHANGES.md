@@ -1,3 +1,11 @@
+#### 5.3.0
+* fix parsing of `readme.txt` for donate link
+* refactor transient storage resulting in significantly few database calls, more performant.
+* move `{get|set}_transient` functions to `abstract class API`
+* fix settings page saving errors.
+* fix for shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
+* overhaul of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra'] to `upgrader_source_selection` filter. Thanks @dd32!
+
 #### 5.2.0
 * fix [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
 * add setting for GitHub Enterprise personal access token
