@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-11-08 09:53-0800\n"
-"PO-Revision-Date: 2015-11-08 09:53-0800\n"
+"POT-Creation-Date: 2015-11-25 20:30-0800\n"
+"PO-Revision-Date: 2015-11-25 20:30-0800\n"
 "Last-Translator: esoj <yo@josemiguel.org>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: es\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Activado como mu-plugin"
 
-#: src/GitHub_Updater/Base.php:404
+#: src/GitHub_Updater/Base.php:466
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -135,12 +135,12 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:534
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:459
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "La rama actual es `%1$s`, intenta %2$sanother branch%3$s."
 
-#: src/GitHub_Updater/Plugin.php:362
+#: src/GitHub_Updater/Plugin.php:355
 msgid "View details"
 msgstr "Ver detalles"
 
@@ -293,65 +293,52 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:310
-#, php-format
-msgid "Renaming %1$s to %2$s"
-msgstr "Renombrado %1$s a %2$s"
-
-#: src/GitHub_Updater/Theme.php:320
-msgid "Rename successful"
-msgstr "Renombrado satisfactoriamente"
-
-#: src/GitHub_Updater/Theme.php:327
-msgid "Unable to rename downloaded repository."
-msgstr "No se ha podido renombrar el repositorio descargado."
-
-#: src/GitHub_Updater/Theme.php:434
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "El tema está actualizado!"
 
-#: src/GitHub_Updater/Theme.php:439
+#: src/GitHub_Updater/Theme.php:364
 msgid "Rollback to:"
 msgstr "Retroceder a:"
 
-#: src/GitHub_Updater/Theme.php:457
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "No hay etiquetas anteriores donde revertir."
 
-#: src/GitHub_Updater/Theme.php:465 src/GitHub_Updater/Theme.php:479
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater muestra una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:472
+#: src/GitHub_Updater/Theme.php:397
 #, php-format
 msgid "View version %s details."
 msgstr "Ver detalles de la versión de %s"
 
-#: src/GitHub_Updater/Theme.php:476
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "Este tema no permite actualizaciones automáticas."
 
-#: src/GitHub_Updater/Theme.php:486 src/GitHub_Updater/Theme.php:631
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:556
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Ver %1$s details%2$s de la versión o %3$sactualiza ahora%4$s."
 
-#: src/GitHub_Updater/Theme.php:624
+#: src/GitHub_Updater/Theme.php:549
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Existe una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:651
+#: src/GitHub_Updater/Theme.php:576
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La versión actual está actualizada. Intenta con %sanother version%s"
 
-#: src/GitHub_Updater/Theme.php:665
+#: src/GitHub_Updater/Theme.php:590
 msgid "Choose a Version"
 msgstr "Elige una versión"
 
-#: src/GitHub_Updater/Theme.php:668
+#: src/GitHub_Updater/Theme.php:593
 msgid "Install"
 msgstr "Instalar"
 
@@ -369,6 +356,15 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr ""
+
+#~ msgid "Renaming %1$s to %2$s"
+#~ msgstr "Renombrado %1$s a %2$s"
+
+#~ msgid "Rename successful"
+#~ msgstr "Renombrado satisfactoriamente"
+
+#~ msgid "Unable to rename downloaded repository."
+#~ msgstr "No se ha podido renombrar el repositorio descargado."
 
 #~ msgid "this plugin"
 #~ msgstr "este plungon"

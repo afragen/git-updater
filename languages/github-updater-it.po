@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-11-08 09:52-0800\n"
-"PO-Revision-Date: 2015-11-08 09:52-0800\n"
+"POT-Creation-Date: 2015-11-25 20:30-0800\n"
+"PO-Revision-Date: 2015-11-25 20:30-0800\n"
 "Last-Translator: Enea Overclokk <info@overclokk.net>\n"
 "Language-Team: Enea Overclokk\n"
 "Language: it\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Attivato come mu-plugin"
 
-#: src/GitHub_Updater/Base.php:404
+#: src/GitHub_Updater/Base.php:466
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -141,12 +141,12 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:534
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:459
 #, fuzzy, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "La versione attuale è aggiornata. Prova %sun&#39;altra versione%s"
 
-#: src/GitHub_Updater/Plugin.php:362
+#: src/GitHub_Updater/Plugin.php:355
 #, fuzzy
 msgid "View details"
 msgstr "Visualizza i dettagli della versione %4$s"
@@ -297,66 +297,53 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:310
-#, fuzzy, php-format
-msgid "Renaming %1$s to %2$s"
-msgstr "Rinominato %s a %s"
-
-#: src/GitHub_Updater/Theme.php:320
-msgid "Rename successful"
-msgstr "Rinominato con successo"
-
-#: src/GitHub_Updater/Theme.php:327
-msgid "Unable to rename downloaded repository."
-msgstr "Impossibile rinominare il repository scaricato."
-
-#: src/GitHub_Updater/Theme.php:434
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "Il tema è aggiornato!"
 
-#: src/GitHub_Updater/Theme.php:439
+#: src/GitHub_Updater/Theme.php:364
 msgid "Rollback to:"
 msgstr "Ripristina a:"
 
-#: src/GitHub_Updater/Theme.php:457
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "Nessun tag precedente da ripristinare."
 
-#: src/GitHub_Updater/Theme.php:465 src/GitHub_Updater/Theme.php:479
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater mostra una nuova versione di %1$s disponibile."
 
-#: src/GitHub_Updater/Theme.php:472
+#: src/GitHub_Updater/Theme.php:397
 #, php-format
 msgid "View version %s details."
 msgstr "Visualizza i dettagli della versione %s."
 
-#: src/GitHub_Updater/Theme.php:476
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "L&#39;aggiornamento automatico non è disponibile per questo tema."
 
-#: src/GitHub_Updater/Theme.php:486 src/GitHub_Updater/Theme.php:631
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:556
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 "Visualizza i dettagli della versione %1$s %2$s o %3$saggiorna adesso%4$s"
 
-#: src/GitHub_Updater/Theme.php:624
+#: src/GitHub_Updater/Theme.php:549
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "C'è una nuova versione di %s disponibile."
 
-#: src/GitHub_Updater/Theme.php:651
+#: src/GitHub_Updater/Theme.php:576
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La versione attuale è aggiornata. Prova %sun&#39;altra versione%s"
 
-#: src/GitHub_Updater/Theme.php:665
+#: src/GitHub_Updater/Theme.php:590
 msgid "Choose a Version"
 msgstr "Scegli una versione"
 
-#: src/GitHub_Updater/Theme.php:668
+#: src/GitHub_Updater/Theme.php:593
 msgid "Install"
 msgstr "Installa"
 
@@ -374,6 +361,16 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#, fuzzy
+#~ msgid "Renaming %1$s to %2$s"
+#~ msgstr "Rinominato %s a %s"
+
+#~ msgid "Rename successful"
+#~ msgstr "Rinominato con successo"
+
+#~ msgid "Unable to rename downloaded repository."
+#~ msgstr "Impossibile rinominare il repository scaricato."
 
 #, fuzzy
 #~ msgid "this plugin"

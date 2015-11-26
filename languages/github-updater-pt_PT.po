@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-11-08 09:52-0800\n"
-"PO-Revision-Date: 2015-11-08 09:52-0800\n"
+"POT-Creation-Date: 2015-11-25 20:30-0800\n"
+"PO-Revision-Date: 2015-11-25 20:30-0800\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Activado como um plugin obrigatório"
 
-#: src/GitHub_Updater/Base.php:404
+#: src/GitHub_Updater/Base.php:466
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr "Renomeado com sucesso através do nome estendido para %1$s"
@@ -139,12 +139,12 @@ msgstr ""
 "Tem que definir um Token privado do GitLab.com, GitLab CE ou GitLab "
 "Empresarial."
 
-#: src/GitHub_Updater/Plugin.php:310 src/GitHub_Updater/Theme.php:534
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:459
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "O ramo actual é `%1$s`, experimente %2$soutro ramo%3$s."
 
-#: src/GitHub_Updater/Plugin.php:362
+#: src/GitHub_Updater/Plugin.php:355
 msgid "View details"
 msgstr "Ver detalhes"
 
@@ -296,65 +296,52 @@ msgstr ""
 "carregamento de algumas páginas do painel de administração para utilizadores "
 "com perfil de `administrador`."
 
-#: src/GitHub_Updater/Theme.php:310
-#, php-format
-msgid "Renaming %1$s to %2$s"
-msgstr "Renomear %1$s para %2$s"
-
-#: src/GitHub_Updater/Theme.php:320
-msgid "Rename successful"
-msgstr "Renomeado com sucesso"
-
-#: src/GitHub_Updater/Theme.php:327
-msgid "Unable to rename downloaded repository."
-msgstr "Não foi possível renomear o repositório descarregado."
-
-#: src/GitHub_Updater/Theme.php:434
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "O tema está actualizado!"
 
-#: src/GitHub_Updater/Theme.php:439
+#: src/GitHub_Updater/Theme.php:364
 msgid "Rollback to:"
 msgstr "Reverter para:"
 
-#: src/GitHub_Updater/Theme.php:457
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "Nenhuma etiqueta anterior para poder reverter."
 
-#: src/GitHub_Updater/Theme.php:465 src/GitHub_Updater/Theme.php:479
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "O GitHub Updater informa que está disponível uma nova versão de %s."
 
-#: src/GitHub_Updater/Theme.php:472
+#: src/GitHub_Updater/Theme.php:397
 #, php-format
 msgid "View version %s details."
 msgstr "Ver detalhes da versão %s."
 
-#: src/GitHub_Updater/Theme.php:476
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "Actualizações automáticas indisponíveis para este tema."
 
-#: src/GitHub_Updater/Theme.php:486 src/GitHub_Updater/Theme.php:631
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:556
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Ver detalhes da versão %1$s%2$s ou %3$sactualize agora%4$s."
 
-#: src/GitHub_Updater/Theme.php:624
+#: src/GitHub_Updater/Theme.php:549
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Está disponível uma nova versão de %s."
 
-#: src/GitHub_Updater/Theme.php:651
+#: src/GitHub_Updater/Theme.php:576
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Esta é a versão actual. Experimente %soutra versão%s"
 
-#: src/GitHub_Updater/Theme.php:665
+#: src/GitHub_Updater/Theme.php:590
 msgid "Choose a Version"
 msgstr "Escolha uma versão"
 
-#: src/GitHub_Updater/Theme.php:668
+#: src/GitHub_Updater/Theme.php:593
 msgid "Install"
 msgstr "Instalar"
 
@@ -375,3 +362,12 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
+
+#~ msgid "Renaming %1$s to %2$s"
+#~ msgstr "Renomear %1$s para %2$s"
+
+#~ msgid "Rename successful"
+#~ msgstr "Renomeado com sucesso"
+
+#~ msgid "Unable to rename downloaded repository."
+#~ msgstr "Não foi possível renomear o repositório descarregado."
