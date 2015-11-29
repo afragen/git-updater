@@ -1,3 +1,6 @@
+#### 5.3.1
+* fix PHP notice during remote installation
+
 #### 5.3.0
 * fix parsing of `readme.txt` for donate link
 * refactor transient storage resulting in significantly few database calls, more performant.
