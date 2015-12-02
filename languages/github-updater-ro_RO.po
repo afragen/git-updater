@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-11-25 20:30-0800\n"
-"PO-Revision-Date: 2015-11-25 20:30-0800\n"
+"PO-Revision-Date: 2015-12-02 21:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Poedit 1.8.5\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-WPHeader: github-updater.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -28,7 +28,7 @@ msgstr "Activat ca mu-plugin"
 #: src/GitHub_Updater/Base.php:466
 #, php-format
 msgid "Rename successful using extended name to %1$s"
-msgstr ""
+msgstr "Redenumire reusita utilizand numele extins in %1$s"
 
 #: src/GitHub_Updater/Install.php:67
 msgid "A repository URI is required."
@@ -82,16 +82,15 @@ msgstr "Jeton Privat Github"
 
 #: src/GitHub_Updater/Install.php:325
 msgid "URI is case sensitive."
-msgstr ""
+msgstr "URL-ul face diferenta intre literele mari si cele mici"
 
 #: src/GitHub_Updater/Install.php:339
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Introdu numele ramurei sau lasa gol pentru 'master'"
 
 #: src/GitHub_Updater/Install.php:370
-#, fuzzy
 msgid "Check for private Bitbucket repositories."
-msgstr "Repozitoriu Bitbucket Privat"
+msgstr "Cauta dupa repozitoriu Bitbucket privat"
 
 #: src/GitHub_Updater/Install.php:384
 msgid "Enter GitHub Access Token for private GitHub repositories."
@@ -103,12 +102,12 @@ msgstr "Introdu Jeton de Acces GitLab pentru repozitoriile GitLab private."
 
 #: src/GitHub_Updater/Install.php:442
 msgid "Activate"
-msgstr ""
+msgstr "Activeaza"
 
 #: src/GitHub_Updater/Install.php:451
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
-msgstr ""
+msgstr "Activeaza reteaua"
 
 #: src/GitHub_Updater/Messages.php:80
 #, php-format
@@ -155,7 +154,7 @@ msgstr "Setari"
 
 #: src/GitHub_Updater/Settings.php:81 src/GitHub_Updater/Settings.php:493
 msgid "Remote Management"
-msgstr ""
+msgstr "Operare de la distanta"
 
 #: src/GitHub_Updater/Settings.php:92 src/GitHub_Updater/Settings.php:100
 #: src/GitHub_Updater/Settings.php:195
@@ -173,23 +172,20 @@ msgid "Saved."
 msgstr "Salvat."
 
 #: src/GitHub_Updater/Settings.php:202
-#, fuzzy
 msgid "Enable Branch Switching"
-msgstr "Actieaza schimbarea ramurelor pentru Module"
+msgstr "Actieaza schimbarea ramurelor"
 
 #: src/GitHub_Updater/Settings.php:214
 msgid "Personal GitHub Access Token"
 msgstr "Jeton Personal de Acces GitHub"
 
 #: src/GitHub_Updater/Settings.php:221
-#, fuzzy
 msgid "GitHub.com Access Token"
-msgstr "Jeton de Acces Github"
+msgstr "Jeton de Acces Github.com"
 
 #: src/GitHub_Updater/Settings.php:231
-#, fuzzy
 msgid "GitHub Enterprise Access Token"
-msgstr "Jeton de Acces Github"
+msgstr "Jeton de Acces Github Enterprise "
 
 #: src/GitHub_Updater/Settings.php:245
 msgid "GitHub Private Settings"
@@ -234,12 +230,12 @@ msgstr "Teme:"
 #: src/GitHub_Updater/Settings.php:542
 #, php-format
 msgid "Extended Naming is %sactive%s."
-msgstr ""
+msgstr "Numele Extins este %sactiv%s."
 
 #: src/GitHub_Updater/Settings.php:547
 #, php-format
 msgid "Extended Naming is %snot active%s."
-msgstr ""
+msgstr "Numele Extins este %sinactiv%s."
 
 #: src/GitHub_Updater/Settings.php:549
 #, php-format
@@ -247,29 +243,31 @@ msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
 "with WP.org plugins."
 msgstr ""
+"Numirea Extinsa redenumeste folderul modulelor %s pentru a preveni conflicte "
+"cu module WP.org"
 
 #: src/GitHub_Updater/Settings.php:550
 #, php-format
 msgid "Activate Extended Naming by setting %s"
-msgstr ""
+msgstr "Activeaza Numirea Extinsa setand %s"
 
 #: src/GitHub_Updater/Settings.php:551
-#, fuzzy
 msgid "Check to enable branch switching from the Plugins or Themes page."
-msgstr " Bifeaza pentru a activa schimbarea ramurelor de pe pagina Modulelor."
+msgstr ""
+" Bifeaza pentru a activa schimbarea ramurelor de pe pagina Modulelor sau a "
+"Temelor."
 
 #: src/GitHub_Updater/Settings.php:558
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr "Introdu Jetonul de Acces GitHub. Lasa gol pentru repozitorii publice."
 
 #: src/GitHub_Updater/Settings.php:565
-#, fuzzy
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
 "API access limits."
 msgstr ""
-"Introdu Jetonul Personal de Acces GitHub pentru a evita limitele de acces "
-"API."
+"Introdu Jetonul Personal de Acces GitHub.com sau GitHub Enterprise pentru a "
+"evita limitele de acces API."
 
 #: src/GitHub_Updater/Settings.php:572
 msgid ""
@@ -290,6 +288,8 @@ msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
 msgstr ""
+"Utilizarea operarii de la distanta ar putea rezulta in cresterea timpilor de "
+"incarcare doar pentru nivelul 'admin' de utilizator in panoul de control"
 
 #: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
@@ -350,6 +350,9 @@ msgid ""
 "and themes. It also allows for remote installation of plugins or themes into "
 "WordPress."
 msgstr ""
+"Un modul pentru actualizarea automata a temelor sau modulelor gazduite pe "
+"GitHub, Bitbucket sau GitLab. De asemenea da posibilitatea operarii de la "
+"distanta a modulelor si temelor in WordPress"
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
