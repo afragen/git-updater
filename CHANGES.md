@@ -1,8 +1,6 @@
-#### 5.3.2
-* fix remote install [#325](https://github.com/afragen/github-updater/issues/325)
-
 #### 5.3.1
 * fix PHP notice during remote installation
+* fix remote install [#325](https://github.com/afragen/github-updater/issues/325)
 
 #### 5.3.0
 * fix parsing of `readme.txt` for donate link
