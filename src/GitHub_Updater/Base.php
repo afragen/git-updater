@@ -372,7 +372,7 @@ class Base {
 		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
-				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 
 			/*
@@ -382,7 +382,7 @@ class Base {
 				foreach ( array_reverse( $plugins ) as $plugin ) {
 					$slug = dirname( $plugin );
 					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
-						$new_source = trailingslashit( $remote_source ) . trailingslashit( dirname( $plugin ) );
+						$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
 						break;
 					}
 				}
@@ -394,7 +394,7 @@ class Base {
 				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
 					$slug = sanitize_text_field( $_POST['slug'] );
 				}
-				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 		}
 
@@ -404,7 +404,7 @@ class Base {
 		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
-				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 
 			/*
@@ -414,7 +414,7 @@ class Base {
 				foreach ( $themes as $theme ) {
 					$slug = $theme;
 					if ( false !== stristr( basename( $source ), $theme ) ) {
-						$new_source = trailingslashit( $remote_source ) . trailingslashit( $theme );
+						$new_source = trailingslashit( $remote_source ) . $theme;
 						break;
 					}
 				}
@@ -423,7 +423,7 @@ class Base {
 				if ( isset( $upgrader->skin->theme ) ) {
 					$slug = $upgrader->skin->theme;
 				}
-				$new_source = trailingslashit( $remote_source ) . trailingslashit( $slug );
+				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 		}
 
@@ -441,7 +441,7 @@ class Base {
 		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
 			$repo['repo'] = self::$options['github_updater_install_repo'];
-			$new_source   = trailingslashit( $remote_source ) . trailingslashit( self::$options['github_updater_install_repo'] );
+			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
 		/*
@@ -451,7 +451,7 @@ class Base {
 		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     $slug !== $repo['repo']
 		) {
-			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['repo'] );
+			$new_source = trailingslashit( $remote_source ) . $repo['repo'];
 		}
 
 		/*
@@ -463,7 +463,7 @@ class Base {
 		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
-			$new_source = trailingslashit( $remote_source ) . trailingslashit( $repo['extended_repo'] );;
+			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
 					'<strong>' . $repo['extended_repo'] . '</strong>'
 			);
@@ -471,7 +471,7 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
-		return $new_source;
+		return trailingslashit( $new_source );
 	}
 
 	/**

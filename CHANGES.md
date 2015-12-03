@@ -1,3 +1,6 @@
+#### 5.3.2
+* code simplification for `upgrader_source_selection`
+
 #### 5.3.1
 * fix PHP notice during remote installation
 * fix remote install [#325](https://github.com/afragen/github-updater/issues/325)
