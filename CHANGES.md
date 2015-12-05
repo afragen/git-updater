@@ -1,6 +1,6 @@
 #### 5.3.2
 * code simplification for `upgrader_source_selection`
-* fix for plugin branch switching to override _up-to-date_ message
+* fix for plugin branch switching to override _up-to-date_ message (most of the time)
 
 #### 5.3.1
 * fix PHP notice during remote installation
