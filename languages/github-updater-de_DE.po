@@ -176,7 +176,7 @@ msgstr "Wechsel des Pluginbranches Aktivieren"
 
 #: src/GitHub_Updater/Settings.php:214
 msgid "Personal GitHub Access Token"
-msgstr "Persönliches GitHub Access Tiken"
+msgstr "Persönlicher GitHub Access Token"
 
 #: src/GitHub_Updater/Settings.php:221
 #, fuzzy
