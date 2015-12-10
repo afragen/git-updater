@@ -152,6 +152,17 @@ class Theme extends Base {
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+				$git_theme['is_link']                 = false;
+			}
+
+			/*
+			* For development when theme directory is a symlink - identify so we can abort an update.
+			*/
+			$local_path = $git_theme['local_path'] . 'style.css';
+			$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
+			$real_path  = realpath( $git_theme['local_path'] . 'style.css' );
+			if ( $real_path && $local_path !== $real_path ) {
+				$git_theme['is_link']                 = true;
 			}
 
 			/*
@@ -221,6 +232,10 @@ class Theme extends Base {
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
+
+				if ( $theme->is_link ) {
+					$rollback['package'] = 'This is a symlinked, development environment theme.';
+				}
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}
@@ -620,6 +635,13 @@ class Theme extends Base {
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
 			);
+
+			/*
+			 * Don't overwrite if it's a symlinked directory.
+			 */
+			if ( $theme->is_link ) {
+				$update['package'] = 'This is a symlinked, development environment theme.';
+			}
 
 			if ( $this->can_update( $theme ) ) {
 				$transient->response[ $theme->repo ] = $update;

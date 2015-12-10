@@ -172,9 +172,20 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
+				$git_plugin['is_link']                 = false;
 			}
 			if ( isset( $all_plugins[ $plugin ]->id )  ) {
 				$git_plugin['dot_org']                 = true;
+			}
+
+			/*
+			 * For development when plugin directory is a symlink - identify so we can abort an update.
+			 */
+			$local_path = $git_plugin['local_path'] . basename( $plugin );
+			$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
+			$real_path  = realpath( $git_plugin['local_path'] . basename( $plugin ) );
+			if (  $local_path !== $real_path ) {
+				$git_plugin['is_link']                 = true;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -239,6 +250,10 @@ class Plugin extends Base {
 					'url'         => $plugin->uri,
 					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
+
+				if ( $plugin->is_link ) {
+					$rollback['package'] = 'This is a symlinked, development environment plugin.';
+				}
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
@@ -474,6 +489,13 @@ class Plugin extends Base {
 				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
+				}
+
+				/*
+				 * Don't overwrite if it's a symlinked directory.
+				 */
+				if ( $plugin->is_link ) {
+					$response['package'] = 'This is a symlinked, development environment plugin.';
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
