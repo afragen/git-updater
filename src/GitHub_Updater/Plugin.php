@@ -181,11 +181,13 @@ class Plugin extends Base {
 			/*
 			 * For development when plugin directory is a symlink - identify so we can abort an update.
 			 */
-			$local_path = $git_plugin['local_path'] . basename( $plugin );
-			$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
-			$real_path  = realpath( $git_plugin['local_path'] . basename( $plugin ) );
-			if (  $local_path !== $real_path ) {
-				$git_plugin['is_link']                 = true;
+			if ( isset( $git_plugin['local_path'] ) ) {
+				$local_path = $git_plugin['local_path'] . basename( $plugin );
+				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
+				$real_path  = realpath( $git_plugin['local_path'] . basename( $plugin ) );
+				if (  $local_path !== $real_path ) {
+					$git_plugin['is_link'] = true;
+				}
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -250,10 +252,6 @@ class Plugin extends Base {
 					'url'         => $plugin->uri,
 					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
-
-				if ( $plugin->is_link ) {
-					$rollback['package'] = 'This is a symlinked, development environment plugin.';
-				}
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
@@ -370,6 +368,10 @@ class Plugin extends Base {
 					esc_html__( 'View details', 'github-updater' )
 				);
 			}
+		}
+
+		if ( isset( $this->config[ $repo ] ) && $this->config[ $repo ]->is_link ) {
+			$links[] = '<strong>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</strong>' ;
 		}
 
 		return $links;
@@ -492,10 +494,10 @@ class Plugin extends Base {
 				}
 
 				/*
-				 * Don't overwrite if it's a symlinked directory.
+				 * Warning message if it's a symlinked directory.
 				 */
 				if ( $plugin->is_link ) {
-					$response['package'] = 'This is a symlinked, development environment plugin.';
+					$response['upgrade_notice'] = esc_html__( 'This is a symlink directory.', 'github-updater' );
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;

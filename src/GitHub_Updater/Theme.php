@@ -158,11 +158,13 @@ class Theme extends Base {
 			/*
 			* For development when theme directory is a symlink - identify so we can abort an update.
 			*/
-			$local_path = $git_theme['local_path'] . 'style.css';
-			$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
-			$real_path  = realpath( $git_theme['local_path'] . 'style.css' );
-			if ( $real_path && $local_path !== $real_path ) {
-				$git_theme['is_link']                 = true;
+			if ( isset( $git_theme['local_path'] ) ) {
+				$local_path = $git_theme['local_path'] . 'style.css';
+				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
+				$real_path  = realpath( $git_theme['local_path'] . 'style.css' );
+				if ( $real_path && $local_path !== $real_path ) {
+					$git_theme['is_link'] = true;
+				}
 			}
 
 			/*
@@ -232,10 +234,6 @@ class Theme extends Base {
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
-
-				if ( $theme->is_link ) {
-					$rollback['package'] = 'This is a symlinked, development environment theme.';
-				}
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}
@@ -266,6 +264,7 @@ class Theme extends Base {
 		}
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
+		add_filter( 'theme_row_meta', array( &$this, 'theme_row_meta' ), 10, 2 );
 	}
 
 	/**
@@ -561,19 +560,22 @@ class Theme extends Base {
 			?>
 			<strong><br />
 				<?php
-					printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
+				printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
 						$theme->name
-					);
-					printf( ' <a href="%s" class="thickbox" title="%s">',
+				);
+				printf( ' <a href="%s" class="thickbox" title="%s">',
 						$details_url,
 						esc_attr( $theme->name )
-					);
-					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
+				);
+				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 						$theme->remote_version,
 						'</a>',
 						'<a href="' . $update_url . '">',
 						'</a>'
-					);
+				);
+				if ( $theme->is_link ) {
+					print( '<p>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</p>' );
+				}
 				?>
 			</strong>
 			<?php
@@ -592,6 +594,9 @@ class Theme extends Base {
 					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 					'</a>'
 				);
+				if ( $theme->is_link ) {
+					print( '<p>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</p>' );
+				}
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
@@ -611,6 +616,23 @@ class Theme extends Base {
 
 			return trim( ob_get_clean(), '1' );
 		}
+	}
+
+	/**
+	 * Place notice in theme row warning that this is likely a symlink directory.
+	 *
+	 * @param $links
+	 * @param $file
+	 *
+	 * @return array
+	 */
+	public function theme_row_meta( $links, $file ) {
+
+		if ( isset( $this->config[ $file ] ) && $this->config[ $file ]->is_link ) {
+			$links[] = '<strong>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</strong>';
+		}
+
+		return $links;
 	}
 
 	/**
@@ -637,10 +659,10 @@ class Theme extends Base {
 			);
 
 			/*
-			 * Don't overwrite if it's a symlinked directory.
+			 * Warning message if it's a symlinked directory.
 			 */
 			if ( $theme->is_link ) {
-				$update['package'] = 'This is a symlinked, development environment theme.';
+				$update['upgrade_notice'] = esc_html__( 'This is a symlink directory.', 'github-updater' );
 			}
 
 			if ( $this->can_update( $theme ) ) {
