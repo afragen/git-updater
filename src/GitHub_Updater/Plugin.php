@@ -181,7 +181,7 @@ class Plugin extends Base {
 			/*
 			 * For development when plugin directory is a symlink - identify so we can abort an update.
 			 */
-			if ( isset( $git_plugin['local_path'] ) ) {
+			if ( defined( 'LOCALHOST_DEVELOPMENT' ) && LOCALHOST_DEVELOPMENT ) {
 				$local_path = $git_plugin['local_path'] . basename( $plugin );
 				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
 				$real_path  = realpath( $git_plugin['local_path'] . basename( $plugin ) );

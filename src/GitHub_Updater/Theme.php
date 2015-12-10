@@ -158,7 +158,7 @@ class Theme extends Base {
 			/*
 			* For development when theme directory is a symlink - identify so we can abort an update.
 			*/
-			if ( isset( $git_theme['local_path'] ) ) {
+			if ( defined( 'LOCALHOST_DEVELOPMENT' ) && LOCALHOST_DEVELOPMENT ) {
 				$local_path = $git_theme['local_path'] . 'style.css';
 				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
 				$real_path  = realpath( $git_theme['local_path'] . 'style.css' );
