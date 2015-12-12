@@ -152,19 +152,6 @@ class Theme extends Base {
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
-				$git_theme['is_link']                 = false;
-			}
-
-			/*
-			* For development when theme directory is a symlink - identify so we can abort an update.
-			*/
-			if ( defined( 'LOCALHOST_DEVELOPMENT' ) && LOCALHOST_DEVELOPMENT ) {
-				$local_path = $git_theme['local_path'] . 'style.css';
-				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
-				$real_path  = realpath( $git_theme['local_path'] . 'style.css' );
-				if ( $real_path && $local_path !== $real_path ) {
-					$git_theme['is_link'] = true;
-				}
 			}
 
 			/*
@@ -573,9 +560,7 @@ class Theme extends Base {
 						'<a href="' . $update_url . '">',
 						'</a>'
 				);
-				if ( $theme->is_link ) {
-					print( '<p>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</p>' );
-				}
+				echo apply_filters( 'github_updater_append_theme_action', null, $theme );
 				?>
 			</strong>
 			<?php
@@ -594,9 +579,7 @@ class Theme extends Base {
 					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 					'</a>'
 				);
-				if ( $theme->is_link ) {
-					print( '<p>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</p>' );
-				}
+				echo apply_filters( 'github_updater_append_theme_action', null, $theme );
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
@@ -619,7 +602,7 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Place notice in theme row warning that this is likely a symlink directory.
+	 * Place notice in theme row.
 	 *
 	 * @param $links
 	 * @param $file
@@ -628,11 +611,7 @@ class Theme extends Base {
 	 */
 	public function theme_row_meta( $links, $file ) {
 
-		if ( isset( $this->config[ $file ] ) && $this->config[ $file ]->is_link ) {
-			$links[] = '<strong>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</strong>';
-		}
-
-		return $links;
+		return apply_filters( 'github_updater_theme_row_meta', $links, $file );
 	}
 
 	/**
@@ -658,12 +637,7 @@ class Theme extends Base {
 				'package'     => $theme->download_link,
 			);
 
-			/*
-			 * Warning message if it's a symlinked directory.
-			 */
-			if ( $theme->is_link ) {
-				$update['upgrade_notice'] = esc_html__( 'This is a symlink directory.', 'github-updater' );
-			}
+			$update = apply_filters( 'github_updater_theme_transient_update', $update );
 
 			if ( $this->can_update( $theme ) ) {
 				$transient->response[ $theme->repo ] = $update;

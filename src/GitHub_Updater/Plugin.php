@@ -172,22 +172,9 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
-				$git_plugin['is_link']                 = false;
 			}
 			if ( isset( $all_plugins[ $plugin ]->id )  ) {
 				$git_plugin['dot_org']                 = true;
-			}
-
-			/*
-			 * For development when plugin directory is a symlink - identify so we can abort an update.
-			 */
-			if ( defined( 'LOCALHOST_DEVELOPMENT' ) && LOCALHOST_DEVELOPMENT ) {
-				$local_path = $git_plugin['local_path'] . basename( $plugin );
-				$local_path = str_replace( '/' . $_SERVER['HTTP_HOST'], '', $local_path );
-				$real_path  = realpath( $git_plugin['local_path'] . basename( $plugin ) );
-				if (  $local_path !== $real_path ) {
-					$git_plugin['is_link'] = true;
-				}
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -370,11 +357,7 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( isset( $this->config[ $repo ] ) && $this->config[ $repo ]->is_link ) {
-			$links[] = '<strong>' . esc_html__( 'This is a symlink directory.', 'github-updater' ) . '</strong>' ;
-		}
-
-		return $links;
+		return apply_filters( 'github_updater_plugin_row_meta', $links, $file );
 	}
 
 	/**
@@ -477,6 +460,8 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 				);
 
+				$response = apply_filters( 'github_updater_plugin_transient_update', $response );
+
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
@@ -491,13 +476,6 @@ class Plugin extends Base {
 				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
-				}
-
-				/*
-				 * Warning message if it's a symlinked directory.
-				 */
-				if ( $plugin->is_link ) {
-					$response['upgrade_notice'] = esc_html__( 'This is a symlink directory.', 'github-updater' );
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
