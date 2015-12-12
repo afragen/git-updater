@@ -1,6 +1,12 @@
 #### 5.3.2
 * code simplification for `upgrader_source_selection`
 * fix for plugin branch switching to override _up-to-date_ message (most of the time)
+* added filters for developers, well I wanted them anyway ;-)
+	* `github_updater_plugin_transient_update`
+	* `github_updater_theme_transient_update`
+	* `github_updater_plugin_row_meta`
+	* `github_updater_theme_row_meta`
+	* `github_updater_append_theme_action`
 
 #### 5.3.1
 * fix PHP notice during remote installation
