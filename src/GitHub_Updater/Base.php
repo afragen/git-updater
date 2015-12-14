@@ -396,6 +396,19 @@ class Base {
 				}
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
+
+			/*
+			 * Plugin directory is misnamed to start.
+			 */
+			if ( ! in_array( $slug, $this->config ) ) {
+				foreach ( $this->config as $plugin ) {
+					if ( $slug === dirname( $plugin->slug ) ) {
+						$slug       = $plugin->repo;
+						$new_source = trailingslashit( $remote_source ) . $slug;
+						break;
+					}
+				}
+			}
 		}
 
 		/*

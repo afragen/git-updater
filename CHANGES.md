@@ -7,6 +7,7 @@
 	* `github_updater_plugin_row_meta`
 	* `github_updater_theme_row_meta`
 	* `github_updater_append_theme_action`
+* fix for renaming of updating plugins that were never initially renamed when first installed. Strange bug.
 
 #### 5.3.1
 * fix PHP notice during remote installation
