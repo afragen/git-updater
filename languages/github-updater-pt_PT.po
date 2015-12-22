@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-12-21 19:41-0800\n"
-"PO-Revision-Date: 2015-12-21 19:41-0800\n"
+"PO-Revision-Date: 2015-12-22 14:47+0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -350,7 +350,6 @@ msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
-#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins "
 "and themes. It also allows for remote installation of plugins or themes into "
@@ -363,12 +362,3 @@ msgstr ""
 #. Author of the plugin/theme
 msgid "Andy Fragen"
 msgstr "Andy Fragen"
-
-#~ msgid "Renaming %1$s to %2$s"
-#~ msgstr "Renomear %1$s para %2$s"
-
-#~ msgid "Rename successful"
-#~ msgstr "Renomeado com sucesso"
-
-#~ msgid "Unable to rename downloaded repository."
-#~ msgstr "Não foi possível renomear o repositório descarregado."
