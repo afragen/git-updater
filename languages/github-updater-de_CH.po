@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-11-25 20:31-0800\n"
-"PO-Revision-Date: 2015-11-25 20:31-0800\n"
+"POT-Creation-Date: 2015-12-21 19:42-0800\n"
+"PO-Revision-Date: 2015-12-21 19:43-0800\n"
 "Last-Translator: Linus Metzler <linus.metzler@gmail.com>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: de_CH\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr "Aktiviert als mu-Plugin"
 
-#: src/GitHub_Updater/Base.php:466
+#: src/GitHub_Updater/Base.php:480
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr "Umbenennen erfolgreich, der erweiterte Name %1$s wird nun verwendet"
@@ -137,7 +137,7 @@ msgstr ""
 "Sie müssen ein privates GitLab.com, GitLab CE oder GitLab Enterprise Token "
 "eingeben."
 
-#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:459
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:460
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
@@ -176,7 +176,7 @@ msgstr "Wechsel des Pluginbranches Aktivieren"
 
 #: src/GitHub_Updater/Settings.php:214
 msgid "Personal GitHub Access Token"
-msgstr "Persönliches GitHub Access Tiken"
+msgstr "Persönlicher GitHub Access Token"
 
 #: src/GitHub_Updater/Settings.php:221
 #, fuzzy
@@ -297,54 +297,54 @@ msgstr ""
 "Verwenden von Fernwartung/-managementdiensten kann eine höhere "
 "Seiteladezeiten zur Folge haben für `Admin`-Level Benutzer auf dem Dashboard"
 
-#: src/GitHub_Updater/Theme.php:359
+#: src/GitHub_Updater/Theme.php:360
 msgid "Theme is up-to-date!"
 msgstr "Theme ist auf dem neusten Stand!"
 
-#: src/GitHub_Updater/Theme.php:364
+#: src/GitHub_Updater/Theme.php:365
 msgid "Rollback to:"
 msgstr "Rollback zu:"
 
-#: src/GitHub_Updater/Theme.php:382
+#: src/GitHub_Updater/Theme.php:383
 msgid "No previous tags to rollback to."
 msgstr "Keine früheren Tags für ein Rollback."
 
-#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
+#: src/GitHub_Updater/Theme.php:391 src/GitHub_Updater/Theme.php:405
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater hat eine neue Version von %s gefunden."
 
-#: src/GitHub_Updater/Theme.php:397
+#: src/GitHub_Updater/Theme.php:398
 #, php-format
 msgid "View version %s details."
 msgstr "Zeige Details der Version %s"
 
-#: src/GitHub_Updater/Theme.php:401
+#: src/GitHub_Updater/Theme.php:402
 msgid "Automatic update is unavailable for this theme."
 msgstr "Automatisches Update ist nicht verfügbar für dieses Theme."
 
-#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:556
+#: src/GitHub_Updater/Theme.php:412 src/GitHub_Updater/Theme.php:557
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Zeige Details der Version%1$s %2$s oder %3$saktualisiere jetzt%4$s."
 
-#: src/GitHub_Updater/Theme.php:549
+#: src/GitHub_Updater/Theme.php:550
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Es ist eine neue Version von %s verfügbar."
 
-#: src/GitHub_Updater/Theme.php:576
+#: src/GitHub_Updater/Theme.php:585
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr ""
 "Die aktuelle Version ist auf dem neuesten Stand. Versuchen Sie %seine andere "
 "Version%s"
 
-#: src/GitHub_Updater/Theme.php:590
+#: src/GitHub_Updater/Theme.php:607
 msgid "Choose a Version"
 msgstr "Wählen Sie eine Version"
 
-#: src/GitHub_Updater/Theme.php:593
+#: src/GitHub_Updater/Theme.php:610
 msgid "Install"
 msgstr "Installieren"
 
@@ -353,8 +353,9 @@ msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
+#, fuzzy
 msgid ""
-"A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins "
+"A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins "
 "and themes. It also allows for remote installation of plugins or themes into "
 "WordPress."
 msgstr ""
