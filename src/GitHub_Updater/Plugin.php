@@ -357,15 +357,7 @@ class Plugin extends Base {
 			}
 		}
 
-		/**
-		 * Filter whether to add an element to the plugin row meta.
-		 *
-		 * @since 5.3.2
-		 *
-		 * @param array     $links
-		 * @param string    $file
-		 */
-		return apply_filters( 'github_updater_plugin_row_meta', $links, $file );
+		return $links;
 	}
 
 	/**
@@ -467,15 +459,6 @@ class Plugin extends Base {
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,
 				);
-
-				/**
-				 * Filter to add an element to the transient response array.
-				 *
-				 * @since 5.3.2
-				 *
-				 * @param   array   $response   Array that is saved in update transient.
-				 */
-				$response = apply_filters( 'github_updater_plugin_transient_update', $response );
 
 				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org

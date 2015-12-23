@@ -1,3 +1,6 @@
+#### 5.3.3
+* remove added filters, below as they didn't add functionality to this plugin.
+
 #### 5.3.2
 * code simplification for `upgrader_source_selection`
 * fix for plugin branch switching to override _up-to-date_ message (most of the time)
