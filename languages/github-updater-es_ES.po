@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-12-21 19:42-0800\n"
-"PO-Revision-Date: 2015-12-21 19:42-0800\n"
+"POT-Creation-Date: 2015-12-23 13:30-0800\n"
+"PO-Revision-Date: 2015-12-23 13:30-0800\n"
 "Last-Translator: esoj <yo@josemiguel.org>\n"
 "Language-Team: Andy Fragen <andy@thefragens.com>\n"
 "Language: es\n"
@@ -135,7 +135,7 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:460
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:458
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "La rama actual es `%1$s`, intenta %2$sanother branch%3$s."
@@ -293,52 +293,52 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:360
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "El tema está actualizado!"
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:364
 msgid "Rollback to:"
 msgstr "Retroceder a:"
 
-#: src/GitHub_Updater/Theme.php:383
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "No hay etiquetas anteriores donde revertir."
 
-#: src/GitHub_Updater/Theme.php:391 src/GitHub_Updater/Theme.php:405
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater muestra una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:398
+#: src/GitHub_Updater/Theme.php:397
 #, php-format
 msgid "View version %s details."
 msgstr "Ver detalles de la versión de %s"
 
-#: src/GitHub_Updater/Theme.php:402
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "Este tema no permite actualizaciones automáticas."
 
-#: src/GitHub_Updater/Theme.php:412 src/GitHub_Updater/Theme.php:557
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:555
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Ver %1$s details%2$s de la versión o %3$sactualiza ahora%4$s."
 
-#: src/GitHub_Updater/Theme.php:550
+#: src/GitHub_Updater/Theme.php:548
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Existe una nueva versión de %s disponible."
 
-#: src/GitHub_Updater/Theme.php:585
+#: src/GitHub_Updater/Theme.php:575
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "La versión actual está actualizada. Intenta con %sanother version%s"
 
-#: src/GitHub_Updater/Theme.php:607
+#: src/GitHub_Updater/Theme.php:589
 msgid "Choose a Version"
 msgstr "Elige una versión"
 
-#: src/GitHub_Updater/Theme.php:610
+#: src/GitHub_Updater/Theme.php:592
 msgid "Install"
 msgstr "Instalar"
 
