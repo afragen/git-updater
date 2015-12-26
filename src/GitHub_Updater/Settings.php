@@ -57,12 +57,12 @@ class Settings extends Base {
 	 * Start up
 	 */
 	public function __construct() {
-		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( $this, 'add_plugin_page' ) );
-		add_action( 'network_admin_edit_github-updater', array( $this, 'update_network_setting' ) );
-		add_action( 'admin_init', array( $this, 'page_init' ) );
-		add_action( 'admin_init', array( $this, 'remote_management_page_init' ) );
+		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
+		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_network_setting' ) );
+		add_action( 'admin_init', array( &$this, 'page_init' ) );
+		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
-		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( $this, 'plugin_action_links' ) );
+		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( &$this, 'plugin_action_links' ) );
 	}
 
 	/**
@@ -93,7 +93,7 @@ class Settings extends Base {
 				esc_html__( 'GitHub Updater', 'github-updater' ),
 				'manage_network',
 				'github-updater',
-				array( $this, 'create_admin_page' )
+				array( &$this, 'create_admin_page' )
 			);
 		} else {
 			add_options_page(
@@ -101,7 +101,7 @@ class Settings extends Base {
 				esc_html__( 'GitHub Updater', 'github-updater' ),
 				'manage_options',
 				'github-updater',
-				array( $this, 'create_admin_page' )
+				array( &$this, 'create_admin_page' )
 			);
 		}
 	}
@@ -182,7 +182,7 @@ class Settings extends Base {
 		register_setting(
 			'github_updater',           // Option group
 			'github_updater',           // Option name
-			array( $this, 'sanitize' )  // Sanitize
+			array( &$this, 'sanitize' )  // Sanitize
 		);
 
 		$this->ghu_tokens();
@@ -193,14 +193,14 @@ class Settings extends Base {
 		add_settings_section(
 			'github_updater_settings',
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			array( $this, 'print_section_ghu_settings'),
+			array( &$this, 'print_section_ghu_settings'),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'branch_switch',
 			esc_html__( 'Enable Branch Switching', 'github-updater' ),
-			array( $this, 'token_callback_checkbox' ),
+			array( &$this, 'token_callback_checkbox' ),
 			'github_updater_install_settings',
 			'github_updater_settings',
 			array( 'id' => 'branch_switch' )
@@ -212,14 +212,14 @@ class Settings extends Base {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'Personal GitHub Access Token', 'github-updater' ),
-			array( $this, 'print_section_github_access_token' ),
+			array( &$this, 'print_section_github_access_token' ),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( $this, 'token_callback_text' ),
+			array( &$this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'github_access_token',
 			array( 'id' => 'github_access_token' )
@@ -229,7 +229,7 @@ class Settings extends Base {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( $this, 'token_callback_text' ),
+				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'github_access_token',
 				array( 'id' => 'github_enterprise_token' )
@@ -243,7 +243,7 @@ class Settings extends Base {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( $this, 'print_section_github_info' ),
+				array( &$this, 'print_section_github_info' ),
 				'github_updater_install_settings'
 			);
 		}
@@ -256,7 +256,7 @@ class Settings extends Base {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
-				array( $this, 'print_section_gitlab_token' ),
+				array( &$this, 'print_section_gitlab_token' ),
 				'github_updater_install_settings'
 			);
 		}
@@ -265,7 +265,7 @@ class Settings extends Base {
 			add_settings_field(
 				'gitlab_private_token',
 				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
-				array( $this, 'token_callback_text' ),
+				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_private_token' )
@@ -276,7 +276,7 @@ class Settings extends Base {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
-				array( $this, 'token_callback_text' ),
+				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_enterprise_token' )
@@ -289,14 +289,14 @@ class Settings extends Base {
 		add_settings_section(
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			array( $this, 'print_section_bitbucket_username' ),
+			array( &$this, 'print_section_bitbucket_username' ),
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_username',
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
-			array( $this, 'token_callback_text' ),
+			array( &$this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_username' )
@@ -305,7 +305,7 @@ class Settings extends Base {
 		add_settings_field(
 			'bitbucket_password',
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
-			array( $this, 'token_callback_text' ),
+			array( &$this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_password' )
@@ -318,7 +318,7 @@ class Settings extends Base {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
-				array( $this, 'print_section_bitbucket_info' ),
+				array( &$this, 'print_section_bitbucket_info' ),
 				'github_updater_install_settings'
 			);
 		}
@@ -427,17 +427,17 @@ class Settings extends Base {
 			switch ( $token->type ) {
 				case ( strpos( $token->type, 'github' ) ):
 					$setting_field['section']         = 'github_id';
-					$setting_field['callback_method'] = array( $this, 'token_callback_text' );
+					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
 				case ( strpos( $token->type, 'bitbucket' ) ):
 					$setting_field['section']         = 'bitbucket_id';
-					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
+					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
 				case ( strpos( $token->type, 'gitlab' ) ):
 					$setting_field['section']         = 'gitlab_id';
-					$setting_field['callback_method'] = array( $this, 'token_callback_checkbox' );
+					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
 			}
@@ -485,13 +485,13 @@ class Settings extends Base {
 		register_setting(
 			'github_updater_remote_management',
 			'github_updater_remote_settings',
-			array( $this, 'sanitize' )
+			array( &$this, 'sanitize' )
 		);
 
 		add_settings_section(
 			'remote_management',
 			esc_html__( 'Remote Management', 'github-updater' ),
-			array( $this, 'print_section_remote_management' ),
+			array( &$this, 'print_section_remote_management' ),
 			'github_updater_remote_settings'
 		);
 
@@ -499,7 +499,7 @@ class Settings extends Base {
 			add_settings_field(
 				$id,
 				esc_html__( $name ),
-				array( $this, 'token_callback_checkbox_remote' ),
+				array( &$this, 'token_callback_checkbox_remote' ),
 				'github_updater_remote_settings',
 				'remote_management',
 				array( 'id' => $id )
