@@ -11,10 +11,12 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 		$this->start_transaction();
 	}
 
-	function tearDown() {
+
+/*  function tearDown() {
 		global $wpdb;
 		$wpdb->query( 'ROLLBACK' );
 	}
+*/
 
 	function clean_up_global_scope() {
 		$_GET = array();
