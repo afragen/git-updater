@@ -12,6 +12,7 @@
  */
 
 require_once ( dirname( __FILE__ ) . '/lib/testcase.php' );
+global $wpdb, $current_site, $current_blog, $wp_rewrite, $shortcode_tags, $wp;
 
 $GLOBALS['wp_tests_options'] = array(
 	'active_plugins' => array( 'github-updater/github-updater.php' ),

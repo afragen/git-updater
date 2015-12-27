@@ -12,9 +12,8 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 
 	function tearDown() {
-		parent::tearDown();
 		global $wpdb;
-		//$wpdb->query( 'ROLLBACK' );
+		$wpdb->query( 'ROLLBACK' );
 	}
 
 	function clean_up_global_scope() {
