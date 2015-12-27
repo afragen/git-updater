@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2015-12-23 13:29-0800\n"
-"PO-Revision-Date: 2015-12-23 13:29-0800\n"
+"PO-Revision-Date: 2015-12-27 21:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
@@ -345,15 +345,14 @@ msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
-#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins "
 "and themes. It also allows for remote installation of plugins or themes into "
 "WordPress."
 msgstr ""
 "Un modul pentru actualizarea automata a temelor sau modulelor gazduite pe "
-"GitHub, Bitbucket sau GitLab. De asemenea da posibilitatea operarii de la "
-"distanta a modulelor si temelor in WordPress"
+"GitHub, Bitbucket sau GitLab. De asemenea ofera posibilitatea instalarii de "
+"la distanta a modulelor si temelor in WordPress"
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"
