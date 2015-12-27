@@ -11,6 +11,8 @@
  *
  */
 
+require_once 'PHPUnit/Autoload.php';
+
 $GLOBALS['wp_tests_options'] = array(
 	'active_plugins' => array( 'github-updater/github-updater.php' ),
 );
