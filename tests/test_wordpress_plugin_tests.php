@@ -45,7 +45,7 @@ class WP_Test_WordPress_Plugin_Tests extends \WP_UnitTestCase {
 	 */
 	function test_plugin_activated() {
 
-		$this->assertTrue( is_plugin_active( 'plugin-slug/main-plugin-file.php' ) );
+		$this->assertTrue( is_plugin_active( 'github-updater/github-updater.php' ) );
 
 	}
 
