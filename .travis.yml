@@ -20,11 +20,9 @@ php:
 env:
     - WP_VERSION=master WP_MULTISITE=0
     - WP_VERSION=4.4 WP_MULTISITE=0
-    - WP_VERSION=4.3 WP_MULTISITE=0
     - WP_VERSION=3.8.0 WP_MULTISITE=0
     - WP_VERSION=master WP_MULTISITE=1
     - WP_VERSION=4.4 WP_MULTISITE=1
-    - WP_VERSION=4.3 WP_MULTISITE=1
     - WP_VERSION=3.8.0 WP_MULTISITE=1
 
 
@@ -47,7 +45,7 @@ matrix:
     - php: hhvm-nightly
 
 # Clones WordPress and configures our testing environment.
-#before_script:
+before_script:
 #    - export PLUGIN_SLUG=$(basename $(pwd))
 #    - git clone https://github.com/tierra/wordpress.git /tmp/wordpress
 #    - git clone . "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
@@ -62,4 +60,4 @@ matrix:
 #    - sed -i "s/yourpasswordhere//" wp-tests-config.php
 #    - cd "/tmp/wordpress/src/wp-content/plugins/$PLUGIN_SLUG"
 
-#script: phpunit
+script: phpunit
