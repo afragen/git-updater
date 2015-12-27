@@ -90,9 +90,9 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 
 		$this->flush_cache();
 		unset($GLOBALS['wp_query'], $GLOBALS['wp_the_query']);
-		$GLOBALS['wp_the_query'] =& new WP_Query();
-		$GLOBALS['wp_query'] =& $GLOBALS['wp_the_query'];
-		$GLOBALS['wp'] =& new WP();
+		$GLOBALS['wp_the_query'] = new WP_Query();
+		$GLOBALS['wp_query'] = $GLOBALS['wp_the_query'];
+		$GLOBALS['wp'] = new WP();
 
 		// clean out globals to stop them polluting wp and wp_query
 		foreach ($GLOBALS['wp']->public_query_vars as $v) {
