@@ -1,6 +1,7 @@
 #### 5.3.3
 * remove added filters, below as they didn't add functionality to this plugin.
 * try to use references to `&$this`
+* added PHPUnit testing setup, I could use help writing tests. A great way to contribute. :-)
 
 #### 5.3.2
 * code simplification for `upgrader_source_selection`
