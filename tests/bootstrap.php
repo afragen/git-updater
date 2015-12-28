@@ -1,21 +1,15 @@
 <?php
-/**
- * Bootstrap the testing environment
- * Uses wordpress tests (http://github.com/nb/wordpress-tests/) which uses PHPUnit
- * @package wordpress-plugin-tests
- *
- * Usage: change the below array to any plugin(s) you want activated during the tests
- *        value should be the path to the plugin relative to /wp-content/
- *
- * Note: Do note change the name of this file. PHPUnit will automatically fire this file when run.
- *
- */
 
-require_once ( dirname( __FILE__ ) . '/lib/testcase.php' );
-global $wpdb, $current_site, $current_blog, $wp_rewrite, $shortcode_tags, $wp;
+$_tests_dir = getenv( 'WP_TESTS_DIR' );
+if ( ! $_tests_dir ) {
+	$_tests_dir = '/tmp/wordpress-tests-lib';
+}
 
-$GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( 'github-updater/github-updater.php' ),
-);
+require_once $_tests_dir . '/includes/functions.php';
 
-require_once dirname( __FILE__ ) . '/bootstrap.php';
+function _manually_load_plugin() {
+	require dirname( dirname( __FILE__ ) ) . '/github-updater.php';
+}
+tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
+
+require $_tests_dir . '/includes/bootstrap.php';
