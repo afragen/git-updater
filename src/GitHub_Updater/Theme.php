@@ -249,7 +249,6 @@ class Theme extends Base {
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
-		add_filter( 'theme_row_meta', array( &$this, 'theme_row_meta' ), 10, 2 );
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
 	}
@@ -451,7 +450,6 @@ class Theme extends Base {
 			}
 		}
 
-
 		/*
 		 * Create after_theme_row_
 		 */
@@ -560,14 +558,6 @@ class Theme extends Base {
 						'<a href="' . $update_url . '">',
 						'</a>'
 				);
-				/**
-				 * Filter to add append to theme action message.
-				 *
-				 * @since 5.3.2
-				 *
-				 * @param   object  $theme  Contains elements of the theme.
-				 */
-				echo apply_filters( 'github_updater_append_theme_action', null, $theme );
 				?>
 			</strong>
 			<?php
@@ -586,14 +576,6 @@ class Theme extends Base {
 					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 					'</a>'
 				);
-				/**
-				 * Filter to add append to theme action message.
-				 *
-				 * @since 5.3.2
-				 *
-				 * @param   object  $theme  Contains elements of the theme.
-				 */
-				echo apply_filters( 'github_updater_append_theme_action', null, $theme );
 				?>
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
@@ -613,26 +595,6 @@ class Theme extends Base {
 
 			return trim( ob_get_clean(), '1' );
 		}
-	}
-
-	/**
-	 * Place notice in theme row.
-	 *
-	 * @param $links
-	 * @param $file
-	 *
-	 * @return array
-	 */
-	public function theme_row_meta( $links, $file ) {
-		/**
-		 * Filter whether to add an element to the theme row meta.
-		 *
-		 * @since 5.3.2
-		 *
-		 * @param array     $links
-		 * @param string    $file
-		 */
-		return apply_filters( 'github_updater_theme_row_meta', $links, $file );
 	}
 
 	/**
@@ -657,15 +619,6 @@ class Theme extends Base {
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
 			);
-
-			/**
-			 * Filter to add an element to the transient response array.
-			 *
-			 * @since 5.3.2
-			 *
-			 * @param   array   $response   Array that is saved in update transient.
-			 */
-			$update = apply_filters( 'github_updater_theme_transient_update', $update );
 
 			if ( $this->can_update( $theme ) ) {
 				$transient->response[ $theme->repo ] = $update;

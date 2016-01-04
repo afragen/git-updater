@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-12-21 19:40-0800\n"
-"PO-Revision-Date: 2015-12-21 19:40-0800\n"
+"POT-Creation-Date: 2015-12-23 13:29-0800\n"
+"PO-Revision-Date: 2015-12-23 13:29-0800\n"
 "Last-Translator: Andrii Ryzhkv\n"
 "Language-Team: Andrii Ryzhkv\n"
 "Language: uk\n"
@@ -139,7 +139,7 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:460
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:458
 #, fuzzy, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "Поточна версія остання. Спробуйте"
@@ -288,53 +288,53 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:360
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "Тема не має оновлень!"
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:364
 #, fuzzy
 msgid "Rollback to:"
 msgstr "%sВідкат до:%s"
 
-#: src/GitHub_Updater/Theme.php:383
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "Немає теґів для відкату назад."
 
-#: src/GitHub_Updater/Theme.php:391 src/GitHub_Updater/Theme.php:405
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, fuzzy, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater показує, що доступна нова версія %1$s.&nbsp;"
 
-#: src/GitHub_Updater/Theme.php:398
+#: src/GitHub_Updater/Theme.php:397
 #, fuzzy, php-format
 msgid "View version %s details."
 msgstr "Переглянути подробиці версії %4$s"
 
-#: src/GitHub_Updater/Theme.php:402
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичне оновлення недоступно для цієї теми."
 
-#: src/GitHub_Updater/Theme.php:412 src/GitHub_Updater/Theme.php:557
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:555
 #, fuzzy, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "%4$sПереглянути подробиці версії %5$s або %6$sоновити зараз%7$s ."
 
-#: src/GitHub_Updater/Theme.php:550
+#: src/GitHub_Updater/Theme.php:548
 #, fuzzy, php-format
 msgid "There is a new version of %s available now."
 msgstr "Нова версія"
 
-#: src/GitHub_Updater/Theme.php:585
+#: src/GitHub_Updater/Theme.php:575
 #, fuzzy, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Поточна версія остання. Спробуйте"
 
-#: src/GitHub_Updater/Theme.php:607
+#: src/GitHub_Updater/Theme.php:589
 msgid "Choose a Version"
 msgstr "Вибрати версію"
 
-#: src/GitHub_Updater/Theme.php:610
+#: src/GitHub_Updater/Theme.php:592
 msgid "Install"
 msgstr "Встановити"
 

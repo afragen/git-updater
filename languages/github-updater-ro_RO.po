@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2015-12-21 19:41-0800\n"
-"PO-Revision-Date: 2015-12-21 19:41-0800\n"
+"POT-Creation-Date: 2015-12-23 13:29-0800\n"
+"PO-Revision-Date: 2015-12-27 21:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
@@ -139,7 +139,7 @@ msgstr ""
 "Trebuie sa setezi un Jeton Privat pentru GitLab.com, GitLab CE sau GitHub "
 "Enterprise."
 
-#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:460
+#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:458
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "Ramura curenta este `%1$s`, incerca %2$salta ramura%3$s."
@@ -291,52 +291,52 @@ msgstr ""
 "Utilizarea operarii de la distanta ar putea rezulta in cresterea timpilor de "
 "incarcare doar pentru nivelul 'admin' de utilizator in panoul de control"
 
-#: src/GitHub_Updater/Theme.php:360
+#: src/GitHub_Updater/Theme.php:359
 msgid "Theme is up-to-date!"
 msgstr "Tema e la zi!"
 
-#: src/GitHub_Updater/Theme.php:365
+#: src/GitHub_Updater/Theme.php:364
 msgid "Rollback to:"
 msgstr "Revenire la:"
 
-#: src/GitHub_Updater/Theme.php:383
+#: src/GitHub_Updater/Theme.php:382
 msgid "No previous tags to rollback to."
 msgstr "Nici o eticheta la care sa revii."
 
-#: src/GitHub_Updater/Theme.php:391 src/GitHub_Updater/Theme.php:405
+#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Updater arata o noua versiune pentru %s disponibila."
 
-#: src/GitHub_Updater/Theme.php:398
+#: src/GitHub_Updater/Theme.php:397
 #, php-format
 msgid "View version %s details."
 msgstr "Vezi detaliile pentru versiunea %s."
 
-#: src/GitHub_Updater/Theme.php:402
+#: src/GitHub_Updater/Theme.php:401
 msgid "Automatic update is unavailable for this theme."
 msgstr "Actualizarea automata nu este disponibila pentru aceasta tema."
 
-#: src/GitHub_Updater/Theme.php:412 src/GitHub_Updater/Theme.php:557
+#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:555
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Vezi versiunea %1$s detalii%2$s sau %3$sactualizeaza acum%4$s."
 
-#: src/GitHub_Updater/Theme.php:550
+#: src/GitHub_Updater/Theme.php:548
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Exista o noua versiune pentru %s disponibila."
 
-#: src/GitHub_Updater/Theme.php:585
+#: src/GitHub_Updater/Theme.php:575
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Versiunea curenta este la zi. Incearca %salta versiune%s"
 
-#: src/GitHub_Updater/Theme.php:607
+#: src/GitHub_Updater/Theme.php:589
 msgid "Choose a Version"
 msgstr "Alege o Versiune"
 
-#: src/GitHub_Updater/Theme.php:610
+#: src/GitHub_Updater/Theme.php:592
 msgid "Install"
 msgstr "Instaleaza"
 
@@ -345,15 +345,14 @@ msgid "https://github.com/afragen/github-updater"
 msgstr "https://github.com/afragen/github-updater"
 
 #. Description of the plugin/theme
-#, fuzzy
 msgid ""
 "A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins "
 "and themes. It also allows for remote installation of plugins or themes into "
 "WordPress."
 msgstr ""
 "Un modul pentru actualizarea automata a temelor sau modulelor gazduite pe "
-"GitHub, Bitbucket sau GitLab. De asemenea da posibilitatea operarii de la "
-"distanta a modulelor si temelor in WordPress"
+"GitHub, Bitbucket sau GitLab. De asemenea ofera posibilitatea instalarii de "
+"la distanta a modulelor si temelor in WordPress"
 
 #. Author of the plugin/theme
 msgid "Andy Fragen"

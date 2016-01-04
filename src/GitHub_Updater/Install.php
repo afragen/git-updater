@@ -263,7 +263,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_repo',
 			sprintf( esc_html__( '%s URI', 'github-updater' ), $repo_type ),
-			array( $this, 'get_repo' ),
+			array( &$this, 'get_repo' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -271,7 +271,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_branch',
 			esc_html__( 'Repository Branch', 'github-updater' ),
-			array( $this, 'branch' ),
+			array( &$this, 'branch' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -279,7 +279,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_api',
 			esc_html__( 'Remote Repository Host', 'github-updater' ),
-			array( $this, 'install_api' ),
+			array( &$this, 'install_api' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -287,7 +287,7 @@ class Install extends Base {
 		add_settings_field(
 			'is_private',
 			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			array( $this, 'is_private' ),
+			array( &$this, 'is_private' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -295,7 +295,7 @@ class Install extends Base {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( $this, 'access_token' ),
+			array( &$this, 'access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -306,7 +306,7 @@ class Install extends Base {
 			add_settings_field(
 				'gitlab_private_token',
 				esc_html__( 'GitLab Private Token', 'github-updater' ),
-				array( $this, 'private_token' ),
+				array( &$this, 'private_token' ),
 				'github_updater_install_' . $type,
 				$type
 			);
