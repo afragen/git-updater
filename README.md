@@ -315,6 +315,7 @@ add_filter( 'github_updater_hide_settings', '__return_true' );
 * Romanian by [Corneliu Cirlan](https://github.com/corneliucirlan)
 * Japanese by [ishihara](https://github.com/1shiharat)
 * Russian by [Anatoly Yumashev](https://github.com/yumashev)
+* Bulgarian by [Adrian Dimitrov](https://github.com/dimitrov-adrian)
 
 ## Issues
 
