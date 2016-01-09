@@ -534,7 +534,7 @@ class Theme extends Base {
 	 * @return string (content buffer)
 	 */
 	protected function append_theme_actions_content( $theme ) {
-
+		$options                = get_site_option( 'github_updater' );
 		$details_url            = esc_url( self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" ) );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
@@ -590,12 +590,19 @@ class Theme extends Base {
 					else jQuery(this).parent().next().hide();
 				">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-						<?php if ( ! empty( $this->options['branch_switch'] ) ): ?>
-							<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
-						<?php endif; ?>
-						<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?>
-						<?php if ( empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) ) {
+						<?php if ( ! empty( $options['branch_switch'] ) ) {
+							foreach ( array_keys( $theme->branches ) as $branch ) {
+								echo '<option>' . $branch . '</option>';
+							}
+						}
+						foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) {
+							echo '<option>' . $version . '</option>';
+						}
+						if ( empty( $options['branch_switch'] ) &&
+						     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
+						) {
 							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+
 							return trim( ob_get_clean(), '1' );
 						} ?>
 					</select></label>
