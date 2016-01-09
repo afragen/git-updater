@@ -590,8 +590,15 @@ class Theme extends Base {
 					else jQuery(this).parent().next().hide();
 				">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-					<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
-					<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?></select></label>
+						<?php if ( ! empty( $this->options['branch_switch'] ) ): ?>
+							<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
+						<?php endif; ?>
+						<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?>
+						<?php if ( empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) ) {
+							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+							return trim( ob_get_clean(), '1' );
+						} ?>
+					</select></label>
 				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
