@@ -239,6 +239,9 @@ class Plugin extends Base {
 					'url'         => $plugin->uri,
 					'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 				);
+				if ( array_key_exists( $this->tag, $plugin->branches ) ) {
+					$rollback['new_version'] = '0.0.0';
+				}
 				$updates_transient->response[ $plugin->slug ] = (object) $rollback;
 				set_site_transient( 'update_plugins', $updates_transient );
 			}

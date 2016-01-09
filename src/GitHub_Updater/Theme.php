@@ -221,6 +221,9 @@ class Theme extends Base {
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
+				if ( array_key_exists( $this->tag, $theme->branches ) ) {
+					$rollback['new_version'] = '0.0.0';
+				}
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}

@@ -1,3 +1,6 @@
+#### 5.3.4
+* reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
+
 #### 5.3.3
 * remove added filters, below as they didn't add functionality to this plugin.
 * try to use references to `&$this`
