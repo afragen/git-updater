@@ -1,6 +1,7 @@
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
 * fix display of branch switching themes on single install.
+* fix bug in getting Bitbucket branch names.
 
 #### 5.3.3
 * remove added filters, below as they didn't add functionality to this plugin.
