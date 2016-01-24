@@ -456,7 +456,7 @@ class Theme extends Base {
 		/*
 		 * Create after_theme_row_
 		 */
-		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+		echo '<tr class="plugin-update-tr" id="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
