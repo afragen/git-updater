@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-05 15:08-0800\n"
-"PO-Revision-Date: 2016-01-05 15:10-0800\n"
+"POT-Creation-Date: 2016-01-24 16:50-0800\n"
+"PO-Revision-Date: 2016-01-24 16:50-0800\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: \n"
 "Language: bg\n"
@@ -143,12 +143,12 @@ msgstr ""
 "Трябва да зададете GitLab.com, GitLab CE, или GitLab Enterprise Private "
 "Token."
 
-#: src/GitHub_Updater/Plugin.php:303 src/GitHub_Updater/Theme.php:458
+#: src/GitHub_Updater/Plugin.php:306 src/GitHub_Updater/Theme.php:461
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "Текущият клон е `%1$s`, изпробвайте %2$sдруг клон%3$s."
 
-#: src/GitHub_Updater/Plugin.php:355
+#: src/GitHub_Updater/Plugin.php:358
 msgid "View details"
 msgstr "Преглед на детайли"
 
@@ -300,53 +300,53 @@ msgstr ""
 "времето за зареждане в контролния панел за потребителите с администраторска "
 "роля."
 
-#: src/GitHub_Updater/Theme.php:359
+#: src/GitHub_Updater/Theme.php:362
 msgid "Theme is up-to-date!"
 msgstr "Темата е последна версия!"
 
-#: src/GitHub_Updater/Theme.php:364
+#: src/GitHub_Updater/Theme.php:367
 msgid "Rollback to:"
 msgstr "Връщане към:"
 
-#: src/GitHub_Updater/Theme.php:382
+#: src/GitHub_Updater/Theme.php:385 src/GitHub_Updater/Theme.php:604
 msgid "No previous tags to rollback to."
 msgstr "Няма предишни тагове за връщане."
 
-#: src/GitHub_Updater/Theme.php:390 src/GitHub_Updater/Theme.php:404
+#: src/GitHub_Updater/Theme.php:393 src/GitHub_Updater/Theme.php:407
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Актуализатор показва налична версия за %s."
 
-#: src/GitHub_Updater/Theme.php:397
+#: src/GitHub_Updater/Theme.php:400
 #, php-format
 msgid "View version %s details."
 msgstr "Преглед на детайлите за версия %s"
 
-#: src/GitHub_Updater/Theme.php:401
+#: src/GitHub_Updater/Theme.php:404
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичното обновяване не е налично за тази тема."
 
-#: src/GitHub_Updater/Theme.php:411 src/GitHub_Updater/Theme.php:555
+#: src/GitHub_Updater/Theme.php:414 src/GitHub_Updater/Theme.php:558
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 "Преглед на %1$s детайлити%2$s по версията, или %3$sобновяване сега%4$s."
 
-#: src/GitHub_Updater/Theme.php:548
+#: src/GitHub_Updater/Theme.php:551
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Има налична нова версия на %s."
 
-#: src/GitHub_Updater/Theme.php:575
+#: src/GitHub_Updater/Theme.php:578
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Текущата ви версия е последна. Пробвайте %sнякоя друга%s"
 
-#: src/GitHub_Updater/Theme.php:589
+#: src/GitHub_Updater/Theme.php:592
 msgid "Choose a Version"
 msgstr "Изберете версия"
 
-#: src/GitHub_Updater/Theme.php:592
+#: src/GitHub_Updater/Theme.php:609
 msgid "Install"
 msgstr "Инсталиране"
 

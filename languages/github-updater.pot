@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-01-08 19:24-0800\n"
+"POT-Creation-Date: 2016-01-24 16:49-0800\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -284,7 +284,7 @@ msgstr ""
 msgid "Rollback to:"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:385 src/GitHub_Updater/Theme.php:598
+#: src/GitHub_Updater/Theme.php:385 src/GitHub_Updater/Theme.php:604
 msgid "No previous tags to rollback to."
 msgstr ""
 
@@ -321,7 +321,7 @@ msgstr ""
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:602
+#: src/GitHub_Updater/Theme.php:609
 msgid "Install"
 msgstr ""
 
