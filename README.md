@@ -1,5 +1,7 @@
 ![GitHub Updater](./assets/GitHub_Updater_logo.png)
 
+[![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
+
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
@@ -315,6 +317,7 @@ add_filter( 'github_updater_hide_settings', '__return_true' );
 * Romanian by [Corneliu Cirlan](https://github.com/corneliucirlan)
 * Japanese by [ishihara](https://github.com/1shiharat)
 * Russian by [Anatoly Yumashev](https://github.com/yumashev)
+* Bulgarian by [Adrian Dimitrov](https://github.com/dimitrov-adrian)
 
 ## Issues
 

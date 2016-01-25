@@ -1,3 +1,10 @@
+#### 5.3.4
+* reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
+* fix display of branch switching themes on single install.
+* fix bug in getting Bitbucket branch names.
+* fix to hide checkbox when active as mu-plugin.
+* work better with shiny updates.
+
 #### 5.3.3
 * remove added filters, below as they didn't add functionality to this plugin.
 * try to use references to `&$this`

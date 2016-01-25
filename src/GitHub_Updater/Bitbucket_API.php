@@ -236,8 +236,8 @@ class Bitbucket_API extends API {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );
 
 			if ( $response ) {
-				foreach ( $response as $branch ) {
-					$branches[ $branch->branch ] = $this->construct_download_link( false, $branch->branch );
+				foreach ( $response as $branch => $api_response ) {
+					$branches[ $branch ] = $this->construct_download_link( false, $branch );
 				}
 				$this->type->branches = $branches;
 				$this->set_transient( 'branches', $branches );

@@ -221,6 +221,9 @@ class Theme extends Base {
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
 				);
+				if ( array_key_exists( $this->tag, $theme->branches ) ) {
+					$rollback['new_version'] = '0.0.0';
+				}
 				$updates_transient->response[ $theme->repo ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}
@@ -453,7 +456,7 @@ class Theme extends Base {
 		/*
 		 * Create after_theme_row_
 		 */
-		echo '<tr class="plugin-update-tr"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+		echo '<tr class="plugin-update-tr" id="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
@@ -531,7 +534,7 @@ class Theme extends Base {
 	 * @return string (content buffer)
 	 */
 	protected function append_theme_actions_content( $theme ) {
-
+		$options                = get_site_option( 'github_updater' );
 		$details_url            = esc_url( self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" ) );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
@@ -587,8 +590,22 @@ class Theme extends Base {
 					else jQuery(this).parent().next().hide();
 				">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-					<?php foreach ( array_keys( $theme->branches ) as $branch ) { echo '<option>' . $branch . '</option>'; }?>
-					<?php foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) { echo '<option>' . $version . '</option>'; }?></select></label>
+						<?php if ( ! empty( $options['branch_switch'] ) ) {
+							foreach ( array_keys( $theme->branches ) as $branch ) {
+								echo '<option>' . $branch . '</option>';
+							}
+						}
+						foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) {
+							echo '<option>' . $version . '</option>';
+						}
+						if ( empty( $options['branch_switch'] ) &&
+						     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
+						) {
+							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+
+							return trim( ob_get_clean(), '1' );
+						} ?>
+					</select></label>
 				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
