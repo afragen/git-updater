@@ -50,7 +50,7 @@ Run the composer command: ```composer require afragen/github-updater```
 ### Manual
 
 1. Download the latest [tagged archive](https://github.com/afragen/github-updater/releases) (choose the "zip" option).
-2. Unzip the archive, rename the folder to `github-upddater`.
+2. Unzip the archive, rename the folder to `github-updater`.
 3. Copy the folder to your `/wp-content/plugins/` directory.
 4. Go to the Plugins screen and click __Activate__.
 
