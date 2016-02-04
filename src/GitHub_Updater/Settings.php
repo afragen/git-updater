@@ -134,7 +134,7 @@ class Settings extends Base {
 		?>
 		<div class="wrap">
 			<h2>
-				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="<?php esc_html_e( 'GitHub Updater Logo', 'github-updater' ); ?>" ></a><br>
+				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
