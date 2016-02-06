@@ -18,17 +18,17 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * GitLab_API
+ *
  * Get remote data from a GitLab repo.
  *
- * Class    GitLab_API
- * @package Fragen\GitHub_Updater
+ * @package Fragen\GitHub_Updater\GitLab_API
  * @author  Andy Fragen
  */
 class GitLab_API extends API {
 
 	/**
 	 * Holds loose class method name.
-	 *
 	 * @var null
 	 */
 	protected static $method = null;

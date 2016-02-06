@@ -18,9 +18,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class API
+ * API
  *
- * @package Fragen\GitHub_Updater
+ * @package Fragen\GitHub_Updater\API
  */
 abstract class API extends Base {
 

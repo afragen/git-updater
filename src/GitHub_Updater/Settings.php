@@ -18,24 +18,23 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Settings
+ *
  * Add a settings page.
  *
- * Class    Settings
- * @package Fragen\GitHub_Updater
+ * @package Fragen\GitHub_Updater\Settings
  * @author  Andy Fragen
  */
 class Settings extends Base {
 
 	/**
 	 * Holds the plugin basename.
-	 *
 	 * @var string
 	 */
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
 	 * Holds boolean on whether or not the repo is private.
-	 *
 	 * @var bool
 	 */
 	private static $github_private    = false;

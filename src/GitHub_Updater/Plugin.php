@@ -18,10 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Plugin
+ *
  * Update a WordPress plugin from a GitHub repo.
  *
- * Class    Plugin
- * @package Fragen\GitHub_Updater
+ * @package Fragen\GitHub_Updater\Plugin
  * @author  Andy Fragen
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
@@ -30,14 +31,12 @@ class Plugin extends Base {
 
 	/**
 	 * Plugin object.
-	 *
 	 * @var bool|Plugin
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable
-	 *
 	 * @var string branch
 	 */
 	protected $tag = false;

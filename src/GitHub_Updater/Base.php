@@ -19,10 +19,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Base
+ *
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * Class    Base
- * @package Fragen\GitHub_Updater
+ * @package Fragen\GitHub_Updater\Base
  * @author  Andy Fragen
  * @author  Gary Jones
  */
@@ -30,63 +31,54 @@ class Base {
 
 	/**
 	 * Store details of all repositories that are installed.
-	 *
 	 * @var object
 	 */
 	protected $config;
 
 	/**
 	 * Class Object for API.
-	 *
 	 * @var object
 	 */
  	protected $repo_api;
 
 	/**
 	 * Variable for setting update transient hours.
-	 *
 	 * @var integer
 	 */
 	protected static $hours;
 
 	/**
 	 * Variable for holding transient ids.
-	 *
 	 * @var array
 	 */
 	protected static $transients = array();
 
 	/**
 	 * Variable for holding extra theme and plugin headers.
-	 *
 	 * @var array
 	 */
 	protected static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
-	 *
 	 * @var array
 	 */
 	protected static $options;
 
 	/**
 	 * Holds the values for remote management settings.
-	 *
 	 * @var mixed
 	 */
 	protected static $options_remote;
 
 	/**
 	 * Holds HTTP error code from API call.
-	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
 	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
-	 *
 	 * @var array
 	 */
 	protected static $git_servers = array(
@@ -97,7 +89,6 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
-	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
@@ -135,7 +126,7 @@ class Base {
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
-		$admin_pages  = array(
+		$admin_pages = array(
 			'plugins.php', 'plugin-install.php',
 			'themes.php', 'theme-install.php',
 			'update-core.php', 'update.php',

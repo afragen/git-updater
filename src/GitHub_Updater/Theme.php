@@ -18,10 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Theme
+ *
  * Update a WordPress theme from a GitHub repo.
  *
- * Class      Theme
- * @package   Fragen\GitHub_Updater
+ * @package   Fragen\GitHub_Updater\Theme
  * @author    Andy Fragen
  * @author    Seth Carstens
  * @link      https://github.com/WordPress-Phoenix/whitelabel-framework
@@ -32,14 +33,12 @@ class Theme extends Base {
 
 	/**
 	 * Theme object.
-	 *
 	 * @var bool|Theme
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable.
-	 *
 	 * @var number
 	 */
 	protected $tag = false;
