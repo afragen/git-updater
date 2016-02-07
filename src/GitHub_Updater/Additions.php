@@ -74,10 +74,10 @@ class Additions {
 	protected function add_plugin_headers( $config, $repos ) {
 		$this->add_to_github_updater = array();
 		foreach ( $config as $repo ) {
-			$addition = $repos[ $repo['slug'] ];
 			if ( false !== strpos( $repo['type'], 'theme' ) ) {
 				continue;
 			}
+			$addition = $repos[ $repo['slug'] ];
 			switch ( $repo['type'] ) {
 				case 'github_plugin':
 					$addition['GitHub Plugin URI'] = $repo['uri'];
@@ -103,10 +103,10 @@ class Additions {
 	public function add_theme_headers( $config, $theme ) {
 		$this->add_to_github_updater = array();
 		foreach ( $config as $repo ) {
-			$addition = $theme[ $repo['slug'] ];
 			if ( false !== strpos( $repo['type'], 'plugin' ) ) {
 				continue;
 			}
+			$addition = $theme[ $repo['slug'] ];
 			switch ( $repo['type'] ) {
 				case 'github_theme':
 					$addition['GitHub Theme URI'] = $repo['uri'];
