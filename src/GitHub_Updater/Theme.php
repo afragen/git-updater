@@ -505,7 +505,8 @@ class Theme extends Base {
 			/**
 			 * Get $repo_uri from themes added to GitHub Updater via hook.
 			 */
-			foreach ( apply_filters( 'github_updater_additions', null, $theme, 'theme' ) as $addition ) {
+			$additions = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
+			foreach ( (array) $additions as $addition ) {
 				if ( $theme_key === $addition['slug'] ) {
 					if ( ! empty( $addition[ $server . ' Theme URI' ] ) ) {
 						$repo_uri = $addition[ $server . ' Theme URI' ];
