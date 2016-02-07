@@ -855,10 +855,4 @@ class Base {
 		return (integer) $rating;
 	}
 
-	protected function parse_github_updater_additions( $config ) {
-
-
-
-	}
-
 }
