@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Install
+ * Class Install
  *
  * Install <author>/<repo> directly from GitHub Updater.
  *
- * @package Fragen\GitHub_Updater\Install
+ * @package Fragen\GitHub_Updater
  */
 class Install extends Base {
 

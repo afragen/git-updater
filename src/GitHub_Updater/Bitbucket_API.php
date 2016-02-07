@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Bitbucket_API
+ * Class Bitbucket_API
  *
  * Get remote data from a Bitbucket repo.
  *
- * @package Fragen\GitHub_Updater\Bitbucket_API
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class Bitbucket_API extends API {

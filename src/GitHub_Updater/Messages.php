@@ -18,9 +18,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Messages
+ * Class Messages
  *
- * @package Fragen\GitHub_Updater\Messages
+ * @package Fragen\GitHub_Updater
  */
 class Messages extends Base {
 

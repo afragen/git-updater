@@ -10,11 +10,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Autoloader
+ * Class Autoloader
  *
  * To use with different plugins be sure to create a new namespace.
  *
- * @package   Fragen\GitHub_Updater\Autoloader
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen <andy@thefragens.com>
  * @author    Barry Hughes <barry@codingkillsme.com>
  * @license   GPL-2.0+

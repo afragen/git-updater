@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Settings
+ * Class Settings
  *
  * Add a settings page.
  *
- * @package Fragen\GitHub_Updater\Settings
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class Settings extends Base {

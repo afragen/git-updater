@@ -18,9 +18,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Readme_Parser
+ * Class Readme_Parser
  *
- * @package Fragen\GitHub_Updater\Readme_Parser
+ * @package Fragen\GitHub_Updater
  */
 class Readme_Parser extends \Automattic_Readme {
 

@@ -19,11 +19,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Base
+ * Class Base
  *
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * @package Fragen\GitHub_Updater\Base
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Gary Jones
  */
@@ -853,6 +853,12 @@ class Base {
 		}
 
 		return (integer) $rating;
+	}
+
+	protected function parse_github_updater_additions( $config ) {
+
+
+
 	}
 
 }

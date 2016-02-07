@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * GitLab_API
+ * Class GitLab_API
  *
  * Get remote data from a GitLab repo.
  *
- * @package Fragen\GitHub_Updater\GitLab_API
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class GitLab_API extends API {

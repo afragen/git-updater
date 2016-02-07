@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * GitHub_API
+ * Class GitHub_API
  *
  * Get remote data from a GitHub repo.
  *
- * @package Fragen\GitHub_Updater\GitHub_API
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class GitHub_API extends API {

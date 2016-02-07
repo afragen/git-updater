@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Plugin
+ * Class Plugin
  *
  * Update a WordPress plugin from a GitHub repo.
  *
- * @package Fragen\GitHub_Updater\Plugin
+ * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
