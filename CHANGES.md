@@ -1,5 +1,7 @@
-#### 5.3.5
+#### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
+* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, see [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
+* add necessary code in `class Plugin` and `class Theme` for above
 
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
