@@ -104,6 +104,9 @@ class Plugin extends Base {
 			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
 		}
 
+		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
+		$plugins = array_merge( $plugins, (array) $additions );
+
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
 

@@ -97,10 +97,24 @@ class Theme extends Base {
 			$repo_uri            = null;
 			$repo_enterprise_uri = null;
 			$repo_enterprise_api = null;
+			$additions           = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
 				$repo_uri = $theme->get( $value );
+
+				/**
+				 * Get $repo_uri from themes added to GitHub Updater via hook.
+				 */
+				foreach ( $additions as $addition ) {
+					if ( $theme->stylesheet === $addition['slug'] ) {
+						if ( ! empty( $addition[ $value ] ) ) {
+							$repo_uri = $addition[ $value ];
+							break;
+						}
+					}
+				}
+
 				if ( empty( $repo_uri ) ||
 				     false === stristr( $value, 'Theme' )
 				) {
