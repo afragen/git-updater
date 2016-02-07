@@ -1,3 +1,6 @@
+#### 5.3.5
+* fix deprecated PHP4 constructor in vendor class.
+
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
 * fix display of branch switching themes on single install.

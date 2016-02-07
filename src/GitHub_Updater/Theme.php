@@ -18,9 +18,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Theme
+ *
  * Update a WordPress theme from a GitHub repo.
  *
- * Class      Theme
  * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @author    Seth Carstens
@@ -32,14 +33,12 @@ class Theme extends Base {
 
 	/**
 	 * Theme object.
-	 *
 	 * @var bool|Theme
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable.
-	 *
 	 * @var number
 	 */
 	protected $tag = false;
@@ -98,10 +97,24 @@ class Theme extends Base {
 			$repo_uri            = null;
 			$repo_enterprise_uri = null;
 			$repo_enterprise_api = null;
+			$additions           = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
 				$repo_uri = $theme->get( $value );
+
+				/**
+				 * Get $repo_uri from themes added to GitHub Updater via hook.
+				 */
+				foreach ( (array) $additions as $addition ) {
+					if ( $theme->stylesheet === $addition['slug'] ) {
+						if ( ! empty( $addition[ $value ] ) ) {
+							$repo_uri = $addition[ $value ];
+							break;
+						}
+					}
+				}
+
 				if ( empty( $repo_uri ) ||
 				     false === stristr( $value, 'Theme' )
 				) {
@@ -489,6 +502,18 @@ class Theme extends Base {
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
+			/**
+			 * Get $repo_uri from themes added to GitHub Updater via hook.
+			 */
+			$additions = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
+			foreach ( (array) $additions as $addition ) {
+				if ( $theme_key === $addition['slug'] ) {
+					if ( ! empty( $addition[ $server . ' Theme URI' ] ) ) {
+						$repo_uri = $addition[ $server . ' Theme URI' ];
+						break;
+					}
+				}
+			}
 			if ( empty( $repo_uri ) ) {
 				continue;
 			}

@@ -18,9 +18,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Plugin
+ *
  * Update a WordPress plugin from a GitHub repo.
  *
- * Class    Plugin
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Codepress
@@ -30,14 +31,12 @@ class Plugin extends Base {
 
 	/**
 	 * Plugin object.
-	 *
 	 * @var bool|Plugin
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable
-	 *
 	 * @var string branch
 	 */
 	protected $tag = false;
@@ -104,6 +103,9 @@ class Plugin extends Base {
 		if ( isset( $update_plugins->response, $update_plugins->no_update ) ) {
 			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
 		}
+
+		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
+		$plugins = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
