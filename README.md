@@ -300,6 +300,8 @@ add_filter( 'github_updater_hide_settings', '__return_true' );
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
 <https://github.com/szepeviktor/github-link>
 
+You can use the [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) plugin to add plugins or themes that don't contain the proper headers via a JSON file. They can then be updated with GitHub Updater.
+
 ### Translations
 
 * French by
