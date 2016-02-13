@@ -1,6 +1,6 @@
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
-* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, see [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
+* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
 * add necessary code in `class Plugin` and `class Theme` for above
 
 #### 5.3.4
