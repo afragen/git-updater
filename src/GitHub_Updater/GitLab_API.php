@@ -420,6 +420,7 @@ class GitLab_API extends API {
 			if ( $this->type->repo === $project->name ) {
 				$id = $project->id;
 				$this->set_transient( 'projects', $response );
+				break;
 			}
 		}
 

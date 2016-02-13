@@ -502,8 +502,17 @@ class Theme extends Base {
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
+
 			/**
-			 * Get $repo_uri from themes added to GitHub Updater via hook.
+			 * Filter to add themes not containing appropriate header line.
+			 *
+			 * @since   5.4.0
+			 * @access  public
+			 *
+			 * @param   array   $additions  Listing of themes to add.
+			 *                              Default null.
+			 * @param   array   $theme      Current theme.
+			 * @param   string  'theme'    Type being passed.
 			 */
 			$additions = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
 			foreach ( (array) $additions as $addition ) {

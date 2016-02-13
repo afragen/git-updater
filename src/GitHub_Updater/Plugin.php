@@ -104,8 +104,19 @@ class Plugin extends Base {
 			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
 		}
 
+		/**
+		 * Filter to add plugins not containing appropriate header line.
+		 *
+		 * @since   5.4.0
+		 * @access  public
+		 *
+		 * @param   array   $additions  Listing of plugins to add.
+		 *                              Default null.
+		 * @param   array   $plugins    Listing of all plugins.
+		 * @param   string  'plugin'    Type being passed.
+		 */
 		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
-		$plugins = array_merge( $plugins, (array) $additions );
+		$plugins   = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
