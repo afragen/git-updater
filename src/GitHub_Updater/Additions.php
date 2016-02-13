@@ -6,7 +6,7 @@ namespace Fragen\GitHub_Updater;
  * Class Additions
  *
  * Add repos without GitHub Updater headers to GitHub Updater.
- * Uses JSON config data file.
+ * Uses JSON config data file and companion plugin.
  *
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
