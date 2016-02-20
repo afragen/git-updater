@@ -4,6 +4,7 @@
 .gitignore export-ignore
 composer.json export-ignore
 .travis.yml export-ignore
+/bin export-ignore
 /tests export-ignore
 phpunit.xml export-ignore
 
