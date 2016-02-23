@@ -57,6 +57,8 @@ class Settings extends Base {
 	 * Start up
 	 */
 	public function __construct() {
+		$this->ensure_api_key_is_set();
+
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
@@ -590,7 +592,16 @@ class Settings extends Base {
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
+		$api_key = get_site_option( 'github_updater_api_key' );
+
+		echo "<p>";
+		esc_html_e( 'Restful API for triggering updates is available at:', 'github-updater' );
+		echo "<br>";
+		echo "<tt>".admin_url("admin-ajax.php")."?action=github-updater-update&key=".$api_key."</tt>";
+		echo "</p>";
+		echo "<p>";
 		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
+		echo "</p>";
 	}
 
 	/**
