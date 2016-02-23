@@ -212,149 +212,56 @@ class Base {
 	}
 
 	/**
-	 * Update theme via ajax.
-	 */
-	private function ajax_update_theme($themeName) {
-		if (!isset($_REQUEST["key"]) || $_REQUEST["key"]!=get_site_option('github_updater_api_key'))
-			$this->ajax_fail("Bad api key.");
-
-		Theme::$object = Theme::instance();
-		$themes=Theme::$object->get_theme_meta();
-		$updateTheme=NULL;
-
-		foreach ($themes as $theme) {
-			if ($theme->repo==$themeName)
-				$updateTheme=$theme;
-		}
-
-		if (!$updateTheme)
-			$this->ajax_fail("Theme not found.");
-
-		$startsWith="https://github.com/";
-		if (substr($updateTheme->uri,0,strlen($startsWith))!=$startsWith)
-			$this->ajax_fail("Currently only GitHub themes can be updated through tihs api.");
-
-		$repo=str_replace("https://github.com/","",$updateTheme->uri);
-		$packageUrl="https://api.github.com/repos/$repo/zipball/$tag";
-		echo "packageUrl: $packageUrl\n";
-
-		$token=self::$options["github_access_token"];
-
-		if ($token)
-			$packageUrl.="?access_token=$token";
-
-		$current = get_site_transient( 'update_themes' );
-
-		// We don't know which version we will be downloading, it will simply be the 
-		// one given by the tag. We pass NULL to "new_version" which isn't documented
-		// anywhere, but seems to work.
-		$transientEntry=array(
-			"theme"=>$updateTheme->repo,
-			"new_version"=>NULL,
-			"url"=>$updateTheme->uri,
-			"package"=>$packageUrl
-		);
-
-		$current->response[$updateTheme->repo]=$transientEntry;
-		set_site_transient('update_themes', $current);
-
-		$repo=$updateTheme->repo;
-
-		$skin=new JsonUpgraderSkin();
-		$upgrader = new \Theme_Upgrader($skin);
-		$upgrader->upgrade($updateTheme->repo);
-
-		return $skin;
-	}
-
-	/**
-	 * Update plugin via ajax.
-	 */
-	private function ajax_update_plugin($pluginName, $tag) {
-		Plugin::$object = Plugin::instance();
-		$plugins=Plugin::$object->get_plugin_meta();
-		$updatePlugin=NULL;
-
-		foreach ($plugins as $plugin) {
-			if ($plugin->repo==$pluginName)
-				$updatePlugin=$plugin;
-		}
-
-		if (!$updatePlugin)
-			$this->ajax_fail("Plugin not found.");
-
-		$startsWith="https://github.com/";
-		if (substr($updatePlugin->uri,0,strlen($startsWith))!=$startsWith)
-			$this->ajax_fail("Currently only GitHub plugins can be updated through tihs api.");
-
-		$repo=str_replace("https://github.com/","",$updatePlugin->uri);
-		$packageUrl="https://api.github.com/repos/$repo/zipball/$tag";
-
-		$token=self::$options["github_access_token"];
-
-		if ($token)
-			$packageUrl.="?access_token=$token";
-
-		$current = get_site_transient( 'update_plugins' );
-
-		// We don't know which version we will be downloading, it will simply be the 
-		// one given by the tag. We pass NULL to "new_version" which isn't documented
-		// anywhere, but seems to work.
-		$transientEntry=array(
-			"slug"=>$updatePlugin->repo,
-			"plugin"=>$updatePlugin->slug,
-			"new_version"=>NULL,
-			"url"=>$updatePlugin->uri,
-			"package"=>$packageUrl
-		);
-
-		$current->response[$updatePlugin->slug]=(object)$transientEntry;
-		set_site_transient('update_plugins', $current);
-
-		$skin=new JsonUpgraderSkin();
-		$upgrader = new \Plugin_Upgrader($skin);
-		$upgrader->upgrade($updatePlugin->slug);
-
-		return $skin;
-	}
-
-	/**
 	 * Ajax endpoint for rest updates.
 	 */
 	public function ajax_update() {
-		$tag="master";
+		try {
+			$json_encode_flags=0;
+			if (defined("JSON_PRETTY_PRINT"))
+				$json_encode_flags=JSON_PRETTY_PRINT;
 
-		if (isset($_REQUEST["tag"]) && $_REQUEST["tag"])
-			$tag=$_REQUEST["tag"];
+			if (!isset($_REQUEST["key"]) || $_REQUEST["key"]!=get_site_option('github_updater_api_key'))
+ 				throw new \Exception("Bad api key.");
 
-		if (isset($_REQUEST["committish"]) && $_REQUEST["committish"])
-			$tag=$_REQUEST["committish"];
+			$tag="master";
+			if (isset($_REQUEST["tag"]) && $_REQUEST["tag"])
+				$tag=$_REQUEST["tag"];
 
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			if (isset($_REQUEST["committish"]) && $_REQUEST["committish"])
+				$tag=$_REQUEST["committish"];
 
-		if (isset($_REQUEST["plugin"]) && $_REQUEST["plugin"])
-			$upgraderSkin=$this->ajax_update_plugin($_REQUEST["plugin"],$tag);
+			$upgrader_skin=new JsonUpgraderSkin();
 
-		else if (isset($_REQUEST["theme"]) && $_REQUEST["theme"])
-			$upgraderSkin=$this->ajax_update_theme($_REQUEST["theme"],$tag);
+			if (isset($_REQUEST["plugin"]) && $_REQUEST["plugin"])
+				Plugin::instance()->update_single_plugin($_REQUEST["plugin"], $tag, $upgrader_skin);
 
-		else
-			$this->ajax_fail("No plugin or theme specified for update.");
+			else if (isset($_REQUEST["theme"]) && $_REQUEST["theme"])
+				Theme::instance()->update_single_theme($_REQUEST["theme"], $tag, $upgrader_skin);
 
-		$res=array(
-			"messages"=>$upgraderSkin->messages,
-		);
+			else
+				throw new \Exception("No plugin or theme specified for update.");
 
-		if ($upgraderSkin->error) {
+			if ($upgrader_skin->error)
+				throw new \Exception("Upgrade error.");
+		}
+
+		catch (\Exception $e) {
 			http_response_code(500);
-			$res["error"]=TRUE;
+			header('Content-Type: application/json');
+
+			echo json_encode(array(
+				"message"=>$e->getMessage(),
+				"error"=>TRUE
+			),$json_encode_flags);
+			exit;
 		}
 
-		else {
-			$res["success"]=TRUE;
-		}
+		header('Content-Type: application/json');
 
-		echo json_encode($res,JSON_PRETTY_PRINT);
+		echo json_encode(array(
+			"success"=>TRUE,
+			"messages"=>$upgrader_skin->messages,
+		),$json_encode_flags);
 		exit;
 	}
 

@@ -18,6 +18,8 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
 /**
  * Class JsonUpgraderSkin
  *

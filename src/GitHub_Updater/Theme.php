@@ -177,34 +177,10 @@ class Theme extends Base {
 	 */
 	public function get_remote_theme_meta() {
 		foreach ( (array) $this->config as $theme ) {
-			$this->repo_api = null;
-			switch( $theme->type ) {
-				case 'github_theme':
-					$this->repo_api = new GitHub_API( $theme );
-					break;
-				case 'bitbucket_theme':
-					$this->repo_api = new Bitbucket_API( $theme );
-					break;
-				case 'gitlab_theme':
-					$this->repo_api = new GitLab_API( $theme );
-					break;
-			}
+			$this->get_single_remote_theme_meta($theme);
 
 			if ( is_null( $this->repo_api ) ) {
 				continue;
-			}
-
-			$this->{$theme->type} = $theme;
-			$this->set_defaults( $theme->type );
-
-			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
-				$this->repo_api->get_repo_meta();
-				$this->repo_api->get_remote_tag();
-				$changelog = $this->get_changelog_filename( $theme->type );
-				if ( $changelog ) {
-					$this->repo_api->get_remote_changes( $changelog );
-				}
-				$theme->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -243,6 +219,75 @@ class Theme extends Base {
 		$this->make_force_check_transient( 'themes' );
 		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 		$this->load_pre_filters();
+	}
+
+	/**
+	 * Set up things for working with a particular theme
+	 * from the $this->config array.
+	 */
+	protected function get_single_remote_theme_meta($theme) {
+		$this->repo_api = null;
+		switch( $theme->type ) {
+			case 'github_theme':
+				$this->repo_api = new GitHub_API( $theme );
+				break;
+			case 'bitbucket_theme':
+				$this->repo_api = new Bitbucket_API( $theme );
+				break;
+			case 'gitlab_theme':
+				$this->repo_api = new GitLab_API( $theme );
+				break;
+		}
+
+		if ( is_null( $this->repo_api ) ) {
+			return;
+		}
+
+		$this->{$theme->type} = $theme;
+		$this->set_defaults( $theme->type );
+
+		if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
+			$this->repo_api->get_repo_meta();
+			$this->repo_api->get_remote_tag();
+			$changelog = $this->get_changelog_filename( $theme->type );
+			if ( $changelog ) {
+				$this->repo_api->get_remote_changes( $changelog );
+			}
+			$theme->download_link = $this->repo_api->construct_download_link();
+		}
+	}
+
+	/**
+	 * Update a single theme
+	 */
+	public function update_single_theme($theme_slug, $tag="master", $upgrader_skin=NULL) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+		$theme=NULL;
+
+		foreach ( (array) $this->config as $config_entry ) {
+			if ($config_entry->repo == $theme_slug)
+				$theme = $config_entry;
+		}
+
+		if (!$theme)
+			throw new \Exception("Theme not found: ".$theme_slug);
+
+		$this->get_single_remote_theme_meta($theme);
+
+		$updates_transient = get_site_transient( 'update_themes' );
+		$update=array(
+			"theme"=>$theme->repo,
+			"new_version"=>NULL,
+			"url"=>$theme->uri,
+			"package"=>$this->repo_api->construct_download_link( false, $tag )
+		);
+
+		$updates_transient->response[$theme->repo]=$update;
+		set_site_transient('update_themes', $updates_transient);
+
+		$upgrader = new \Theme_Upgrader($upgrader_skin);
+		$upgrader->upgrade($theme->repo);
 	}
 
 	/**
