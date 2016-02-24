@@ -188,21 +188,6 @@ class Base {
 	}
 
 	/**
-	 * Fail hard with a JSON message.
-	 */
-	private function ajax_fail($message, $code=500) {
-		http_response_code($code);
-		header('Content-Type: application/json');
-
-		echo json_encode(array(
-			"message"=>$message,
-			"error"=>TRUE
-		),JSON_PRETTY_PRINT);
-
-		exit;
-	}
-
-	/**
 	 * Ajax endpoint for rest updates.
 	 */
 	public function ajax_update() {
