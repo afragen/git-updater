@@ -79,6 +79,10 @@ class GitHub_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
@@ -110,6 +114,20 @@ class GitHub_API extends API {
 	 */
 	public function get_remote_changes( $changes ) {
 		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
+
+		/*
+		 * Set response from local file if no update available.
+		 */
+		if ( ! $response && ! $this->can_update( $this->type )  ) {
+			$response = new \stdClass();
+			$content = $this->get_local_info( $this->type, $changes );
+			if ( $content ) {
+				$response->content = $content;
+				$this->set_transient( 'changes', $response );
+			} else {
+				$response = false;
+			}
+		}
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
@@ -150,6 +168,19 @@ class GitHub_API extends API {
 
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
+		/*
+		 * Set $response from local file if no update available.
+		 */
+		if ( ! $response && ! $this->can_update( $this->type )  ) {
+			$response = new \stdClass();
+			$content = $this->get_local_info( $this->type, 'readme.txt' );
+			if ( $content ) {
+				$response->content = $content;
+			} else {
+				$response = false;
+			}
+		}
+
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
 		}
@@ -178,6 +209,10 @@ class GitHub_API extends API {
 		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
 
@@ -204,6 +239,12 @@ class GitHub_API extends API {
 	public function get_remote_branches() {
 		$branches = array();
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
+
+		if ( $this->exit_no_update( $response ) &&
+		     empty( $this->options['branch_switch'] )
+		) {
+			return false;
+		}
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/branches' );

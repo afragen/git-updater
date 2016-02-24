@@ -877,4 +877,63 @@ class Base {
 		return (integer) $rating;
 	}
 
+	/**
+	 * Test to exit early if no update available, saves API calls.
+	 *
+	 * @param $response
+	 *
+	 * @return bool
+	 */
+	protected function exit_no_update( $response ) {
+		if ( ! isset( $_GET['force-check'] ) ) {
+			if ( ! $response && ! $this->can_update( $this->type ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get local file info if no update available. Save API calls.
+	 *
+	 * @param $repo
+	 * @param $file
+	 *
+	 * @return null|string
+	 */
+	protected function get_local_info( $repo, $file ) {
+		$response = null;
+
+		if ( isset( $_GET['force-check'] ) ) {
+			return $response;
+		}
+
+		if ( is_dir( $repo->local_path ) ) {
+			if ( file_exists( $repo->local_path . $file ) ) {
+				$response = file_get_contents( $repo->local_path . $file );
+			}
+		} elseif ( is_dir( $repo->local_path_extended ) ) {
+			if ( file_exists( $repo->local_path_extended . $file ) ) {
+				$response = file_get_contents( $repo->local_path_extended . $file );
+			}
+		}
+
+		switch ( $repo->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$response = base64_encode( $response );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$response = base64_encode( $response );
+				break;
+		}
+
+		return $response;
+	}
+
 }
