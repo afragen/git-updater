@@ -65,6 +65,13 @@ class Plugin extends Base {
 	}
 
 	/**
+	 * Returns an array of configurations for the known plugins.
+	 */
+	public function get_plugin_configs() {
+		return $this->config;
+	}
+
+	/**
 	 * The Plugin object can be created/obtained via this
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
@@ -206,10 +213,35 @@ class Plugin extends Base {
 	 */
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
-			$this->get_single_remote_plugin_meta($plugin);
+			$this->repo_api = null;
+			switch( $plugin->type ) {
+				case 'github_plugin':
+					$this->repo_api = new GitHub_API( $plugin );
+					break;
+				case 'bitbucket_plugin':
+					$this->repo_api = new Bitbucket_API( $plugin );
+					break;
+				case 'gitlab_plugin';
+					$this->repo_api = new GitLab_API( $plugin );
+					break;
+			}
 
 			if ( is_null( $this->repo_api ) ) {
 				continue;
+			}
+
+			$this->{$plugin->type} = $plugin;
+			$this->set_defaults( $plugin->type );
+
+			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
+				$this->repo_api->get_repo_meta();
+				$this->repo_api->get_remote_tag();
+				$changelog = $this->get_changelog_filename( $plugin->type );
+				if ( $changelog ) {
+					$this->repo_api->get_remote_changes( $changelog );
+				}
+				$this->repo_api->get_remote_readme();
+				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 
 			/*
@@ -241,77 +273,6 @@ class Plugin extends Base {
 		$this->make_force_check_transient( 'plugins' );
 		set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 		$this->load_pre_filters();
-	}
-
-	/**
-	 * Set up things for working with a particular plugin
-	 * from the $this->config array.
-	 */
-	protected function get_single_remote_plugin_meta($plugin) {
-		$this->repo_api = null;
-		switch( $plugin->type ) {
-			case 'github_plugin':
-				$this->repo_api = new GitHub_API( $plugin );
-				break;
-			case 'bitbucket_plugin':
-				$this->repo_api = new Bitbucket_API( $plugin );
-				break;
-			case 'gitlab_plugin';
-				$this->repo_api = new GitLab_API( $plugin );
-				break;
-		}
-
-		if ( is_null( $this->repo_api ) ) {
-			return;
-		}
-
-		$this->{$plugin->type} = $plugin;
-		$this->set_defaults( $plugin->type );
-
-		if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-			$this->repo_api->get_repo_meta();
-			$this->repo_api->get_remote_tag();
-			$changelog = $this->get_changelog_filename( $plugin->type );
-			if ( $changelog ) {
-				$this->repo_api->get_remote_changes( $changelog );
-			}
-			$this->repo_api->get_remote_readme();
-			$plugin->download_link = $this->repo_api->construct_download_link();
-		}
-	}
-
-	/**
-	 * Update a single plugin
-	 */
-	public function update_single_plugin($plugin_slug, $tag="master", $upgrader_skin=NULL) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-
-		$plugin=NULL;
-
-		foreach ( (array) $this->config as $config_entry ) {
-			if ($config_entry->repo == $plugin_slug)
-				$plugin = $config_entry;
-		}
-
-		if (!$plugin)
-			throw new \Exception("Plugin not found: ".$plugin_slug);
-
-		$this->get_single_remote_plugin_meta($plugin);
-
-		$updates_transient = get_site_transient( 'update_plugins' );
-		$update=array(
-			"slug"=>$plugin->repo,
-			"plugin"=>$plugin->slug,
-			"new_version"=>NULL,
-			"url"=>$plugin->uri,
-			"package"=>$this->repo_api->construct_download_link( false, $tag )
-		);
-
-		$updates_transient->response[$plugin->slug]=(object)$update;
-		set_site_transient('update_plugins', $updates_transient);
-
-		$upgrader = new \Plugin_Upgrader($upgrader_skin);
-		$upgrader->upgrade($plugin->slug);
 	}
 
 	/**

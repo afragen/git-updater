@@ -1,10 +1,10 @@
 <?php
-
 /**
  * GitHub Updater
  *
  * @package   GitHub_Updater
  * @author    Andy Fragen
+ * @author    Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
@@ -21,15 +21,22 @@ if ( ! defined( 'WPINC' ) ) {
 require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 /**
- * Class JsonUpgraderSkin
+ * Class RestUpgraderSkin
+ *
+ * Extends WP_Upgrader_Skin and collects outputed messages for later
+ * processing, rather than printing them out.
  *
  * @package Fragen\GitHub_Updater
  */
-class JsonUpgraderSkin extends \WP_Upgrader_Skin {
+class RestUpgraderSkin extends \WP_Upgrader_Skin {
 
 	public $messages=array();
 	public $error;
 
+	/**
+	 * Overrides the feedback method.
+	 * Adds the feedback string to the messages array.
+	 */
 	public function feedback($string) {
 		if ( isset( $this->upgrader->strings[$string] ) )
 			$string = $this->upgrader->strings[$string];
@@ -46,22 +53,32 @@ class JsonUpgraderSkin extends \WP_Upgrader_Skin {
 		if ( empty($string) )
 			return;
 
-		//echo "$string\n";
-
 		$this->messages[]=$string;
 	}
 
+	/**
+	 * Set the error flag to true, then let the base class handle the rest.
+	 */
 	public function error($errors) {
 		$this->error=TRUE;
 		parent::error($errors);
 	}
 
+	/**
+	 * Do nothing.
+	 */
 	public function decrement_update_count() {
 	}
 
+	/**
+	 * Do nothing.
+	 */
     public function header() {
     }
 
+	/**
+	 * Do nothing.
+	 */
 	public function footer() {
 	}
 }

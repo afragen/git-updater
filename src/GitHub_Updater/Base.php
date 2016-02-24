@@ -191,54 +191,8 @@ class Base {
 	 * Ajax endpoint for rest updates.
 	 */
 	public function ajax_update() {
-		try {
-			$json_encode_flags=0;
-			if (defined("JSON_PRETTY_PRINT"))
-				$json_encode_flags=JSON_PRETTY_PRINT;
-
-			if (!isset($_REQUEST["key"]) || $_REQUEST["key"]!=get_site_option('github_updater_api_key'))
- 				throw new \Exception("Bad api key.");
-
-			$tag="master";
-			if (isset($_REQUEST["tag"]) && $_REQUEST["tag"])
-				$tag=$_REQUEST["tag"];
-
-			if (isset($_REQUEST["committish"]) && $_REQUEST["committish"])
-				$tag=$_REQUEST["committish"];
-
-			$upgrader_skin=new JsonUpgraderSkin();
-
-			if (isset($_REQUEST["plugin"]) && $_REQUEST["plugin"])
-				Plugin::instance()->update_single_plugin($_REQUEST["plugin"], $tag, $upgrader_skin);
-
-			else if (isset($_REQUEST["theme"]) && $_REQUEST["theme"])
-				Theme::instance()->update_single_theme($_REQUEST["theme"], $tag, $upgrader_skin);
-
-			else
-				throw new \Exception("No plugin or theme specified for update.");
-
-			if ($upgrader_skin->error)
-				throw new \Exception("Upgrade error.");
-		}
-
-		catch (\Exception $e) {
-			http_response_code(500);
-			header('Content-Type: application/json');
-
-			echo json_encode(array(
-				"message"=>$e->getMessage(),
-				"error"=>TRUE
-			),$json_encode_flags);
-			exit;
-		}
-
-		header('Content-Type: application/json');
-
-		echo json_encode(array(
-			"success"=>TRUE,
-			"messages"=>$upgrader_skin->messages,
-		),$json_encode_flags);
-		exit;
+		$rest_update=new RestUpdate();
+		$rest_update->process_request();
 	}
 
 	/**
