@@ -217,6 +217,7 @@ class Theme extends Base {
 				if ( $changelog ) {
 					$this->repo_api->get_remote_changes( $changelog );
 				}
+				$this->repo_api->get_remote_branches();
 				$theme->download_link = $this->repo_api->construct_download_link();
 			}
 
