@@ -241,6 +241,7 @@ class Plugin extends Base {
 					$this->repo_api->get_remote_changes( $changelog );
 				}
 				$this->repo_api->get_remote_readme();
+				$this->repo_api->get_remote_branches();
 				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 
