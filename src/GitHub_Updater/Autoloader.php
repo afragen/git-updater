@@ -10,10 +10,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Autoloader
  *
  * To use with different plugins be sure to create a new namespace.
  *
- * Class      Autoloader
  * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen <andy@thefragens.com>
  * @author    Barry Hughes <barry@codingkillsme.com>
@@ -25,7 +25,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Autoloader {
 	/**
 	 * Roots to scan when autoloading.
-	 *
 	 * @var array
 	 */
 	protected $roots = array();
@@ -33,7 +32,6 @@ class Autoloader {
 	/**
 	 * List of class names and locations in filesystem, for situations
 	 * where they deviate from convention etc.
-	 *
 	 * @var array
 	 */
 	protected $map   = array();

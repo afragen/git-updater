@@ -2,8 +2,8 @@
 
 Class Automattic_Readme {
 
-	function Automattic_Readme() {
-		// This space intentially blank
+	function __construct() {
+		// This space intentionally blank
 	}
 
 	function parse_readme( $file ) {
