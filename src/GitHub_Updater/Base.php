@@ -615,7 +615,7 @@ class Base {
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
 		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
 
-		if ( $this->tag &&
+		if ( ( isset( $this->tag ) && $this->tag ) &&
 		     ( isset( $_GET['plugin'] ) && $type->slug === $_GET['plugin'] )
 		) {
 			$remote_is_newer = true;
