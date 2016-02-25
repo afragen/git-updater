@@ -282,8 +282,7 @@ class GitLab_API extends API {
 		$branches = array();
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
-		if ( $this->exit_no_update( $response ) &&
-		     empty( $this->options['branch_switch'] ) ) {
+		if ( $this->exit_no_update( $response, true ) ) {
 			return false;
 		}
 

@@ -880,11 +880,16 @@ class Base {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param $response
+	 * @param $response array|bool
+	 * @param $branch   bool
 	 *
 	 * @return bool
 	 */
-	protected function exit_no_update( $response ) {
+	protected function exit_no_update( $response, $branch = false ) {
+		if ( $branch ) {
+			$options = get_site_option( 'github_updater' );
+			return empty( $options['branch_switch'] );
+		}
 		if ( ! isset( $_GET['force-check'] ) ) {
 			if ( ! $response && ! $this->can_update( $this->type ) ) {
 				return true;
