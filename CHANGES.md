@@ -4,6 +4,7 @@
 * add necessary code in `class Plugin` and `class Theme` for above
 * skip many remote API calls if no update available and use local files, huge performance boost :-)
 * remove ability to use GitHub asset for update, this eliminates an API call for a rarely used feature.
+* consolidate error messages to show only once per error.
 
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
