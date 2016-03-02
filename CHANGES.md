@@ -2,7 +2,7 @@
 * fix deprecated PHP4 constructor in vendor class.
 * add `class Additions` to process JSON config from hook to add repos to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
 * add necessary code in `class Plugin` and `class Theme` for above
-* skip many remote API calls if no update available.
+* skip many remote API calls if no update available and use local files, huge performance boost :-)
 * remove ability to use GitHub asset for update, this eliminates an API call for a rarely used feature.
 
 #### 5.3.4
