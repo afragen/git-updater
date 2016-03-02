@@ -3,7 +3,7 @@ Contributors: afragen, garyj, sethmatics
 Donate link: http://thefragens.com/github-updater-donate
 Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 Requires at least: 3.8
-Tested up to: 4.4
+Tested up to: 4.5
 Stable tag: master
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
