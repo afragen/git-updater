@@ -43,3 +43,21 @@ The following headers are available for use depending upon your hosting source.
 * GitLab Branch
 * GitLab Enterprise
 * GitLab CE
+
+== Developer Hooks ==
+
+There are 2 added filter hooks specifically for developers wanting to distribute private themes/plugins to clients without the client having to interact with the Settings page.
+
+The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return a **single** key/value pair where the key is the plugin/theme repo slug and the value is the token.
+
+`
+add_filter( 'github_updater_token_distribution',
+	function () {
+		return array( 'my-private-theme' => 'kjasdp984298asdvhaljsg984aljhgosrpfiu' );
+	} );
+`
+
+The second hook will simply make the Settings page unavailable.
+
+`add_filter( 'github_updater_hide_settings', '__return_true' );`
+

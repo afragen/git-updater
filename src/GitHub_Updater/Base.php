@@ -821,6 +821,10 @@ class Base {
 			}
 		}
 
+		$response['sections']['other_notes'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
+		if ( empty( $response['sections']['other_notes'] ) ) {
+			unset( $response['sections']['other_notes'] );
+		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );

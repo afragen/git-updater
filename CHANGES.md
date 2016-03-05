@@ -1,10 +1,12 @@
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
-* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
+* add `class Additions` to process JSON config from hook to add repositories to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
 * add necessary code in `class Plugin` and `class Theme` for above
 * skip many remote API calls if no update available and use local files, huge performance boost :-)
-* remove ability to use GitHub asset for update, this eliminates an API call for a rarely used feature.
-* consolidate error messages to show only once per error.
+* remove check for GitHub asset, this eliminates an API call for a rarely used feature
+* consolidate error messages to show only once per error
+* add _Other Notes_ section to View details
+* update readme.txt with _Other Notes_ information
 
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
