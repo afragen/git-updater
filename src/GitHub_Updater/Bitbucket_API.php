@@ -305,6 +305,10 @@ class Bitbucket_API extends API {
 		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
 		$endpoint           = '';
 
+		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
+			return $this->make_release_asset_download_link();
+		}
+
 		/*
 		 * Check for rollback.
 		 */

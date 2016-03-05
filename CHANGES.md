@@ -4,6 +4,7 @@
 * add necessary code in `class Plugin` and `class Theme` for above
 * skip many remote API calls if no update available and use local files, huge performance boost :-)
 * remove check for GitHub asset, this eliminates an API call for a rarely used feature
+* added additional header `Release Asset: true` to add back ability to set download link to release asset.
 * consolidate error messages to show only once per error
 * add _Other Notes_ section to View details
 * update readme.txt with _Other Notes_ information

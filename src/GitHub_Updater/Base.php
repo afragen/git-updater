@@ -241,8 +241,9 @@ class Base {
 	 */
 	public function add_plugin_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'Requires WP'  => 'Requires WP',
-			'Requires PHP' => 'Requires PHP',
+			'Requires WP'   => 'Requires WP',
+			'Requires PHP'  => 'Requires PHP',
+			'Release Asset' => 'Release Asset',
 		);
 
 		foreach ( self::$git_servers as $server ) {
@@ -267,8 +268,9 @@ class Base {
 	 */
 	public function add_theme_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'Requires WP'  => 'Requires WP',
-			'Requires PHP' => 'Requires PHP',
+			'Requires WP'   => 'Requires WP',
+			'Requires PHP'  => 'Requires PHP',
+			'Release Asset' => 'Release Asset',
 		);
 
 		foreach ( self::$git_servers as $server ) {
@@ -321,6 +323,7 @@ class Base {
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '3.8.0';
 		$this->$type->requires_php_version  = '5.3';
+		$this->$type->release_asset         = false;
 	}
 
 	/**
@@ -735,6 +738,7 @@ class Base {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+		$this->type->release_asset        = ! empty( $response['Release Asset'] ) ? $response['Release Asset'] : $this->type->release_asset;
 	}
 
 	/**
