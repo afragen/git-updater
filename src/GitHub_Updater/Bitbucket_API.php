@@ -37,7 +37,8 @@ class Bitbucket_API extends API {
 		parent::$hours  = 12;
 		$this->response = $this->get_transient();
 
-		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
@@ -389,6 +390,25 @@ class Bitbucket_API extends API {
 			$username = parent::$options['bitbucket_username'];
 			$password = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Removes Basic Authentication header for Bitbucket Release Assets.
+	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
+	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
+	 *
+	 * @param $args
+	 * @param $url
+	 *
+	 * @return mixed
+	 */
+	public function http_release_asset_auth( $args, $url ) {
+		$arrURL = parse_url( $url );
+		if ( 'bbuseruploads.s3.amazonaws.com' === $arrURL['host'] ) {
+			unset( $args['headers']['Authorization'] );
 		}
 
 		return $args;
