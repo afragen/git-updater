@@ -5,7 +5,7 @@
 * skip many remote API calls if no update available and use local files, huge performance boost :-)
 * remove check for GitHub asset, this eliminates an API call for a rarely used feature
 * added additional header `Release Asset: true` to add back ability to set download link to release asset.
-* added function to remove _Basic Authentication_ header when downloading Bitbucket release asset as they are stored on AmazonS3 and use [Query String Request Authentication Alternative](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+* added function to remove _Basic Authentication_ header when downloading private Bitbucket release assets as they are stored on AmazonS3 and use [Query String Request Authentication Alternative](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
 * consolidate error messages to show only once per error
 * add _Other Notes_ section to View details
 * update readme.txt with _Other Notes_ information
