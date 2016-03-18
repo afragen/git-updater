@@ -18,9 +18,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Settings
+ *
  * Add a settings page.
  *
- * Class    Settings
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
@@ -28,14 +29,12 @@ class Settings extends Base {
 
 	/**
 	 * Holds the plugin basename.
-	 *
 	 * @var string
 	 */
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
 	 * Holds boolean on whether or not the repo is private.
-	 *
 	 * @var bool
 	 */
 	private static $github_private    = false;
@@ -134,7 +133,7 @@ class Settings extends Base {
 		?>
 		<div class="wrap">
 			<h2>
-				<img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" ><br>
+				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>

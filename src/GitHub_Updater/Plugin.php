@@ -18,9 +18,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Plugin
+ *
  * Update a WordPress plugin from a GitHub repo.
  *
- * Class    Plugin
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Codepress
@@ -30,14 +31,12 @@ class Plugin extends Base {
 
 	/**
 	 * Plugin object.
-	 *
 	 * @var bool|Plugin
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable
-	 *
 	 * @var string branch
 	 */
 	protected $tag = false;
@@ -104,6 +103,20 @@ class Plugin extends Base {
 		if ( isset( $update_plugins->response, $update_plugins->no_update ) ) {
 			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
 		}
+
+		/**
+		 * Filter to add plugins not containing appropriate header line.
+		 *
+		 * @since   5.4.0
+		 * @access  public
+		 *
+		 * @param   array   $additions  Listing of plugins to add.
+		 *                              Default null.
+		 * @param   array   $plugins    Listing of all plugins.
+		 * @param   string  'plugin'    Type being passed.
+		 */
+		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
+		$plugins   = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
@@ -221,6 +234,7 @@ class Plugin extends Base {
 					$this->repo_api->get_remote_changes( $changelog );
 				}
 				$this->repo_api->get_remote_readme();
+				$this->repo_api->get_remote_branches();
 				$plugin->download_link = $this->repo_api->construct_download_link();
 			}
 

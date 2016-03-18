@@ -57,8 +57,10 @@ class Messages extends Base {
 					break;
 				case 'git':
 				default:
-					add_action( 'admin_notices', array( __CLASS__, 'show_error_message' ) );
-					add_action( 'network_admin_notices', array( __CLASS__, 'show_error_message' ) );
+					add_action( 'admin_notices', array( __CLASS__, 'show_403_error_message' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'show_403_error_message' ) );
+					add_action( 'admin_notices', array( __CLASS__, 'show_401_error_message' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'show_401_error_message' ) );
 					break;
 			}
 		}
@@ -67,22 +69,21 @@ class Messages extends Base {
 	}
 
 	/**
-	 * Create error message.
-	 * Usually 403 as API rate limit max out or 401 as private repo with no token set.
+	 * Create error message for 403 error.
+	 * Usually 403 as API rate limit max out.
 	 */
-	public static function show_error_message() {
+	public static function show_403_error_message() {
+		$_403 = false;
 		foreach ( self::$error_code as $repo ) {
-
-			?>
-			<div class="error notice is-dismissible">
-				<p>
-					<?php
-					printf( esc_html__( '%s was not checked. GitHub Updater Error Code:', 'github-updater' ),
-						'<strong>' . $repo['name'] . '</strong>'
-					);
-					echo ' ' . $repo['code'];
-					?>
-					<?php if ( 403 === $repo['code'] && 'github' === $repo['git'] ): ?>
+			if ( 403 === $repo['code'] && 'github' === $repo['git'] && ! $_403 ) {
+				$_403 = true;
+				?>
+				<div class="error notice is-dismissible">
+					<p>
+						<?php
+						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						echo ' ' . $repo['code'];
+						?>
 						<br>
 						<?php
 						printf( esc_html__( 'GitHub API\'s rate limit will reset in %s minutes.', 'github-updater' ),
@@ -95,15 +96,35 @@ class Messages extends Base {
 							'</a>'
 						);
 						?>
-					<?php endif; ?>
-					<?php if ( 401 === $repo['code'] ) : ?>
-						<br>
-						<?php esc_html_e( 'There is probably an error on the GitHub Updater Settings page.', 'github-updater' ); ?>
-					<?php endif; ?>
-				</p>
-			</div>
-		<?php
+					</p>
+				</div>
+				<?php
+			}
+		}
+	}
 
+	/**
+	 * Create error message or 401 (Authentication Error) error.
+	 * Usually 401 as private repo with no token set or incorrect user/pass.
+	 */
+	public static function show_401_error_message() {
+		$_401 = false;
+		foreach( self::$error_code as $repo ) {
+			if ( 401 === $repo['code'] && ! $_401 ) {
+				$_401 = true;
+				?>
+				<div class="error notice is-dismissible">
+					<p>
+						<?php
+						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						echo ' ' . $repo['code'];
+						?>
+						<br>
+						<?php esc_html_e( 'There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater' ); ?>
+					</p>
+				</div>
+				<?php
+			}
 		}
 	}
 

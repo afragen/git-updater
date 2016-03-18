@@ -226,4 +226,37 @@ abstract class API extends Base {
 		return true;
 	}
 
+	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @return string $download_link
+	 */
+	protected function make_release_asset_download_link() {
+		switch ( $this->type->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$download_link = implode( '/', array(
+					'https://github.com',
+					$this->type->owner,
+					$this->type->repo,
+					'releases/download',
+					$this->type->newest_tag,
+					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				) );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				$download_link = implode( '/', array(
+					'https://bitbucket.org',
+					$this->type->owner,
+					$this->type->repo,
+					'downloads',
+					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				) );
+				break;
+		}
+		return $download_link;
+	}
+
 }

@@ -18,9 +18,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Bitbucket_API
+ *
  * Get remote data from a Bitbucket repo.
  *
- * Class    Bitbucket_API
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
@@ -36,7 +37,8 @@ class Bitbucket_API extends API {
 		parent::$hours  = 12;
 		$this->response = $this->get_transient();
 
-		add_filter( 'http_request_args', array( $this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
@@ -88,6 +90,10 @@ class Bitbucket_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
 			$arr_resp = (array) $response;
@@ -120,6 +126,20 @@ class Bitbucket_API extends API {
 	 */
 	public function get_remote_changes( $changes ) {
 		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
+
+		/*
+		 * Set $response from local file if no update available.
+		 */
+		if ( ! $response && ! $this->can_update( $this->type )  ) {
+			$response = new \stdClass();
+			$content = $this->get_local_info( $this->type, $changes );
+			if ( $content ) {
+				$response->data = $content;
+				$this->set_transient( 'changes', $response );
+			} else {
+				$response = false;
+			}
+		}
 
 		if ( ! $response ) {
 			if ( ! isset( $this->type->branch ) ) {
@@ -168,6 +188,19 @@ class Bitbucket_API extends API {
 
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
+		/*
+		 * Set $response from local file if no update available.
+		 */
+		if ( ! $response && ! $this->can_update( $this->type )  ) {
+			$response = new \stdClass();
+			$content = $this->get_local_info( $this->type, 'readme.txt' );
+			if ( $content ) {
+				$response->data = $content;
+			} else {
+				$response = false;
+			}
+		}
+
 		if ( ! $response ) {
 			if ( ! isset( $this->type->branch ) ) {
 				$this->type->branch = 'master';
@@ -204,6 +237,10 @@ class Bitbucket_API extends API {
 	public function get_repo_meta() {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
 		if ( ! $response ) {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 
@@ -218,7 +255,6 @@ class Bitbucket_API extends API {
 
 		$this->type->repo_meta = $response;
 		$this->_add_meta_repo_object();
-		$this->get_remote_branches();
 
 		return true;
 	}
@@ -231,6 +267,10 @@ class Bitbucket_API extends API {
 	public function get_remote_branches() {
 		$branches = array();
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
+
+		if ( $this->exit_no_update( $response, true ) ) {
+			return false;
+		}
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );
@@ -265,6 +305,10 @@ class Bitbucket_API extends API {
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
 		$endpoint           = '';
+
+		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
+			return $this->make_release_asset_download_link();
+		}
 
 		/*
 		 * Check for rollback.
@@ -346,6 +390,25 @@ class Bitbucket_API extends API {
 			$username = parent::$options['bitbucket_username'];
 			$password = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Removes Basic Authentication header for Bitbucket Release Assets.
+	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
+	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
+	 *
+	 * @param $args
+	 * @param $url
+	 *
+	 * @return mixed
+	 */
+	public function http_release_asset_auth( $args, $url ) {
+		$arrURL = parse_url( $url );
+		if ( 'bbuseruploads.s3.amazonaws.com' === $arrURL['host'] ) {
+			unset( $args['headers']['Authorization'] );
 		}
 
 		return $args;

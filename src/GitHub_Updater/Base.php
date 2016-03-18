@@ -19,9 +19,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Base
+ *
  * Update a WordPress plugin or theme from a Git-based repo.
  *
- * Class    Base
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Gary Jones
@@ -30,63 +31,54 @@ class Base {
 
 	/**
 	 * Store details of all repositories that are installed.
-	 *
 	 * @var object
 	 */
 	protected $config;
 
 	/**
 	 * Class Object for API.
-	 *
 	 * @var object
 	 */
  	protected $repo_api;
 
 	/**
 	 * Variable for setting update transient hours.
-	 *
 	 * @var integer
 	 */
 	protected static $hours;
 
 	/**
 	 * Variable for holding transient ids.
-	 *
 	 * @var array
 	 */
 	protected static $transients = array();
 
 	/**
 	 * Variable for holding extra theme and plugin headers.
-	 *
 	 * @var array
 	 */
 	protected static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
-	 *
 	 * @var array
 	 */
 	protected static $options;
 
 	/**
 	 * Holds the values for remote management settings.
-	 *
 	 * @var mixed
 	 */
 	protected static $options_remote;
 
 	/**
 	 * Holds HTTP error code from API call.
-	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
 	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
-	 *
 	 * @var array
 	 */
 	protected static $git_servers = array(
@@ -97,7 +89,6 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
-	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
@@ -135,7 +126,7 @@ class Base {
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
-		$admin_pages  = array(
+		$admin_pages = array(
 			'plugins.php', 'plugin-install.php',
 			'themes.php', 'theme-install.php',
 			'update-core.php', 'update.php',
@@ -250,8 +241,9 @@ class Base {
 	 */
 	public function add_plugin_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'Requires WP'  => 'Requires WP',
-			'Requires PHP' => 'Requires PHP',
+			'Requires WP'   => 'Requires WP',
+			'Requires PHP'  => 'Requires PHP',
+			'Release Asset' => 'Release Asset',
 		);
 
 		foreach ( self::$git_servers as $server ) {
@@ -276,8 +268,9 @@ class Base {
 	 */
 	public function add_theme_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
-			'Requires WP'  => 'Requires WP',
-			'Requires PHP' => 'Requires PHP',
+			'Requires WP'   => 'Requires WP',
+			'Requires PHP'  => 'Requires PHP',
+			'Release Asset' => 'Release Asset',
 		);
 
 		foreach ( self::$git_servers as $server ) {
@@ -330,6 +323,7 @@ class Base {
 		$this->$type->score                 = 0;
 		$this->$type->requires_wp_version   = '3.8.0';
 		$this->$type->requires_php_version  = '5.3';
+		$this->$type->release_asset         = false;
 	}
 
 	/**
@@ -624,7 +618,7 @@ class Base {
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
 		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
 
-		if ( $this->tag &&
+		if ( ( isset( $this->tag ) && $this->tag ) &&
 		     ( isset( $_GET['plugin'] ) && $type->slug === $_GET['plugin'] )
 		) {
 			$remote_is_newer = true;
@@ -744,6 +738,7 @@ class Base {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
+		$this->type->release_asset        = ! empty( $response['Release Asset'] ) && 'true' === $response['Release Asset'] ? true : false;
 	}
 
 	/**
@@ -830,6 +825,10 @@ class Base {
 			}
 		}
 
+		$response['sections']['other_notes'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
+		if ( empty( $response['sections']['other_notes'] ) ) {
+			unset( $response['sections']['other_notes'] );
+		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
@@ -862,6 +861,70 @@ class Base {
 		}
 
 		return (integer) $rating;
+	}
+
+	/**
+	 * Test to exit early if no update available, saves API calls.
+	 *
+	 * @param $response array|bool
+	 * @param $branch   bool
+	 *
+	 * @return bool
+	 */
+	protected function exit_no_update( $response, $branch = false ) {
+		if ( $branch ) {
+			$options = get_site_option( 'github_updater' );
+			return empty( $options['branch_switch'] );
+		}
+		if ( ! isset( $_GET['force-check'] ) ) {
+			if ( ! $response && ! $this->can_update( $this->type ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get local file info if no update available. Save API calls.
+	 *
+	 * @param $repo
+	 * @param $file
+	 *
+	 * @return null|string
+	 */
+	protected function get_local_info( $repo, $file ) {
+		$response = null;
+
+		if ( isset( $_GET['force-check'] ) ) {
+			return $response;
+		}
+
+		if ( is_dir( $repo->local_path ) ) {
+			if ( file_exists( $repo->local_path . $file ) ) {
+				$response = file_get_contents( $repo->local_path . $file );
+			}
+		} elseif ( is_dir( $repo->local_path_extended ) ) {
+			if ( file_exists( $repo->local_path_extended . $file ) ) {
+				$response = file_get_contents( $repo->local_path_extended . $file );
+			}
+		}
+
+		switch ( $repo->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$response = base64_encode( $response );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$response = base64_encode( $response );
+				break;
+		}
+
+		return $response;
 	}
 
 }

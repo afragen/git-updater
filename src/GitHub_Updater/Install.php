@@ -18,16 +18,16 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Class Install
+ *
  * Install <author>/<repo> directly from GitHub Updater.
  *
- * Class    Install
  * @package Fragen\GitHub_Updater
  */
 class Install extends Base {
 
 	/**
 	 * Class options.
-	 *
 	 * @var array
 	 */
 	protected static $install = array();
