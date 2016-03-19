@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2016-03-18 08:20-0700\n"
-"PO-Revision-Date: 2016-03-18 08:20-0700\n"
+"PO-Revision-Date: 2016-03-18 21:45+0000\n"
 "Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
 "Language: pt_PT\n"
@@ -109,9 +109,8 @@ msgid "Network Enable"
 msgstr "Activar na rede"
 
 #: src/GitHub_Updater/Messages.php:84 src/GitHub_Updater/Messages.php:119
-#, fuzzy
 msgid "GitHub Updater Error Code:"
-msgstr "%1$s não foi verificado. Erro do GitHub Updater com o código: %2$s"
+msgstr "Código de erro do GitHub Updater:"
 
 #: src/GitHub_Updater/Messages.php:89
 #, php-format
@@ -128,12 +127,12 @@ msgstr ""
 "%sToken pessoal de acesso%s para evitar que isto aconteça."
 
 #: src/GitHub_Updater/Messages.php:123
-#, fuzzy
 msgid ""
 "There is probably an access token or password error on the GitHub Updater "
 "Settings page."
 msgstr ""
-"Provavelmente existe um erro na página de definições do GitHub Updater."
+"Provavelmente existe um erro no Token de acesso ou senha na página de "
+"definições do GitHub Updater."
 
 #: src/GitHub_Updater/Messages.php:138
 msgid ""
