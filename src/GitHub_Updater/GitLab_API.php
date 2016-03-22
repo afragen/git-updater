@@ -78,7 +78,7 @@ class GitLab_API extends API {
 
 			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
 
-			if ( empty( $response ) ) {
+			if ( empty( $response ) || ! isset( $response->content ) ) {
 				return false;
 			}
 
