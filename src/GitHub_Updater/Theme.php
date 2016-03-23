@@ -83,6 +83,13 @@ class Theme extends Base {
 	}
 
 	/**
+	 * Returns an array of configurations for the known themes.
+	 */
+	public function get_theme_configs() {
+		return $this->config;
+	}
+
+	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array.
 	 *
