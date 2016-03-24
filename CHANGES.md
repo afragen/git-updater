@@ -1,3 +1,6 @@
+#### 5.4.1
+* get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
+
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
 * add `class Additions` to process JSON config from hook to add repositories to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
