@@ -50,6 +50,7 @@ class Settings extends Base {
 	protected static $remote_management = array(
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
+		'managewp'     => 'ManageWP',
 	);
 
 	/**

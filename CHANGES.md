@@ -1,5 +1,6 @@
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
+* ManageWP now works for Remote Management.
 
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
