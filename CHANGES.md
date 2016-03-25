@@ -1,6 +1,7 @@
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
 * ManageWP now works for Remote Management.
+* fix bug in `GitLab_API` to use `path` and not `name`. Thanks @marbetschar
 
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.

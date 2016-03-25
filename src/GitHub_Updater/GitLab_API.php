@@ -253,8 +253,9 @@ class GitLab_API extends API {
 			}
 
 			foreach ( $projects as $project ) {
-				if ( $this->type->repo === $project->name ) {
+				if ( $this->type->repo === $project->path ) {
 					$response = $project;
+					break;
 				}
 			}
 
@@ -450,7 +451,7 @@ class GitLab_API extends API {
 		}
 
 		foreach ( $response as $project ) {
-			if ( $this->type->repo === $project->name ) {
+			if ( $this->type->repo === $project->path ) {
 				$id = $project->id;
 				$this->set_transient( 'projects', $response );
 				break;
