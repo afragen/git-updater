@@ -180,6 +180,7 @@ class Base {
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
+		add_action( 'update_option_auto_updater.lock', array( &$this, 'forced_meta_update_remote_management' ) );
 	}
 
 	/**
