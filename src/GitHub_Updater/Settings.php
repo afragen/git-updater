@@ -63,6 +63,13 @@ class Settings extends Base {
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( &$this, 'plugin_action_links' ) );
+
+		// Make sure array values exist.
+		foreach ( array_keys( self::$remote_management ) as $key ) {
+			if ( empty( parent::$options_remote[ $key ] ) ) {
+				parent::$options_remote[ $key ] = null;
+			}
+		}
 	}
 
 	/**
@@ -630,11 +637,6 @@ class Settings extends Base {
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
-		if ( empty( parent::$options_remote ) ) {
-			foreach ( array_keys( self::$remote_management ) as $key ) {
-				parent::$options_remote[ $key ] = null;
-			}
-		}
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
