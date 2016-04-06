@@ -29,6 +29,7 @@ class GitLab_API extends API {
 
 	/**
 	 * Holds loose class method name.
+	 *
 	 * @var null
 	 */
 	protected static $method = null;
@@ -117,7 +118,7 @@ class GitLab_API extends API {
 			$response     = $this->api( '/projects/' . $id . '/repository/tags' );
 
 			if ( ! $response ) {
-				$response = new \stdClass();
+				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
 
@@ -148,9 +149,9 @@ class GitLab_API extends API {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, $changes );
+			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response->content = $content;
 				$this->set_transient( 'changes', $response );
@@ -203,9 +204,9 @@ class GitLab_API extends API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, 'readme.txt' );
+			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
 				$response->content = $content;
 			} else {
@@ -298,6 +299,7 @@ class GitLab_API extends API {
 				}
 				$this->type->branches = $branches;
 				$this->set_transient( 'branches', $branches );
+
 				return true;
 			}
 		}
@@ -314,7 +316,7 @@ class GitLab_API extends API {
 	/**
 	 * Construct $this->type->download_link using GitLab API.
 	 *
-	 * @param boolean $rollback for theme rollback
+	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
 	 * @return string $endpoint
@@ -329,7 +331,12 @@ class GitLab_API extends API {
 			$gitlab_base = 'https://gitlab.com';
 		}
 
-		$download_link_base = implode( '/', array( $gitlab_base, $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
+		$download_link_base = implode( '/', array(
+			$gitlab_base,
+			$this->type->owner,
+			$this->type->repo,
+			'repository/archive.zip',
+		) );
 		$endpoint           = '';
 
 		/*
@@ -362,7 +369,7 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
-		if ( ! empty( parent::$options[ 'gitlab_private_token' ] ) ) {
+		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
 			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
 		}
 
@@ -381,19 +388,20 @@ class GitLab_API extends API {
 
 	/**
 	 * Add remote data to type object.
+	 *
 	 * @access private
 	 */
 	private function _add_meta_repo_object() {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
 		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private      = ! $this->type->repo_meta->public;
+		$this->type->private = ! $this->type->repo_meta->public;
 	}
 
 	/**
 	 * Create GitLab API endpoints.
 	 *
-	 * @param $git object
+	 * @param $git      object
 	 * @param $endpoint string
 	 *
 	 * @return string
@@ -443,7 +451,7 @@ class GitLab_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$response = $this->api( '/projects' );
+			$response     = $this->api( '/projects' );
 			if ( empty( $response ) && isset( $this->type->slug ) ) {
 				$id = rtrim( urlencode( $this->type->slug ), '.php' );
 
