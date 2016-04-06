@@ -5,6 +5,8 @@
 * add filter for background updates if set globally. Thanks @jancbeck
 * fix PHP notice when adding new Remote Management option
 * delete all transients on uninstall
+* fix logic for display of GitLab token fields
+* display WP_Error message for `wp_remote_get()` error
 
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.

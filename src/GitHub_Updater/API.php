@@ -108,6 +108,7 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
+			Messages::create_error_message( $response );
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {

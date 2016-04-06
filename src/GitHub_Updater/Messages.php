@@ -25,6 +25,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Messages extends Base {
 
 	/**
+	 * Holds WP_Error message.
+	 * 
+	 * @var string
+	 */
+	public static $error_message = '';
+
+	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
 	 * @param string
@@ -47,6 +54,11 @@ class Messages extends Base {
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			switch ( $type ) {
+				case is_wp_error( $type ):
+					self::$error_message = $type->get_error_message();
+					add_action( 'admin_notices', array( __CLASS__, 'show_wp_error' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'show_wp_error' ) );
+					break;
 				case 'gitlab':
 					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) ||
 					       empty( parent::$options['gitlab_private_token'] ) )
@@ -139,6 +151,20 @@ class Messages extends Base {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Generate error message for WP_Error.
+	 */
+	public static function show_wp_error() {
+		?>
+		<div class="error notice is-dismissible">
+			<p>
+				<?php echo self::$error_message; ?>
+			</p>
+		</div>
+		<?php
+
 	}
 
 }
