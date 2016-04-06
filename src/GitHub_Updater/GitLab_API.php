@@ -452,13 +452,8 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			self::$method = 'projects';
 			$response     = $this->api( '/projects' );
-			if ( empty( $response ) && isset( $this->type->slug ) ) {
-				$id = rtrim( urlencode( $this->type->slug ), '.php' );
-
-				return $id;
-			}
-			if ( empty( $response ) && false !== strstr( $this->type->type, 'theme' ) ) {
-				$id = rtrim( urlencode( $this->type->repo ) );
+			if ( empty( $response ) ) {
+				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
 
 				return $id;
 			}

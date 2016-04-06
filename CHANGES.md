@@ -7,6 +7,7 @@
 * delete all transients on uninstall
 * fix logic for display of GitLab token fields
 * display WP_Error message for `wp_remote_get()` error
+* correctly get use GitLab namespace/project instead of project id when needed
 
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
