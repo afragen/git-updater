@@ -391,6 +391,7 @@ class Settings extends Base {
 				 * Set boolean if GitLab CE/Enterprise header found.
 				 */
 				if ( false !== strpos( $token->type, 'gitlab' ) &&
+				     ! empty( $token->enterprise ) &&
 				     ! self::$gitlab_enterprise
 				) {
 					self::$gitlab_enterprise = true;
@@ -412,7 +413,10 @@ class Settings extends Base {
 			/*
 			 * Set boolean if GitLab header found.
 			 */
-			if ( false !== strpos( $token->type, 'gitlab' ) && ! self::$gitlab ) {
+			if ( false !== strpos( $token->type, 'gitlab' ) &&
+			     empty( $token->enterprise ) &&
+			     ! self::$gitlab
+			) {
 				self::$gitlab = true;
 			}
 
