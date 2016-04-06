@@ -26,7 +26,7 @@ class Messages extends Base {
 
 	/**
 	 * Holds WP_Error message.
-	 * 
+	 *
 	 * @var string
 	 */
 	public static $error_message = '';
@@ -121,7 +121,7 @@ class Messages extends Base {
 	 */
 	public static function show_401_error_message() {
 		$_401 = false;
-		foreach( self::$error_code as $repo ) {
+		foreach ( self::$error_code as $repo ) {
 			if ( 401 === $repo['code'] && ! $_401 ) {
 				$_401 = true;
 				?>
@@ -160,11 +160,13 @@ class Messages extends Base {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php echo self::$error_message; ?>
+				<?php
+				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+				echo ' ' . self::$error_message;
+				?>
 			</p>
 		</div>
 		<?php
-
 	}
 
 }
