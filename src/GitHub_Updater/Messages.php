@@ -63,7 +63,7 @@ class Messages extends Base {
 					add_action( 'network_admin_notices', array( __CLASS__, 'show_wp_error' ) );
 					break;
 				case 'gitlab':
-					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) ||
+					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
 					       empty( parent::$options['gitlab_private_token'] ) )
 					) {
 						add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
