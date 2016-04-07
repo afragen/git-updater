@@ -31,54 +31,63 @@ class Base {
 
 	/**
 	 * Store details of all repositories that are installed.
+	 *
 	 * @var object
 	 */
 	protected $config;
 
 	/**
 	 * Class Object for API.
+	 *
 	 * @var object
 	 */
- 	protected $repo_api;
+	protected $repo_api;
 
 	/**
 	 * Variable for setting update transient hours.
+	 *
 	 * @var integer
 	 */
 	protected static $hours;
 
 	/**
 	 * Variable for holding transient ids.
+	 *
 	 * @var array
 	 */
 	protected static $transients = array();
 
 	/**
 	 * Variable for holding extra theme and plugin headers.
+	 *
 	 * @var array
 	 */
 	protected static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
+	 *
 	 * @var array
 	 */
 	protected static $options;
 
 	/**
 	 * Holds the values for remote management settings.
+	 *
 	 * @var mixed
 	 */
 	protected static $options_remote;
 
 	/**
 	 * Holds HTTP error code from API call.
+	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
 	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
+	 *
 	 * @var array
 	 */
 	protected static $git_servers = array(
@@ -89,12 +98,27 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
+	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
 		'branch'     => 'Branch',
 		'enterprise' => 'Enterprise',
 		'gitlab_ce'  => 'CE',
+	);
+
+	/**
+	 * Holds boolean on whether or not the repo is private or enterprise.
+	 * Used by class Settings and class Messages.
+	 *
+	 * @var bool
+	 */
+	protected static $private_enterprise = array(
+		'github_private'    => false,
+		'github_enterprise' => false,
+		'bitbucket_private' => false,
+		'gitlab'            => false,
+		'gitlab_enterprise' => false,
 	);
 
 	/**
@@ -126,11 +150,15 @@ class Base {
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
-		$admin_pages = array(
-			'plugins.php', 'plugin-install.php',
-			'themes.php', 'theme-install.php',
-			'update-core.php', 'update.php',
-			'options-general.php', 'settings.php',
+		$admin_pages       = array(
+			'plugins.php',
+			'plugin-install.php',
+			'themes.php',
+			'theme-install.php',
+			'update-core.php',
+			'update.php',
+			'options-general.php',
+			'settings.php',
 		);
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
@@ -294,37 +322,37 @@ class Base {
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
-			self::$options['branch_switch']      = null;
+			self::$options['branch_switch'] = null;
 		}
 		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
 
-		$this->$type->remote_version        = '0.0.0';
-		$this->$type->newest_tag            = '0.0.0';
-		$this->$type->download_link         = null;
-		$this->$type->tags                  = array();
-		$this->$type->rollback              = array();
-		$this->$type->branches              = array();
-		$this->$type->requires              = null;
-		$this->$type->tested                = null;
-		$this->$type->donate_link           = null;
-		$this->$type->contributors          = array();
-		$this->$type->downloaded            = 0;
-		$this->$type->last_updated          = null;
-		$this->$type->rating                = 0;
-		$this->$type->num_ratings           = 0;
-		$this->$type->transient             = array();
-		$this->$type->repo_meta             = array();
-		$this->$type->private               = true;
-		$this->$type->watchers              = 0;
-		$this->$type->forks                 = 0;
-		$this->$type->open_issues           = 0;
-		$this->$type->score                 = 0;
-		$this->$type->requires_wp_version   = '3.8.0';
-		$this->$type->requires_php_version  = '5.3';
-		$this->$type->release_asset         = false;
+		$this->$type->remote_version       = '0.0.0';
+		$this->$type->newest_tag           = '0.0.0';
+		$this->$type->download_link        = null;
+		$this->$type->tags                 = array();
+		$this->$type->rollback             = array();
+		$this->$type->branches             = array();
+		$this->$type->requires             = null;
+		$this->$type->tested               = null;
+		$this->$type->donate_link          = null;
+		$this->$type->contributors         = array();
+		$this->$type->downloaded           = 0;
+		$this->$type->last_updated         = null;
+		$this->$type->rating               = 0;
+		$this->$type->num_ratings          = 0;
+		$this->$type->transient            = array();
+		$this->$type->repo_meta            = array();
+		$this->$type->private              = true;
+		$this->$type->watchers             = 0;
+		$this->$type->forks                = 0;
+		$this->$type->open_issues          = 0;
+		$this->$type->score                = 0;
+		$this->$type->requires_wp_version  = '3.8.0';
+		$this->$type->requires_php_version = '5.3';
+		$this->$type->release_asset        = false;
 	}
 
 	/**
@@ -473,7 +501,7 @@ class Base {
 		) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
-					'<strong>' . $repo['extended_repo'] . '</strong>'
+				'<strong>' . $repo['extended_repo'] . '</strong>'
 			);
 		}
 
@@ -601,7 +629,7 @@ class Base {
 			return $changes;
 		}
 
-			return false;
+		return false;
 	}
 
 
@@ -616,7 +644,7 @@ class Base {
 		global $wp_version;
 
 		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
-		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version,'>=' );
+		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
 		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
 
 		if ( ( isset( $this->tag ) && $this->tag ) &&
@@ -663,12 +691,12 @@ class Base {
 	 * @return mixed
 	 */
 	protected function get_repo_parts( $repo, $type ) {
-		$arr['bool'] = false;
-		$pattern     = '/' . strtolower( $repo ) . '_/';
-		$type        = preg_replace( $pattern, '', $type );
-		$repo_types  = array(
+		$arr['bool']    = false;
+		$pattern        = '/' . strtolower( $repo ) . '_/';
+		$type           = preg_replace( $pattern, '', $type );
+		$repo_types     = array(
 			'GitHub'    => 'github_' . $type,
-			'Bitbucket' => 'bitbucket_'. $type,
+			'Bitbucket' => 'bitbucket_' . $type,
 			'GitLab'    => 'gitlab_' . $type,
 		);
 		$repo_base_uris = array(
@@ -765,7 +793,12 @@ class Base {
 					break;
 				case 'bitbucket':
 					foreach ( (array) $response as $num => $tag ) {
-						$download_base = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'get/' ) );
+						$download_base = implode( '/', array(
+							$repo_type['base_download'],
+							$this->type->owner,
+							$this->type->repo,
+							'get/',
+						) );
 						if ( isset( $num ) ) {
 							$tags[]           = $num;
 							$rollback[ $num ] = $download_base . $num . '.zip';
@@ -774,10 +807,15 @@ class Base {
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link = implode( '/', array( $repo_type['base_download'], $this->type->owner, $this->type->repo, 'repository/archive.zip' ) );
+						$download_link = implode( '/', array(
+							$repo_type['base_download'],
+							$this->type->owner,
+							$this->type->repo,
+							'repository/archive.zip',
+						) );
 						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
 						if ( isset( $tag->name ) ) {
-							$tags[] = $tag->name;
+							$tags[]                 = $tag->name;
 							$rollback[ $tag->name ] = $download_link;
 						}
 					}
@@ -792,9 +830,9 @@ class Base {
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 
-		$newest_tag             = null;
-		$newest_tag_key         = key( array_slice( $tags, -1, 1, true ) );
-		$newest_tag             = $tags[ $newest_tag_key ];
+		$newest_tag     = null;
+		$newest_tag_key = key( array_slice( $tags, - 1, 1, true ) );
+		$newest_tag     = $tags[ $newest_tag_key ];
 
 		$this->type->newest_tag = $newest_tag;
 		$this->type->tags       = $tags;
@@ -817,7 +855,7 @@ class Base {
 			if ( 'description' === $section ) {
 				continue;
 			}
-			$readme['sections/' . $section ] = $value;
+			$readme[ 'sections/' . $section ] = $value;
 		}
 		foreach ( $readme as $key => $value ) {
 			$key = explode( '/', $key );
@@ -875,6 +913,7 @@ class Base {
 	protected function exit_no_update( $response, $branch = false ) {
 		if ( $branch ) {
 			$options = get_site_option( 'github_updater' );
+
 			return empty( $options['branch_switch'] );
 		}
 		if ( ! isset( $_GET['force-check'] ) ) {

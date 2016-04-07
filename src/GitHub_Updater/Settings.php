@@ -29,22 +29,14 @@ class Settings extends Base {
 
 	/**
 	 * Holds the plugin basename.
+	 *
 	 * @var string
 	 */
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Holds boolean on whether or not the repo is private.
-	 * @var bool
-	 */
-	private static $github_private    = false;
-	private static $github_enterprise = false;
-	private static $bitbucket_private = false;
-	private static $gitlab            = false;
-	private static $gitlab_enterprise = false;
-
-	/**
 	 * Supported remote management services.
+	 *
 	 * @var array
 	 */
 	protected static $remote_management = array(
@@ -62,7 +54,10 @@ class Settings extends Base {
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
-		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array( &$this, 'plugin_action_links' ) );
+		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array(
+			&$this,
+			'plugin_action_links',
+		) );
 
 		// Make sure array values exist.
 		foreach ( array_keys( self::$remote_management ) as $key ) {
@@ -82,11 +77,11 @@ class Settings extends Base {
 	 */
 	private function _settings_tabs() {
 		return array(
-				'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
-				'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
-				'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
-				'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
-			);
+			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
+			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
+			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
+			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
+		);
 	}
 
 	/**
@@ -151,9 +146,9 @@ class Settings extends Base {
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
-						settings_fields( 'github_updater' );
-						do_settings_sections( 'github_updater_install_settings' );
-						submit_button();
+					settings_fields( 'github_updater' );
+					do_settings_sections( 'github_updater_install_settings' );
+					submit_button();
 					?>
 				</form>
 			<?php endif; ?>
@@ -170,9 +165,9 @@ class Settings extends Base {
 				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
-						settings_fields( 'github_updater_remote_management' );
-						do_settings_sections( 'github_updater_remote_settings' );
-						submit_button();
+					settings_fields( 'github_updater_remote_management' );
+					do_settings_sections( 'github_updater_remote_settings' );
+					submit_button();
 					?>
 				</form>
 			<?php endif; ?>
@@ -200,7 +195,7 @@ class Settings extends Base {
 		add_settings_section(
 			'github_updater_settings',
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			array( &$this, 'print_section_ghu_settings'),
+			array( &$this, 'print_section_ghu_settings' ),
 			'github_updater_install_settings'
 		);
 
@@ -232,7 +227,7 @@ class Settings extends Base {
 			array( 'id' => 'github_access_token' )
 		);
 
-		if ( self::$github_enterprise ) {
+		if ( parent::$private_enterprise['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
@@ -246,7 +241,7 @@ class Settings extends Base {
 		/*
 		 * Show section for private GitHub repositories.
 		 */
-		if ( self::$github_private || self::$github_enterprise ) {
+		if ( parent::$private_enterprise['github_private'] || parent::$private_enterprise['github_enterprise'] ) {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
@@ -259,7 +254,7 @@ class Settings extends Base {
 		 * Add setting for GitLab.com, GitLab Community Edition.
 		 * or GitLab Enterprise Private Token.
 		 */
-		if ( self::$gitlab || self::$gitlab_enterprise ) {
+		if ( parent::$private_enterprise['gitlab'] || parent::$private_enterprise['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -268,7 +263,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$gitlab ) {
+		if ( parent::$private_enterprise['gitlab'] ) {
 			add_settings_field(
 				'gitlab_private_token',
 				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
@@ -279,7 +274,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$gitlab_enterprise ) {
+		if ( parent::$private_enterprise['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
@@ -321,7 +316,7 @@ class Settings extends Base {
 		/*
 		 * Show section for private Bitbucket repositories.
 		 */
-		if ( self::$bitbucket_private ) {
+		if ( parent::$private_enterprise['bitbucket_private'] ) {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
@@ -333,7 +328,7 @@ class Settings extends Base {
 		/*
 		 * Show if no private repositories are present.
 		 */
-		if ( ! self::$github_private && ! self::$bitbucket_private ) {
+		if ( ! parent::$private_enterprise['github_private'] && ! parent::$private_enterprise['bitbucket_private'] ) {
 			add_settings_section(
 				null,
 				esc_html__( 'No private repositories are installed.', 'github-updater' ),
@@ -356,8 +351,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$plugin = get_site_transient( 'ghu_plugin' );
-		$theme  = get_site_transient( 'ghu_theme' );
+		$plugin           = get_site_transient( 'ghu_plugin' );
+		$theme            = get_site_transient( 'ghu_theme' );
 		if ( ! $plugin ) {
 			$plugin = Plugin::instance();
 			$plugin->get_remote_plugin_meta();
@@ -383,18 +378,18 @@ class Settings extends Base {
 				 * Set boolean if GitHub Enterprise header found.
 				 */
 				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! self::$github_enterprise
+				     ! parent::$private_enterprise['github_enterprise']
 				) {
-					self::$github_enterprise = true;
+					parent::$private_enterprise['github_enterprise'] = true;
 				}
 				/*
 				 * Set boolean if GitLab CE/Enterprise header found.
 				 */
 				if ( false !== strpos( $token->type, 'gitlab' ) &&
 				     ! empty( $token->enterprise ) &&
-				     ! self::$gitlab_enterprise
+				     ! parent::$private_enterprise['gitlab_enterprise']
 				) {
-					self::$gitlab_enterprise = true;
+					parent::$private_enterprise['gitlab_enterprise'] = true;
 				}
 			}
 
@@ -402,11 +397,15 @@ class Settings extends Base {
 			 * Check to see if it's a private repo and set variables.
 			 */
 			if ( $token->private ) {
-				if ( false !== strpos( $token->type, 'github' ) && ! self::$github_private )  {
-					self::$github_private = true;
+				if ( false !== strpos( $token->type, 'github' ) &&
+				     ! parent::$private_enterprise['github_private']
+				) {
+					parent::$private_enterprise['github_private'] = true;
 				}
-				if ( false !== strpos( $token->type, 'bitbucket' ) && ! self::$bitbucket_private ) {
-					self::$bitbucket_private = true;
+				if ( false !== strpos( $token->type, 'bitbucket' ) &&
+				     ! parent::$private_enterprise['bitbucket_private']
+				) {
+					parent::$private_enterprise['bitbucket_private'] = true;
 				}
 			}
 
@@ -415,9 +414,9 @@ class Settings extends Base {
 			 */
 			if ( false !== strpos( $token->type, 'gitlab' ) &&
 			     empty( $token->enterprise ) &&
-			     ! self::$gitlab
+			     ! parent::$private_enterprise['gitlab']
 			) {
-				self::$gitlab = true;
+				parent::$private_enterprise['gitlab'] = true;
 			}
 
 			/*
@@ -427,7 +426,7 @@ class Settings extends Base {
 				continue;
 			}
 
-			if ( false !== strpos( $token->type, 'theme') ) {
+			if ( false !== strpos( $token->type, 'theme' ) ) {
 				$type = esc_html__( 'Theme:', 'github-updater' ) . '&nbsp;';
 			}
 
@@ -468,16 +467,16 @@ class Settings extends Base {
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['github_access_token'] );
-		if ( self::$github_enterprise ) {
+		if ( parent::$private_enterprise['github_enterprise'] ) {
 			unset( $ghu_unset_keys['github_enterprise_token'] );
 		}
 		unset( $ghu_unset_keys['branch_switch'] );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
-		if ( self::$gitlab ) {
+		if ( parent::$private_enterprise['gitlab'] ) {
 			unset( $ghu_unset_keys['gitlab_private_token'] );
 		}
-		if ( self::$gitlab_enterprise ) {
+		if ( parent::$private_enterprise['gitlab_enterprise'] ) {
 			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
 		}
 		if ( ! empty( $ghu_unset_keys ) ) {
@@ -553,13 +552,13 @@ class Settings extends Base {
 			printf( esc_html__( 'Extended Naming is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
 		}
 		if ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
-		       ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
+		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
 		) {
 			printf( esc_html__( 'Extended Naming is %snot active%s.', 'github-updater' ), '<strong>', '</strong>' );
 		}
-		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater'), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>');
+		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater' ), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>' );
 		printf( '<br>' . esc_html__( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
-		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>');
+		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>' );
 	}
 
 	/**
@@ -610,11 +609,11 @@ class Settings extends Base {
 	 * @param $args
 	 */
 	public function token_callback_text( $args ) {
-		$name = isset( parent::$options[ $args['id' ] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
+		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
 		$type = stristr( $args['id'], 'password' ) ? 'password' : 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" >
+			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
 		</label>
 		<?php
 	}
@@ -627,7 +626,7 @@ class Settings extends Base {
 	public function token_callback_checkbox( $args ) {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options[ $args['id'] ], true); ?> >
+			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options[ $args['id'] ], true ); ?> >
 		</label>
 		<?php
 	}
@@ -643,7 +642,7 @@ class Settings extends Base {
 	public function token_callback_checkbox_remote( $args ) {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked('1', parent::$options_remote[ $args['id'] ], true); ?> >
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options_remote[ $args['id'] ], true ); ?> >
 		</label>
 		<?php
 	}

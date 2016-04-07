@@ -5,7 +5,7 @@
 * add filter for background updates if set globally. Thanks @jancbeck
 * fix PHP notice when adding new Remote Management option
 * delete all transients on uninstall
-* fix logic for display of GitLab token fields
+* fix logic for display of GitLab token fields and error notice
 * display WP_Error message for `wp_remote_get()` error
 * correctly get use GitLab namespace/project instead of project id when needed
 

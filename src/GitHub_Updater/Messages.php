@@ -63,12 +63,8 @@ class Messages extends Base {
 					add_action( 'network_admin_notices', array( __CLASS__, 'show_wp_error' ) );
 					break;
 				case 'gitlab':
-					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) ||
-					       empty( parent::$options['gitlab_private_token'] ) )
-					) {
-						add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
-						add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
-					}
+					add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
 					break;
 				case 'git':
 				default:
@@ -147,13 +143,19 @@ class Messages extends Base {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public static function gitlab_error() {
-		?>
-		<div class="error notice is-dismissible">
-			<p>
-				<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
-			</p>
-		</div>
-		<?php
+		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
+		       parent::$private_enterprise['gitlab_enterprise'] ) ||
+		     ( empty( parent::$options['gitlab_private_token'] ) &&
+		       parent::$private_enterprise['gitlab'] )
+		) {
+			?>
+			<div class="error notice is-dismissible">
+				<p>
+					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 
 	/**
