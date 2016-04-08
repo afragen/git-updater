@@ -108,12 +108,12 @@ class Base {
 	);
 
 	/**
-	 * Holds boolean on whether or not the repo is private or enterprise.
+	 * Holds boolean on whether or not the repo requires authentication.
 	 * Used by class Settings and class Messages.
 	 *
 	 * @var bool
 	 */
-	protected static $private_enterprise = array(
+	protected static $auth_required = array(
 		'github_private'    => false,
 		'github_enterprise' => false,
 		'bitbucket_private' => false,

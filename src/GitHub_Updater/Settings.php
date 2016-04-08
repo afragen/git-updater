@@ -227,7 +227,7 @@ class Settings extends Base {
 			array( 'id' => 'github_access_token' )
 		);
 
-		if ( parent::$private_enterprise['github_enterprise'] ) {
+		if ( parent::$auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
@@ -241,7 +241,7 @@ class Settings extends Base {
 		/*
 		 * Show section for private GitHub repositories.
 		 */
-		if ( parent::$private_enterprise['github_private'] || parent::$private_enterprise['github_enterprise'] ) {
+		if ( parent::$auth_required['github_private'] || parent::$auth_required['github_enterprise'] ) {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
@@ -254,7 +254,7 @@ class Settings extends Base {
 		 * Add setting for GitLab.com, GitLab Community Edition.
 		 * or GitLab Enterprise Private Token.
 		 */
-		if ( parent::$private_enterprise['gitlab'] || parent::$private_enterprise['gitlab_enterprise'] ) {
+		if ( parent::$auth_required['gitlab'] || parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -263,7 +263,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$private_enterprise['gitlab'] ) {
+		if ( parent::$auth_required['gitlab'] ) {
 			add_settings_field(
 				'gitlab_private_token',
 				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
@@ -274,7 +274,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$private_enterprise['gitlab_enterprise'] ) {
+		if ( parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
@@ -316,7 +316,7 @@ class Settings extends Base {
 		/*
 		 * Show section for private Bitbucket repositories.
 		 */
-		if ( parent::$private_enterprise['bitbucket_private'] ) {
+		if ( parent::$auth_required['bitbucket_private'] ) {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
@@ -328,7 +328,7 @@ class Settings extends Base {
 		/*
 		 * Show if no private repositories are present.
 		 */
-		if ( ! parent::$private_enterprise['github_private'] && ! parent::$private_enterprise['bitbucket_private'] ) {
+		if ( ! parent::$auth_required['github_private'] && ! parent::$auth_required['bitbucket_private'] ) {
 			add_settings_section(
 				null,
 				esc_html__( 'No private repositories are installed.', 'github-updater' ),
@@ -378,18 +378,18 @@ class Settings extends Base {
 				 * Set boolean if GitHub Enterprise header found.
 				 */
 				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! parent::$private_enterprise['github_enterprise']
+				     ! parent::$auth_required['github_enterprise']
 				) {
-					parent::$private_enterprise['github_enterprise'] = true;
+					parent::$auth_required['github_enterprise'] = true;
 				}
 				/*
 				 * Set boolean if GitLab CE/Enterprise header found.
 				 */
 				if ( false !== strpos( $token->type, 'gitlab' ) &&
 				     ! empty( $token->enterprise ) &&
-				     ! parent::$private_enterprise['gitlab_enterprise']
+				     ! parent::$auth_required['gitlab_enterprise']
 				) {
-					parent::$private_enterprise['gitlab_enterprise'] = true;
+					parent::$auth_required['gitlab_enterprise'] = true;
 				}
 			}
 
@@ -398,14 +398,14 @@ class Settings extends Base {
 			 */
 			if ( $token->private ) {
 				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! parent::$private_enterprise['github_private']
+				     ! parent::$auth_required['github_private']
 				) {
-					parent::$private_enterprise['github_private'] = true;
+					parent::$auth_required['github_private'] = true;
 				}
 				if ( false !== strpos( $token->type, 'bitbucket' ) &&
-				     ! parent::$private_enterprise['bitbucket_private']
+				     ! parent::$auth_required['bitbucket_private']
 				) {
-					parent::$private_enterprise['bitbucket_private'] = true;
+					parent::$auth_required['bitbucket_private'] = true;
 				}
 			}
 
@@ -414,9 +414,9 @@ class Settings extends Base {
 			 */
 			if ( false !== strpos( $token->type, 'gitlab' ) &&
 			     empty( $token->enterprise ) &&
-			     ! parent::$private_enterprise['gitlab']
+			     ! parent::$auth_required['gitlab']
 			) {
-				parent::$private_enterprise['gitlab'] = true;
+				parent::$auth_required['gitlab'] = true;
 			}
 
 			/*
@@ -467,16 +467,16 @@ class Settings extends Base {
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		unset( $ghu_unset_keys['github_access_token'] );
-		if ( parent::$private_enterprise['github_enterprise'] ) {
+		if ( parent::$auth_required['github_enterprise'] ) {
 			unset( $ghu_unset_keys['github_enterprise_token'] );
 		}
 		unset( $ghu_unset_keys['branch_switch'] );
 		unset( $ghu_unset_keys['bitbucket_username'] );
 		unset( $ghu_unset_keys['bitbucket_password'] );
-		if ( parent::$private_enterprise['gitlab'] ) {
+		if ( parent::$auth_required['gitlab'] ) {
 			unset( $ghu_unset_keys['gitlab_private_token'] );
 		}
-		if ( parent::$private_enterprise['gitlab_enterprise'] ) {
+		if ( parent::$auth_required['gitlab_enterprise'] ) {
 			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
 		}
 		if ( ! empty( $ghu_unset_keys ) ) {

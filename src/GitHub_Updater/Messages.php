@@ -144,9 +144,9 @@ class Messages extends Base {
 	 */
 	public static function gitlab_error() {
 		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
-		       parent::$private_enterprise['gitlab_enterprise'] ) ||
+		       parent::$auth_required['gitlab_enterprise'] ) ||
 		     ( empty( parent::$options['gitlab_private_token'] ) &&
-		       parent::$private_enterprise['gitlab'] )
+		       parent::$auth_required['gitlab'] )
 		) {
 			?>
 			<div class="error notice is-dismissible">
