@@ -108,6 +108,7 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
+			Messages::create_error_message( $response );
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
@@ -224,6 +225,39 @@ abstract class API extends Base {
 		set_site_transient( $transient, $this->response, ( self::$hours * HOUR_IN_SECONDS ) );
 
 		return true;
+	}
+
+	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @return string $download_link
+	 */
+	protected function make_release_asset_download_link() {
+		switch ( $this->type->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$download_link = implode( '/', array(
+					'https://github.com',
+					$this->type->owner,
+					$this->type->repo,
+					'releases/download',
+					$this->type->newest_tag,
+					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				) );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				$download_link = implode( '/', array(
+					'https://bitbucket.org',
+					$this->type->owner,
+					$this->type->repo,
+					'downloads',
+					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				) );
+				break;
+		}
+		return $download_link;
 	}
 
 }

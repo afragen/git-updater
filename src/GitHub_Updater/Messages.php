@@ -25,6 +25,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Messages extends Base {
 
 	/**
+	 * Holds WP_Error message.
+	 *
+	 * @var string
+	 */
+	public static $error_message = '';
+
+	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
 	 * @param string
@@ -47,13 +54,17 @@ class Messages extends Base {
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			switch ( $type ) {
-				case 'gitlab':
-					if ( ( empty( parent::$options['gitlab_enterprise_token'] ) ||
-					       empty( parent::$options['gitlab_private_token'] ) )
-					) {
-						add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
-						add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
+				case is_wp_error( $type ):
+					self::$error_message = $type->get_error_message();
+					if ( false !== strstr( self::$error_message, 'timed out' ) ) {
+						break;
 					}
+					add_action( 'admin_notices', array( __CLASS__, 'show_wp_error' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'show_wp_error' ) );
+					break;
+				case 'gitlab':
+					add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
+					add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
 					break;
 				case 'git':
 				default:
@@ -109,7 +120,7 @@ class Messages extends Base {
 	 */
 	public static function show_401_error_message() {
 		$_401 = false;
-		foreach( self::$error_code as $repo ) {
+		foreach ( self::$error_code as $repo ) {
 			if ( 401 === $repo['code'] && ! $_401 ) {
 				$_401 = true;
 				?>
@@ -132,10 +143,32 @@ class Messages extends Base {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public static function gitlab_error() {
+		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
+		       parent::$auth_required['gitlab_enterprise'] ) ||
+		     ( empty( parent::$options['gitlab_private_token'] ) &&
+		       parent::$auth_required['gitlab'] )
+		) {
+			?>
+			<div class="error notice is-dismissible">
+				<p>
+					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				</p>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Generate error message for WP_Error.
+	 */
+	public static function show_wp_error() {
 		?>
 		<div class="error notice is-dismissible">
 			<p>
-				<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+				<?php
+				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+				echo ' ' . self::$error_message;
+				?>
 			</p>
 		</div>
 		<?php

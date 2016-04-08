@@ -205,13 +205,25 @@ Do not include your username or password in the plugin or theme URI.
 
 ## WordPress and PHP Requirements
 
-There are now two **optional** headers for setting minimum requirements for both WordPress and PHP.
+There are two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
 Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
 
 At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
+
+## Release Assets
+
+An **optional header** is available for use if your plugin or theme requires updating via a release asset.
+
+Use `Release Asset:`. eg., `Release Asset: true`.
+
+Your release asset filename is generated automatically and **must** have the following format or there will be an update error.
+
+Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the newest release tag, example `test-plugin-0.7.3.zip`.
+
+**You must tag your releases to use this feature.**
 
 ## Deleting Transients
 
@@ -354,3 +366,5 @@ GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 ## Pull Requests
 
 Pull requests are welcome. Please fork and submit pull requests against the `develop` branch.
+
+Loving crafted with [PhpStorm](https://www.jetbrains.com/phpstorm/)

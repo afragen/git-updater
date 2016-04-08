@@ -79,7 +79,7 @@ class GitHub_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
+		if ( $this->exit_no_update( $response ) && 'theme' !== $repo_type['type'] ) {
 			return false;
 		}
 
@@ -287,6 +287,10 @@ class GitHub_API extends API {
 
 		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
 		$endpoint           = '';
+
+		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
+			return $this->make_release_asset_download_link();
+		}
 
 		/*
 		 * Check for rollback.

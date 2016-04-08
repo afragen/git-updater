@@ -1,10 +1,25 @@
+#### 5.4.1
+* get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
+* ManageWP now works for Remote Management.
+* fix bug in `GitLab_API` to use `path` and not `name`. Thanks @marbetschar
+* add filter for background updates if set globally. Thanks @jancbeck
+* fix PHP notice when adding new Remote Management option
+* delete all transients on uninstall
+* fix logic for display of GitLab token fields and error notice
+* display WP_Error message for `wp_remote_get()` error
+* correctly get use GitLab namespace/project instead of project id when needed
+
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
-* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, uses [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) to add
+* add `class Additions` to process JSON config from hook to add repos to GitHub Updater, see [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
 * add necessary code in `class Plugin` and `class Theme` for above
 * skip many remote API calls if no update available and use local files, huge performance boost :-)
-* remove ability to use GitHub asset for update, this eliminates an API call for a rarely used feature.
-* consolidate error messages to show only once per error.
+* remove check for GitHub asset, this eliminates an API call for a rarely used feature
+* added additional header `Release Asset: true` to add back ability to set download link to release asset.
+* added function to remove _Basic Authentication_ header when downloading private Bitbucket release assets as they are stored on AmazonS3 and use [Query String Request Authentication Alternative](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth)
+* consolidate error messages to show only once per error
+* add _Other Notes_ section to View details
+* update readme.txt with _Other Notes_ information
 
 #### 5.3.4
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
