@@ -31,11 +31,12 @@ if ( ! defined( 'WPINC' ) ) {
  */
 if ( ! class_exists( '\\Fragen\\GitHub_Updater\\Base' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
-	require trailingslashit( WP_PLUGIN_DIR ). $ghu_plugin_file;
+	require trailingslashit( WP_PLUGIN_DIR ) . $ghu_plugin_file;
 }
 
 /**
  * Deactivate if plugin in loaded not as mu-plugin.
+ *
  * @param $plugin
  * @param $network_wide
  */
@@ -48,6 +49,7 @@ function ghu_deactivate( $plugin, $network_wide ) {
 
 /**
  * Label as mu-plugin in plugin view.
+ *
  * @param $actions
  *
  * @return array
@@ -63,7 +65,7 @@ function ghu_mu_plugin_active( $actions ) {
 		unset( $actions['deactivate'] );
 	}
 
-	return array_merge( array( 'mu-plugin' => esc_html__('Activated as mu-plugin', 'github-updater' ) ), $actions );
+	return array_merge( array( 'mu-plugin' => esc_html__( 'Activated as mu-plugin', 'github-updater' ) ), $actions );
 }
 
 /*
@@ -77,7 +79,7 @@ add_action( 'activated_plugin', 'ghu_deactivate', 10, 2 );
 add_filter( 'network_admin_plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 add_filter( 'plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 add_action( 'after_plugin_row_' . $ghu_plugin_file,
-	function() {
-		print('<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>');
-		print('<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>');
+	function () {
+		print( '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>' );
+		print( '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>' );
 	} );
