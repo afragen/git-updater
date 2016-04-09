@@ -33,12 +33,14 @@ class Theme extends Base {
 
 	/**
 	 * Theme object.
+	 *
 	 * @var bool|Theme
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable.
+	 *
 	 * @var number
 	 */
 	protected $tag = false;
@@ -75,7 +77,7 @@ class Theme extends Base {
 	 */
 	public static function instance() {
 		$class = __CLASS__;
-		if ( false === self::$object  ) {
+		if ( false === self::$object ) {
 			self::$object = new $class();
 		}
 
@@ -139,7 +141,7 @@ class Theme extends Base {
 
 				if ( ! empty( $repo_enterprise_uri ) ) {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
-					switch( $header_parts[0] ) {
+					switch ( $header_parts[0] ) {
 						case 'GitHub':
 							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
@@ -161,7 +163,7 @@ class Theme extends Base {
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
-				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] .'/';
+				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
@@ -191,7 +193,7 @@ class Theme extends Base {
 	public function get_remote_theme_meta() {
 		foreach ( (array) $this->config as $theme ) {
 			$this->repo_api = null;
-			switch( $theme->type ) {
+			switch ( $theme->type ) {
 				case 'github_theme':
 					$this->repo_api = new GitHub_API( $theme );
 					break;
@@ -228,7 +230,7 @@ class Theme extends Base {
 			     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
 			) {
 				$this->tag         = $_GET['rollback'];
-				$updates_transient = get_site_transient('update_themes');
+				$updates_transient = get_site_transient( 'update_themes' );
 				$rollback          = array(
 					'theme'       => $theme->repo,
 					'new_version' => $this->tag,
@@ -250,7 +252,7 @@ class Theme extends Base {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher'), 10, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 10, 2 );
 				}
 			}
 		}
@@ -325,8 +327,13 @@ class Theme extends Base {
 	public function fix_display_in_themes_api() {
 		?>
 		<style>
-			#theme-installer div.install-theme-info { display: block !important; }
-			#theme-installer.wp-full-overlay.single-theme, .wp-full-overlay-sidebar { position: relative; }
+			#theme-installer div.install-theme-info {
+				display: block !important;
+			}
+
+			#theme-installer.wp-full-overlay.single-theme, .wp-full-overlay-sidebar {
+				position: relative;
+			}
 		</style>
 		<?php
 	}
@@ -349,25 +356,25 @@ class Theme extends Base {
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
-				'a'       => array( 'href' => array(), 'title' => array() ),
-				'abbr'    => array( 'title' => array() ),
-				'acronym' => array( 'title' => array() ),
-				'code'    => array(),
-				'em'      => array(),
-				'strong'  => array(),
-			);
-		$theme_name    = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$install_url   = self_admin_url( "theme-install.php" );
-		$details_url   = esc_attr( add_query_arg(
-				array(
-					'tab'       => 'theme-information',
-					'theme'     => $theme_key,
-					'TB_iframe' => 'true',
-					'width'     => 270,
-					'height'    => 400
-				),
-				$install_url ) );
+			'a'       => array( 'href' => array(), 'title' => array() ),
+			'abbr'    => array( 'title' => array() ),
+			'acronym' => array( 'title' => array() ),
+			'code'    => array(),
+			'em'      => array(),
+			'strong'  => array(),
+		);
+		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
+		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$install_url        = self_admin_url( "theme-install.php" );
+		$details_url        = esc_attr( add_query_arg(
+			array(
+				'tab'       => 'theme-information',
+				'theme'     => $theme_key,
+				'TB_iframe' => 'true',
+				'width'     => 270,
+				'height'    => 400,
+			),
+			$install_url ) );
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
@@ -381,7 +388,7 @@ class Theme extends Base {
 				esc_html_e( 'Rollback to:', 'github-updater' );
 				echo '</strong> ';
 				// display last three tags
-				for ( $i = 0; $i < 3 ; $i++ ) {
+				for ( $i = 0; $i < 3; $i ++ ) {
 					$tag = array_shift( $rollback_keys );
 					if ( empty( $tag ) ) {
 						break;
@@ -446,7 +453,7 @@ class Theme extends Base {
 	 *
 	 * @return bool|void
 	 */
-	public function theme_branch_switcher(  $theme_key, $theme ) {
+	public function theme_branch_switcher( $theme_key, $theme ) {
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -474,7 +481,7 @@ class Theme extends Base {
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
-			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'<a href="#" onclick="jQuery(\'#' . $id . '\').toggle();return false;">',
 			'</a>'
 		);
 
@@ -510,10 +517,10 @@ class Theme extends Base {
 			 * @since   5.4.0
 			 * @access  public
 			 *
-			 * @param   array   $additions  Listing of themes to add.
+			 * @param   array $additions    Listing of themes to add.
 			 *                              Default null.
-			 * @param   array   $theme      Current theme.
-			 * @param   string  'theme'    Type being passed.
+			 * @param   array $theme        Current theme.
+			 * @param         string        'theme'    Type being passed.
 			 */
 			$additions = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
 			foreach ( (array) $additions as $addition ) {
@@ -564,6 +571,7 @@ class Theme extends Base {
 	 * @author Seth Carstens
 	 *
 	 * @access private
+	 *
 	 * @param object $theme
 	 *
 	 * @return string (content buffer)
@@ -584,17 +592,17 @@ class Theme extends Base {
 			<strong><br />
 				<?php
 				printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
-						$theme->name
+					$theme->name
 				);
 				printf( ' <a href="%s" class="thickbox" title="%s">',
-						$details_url,
-						esc_attr( $theme->name )
+					$details_url,
+					esc_attr( $theme->name )
 				);
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-						$theme->remote_version,
-						'</a>',
-						'<a href="' . $update_url . '">',
-						'</a>'
+					$theme->remote_version,
+					'</a>',
+					'<a href="' . $update_url . '">',
+					'</a>'
 				);
 				?>
 			</strong>
@@ -618,13 +626,13 @@ class Theme extends Base {
 			</p>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<label><select style="width: 60%;"
-					onchange="if(jQuery(this).val() != '') {
-						jQuery(this).parent().next().show();
-						jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
-					}
-					else jQuery(this).parent().next().hide();
-				">
-				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
+				               onchange="if(jQuery(this).val() != '') {
+					               jQuery(this).parent().next().show();
+					               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
+					               }
+					               else jQuery(this).parent().next().hide();
+					               ">
+						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 						<?php if ( ! empty( $options['branch_switch'] ) ) {
 							foreach ( array_keys( $theme->branches ) as $branch ) {
 								echo '<option>' . $branch . '</option>';

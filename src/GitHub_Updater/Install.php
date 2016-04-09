@@ -28,6 +28,7 @@ class Install extends Base {
 
 	/**
 	 * Class options.
+	 *
 	 * @var array
 	 */
 	protected static $install = array();
@@ -76,8 +77,8 @@ class Install extends Base {
 			$headers                      = Base::parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install                = Settings::sanitize( $_POST );
-			self::$install['repo']        = $headers['repo'];
+			self::$install         = Settings::sanitize( $_POST );
+			self::$install['repo'] = $headers['repo'];
 
 			/*
 			 * Create GitHub endpoint.
@@ -106,7 +107,7 @@ class Install extends Base {
 				 * Add access token if present.
 				 */
 				if ( ! empty( self::$install['github_access_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
+					self::$install['download_link']            = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
 					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
 				} elseif ( ! empty( parent::$options['github_access_token'] ) &&
 				           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
@@ -145,7 +146,11 @@ class Install extends Base {
 					$gitlab_base = $headers['base_uri'];
 				}
 
-				self::$install['download_link'] = implode( '/', array( $gitlab_base, self::$install['github_updater_repo'], 'repository/archive.zip' ) );
+				self::$install['download_link'] = implode( '/', array(
+					$gitlab_base,
+					self::$install['github_updater_repo'],
+					'repository/archive.zip',
+				) );
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
 
 				if ( ! empty( self::$install['gitlab_private_token'] ) ) {
@@ -165,7 +170,11 @@ class Install extends Base {
 			if ( ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
 			     'plugin' === $type
 			) {
-				parent::$options['github_updater_install_repo'] = implode( '-', array( self::$install['github_updater_api'], $headers['owner'], self::$install['repo'] ) );
+				parent::$options['github_updater_install_repo'] = implode( '-', array(
+					self::$install['github_updater_api'],
+					$headers['owner'],
+					self::$install['repo'],
+				) );
 			}
 
 			update_site_option( 'github_updater', parent::$options );
@@ -179,7 +188,10 @@ class Install extends Base {
 				 * Create a new instance of Plugin_Upgrader.
 				 */
 				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
-				add_filter( 'install_plugin_complete_actions', array( &$this, 'install_plugin_complete_actions' ), 10, 3 );
+				add_filter( 'install_plugin_complete_actions', array(
+					&$this,
+					'install_plugin_complete_actions',
+				), 10, 3 );
 			}
 
 			if ( 'theme' === $type ) {
@@ -189,7 +201,10 @@ class Install extends Base {
 				 * Create a new instance of Theme_Upgrader.
 				 */
 				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
-				add_filter( 'install_theme_complete_actions', array( &$this, 'install_theme_complete_actions' ), 10, 3 );
+				add_filter( 'install_theme_complete_actions', array(
+					&$this,
+					'install_theme_complete_actions',
+				), 10, 3 );
 			}
 
 			/*
@@ -251,7 +266,7 @@ class Install extends Base {
 			'github_updater_install',
 			'github_updater_install_' . $type,
 			array( 'Fragen\\GitHub_Updater\\Settings', 'sanitize' )
-			);
+		);
 
 		add_settings_section(
 			$type,
@@ -320,9 +335,9 @@ class Install extends Base {
 	public function get_repo() {
 		?>
 		<label for="github_updater_repo">
-			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus >
+			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus>
 			<p class="description">
-				<?php esc_html_e( 'URI is case sensitive.', 'github-updater') ?>
+				<?php esc_html_e( 'URI is case sensitive.', 'github-updater' ) ?>
 			</p>
 		</label>
 		<?php
@@ -339,7 +354,7 @@ class Install extends Base {
 				<?php esc_html_e( 'Enter branch name or leave empty for `master`', 'github-updater' ) ?>
 			</p>
 		</label>
-	<?php
+		<?php
 	}
 
 	/**
@@ -356,7 +371,7 @@ class Install extends Base {
 				<?php endforeach ?>
 			</select>
 		</label>
-	<?php
+		<?php
 	}
 
 	/**
@@ -379,7 +394,7 @@ class Install extends Base {
 	public function access_token() {
 		?>
 		<label for="github_access_token">
-			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="" >
+			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
 			<p class="description">
 				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
 			</p>
@@ -393,12 +408,12 @@ class Install extends Base {
 	public function private_token() {
 		?>
 		<label for="gitlab_private_token">
-			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_private_token" value="" >
+			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_private_token" value="">
 			<p class="description">
 				<?php esc_html_e( 'Enter GitLab Private Token for private GitLab repositories.', 'github-updater' ) ?>
 			</p>
 		</label>
-	<?php
+		<?php
 	}
 
 	/**
@@ -431,12 +446,12 @@ class Install extends Base {
 			unset( $install_actions['preview'] );
 		}
 
-		$stylesheet = self::$install['repo'];
+		$stylesheet    = self::$install['repo'];
 		$activate_link = add_query_arg( array(
 			'action'     => 'activate',
 			//'template'   => urlencode( $template ),
 			'stylesheet' => urlencode( $stylesheet ),
-			), admin_url('themes.php') );
+		), admin_url( 'themes.php' ) );
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
 		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'github-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
@@ -445,7 +460,7 @@ class Install extends Base {
 			$network_activate_link = add_query_arg( array(
 				'action' => 'enable',
 				'theme'  => urlencode( $stylesheet ),
-				), network_admin_url( 'themes.php' ) );
+			), network_admin_url( 'themes.php' ) );
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
 
 			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'github-updater' ) . '</a>';

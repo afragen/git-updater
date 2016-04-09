@@ -99,7 +99,7 @@ class Bitbucket_API extends API {
 			$arr_resp = (array) $response;
 
 			if ( ! $response || ! $arr_resp ) {
-				$response = new \stdClass();
+				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
 
@@ -130,9 +130,9 @@ class Bitbucket_API extends API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, $changes );
+			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response->data = $content;
 				$this->set_transient( 'changes', $response );
@@ -191,9 +191,9 @@ class Bitbucket_API extends API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, 'readme.txt' );
+			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
 				$response->data = $content;
 			} else {
@@ -208,7 +208,7 @@ class Bitbucket_API extends API {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
 
 			if ( ! $response ) {
-				$response = new \stdClass();
+				$response          = new \stdClass();
 				$response->message = 'No readme found';
 			}
 
@@ -281,6 +281,7 @@ class Bitbucket_API extends API {
 				}
 				$this->type->branches = $branches;
 				$this->set_transient( 'branches', $branches );
+
 				return true;
 			}
 		}
@@ -297,13 +298,18 @@ class Bitbucket_API extends API {
 	/**
 	 * Construct $this->type->download_link using Bitbucket API
 	 *
-	 * @param boolean $rollback for theme rollback
+	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = implode( '/', array( 'https://bitbucket.org', $this->type->owner, $this->type->repo, 'get/' ) );
+		$download_link_base = implode( '/', array(
+			'https://bitbucket.org',
+			$this->type->owner,
+			$this->type->repo,
+			'get/',
+		) );
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
@@ -338,6 +344,7 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Add remote data to type object.
+	 *
 	 * @access private
 	 */
 	private function _add_meta_repo_object() {
@@ -368,7 +375,7 @@ class Bitbucket_API extends API {
 		 * Check whether attempting to update private Bitbucket repo.
 		 */
 		if ( isset( $this->type->repo ) &&
-			! empty( parent::$options[ $this->type->repo ] ) &&
+		     ! empty( parent::$options[ $this->type->repo ] ) &&
 		     false !== strpos( $url, $this->type->repo )
 		) {
 			$bitbucket_private = true;
@@ -387,8 +394,8 @@ class Bitbucket_API extends API {
 		}
 
 		if ( $bitbucket_private || $bitbucket_private_install ) {
-			$username = parent::$options['bitbucket_username'];
-			$password = parent::$options['bitbucket_password'];
+			$username                         = parent::$options['bitbucket_username'];
+			$password                         = parent::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 
@@ -398,6 +405,7 @@ class Bitbucket_API extends API {
 	/**
 	 * Removes Basic Authentication header for Bitbucket Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
+	 *
 	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
 	 *
 	 * @param $args

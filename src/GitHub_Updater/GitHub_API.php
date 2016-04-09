@@ -87,7 +87,7 @@ class GitHub_API extends API {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( ! $response ) {
-				$response = new \stdClass();
+				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
 
@@ -118,9 +118,9 @@ class GitHub_API extends API {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, $changes );
+			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response->content = $content;
 				$this->set_transient( 'changes', $response );
@@ -130,7 +130,7 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes  );
+			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
 				$this->set_transient( 'changes', $response );
@@ -171,9 +171,9 @@ class GitHub_API extends API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type )  ) {
+		if ( ! $response && ! $this->can_update( $this->type ) ) {
 			$response = new \stdClass();
-			$content = $this->get_local_info( $this->type, 'readme.txt' );
+			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
 				$response->content = $content;
 			} else {
@@ -253,6 +253,7 @@ class GitHub_API extends API {
 				}
 				$this->type->branches = $branches;
 				$this->set_transient( 'branches', $branches );
+
 				return true;
 			}
 		}
@@ -270,7 +271,7 @@ class GitHub_API extends API {
 	 * Construct $this->type->download_link using Repository Contents API
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
-	 * @param boolean $rollback for theme rollback
+	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
 	 *
 	 * @return string $endpoint
@@ -285,7 +286,13 @@ class GitHub_API extends API {
 			$github_base = 'https://api.github.com';
 		}
 
-		$download_link_base = implode( '/', array( $github_base, 'repos', $this->type->owner, $this->type->repo, 'zipball/' ) );
+		$download_link_base = implode( '/', array(
+			$github_base,
+			'repos',
+			$this->type->owner,
+			$this->type->repo,
+			'zipball/',
+		) );
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
@@ -357,7 +364,7 @@ class GitHub_API extends API {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param $git object
+	 * @param $git      object
 	 * @param $endpoint string
 	 *
 	 * @return string $endpoint
@@ -386,6 +393,7 @@ class GitHub_API extends API {
 
 	/**
 	 * Add remote data to type object.
+	 *
 	 * @access private
 	 */
 	private function _add_meta_repo_object() {
@@ -405,7 +413,10 @@ class GitHub_API extends API {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
-			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array( 'git' => 'github', 'wait' => $wait ) );
+			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array(
+				'git'  => 'github',
+				'wait' => $wait,
+			) );
 		}
 	}
 

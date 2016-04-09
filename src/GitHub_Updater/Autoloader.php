@@ -25,6 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 class Autoloader {
 	/**
 	 * Roots to scan when autoloading.
+	 *
 	 * @var array
 	 */
 	protected $roots = array();
@@ -32,9 +33,10 @@ class Autoloader {
 	/**
 	 * List of class names and locations in filesystem, for situations
 	 * where they deviate from convention etc.
+	 *
 	 * @var array
 	 */
-	protected $map   = array();
+	protected $map = array();
 
 
 	/**
@@ -60,6 +62,7 @@ class Autoloader {
 		// Check for a static mapping first of all
 		if ( isset( $this->map[ $class ] ) && file_exists( $this->map[ $class ] ) ) {
 			include $this->map[ $class ];
+
 			return;
 		}
 
