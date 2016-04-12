@@ -9,6 +9,7 @@
 * display WP_Error message for `wp_remote_get()` error
 * correctly get use GitLab namespace/project instead of project id when needed
 * added `data-slug` to theme update rows so CSS may be applied
+* now supports MainWP for remote management, thanks @ruben-
 
 #### 5.4.0
 * fix deprecated PHP4 constructor in vendor class.
