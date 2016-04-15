@@ -36,7 +36,7 @@ class Readme_Parser extends \Automattic_Readme {
 	 * @return array
 	 */
 	public function parse_readme( $file_contents ) {
-		return $this->parse_readme_contents( $file_contents );
+		return (array) $this->parse_readme_contents( $file_contents );
 	}
 
 	/**
