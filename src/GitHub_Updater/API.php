@@ -26,6 +26,7 @@ abstract class API extends Base {
 
 	/**
 	 * Variable to hold all repository remote info.
+	 *
 	 * @var array
 	 */
 	protected $response = array();
@@ -108,21 +109,25 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
+			Messages::create_error_message( $response );
+
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, false ) ) {
 			self::$error_code = array_merge(
 				self::$error_code,
-				array( $this->type->repo => array(
-					'repo' => $this->type->repo,
-					'code' => $code,
-					'name' => $this->type->name,
-					)
+				array(
+					$this->type->repo => array(
+						'repo' => $this->type->repo,
+						'code' => $code,
+						'name' => $this->type->name,
+					),
 				) );
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
 			Messages::create_error_message( $type['repo'] );
+
 			return false;
 		}
 
@@ -133,6 +138,7 @@ abstract class API extends Base {
 	 * Return API url.
 	 *
 	 * @access private
+	 *
 	 * @param string $endpoint
 	 *
 	 * @return string $endpoint
@@ -256,6 +262,7 @@ abstract class API extends Base {
 				) );
 				break;
 		}
+
 		return $download_link;
 	}
 

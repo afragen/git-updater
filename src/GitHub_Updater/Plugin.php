@@ -31,12 +31,14 @@ class Plugin extends Base {
 
 	/**
 	 * Plugin object.
+	 *
 	 * @var bool|Plugin
 	 */
 	protected static $object = false;
 
 	/**
 	 * Rollback variable
+	 *
 	 * @var string branch
 	 */
 	protected $tag = false;
@@ -110,10 +112,10 @@ class Plugin extends Base {
 		 * @since   5.4.0
 		 * @access  public
 		 *
-		 * @param   array   $additions  Listing of plugins to add.
+		 * @param   array $additions    Listing of plugins to add.
 		 *                              Default null.
-		 * @param   array   $plugins    Listing of all plugins.
-		 * @param   string  'plugin'    Type being passed.
+		 * @param   array $plugins      Listing of all plugins.
+		 * @param         string        'plugin'    Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
 		$plugins   = array_merge( $plugins, (array) $additions );
@@ -156,7 +158,7 @@ class Plugin extends Base {
 
 				if ( ! empty( $repo_enterprise_uri ) ) {
 					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
-					switch( $header_parts[0] ) {
+					switch ( $header_parts[0] ) {
 						case 'GitHub':
 							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
@@ -166,17 +168,21 @@ class Plugin extends Base {
 					}
 				}
 
-				$git_plugin['type']                    = $repo_parts['type'];
-				$git_plugin['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
-				$git_plugin['enterprise']              = $repo_enterprise_uri;
-				$git_plugin['enterprise_api']          = $repo_enterprise_api;
-				$git_plugin['owner']                   = $header['owner'];
-				$git_plugin['repo']                    = $header['repo'];
-				$git_plugin['extended_repo']           = implode( '-', array( $repo_parts['git_server'], $header['owner'], $header['repo'] ) );
-				$git_plugin['branch']                  = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
-				$git_plugin['slug']                    = $plugin;
-				$git_plugin['local_path']              = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
-				$git_plugin['local_path_extended']     = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
+				$git_plugin['type']                = $repo_parts['type'];
+				$git_plugin['uri']                 = $repo_parts['base_uri'] . $header['owner_repo'];
+				$git_plugin['enterprise']          = $repo_enterprise_uri;
+				$git_plugin['enterprise_api']      = $repo_enterprise_api;
+				$git_plugin['owner']               = $header['owner'];
+				$git_plugin['repo']                = $header['repo'];
+				$git_plugin['extended_repo']       = implode( '-', array(
+					$repo_parts['git_server'],
+					$header['owner'],
+					$header['repo'],
+				) );
+				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
+				$git_plugin['slug']                = $plugin;
+				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
@@ -186,8 +192,8 @@ class Plugin extends Base {
 				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
 			}
-			if ( isset( $all_plugins[ $plugin ]->id )  ) {
-				$git_plugin['dot_org']                 = true;
+			if ( isset( $all_plugins[ $plugin ]->id ) ) {
+				$git_plugin['dot_org'] = true;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -207,7 +213,7 @@ class Plugin extends Base {
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
 			$this->repo_api = null;
-			switch( $plugin->type ) {
+			switch ( $plugin->type ) {
 				case 'github_plugin':
 					$this->repo_api = new GitHub_API( $plugin );
 					break;
@@ -245,7 +251,7 @@ class Plugin extends Base {
 			     ( isset( $_GET['plugin'] ) && $_GET['plugin'] === $plugin->slug )
 			) {
 				$this->tag         = $_GET['rollback'];
-				$updates_transient = get_site_transient('update_plugins');
+				$updates_transient = get_site_transient( 'update_plugins' );
 				$rollback          = array(
 					'slug'        => $plugin->repo,
 					'plugin'      => $plugin->slug,
@@ -319,7 +325,7 @@ class Plugin extends Base {
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
-			'<a href="#" onclick="jQuery(\'#' . $id .'\').toggle();return false;">',
+			'<a href="#" onclick="jQuery(\'#' . $id . '\').toggle();return false;">',
 			'</a>'
 		);
 
@@ -347,7 +353,7 @@ class Plugin extends Base {
 	 */
 	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
-		$repo          = dirname ( $file );
+		$repo          = dirname( $file );
 		$slugs         = $this->get_repo_slugs( $repo );
 		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
@@ -368,7 +374,7 @@ class Plugin extends Base {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 					esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
-					                   '&TB_iframe=true&width=600&height=550' ) ),
+					                            '&TB_iframe=true&width=600&height=550' ) ),
 					esc_html__( 'View details', 'github-updater' )
 				);
 			}
@@ -392,7 +398,7 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		$transient = 'ghu-' . md5( $response->slug . 'wporg' );
+		$transient    = 'ghu-' . md5( $response->slug . 'wporg' );
 		$wp_repo_data = get_site_transient( $transient );
 		if ( ! $wp_repo_data ) {
 			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
@@ -414,7 +420,7 @@ class Plugin extends Base {
 			$repos = $this->get_repo_slugs( $plugin->repo );
 			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
 				$response->slug = $repos['repo'];
-				$match = true;
+				$match          = true;
 			} else {
 				continue;
 			}
@@ -440,7 +446,7 @@ class Plugin extends Base {
 				foreach ( $plugin->contributors as $contributor ) {
 					$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 				}
-				$response->contributors  = $contributors;
+				$response->contributors = $contributors;
 				if ( ! $plugin->private ) {
 					$response->num_ratings = $plugin->num_ratings;
 					$response->rating      = $plugin->rating;
