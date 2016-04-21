@@ -43,6 +43,7 @@ class Settings extends Base {
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
 		'managewp'     => 'ManageWP',
+		'mainwp'       => 'MainWP',
 	);
 
 	/**

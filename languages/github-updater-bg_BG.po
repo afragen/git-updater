@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-18 08:21-0700\n"
-"PO-Revision-Date: 2016-03-18 08:21-0700\n"
+"POT-Creation-Date: 2016-04-13 13:48-0700\n"
+"PO-Revision-Date: 2016-04-13 13:48-0700\n"
 "Last-Translator: Adrian Dimitrov <dimitrov.adrian@gmail.com>\n"
 "Language-Team: \n"
 "Language: bg\n"
@@ -24,106 +24,107 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: mu/ghu-loader.php:66
+#: mu/ghu-loader.php:68
 msgid "Activated as mu-plugin"
 msgstr "Активиране като мултисайт разширение"
 
-#: src/GitHub_Updater/Base.php:474
+#: src/GitHub_Updater/Base.php:503
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr "Преименуването е успешно, използвайки %1$s"
 
-#: src/GitHub_Updater/Install.php:67
+#: src/GitHub_Updater/Install.php:68
 msgid "A repository URI is required."
 msgstr "Изисква се URL на хранилището"
 
-#: src/GitHub_Updater/Install.php:223 src/GitHub_Updater/Settings.php:78
+#: src/GitHub_Updater/Install.php:238 src/GitHub_Updater/Settings.php:82
 msgid "Install Plugin"
 msgstr "Инсталиране на разширение"
 
-#: src/GitHub_Updater/Install.php:226 src/GitHub_Updater/Settings.php:79
+#: src/GitHub_Updater/Install.php:241 src/GitHub_Updater/Settings.php:83
 msgid "Install Theme"
 msgstr "Инсталиране на тема"
 
-#: src/GitHub_Updater/Install.php:244
+#: src/GitHub_Updater/Install.php:259
 msgid "Plugin"
 msgstr "Разширение"
 
-#: src/GitHub_Updater/Install.php:247
+#: src/GitHub_Updater/Install.php:262
 msgid "Theme"
 msgstr "Тема"
 
-#: src/GitHub_Updater/Install.php:258
+#: src/GitHub_Updater/Install.php:273
 #, php-format
 msgid "GitHub Updater Install %s"
 msgstr "GitHub Актуализатор инсталира %s"
 
-#: src/GitHub_Updater/Install.php:265
+#: src/GitHub_Updater/Install.php:280
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:273
+#: src/GitHub_Updater/Install.php:288
 msgid "Repository Branch"
 msgstr "Клон на хранилището"
 
-#: src/GitHub_Updater/Install.php:281
+#: src/GitHub_Updater/Install.php:296
 msgid "Remote Repository Host"
 msgstr "Отдалечено хранилище"
 
-#: src/GitHub_Updater/Install.php:289
+#: src/GitHub_Updater/Install.php:304
 msgid "Private Bitbucket Repository"
 msgstr "Частно Bitbucket хранилище"
 
-#: src/GitHub_Updater/Install.php:297
+#: src/GitHub_Updater/Install.php:312
 #, fuzzy
 msgid "GitHub Access Token"
 msgstr "Личен GitHub Access Token"
 
-#: src/GitHub_Updater/Install.php:308
+#: src/GitHub_Updater/Install.php:323
 msgid "GitLab Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:325
+#: src/GitHub_Updater/Install.php:340
 msgid "URI is case sensitive."
 msgstr "В URI има значение малки и главни букви."
 
-#: src/GitHub_Updater/Install.php:339
+#: src/GitHub_Updater/Install.php:354
 msgid "Enter branch name or leave empty for `master`"
 msgstr "Въведете име на клон или оставете празно за `master`"
 
-#: src/GitHub_Updater/Install.php:370
+#: src/GitHub_Updater/Install.php:385
 msgid "Check for private Bitbucket repositories."
 msgstr "Проверка за частни Bitbucket хранилища."
 
-#: src/GitHub_Updater/Install.php:384
+#: src/GitHub_Updater/Install.php:399
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr "Въведете GitHub Access Token за частни GitHub хранилища."
 
-#: src/GitHub_Updater/Install.php:398
+#: src/GitHub_Updater/Install.php:413
 msgid "Enter GitLab Private Token for private GitLab repositories."
 msgstr "Въведете GitLab Private Token за частни GitLab хранилища."
 
-#: src/GitHub_Updater/Install.php:442
+#: src/GitHub_Updater/Install.php:457
 msgid "Activate"
 msgstr "Активиране"
 
-#: src/GitHub_Updater/Install.php:451
+#: src/GitHub_Updater/Install.php:466
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr "Включване за мрежата"
 
-#: src/GitHub_Updater/Messages.php:84 src/GitHub_Updater/Messages.php:119
+#: src/GitHub_Updater/Messages.php:95 src/GitHub_Updater/Messages.php:130
+#: src/GitHub_Updater/Messages.php:169
 #, fuzzy
 msgid "GitHub Updater Error Code:"
 msgstr "%s не беше проверен. GitHub Актуализатор номер на грешка:"
 
-#: src/GitHub_Updater/Messages.php:89
+#: src/GitHub_Updater/Messages.php:100
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr "GitHub API ограничението ще бъде занулено след %s минути."
 
-#: src/GitHub_Updater/Messages.php:94
+#: src/GitHub_Updater/Messages.php:105
 #, php-format
 msgid ""
 "It looks like you are running into GitHub API rate limits. Be sure and "
@@ -132,119 +133,119 @@ msgstr ""
 "Изглежда, че сте на границата на API ограниченията от GitHub. Обмислете "
 "използването на %sPersonal Access Token%s за да подобни проблеми."
 
-#: src/GitHub_Updater/Messages.php:123
+#: src/GitHub_Updater/Messages.php:134
 #, fuzzy
 msgid ""
 "There is probably an access token or password error on the GitHub Updater "
 "Settings page."
 msgstr "Вероятно има проблем в настройките на GitHub Актуализатора"
 
-#: src/GitHub_Updater/Messages.php:138
+#: src/GitHub_Updater/Messages.php:154
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 "Трябва да зададете GitLab.com, GitLab CE, или GitLab Enterprise Private "
 "Token."
 
-#: src/GitHub_Updater/Plugin.php:320 src/GitHub_Updater/Theme.php:475
+#: src/GitHub_Updater/Plugin.php:326 src/GitHub_Updater/Theme.php:482
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr "Текущият клон е `%1$s`, изпробвайте %2$sдруг клон%3$s."
 
-#: src/GitHub_Updater/Plugin.php:372
+#: src/GitHub_Updater/Plugin.php:378
 msgid "View details"
 msgstr "Преглед на детайли"
 
-#: src/GitHub_Updater/Settings.php:77 src/GitHub_Updater/Settings.php:697
+#: src/GitHub_Updater/Settings.php:81 src/GitHub_Updater/Settings.php:704
 msgid "Settings"
 msgstr "Настройки"
 
-#: src/GitHub_Updater/Settings.php:80 src/GitHub_Updater/Settings.php:492
+#: src/GitHub_Updater/Settings.php:84 src/GitHub_Updater/Settings.php:504
 msgid "Remote Management"
 msgstr "Отдалечено управление"
 
-#: src/GitHub_Updater/Settings.php:91 src/GitHub_Updater/Settings.php:99
-#: src/GitHub_Updater/Settings.php:194
+#: src/GitHub_Updater/Settings.php:95 src/GitHub_Updater/Settings.php:103
+#: src/GitHub_Updater/Settings.php:198
 msgid "GitHub Updater Settings"
 msgstr "Настройки на GitHub Актуализатора"
 
 #. Plugin Name of the plugin/theme
-#: src/GitHub_Updater/Settings.php:92 src/GitHub_Updater/Settings.php:100
-#: src/GitHub_Updater/Settings.php:137
+#: src/GitHub_Updater/Settings.php:96 src/GitHub_Updater/Settings.php:104
+#: src/GitHub_Updater/Settings.php:141
 msgid "GitHub Updater"
 msgstr "GitHub Актуализатор"
 
-#: src/GitHub_Updater/Settings.php:141
+#: src/GitHub_Updater/Settings.php:145
 msgid "Saved."
 msgstr "Записано."
 
-#: src/GitHub_Updater/Settings.php:201
+#: src/GitHub_Updater/Settings.php:205
 msgid "Enable Branch Switching"
 msgstr "Промяна на клона"
 
-#: src/GitHub_Updater/Settings.php:213
+#: src/GitHub_Updater/Settings.php:217
 msgid "Personal GitHub Access Token"
 msgstr "Личен GitHub Access Token"
 
-#: src/GitHub_Updater/Settings.php:220
+#: src/GitHub_Updater/Settings.php:224
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:230
+#: src/GitHub_Updater/Settings.php:234
 msgid "GitHub Enterprise Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:244
+#: src/GitHub_Updater/Settings.php:248
 msgid "GitHub Private Settings"
 msgstr "GitHub Private настройки"
 
-#: src/GitHub_Updater/Settings.php:257
+#: src/GitHub_Updater/Settings.php:261
 msgid "GitLab Private Settings"
 msgstr "GitLab Private настройки"
 
-#: src/GitHub_Updater/Settings.php:266
+#: src/GitHub_Updater/Settings.php:270
 msgid "GitLab.com Private Token"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:277
+#: src/GitHub_Updater/Settings.php:281
 msgid "GitLab CE or GitLab Enterprise Private Token"
 msgstr "GitLab CE или GitLab Enterprise Private Token"
 
-#: src/GitHub_Updater/Settings.php:290
+#: src/GitHub_Updater/Settings.php:294
 msgid "Bitbucket Private Settings"
 msgstr "Bitbucket настройки"
 
-#: src/GitHub_Updater/Settings.php:297
+#: src/GitHub_Updater/Settings.php:301
 msgid "Bitbucket Username"
 msgstr "Bitbucket потребител"
 
-#: src/GitHub_Updater/Settings.php:306
+#: src/GitHub_Updater/Settings.php:310
 msgid "Bitbucket Password"
 msgstr "Bitbucket парола"
 
-#: src/GitHub_Updater/Settings.php:319
+#: src/GitHub_Updater/Settings.php:323
 msgid "Bitbucket Private Repositories"
 msgstr "Bitbucket частни хранилища"
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:335
 msgid "No private repositories are installed."
 msgstr "Няма инстлирани частни хранилища."
 
-#: src/GitHub_Updater/Settings.php:419
+#: src/GitHub_Updater/Settings.php:431
 msgid "Theme:"
 msgstr "Тема:"
 
-#: src/GitHub_Updater/Settings.php:541
+#: src/GitHub_Updater/Settings.php:553
 #, php-format
 msgid "Extended Naming is %sactive%s."
 msgstr "Разширеното именуване е %sактивирано%s."
 
-#: src/GitHub_Updater/Settings.php:546
+#: src/GitHub_Updater/Settings.php:558
 #, php-format
 msgid "Extended Naming is %snot active%s."
 msgstr "Разширеното именуване %sне е активно%s."
 
-#: src/GitHub_Updater/Settings.php:548
+#: src/GitHub_Updater/Settings.php:560
 #, php-format
 msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
@@ -253,25 +254,25 @@ msgstr ""
 "Разширено именуване, преименува директориите на разширенията към %s за да се "
 "избегнат възможни конфликти с разширения от WP.org."
 
-#: src/GitHub_Updater/Settings.php:549
+#: src/GitHub_Updater/Settings.php:561
 #, php-format
 msgid "Activate Extended Naming by setting %s"
 msgstr ""
 "Активиране на разширеното именуване чрез задаване на %s в wp-config.php"
 
-#: src/GitHub_Updater/Settings.php:550
+#: src/GitHub_Updater/Settings.php:562
 msgid "Check to enable branch switching from the Plugins or Themes page."
 msgstr ""
 "Отбележете за да позволите промяната на клона от страниците на разширенията "
 "и темите."
 
-#: src/GitHub_Updater/Settings.php:557
+#: src/GitHub_Updater/Settings.php:569
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 "Въведете вашия GitHub Access Token. Оставете празно, ако хранилището е "
 "публично."
 
-#: src/GitHub_Updater/Settings.php:564
+#: src/GitHub_Updater/Settings.php:576
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
 "API access limits."
@@ -279,22 +280,22 @@ msgstr ""
 "Въведете вашия Access Token за GitHub.com или GitHub Enterprise за да "
 "избегнете ограниченията на API заявките."
 
-#: src/GitHub_Updater/Settings.php:571
+#: src/GitHub_Updater/Settings.php:583
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 "Отбележете, ако това е частно хранилище. Оставете празно ако е публично."
 
-#: src/GitHub_Updater/Settings.php:578
+#: src/GitHub_Updater/Settings.php:590
 msgid "Enter your personal Bitbucket username and password."
 msgstr "Въведете вашите потребител и парола за Bitbucket."
 
-#: src/GitHub_Updater/Settings.php:585
+#: src/GitHub_Updater/Settings.php:597
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 "Въведете вашият GitLab.com, GitLab CE, или GitLab Enterprise Private Token."
 
-#: src/GitHub_Updater/Settings.php:592
+#: src/GitHub_Updater/Settings.php:604
 msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
@@ -303,53 +304,53 @@ msgstr ""
 "времето за зареждане в контролния панел за потребителите с администраторска "
 "роля."
 
-#: src/GitHub_Updater/Theme.php:376
+#: src/GitHub_Updater/Theme.php:383
 msgid "Theme is up-to-date!"
 msgstr "Темата е последна версия!"
 
-#: src/GitHub_Updater/Theme.php:381
+#: src/GitHub_Updater/Theme.php:388
 msgid "Rollback to:"
 msgstr "Връщане към:"
 
-#: src/GitHub_Updater/Theme.php:399 src/GitHub_Updater/Theme.php:639
+#: src/GitHub_Updater/Theme.php:406 src/GitHub_Updater/Theme.php:647
 msgid "No previous tags to rollback to."
 msgstr "Няма предишни тагове за връщане."
 
-#: src/GitHub_Updater/Theme.php:407 src/GitHub_Updater/Theme.php:421
+#: src/GitHub_Updater/Theme.php:414 src/GitHub_Updater/Theme.php:428
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr "GitHub Актуализатор показва налична версия за %s."
 
-#: src/GitHub_Updater/Theme.php:414
+#: src/GitHub_Updater/Theme.php:421
 #, php-format
 msgid "View version %s details."
 msgstr "Преглед на детайлите за версия %s"
 
-#: src/GitHub_Updater/Theme.php:418
+#: src/GitHub_Updater/Theme.php:425
 msgid "Automatic update is unavailable for this theme."
 msgstr "Автоматичното обновяване не е налично за тази тема."
 
-#: src/GitHub_Updater/Theme.php:428 src/GitHub_Updater/Theme.php:593
+#: src/GitHub_Updater/Theme.php:435 src/GitHub_Updater/Theme.php:601
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 "Преглед на %1$s детайлити%2$s по версията, или %3$sобновяване сега%4$s."
 
-#: src/GitHub_Updater/Theme.php:586
+#: src/GitHub_Updater/Theme.php:594
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr "Има налична нова версия на %s."
 
-#: src/GitHub_Updater/Theme.php:613
+#: src/GitHub_Updater/Theme.php:621
 #, php-format
 msgid "Current version is up to date. Try %sanother version%s"
 msgstr "Текущата ви версия е последна. Пробвайте %sнякоя друга%s"
 
-#: src/GitHub_Updater/Theme.php:627
+#: src/GitHub_Updater/Theme.php:635
 msgid "Choose a Version"
 msgstr "Изберете версия"
 
-#: src/GitHub_Updater/Theme.php:644
+#: src/GitHub_Updater/Theme.php:652
 msgid "Install"
 msgstr "Инсталиране"
 
