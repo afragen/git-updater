@@ -367,7 +367,7 @@ class Settings extends Base {
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
-			$type                             = '';
+			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
@@ -428,7 +428,7 @@ class Settings extends Base {
 			}
 
 			if ( false !== strpos( $token->type, 'theme' ) ) {
-				$type = esc_html__( 'Theme:', 'github-updater' ) . '&nbsp;';
+				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
 			$setting_field['id']    = $token->repo;
