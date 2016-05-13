@@ -376,10 +376,11 @@ class Theme extends Base {
 			),
 			$install_url ) );
 
+		echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
 			$rollback_keys = array_keys( $rollback );
-			echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
 			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
 			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
@@ -409,7 +410,6 @@ class Theme extends Base {
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$r = $current->response[ $theme_key ];
-			echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 			if ( empty( $r['package'] ) ) {
 				printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
 					$theme_name
