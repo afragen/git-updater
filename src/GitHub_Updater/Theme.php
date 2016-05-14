@@ -410,14 +410,15 @@ class Theme extends Base {
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$r = $current->response[ $theme_key ];
+			printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
+				$theme_name
+			);
+			printf( ' <a href="%s" class="thickbox" title="%s"> ',
+				$details_url,
+				$theme_name
+			);
 			if ( empty( $r['package'] ) ) {
-				printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-					$theme_name
-				);
-				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					$details_url,
-					$theme_name
-				);
+
 				printf( esc_html__( 'View version %s details.', 'github-updater' ),
 					$r['new_version']
 				);
@@ -425,13 +426,7 @@ class Theme extends Base {
 				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
 				echo '</em>';
 			} else {
-				printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-					$theme_name
-				);
-				printf( ' <a href="%s" class="thickbox" title="%s"> ',
-					$details_url,
-					$theme_name
-				);
+
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$r['new_version'],
 					'</a>',
