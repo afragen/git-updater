@@ -377,6 +377,12 @@ class Theme extends Base {
 			$install_url ) );
 
 		echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+		/*
+		 * Update transient if necessary.
+		 */
+		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
+			$this->pre_set_site_transient_update_themes( $current );
+		}
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
