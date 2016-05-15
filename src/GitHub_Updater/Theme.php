@@ -354,6 +354,10 @@ class Theme extends Base {
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
+		global $wp_version;
+		$open_div = '<div class="update-message">';
+		$close_div = '';
+
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
 			'a'       => array( 'href' => array(), 'title' => array() ),
@@ -376,13 +380,19 @@ class Theme extends Base {
 			),
 			$install_url ) );
 
-		echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
 		/*
 		 * Update transient if necessary.
 		 */
 		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
 			$this->pre_set_site_transient_update_themes( $current );
 		}
+
+		if ( version_compare( $wp_version, '4.6', '>=' ) || class_exists( 'Shiny_Updates' ) ) {
+			$open_div = '<div class="update-message notice inline notice-warning notice-alt"><p>';
+			$close_div = '</p>';
+		}
+
+		echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">' . $open_div;
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
@@ -424,7 +434,6 @@ class Theme extends Base {
 				$theme_name
 			);
 			if ( empty( $r['package'] ) ) {
-
 				printf( esc_html__( 'View version %s details.', 'github-updater' ),
 					$r['new_version']
 				);
@@ -432,7 +441,6 @@ class Theme extends Base {
 				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
 				echo '</em>';
 			} else {
-
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$r['new_version'],
 					'</a>',
@@ -443,7 +451,7 @@ class Theme extends Base {
 
 			do_action( "in_theme_update_message-$theme_key", $theme, $r );
 		}
-		echo '</div></td></tr>';
+		echo $close_div . '</div></td></tr>';
 	}
 
 	/**
