@@ -1,3 +1,8 @@
+#### 5.4.2
+* simplify some `after_theme_row`
+* better internationalization for changing plugin _View details_ link
+* update `after_theme_row` classes for Shiny Updates
+
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
 * ManageWP now works for Remote Management.
