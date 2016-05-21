@@ -84,25 +84,19 @@ class Additions {
 
 			switch ( $repo['type'] ) {
 				case 'github_plugin':
-					$addition['GitHub Plugin URI'] = $repo['uri'];
+				case 'github_theme':
+					$addition['slug']                                  = $repo['slug'];
+					$addition[ 'GitHub ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 				case 'bitbucket_plugin':
-					$addition['Bitbucket Plugin URI'] = $repo['uri'];
+				case 'bitbucket_theme':
+					$addition['slug']                                     = $repo['slug'];
+					$addition[ 'Bitbucket ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 				case 'gitlab_plugin':
-					$addition['GitLab Plugin URI'] = $repo['uri'];
-					break;
-				case 'github_theme':
-					$addition['slug']             = $repo['slug'];
-					$addition['GitHub Theme URI'] = $repo['uri'];
-					break;
-				case 'bitbucket_theme':
-					$addition['slug']                = $repo['slug'];
-					$addition['Bitbucket Theme URI'] = $repo['uri'];
-					break;
 				case 'gitlab_theme':
-					$addition['slug']             = $repo['slug'];
-					$addition['GitLab Theme URI'] = $repo['uri'];
+					$addition['slug']                                  = $repo['slug'];
+					$addition[ 'GitLab ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 			}
 
