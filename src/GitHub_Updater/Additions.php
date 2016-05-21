@@ -56,28 +56,35 @@ class Additions {
 		if ( null === ( $config = json_decode( $config, true ) ) ) {
 			return false;
 		}
-		if ( 'plugin' === $type ) {
-			$this->add_plugin_headers( $config, $repos );
-		}
-		if ( 'theme' === $type ) {
-			$this->add_theme_headers( $config, $repos );
-		}
+
+		$this->add_headers( $config, $repos, $type );
 	}
 
 	/**
-	 * Add GitHub Updater plugin header.
-	 * Adds extra header in Class Plugins via hook.
+	 * Add GitHub Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @param $config
 	 * @param $repos
+	 * @param $type
 	 */
-	protected function add_plugin_headers( $config, $repos ) {
+	public function add_headers( $config, $repos, $type ) {
 		$this->add_to_github_updater = array();
 		foreach ( $config as $repo ) {
-			if ( false !== strpos( $repo['type'], 'theme' ) ) {
+			$addition  = array();
+			$additions[ $repo['slug'] ] = array();
+
+			// Continue if repo not installed.
+			if ( ! array_key_exists( $repo['slug'], $repos ) ) {
 				continue;
 			}
-			$addition = $repos[ $repo['slug'] ];
+
+			if ( 'plugin' === $type ) {
+				$additions[ $repo['slug'] ] = $repos[ $repo['slug'] ];
+			}
+			if ( 'theme' === $type ) {
+				//$additions[ $repo['slug'] ] = array();
+			}
+
 			switch ( $repo['type'] ) {
 				case 'github_plugin':
 					$addition['GitHub Plugin URI'] = $repo['uri'];
@@ -88,39 +95,21 @@ class Additions {
 				case 'gitlab_plugin':
 					$addition['GitLab Plugin URI'] = $repo['uri'];
 					break;
-			}
-			$this->add_to_github_updater[ $repo['slug'] ] = $addition;
-		}
-	}
-
-	/**
-	 * Add GitHub Updater theme header.
-	 * Adds header URI into Class Theme via hook.
-	 *
-	 * @param $config
-	 * @param $theme
-	 */
-	public function add_theme_headers( $config, $theme ) {
-		$this->add_to_github_updater = array();
-		foreach ( $config as $repo ) {
-			if ( false !== strpos( $repo['type'], 'plugin' ) ) {
-				continue;
-			}
-			$addition = $theme[ $repo['slug'] ];
-			switch ( $repo['type'] ) {
 				case 'github_theme':
+					$addition['slug']             = $repo['slug'];
 					$addition['GitHub Theme URI'] = $repo['uri'];
 					break;
-				case
-				'bitbucket_theme':
+				case 'bitbucket_theme':
+					$addition['slug']                = $repo['slug'];
 					$addition['Bitbucket Theme URI'] = $repo['uri'];
 					break;
 				case 'gitlab_theme':
+					$addition['slug']             = $repo['slug'];
 					$addition['GitLab Theme URI'] = $repo['uri'];
 					break;
 			}
-			$addition['slug']                             = $repo['slug'];
-			$this->add_to_github_updater[ $repo['slug'] ] = $addition;
+
+			$this->add_to_github_updater[ $repo['slug'] ] = array_merge( $additions[ $repo['slug'] ], $addition );
 		}
 	}
 

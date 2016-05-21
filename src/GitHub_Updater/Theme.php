@@ -93,13 +93,13 @@ class Theme extends Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
+		$additions  = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme           = array();
 			$repo_uri            = null;
 			$repo_enterprise_uri = null;
 			$repo_enterprise_api = null;
-			$additions           = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
