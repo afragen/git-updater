@@ -70,19 +70,16 @@ class Additions {
 	public function add_headers( $config, $repos, $type ) {
 		$this->add_to_github_updater = array();
 		foreach ( $config as $repo ) {
-			$addition  = array();
-			$additions[ $repo['slug'] ] = array();
-
 			// Continue if repo not installed.
 			if ( ! array_key_exists( $repo['slug'], $repos ) ) {
 				continue;
 			}
 
+			$addition                   = array();
+			$additions[ $repo['slug'] ] = array();
+
 			if ( 'plugin' === $type ) {
 				$additions[ $repo['slug'] ] = $repos[ $repo['slug'] ];
-			}
-			if ( 'theme' === $type ) {
-				//$additions[ $repo['slug'] ] = array();
 			}
 
 			switch ( $repo['type'] ) {
