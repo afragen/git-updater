@@ -355,7 +355,7 @@ class Theme extends Base {
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		global $wp_version;
-		$open_div = '<div class="update-message">';
+		$open_div  = '<div class="update-message">';
 		$close_div = '';
 
 		$current            = get_site_transient( 'update_themes' );
@@ -388,7 +388,7 @@ class Theme extends Base {
 		}
 
 		if ( version_compare( $wp_version, '4.6', '>=' ) || class_exists( 'Shiny_Updates' ) ) {
-			$open_div = '<div class="update-message notice inline notice-warning notice-alt"><p>';
+			$open_div  = '<div class="update-message notice inline notice-warning notice-alt"><p>';
 			$close_div = '</p>';
 		}
 
