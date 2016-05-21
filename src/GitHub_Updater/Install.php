@@ -172,12 +172,7 @@ class Install extends Base {
 					}
 				}
 			}
-		}
 
-		/*
-		 * When first selecting Install tab skip the following.
-		 */
-		if ( ! empty( self::$install ) ) {
 			parent::$options['github_updater_install_repo'] = self::$install['repo'];
 
 			if ( ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
