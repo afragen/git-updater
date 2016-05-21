@@ -377,7 +377,7 @@ class Plugin extends Base {
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
 		if ( array_key_exists( $repo, $this->config ) ) {
-			if ( false !== stristr( $links[2], 'Visit plugin site' ) ) {
+			if ( ! is_null( $repo ) ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 					esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .

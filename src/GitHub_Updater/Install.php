@@ -153,20 +153,28 @@ class Install extends Base {
 				) );
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
 
+				/*
+				 * Add private token.
+				 */
 				if ( ! empty( self::$install['gitlab_private_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
-
 					if ( 'gitlab.com' === $headers['host'] ) {
+						self::$install['download_link']          = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
 						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
 					} else {
+						self::$install['download_link']             = add_query_arg( 'private_token', self::$options['gitlab_private_token'], self::$install['download_link'] );
 						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
 					}
-				} elseif ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], self::$install['download_link'] );
+				} else {
+					if ( 'gitlab.com' === $headers['host'] ) {
+						self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], self::$install['download_link'] );
+					} else {
+						self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], self::$install['download_link'] );
+					}
 				}
 			}
 
 			parent::$options['github_updater_install_repo'] = self::$install['repo'];
+
 			if ( ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
 			     'plugin' === $type
 			) {
