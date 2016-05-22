@@ -251,7 +251,7 @@ class Theme extends Base {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
-				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
+				//add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 10, 2 );
@@ -266,6 +266,8 @@ class Theme extends Base {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
+		//add_action( 'admin_head-themes.php', array( $this, 'fix_display_in_themes_api' ) );
+
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}
@@ -317,7 +319,6 @@ class Theme extends Base {
 				break;
 			}
 		}
-		add_action( 'admin_head', array( $this, 'fix_display_in_themes_api' ) );
 
 		return $response;
 	}
@@ -325,7 +326,7 @@ class Theme extends Base {
 	/**
 	 * Fix for new issue in 3.9 :-(
 	 */
-	public function fix_display_in_themes_api() {
+	/*public function fix_display_in_themes_api() {
 		?>
 		<style>
 			#theme-installer div.install-theme-info {
@@ -337,7 +338,7 @@ class Theme extends Base {
 			}
 		</style>
 		<?php
-	}
+	}*/
 
 	/**
 	 * Remove star rating for private themes.
@@ -355,8 +356,26 @@ class Theme extends Base {
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
+		$current = get_site_transient( 'update_themes' );
 
-		$current            = get_site_transient( 'update_themes' );
+		add_filter( 'su_modify_theme_details_url', function ( $details_url, $theme_key ) {
+			$themes = Theme::instance()->config;
+			if ( array_key_exists( $theme_key, $themes ) ) {
+				$details_url = esc_attr( add_query_arg(
+					array(
+						'tab'       => 'theme-information',
+						'theme'     => $theme_key,
+						'TB_iframe' => 'true',
+						'width'     => 270,
+						'height'    => 400,
+					),
+					self_admin_url( "theme-install.php" ) ) );
+			}
+
+			return $details_url;
+		}, 10, 2 );
+
+		/*
 		$themes_allowedtags = array(
 			'a'       => array( 'href' => array(), 'title' => array() ),
 			'abbr'    => array( 'title' => array() ),
@@ -366,8 +385,8 @@ class Theme extends Base {
 			'strong'  => array(),
 		);
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$install_url        = self_admin_url( "theme-install.php" );
+		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url        = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
@@ -377,6 +396,7 @@ class Theme extends Base {
 				'height'    => 400,
 			),
 			$install_url ) );
+		*/
 
 		/*
 		 * Update transient if necessary.
@@ -384,7 +404,6 @@ class Theme extends Base {
 		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
 			$this->pre_set_site_transient_update_themes( $current );
 		}
-
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$enclosure = $this->update_row_enclosure( $theme_key, 'theme' );
@@ -421,32 +440,23 @@ class Theme extends Base {
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$r = $current->response[ $theme_key ];
-			printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
-				$theme_name
-			);
-			printf( ' <a href="%s" class="thickbox" title="%s"> ',
-				$details_url,
-				$theme_name
-			);
-			if ( empty( $r['package'] ) ) {
-				printf( esc_html__( 'View version %s details.', 'github-updater' ),
-					$r['new_version']
-				);
-				echo '</a><em>';
-				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
-				echo '</em>';
-			} else {
-				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-					$r['new_version'],
-					'</a>',
-					'<a href="' . wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ) . '">',
-					'</a>'
-				);
-			}
+			$r = array_merge( $r, $this->config[ $theme_key ]->transient, array( 'update' => true ) );
+			$api = $this->themes_api( false, 'theme_information', (object) array(
+				'slug'   => $theme_key,
+				'fields' => array( 'sections' => true ),
+			) );
 
-			do_action( "in_theme_update_message-$theme_key", $theme, $r );
+			add_filter( 'su_theme_update_row_modify_response', function ( $response, $theme_key ) {
+				$themes = Theme::instance()->config;
+				if ( array_key_exists( $theme_key, $themes ) ) {
+					$response = array_merge( $response, $themes[ $theme_key ]->transient, array( 'update' => true ) );
+				}
+
+				return $response;
+			}, 10, 2 );
+
+			do_action( "in_theme_update_message-$theme_key", $theme, $api );
 		}
-		//echo $close_div . '</div></td></tr>';
 	}
 
 	/**
