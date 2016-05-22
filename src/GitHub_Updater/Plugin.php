@@ -67,6 +67,13 @@ class Plugin extends Base {
 	}
 
 	/**
+	 * Returns an array of configurations for the known plugins.
+	 */
+	public function get_plugin_configs() {
+		return $this->config;
+	}
+
+	/**
 	 * The Plugin object can be created/obtained via this
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.

@@ -126,6 +126,8 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
+		$this->ensure_api_key_is_set();
+
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 
@@ -135,10 +137,22 @@ class Base {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'token_distribution' ) );
+		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
+		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+	}
+
+	/**
+	 * Ensure api key is set.
+	 */
+	protected function ensure_api_key_is_set() {
+		$api_key = get_site_option( 'github_updater_api_key' );
+		if ( ! $api_key ) {
+			update_site_option( 'github_updater_api_key', md5( uniqid( rand(), true ) ) );
+		}
 	}
 
 	/**
@@ -198,6 +212,14 @@ class Base {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Ajax endpoint for rest updates.
+	 */
+	public function ajax_update() {
+		$rest_update = new Rest_Update();
+		$rest_update->process_request();
 	}
 
 	/**

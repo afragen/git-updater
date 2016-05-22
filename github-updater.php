@@ -20,7 +20,7 @@
  * Text Domain:       github-updater
  * Network:           true
  * GitHub Plugin URI: https://github.com/afragen/github-updater
- * GitHub Branch:     develop
+ * GitHub Branch:     feature/rest-api
  * Requires WP:       3.8
  * Requires PHP:      5.3
  */
