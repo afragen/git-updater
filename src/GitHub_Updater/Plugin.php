@@ -271,7 +271,6 @@ class Plugin extends Base {
 			}
 		}
 		$this->make_force_check_transient( 'plugins' );
-		set_site_transient( 'ghu_plugin', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 		$this->load_pre_filters();
 	}
 

@@ -257,7 +257,6 @@ class Theme extends Base {
 			}
 		}
 		$this->make_force_check_transient( 'themes' );
-		set_site_transient( 'ghu_theme', self::$object, ( self::$hours * HOUR_IN_SECONDS ) );
 		$this->load_pre_filters();
 	}
 
