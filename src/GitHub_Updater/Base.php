@@ -136,6 +136,8 @@ class Base {
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'token_distribution' ) );
 
+		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
+		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
 	}
 
@@ -278,6 +280,7 @@ class Base {
 
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
 		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		ksort( self::$extra_headers );
 
 		return $extra_headers;
 	}

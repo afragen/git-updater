@@ -5,6 +5,7 @@
 * refactor and improve for `GitHub Updater Additions` plugin
 * fix for using GitLab CE private token with using Install
 * rework GitHub repo meta as search was occasionally flaky, now also using owner's repos check
+* refactor adding extra headers
 
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.

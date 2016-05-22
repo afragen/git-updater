@@ -53,8 +53,6 @@ class Theme extends Base {
 			$this->delete_all_transients( 'themes' );
 		}
 
-		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
-
 		/*
 		 * Get details of installed git sourced themes.
 		 */
