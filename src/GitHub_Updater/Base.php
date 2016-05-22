@@ -180,15 +180,13 @@ class Base {
 		}
 
 		if ( current_user_can( 'update_plugins' ) ) {
-			Plugin::$object = Plugin::instance();
 			if ( $force_meta_update ) {
-				Plugin::$object->get_remote_plugin_meta();
+				Plugin::instance()->get_remote_plugin_meta();
 			}
 		}
 		if ( current_user_can( 'update_themes' ) ) {
-			Theme::$object = Theme::instance();
 			if ( $force_meta_update ) {
-				Theme::$object->get_remote_theme_meta();
+				Theme::instance()->get_remote_theme_meta();
 			}
 		}
 		if ( is_admin() &&
@@ -215,16 +213,14 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function forced_meta_update_plugins() {
-		Plugin::$object = Plugin::instance();
-		Plugin::$object->get_remote_plugin_meta();
+		Plugin::instance()->get_remote_plugin_meta();
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
 	 */
 	public function forced_meta_update_themes() {
-		Theme::$object = Theme::instance();
-		Theme::$object->get_remote_theme_meta();
+		Theme::instance()->get_remote_theme_meta();
 	}
 
 	/**
