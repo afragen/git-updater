@@ -239,6 +239,7 @@ abstract class API extends Base {
 	 * @return string $download_link
 	 */
 	protected function make_release_asset_download_link() {
+		$download_link = '';
 		switch ( $this->type->type ) {
 			case 'github_plugin':
 			case 'github_theme':
