@@ -611,7 +611,7 @@ class Settings extends Base {
 		echo "<p>";
 		esc_html_e( 'Restful API for triggering updates is available at:', 'github-updater' );
 		echo "<br>";
-		echo "<tt>".admin_url("admin-ajax.php")."?action=github-updater-update&key=".$api_key."</tt>";
+		echo "<tt>" . admin_url( "admin-ajax.php" ) . "?action=github-updater-update&key=" . $api_key . "</tt>";
 		echo "</p>";
 		echo "<p>";
 		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
