@@ -51,6 +51,8 @@ class Plugin extends Base {
 			$this->delete_all_transients( 'plugins' );
 		}
 
+		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
+
 		/*
 		 * Get details of installed git sourced plugins.
 		 */

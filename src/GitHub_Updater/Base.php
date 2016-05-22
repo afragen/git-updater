@@ -128,7 +128,6 @@ class Base {
 	public function __construct() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
-		$this->add_headers();
 
 		/*
 		 * Calls in init hook for user capabilities.
@@ -250,56 +249,28 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers via filter hooks.
-	 */
-	public function add_headers() {
-		add_filter( 'extra_plugin_headers', array( &$this, 'add_plugin_headers' ) );
-		add_filter( 'extra_theme_headers', array( &$this, 'add_theme_headers' ) );
-	}
-
-	/**
-	 * Add extra headers to get_plugins().
+	 * Add extra headers to get_plugins() or wp_get_themes().
 	 *
 	 * @param $extra_headers
 	 *
 	 * @return array
 	 */
-	public function add_plugin_headers( $extra_headers ) {
+	public function add_headers( $extra_headers ) {
 		$ghu_extra_headers = array(
 			'Requires WP'   => 'Requires WP',
 			'Requires PHP'  => 'Requires PHP',
 			'Release Asset' => 'Release Asset',
 		);
 
-		foreach ( self::$git_servers as $server ) {
-			$ghu_extra_headers[ $server . ' Plugin URI' ] = $server . ' Plugin URI';
-			foreach ( self::$extra_repo_headers as $header ) {
-				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
-			}
+		$current_filter = current_filter();
+		if ( 'extra_plugin_headers' === $current_filter ) {
+			$uri_type = ' Plugin URI';
+		} elseif ( 'extra_theme_headers' === $current_filter ) {
+			$uri_type = ' Theme URI';
 		}
 
-		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
-
-		return $extra_headers;
-	}
-
-	/**
-	 * Add extra headers to wp_get_themes().
-	 *
-	 * @param $extra_headers
-	 *
-	 * @return array
-	 */
-	public function add_theme_headers( $extra_headers ) {
-		$ghu_extra_headers = array(
-			'Requires WP'   => 'Requires WP',
-			'Requires PHP'  => 'Requires PHP',
-			'Release Asset' => 'Release Asset',
-		);
-
 		foreach ( self::$git_servers as $server ) {
-			$ghu_extra_headers[ $server . ' Theme URI' ] = $server . ' Theme URI';
+			$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
 			foreach ( self::$extra_repo_headers as $header ) {
 				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
 			}
