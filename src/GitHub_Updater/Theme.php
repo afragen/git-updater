@@ -355,9 +355,6 @@ class Theme extends Base {
 	 * @author Seth Carstens
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
-		global $wp_version;
-		$open_div  = '<div class="update-message">';
-		$close_div = '';
 
 		$current            = get_site_transient( 'update_themes' );
 		$themes_allowedtags = array(
@@ -388,14 +385,10 @@ class Theme extends Base {
 			$this->pre_set_site_transient_update_themes( $current );
 		}
 
-		if ( version_compare( $wp_version, '4.6', '>=' ) || class_exists( 'Shiny_Updates' ) ) {
-			$open_div  = '<div class="update-message notice inline notice-warning notice-alt"><p>';
-			$close_div = '</p>';
-		}
-
-		echo '<tr class="plugin-update-tr" data-slug="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">' . $open_div;
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
+			$enclosure = $this->update_row_enclosure( $theme_key, 'theme' );
+			echo $enclosure['open'];
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
 			$rollback_keys = array_keys( $rollback );
 			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
@@ -423,6 +416,7 @@ class Theme extends Base {
 			} else {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
+			echo $enclosure['close'];
 		}
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
@@ -452,7 +446,7 @@ class Theme extends Base {
 
 			do_action( "in_theme_update_message-$theme_key", $theme, $r );
 		}
-		echo $close_div . '</div></td></tr>';
+		//echo $close_div . '</div></td></tr>';
 	}
 
 	/**
@@ -469,9 +463,9 @@ class Theme extends Base {
 			return false;
 		}
 
-		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$id            = $theme_key . '-id';
-		$branches      = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$enclosure = $this->update_row_enclosure( $theme_key, 'theme', true );
+		$id        = $theme_key . '-id';
+		$branches  = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
 
 		/*
 		 * Get current branch.
@@ -487,8 +481,7 @@ class Theme extends Base {
 		/*
 		 * Create after_theme_row_
 		 */
-		echo '<tr class="plugin-update-tr" id="' . $theme_key . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
-
+		echo $enclosure['open'];
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
 			'<a href="#" onclick="jQuery(\'#' . $id . '\').toggle();return false;">',
@@ -504,7 +497,7 @@ class Theme extends Base {
 			);
 		}
 		print( '</ul>' );
-		echo '</div></td></tr>';
+		echo $enclosure['close'];
 	}
 
 	/**

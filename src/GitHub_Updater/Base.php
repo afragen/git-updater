@@ -938,4 +938,43 @@ class Base {
 		return $response;
 	}
 
+	/**
+	 * Return correct update row opening and closing tags for Shiny Updates.
+	 *
+	 * @param      $repo_name
+	 * @param      $type
+	 * @param bool $branch_switcher
+	 *
+	 * @return array
+	 */
+	protected function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
+		global $wp_version;
+		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$repo_base     = $repo_name;
+
+		if ( 'plugin' === $type ) {
+			$repo_base = dirname( $repo_name );
+		}
+
+		$enclosure = array(
+			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ). '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
+			'close' => '</div></td></tr>',
+		);
+
+		if ( version_compare( $wp_version, '4.6', '>=' ) || function_exists( 'su_init' ) ) {
+			$open_p  = '<p>';
+			$close_p = '</p>';
+			if ( $branch_switcher ) {
+				$open_p  = '';
+				$close_p = '';
+			}
+			$enclosure = array(
+				'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt">' . $open_p,
+				'close' => $close_p . '</div></td></tr>',
+			);
+		}
+
+		return $enclosure;
+	}
+
 }

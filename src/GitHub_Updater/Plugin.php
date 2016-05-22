@@ -297,7 +297,7 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$enclosure = $this->update_row_enclosure( $plugin_file, 'plugin', true );
 		$plugin        = $this->get_repo_slugs( dirname( $plugin_file ) );
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
@@ -320,8 +320,7 @@ class Plugin extends Base {
 		/*
 		 * Create after_plugin_row_
 		 */
-		echo '<tr class="plugin-update-tr" data-slug="' . dirname( $plugin_file ) . '" data-plugin="' . $plugin_file . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message update-ok">';
-
+		echo $enclosure['open'];
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
 			'<a href="#" onclick="jQuery(\'#' . $id . '\').toggle();return false;">',
@@ -337,7 +336,7 @@ class Plugin extends Base {
 			);
 		}
 		print( '</ul>' );
-		echo '</div></td></tr>';
+		echo $enclosure['close'];
 
 		return true;
 	}
