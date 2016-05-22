@@ -167,6 +167,8 @@ class Theme extends Base {
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+
+				break;
 			}
 
 			/*
