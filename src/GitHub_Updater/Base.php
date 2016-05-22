@@ -180,12 +180,12 @@ class Base {
 
 		if ( current_user_can( 'update_plugins' ) ) {
 			if ( $force_meta_update ) {
-				Plugin::instance()->get_remote_plugin_meta();
+				$this->forced_meta_update_plugins();
 			}
 		}
 		if ( current_user_can( 'update_themes' ) ) {
 			if ( $force_meta_update ) {
-				Theme::instance()->get_remote_theme_meta();
+				$this->forced_meta_update_themes();
 			}
 		}
 		if ( is_admin() &&
