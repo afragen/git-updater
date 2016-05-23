@@ -251,7 +251,6 @@ class Theme extends Base {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
-				//add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 10, 2 );
@@ -359,29 +358,6 @@ class Theme extends Base {
 		}, 10, 2 );
 
 		/*
-		$themes_allowedtags = array(
-			'a'       => array( 'href' => array(), 'title' => array() ),
-			'abbr'    => array( 'title' => array() ),
-			'acronym' => array( 'title' => array() ),
-			'code'    => array(),
-			'em'      => array(),
-			'strong'  => array(),
-		);
-		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$install_url        = self_admin_url( "theme-install.php" );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$details_url        = esc_attr( add_query_arg(
-			array(
-				'tab'       => 'theme-information',
-				'theme'     => $theme_key,
-				'TB_iframe' => 'true',
-				'width'     => 270,
-				'height'    => 400,
-			),
-			$install_url ) );
-		*/
-
-		/*
 		 * Update transient if necessary.
 		 */
 		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
@@ -471,48 +447,6 @@ class Theme extends Base {
 		}
 		print( '</ul>' );
 		echo $enclosure['close'];
-	}
-
-	/**
-	 * Remove default after_theme_row_$stylesheet.
-	 *
-	 * @author @grappler
-	 *
-	 * @param $theme_key
-	 * @param $theme
-	 */
-	public function remove_after_theme_row( $theme_key, $theme ) {
-
-		foreach ( parent::$git_servers as $server ) {
-			$repo_header = $server . ' Theme URI';
-			$repo_uri    = $theme->get( $repo_header );
-
-			/**
-			 * Filter to add themes not containing appropriate header line.
-			 *
-			 * @since   5.4.0
-			 * @access  public
-			 *
-			 * @param   array $additions    Listing of themes to add.
-			 *                              Default null.
-			 * @param   array $theme        Current theme.
-			 * @param         string        'theme'    Type being passed.
-			 */
-			$additions = apply_filters( 'github_updater_additions', null, $theme, 'theme' );
-			foreach ( (array) $additions as $addition ) {
-				if ( $theme_key === $addition['slug'] ) {
-					if ( ! empty( $addition[ $server . ' Theme URI' ] ) ) {
-						$repo_uri = $addition[ $server . ' Theme URI' ];
-						break;
-					}
-				}
-			}
-			if ( empty( $repo_uri ) ) {
-				continue;
-			}
-
-			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
-		}
 	}
 
 	/**
