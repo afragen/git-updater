@@ -7,6 +7,8 @@
 * rework GitHub repo meta as search was occasionally flaky, now also using owner's repos check
 * refactor adding extra headers
 * add REST API endpoints courtesy of @limikael
+* simplified and removed lots of code for viewing theme details, use core when available. ;-)
+* added CSS file to help display theme view details, waiting for [#36923](https://core.trac.wordpress.org/ticket/36923) for it to work
 
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
