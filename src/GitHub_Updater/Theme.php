@@ -266,7 +266,6 @@ class Theme extends Base {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		//add_action( 'admin_head-themes.php', array( $this, 'fix_display_in_themes_api' ) );
 
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
@@ -322,23 +321,6 @@ class Theme extends Base {
 
 		return $response;
 	}
-
-	/**
-	 * Fix for new issue in 3.9 :-(
-	 */
-	/*public function fix_display_in_themes_api() {
-		?>
-		<style>
-			#theme-installer div.install-theme-info {
-				display: block !important;
-			}
-
-			#theme-installer.wp-full-overlay.single-theme, .wp-full-overlay-sidebar {
-				position: relative;
-			}
-		</style>
-		<?php
-	}*/
 
 	/**
 	 * Remove star rating for private themes.
@@ -436,26 +418,6 @@ class Theme extends Base {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
 			echo $enclosure['close'];
-		}
-
-		if ( isset( $current->response[ $theme_key ] ) ) {
-			$r = $current->response[ $theme_key ];
-			$r = array_merge( $r, $this->config[ $theme_key ]->transient, array( 'update' => true ) );
-			$api = $this->themes_api( false, 'theme_information', (object) array(
-				'slug'   => $theme_key,
-				'fields' => array( 'sections' => true ),
-			) );
-
-			add_filter( 'su_theme_update_row_modify_response', function ( $response, $theme_key ) {
-				$themes = Theme::instance()->config;
-				if ( array_key_exists( $theme_key, $themes ) ) {
-					$response = array_merge( $response, $themes[ $theme_key ]->transient, array( 'update' => true ) );
-				}
-
-				return $response;
-			}, 10, 2 );
-
-			do_action( "in_theme_update_message-$theme_key", $theme, $api );
 		}
 	}
 
