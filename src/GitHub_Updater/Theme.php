@@ -453,7 +453,6 @@ class Theme extends Base {
 
 			do_action( "in_theme_update_message-$theme_key", $theme, $r );
 		}
-		//echo $close_div . '</div></td></tr>';
 	}
 
 	/**
