@@ -32,7 +32,14 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 class Rest_Update extends Base {
 
 	/**
-	 * Consruct.
+	 * Holds REST API Upgrader Skin.
+	 *
+	 * @var \Fragen\GitHub_Updater\Rest_Upgrader_Skin
+	 */
+	protected $upgrader_skin;
+
+	/**
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
