@@ -337,7 +337,7 @@ class Theme extends Base {
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
 
-		add_filter( 'su_modify_theme_details_url', function ( $details_url, $theme_key ) {
+		add_filter( 'modify_wp_theme_details_url', function ( $details_url, $theme_key ) {
 			$themes = Theme::instance()->config;
 			if ( array_key_exists( $theme_key, $themes ) ) {
 				$details_url = esc_attr( add_query_arg(
