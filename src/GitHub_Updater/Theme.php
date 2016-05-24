@@ -259,7 +259,7 @@ class Theme extends Base {
 			if ( is_multisite() ) {
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 10, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 15, 2 );
 				}
 			}
 		}
