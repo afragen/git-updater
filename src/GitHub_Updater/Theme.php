@@ -484,8 +484,17 @@ class Theme extends Base {
 	 * @return string (content buffer)
 	 */
 	protected function append_theme_actions_content( $theme ) {
-		$options                = get_site_option( 'github_updater' );
-		$details_url            = esc_url( self_admin_url( "theme-install.php?tab=theme-information&theme=$theme->repo&TB_iframe=true&width=270&height=400" ) );
+		$options = get_site_option( 'github_updater' );
+		$details_url = esc_attr( add_query_arg(
+			array(
+				'tab'       => 'theme-information',
+				'theme'     => $theme->repo,
+				'TB_iframe' => 'true',
+				'width'     => 270,
+				'height'    => 400,
+			),
+			self_admin_url( "theme-install.php" ) ) );
+
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
