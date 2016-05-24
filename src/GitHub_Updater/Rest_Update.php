@@ -43,6 +43,7 @@ class Rest_Update extends Base {
 	 */
 	public function __construct() {
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
+		$this->load_post_filters();
 	}
 
 	/**
@@ -51,7 +52,7 @@ class Rest_Update extends Base {
 	 * the get_remote_plugin_meta function.
 	 * Ideally this code should not exist in two places, so some some
 	 * refactoring could improve things.
-	 * 
+	 *
 	 * @param object $plugin
 	 */
 	protected function get_single_remote_plugin_meta( $plugin ) {
