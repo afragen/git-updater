@@ -848,12 +848,11 @@ class Base {
 			if ( 'description' === $section ) {
 				continue;
 			}
-			$readme[ 'sections/' . $section ] = $value;
+			$readme[ $section ] = $value;
 		}
 		foreach ( $readme as $key => $value ) {
-			$key = explode( '/', $key );
-			if ( ! empty( $value ) && 'sections' === $key[0] ) {
-				unset( $response['sections'][ $key[1] ] );
+			if ( ! empty( $value ) ) {
+				unset( $response['sections'][ $key ] );
 			}
 		}
 
