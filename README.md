@@ -280,6 +280,15 @@ Please go the Remote Management tab of the Settings page and check which remote 
 
 ![Remote Management Tab](./assets/screenshot-3.png)
 
+### RESTful Api for Remote Management
+
+GitHub updater also support other customized continous integration workflows, and it is possible to integrate with other services than those discussed above. For this, there is a REST api available for telling GitHub Updater to update themes and plugins to the latest version from their repositories.
+
+On the Remote Management tab, you can see the url that serves as the enpoint for this api. This url will look something like:
+
+    http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61
+
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
