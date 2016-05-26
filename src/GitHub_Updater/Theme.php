@@ -61,11 +61,6 @@ class Theme extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-
-		/*
-		 * Load post-processing filters. Renaming filters, etc.
-		 */
-		$this->load_post_filters();
 	}
 
 	/**
@@ -187,10 +182,6 @@ class Theme extends Base {
 
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
-		/*
-		 * Load post-processing filters. Renaming filters, etc.
-		 */
-		$this->load_post_filters();
 
 		return $git_themes;
 	}
@@ -201,36 +192,10 @@ class Theme extends Base {
 	 */
 	public function get_remote_theme_meta() {
 		foreach ( (array) $this->config as $theme ) {
-			$this->repo_api = null;
-			switch ( $theme->type ) {
-				case 'github_theme':
-					$this->repo_api = new GitHub_API( $theme );
-					break;
-				case 'bitbucket_theme':
-					$this->repo_api = new Bitbucket_API( $theme );
-					break;
-				case 'gitlab_theme':
-					$this->repo_api = new GitLab_API( $theme );
-					break;
-			}
 
-			if ( is_null( $this->repo_api ) ) {
+			if ( ! $this->get_remote_repo_meta( $theme ) ) {
 				continue;
-			}
-
-			$this->{$theme->type} = $theme;
-			$this->set_defaults( $theme->type );
-
-			if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
-				$this->repo_api->get_repo_meta();
-				$this->repo_api->get_remote_tag();
-				$changelog = $this->get_changelog_filename( $theme->type );
-				if ( $changelog ) {
-					$this->repo_api->get_remote_changes( $changelog );
-				}
-				$this->repo_api->get_remote_branches();
-				$theme->download_link = $this->repo_api->construct_download_link();
-			}
+			};
 
 			/*
 			 * Update theme transient with rollback data.

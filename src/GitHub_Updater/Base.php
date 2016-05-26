@@ -143,6 +143,7 @@ class Base {
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 	}
 
 	/**
@@ -348,10 +349,55 @@ class Base {
 	}
 
 	/**
-	 * Load post-update filters.
+	 * Get remote repo meta data for plugins or themes.
+	 * Calls remote APIs for data.
+	 *
+	 * @param $repo
+	 *
+	 * @return bool
 	 */
-	public function load_post_filters() {
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
+	public function get_remote_repo_meta( $repo ) {
+		$this->repo_api = null;
+		$file           = 'style.css';
+		if ( false !== stristr( $repo->type, 'plugin' ) ) {
+			$file = basename( $repo->slug );
+		}
+
+		switch ( $repo->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$this->repo_api = new GitHub_API( $repo );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				$this->repo_api = new Bitbucket_API( $repo );
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$this->repo_api = new GitLab_API( $repo );
+				break;
+		}
+
+		if ( is_null( $this->repo_api ) ) {
+			return false;
+		}
+
+		$this->{$repo->type} = $repo;
+		$this->set_defaults( $repo->type );
+
+		if ( $this->repo_api->get_remote_info( $file ) ) {
+			$this->repo_api->get_repo_meta();
+			$this->repo_api->get_remote_tag();
+			$changelog = $this->get_changelog_filename( $repo->type );
+			if ( $changelog ) {
+				$this->repo_api->get_remote_changes( $changelog );
+			}
+			$this->repo_api->get_remote_readme();
+			$this->repo_api->get_remote_branches();
+			$repo->download_link = $this->repo_api->construct_download_link();
+		}
+
+		return true;
 	}
 
 	/**
@@ -368,23 +414,16 @@ class Base {
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
 		global $wp_filesystem, $plugins, $themes;
-		$slug       = null;
-		$repo       = null;
-		$new_source = null;
-
-		/*
-		 * Exit for mismatch.
-		 */
-		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Theme ||
-		     $upgrader instanceof \Theme_Upgrader && $this instanceof Plugin
-		) {
-			return $source;
-		}
+		$slug            = null;
+		$repo            = null;
+		$new_source      = null;
+		$upgrader_object = null;
 
 		/*
 		 * Rename plugins.
 		 */
-		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+		if ( $upgrader instanceof \Plugin_Upgrader ) {
+			$upgrader_object = Plugin::instance();
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -411,25 +450,13 @@ class Base {
 				}
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Plugin directory is misnamed to start.
-			 */
-			if ( ! in_array( $slug, $this->config ) ) {
-				foreach ( $this->config as $plugin ) {
-					if ( $slug === dirname( $plugin->slug ) ) {
-						$slug       = $plugin->repo;
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
 		}
 
 		/*
 		 * Rename themes.
 		 */
-		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+		if ( $upgrader instanceof \Theme_Upgrader ) {
+			$upgrader_object = Theme::instance();
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -455,7 +482,7 @@ class Base {
 			}
 		}
 
-		$repo = $this->get_repo_slugs( $slug );
+		$repo = $this->get_repo_slugs( $slug, $upgrader_object );
 
 		/*
 		 * Not GitHub Updater plugin/theme.
@@ -470,6 +497,20 @@ class Base {
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
 			$repo['repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
+		}
+
+		/*
+		 * Directory is misnamed to start.
+		 * Make cause deactivation.
+		 */
+		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) ) {
+			foreach ( $upgrader_object->config as $plugin ) {
+				if ( $slug === dirname( $plugin->slug ) ) {
+					$slug       = $plugin->repo;
+					$new_source = trailingslashit( $remote_source ) . $slug;
+					break;
+				}
+			}
 		}
 
 		/*
@@ -506,17 +547,22 @@ class Base {
 	 * Set array with normal and extended repo names.
 	 * Fix name even if installed without renaming originally.
 	 *
-	 * @param $slug
+	 * @param string $slug
+	 * @param object $upgrader_object
 	 *
 	 * @return array
 	 */
-	protected function get_repo_slugs( $slug ) {
+	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
 		$arr    = array();
 		$rename = explode( '-', $slug );
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
-		foreach ( $this->config as $repo ) {
+		if ( is_null( $upgrader_object ) ) {
+			$upgrader_object = $this;
+		}
+
+		foreach ( $upgrader_object->config as $repo ) {
 			if ( $slug === $repo->repo ||
 			     $slug === $repo->extended_repo ||
 			     $rename === $repo->owner . '-' . $repo->repo
@@ -978,7 +1024,7 @@ class Base {
 		}
 
 		$enclosure = array(
-			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ). '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
+			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
 			'close' => '</div></td></tr>',
 		);
 
