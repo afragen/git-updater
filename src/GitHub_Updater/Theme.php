@@ -61,11 +61,6 @@ class Theme extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-
-		/*
-		 * Load post-processing filters. Renaming filters, etc.
-		 */
-		$this->load_post_filters();
 	}
 
 	/**
@@ -187,10 +182,6 @@ class Theme extends Base {
 
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
-		/*
-		 * Load post-processing filters. Renaming filters, etc.
-		 */
-		$this->load_post_filters();
 
 		return $git_themes;
 	}

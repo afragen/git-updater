@@ -143,6 +143,7 @@ class Base {
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 	}
 
 	/**
@@ -397,13 +398,6 @@ class Base {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Load post-update filters.
-	 */
-	public function load_post_filters() {
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 	}
 
 	/**

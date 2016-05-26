@@ -43,7 +43,6 @@ class Rest_Update extends Base {
 	 */
 	public function __construct() {
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
-		$this->load_post_filters();
 	}
 
 	/**

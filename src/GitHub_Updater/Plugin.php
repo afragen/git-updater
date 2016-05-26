@@ -59,11 +59,6 @@ class Plugin extends Base {
 		if ( empty( $this->config ) ) {
 			return false;
 		}
-
-		/*
-		 * Load post-processing filters. Renaming filters etc.
-		 */
-		$this->load_post_filters();
 	}
 
 	/**
@@ -205,10 +200,6 @@ class Plugin extends Base {
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
 		}
-		/*
-		 * Load post-processing filters. Renaming filters etc.
-		 */
-		$this->load_post_filters();
 
 		return $git_plugins;
 	}
