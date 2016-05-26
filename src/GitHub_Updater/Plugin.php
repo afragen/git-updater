@@ -219,37 +219,10 @@ class Plugin extends Base {
 	 */
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
-			$this->repo_api = null;
-			switch ( $plugin->type ) {
-				case 'github_plugin':
-					$this->repo_api = new GitHub_API( $plugin );
-					break;
-				case 'bitbucket_plugin':
-					$this->repo_api = new Bitbucket_API( $plugin );
-					break;
-				case 'gitlab_plugin';
-					$this->repo_api = new GitLab_API( $plugin );
-					break;
-			}
 
-			if ( is_null( $this->repo_api ) ) {
+			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
 				continue;
-			}
-
-			$this->{$plugin->type} = $plugin;
-			$this->set_defaults( $plugin->type );
-
-			if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-				$this->repo_api->get_repo_meta();
-				$this->repo_api->get_remote_tag();
-				$changelog = $this->get_changelog_filename( $plugin->type );
-				if ( $changelog ) {
-					$this->repo_api->get_remote_changes( $changelog );
-				}
-				$this->repo_api->get_remote_readme();
-				$this->repo_api->get_remote_branches();
-				$plugin->download_link = $this->repo_api->construct_download_link();
-			}
+			};
 
 			/*
 			 * Update plugin transient with rollback (branch switching) data.
@@ -305,7 +278,7 @@ class Plugin extends Base {
 		}
 
 		$enclosure = $this->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin        = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$plugin    = $this->get_repo_slugs( dirname( $plugin_file ) );
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
 			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;

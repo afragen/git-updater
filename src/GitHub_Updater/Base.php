@@ -348,6 +348,58 @@ class Base {
 	}
 
 	/**
+	 * Get remote repo meta data for plugins or themes.
+	 * Calls remote APIs for data.
+	 *
+	 * @param $repo
+	 *
+	 * @return bool
+	 */
+	public function get_remote_repo_meta( $repo ) {
+		$this->repo_api = null;
+		$file           = 'style.css';
+		if ( false !== stristr( $repo->type, 'plugin' ) ) {
+			$file = basename( $repo->slug );
+		}
+
+		switch ( $repo->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$this->repo_api = new GitHub_API( $repo );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				$this->repo_api = new Bitbucket_API( $repo );
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$this->repo_api = new GitLab_API( $repo );
+				break;
+		}
+
+		if ( is_null( $this->repo_api ) ) {
+			return false;
+		}
+
+		$this->{$repo->type} = $repo;
+		$this->set_defaults( $repo->type );
+
+		if ( $this->repo_api->get_remote_info( $file ) ) {
+			$this->repo_api->get_repo_meta();
+			$this->repo_api->get_remote_tag();
+			$changelog = $this->get_changelog_filename( $repo->type );
+			if ( $changelog ) {
+				$this->repo_api->get_remote_changes( $changelog );
+			}
+			$this->repo_api->get_remote_readme();
+			$this->repo_api->get_remote_branches();
+			$repo->download_link = $this->repo_api->construct_download_link();
+		}
+
+		return true;
+	}
+
+	/**
 	 * Load post-update filters.
 	 */
 	public function load_post_filters() {
@@ -978,7 +1030,7 @@ class Base {
 		}
 
 		$enclosure = array(
-			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ). '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
+			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
 			'close' => '</div></td></tr>',
 		);
 

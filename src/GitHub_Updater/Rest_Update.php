@@ -47,46 +47,6 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Fill in some more information about the plugin. The code for this
-	 * function is more or less copy/pasted from the Plugin    class within
-	 * the get_remote_plugin_meta function.
-	 * Ideally this code should not exist in two places, so some some
-	 * refactoring could improve things.
-	 *
-	 * @param object $plugin
-	 */
-	protected function get_single_remote_plugin_meta( $plugin ) {
-		$this->repo_api = null;
-		switch ( $plugin->type ) {
-			case 'github_plugin':
-				$this->repo_api = new GitHub_API( $plugin );
-				break;
-			case 'bitbucket_plugin':
-				$this->repo_api = new Bitbucket_API( $plugin );
-				break;
-			case 'gitlab_plugin';
-				$this->repo_api = new GitLab_API( $plugin );
-				break;
-			default:
-				return;
-		}
-
-		$this->{$plugin->type} = $plugin;
-		$this->set_defaults( $plugin->type );
-
-		if ( $this->repo_api->get_remote_info( basename( $plugin->slug ) ) ) {
-			$this->repo_api->get_repo_meta();
-			$this->repo_api->get_remote_tag();
-			$changelog = $this->get_changelog_filename( $plugin->type );
-			if ( $changelog ) {
-				$this->repo_api->get_remote_changes( $changelog );
-			}
-			$this->repo_api->get_remote_readme();
-			$plugin->download_link = $this->repo_api->construct_download_link();
-		}
-	}
-
-	/**
 	 * Update plugin.
 	 *
 	 * @param  string $plugin_slug
@@ -107,7 +67,7 @@ class Rest_Update extends Base {
 			throw new \Exception( "Plugin not found: " . $plugin_slug );
 		}
 
-		$this->get_single_remote_plugin_meta( $plugin );
+		$this->get_remote_repo_meta( $plugin );
 
 		$updates_transient = get_site_transient( 'update_plugins' );
 		$update            = array(
@@ -123,45 +83,6 @@ class Rest_Update extends Base {
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->slug );
-	}
-
-	/**
-	 * Fill in some more information about the plugin. The code is copy
-	 * pasted from the Theme class, for further comments see the
-	 * get_single_remote_plugin_meta function.
-	 *
-	 * @param $theme
-	 */
-	protected function get_single_remote_theme_meta( $theme ) {
-		$this->repo_api = null;
-		switch ( $theme->type ) {
-			case 'github_theme':
-				$this->repo_api = new GitHub_API( $theme );
-				break;
-			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $theme );
-				break;
-			case 'gitlab_theme':
-				$this->repo_api = new GitLab_API( $theme );
-				break;
-		}
-
-		if ( is_null( $this->repo_api ) ) {
-			return;
-		}
-
-		$this->{$theme->type} = $theme;
-		$this->set_defaults( $theme->type );
-
-		if ( $this->repo_api->get_remote_info( 'style.css' ) ) {
-			$this->repo_api->get_repo_meta();
-			$this->repo_api->get_remote_tag();
-			$changelog = $this->get_changelog_filename( $theme->type );
-			if ( $changelog ) {
-				$this->repo_api->get_remote_changes( $changelog );
-			}
-			$theme->download_link = $this->repo_api->construct_download_link();
-		}
 	}
 
 	/**
@@ -185,7 +106,7 @@ class Rest_Update extends Base {
 			throw new \Exception( "Theme not found: " . $theme_slug );
 		}
 
-		$this->get_single_remote_theme_meta( $theme );
+		$this->get_remote_repo_meta( $theme );
 
 		$updates_transient = get_site_transient( 'update_themes' );
 		$update            = array(
