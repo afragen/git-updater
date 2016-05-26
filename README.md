@@ -280,6 +280,48 @@ Please go the Remote Management tab of the Settings page and check which remote 
 
 ![Remote Management Tab](./assets/screenshot-3.png)
 
+### REST API for Remote Management
+
+GitHub Updater also supports other customized continuous integration workflows, and it is possible to integrate with other services than those discussed above. For this, there is a REST API available for telling GitHub Updater to update themes and plugins to the latest version from their repositories.
+
+On the Remote Management tab, you will see a url that serves as the enpoint for this api. This url will look something like this:
+
+    http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61
+
+The exact url will of course depend on your system. The value for the `key` attribute is automatically generated on the first activation of the GitHub Updater plugin and is used for authentication. Any person or entity knowing this key will be able to change the versions of your installed plugins, but nothing else.
+
+Now, if we would use `curl` to access the url exactly like it appears on the Remote Management tab, we would see something like this:
+
+    $ curl "http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61"
+    {
+        "message": "No plugin or theme specified for update.",
+        "error": true
+    }
+
+This error message is given because GitHub Updater requires us to specify either a theme or a plugin that we wish to update. This is specified using the `theme` or `plugin` attributes, and the theme or plugin is identified by its slug. Let's try to update a plugin:
+
+    $ curl "http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61&plugin=mickesplugin"
+    {
+        "messages": [
+            "Downloading update from <span class=\"code\">https:\/\/api.github.com\/repos\/limikael\/mickesplugin\/zipball\/master<\/span>&#8230;",
+            "Unpacking the update&#8230;",
+            "Installing the latest version&#8230;",
+            "Removing the old version of the plugin&#8230;",
+            "Plugin updated successfully."
+        ],
+        "success": true
+    }
+
+And our plugin is updated! The messages that are shown are those that otherwise would be shown in the Wordpress admin interface. The full list of attributes accepted by the REST API service is shown here:
+
+* __key__ - The key as displayed on the Remote Management tab. The key passed to the endpoint in the api call must match the key stored on the system.
+* __plugin__ - Specify this to update a particular plugin. The plugin should be specified using only the name of the plugin as it is known to the system, not the remote repo.
+* __theme__ - Specify this to update a theme.
+* __committish__ - Specify a particular tag, branch or commit for the update. If nothing is specified, it defaults to "master".
+* __tag__ - An alias for the committish attribute.
+
+When using the REST API for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin` or `theme`. All other attributes are optional.
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
