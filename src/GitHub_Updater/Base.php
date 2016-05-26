@@ -414,23 +414,16 @@ class Base {
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
 		global $wp_filesystem, $plugins, $themes;
-		$slug       = null;
-		$repo       = null;
-		$new_source = null;
-
-		/*
-		 * Exit for mismatch.
-		 */
-		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Theme ||
-		     $upgrader instanceof \Theme_Upgrader && $this instanceof Plugin
-		) {
-			return $source;
-		}
+		$slug            = null;
+		$repo            = null;
+		$new_source      = null;
+		$upgrader_object = null;
 
 		/*
 		 * Rename plugins.
 		 */
-		if ( $upgrader instanceof \Plugin_Upgrader && $this instanceof Plugin ) {
+		if ( $upgrader instanceof \Plugin_Upgrader ) {
+			$upgrader_object = Plugin::instance();
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -457,25 +450,13 @@ class Base {
 				}
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Plugin directory is misnamed to start.
-			 */
-			if ( ! in_array( $slug, $this->config ) ) {
-				foreach ( $this->config as $plugin ) {
-					if ( $slug === dirname( $plugin->slug ) ) {
-						$slug       = $plugin->repo;
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
 		}
 
 		/*
 		 * Rename themes.
 		 */
-		if ( $upgrader instanceof \Theme_Upgrader && $this instanceof Theme ) {
+		if ( $upgrader instanceof \Theme_Upgrader ) {
+			$upgrader_object = Theme::instance();
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -501,7 +482,7 @@ class Base {
 			}
 		}
 
-		$repo = $this->get_repo_slugs( $slug );
+		$repo = $this->get_repo_slugs( $slug, $upgrader_object );
 
 		/*
 		 * Not GitHub Updater plugin/theme.
@@ -516,6 +497,20 @@ class Base {
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
 			$repo['repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
+		}
+
+		/*
+		 * Directory is misnamed to start.
+		 * Make cause deactivation.
+		 */
+		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) ) {
+			foreach ( $upgrader_object->config as $plugin ) {
+				if ( $slug === dirname( $plugin->slug ) ) {
+					$slug       = $plugin->repo;
+					$new_source = trailingslashit( $remote_source ) . $slug;
+					break;
+				}
+			}
 		}
 
 		/*
@@ -552,17 +547,22 @@ class Base {
 	 * Set array with normal and extended repo names.
 	 * Fix name even if installed without renaming originally.
 	 *
-	 * @param $slug
+	 * @param string $slug
+	 * @param object $upgrader_object
 	 *
 	 * @return array
 	 */
-	protected function get_repo_slugs( $slug ) {
+	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
 		$arr    = array();
 		$rename = explode( '-', $slug );
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
-		foreach ( $this->config as $repo ) {
+		if ( is_null( $upgrader_object ) ) {
+			$upgrader_object = $this;
+		}
+
+		foreach ( $upgrader_object->config as $repo ) {
 			if ( $slug === $repo->repo ||
 			     $slug === $repo->extended_repo ||
 			     $rename === $repo->owner . '-' . $repo->repo
