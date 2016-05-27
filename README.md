@@ -274,7 +274,7 @@ I've seen this error code occasionally with Bitbucket.
 
 ## Remote Management Services
 
-Currently, GitHub Updater works with both iThemes Sync and InfiniteWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
+Currently, GitHub Updater works with both iThemes Sync, InfiniteWP, ManageWP, and MainWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
 
 Please go the Remote Management tab of the Settings page and check which remote management service you wish to use. There may be a small amount of overhead related to using any of these services which may impact performance, but only for **admin** level users in the dashboard.
 
@@ -282,13 +282,13 @@ Please go the Remote Management tab of the Settings page and check which remote 
 
 ### REST API for Remote Management
 
-GitHub Updater also supports other customized continuous integration workflows, and it is possible to integrate with other services than those discussed above. For this, there is a REST API available for telling GitHub Updater to update themes and plugins to the latest version from their repositories.
+GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the REST API is available in GitHub Updater to update themes and plugins to the latest version from their repositories.
 
-On the Remote Management tab, you will see a url that serves as the enpoint for this api. This url will look something like this:
+On the Remote Management tab, you will see a URL that serves as the endpoint for this API. This url will look something like this:
 
     http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61
 
-The exact url will of course depend on your system. The value for the `key` attribute is automatically generated on the first activation of the GitHub Updater plugin and is used for authentication. Any person or entity knowing this key will be able to change the versions of your installed plugins, but nothing else.
+The exact URL will of course depend on your system. The value for the `key` attribute is automatically generated on the first activation of the GitHub Updater plugin and is used for authentication. Any person or entity knowing this key will be able to change the versions of your installed plugins, but nothing else.
 
 Now, if we would use `curl` to access the url exactly like it appears on the Remote Management tab, we would see something like this:
 
@@ -312,11 +312,11 @@ This error message is given because GitHub Updater requires us to specify either
         "success": true
     }
 
-And our plugin is updated! The messages that are shown are those that otherwise would be shown in the Wordpress admin interface. The full list of attributes accepted by the REST API service is shown here:
+And our plugin is updated! The messages displayed are those that otherwise would be displayed in the non-shiny WordPress admin interface. The full list of attributes accepted by this REST API service is shown here:
 
 * __key__ - The key as displayed on the Remote Management tab. The key passed to the endpoint in the api call must match the key stored on the system.
-* __plugin__ - Specify this to update a particular plugin. The plugin should be specified using only the name of the plugin as it is known to the system, not the remote repo.
-* __theme__ - Specify this to update a theme.
+* __plugin__ - Specify this to update a plugin. This is the plugin's slug.
+* __theme__ - Specify this to update a theme. This is the theme's slug.
 * __committish__ - Specify a particular tag, branch or commit for the update. If nothing is specified, it defaults to "master".
 * __tag__ - An alias for the committish attribute.
 
