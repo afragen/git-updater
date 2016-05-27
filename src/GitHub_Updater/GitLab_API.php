@@ -219,13 +219,12 @@ class GitLab_API extends API {
 			self::$method = 'readme';
 			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=readme.txt' );
 
-			if ( $response ) {
-				$parser   = new Readme_Parser;
-				$response = $parser->parse_readme( base64_decode( $response->content ) );
-				$this->set_transient( 'readme', $response );
-			}
 		}
-
+		if ( $response && isset( $response->content ) ) {
+			$parser   = new Readme_Parser;
+			$response = $parser->parse_readme( base64_decode( $response->content ) );
+			$this->set_transient( 'readme', $response );
+		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
