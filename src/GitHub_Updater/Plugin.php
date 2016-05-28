@@ -342,8 +342,18 @@ class Plugin extends Base {
 			if ( ! is_null( $repo ) ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-					esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
-					                            '&TB_iframe=true&width=600&height=550' ) ),
+					esc_url(
+						add_query_arg(
+							array(
+								'tab'       => 'plugin-information',
+								'plugin'    => $repo,
+								'TB_iframe' => 'true',
+								'width'     => 600,
+								'height'    => 550,
+							),
+							network_admin_url( 'plugin_install.php' )
+						)
+					),
 					esc_html__( 'View details', 'github-updater' )
 				);
 			}
