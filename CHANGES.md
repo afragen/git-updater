@@ -1,16 +1,15 @@
 #### 5.4.2
 * simplify some `after_theme_row`
 * better internationalization for changing plugin _View details_ link
-* update `after_theme_row` classes for Shiny Updates
 * refactor and improve for `GitHub Updater Additions` plugin
 * fix for using GitLab CE private token with using Install
 * rework GitHub repo meta as search was occasionally flaky, now also using owner's repos check
 * refactor adding extra headers
-* add REST API endpoints courtesy of @limikael
+* add REST API endpoints for updating courtesy of @limikael
 * simplified and removed lots of code for viewing theme details, use core when available. ;-)
 * added CSS file to help display theme view details, waiting for [#36923](https://core.trac.wordpress.org/ticket/36923) for it to work
 * refactored `get_remote_{plugin|theme}_meta()` to `get_remote_repo_meta()` as it was in 4 different places :P
-* fixed renaming code to work with Shiny Updates
+* updated for Shiny Updates
 * fixed PHP fatal, thanks @charli-polo
 
 #### 5.4.1
