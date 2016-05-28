@@ -7,7 +7,7 @@
 * refactor adding extra headers
 * add REST API endpoints for updating courtesy of @limikael
 * simplified and removed lots of code for viewing theme details, use core when available. ;-)
-* added CSS file to help display theme view details, waiting for [#36923](https://core.trac.wordpress.org/ticket/36923) for it to work
+* added CSS file to help display theme view details
 * refactored `get_remote_{plugin|theme}_meta()` to `get_remote_repo_meta()` as it was in 4 different places :P
 * updated for Shiny Updates
 * fixed PHP fatal, thanks @charli-polo

@@ -356,7 +356,7 @@ class Theme extends Base {
 				'height'    => 400,
 			),
 			$install_url ) );
-		$nonced_update_url         = wp_nonce_url(
+		$nonced_update_url  = wp_nonce_url(
 			$this->get_theme_update_url( 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
 		);
@@ -491,6 +491,8 @@ class Theme extends Base {
 
 	/**
 	 * Remove default after_theme_row_$stylesheet.
+	 *
+	 * @TODO   remove Shiny Update plugin specific remove_action()
 	 *
 	 * @author @grappler
 	 *
