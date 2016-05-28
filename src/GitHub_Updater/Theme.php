@@ -95,7 +95,19 @@ class Theme extends Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
-		$additions  = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
+
+		/**
+		 * Filter to add themes not containing appropriate header line.
+		 *
+		 * @since   5.4.0
+		 * @access  public
+		 *
+		 * @param   array $additions    Listing of themes to add.
+		 *                              Default null.
+		 * @param   array $themes       Listing of all themes.
+		 * @param         string        'theme'    Type being passed.
+		 */
+		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme           = array();
