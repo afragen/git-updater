@@ -222,6 +222,7 @@ class Theme extends Base {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
+				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 15, 2 );
@@ -292,6 +293,27 @@ class Theme extends Base {
 	}
 
 	/**
+	 * Generate theme update URL.
+	 *
+	 * @param string $action
+	 * @param string $theme
+	 *
+	 * @return string|void
+	 */
+	protected function get_theme_update_url( $action, $theme ) {
+		$update_url = esc_attr(
+			add_query_arg(
+				array(
+					'action' => $action,
+					'theme'  => urlencode( $theme ),
+				),
+				self_admin_url( 'update.php' )
+			) );
+
+		return $update_url;
+	}
+
+	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
 	 * @param $theme_key
@@ -301,7 +323,33 @@ class Theme extends Base {
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
-		
+
+		$themes_allowedtags = array(
+			'a'       => array( 'href' => array(), 'title' => array() ),
+			'abbr'    => array( 'title' => array() ),
+			'acronym' => array( 'title' => array() ),
+			'code'    => array(),
+			'em'      => array(),
+			'strong'  => array(),
+		);
+		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
+		$install_url        = self_admin_url( "theme-install.php" );
+		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$details_url        = esc_attr( add_query_arg(
+			array(
+				'tab'       => 'theme-information',
+				'theme'     => $theme_key,
+				'TB_iframe' => 'true',
+				'width'     => 270,
+				'height'    => 400,
+			),
+			$install_url ) );
+		$nonced_update_url         = wp_nonce_url(
+			$this->get_theme_update_url( 'upgrade-theme', $theme_key ),
+			'upgrade-theme_' . $theme_key
+		);
+		$enclosure          = $this->update_row_enclosure( $theme_key, 'theme' );
+
 		/*
 		 * Update transient if necessary.
 		 */
@@ -310,10 +358,10 @@ class Theme extends Base {
 		}
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
-			$enclosure = $this->update_row_enclosure( $theme_key, 'theme' );
-			echo $enclosure['open'];
 			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
 			$rollback_keys = array_keys( $rollback );
+
+			echo $enclosure['open'];
 			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
 			echo '&nbsp';
 			if ( count( $rollback ) > 0 ) {
@@ -340,6 +388,37 @@ class Theme extends Base {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 			}
 			echo $enclosure['close'];
+		}
+
+		if ( isset( $current->response[ $theme_key ] ) ) {
+			$response = $current->response[ $theme_key ];
+			echo $enclosure['open'];
+
+			printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
+				$theme_name
+			);
+			printf( ' <a href="%s" class="thickbox" title="%s"> ',
+				$details_url,
+				$theme_name
+			);
+			if ( empty( $response['package'] ) ) {
+				printf( esc_html__( 'View version %s details.', 'github-updater' ),
+					$response['new_version']
+				);
+				echo '</a><em>';
+				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
+				echo '</em>';
+			} else {
+				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
+					$response['new_version'],
+					'</a>',
+					'<a href="' . $nonced_update_url . '" class="update-link" aria-label="update ' . $theme_name . ' now">',
+					'</a>'
+				);
+			}
+			echo $enclosure['close'];
+
+			do_action( "in_theme_update_message-$theme_key", $theme, $response );
 		}
 	}
 
@@ -392,6 +471,51 @@ class Theme extends Base {
 		}
 		print( '</ul>' );
 		echo $enclosure['close'];
+	}
+
+	/**
+	 * Remove default after_theme_row_$stylesheet.
+	 *
+	 * @author @grappler
+	 *
+	 * @param $theme_key
+	 * @param $theme
+	 */
+	public function remove_after_theme_row( $theme_key, $theme ) {
+
+		foreach ( parent::$git_servers as $server ) {
+			$repo_header = $server . ' Theme URI';
+			$repo_uri    = $theme->get( $repo_header );
+			$themes      = $this->get_theme_configs();
+
+			/**
+			 * Filter to add themes not containing appropriate header line.
+			 *
+			 * @since   5.4.0
+			 * @access  public
+			 *
+			 * @param   array $additions    Listing of themes to add.
+			 *                              Default null.
+			 * @param   array $themes       Listing of all themes.
+			 * @param         string        'theme'    Type being passed.
+			 */
+			$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
+			foreach ( (array) $additions as $addition ) {
+				if ( $theme_key === $addition['slug'] ) {
+					if ( ! empty( $addition[ $server . ' Theme URI' ] ) ) {
+						$repo_uri = $addition[ $server . ' Theme URI' ];
+						break;
+					}
+				}
+			}
+			if ( empty( $repo_uri ) ) {
+				continue;
+			}
+
+			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
+			remove_action( "after_theme_row_$theme_key", 'su_theme_update_row', 10 );
+			break;
+		}
 	}
 
 	/**
