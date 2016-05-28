@@ -390,8 +390,8 @@ class Theme extends Base {
 					if ( $i > 0 ) {
 						echo ", ";
 					}
-					printf( '<a href="%s%s">%s</a>',
-						wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . $theme_key, 'upgrade-theme_' . $theme_key ),
+					printf( '<a href="%s%s" aria-label="rollback ' . $theme_name . ' now">%s</a>',
+						$nonced_update_url,
 						'&rollback=' . urlencode( $tag ),
 						$tag
 					);
@@ -448,9 +448,13 @@ class Theme extends Base {
 			return false;
 		}
 
-		$enclosure = $this->update_row_enclosure( $theme_key, 'theme', true );
-		$id        = $theme_key . '-id';
-		$branches  = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme', true );
+		$id                = $theme_key . '-id';
+		$branches          = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$nonced_update_url = wp_nonce_url(
+			$this->get_theme_update_url( 'upgrade-theme', $theme_key ),
+			'upgrade-theme_' . $theme_key
+		);
 
 		/*
 		 * Get current branch.
@@ -476,7 +480,7 @@ class Theme extends Base {
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
 			printf( '<li><a href="%s%s">%s</a></li>',
-				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' . urlencode( $theme_key ) ), 'upgrade-theme_' . $theme_key ),
+				$nonced_update_url,
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
 			);
@@ -568,8 +572,8 @@ class Theme extends Base {
 	 * @return string (content buffer)
 	 */
 	protected function append_theme_actions_content( $theme ) {
-		$options = get_site_option( 'github_updater' );
-		$details_url = esc_attr( add_query_arg(
+		$options           = get_site_option( 'github_updater' );
+		$details_url       = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
 				'theme'     => $theme->repo,
@@ -578,6 +582,10 @@ class Theme extends Base {
 				'height'    => 400,
 			),
 			self_admin_url( "theme-install.php" ) ) );
+		$nonced_update_url = wp_nonce_url(
+			$this->get_theme_update_url( 'upgrade-theme', $theme->repo ),
+			'upgrade-theme_' . $theme->repo
+		);
 
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
@@ -586,7 +594,6 @@ class Theme extends Base {
 		 * If theme is not present in theme_update transient response ( theme is not up to date )
 		 */
 		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
-			$update_url = wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo );
 			ob_start();
 			?>
 			<strong><br />
@@ -601,7 +608,7 @@ class Theme extends Base {
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$theme->remote_version,
 					'</a>',
-					'<a href="' . $update_url . '">',
+					'<a id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
 					'</a>'
 				);
 				?>
@@ -614,7 +621,7 @@ class Theme extends Base {
 			 * If the theme is up to date, display the custom rollback/beta version updater
 			 */
 			ob_start();
-			$rollback_url = sprintf( '%s%s', wp_nonce_url( self_admin_url( 'update.php?action=upgrade-theme&theme=' ) . urlencode( $theme->repo ), 'upgrade-theme_' . $theme->repo ), '&rollback=' );
+			$rollback_url = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 			?>
 			<p><?php
