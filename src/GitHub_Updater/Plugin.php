@@ -300,7 +300,7 @@ class Plugin extends Base {
 
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s">%s</a></li>',
+			printf( '<li><a href="%s%s" aria-label="switch to ' . $branch . ' branch">%s</a></li>',
 				wp_nonce_url(
 					add_query_arg(
 						array(
