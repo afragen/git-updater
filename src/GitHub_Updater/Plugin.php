@@ -301,7 +301,15 @@ class Plugin extends Base {
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
 			printf( '<li><a href="%s%s">%s</a></li>',
-				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
+				wp_nonce_url(
+					add_query_arg(
+						array(
+							'action' => 'upgrade-plugin',
+							'plugin' => urlencode( $plugin_file ),
+						),
+						self_admin_url( 'update.php' )
+					),
+					'upgrade-plugin_' . $plugin_file ),
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
 			);
