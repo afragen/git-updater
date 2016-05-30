@@ -142,7 +142,7 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
-			$json_encode_flags = 0;
+			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
 			if ( defined( "JSON_PRETTY_PRINT" ) ) {
 				$json_encode_flags = JSON_PRETTY_PRINT;
 			}

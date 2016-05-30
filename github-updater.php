@@ -22,7 +22,7 @@
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Branch:     develop
  * Requires WP:       4.0
- * Requires PHP:      5.4
+ * Requires PHP:      5.3
  */
 
 /*
@@ -36,7 +36,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( ! class_exists( 'WPUpdatePhp' ) ) {
 	require_once ( plugin_dir_path( __FILE__ ) . '/vendor/wp-update-php/src/WPUpdatePhp.php' );
 }
-$updatePhp = new WPUpdatePhp( '5.4.0' );
+$updatePhp = new WPUpdatePhp( '5.3.0' );
 if ( method_exists( $updatePhp, 'set_plugin_name' ) ) {
 	$updatePhp->set_plugin_name( 'GitHub Updater' );
 }
