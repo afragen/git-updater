@@ -216,7 +216,7 @@ class Base {
 	}
 
 	/**
-	 * Ajax endpoint for rest updates.
+	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
 		$rest_update = new Rest_Update();
