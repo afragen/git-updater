@@ -207,7 +207,7 @@ class Theme extends Base {
 
 			if ( ! $this->get_remote_repo_meta( $theme ) ) {
 				continue;
-			};
+			}
 
 			/*
 			 * Update theme transient with rollback data.

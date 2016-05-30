@@ -213,7 +213,7 @@ class Plugin extends Base {
 
 			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
 				continue;
-			};
+			}
 
 			/*
 			 * Update plugin transient with rollback (branch switching) data.
