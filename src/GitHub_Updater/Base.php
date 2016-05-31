@@ -1044,4 +1044,26 @@ class Base {
 		return $enclosure;
 	}
 
+	/**
+	 * Generate update URL.
+	 *
+	 * @param string $type ( plugin or theme )
+	 * @param string $action
+	 * @param string $repo_name
+	 *
+	 * @return string|void
+	 */
+	protected function get_update_url( $type, $action, $repo_name ) {
+		$update_url = esc_attr(
+			add_query_arg(
+				array(
+					'action' => $action,
+					$type    => urlencode( $repo_name ),
+				),
+				self_admin_url( 'update.php' )
+			) );
+
+		return $update_url;
+	}
+
 }

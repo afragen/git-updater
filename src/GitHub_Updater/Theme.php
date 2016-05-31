@@ -305,27 +305,6 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Generate theme update URL.
-	 *
-	 * @param string $action
-	 * @param string $theme
-	 *
-	 * @return string|void
-	 */
-	protected function get_theme_update_url( $action, $theme ) {
-		$update_url = esc_attr(
-			add_query_arg(
-				array(
-					'action' => $action,
-					'theme'  => urlencode( $theme ),
-				),
-				self_admin_url( 'update.php' )
-			) );
-
-		return $update_url;
-	}
-
-	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 *
 	 * @param $theme_key
@@ -345,7 +324,6 @@ class Theme extends Base {
 			'strong'  => array(),
 		);
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$install_url        = self_admin_url( "theme-install.php" );
 		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url        = esc_attr( add_query_arg(
 			array(
@@ -355,9 +333,9 @@ class Theme extends Base {
 				'width'     => 270,
 				'height'    => 400,
 			),
-			$install_url ) );
+			self_admin_url( "theme-install.php" ) ) );
 		$nonced_update_url  = wp_nonce_url(
-			$this->get_theme_update_url( 'upgrade-theme', $theme_key ),
+			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
 		);
 		$enclosure          = $this->update_row_enclosure( $theme_key, 'theme' );
@@ -452,7 +430,7 @@ class Theme extends Base {
 		$id                = $theme_key . '-id';
 		$branches          = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
 		$nonced_update_url = wp_nonce_url(
-			$this->get_theme_update_url( 'upgrade-theme', $theme_key ),
+			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
 		);
 

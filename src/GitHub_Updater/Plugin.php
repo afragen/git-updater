@@ -302,13 +302,7 @@ class Plugin extends Base {
 		foreach ( $branches as $branch => $uri ) {
 			printf( '<li><a href="%s%s" aria-label="switch to ' . $branch . ' branch">%s</a></li>',
 				wp_nonce_url(
-					add_query_arg(
-						array(
-							'action' => 'upgrade-plugin',
-							'plugin' => urlencode( $plugin_file ),
-						),
-						self_admin_url( 'update.php' )
-					),
+					$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file),
 					'upgrade-plugin_' . $plugin_file ),
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
