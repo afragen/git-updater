@@ -63,7 +63,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( 'Plugin not found: ' . $plugin_slug );
+			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
 		}
 
 		$this->get_remote_repo_meta( $plugin );
@@ -102,7 +102,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( 'Theme not found: ' . $theme_slug );
+			throw new \Exception( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
