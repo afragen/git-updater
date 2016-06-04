@@ -258,7 +258,7 @@ class Rest_Update extends Base {
 			$response['success'] = true;
 		}
 
-		echo json_encode( $response, $json_encode_flags );
+		echo json_encode( $response, $json_encode_flags ) . "\n";
 		exit;
 	}
 
