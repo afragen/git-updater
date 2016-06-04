@@ -123,6 +123,45 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * Return listing of available updates.
+	 *
+	 * @param $response
+	 *
+	 * @return mixed
+	 */
+	public function show_updates( $response ) {
+		$themes       = get_site_transient( 'update_themes' );
+		$plugins      = get_site_transient( 'update_plugins' );
+		$show_plugins = null;
+		$show_themes  = null;
+
+		foreach ( $plugins->response as $plugin ) {
+			$plugin->plugin = $plugin->slug;
+			unset( $plugin->slug );
+			unset( $plugin->url );
+			unset( $plugin->package );
+
+			if ( isset( $plugin->id, $plugin->tested, $plugin->compatibility ) ) {
+				unset( $plugin->id );
+				unset( $plugin->tested );
+				unset( $plugin->compatibility );
+			}
+			$show_plugins[] = $plugin;
+		}
+		foreach ( $themes->response as $theme ) {
+			unset( $theme['url'] );
+			unset( $theme['package'] );
+			$show_themes[] = $theme;
+		}
+
+		$response['messages'] = 'Available Updates';
+		$response['plugins']  = $show_plugins;
+		$response['themes']   = $show_themes;
+
+		return $response;
+	}
+
+	/**
 	 * Is there an error?
 	 */
 	public function is_error() {
@@ -142,12 +181,15 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
+			$show_updates      = false;
 			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
 			if ( defined( 'JSON_PRETTY_PRINT' ) ) {
 				$json_encode_flags = JSON_PRETTY_PRINT;
 			}
 
-			if ( ! isset( $_REQUEST['key'] ) || $_REQUEST['key'] != get_site_option( 'github_updater_api_key' ) ) {
+			if ( ! isset( $_REQUEST['key'] ) ||
+			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
+			) {
 				throw new \Exception( 'Bad api key.' );
 			}
 
@@ -163,6 +205,8 @@ class Rest_Update extends Base {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
+			} elseif ( isset( $_REQUEST['updates'] ) ) {
+				$show_updates = true;
 			} else {
 				throw new \Exception( 'No plugin or theme specified for update.' );
 			}
@@ -183,6 +227,10 @@ class Rest_Update extends Base {
 			'messages' => $this->get_messages(),
 		);
 
+		if ( $show_updates ) {
+			$response = $this->show_updates( $response );
+		}
+
 		if ( $this->is_error() ) {
 			$response['error'] = true;
 			http_response_code( 500 );
@@ -193,4 +241,5 @@ class Rest_Update extends Base {
 		echo json_encode( $response, $json_encode_flags );
 		exit;
 	}
+
 }
