@@ -36,6 +36,8 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	/**
 	 * Overrides the feedback method.
 	 * Adds the feedback string to the messages array.
+	 *
+	 * @param string $string
 	 */
 	public function feedback( $string ) {
 		if ( isset( $this->upgrader->strings[ $string ] ) ) {
@@ -60,6 +62,8 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 
 	/**
 	 * Set the error flag to true, then let the base class handle the rest.
+	 *
+	 * @param $errors
 	 */
 	public function error( $errors ) {
 		$this->error = true;
