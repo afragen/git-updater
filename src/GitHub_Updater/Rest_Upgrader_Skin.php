@@ -44,7 +44,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 			$string = $this->upgrader->strings[ $string ];
 		}
 
-		if ( strpos( $string, '%' ) !== false ) {
+		if ( false !== strpos( $string, '%' ) ) {
 			$args = func_get_args();
 			$args = array_splice( $args, 1 );
 			if ( $args ) {
