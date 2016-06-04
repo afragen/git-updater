@@ -91,7 +91,7 @@ class Rest_Update extends Base {
 
 		if ( $is_plugin_active ) {
 			activate_plugin( $plugin->slug, null, true );
-			$this->upgrader_skin->messages[] ='Plugin re-activated successfully.';
+			$this->upgrader_skin->messages[] ='Plugin reactivated successfully.';
 		}
 	}
 
