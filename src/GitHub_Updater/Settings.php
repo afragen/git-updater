@@ -609,7 +609,7 @@ class Settings extends Base {
 		$api_key = get_site_option( 'github_updater_api_key' );
 
 		echo "<p>";
-		esc_html_e( 'Restful API for triggering updates is available at:', 'github-updater' );
+		esc_html_e( 'RESTful triggering updates is available at:', 'github-updater' );
 		echo "<br>";
 		echo "<tt>" . admin_url( "admin-ajax.php" ) . "?action=github-updater-update&key=" . $api_key . "</tt>";
 		echo "</p>";

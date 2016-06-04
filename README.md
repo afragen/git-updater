@@ -280,11 +280,11 @@ Please go the Remote Management tab of the Settings page and check which remote 
 
 ![Remote Management Tab](./assets/screenshot-3.png)
 
-### REST API for Remote Management
+### RESTful Endpoints for Remote Management
 
-GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the REST API is available in GitHub Updater to update themes and plugins to the latest version from their repositories.
+GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the RESTful endpoints are available in GitHub Updater to update themes and plugins to the latest version from their repositories.
 
-On the Remote Management tab, you will see a URL that serves as the endpoint for this API. This url will look something like this:
+On the Remote Management tab, you will see a URL that serves as the endpoint for this. This url will look something like this:
 
     http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61
 
@@ -312,7 +312,7 @@ This error message is given because GitHub Updater requires us to specify either
         "success": true
     }
 
-And our plugin is updated! The messages displayed are those that otherwise would be displayed in the non-shiny WordPress admin interface. The full list of attributes accepted by this REST API service is shown here:
+And our plugin is updated! The messages displayed are those that otherwise would be displayed in the non-shiny WordPress admin interface. The full list of attributes accepted by this RESTful service is shown here:
 
 * __key__ - The key as displayed on the Remote Management tab. The key passed to the endpoint in the api call must match the key stored on the system.
 * __plugin__ - Specify this to update a plugin. This is the plugin's slug.
@@ -320,7 +320,7 @@ And our plugin is updated! The messages displayed are those that otherwise would
 * __committish__ - Specify a particular tag, branch or commit for the update. If nothing is specified, it defaults to "master".
 * __tag__ - An alias for the committish attribute.
 
-When using the REST API for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin` or `theme`. All other attributes are optional.
+When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin` or `theme`. All other attributes are optional.
 
 ## Extended Naming
 
