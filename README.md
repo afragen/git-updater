@@ -319,6 +319,7 @@ And our plugin is updated! The messages displayed are those that otherwise would
 * __theme__ - Specify this to update a theme. This is the theme's slug.
 * __committish__ - Specify a particular tag, branch or commit for the update. If nothing is specified, it defaults to "master".
 * __tag__ - An alias for the committish attribute.
+* __updates__ - Displays available updates.
 
 When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin` or `theme`. All other attributes are optional.
 
