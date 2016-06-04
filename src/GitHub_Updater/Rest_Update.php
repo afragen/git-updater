@@ -152,17 +152,16 @@ class Rest_Update extends Base {
 			}
 
 			$tag = 'master';
-			if ( isset( $_REQUEST['tag'] ) && $_REQUEST['tag'] ) {
-				$tag = $_REQUEST['tag'];
-			}
 
-			if ( isset( $_REQUEST['committish'] ) && $_REQUEST['committish'] ) {
+			if ( isset( $_REQUEST['tag'] ) ) {
+				$tag = $_REQUEST['tag'];
+			} elseif ( isset( $_REQUEST['committish'] ) ) {
 				$tag = $_REQUEST['committish'];
 			}
 
-			if ( isset( $_REQUEST['plugin'] ) && $_REQUEST['plugin'] ) {
+			if ( isset( $_REQUEST['plugin'] ) ) {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
-			} else if ( isset( $_REQUEST['theme'] ) && $_REQUEST['theme'] ) {
+			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
 			} else {
 				throw new \Exception( 'No plugin or theme specified for update.' );
