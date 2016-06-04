@@ -135,6 +135,15 @@ class Rest_Update extends Base {
 		$show_plugins = null;
 		$show_themes  = null;
 
+		/*
+		 * Reset update data if REST update done.
+		 */
+		if ( ! $themes || ! $plugins ) {
+			$this->forced_meta_update_remote_management();
+			$themes  = Theme::instance()->pre_set_site_transient_update_themes( $themes );
+			$plugins = Plugin::instance()->pre_set_site_transient_update_plugins( $plugins );
+		}
+
 		foreach ( $plugins->response as $plugin ) {
 			$plugin->plugin = $plugin->slug;
 			unset( $plugin->slug );
