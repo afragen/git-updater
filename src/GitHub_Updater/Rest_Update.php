@@ -157,6 +157,7 @@ class Rest_Update extends Base {
 			}
 			$show_plugins[] = $plugin;
 		}
+		
 		foreach ( $themes->response as $theme ) {
 			unset( $theme['url'] );
 			unset( $theme['package'] );
