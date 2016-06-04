@@ -53,7 +53,7 @@ class Rest_Update extends Base {
 	 *
 	 * @throws \Exception
 	 */
-	public function update_plugin( $plugin_slug, $tag = "master" ) {
+	public function update_plugin( $plugin_slug, $tag = 'master' ) {
 		$plugin = null;
 
 		foreach ( (array) Plugin::instance()->get_plugin_configs() as $config_entry ) {
@@ -63,18 +63,18 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( "Plugin not found: " . $plugin_slug );
+			throw new \Exception( 'Plugin not found: ' . $plugin_slug );
 		}
 
 		$this->get_remote_repo_meta( $plugin );
 
 		$updates_transient = get_site_transient( 'update_plugins' );
 		$update            = array(
-			"slug"        => $plugin->repo,
-			"plugin"      => $plugin->slug,
-			"new_version" => null,
-			"url"         => $plugin->uri,
-			"package"     => $this->repo_api->construct_download_link( false, $tag ),
+			'slug'        => $plugin->repo,
+			'plugin'      => $plugin->slug,
+			'new_version' => null,
+			'url'         => $plugin->uri,
+			'package'     => $this->repo_api->construct_download_link( false, $tag ),
 		);
 
 		$updates_transient->response[ $plugin->slug ] = (object) $update;
@@ -92,7 +92,7 @@ class Rest_Update extends Base {
 	 *
 	 * @throws \Exception
 	 */
-	public function update_theme( $theme_slug, $tag = "master" ) {
+	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
 
 		foreach ( (array) Theme::instance()->get_theme_configs() as $config_entry ) {
@@ -102,17 +102,17 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( "Theme not found: " . $theme_slug );
+			throw new \Exception( 'Theme not found: ' . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
 
 		$updates_transient = get_site_transient( 'update_themes' );
 		$update            = array(
-			"theme"       => $theme->repo,
-			"new_version" => null,
-			"url"         => $theme->uri,
-			"package"     => $this->repo_api->construct_download_link( false, $tag ),
+			'theme'       => $theme->repo,
+			'new_version' => null,
+			'url'         => $theme->uri,
+			'package'     => $this->repo_api->construct_download_link( false, $tag ),
 		);
 
 		$updates_transient->response[ $theme->repo ] = $update;
@@ -143,37 +143,37 @@ class Rest_Update extends Base {
 	public function process_request() {
 		try {
 			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
-			if ( defined( "JSON_PRETTY_PRINT" ) ) {
+			if ( defined( 'JSON_PRETTY_PRINT' ) ) {
 				$json_encode_flags = JSON_PRETTY_PRINT;
 			}
 
-			if ( ! isset( $_REQUEST["key"] ) || $_REQUEST["key"] != get_site_option( 'github_updater_api_key' ) ) {
-				throw new \Exception( "Bad api key." );
+			if ( ! isset( $_REQUEST['key'] ) || $_REQUEST['key'] != get_site_option( 'github_updater_api_key' ) ) {
+				throw new \Exception( 'Bad api key.' );
 			}
 
-			$tag = "master";
-			if ( isset( $_REQUEST["tag"] ) && $_REQUEST["tag"] ) {
-				$tag = $_REQUEST["tag"];
+			$tag = 'master';
+			if ( isset( $_REQUEST['tag'] ) && $_REQUEST['tag'] ) {
+				$tag = $_REQUEST['tag'];
 			}
 
-			if ( isset( $_REQUEST["committish"] ) && $_REQUEST["committish"] ) {
-				$tag = $_REQUEST["committish"];
+			if ( isset( $_REQUEST['committish'] ) && $_REQUEST['committish'] ) {
+				$tag = $_REQUEST['committish'];
 			}
 
-			if ( isset( $_REQUEST["plugin"] ) && $_REQUEST["plugin"] ) {
-				$this->update_plugin( $_REQUEST["plugin"], $tag );
-			} else if ( isset( $_REQUEST["theme"] ) && $_REQUEST["theme"] ) {
-				$this->update_theme( $_REQUEST["theme"], $tag );
+			if ( isset( $_REQUEST['plugin'] ) && $_REQUEST['plugin'] ) {
+				$this->update_plugin( $_REQUEST['plugin'], $tag );
+			} else if ( isset( $_REQUEST['theme'] ) && $_REQUEST['theme'] ) {
+				$this->update_theme( $_REQUEST['theme'], $tag );
 			} else {
-				throw new \Exception( "No plugin or theme specified for update." );
+				throw new \Exception( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
 			http_response_code( 500 );
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
-				"message" => $e->getMessage(),
-				"error"   => true,
+				'message' => $e->getMessage(),
+				'error'   => true,
 			), $json_encode_flags );
 			exit;
 		}
@@ -181,14 +181,14 @@ class Rest_Update extends Base {
 		header( 'Content-Type: application/json' );
 
 		$response = array(
-			"messages" => $this->get_messages(),
+			'messages' => $this->get_messages(),
 		);
 
 		if ( $this->is_error() ) {
-			$response["error"] = true;
+			$response['error'] = true;
 			http_response_code( 500 );
 		} else {
-			$response["success"] = true;
+			$response['success'] = true;
 		}
 
 		echo json_encode( $response, $json_encode_flags );
