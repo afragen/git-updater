@@ -54,7 +54,8 @@ class Rest_Update extends Base {
 	 * @throws \Exception
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
-		$plugin = null;
+		$plugin          = null;
+		$is_plugin_active = false;
 
 		foreach ( (array) Plugin::instance()->get_plugin_configs() as $config_entry ) {
 			if ( $config_entry->repo == $plugin_slug ) {
@@ -65,6 +66,10 @@ class Rest_Update extends Base {
 
 		if ( ! $plugin ) {
 			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
+		}
+
+		if ( is_plugin_active( $plugin->slug ) ) {
+			$is_plugin_active = true;
 		}
 
 		$this->get_remote_repo_meta( $plugin );
@@ -83,6 +88,11 @@ class Rest_Update extends Base {
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->slug );
+
+		if ( $is_plugin_active ) {
+			activate_plugin( $plugin->slug, null, true );
+			$this->upgrader_skin->messages[] ='Plugin re-activated successfully.';
+		}
 	}
 
 	/**
