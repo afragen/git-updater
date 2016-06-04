@@ -148,13 +148,11 @@ class Rest_Update extends Base {
 		$show_themes  = null;
 
 		/*
-		 * Reset update data if REST update done.
+		 * Ensure update data is up to date.
 		 */
-		if ( ! $themes || ! $plugins ) {
-			$this->forced_meta_update_remote_management();
-			$themes  = Theme::instance()->pre_set_site_transient_update_themes( $themes );
-			$plugins = Plugin::instance()->pre_set_site_transient_update_plugins( $plugins );
-		}
+		$this->forced_meta_update_remote_management();
+		$themes  = Theme::instance()->pre_set_site_transient_update_themes( $themes );
+		$plugins = Plugin::instance()->pre_set_site_transient_update_plugins( $plugins );
 
 		foreach ( $plugins->response as $plugin ) {
 			$plugin->plugin = $plugin->slug;
@@ -169,7 +167,7 @@ class Rest_Update extends Base {
 			}
 			$show_plugins[] = $plugin;
 		}
-		
+
 		foreach ( $themes->response as $theme ) {
 			unset( $theme['url'] );
 			unset( $theme['package'] );
