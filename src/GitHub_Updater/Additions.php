@@ -46,6 +46,7 @@ class Additions {
 	 *
 	 * @param $config
 	 * @param $repos
+	 * @param $type
 	 *
 	 * @return bool
 	 */
@@ -54,6 +55,10 @@ class Additions {
 			return false;
 		}
 		if ( null === ( $config = json_decode( $config, true ) ) ) {
+			$error    = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
+			$messages = Messages::instance();
+			$messages::create_error_message( $error );
+
 			return false;
 		}
 
