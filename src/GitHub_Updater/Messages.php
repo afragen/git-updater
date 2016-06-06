@@ -25,11 +25,31 @@ if ( ! defined( 'WPINC' ) ) {
 class Messages extends Base {
 
 	/**
+	 * Holds instance of this object.
+	 *
+	 * @var
+	 */
+	private static $instance;
+
+	/**
 	 * Holds WP_Error message.
 	 *
 	 * @var string
 	 */
 	public static $error_message = '';
+
+	/**
+	 * Singleton
+	 *
+	 * @return object
+	 */
+	public static function instance() {
+		if ( ! isset( self::$instance ) ) {
+			self::$instance = new self;
+		}
+
+		return self::$instance;
+	}
 
 	/**
 	 * Display message when API returns other than 200 or 404.
