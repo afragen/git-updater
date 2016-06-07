@@ -58,7 +58,7 @@ class Messages extends Base {
 	 *
 	 * @return bool
 	 */
-	public static function create_error_message( $type = '' ) {
+	public function create_error_message( $type = '' ) {
 		global $pagenow;
 
 		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
@@ -79,19 +79,19 @@ class Messages extends Base {
 					if ( false !== strstr( self::$error_message, 'timed out' ) ) {
 						break;
 					}
-					add_action( 'admin_notices', array( __CLASS__, 'show_wp_error' ) );
-					add_action( 'network_admin_notices', array( __CLASS__, 'show_wp_error' ) );
+					add_action( 'admin_notices', array( &$this, 'show_wp_error' ) );
+					add_action( 'network_admin_notices', array( &$this, 'show_wp_error' ) );
 					break;
 				case 'gitlab':
-					add_action( 'admin_notices', array( __CLASS__, 'gitlab_error' ) );
-					add_action( 'network_admin_notices', array( __CLASS__, 'gitlab_error' ) );
+					add_action( 'admin_notices', array( &$this, 'gitlab_error' ) );
+					add_action( 'network_admin_notices', array( &$this, 'gitlab_error' ) );
 					break;
 				case 'git':
 				default:
-					add_action( 'admin_notices', array( __CLASS__, 'show_403_error_message' ) );
-					add_action( 'network_admin_notices', array( __CLASS__, 'show_403_error_message' ) );
-					add_action( 'admin_notices', array( __CLASS__, 'show_401_error_message' ) );
-					add_action( 'network_admin_notices', array( __CLASS__, 'show_401_error_message' ) );
+					add_action( 'admin_notices', array( &$this, 'show_403_error_message' ) );
+					add_action( 'network_admin_notices', array( &$this, 'show_403_error_message' ) );
+					add_action( 'admin_notices', array( &$this, 'show_401_error_message' ) );
+					add_action( 'network_admin_notices', array( &$this, 'show_401_error_message' ) );
 					break;
 			}
 		}
@@ -103,7 +103,7 @@ class Messages extends Base {
 	 * Create error message for 403 error.
 	 * Usually 403 as API rate limit max out.
 	 */
-	public static function show_403_error_message() {
+	public function show_403_error_message() {
 		$_403 = false;
 		foreach ( self::$error_code as $repo ) {
 			if ( 403 === $repo['code'] && 'github' === $repo['git'] && ! $_403 ) {
@@ -138,7 +138,7 @@ class Messages extends Base {
 	 * Create error message or 401 (Authentication Error) error.
 	 * Usually 401 as private repo with no token set or incorrect user/pass.
 	 */
-	public static function show_401_error_message() {
+	public function show_401_error_message() {
 		$_401 = false;
 		foreach ( self::$error_code as $repo ) {
 			if ( 401 === $repo['code'] && ! $_401 ) {
@@ -162,7 +162,7 @@ class Messages extends Base {
 	/**
 	 * Generate error message for missing GitLab Private Token.
 	 */
-	public static function gitlab_error() {
+	public function gitlab_error() {
 		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
 		       parent::$auth_required['gitlab_enterprise'] ) ||
 		     ( empty( parent::$options['gitlab_private_token'] ) &&
@@ -181,7 +181,7 @@ class Messages extends Base {
 	/**
 	 * Generate error message for WP_Error.
 	 */
-	public static function show_wp_error() {
+	public function show_wp_error() {
 		?>
 		<div class="error notice is-dismissible">
 			<p>

@@ -31,7 +31,7 @@ class Additions {
 	/**
 	 * Singleton
 	 *
-	 * @return object
+	 * @return object $instance Messages
 	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
@@ -55,9 +55,8 @@ class Additions {
 			return false;
 		}
 		if ( null === ( $config = json_decode( $config, true ) ) ) {
-			$error    = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
-			$messages = Messages::instance();
-			$messages::create_error_message( $error );
+			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
+			Messages::instance()->create_error_message( $error );
 
 			return false;
 		}

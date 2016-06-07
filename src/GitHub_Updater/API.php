@@ -109,7 +109,7 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
-			Messages::create_error_message( $response );
+			Messages::instance()->create_error_message( $response );
 
 			return false;
 		}
@@ -126,7 +126,7 @@ abstract class API extends Base {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Messages::create_error_message( $type['repo'] );
+			Messages::instance()->create_error_message( $type['repo'] );
 
 			return false;
 		}
