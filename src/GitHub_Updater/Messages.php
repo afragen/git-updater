@@ -41,7 +41,7 @@ class Messages extends Base {
 	/**
 	 * Singleton
 	 *
-	 * @return object
+	 * @return object $instance Messages
 	 */
 	public static function instance() {
 		$class = __CLASS__;
