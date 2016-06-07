@@ -121,6 +121,7 @@ abstract class API extends Base {
 						'repo' => $this->type->repo,
 						'code' => $code,
 						'name' => $this->type->name,
+						'git'  => $this->type->type,
 					),
 				) );
 			if ( 'github' === $type['repo'] ) {
