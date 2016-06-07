@@ -44,9 +44,8 @@ class Messages extends Base {
 	 * @return object $instance Messages
 	 */
 	public static function instance() {
-		$class = __CLASS__;
 		if ( false === self::$instance ) {
-			self::$instance = new $class();
+			self::$instance = new self();
 		}
 
 		return self::$instance;
