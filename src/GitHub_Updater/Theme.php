@@ -36,7 +36,7 @@ class Theme extends Base {
 	 *
 	 * @var bool|Theme
 	 */
-	protected static $object = false;
+	private static $instance = false;
 
 	/**
 	 * Rollback variable.
@@ -68,15 +68,15 @@ class Theme extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return Theme
+	 * @return object $instance Theme
 	 */
 	public static function instance() {
 		$class = __CLASS__;
-		if ( false === self::$object ) {
-			self::$object = new $class();
+		if ( false === self::$instance ) {
+			self::$instance = new $class();
 		}
 
-		return self::$object;
+		return self::$instance;
 	}
 
 	/**

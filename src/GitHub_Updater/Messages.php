@@ -27,9 +27,9 @@ class Messages extends Base {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var
+	 * @var bool|Messages
 	 */
-	private static $instance;
+	private static $instance = false;
 
 	/**
 	 * Holds WP_Error message.
@@ -44,8 +44,9 @@ class Messages extends Base {
 	 * @return object
 	 */
 	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
+		$class = __CLASS__;
+		if ( false === self::$instance ) {
+			self::$instance = new $class();
 		}
 
 		return self::$instance;

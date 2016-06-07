@@ -34,7 +34,7 @@ class Plugin extends Base {
 	 *
 	 * @var bool|Plugin
 	 */
-	protected static $object = false;
+	private static $instance = false;
 
 	/**
 	 * Rollback variable
@@ -73,15 +73,15 @@ class Plugin extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return Plugin
+	 * @return object $instance Plugin
 	 */
 	public static function instance() {
 		$class = __CLASS__;
-		if ( false === self::$object ) {
-			self::$object = new $class();
+		if ( false === self::$instance ) {
+			self::$instance = new $class();
 		}
 
-		return self::$object;
+		return self::$instance;
 	}
 
 	/**

@@ -17,9 +17,9 @@ class Additions {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var
+	 * @var bool|Additions
 	 */
-	private static $instance;
+	private static $instance = false;
 
 	/**
 	 * Holds array of plugin/theme headers to add to GitHub Updater.
@@ -31,11 +31,12 @@ class Additions {
 	/**
 	 * Singleton
 	 *
-	 * @return object $instance Messages
+	 * @return object $instance Additions
 	 */
 	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
+		$class = __CLASS__;
+		if ( false === self::$instance ) {
+			self::$instance = new $class();
 		}
 
 		return self::$instance;
