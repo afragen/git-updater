@@ -562,7 +562,7 @@ class Theme extends Base {
 			),
 			self_admin_url( "theme-install.php" ) ) );
 		$nonced_update_url = wp_nonce_url(
-			$this->get_theme_update_url( 'upgrade-theme', $theme->repo ),
+			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo
 		);
 
