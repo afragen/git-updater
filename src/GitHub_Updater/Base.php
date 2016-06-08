@@ -1028,7 +1028,7 @@ class Base {
 			'close' => '</div></td></tr>',
 		);
 
-		if ( version_compare( $wp_version, '4.6', '>=' ) || function_exists( 'su_init' ) ) {
+		if ( version_compare( $wp_version, '4.5.100', '>=' ) ) {
 			$open_p  = '<p>';
 			$close_p = '</p>';
 			if ( $branch_switcher ) {
