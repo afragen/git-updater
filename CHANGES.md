@@ -10,6 +10,7 @@
 * updated for Shiny Updates
 * fixed PHP fatal, thanks @charli-polo
 * fixes for displaying WP_Errors
+* make error messages non-static
 
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
