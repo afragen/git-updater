@@ -213,7 +213,7 @@ class GitHub_API extends API {
 		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
-		
+
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
 			$response = ! empty( $response->items[0] ) ? $response->items[0] : false;
@@ -232,7 +232,7 @@ class GitHub_API extends API {
 				}
 			}
 
-			if ( $response ) {
+			if ( $response && ! isset( $response->items ) ) {
 				$this->set_transient( 'meta', $response );
 			}
 		}
