@@ -702,15 +702,13 @@ class Base {
 	 * @return array
 	 */
 	protected function parse_header_uri( $repo_header ) {
-		$header_parts         = parse_url( $repo_header );
-		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo           = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
-		$header['path']       = $owner_repo;
-		$owner_repo           = explode( '/', $owner_repo );
-		$header['owner']      = $owner_repo[0];
-		$header['repo']       = $owner_repo[1];
+		$header_parts     = parse_url( $repo_header );
+		$header['scheme'] = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']   = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$owner_repo       = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo       = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
+		$header['path']   = $owner_repo;
+		list( $header['owner'], $header['repo'] ) = explode( '/', $owner_repo );
 		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
