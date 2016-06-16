@@ -1016,13 +1016,16 @@ class Base {
 		global $wp_version;
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$repo_base     = $repo_name;
+		$shiny_classes = ' notice inline notice-warning notice-alt';
 
 		if ( 'plugin' === $type ) {
 			$repo_base = dirname( $repo_name );
 		}
 
+		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+
 		$enclosure = array(
-			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
+			'open'  => $open,
 			'close' => '</div></td></tr>',
 		);
 
@@ -1034,7 +1037,7 @@ class Base {
 				$close_p = '';
 			}
 			$enclosure = array(
-				'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt">' . $open_p,
+				'open'  => substr_replace( $open, $shiny_classes, - 2, 0 ) . $open_p,
 				'close' => $close_p . '</div></td></tr>',
 			);
 		}
