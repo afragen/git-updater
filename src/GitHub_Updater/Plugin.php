@@ -352,7 +352,7 @@ class Plugin extends Base {
 								'width'     => 600,
 								'height'    => 550,
 							),
-							network_admin_url( 'plugin_install.php' )
+							network_admin_url( 'plugin-install.php' )
 						)
 					),
 					esc_html__( 'View details', 'github-updater' )
