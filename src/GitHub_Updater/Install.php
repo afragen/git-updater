@@ -157,11 +157,10 @@ class Install extends Base {
 				 * Add private token.
 				 */
 				if ( ! empty( self::$install['gitlab_private_token'] ) ) {
+					self::$install['download_link'] = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
 					if ( 'gitlab.com' === $headers['host'] ) {
-						self::$install['download_link']          = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
 						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
 					} else {
-						self::$install['download_link']             = add_query_arg( 'private_token', self::$options['gitlab_private_token'], self::$install['download_link'] );
 						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
 					}
 				} else {
