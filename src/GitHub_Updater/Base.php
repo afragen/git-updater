@@ -1029,7 +1029,7 @@ class Base {
 			'close' => '</div></td></tr>',
 		);
 
-		if ( version_compare( $wp_version, '4.5.100', '>=' ) ) {
+		if ( version_compare( $wp_version, '4.6-alpha-37714', '>=' ) ) {
 			$open_p  = '<p>';
 			$close_p = '</p>';
 			if ( $branch_switcher ) {
