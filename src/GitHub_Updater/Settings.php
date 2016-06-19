@@ -145,7 +145,7 @@ class Settings extends Base {
 			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
 				<div class="updated">
-					<p><strong><?php esc_html_e( 'RESTful API key reset.', 'github-updater' ); ?></strong></p>
+					<p><strong><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></strong></p>
 				</div>
 			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
 				<div class="updated">
@@ -174,7 +174,7 @@ class Settings extends Base {
 				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
 				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
 				<form method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-					<?php submit_button( esc_html__( 'Reset RESTful API key', 'github-updater' ) ); ?>
+					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
 				</form>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
@@ -637,7 +637,7 @@ class Settings extends Base {
 
 		?>
 		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful API endpoints begin at:', 'github-updater' ); ?>
+			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
 			<br>
 			<span style="font-family:monospace;"><?php echo $api_url ?></span>
 		<p>

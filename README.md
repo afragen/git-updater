@@ -321,7 +321,7 @@ And our plugin is updated! The messages displayed are those that otherwise would
 * __tag__ - An alias for the committish attribute.
 * __updates__ - Displays available updates.
 
-When using the RESTful API endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
+When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
 
 ## Extended Naming
 
