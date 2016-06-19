@@ -274,7 +274,7 @@ I've seen this error code occasionally with Bitbucket.
 
 ## Remote Management Services
 
-Currently, GitHub Updater works with both iThemes Sync, InfiniteWP, ManageWP, and MainWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
+Currently, GitHub Updater works with iThemes Sync, InfiniteWP, ManageWP, and MainWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
 
 Please go the Remote Management tab of the Settings page and check which remote management service you wish to use. There may be a small amount of overhead related to using any of these services which may impact performance, but only for **admin** level users in the dashboard.
 
@@ -321,7 +321,7 @@ And our plugin is updated! The messages displayed are those that otherwise would
 * __tag__ - An alias for the committish attribute.
 * __updates__ - Displays available updates.
 
-When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin` or `theme`. All other attributes are optional.
+When using the RESTful API endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
 
 ## Extended Naming
 

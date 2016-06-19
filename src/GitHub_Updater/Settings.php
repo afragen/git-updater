@@ -143,8 +143,14 @@ class Settings extends Base {
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
-			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
-				<div class="updated"><p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p></div>
+			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
+				<div class="updated">
+					<p><strong><?php esc_html_e( 'RESTful API key reset.', 'github-updater' ); ?></strong></p>
+				</div>
+			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
+				<div class="updated">
+					<p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p>
+				</div>
 			<?php endif; ?>
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
@@ -166,6 +172,10 @@ class Settings extends Base {
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
 				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
+				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
+				<form method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
+					<?php submit_button( esc_html__( 'Reset RESTful API key', 'github-updater' ) ); ?>
+				</form>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 					settings_fields( 'github_updater_remote_management' );
@@ -532,6 +542,19 @@ class Settings extends Base {
 			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
+
+		if ( $this->reset_api_key() && ! is_multisite() ) {
+			$location = add_query_arg(
+				array(
+					'page'  => 'github-updater',
+					'tab'   => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
+					'reset' => true,
+				),
+				admin_url( 'options-general.php' )
+			);
+			wp_redirect( $location );
+			exit;
+		}
 	}
 
 	/**
@@ -607,15 +630,20 @@ class Settings extends Base {
 	 */
 	public function print_section_remote_management() {
 		$api_key = get_site_option( 'github_updater_api_key' );
+		$api_url = add_query_arg( array(
+			'action' => 'github-updater-update',
+			'key'    => $api_key,
+		), admin_url( 'admin-ajax.php' ) );
 
-		echo "<p>";
-		esc_html_e( 'RESTful triggering updates is available at:', 'github-updater' );
-		echo "<br>";
-		echo "<tt>" . admin_url( "admin-ajax.php" ) . "?action=github-updater-update&key=" . $api_key . "</tt>";
-		echo "</p>";
-		echo "<p>";
-		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
-		echo "</p>";
+		?>
+		<p>
+			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful API endpoints begin at:', 'github-updater' ); ?>
+			<br>
+			<span style="font-family:monospace;"><?php echo $api_url ?></span>
+		<p>
+			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
+		</p>
+		<?php
 	}
 
 	/**
@@ -685,6 +713,8 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
+		$reset = $this->reset_api_key();
+
 		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
 		parse_str( $query, $arr );
 		if ( empty( $arr['tab'] ) ) {
@@ -694,13 +724,34 @@ class Settings extends Base {
 		$location = add_query_arg(
 			array(
 				'page'    => 'github-updater',
-				'updated' => 'true',
+				'updated' => true,
 				'tab'     => $arr['tab'],
+				'reset'   => empty( $reset ) ? false : true,
 			),
 			network_admin_url( 'settings.php' )
 		);
 		wp_redirect( $location );
 		exit;
+	}
+
+	/**
+	 * Reset RESTful API key.
+	 * Deleting site option will cause it to be re-created.
+	 *
+	 * @return bool
+	 */
+	private function reset_api_key() {
+		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
+		     'github_updater_remote_management' === $_REQUEST['tab']
+		) {
+			$_POST                     = $_REQUEST;
+			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
+			delete_site_option( 'github_updater_api_key' );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

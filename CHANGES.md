@@ -5,6 +5,7 @@
 * rework GitHub repo meta as search was occasionally flaky, now also using owner's repos check
 * refactor adding extra headers
 * add RESTful endpoints for updating from CLI or browser, courtesy of @limikael
+* add reset of RESTful API key
 * added CSS file to help display theme view details
 * refactored `get_remote_{plugin|theme}_meta()` to `get_remote_repo_meta()` as it was in 4 different places :P
 * updated for Shiny Updates
