@@ -54,7 +54,7 @@ class Rest_Update extends Base {
 	 * @throws \Exception
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
-		$plugin          = null;
+		$plugin           = null;
 		$is_plugin_active = false;
 
 		foreach ( (array) Plugin::instance()->get_plugin_configs() as $config_entry ) {
@@ -91,7 +91,7 @@ class Rest_Update extends Base {
 
 		if ( $is_plugin_active ) {
 			activate_plugin( $plugin->slug, null, true );
-			$this->upgrader_skin->messages[] ='Plugin reactivated successfully.';
+			$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 		}
 	}
 
