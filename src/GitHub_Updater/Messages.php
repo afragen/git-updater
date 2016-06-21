@@ -85,14 +85,12 @@ class Messages extends Base {
 				case 'gitlab':
 					add_action( 'admin_notices', array( &$this, 'gitlab_error' ) );
 					add_action( 'network_admin_notices', array( &$this, 'gitlab_error' ) );
-					break;
 				case 'git':
 				default:
 					add_action( 'admin_notices', array( &$this, 'show_403_error_message' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_403_error_message' ) );
 					add_action( 'admin_notices', array( &$this, 'show_401_error_message' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_401_error_message' ) );
-					break;
 			}
 		}
 
