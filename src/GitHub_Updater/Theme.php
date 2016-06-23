@@ -604,6 +604,12 @@ class Theme extends Base {
 
 			?>
 			<p><?php
+				if ( ! empty( $options['branch_switch'] ) ) {
+					printf( esc_html__( 'Current branch is `%s`.', 'github-updater' ),
+						$theme->branch
+					);
+					echo '<br>';
+				}
 				printf( esc_html__( 'Current version is up to date. Try %sanother version%s', 'github-updater' ),
 					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 					'</a>'
