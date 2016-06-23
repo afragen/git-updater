@@ -572,23 +572,25 @@ class Theme extends Base {
 		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 			ob_start();
 			?>
-			<p><strong>
-				<?php
-				printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
-					$theme->name
-				);
-				printf( ' <a href="%s" class="thickbox open-plugin-details-modal" title="%s">',
-					$details_url,
-					esc_attr( $theme->name )
-				);
-				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-					$theme->remote_version,
-					'</a>',
-					'<a aria-label="Update ' . $theme->repo . ' now" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
-					'</a>'
-				);
-				?>
-			</strong></p>
+			<p>
+				<strong>
+					<?php
+					printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
+						$theme->name
+					);
+					printf( ' <a href="%s" class="thickbox open-plugin-details-modal" title="%s">',
+						$details_url,
+						esc_attr( $theme->name )
+					);
+					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
+						$theme->remote_version,
+						'</a>',
+						'<a aria-label="Update ' . $theme->repo . ' now" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+						'</a>'
+					);
+					?>
+				</strong>
+			</p>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
