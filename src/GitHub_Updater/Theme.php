@@ -469,8 +469,6 @@ class Theme extends Base {
 	/**
 	 * Remove default after_theme_row_$stylesheet.
 	 *
-	 * @TODO   remove Shiny Update plugin specific remove_action()
-	 *
 	 * @author @grappler
 	 *
 	 * @param $theme_key
@@ -508,7 +506,6 @@ class Theme extends Base {
 			}
 
 			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
-			remove_action( "after_theme_row_$theme_key", 'su_theme_update_row', 10 );
 			break;
 		}
 	}
@@ -575,23 +572,23 @@ class Theme extends Base {
 		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 			ob_start();
 			?>
-			<strong><br />
+			<p><strong>
 				<?php
 				printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
 					$theme->name
 				);
-				printf( ' <a href="%s" class="thickbox" title="%s">',
+				printf( ' <a href="%s" class="thickbox open-plugin-details-modal" title="%s">',
 					$details_url,
 					esc_attr( $theme->name )
 				);
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$theme->remote_version,
 					'</a>',
-					'<a id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+					'<a aria-label="Update ' . $theme->repo . ' now" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
 					'</a>'
 				);
 				?>
-			</strong>
+			</strong></p>
 			<?php
 
 			return trim( ob_get_clean(), '1' );
