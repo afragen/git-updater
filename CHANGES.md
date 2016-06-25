@@ -13,6 +13,7 @@
 * fixes for displaying WP_Errors
 * make error messages non-static
 * fix pesky PHP notice when updating from 5.4.1.3 [#403](https://github.com/afragen/github-updater/issues/403)
+* added _aria-labels_ for screen readers
 
 #### 5.4.1
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.

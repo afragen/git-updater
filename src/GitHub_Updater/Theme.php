@@ -367,9 +367,13 @@ class Theme extends Base {
 					if ( $i > 0 ) {
 						echo ", ";
 					}
-					printf( '<a href="%s%s" aria-label="rollback ' . $theme_name . ' now">%s</a>',
+					printf( '<a href="%1$s%2$s" aria-label="%3$s">%4$s</a>',
 						$nonced_update_url,
 						'&rollback=' . urlencode( $tag ),
+						sprintf( '%1$s ' . $theme_name . ' %2$s',
+							esc_html__( 'Rollback', 'github-updater' ),
+							esc_html__( 'now', 'github-updater' )
+						),
 						$tag
 					);
 				}
@@ -401,7 +405,10 @@ class Theme extends Base {
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$response['new_version'],
 					'</a>',
-					'<a href="' . $nonced_update_url . '" class="update-link" aria-label="update ' . $theme_name . ' now">',
+					sprintf( '<a href="' . $nonced_update_url . '" class="update-link" aria-label="%1$s ' . $theme_name . ' %2$s">',
+						esc_html__( 'Update', 'github-updater' ),
+						esc_html__( 'now', 'github-updater' )
+					),
 					'</a>'
 				);
 			}
@@ -456,7 +463,7 @@ class Theme extends Base {
 
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s">%s</a></li>',
+			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
 				$nonced_update_url,
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
@@ -585,7 +592,10 @@ class Theme extends Base {
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 						$theme->remote_version,
 						'</a>',
-						'<a aria-label="Update ' . $theme->repo . ' now" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+						sprintf( '<a aria-label="%1$s ' . $theme->name . ' %2$s" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+							esc_html__( 'Update', 'github-updater' ),
+							esc_html__( 'now', 'github-updater' )
+						),
 						'</a>'
 					);
 					?>

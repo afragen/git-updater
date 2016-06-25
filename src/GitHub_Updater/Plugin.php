@@ -267,8 +267,13 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$enclosure = $this->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin    = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$enclosure         = $this->update_row_enclosure( $plugin_file, 'plugin', true );
+		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$nonced_update_url = wp_nonce_url(
+			$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
+			'upgrade-plugin_' . $plugin_file
+		);
+
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
 			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
@@ -299,10 +304,8 @@ class Plugin extends Base {
 
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s" aria-label="switch to ' . $branch . ' branch">%s</a></li>',
-				wp_nonce_url(
-					$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file),
-					'upgrade-plugin_' . $plugin_file ),
+			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+				$nonced_update_url,
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
 			);
