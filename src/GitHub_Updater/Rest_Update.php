@@ -65,7 +65,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
+			throw new \Exception( esc_html__( 'Plugin not found or not updatable with GitHub Updater: ', 'github-updater' ) . $plugin_slug );
 		}
 
 		if ( is_plugin_active( $plugin->slug ) ) {
@@ -91,7 +91,7 @@ class Rest_Update extends Base {
 
 		if ( $is_plugin_active ) {
 			activate_plugin( $plugin->slug, null, true );
-			$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
+			$this->upgrader_skin->messages[] = esc_html__( 'Plugin reactivated successfully.', 'github-updater' );
 		}
 	}
 
@@ -114,7 +114,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
+			throw new \Exception( esc_html__( 'Theme not found or not updatable with GitHub Updater: ', 'github-updater' ) . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
@@ -174,7 +174,7 @@ class Rest_Update extends Base {
 			$show_themes[] = $theme;
 		}
 
-		$response['messages'] = 'Available Updates';
+		$response['messages'] = esc_html__( 'Available Updates', 'github-updater' );
 		$response['plugins']  = $show_plugins;
 		$response['themes']   = $show_themes;
 
@@ -210,7 +210,7 @@ class Rest_Update extends Base {
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
 			) {
-				throw new \Exception( 'Bad api key.' );
+				throw new \Exception( esc_html__( 'Bad api key.', 'github-updater' ) );
 			}
 
 			$tag = 'master';
@@ -228,7 +228,7 @@ class Rest_Update extends Base {
 			} elseif ( isset( $_REQUEST['updates'] ) ) {
 				$show_updates = true;
 			} else {
-				throw new \Exception( 'No plugin or theme specified for update.' );
+				throw new \Exception( esc_html__( 'No plugin or theme specified for update.', 'github-updater' ) );
 			}
 		} catch ( \Exception $e ) {
 			http_response_code( 500 );
