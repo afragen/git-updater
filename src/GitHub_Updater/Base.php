@@ -187,14 +187,6 @@ class Base {
 			$force_meta_update = true;
 		}
 
-		// Added for ajax plugin updating.
-		if ( 'admin-ajax.php' === $pagenow &&
-		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
-		) {
-			$force_meta_update = true;
-			add_filter( 'wp_ajax_update_plugin_result', array( &$this, 'wp_ajax_update_plugin_result' ), 10, 1 );
-		}
-
 		if ( current_user_can( 'update_plugins' ) ) {
 			if ( $force_meta_update ) {
 				$this->forced_meta_update_plugins();
