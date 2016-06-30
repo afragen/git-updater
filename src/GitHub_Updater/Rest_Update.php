@@ -58,7 +58,7 @@ class Rest_Update extends Base {
 		$is_plugin_active = false;
 
 		foreach ( (array) Plugin::instance()->get_plugin_configs() as $config_entry ) {
-			if ( $config_entry->repo == $plugin_slug ) {
+			if ( $config_entry->repo === $plugin_slug ) {
 				$plugin = $config_entry;
 				break;
 			}
@@ -107,7 +107,7 @@ class Rest_Update extends Base {
 		$theme = null;
 
 		foreach ( (array) Theme::instance()->get_theme_configs() as $config_entry ) {
-			if ( $config_entry->repo == $theme_slug ) {
+			if ( $config_entry->repo === $theme_slug ) {
 				$theme = $config_entry;
 				break;
 			}
