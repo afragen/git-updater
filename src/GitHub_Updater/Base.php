@@ -495,12 +495,24 @@ class Base {
 		 * Directory is misnamed to start.
 		 * Make cause deactivation.
 		 */
-		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) ) {
-			foreach ( $upgrader_object->config as $plugin ) {
-				if ( $slug === dirname( $plugin->slug ) ) {
-					$slug       = $plugin->repo;
-					$new_source = trailingslashit( $remote_source ) . $slug;
-					break;
+		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
+		     ! isset( self::$options['github_updater_install_repo'] )
+		) {
+			if ( $upgrader instanceof \Plugin_Upgrader ) {
+				foreach ( $upgrader_object->config as $plugin ) {
+					if ( $slug === dirname( $plugin->slug ) ) {
+						$slug       = $plugin->repo;
+						$new_source = trailingslashit( $remote_source ) . $slug;
+						break;
+					}
+				}
+			}
+			if ( $upgrader instanceof \Theme_Upgrader ) {
+				foreach ( $upgrader_object->config as $theme ) {
+					if ( $slug === $theme->repo ) {
+						$new_source = trailingslashit( $remote_source ) . $slug;
+						break;
+					}
 				}
 			}
 		}
