@@ -378,7 +378,7 @@ class Base {
 				break;
 		}
 
-		if ( is_null( $this->repo_api ) ) {
+		if ( null === $this->repo_api ) {
 			return false;
 		}
 
