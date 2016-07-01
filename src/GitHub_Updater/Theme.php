@@ -305,6 +305,7 @@ class Theme extends Base {
 
 	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
+	 * Display update details or rollback links.
 	 *
 	 * @param $theme_key
 	 * @param $theme
@@ -347,35 +348,30 @@ class Theme extends Base {
 		}
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
-			$rollback      = $current->up_to_date[ $theme_key ]['rollback'];
-			$rollback_keys = array_keys( $rollback );
+			$rollback = array_splice( $current->up_to_date[ $theme_key ]['rollback'], 0, 4, true );
+			array_shift( $rollback );
 
 			echo $enclosure['open'];
 			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
 			echo '&nbsp';
-			if ( count( $rollback ) > 0 ) {
-				array_shift( $rollback_keys ); //don't show newest tag, it should be release version
+			if ( ! empty( $rollback ) ) {
 				echo '<strong>';
 				esc_html_e( 'Rollback to:', 'github-updater' );
 				echo '</strong> ';
-				// display last three tags
-				for ( $i = 0; $i < 3; $i ++ ) {
-					$tag = array_shift( $rollback_keys );
-					if ( empty( $tag ) ) {
-						break;
-					}
-					if ( $i > 0 ) {
-						echo ", ";
-					}
+				foreach ( array_keys( $rollback ) as $version ) {
 					printf( '<a href="%1$s%2$s" aria-label="%3$s">%4$s</a>',
 						$nonced_update_url,
-						'&rollback=' . urlencode( $tag ),
+						'&rollback=' . urlencode( $version ),
 						sprintf( '%1$s ' . $theme_name . ' %2$s',
 							esc_html__( 'Rollback', 'github-updater' ),
 							esc_html__( 'now', 'github-updater' )
 						),
-						$tag
+						$version
 					);
+					array_shift( $rollback );
+					if ( ! empty( $rollback ) ) {
+						echo ', ';
+					}
 				}
 			} else {
 				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
