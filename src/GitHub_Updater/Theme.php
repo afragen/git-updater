@@ -603,11 +603,11 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Display version/branch switcher for single site installation.
+	 * Display rollback/branch switcher for single site installation.
 	 *
 	 * @access protected
 	 *
-	 * @param $theme
+	 * @param object $theme
 	 *
 	 * @return string
 	 */
@@ -644,7 +644,9 @@ class Theme extends Base {
 						}
 					}
 					if ( isset( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
-						foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) {
+						$rollback = array_slice( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'], 0, 4, true );
+						array_shift( $rollback );
+						foreach ( array_keys( $rollback ) as $version ) {
 							echo '<option>' . $version . '</option>';
 						}
 					}
