@@ -236,7 +236,7 @@ class Theme extends Base {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'theme_branch_switcher' ), 15, 2 );
+					add_action( "after_theme_row_$theme->repo", array( &$this, 'multisite_branch_switcher' ), 15, 2 );
 				}
 			}
 		}
@@ -305,7 +305,7 @@ class Theme extends Base {
 
 	/**
 	 * Add custom theme update row, from /wp-admin/includes/update.php
-	 * Display update details or rollback links.
+	 * Display update details or rollback links for multisite installation.
 	 *
 	 * @param $theme_key
 	 * @param $theme
@@ -415,14 +415,14 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Create branch switcher row for multisite themes.
+	 * Create branch switcher row for multisite installation.
 	 *
 	 * @param $theme_key
 	 * @param $theme
 	 *
 	 * @return bool|void
 	 */
-	public function theme_branch_switcher( $theme_key, $theme ) {
+	public function multisite_branch_switcher( $theme_key, $theme ) {
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -514,7 +514,7 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Call update theme messaging if needed for single site installation
+	 * Call theme messaging for single site installation.
 	 *
 	 * @author Seth Carstens
 	 *
