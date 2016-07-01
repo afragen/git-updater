@@ -349,7 +349,7 @@ class Theme extends Base {
 
 		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
 			$rollback = array_splice( $current->up_to_date[ $theme_key ]['rollback'], 0, 4, true );
-			array_shift( $rollback );
+			array_shift( $rollback ); // Dump current tag.
 
 			echo $enclosure['open'];
 			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
@@ -645,7 +645,7 @@ class Theme extends Base {
 					}
 					if ( isset( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 						$rollback = array_slice( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'], 0, 4, true );
-						array_shift( $rollback );
+						array_shift( $rollback ); // Dump current tag.
 						foreach ( array_keys( $rollback ) as $version ) {
 							echo '<option>' . $version . '</option>';
 						}
