@@ -419,7 +419,7 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Create branch switcher row for themes.
+	 * Create branch switcher row for multisite themes.
 	 *
 	 * @param $theme_key
 	 * @param $theme
@@ -538,24 +538,24 @@ class Theme extends Base {
 			} else {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
+			$prepared_themes[ $theme->repo ]['description'] .= $this->single_install_switcher( $theme );
 		}
 
 		return $prepared_themes;
 	}
 
 	/**
-	 * Create theme update messaging
+	 * Create theme update messaging for single site installation.
 	 *
 	 * @author Seth Carstens
 	 *
-	 * @access private
+	 * @access protected
 	 *
 	 * @param object $theme
 	 *
 	 * @return string (content buffer)
 	 */
 	protected function append_theme_actions_content( $theme ) {
-		$options           = get_site_option( 'github_updater' );
 		$details_url       = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
@@ -573,11 +573,10 @@ class Theme extends Base {
 		$theme_update_transient = get_site_transient( 'update_themes' );
 
 		/**
-		 * If the theme is outdated, display the custom theme updater content.
-		 * If theme is not present in theme_update transient response ( theme is not up to date )
+		 * Display theme update links.
 		 */
+		ob_start();
 		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
-			ob_start();
 			?>
 			<p>
 				<strong>
@@ -602,65 +601,76 @@ class Theme extends Base {
 				</strong>
 			</p>
 			<?php
+		}
 
-			return trim( ob_get_clean(), '1' );
-		} else {
-			/*
-			 * If the theme is up to date, display the custom rollback/beta version updater
-			 */
-			ob_start();
-			$rollback_url = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
+		return trim( ob_get_clean(), '1' );
+	}
 
-			?>
-			<p><?php
-				if ( ! empty( $options['branch_switch'] ) ) {
-					printf( esc_html__( 'Current branch is `%s`.', 'github-updater' ),
-						$theme->branch
-					);
-					echo '<br>';
-				}
-				printf( esc_html__( 'Current version is up to date. Try %sanother version%s', 'github-updater' ),
-					'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
-					'</a>'
-				);
-				?>
-			</p>
-			<div id="ghu_versions" style="display:none; width: 100%;">
-				<label><select style="width: 60%;"
-				               onchange="if(jQuery(this).val() != '') {
-					               jQuery(this).parent().next().show();
-					               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
-					               }
-					               else jQuery(this).parent().next().hide();
-					               ">
-						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-						<?php if ( ! empty( $options['branch_switch'] ) ) {
-							foreach ( array_keys( $theme->branches ) as $branch ) {
-								echo '<option>' . $branch . '</option>';
-							}
+	/**
+	 * Display version/branch switcher for single site installation.
+	 *
+	 * @access protected
+	 *
+	 * @param $theme
+	 *
+	 * @return string
+	 */
+	protected function single_install_switcher( $theme ) {
+		$show_button            = true;
+		$options                = get_site_option( 'github_updater' );
+		$theme_update_transient = get_site_transient( 'update_themes' );
+		$nonced_update_url      = wp_nonce_url(
+			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
+			'upgrade-theme_' . $theme->repo
+		);
+		$rollback_url           = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
+
+		ob_start();
+		printf( '<p>' . esc_html__( 'Current branch is `%s`. Try %sanother version%s', 'github-updater' ),
+			$theme->branch,
+			'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
+			'</a></p>'
+		);
+		?>
+		<div id="ghu_versions" style="display:none; width: 100%;">
+			<label><select style="width: 60%;"
+			               onchange="if(jQuery(this).val() != '') {
+				               jQuery(this).parent().next().show();
+				               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
+				               }
+				               else jQuery(this).parent().next().hide();
+				               ">
+					<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
+					<?php
+					if ( ! empty( $options['branch_switch'] ) ) {
+						foreach ( array_keys( $theme->branches ) as $branch ) {
+							echo '<option>' . $branch . '</option>';
 						}
+					}
+					if ( isset( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
 						foreach ( array_keys( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] ) as $version ) {
 							echo '<option>' . $version . '</option>';
 						}
-						if ( empty( $options['branch_switch'] ) &&
-						     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
-						) {
-							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
-
-							return trim( ob_get_clean(), '1' );
-						} ?>
-					</select></label>
+					}
+					if ( empty( $options['branch_switch'] ) &&
+					     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
+					) {
+						echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+						$show_button = false;
+					}
+					?>
+				</select></label>
+			<?php if ( $show_button ) : ?>
 				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
-			</div>
-			<?php
+			<?php endif; ?>
+		</div>
+		<?php
 
-			return trim( ob_get_clean(), '1' );
-		}
+		return trim( ob_get_clean(), '1' );
 	}
 
 	/**
 	 * Hook into pre_set_site_transient_update_themes to update.
-	 *
 	 * Finds newest tag and compares to current tag.
 	 *
 	 * @param array $transient
