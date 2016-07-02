@@ -1,18 +1,18 @@
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link
 * refactor and improve `class Additions` for `GitHub Updater Additions` plugin
-* fix for using GitLab CE private token with using `class Install`
-* rework GitHub repo meta as search was occasionally flaky, now also using owner's repos check
+* fixed for using GitLab CE private token with using `class Install`
+* reworked GitHub repo meta as search was occasionally flaky, now also using owner's repos check
 * refactor adding extra headers
-* add RESTful endpoints for updating from CLI or browser, courtesy of @limikael
-* add reset of RESTful API key
+* added RESTful endpoints for updating from CLI or browser, courtesy of @limikael
+* added reset of RESTful API key
 * added CSS file to help display theme view details
 * refactored `get_remote_{plugin|theme}_meta()` to `get_remote_repo_meta()` as it was in 4 different places :P
 * updated for Shiny Updates
 * fixed PHP fatal, thanks @charli-polo
 * fixes for displaying WP_Errors
-* make error messages non-static
-* fix pesky PHP notice when updating from 5.4.1.3 [#403](https://github.com/afragen/github-updater/issues/403)
+* made error messages non-static
+* fixed pesky PHP notice when updating from 5.4.1.3 [#403](https://github.com/afragen/github-updater/issues/403)
 * added _aria-labels_ for screen readers
 * always display theme rollback/branch switcher in single site installation [#411](https://github.com/afragen/github-updater/issues/411)
 
