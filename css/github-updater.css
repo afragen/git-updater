@@ -1,0 +1,4 @@
+div.install-theme-info { display: block !important; }
+
+/* Remove star rating for themes. */
+#theme-installer div.install-theme-info div.star-rating { display: none; }

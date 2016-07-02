@@ -109,7 +109,7 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
-			Messages::create_error_message( $response );
+			Messages::instance()->create_error_message( $response );
 
 			return false;
 		}
@@ -121,12 +121,13 @@ abstract class API extends Base {
 						'repo' => $this->type->repo,
 						'code' => $code,
 						'name' => $this->type->name,
+						'git'  => $this->type->type,
 					),
 				) );
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Messages::create_error_message( $type['repo'] );
+			Messages::instance()->create_error_message( $type['repo'] );
 
 			return false;
 		}
@@ -239,6 +240,7 @@ abstract class API extends Base {
 	 * @return string $download_link
 	 */
 	protected function make_release_asset_download_link() {
+		$download_link = '';
 		switch ( $this->type->type ) {
 			case 'github_plugin':
 			case 'github_theme':

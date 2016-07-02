@@ -17,9 +17,9 @@ class Additions {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var
+	 * @var bool|Additions
 	 */
-	private static $instance;
+	private static $instance = false;
 
 	/**
 	 * Holds array of plugin/theme headers to add to GitHub Updater.
@@ -31,11 +31,11 @@ class Additions {
 	/**
 	 * Singleton
 	 *
-	 * @return object
+	 * @return object $instance Additions
 	 */
 	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
+		if ( false === self::$instance ) {
+			self::$instance = new self();
 		}
 
 		return self::$instance;
@@ -46,6 +46,7 @@ class Additions {
 	 *
 	 * @param $config
 	 * @param $repos
+	 * @param $type
 	 *
 	 * @return bool
 	 */
@@ -54,73 +55,56 @@ class Additions {
 			return false;
 		}
 		if ( null === ( $config = json_decode( $config, true ) ) ) {
+			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
+			Messages::instance()->create_error_message( $error );
+
 			return false;
 		}
-		if ( 'plugin' === $type ) {
-			$this->add_plugin_headers( $config, $repos );
-		}
-		if ( 'theme' === $type ) {
-			$this->add_theme_headers( $config, $repos );
-		}
+
+		$this->add_headers( $config, $repos, $type );
 	}
 
 	/**
-	 * Add GitHub Updater plugin header.
-	 * Adds extra header in Class Plugins via hook.
+	 * Add GitHub Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @param $config
 	 * @param $repos
+	 * @param $type
 	 */
-	protected function add_plugin_headers( $config, $repos ) {
+	public function add_headers( $config, $repos, $type ) {
 		$this->add_to_github_updater = array();
 		foreach ( $config as $repo ) {
-			if ( false !== strpos( $repo['type'], 'theme' ) ) {
+			// Continue if repo not installed.
+			if ( ! array_key_exists( $repo['slug'], $repos ) ) {
 				continue;
 			}
-			$addition = $repos[ $repo['slug'] ];
+
+			$addition                   = array();
+			$additions[ $repo['slug'] ] = array();
+
+			if ( 'plugin' === $type ) {
+				$additions[ $repo['slug'] ] = $repos[ $repo['slug'] ];
+			}
+
 			switch ( $repo['type'] ) {
 				case 'github_plugin':
-					$addition['GitHub Plugin URI'] = $repo['uri'];
+				case 'github_theme':
+					$addition['slug']                                  = $repo['slug'];
+					$addition[ 'GitHub ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 				case 'bitbucket_plugin':
-					$addition['Bitbucket Plugin URI'] = $repo['uri'];
+				case 'bitbucket_theme':
+					$addition['slug']                                     = $repo['slug'];
+					$addition[ 'Bitbucket ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 				case 'gitlab_plugin':
-					$addition['GitLab Plugin URI'] = $repo['uri'];
-					break;
-			}
-			$this->add_to_github_updater[ $repo['slug'] ] = $addition;
-		}
-	}
-
-	/**
-	 * Add GitHub Updater theme header.
-	 * Adds header URI into Class Theme via hook.
-	 *
-	 * @param $config
-	 * @param $theme
-	 */
-	public function add_theme_headers( $config, $theme ) {
-		$this->add_to_github_updater = array();
-		foreach ( $config as $repo ) {
-			if ( false !== strpos( $repo['type'], 'plugin' ) ) {
-				continue;
-			}
-			$addition = $theme[ $repo['slug'] ];
-			switch ( $repo['type'] ) {
-				case 'github_theme':
-					$addition['GitHub Theme URI'] = $repo['uri'];
-					break;
-				case
-				'bitbucket_theme':
-					$addition['Bitbucket Theme URI'] = $repo['uri'];
-					break;
 				case 'gitlab_theme':
-					$addition['GitLab Theme URI'] = $repo['uri'];
+					$addition['slug']                                  = $repo['slug'];
+					$addition[ 'GitLab ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 			}
-			$addition['slug']                             = $repo['slug'];
-			$this->add_to_github_updater[ $repo['slug'] ] = $addition;
+
+			$this->add_to_github_updater[ $repo['slug'] ] = array_merge( $additions[ $repo['slug'] ], $addition );
 		}
 	}
 

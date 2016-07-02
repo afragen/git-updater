@@ -50,6 +50,8 @@ class Settings extends Base {
 	 * Start up
 	 */
 	public function __construct() {
+		$this->ensure_api_key_is_set();
+
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_network_setting' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
@@ -141,8 +143,14 @@ class Settings extends Base {
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
-			<?php if ( isset( $_GET['updated'] ) && true == $_GET['updated'] ): ?>
-				<div class="updated"><p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p></div>
+			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
+				<div class="updated">
+					<p><strong><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></strong></p>
+				</div>
+			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
+				<div class="updated">
+					<p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p>
+				</div>
 			<?php endif; ?>
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
@@ -164,6 +172,10 @@ class Settings extends Base {
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
 				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
+				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
+				<form method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
+					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
+				</form>
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 					settings_fields( 'github_updater_remote_management' );
@@ -352,22 +364,25 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$plugin           = get_site_transient( 'ghu_plugin' );
-		$theme            = get_site_transient( 'ghu_theme' );
+		$plugin           = get_site_transient( 'ghu_plugins' );
+		$theme            = get_site_transient( 'ghu_themes' );
 		if ( ! $plugin ) {
 			$plugin = Plugin::instance();
 			$plugin->get_remote_plugin_meta();
+			set_site_transient( 'ghu_plugins', $plugin, ( self::$hours * HOUR_IN_SECONDS ) );
+
 		}
 		if ( ! $theme ) {
 			$theme = Theme::instance();
 			$theme->get_remote_theme_meta();
+			set_site_transient( 'ghu_themes', $theme, ( self::$hours * HOUR_IN_SECONDS ) );
 		}
 		$ghu_plugins = $plugin->config;
 		$ghu_themes  = $theme->config;
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
-			$type                             = '';
+			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
@@ -428,7 +443,7 @@ class Settings extends Base {
 			}
 
 			if ( false !== strpos( $token->type, 'theme' ) ) {
-				$type = esc_html__( 'Theme:', 'github-updater' ) . '&nbsp;';
+				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
 			$setting_field['id']    = $token->repo;
@@ -527,6 +542,19 @@ class Settings extends Base {
 			}
 			update_site_option( 'github_updater_remote_management', $options );
 		}
+
+		if ( $this->reset_api_key() && ! is_multisite() ) {
+			$location = add_query_arg(
+				array(
+					'page'  => 'github-updater',
+					'tab'   => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
+					'reset' => true,
+				),
+				admin_url( 'options-general.php' )
+			);
+			wp_redirect( $location );
+			exit;
+		}
 	}
 
 	/**
@@ -601,7 +629,21 @@ class Settings extends Base {
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
-		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
+		$api_key = get_site_option( 'github_updater_api_key' );
+		$api_url = add_query_arg( array(
+			'action' => 'github-updater-update',
+			'key'    => $api_key,
+		), admin_url( 'admin-ajax.php' ) );
+
+		?>
+		<p>
+			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
+			<br>
+			<span style="font-family:monospace;"><?php echo $api_url ?></span>
+		<p>
+			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
+		</p>
+		<?php
 	}
 
 	/**
@@ -671,6 +713,8 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
+		$reset = $this->reset_api_key();
+
 		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
 		parse_str( $query, $arr );
 		if ( empty( $arr['tab'] ) ) {
@@ -680,13 +724,34 @@ class Settings extends Base {
 		$location = add_query_arg(
 			array(
 				'page'    => 'github-updater',
-				'updated' => 'true',
+				'updated' => true,
 				'tab'     => $arr['tab'],
+				'reset'   => empty( $reset ) ? false : true,
 			),
 			network_admin_url( 'settings.php' )
 		);
 		wp_redirect( $location );
 		exit;
+	}
+
+	/**
+	 * Reset RESTful API key.
+	 * Deleting site option will cause it to be re-created.
+	 *
+	 * @return bool
+	 */
+	private function reset_api_key() {
+		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
+		     'github_updater_remote_management' === $_REQUEST['tab']
+		) {
+			$_POST                     = $_REQUEST;
+			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
+			delete_site_option( 'github_updater_api_key' );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -5,9 +5,9 @@
 # GitHub Updater
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
-* Requires at least: 3.8
+* Requires at least: 4.0
 * Requires PHP: 5.3
-* Tested up to: 4.5
+* Tested up to: 4.6
 * Stable tag: master
 * Donate link: http://thefragens.com/github-updater-donate
 * License: GPLv2 or later
@@ -274,11 +274,54 @@ I've seen this error code occasionally with Bitbucket.
 
 ## Remote Management Services
 
-Currently, GitHub Updater works with both iThemes Sync and InfiniteWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
+Currently, GitHub Updater works with iThemes Sync, InfiniteWP, ManageWP, and MainWP. If you desire support for another remote management service please invite the developer of that service to engage in discussion here. I am more that amenable to supporting any service. I will need some testing and support to add support for additional services.
 
 Please go the Remote Management tab of the Settings page and check which remote management service you wish to use. There may be a small amount of overhead related to using any of these services which may impact performance, but only for **admin** level users in the dashboard.
 
 ![Remote Management Tab](./assets/screenshot-3.png)
+
+### RESTful Endpoints for Remote Management
+
+GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the RESTful endpoints are available in GitHub Updater to update themes and plugins to the latest version from their repositories.
+
+On the Remote Management tab, you will see a URL that serves as the endpoint for this. This url will look something like this:
+
+    http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61
+
+The exact URL will of course depend on your system. The value for the `key` attribute is automatically generated on the first activation of the GitHub Updater plugin and is used for authentication. Any person or entity knowing this key will be able to change the versions of your installed plugins, but nothing else.
+
+Now, if we would use `curl` to access the url exactly like it appears on the Remote Management tab, we would see something like this:
+
+    $ curl "http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61"
+    {
+        "message": "No plugin or theme specified for update.",
+        "error": true
+    }
+
+This error message is given because GitHub Updater requires us to specify either a theme or a plugin that we wish to update. This is specified using the `theme` or `plugin` attributes, and the theme or plugin is identified by its slug. Let's try to update a plugin:
+
+    $ curl "http://localhost/wordpress/wp-admin/admin-ajax.php?action=github-updater-update&key=76bb2b7c819c36ee37292b6978a4ad61&plugin=mickesplugin"
+    {
+        "messages": [
+            "Downloading update from <span class=\"code\">https:\/\/api.github.com\/repos\/limikael\/mickesplugin\/zipball\/master<\/span>&#8230;",
+            "Unpacking the update&#8230;",
+            "Installing the latest version&#8230;",
+            "Removing the old version of the plugin&#8230;",
+            "Plugin updated successfully."
+        ],
+        "success": true
+    }
+
+And our plugin is updated! The messages displayed are those that otherwise would be displayed in the non-shiny WordPress admin interface. The full list of attributes accepted by this RESTful service is shown here:
+
+* __key__ - The key as displayed on the Remote Management tab. The key passed to the endpoint in the api call must match the key stored on the system.
+* __plugin__ - Specify this to update a plugin. This is the plugin's slug.
+* __theme__ - Specify this to update a theme. This is the theme's slug.
+* __committish__ - Specify a particular tag, branch or commit for the update. If nothing is specified, it defaults to "master".
+* __tag__ - An alias for the committish attribute.
+* __updates__ - Displays available updates.
+
+When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
 
 ## Extended Naming
 
@@ -317,6 +360,7 @@ You can use the [GitHub Updater Additions](https://github.com/afragen/github-upd
 * French by
     * [Daniel Ménard](https://github.com/daniel-menard)
     * [fxbenard](https://github.com/fxbenard)
+    * [Benoît Chantre](https://github.com/benoitchantre)
 * Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by
     * [Valerio Souza](https://github.com/valeriosouza)
