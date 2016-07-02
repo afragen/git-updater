@@ -360,6 +360,7 @@ You can use the [GitHub Updater Additions](https://github.com/afragen/github-upd
 * French by
     * [Daniel Ménard](https://github.com/daniel-menard)
     * [fxbenard](https://github.com/fxbenard)
+    * [Benoît Chantre](https://github.com/benoitchantre)
 * Italian by [Enea Overclokk](https://github.com/overclokk)
 * Portuguese by
     * [Valerio Souza](https://github.com/valeriosouza)
