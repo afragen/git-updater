@@ -145,11 +145,11 @@ class Settings extends Base {
 			<?php $this->_options_tabs(); ?>
 			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
 				<div class="updated">
-					<p><strong><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></strong></p>
+					<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
 				</div>
 			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
 				<div class="updated">
-					<p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p>
+					<p><?php esc_html_e( 'Saved.', 'github-updater' ); ?></p>
 				</div>
 			<?php endif; ?>
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
