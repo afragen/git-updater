@@ -49,7 +49,7 @@ class Theme extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['clear_transients'] ) ) {
 			$this->delete_all_transients( 'themes' );
 		}
 

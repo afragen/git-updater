@@ -227,7 +227,7 @@ Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the
 
 ## Deleting Transients
 
-If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour.
+Use the **Clear Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour.
 
 Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 

@@ -1,3 +1,6 @@
+#### 5.6.0
+* added `Clear Transients` button to Settings page.
+
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link
 * refactor and improve `class Additions` for `GitHub Updater Additions` plugin

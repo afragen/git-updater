@@ -149,10 +149,20 @@ class Settings extends Base {
 				</div>
 			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
 				<div class="updated">
-					<p><?php esc_html_e( 'Saved.', 'github-updater' ); ?></p>
+					<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
+				</div>
+			<?php elseif ( ( isset( $_GET['clear_transients'] ) && true == $_GET['clear_transients'] ) ) : ?>
+				<div class="updated">
+					<p><?php esc_html_e( 'Transients cleared.', 'github-updater' ); ?></p>
 				</div>
 			<?php endif; ?>
+
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
+				<?php $clear_transients = add_query_arg( array( 'github_updater_clear_transients' => true ), $action ); ?>
+				<form method="post" action="<?php esc_attr_e( $clear_transients ); ?>">
+					<?php submit_button( esc_html__( 'Clear Transients', 'github-updater' ) ); ?>
+				</form>
+
 				<form method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 					settings_fields( 'github_updater' );
@@ -543,12 +553,17 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
-		if ( $this->reset_api_key() && ! is_multisite() ) {
+		$reset_api_key    = $this->reset_api_key();
+		$clear_transients = $this->clear_transients();
+
+		if ( ( $reset_api_key || $clear_transients ) && ! is_multisite() ) {
 			$location = add_query_arg(
 				array(
-					'page'  => 'github-updater',
-					'tab'   => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
-					'reset' => true,
+					'page'             => 'github-updater',
+					'tab'              => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
+					'reset'            => $reset_api_key,
+					'clear_transients' => $clear_transients,
+					'updated'          => ( $reset_api_key || $clear_transients ) ? false : true,
 				),
 				admin_url( 'options-general.php' )
 			);
@@ -713,20 +728,22 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
-		$reset = $this->reset_api_key();
-
 		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
 		parse_str( $query, $arr );
 		if ( empty( $arr['tab'] ) ) {
 			$arr['tab'] = 'github_updater_settings';
 		}
 
+		$reset_api_key    = $this->reset_api_key();
+		$clear_transients = $this->clear_transients();
+
 		$location = add_query_arg(
 			array(
-				'page'    => 'github-updater',
-				'updated' => true,
-				'tab'     => $arr['tab'],
-				'reset'   => empty( $reset ) ? false : true,
+				'page'             => 'github-updater',
+				'tab'              => $arr['tab'],
+				'reset'            => $reset_api_key,
+				'clear_transients' => $clear_transients,
+				'updated'          => ( $reset_api_key || $clear_transients ) ? false : true,
 			),
 			network_admin_url( 'settings.php' )
 		);
@@ -747,6 +764,21 @@ class Settings extends Base {
 			$_POST                     = $_REQUEST;
 			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
 			delete_site_option( 'github_updater_api_key' );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clear GitHub Updater transients.
+	 *
+	 * @return bool
+	 */
+	private function clear_transients() {
+		if ( isset( $_REQUEST['github_updater_clear_transients'] ) ) {
+			$_POST = $_REQUEST;
 
 			return true;
 		}
