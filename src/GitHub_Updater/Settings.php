@@ -367,6 +367,8 @@ class Settings extends Base {
 			$options = array_merge( $options, self::sanitize( $_POST['github_updater'] ) );
 			update_site_option( 'github_updater', $options );
 		}
+
+		$this->redirect_on_save();
 	}
 
 	/**
@@ -555,23 +557,7 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
-		$reset_api_key    = $this->reset_api_key();
-		$clear_transients = $this->clear_transients();
-
-		if ( ( $reset_api_key || $clear_transients ) && ! is_multisite() ) {
-			$location = add_query_arg(
-				array(
-					'page'             => 'github-updater',
-					'tab'              => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
-					'reset'            => $reset_api_key,
-					'clear_transients' => $clear_transients,
-					'updated'          => ( $reset_api_key || $clear_transients ) ? false : true,
-				),
-				admin_url( 'options-general.php' )
-			);
-			wp_redirect( $location );
-			exit;
-		}
+		$this->redirect_on_save();
 	}
 
 	/**
@@ -730,27 +716,41 @@ class Settings extends Base {
 			update_site_option( 'github_updater_remote_management', $options );
 		}
 
-		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
-		parse_str( $query, $arr );
-		if ( empty( $arr['tab'] ) ) {
-			$arr['tab'] = 'github_updater_settings';
+		$this->redirect_on_save();
+	}
+
+	/**
+	 * Redirect to correct Settings tab on Save.
+	 */
+	protected function redirect_on_save() {
+		$update           = false;
+		$clear_transients = $this->clear_transients();
+		$reset_api_key    = $this->reset_api_key();
+
+		if ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) {
+			$update = true;
 		}
 
-		$reset_api_key    = $this->reset_api_key();
-		$clear_transients = $this->clear_transients();
+		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		$location = add_query_arg(
-			array(
-				'page'             => 'github-updater',
-				'tab'              => $arr['tab'],
-				'reset'            => $reset_api_key,
-				'clear_transients' => $clear_transients,
-				'updated'          => ( $reset_api_key || $clear_transients ) ? false : true,
-			),
-			network_admin_url( 'settings.php' )
-		);
-		wp_redirect( $location );
-		exit;
+		if ( $update || $clear_transients || $reset_api_key ) {
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY ) : null;
+			parse_str( $query, $arr );
+			$arr['tab'] = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
+
+			$location = add_query_arg(
+				array(
+					'page'             => 'github-updater',
+					'tab'              => $arr['tab'],
+					'clear_transients' => $clear_transients,
+					'reset'            => $reset_api_key,
+					'updated'          => $update,
+				),
+				$redirect_url
+			);
+			wp_redirect( $location );
+			exit;
+		}
 	}
 
 	/**

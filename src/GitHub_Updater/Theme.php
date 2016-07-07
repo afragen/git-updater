@@ -240,7 +240,7 @@ class Theme extends Base {
 				}
 			}
 		}
-		$this->make_force_check_transient( 'themes' );
+		$this->make_transient_list( 'themes' );
 		$this->load_pre_filters();
 	}
 

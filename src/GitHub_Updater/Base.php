@@ -781,13 +781,13 @@ class Base {
 	}
 
 	/**
-	 * Create transient of $type transients for force-check.
+	 * Create transient of $type transients for clearing transients.
 	 *
 	 * @param $type
 	 *
 	 * @return void|bool
 	 */
-	protected function make_force_check_transient( $type ) {
+	protected function make_transient_list( $type ) {
 		$transient = get_site_transient( 'ghu-' . $type );
 		if ( $transient ) {
 			return false;
@@ -956,7 +956,7 @@ class Base {
 
 			return empty( $options['branch_switch'] );
 		}
-		if ( ! isset( $_GET['force-check'] ) ) {
+		if ( ! isset( $_GET['clear_transients'] ) ) {
 			if ( ! $response && ! $this->can_update( $this->type ) ) {
 				return true;
 			}
@@ -976,7 +976,7 @@ class Base {
 	protected function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['clear_transients'] ) ) {
 			return $response;
 		}
 

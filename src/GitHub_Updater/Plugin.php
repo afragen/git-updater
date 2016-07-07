@@ -240,7 +240,7 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->make_force_check_transient( 'plugins' );
+		$this->make_transient_list( 'plugins' );
 		$this->load_pre_filters();
 	}
 
