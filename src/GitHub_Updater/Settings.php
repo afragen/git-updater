@@ -152,26 +152,26 @@ class Settings extends Base {
 					<div class="updated">
 						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
 					</div>
-				<?php elseif ( ( isset( $_GET['clear_transients'] ) && true == $_GET['clear_transients'] ) ) : ?>
+				<?php elseif ( ( isset( $_GET['refresh_transients'] ) && true == $_GET['refresh_transients'] ) ) : ?>
 					<div class="updated">
-						<p><?php esc_html_e( 'Transients cleared.', 'github-updater' ); ?></p>
+						<p><?php esc_html_e( 'Transients refreshed.', 'github-updater' ); ?></p>
 					</div>
 				<?php endif; ?>
-			<?php endif; ?>
 
-			<?php if ( 'github_updater_settings' === $tab ) : ?>
-				<?php $clear_transients = add_query_arg( array( 'github_updater_clear_transients' => true ), $action ); ?>
-				<form method="post" action="<?php esc_attr_e( $clear_transients ); ?>">
-					<?php submit_button( esc_html__( 'Clear Transients', 'github-updater' ) ); ?>
-				</form>
+				<?php if ( 'github_updater_settings' === $tab ) : ?>
+					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
+					<form method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+						<?php submit_button( esc_html__( 'Refresh Transients', 'github-updater' ) ); ?>
+					</form>
 
-				<form method="post" action="<?php esc_attr_e( $action ); ?>">
-					<?php
-					settings_fields( 'github_updater' );
-					do_settings_sections( 'github_updater_install_settings' );
-					submit_button();
-					?>
-				</form>
+					<form method="post" action="<?php esc_attr_e( $action ); ?>">
+						<?php
+						settings_fields( 'github_updater' );
+						do_settings_sections( 'github_updater_install_settings' );
+						submit_button();
+						?>
+					</form>
+				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php
@@ -723,9 +723,9 @@ class Settings extends Base {
 	 * Redirect to correct Settings tab on Save.
 	 */
 	protected function redirect_on_save() {
-		$update           = false;
-		$clear_transients = $this->clear_transients();
-		$reset_api_key    = $this->reset_api_key();
+		$update             = false;
+		$refresh_transients = $this->refresh_transients();
+		$reset_api_key      = $this->reset_api_key();
 
 		if ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) {
 			$update = true;
@@ -733,18 +733,18 @@ class Settings extends Base {
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		if ( $update || $clear_transients || $reset_api_key ) {
+		if ( $update || $refresh_transients || $reset_api_key ) {
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
 			$arr['tab'] = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
 
 			$location = add_query_arg(
 				array(
-					'page'             => 'github-updater',
-					'tab'              => $arr['tab'],
-					'clear_transients' => $clear_transients,
-					'reset'            => $reset_api_key,
-					'updated'          => $update,
+					'page'               => 'github-updater',
+					'tab'                => $arr['tab'],
+					'refresh_transients' => $refresh_transients,
+					'reset'              => $reset_api_key,
+					'updated'            => $update,
 				),
 				$redirect_url
 			);
@@ -778,8 +778,8 @@ class Settings extends Base {
 	 *
 	 * @return bool
 	 */
-	private function clear_transients() {
-		if ( isset( $_REQUEST['github_updater_clear_transients'] ) ) {
+	private function refresh_transients() {
+		if ( isset( $_REQUEST['github_updater_refresh_transients'] ) ) {
 			$_POST = $_REQUEST;
 
 			return true;
