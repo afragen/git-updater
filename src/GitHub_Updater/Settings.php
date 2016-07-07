@@ -143,18 +143,20 @@ class Settings extends Base {
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
-			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
-				<div class="updated">
-					<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
-				</div>
-			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
-				<div class="updated">
-					<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
-				</div>
-			<?php elseif ( ( isset( $_GET['clear_transients'] ) && true == $_GET['clear_transients'] ) ) : ?>
-				<div class="updated">
-					<p><?php esc_html_e( 'Transients cleared.', 'github-updater' ); ?></p>
-				</div>
+			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
+				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
+					</div>
+				<?php elseif ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
+					</div>
+				<?php elseif ( ( isset( $_GET['clear_transients'] ) && true == $_GET['clear_transients'] ) ) : ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'Transients cleared.', 'github-updater' ); ?></p>
+					</div>
+				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php if ( 'github_updater_settings' === $tab ) : ?>
