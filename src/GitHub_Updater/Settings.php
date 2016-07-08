@@ -368,7 +368,6 @@ class Settings extends Base {
 			update_site_option( 'github_updater', $options );
 			$this->redirect_on_save();
 		}
-
 	}
 
 	/**
@@ -555,8 +554,8 @@ class Settings extends Base {
 				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 			}
 			update_site_option( 'github_updater_remote_management', $options );
-			$this->redirect_on_save();
 		}
+		$this->redirect_on_save();
 	}
 
 	/**
