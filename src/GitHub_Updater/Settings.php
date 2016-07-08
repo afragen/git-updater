@@ -724,9 +724,10 @@ class Settings extends Base {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
 		$reset_api_key      = $this->reset_api_key();
+		$option_page        = array( 'github_updater', 'github_updater_remote_management' );
 
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-		     ( isset( $_POST['option_page'] ) && 'github_updater' === $_POST['option_page'] )
+		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page ) )
 
 		) {
 			$update = true;
