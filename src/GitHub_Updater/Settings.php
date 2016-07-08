@@ -723,6 +723,14 @@ class Settings extends Base {
 	 * Redirect to correct Settings tab on Save.
 	 */
 	protected function redirect_on_save() {
+		// Exit on install plugin/theme.
+		if ( isset( $_GET['tab'] ) &&
+		     ( 'github_updater_install_plugin' === $_GET['tab'] ||
+		       'github_updater_install_theme' === $_GET['tab'] )
+		) {
+			return false;
+		}
+
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
 		$reset_api_key      = $this->reset_api_key();
