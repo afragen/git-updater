@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2016-07-02 14:53-0700\n"
-"PO-Revision-Date: 2016-07-02 14:53-0700\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-07-09 18:57+0300\n"
+"Last-Translator: Corneliu Cirlan <corneliu@corneliucirlan.com>\n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
@@ -111,9 +111,8 @@ msgstr "Activeaza reteaua"
 
 #: src/GitHub_Updater/Messages.php:113 src/GitHub_Updater/Messages.php:148
 #: src/GitHub_Updater/Messages.php:187
-#, fuzzy
 msgid "GitHub Updater Error Code:"
-msgstr "%s nu a fost verificat. Github Updater Cod Eroare:"
+msgstr "Github Updater Cod Eroare:"
 
 #: src/GitHub_Updater/Messages.php:118
 #, php-format
@@ -130,11 +129,12 @@ msgstr ""
 "Personal de Access%s pentru a evita acest lucru."
 
 #: src/GitHub_Updater/Messages.php:152
-#, fuzzy
 msgid ""
 "There is probably an access token or password error on the GitHub Updater "
 "Settings page."
-msgstr "Probabil este o eroare pe pagina cu Setarile GitHub Updater"
+msgstr ""
+"Probabil este o eroare la jetonul de acces sau la parola pe pagina de Setari "
+"a GitHub Updater"
 
 #: src/GitHub_Updater/Messages.php:172
 msgid ""
@@ -150,7 +150,7 @@ msgstr "Ramura curenta este `%1$s`, incerca %2$salta ramura%3$s."
 
 #: src/GitHub_Updater/Plugin.php:307 src/GitHub_Updater/Theme.php:462
 msgid "Switch to branch "
-msgstr ""
+msgstr "Schimba pe ramura"
 
 #: src/GitHub_Updater/Plugin.php:361
 msgid "View details"
@@ -158,27 +158,27 @@ msgstr "Vezi detalii"
 
 #: src/GitHub_Updater/Rest_Update.php:68
 msgid "Plugin not found or not updatable with GitHub Updater: "
-msgstr ""
+msgstr "Modul negasit sau nu poate fi actualizat prin GitHub Updater:"
 
 #: src/GitHub_Updater/Rest_Update.php:94
 msgid "Plugin reactivated successfully."
-msgstr ""
+msgstr "Reactivare a modulului reusita."
 
 #: src/GitHub_Updater/Rest_Update.php:117
 msgid "Theme not found or not updatable with GitHub Updater: "
-msgstr ""
+msgstr "Tema negasita sau nu poate fi actualizata prin GitHub Updater:"
 
 #: src/GitHub_Updater/Rest_Update.php:177
 msgid "Available Updates"
-msgstr ""
+msgstr "Actualizari Disponibile"
 
 #: src/GitHub_Updater/Rest_Update.php:213
 msgid "Bad api key."
-msgstr ""
+msgstr "Cheie API gresita."
 
 #: src/GitHub_Updater/Rest_Update.php:231
 msgid "No plugin or theme specified for update."
-msgstr ""
+msgstr "Modul sau tema nespecificata pentru actualizare."
 
 #: src/GitHub_Updater/Settings.php:83 src/GitHub_Updater/Settings.php:769
 msgid "Settings"
@@ -201,7 +201,7 @@ msgstr "GitHub Updater"
 
 #: src/GitHub_Updater/Settings.php:148
 msgid "RESTful key reset."
-msgstr ""
+msgstr "Resetare cheie RESTful"
 
 #: src/GitHub_Updater/Settings.php:152
 msgid "Saved."
@@ -209,7 +209,7 @@ msgstr "Salvat."
 
 #: src/GitHub_Updater/Settings.php:177
 msgid "Reset RESTful key"
-msgstr ""
+msgstr "Reseteaza cheia RESTful"
 
 #: src/GitHub_Updater/Settings.php:217
 msgid "Enable Branch Switching"
@@ -324,6 +324,8 @@ msgid ""
 "Please refer to README for complete list of attributes. RESTful endpoints "
 "begin at:"
 msgstr ""
+"Consultati README pentru lista complete de attribute. Punctul RESTful incepe "
+"la:"
 
 #: src/GitHub_Updater/Settings.php:644
 msgid ""
@@ -342,14 +344,13 @@ msgid "Rollback to:"
 msgstr "Revenire la:"
 
 #: src/GitHub_Updater/Theme.php:366
-#, fuzzy
 msgid "Rollback"
-msgstr "Revenire la:"
+msgstr "Revenire"
 
 #: src/GitHub_Updater/Theme.php:367 src/GitHub_Updater/Theme.php:406
 #: src/GitHub_Updater/Theme.php:592
 msgid "now"
-msgstr ""
+msgstr "acum"
 
 #: src/GitHub_Updater/Theme.php:377 src/GitHub_Updater/Theme.php:656
 msgid "No previous tags to rollback to."
@@ -375,9 +376,8 @@ msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr "Vezi versiunea %1$s detalii%2$s sau %3$sactualizeaza acum%4$s."
 
 #: src/GitHub_Updater/Theme.php:405 src/GitHub_Updater/Theme.php:591
-#, fuzzy
 msgid "Update"
-msgstr "Citeste mai multe informatii despre %scum poti actualiza%s."
+msgstr "Actualizeaza"
 
 #: src/GitHub_Updater/Theme.php:580
 #, php-format
@@ -385,9 +385,9 @@ msgid "There is a new version of %s available now."
 msgstr "Exista o noua versiune pentru %s disponibila."
 
 #: src/GitHub_Updater/Theme.php:625
-#, fuzzy, php-format
+#, php-format
 msgid "Current branch is `%s`. Try %sanother version%s"
-msgstr "Ramura curenta este `%1$s`, incerca %2$salta ramura%3$s."
+msgstr "Ramura curenta este `%s`. Incearca %salta versiune%s"
 
 #: src/GitHub_Updater/Theme.php:639
 msgid "Choose a Version"
