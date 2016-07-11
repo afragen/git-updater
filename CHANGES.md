@@ -1,5 +1,5 @@
 #### 5.6.0
-* added `Refresh Transients` button to Settings page
+* added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
 
 #### 5.5.0
