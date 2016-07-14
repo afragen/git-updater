@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Readme_Parser extends \Automattic_Readme {
+class Readme_Parser extends \Baikonur_ReadmeParser {
 
 	/**
 	 * Constructor
@@ -35,55 +35,22 @@ class Readme_Parser extends \Automattic_Readme {
 	 *
 	 * @return array
 	 */
-	public function parse_readme( $file_contents ) {
-		return (array) $this->parse_readme_contents( $file_contents );
+	public static function parse_readme( $file_contents ) {
+		return (array) parent::parse_readme_contents( $file_contents );
 	}
 
 	/**
-	 * @param      $text
-	 * @param bool $markdown
+	 * @param $text
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
-	public function filter_text( $text, $markdown = false ) { // fancy, Markdown
-		$text = trim( $text );
-		$text = call_user_func( array(
-			get_parent_class( $this ),
-			'code_trick',
-		), $text, $markdown ); // A better parser than Markdown's for: backticks -> CODE
+	protected static function parse_markdown( $text ) {
+		$parser = new \Parsedown();
+		$text   = parent::code_trick( $text );
+		$text   = preg_replace( '/^[\s]*=[\s]+(.+?)[\s]+=/m', "\n" . '<h4>$1</h4>' . "\n", $text );
+		$text   = $parser->text( trim( $text ) );
 
-		if ( $markdown ) { // Parse markdown.
-			$parser = new \Parsedown;
-			$text   = $parser->text( $text );
-		}
-
-		$allowed = array(
-			'a'          => array(
-				'href' => array(),
-				'title' => array(),
-				'rel' => array(),
-			),
-			'blockquote' => array( 'cite' => array() ),
-			'br'         => array(),
-			'cite'       => array(),
-			'p'          => array(),
-			'code'       => array(),
-			'pre'        => array(),
-			'em'         => array(),
-			'strong'     => array(),
-			'ul'         => array(),
-			'ol'         => array(),
-			'li'         => array(),
-			'h3'         => array(),
-			'h4'         => array(),
-		);
-
-		$text = balanceTags( $text );
-
-		$text = wp_kses( $text, $allowed );
-		$text = trim( $text );
-
-		return $text;
+		return trim( $text );
 	}
 
 }

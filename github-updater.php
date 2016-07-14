@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           5.5.0.4
+ * Version:           5.5.0.5
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 if ( ! class_exists( 'WPUpdatePhp' ) ) {
-	require_once ( plugin_dir_path( __FILE__ ) . '/vendor/wp-update-php/src/WPUpdatePhp.php' );
+	require_once( plugin_dir_path( __FILE__ ) . '/vendor/wp-update-php/src/WPUpdatePhp.php' );
 }
 $updatePhp = new WPUpdatePhp( '5.3.0' );
 if ( method_exists( $updatePhp, 'set_plugin_name' ) ) {
@@ -52,10 +52,10 @@ $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array(
-		'Parsedown'         => __DIR__ . '/vendor/parsedown/Parsedown.php',
-		'WPUpdatePHP'       => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
-		'Automattic_Readme' => __DIR__ . '/vendor/parse-readme.php',
-		);
+	'Parsedown'             => __DIR__ . '/vendor/parsedown/Parsedown.php',
+	'WPUpdatePHP'           => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
+	'Baikonur_ReadmeParser' => __DIR__ . '/vendor/ReadmeParser.php',
+);
 
 // Load Autoloader
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );

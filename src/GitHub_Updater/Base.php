@@ -911,8 +911,8 @@ class Base {
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested_up_to'];
-		$this->type->requires     = $response['requires_at_least'];
+		$this->type->tested       = $response['tested'];
+		$this->type->requires     = $response['requires'];
 		$this->type->donate_link  = $response['donate_link'];
 		$this->type->contributors = $response['contributors'];
 
