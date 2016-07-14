@@ -1,4 +1,4 @@
-=== GitHub Updater ===
+# GitHub Updater
 Contributors: afragen, garyj, sethmatics
 Donate link: http://thefragens.com/github-updater-donate
 Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
@@ -8,7 +8,7 @@ Stable tag: master
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-== Description ==
+## Description
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Currently, plugins or themes hosted on GitHub, Bitbucket, or GitLab are also supported. Additionally, self-hosted installations of GitHub or GitLab are supported. It also allows for remote installation of plugins or themes into WordPress.
 
@@ -44,7 +44,7 @@ The following headers are available for use depending upon your hosting source.
 * GitLab Enterprise
 * GitLab CE
 
-== WordPress and PHP Requirements ==
+## WordPress and PHP Requirements
 
 There are two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
@@ -54,7 +54,7 @@ Use `Requires PHP:` to set the minimum required version of PHP needed for your p
 
 At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
 
-== Release Assets ==
+## Release Assets
 
 An **optional header** is available for use if your plugin or theme requires updating via a release asset.
 
@@ -66,7 +66,7 @@ Example, `$repo-$tag.zip` where `$repo` is the repository slug and ``$tag` is th
 
 **You must tag your releases to use this feature.**
 
-== Developer Hooks ==
+## Developer Hooks
 
 There are 2 added filter hooks specifically for developers wanting to distribute private themes/plugins to clients without the client having to interact with the Settings page.
 
