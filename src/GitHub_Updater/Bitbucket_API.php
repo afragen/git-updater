@@ -215,8 +215,9 @@ class Bitbucket_API extends API {
 		}
 
 		if ( $response && isset( $response->data ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( $response->data );
+			$file     = $response->data;
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
 			$this->set_transient( 'readme', $response );
 		}
 

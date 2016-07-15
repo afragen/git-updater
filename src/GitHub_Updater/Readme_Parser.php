@@ -22,35 +22,71 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Readme_Parser extends \Baikonur_ReadmeParser {
+class Readme_Parser extends \Parser {
 
 	/**
-	 * Constructor
-	 */
-	public function __construct() {
-	}
-
-	/**
-	 * @param $file_contents
+	 * Constructor.
 	 *
-	 * @return array
+	 * @param string $file_contents Contents of file.
 	 */
-	public static function parse_readme( $file_contents ) {
-		return (array) parent::parse_readme_contents( $file_contents );
+	public function __construct( $file_contents ) {
+		if ( $file_contents ) {
+			$this->parse_readme( $file_contents );
+		}
 	}
 
 	/**
-	 * @param $text
+	 * @param string $text
 	 *
 	 * @return string
 	 */
-	protected static function parse_markdown( $text ) {
-		$parser = new \Parsedown();
-		$text   = parent::code_trick( $text );
-		$text   = preg_replace( '/^[\s]*=[\s]+(.+?)[\s]+=/m', "\n" . '<h4>$1</h4>' . "\n", $text );
-		$text   = $parser->text( trim( $text ) );
+	protected function parse_markdown( $text ) {
+		static $markdown = null;
 
-		return trim( $text );
+		if ( is_null( $markdown ) ) {
+			$markdown = new \Parsedown();
+		}
+
+		return $markdown->text( $text );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function parse_data() {
+		$data = array();
+		foreach ( $this as $key => $value ) {
+			$data[ $key ] = $value;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @param array $users
+	 *
+	 * @return array
+	 */
+	protected function sanitize_contributors( $users ) {
+		return $users;
+	}
+
+	/**
+	 * @access protected
+	 *
+	 * @param string|array $text
+	 *
+	 * @return string
+	 */
+	protected function sanitize_text( $text ) { // not fancy
+		if ( is_array( $text ) ) {
+			$text = implode( "\n", $text );
+		}
+		$text = strip_tags( $text );
+		$text = esc_html( $text );
+		$text = trim( $text );
+
+		return $text;
 	}
 
 }

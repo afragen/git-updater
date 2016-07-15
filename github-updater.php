@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           5.5.0.5
+ * Version:           5.5.0.6
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -52,9 +52,9 @@ $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
 $extra_classes = array(
-	'Parsedown'             => __DIR__ . '/vendor/parsedown/Parsedown.php',
-	'WPUpdatePHP'           => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
-	'Baikonur_ReadmeParser' => __DIR__ . '/vendor/ReadmeParser.php',
+	'Parser'      => __DIR__ . '/vendor/class-parser.php',
+	'Parsedown'   => __DIR__ . '/vendor/parsedown/Parsedown.php',
+	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
 // Load Autoloader

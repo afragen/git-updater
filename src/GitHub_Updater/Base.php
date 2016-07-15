@@ -904,9 +904,11 @@ class Base {
 			}
 		}
 
-		$response['sections']['other_notes'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
+		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
 		if ( empty( $response['sections']['other_notes'] ) ) {
 			unset( $response['sections']['other_notes'] );
+		} else {
+			$response['sections']['other_notes'] .= $response['remaining_content'];
 		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );

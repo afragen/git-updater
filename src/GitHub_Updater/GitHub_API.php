@@ -186,8 +186,9 @@ class GitHub_API extends API {
 		}
 
 		if ( $response && isset( $response->content ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( base64_decode( $response->content ) );
+			$file     = base64_decode( $response->content );
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
 			$this->set_transient( 'readme', $response );
 		}
 
