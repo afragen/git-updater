@@ -2,6 +2,7 @@
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
 * switched to modified version of [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php), now accepts _Markdownified_ readme.txt files
+* fixed re-activation of RESTful plugin update, multisite vs single site
 
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link
