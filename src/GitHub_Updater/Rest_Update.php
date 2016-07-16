@@ -91,7 +91,7 @@ class Rest_Update extends Base {
 
 		if ( $is_plugin_active ) {
 			$activate = is_multisite() ? activate_plugin( $plugin->slug, null, true ) : activate_plugin( $plugin->slug );
-			if ( is_null( $activate ) ) {
+			if ( ! $activate ) {
 				$this->upgrader_skin->messages[] = esc_html__( 'Plugin reactivated successfully.', 'github-updater' );
 			}
 		}
