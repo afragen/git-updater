@@ -381,7 +381,7 @@ class Settings extends Base {
 		$ghu_themes       = Theme::instance()->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
-		foreach ( (array) $ghu_tokens as $token ) {
+		foreach ( $ghu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
