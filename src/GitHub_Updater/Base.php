@@ -304,12 +304,18 @@ class Base {
 	 * Set default values for plugin/theme.
 	 *
 	 * @param $type
+	 *
+	 * @return array Repo defaults.
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
 			self::$options['branch_switch'] = null;
 		}
-		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
+
+		if ( ! isset( $this->$type->repo ) ) {
+			$this->$type       = new \stdClass();
+			$this->$type->repo = null;
+		} elseif ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
@@ -338,6 +344,8 @@ class Base {
 		$this->$type->requires_wp_version  = '3.8.0';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
+
+		return (array) $this->$type;
 	}
 
 	/**
