@@ -3,6 +3,7 @@
 * added `redirect_on_save()` for Settings page
 * switched to modified version of [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php), now accepts _Markdownified_ readme.txt files
 * fixed re-activation of RESTful plugin update, multisite vs single site
+* when creating Settings page, check current Plugin/Theme class instance, not transient. Fixes issue where remote install of private repo not having private settings saved.
 
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link

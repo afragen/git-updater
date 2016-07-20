@@ -377,22 +377,9 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$plugin           = get_site_transient( 'ghu_plugins' );
-		$theme            = get_site_transient( 'ghu_themes' );
-		if ( ! $plugin ) {
-			$plugin = Plugin::instance();
-			$plugin->get_remote_plugin_meta();
-			set_site_transient( 'ghu_plugins', $plugin, ( self::$hours * HOUR_IN_SECONDS ) );
-
-		}
-		if ( ! $theme ) {
-			$theme = Theme::instance();
-			$theme->get_remote_theme_meta();
-			set_site_transient( 'ghu_themes', $theme, ( self::$hours * HOUR_IN_SECONDS ) );
-		}
-		$ghu_plugins = $plugin->config;
-		$ghu_themes  = $theme->config;
-		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+		$ghu_plugins      = Plugin::instance()->config;
+		$ghu_themes       = Theme::instance()->config;
+		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
