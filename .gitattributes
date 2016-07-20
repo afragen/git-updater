@@ -7,5 +7,3 @@ composer.json export-ignore
 /bin export-ignore
 /tests export-ignore
 phpunit.xml export-ignore
-
-/assets export-ignore
