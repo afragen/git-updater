@@ -775,7 +775,6 @@ class Base {
 			delete_site_transient( $transient );
 		}
 		delete_site_transient( 'ghu-' . $type );
-		delete_site_transient( 'ghu_' . $type );
 
 		return true;
 	}
