@@ -788,8 +788,8 @@ class Base {
 	 * @return void|bool
 	 */
 	protected function make_transient_list( $type ) {
-		$transient = get_site_transient( 'ghu-' . $type );
-		if ( $transient ) {
+		$transients = get_site_transient( 'ghu-' . $type );
+		if ( $transients ) {
 			return false;
 		}
 		set_site_transient( 'ghu-' . $type, self::$transients, ( self::$hours * HOUR_IN_SECONDS ) );
