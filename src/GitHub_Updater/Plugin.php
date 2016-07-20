@@ -190,7 +190,6 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
 			}
 			if ( isset( $all_plugins[ $plugin ]->id ) ) {
@@ -204,8 +203,8 @@ class Plugin extends Base {
 	}
 
 	/**
-	 * Get remote plugin meta to populate $config plugin objects. 
-	 * Calls to remote APIs to get data. 
+	 * Get remote plugin meta to populate $config plugin objects.
+	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
