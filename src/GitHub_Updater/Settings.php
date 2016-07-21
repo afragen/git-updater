@@ -377,8 +377,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = Plugin::instance()->config;
-		$ghu_themes       = Theme::instance()->config;
+		$ghu_plugins      = Plugin::instance()->get_plugin_configs();
+		$ghu_themes       = Theme::instance()->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( (array) $ghu_tokens as $token ) {

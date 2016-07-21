@@ -80,6 +80,8 @@ class Theme extends Base {
 
 	/**
 	 * Returns an array of configurations for the known themes.
+	 *
+	 * @return array
 	 */
 	public function get_theme_configs() {
 		return $this->config;

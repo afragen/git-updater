@@ -63,6 +63,8 @@ class Plugin extends Base {
 
 	/**
 	 * Returns an array of configurations for the known plugins.
+	 *
+	 * @return array
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
