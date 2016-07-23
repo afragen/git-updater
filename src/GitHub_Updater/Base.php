@@ -304,8 +304,6 @@ class Base {
 	 * Set default values for plugin/theme.
 	 *
 	 * @param $type
-	 *
-	 * @return array Repo defaults.
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
@@ -344,8 +342,6 @@ class Base {
 		$this->$type->requires_wp_version  = '3.8.0';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
-
-		return (array) $this->$type;
 	}
 
 	/**
