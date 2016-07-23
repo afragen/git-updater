@@ -386,9 +386,14 @@ class Settings extends Base {
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
 
-			$defaults = $this->set_defaults( $token->type );
-			unset( $defaults['repo'] );
-			$token = (object) array_merge( (array) $token, $defaults );
+			/*
+			 * Set defaults if repo_meta not set and no update available.
+			 */
+			if ( empty( $token->repo_meta ) ) {
+				$defaults = $this->set_defaults( $token->type );
+				unset( $defaults['repo'] );
+				$token = (object) array_merge( (array) $token, $defaults );
+			}
 
 			/*
 			 * Set boolean for Enterprise headers.
