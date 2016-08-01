@@ -12,6 +12,7 @@ Alternatively, clone or download this repo into the `vendor/` folder in your plu
 
 ```
 include  __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php'
+add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
 ```
 
 or let Composer's autoloader do the work.
@@ -47,7 +48,15 @@ function sample_admin_notice__success() {
 add_action( 'admin_notices', 'sample_admin_notice__success' );
 ```
 
+## Autoloaders
+When using the framework with an autoloader you **must** also load the class outside of the `admin_notices` or `network_admin_notices` hooks. The reason is that these hooks come after the `admin_enqueue_script` hook that loads the javascript.
 
+Just add the following in your main plugin.
+
+```
+add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
+```
+ 
 **Note:** the `data-dismissible` attribute must have a unique hyphen separated text prefixed by `data-` which will serve as the key or option name used by the Options API to persist the state to the database. Don't understand, see the following examples.
 
 #### Examples
@@ -62,8 +71,7 @@ To actually make the dismissed admin notice not to appear, use the `is_admin_not
 
 ```
 function sample_admin_notice__success1() {
-	$PAnD = new PAnD();
-	if ( ! $PAnD->is_admin_notice_active( 'data-notice-one-forever' ) ) {
+	if ( ! PAnD::instance()->is_admin_notice_active( 'data-notice-one-forever' ) ) {
 		return;
 	}
 
@@ -73,13 +81,14 @@ function sample_admin_notice__success1() {
 	</div>
 	<?php
 }
+
+add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
 add_action( 'admin_notices', 'sample_admin_notice__success1' );
 ```
 
 ```
 function sample_admin_notice__success2() {
-	$PAnD = new PAnD();
-	if ( ! $PAnD->is_admin_notice_active( 'data-notice-two-2' ) ) {
+	if ( ! PAnD::instance()->is_admin_notice_active( 'data-notice-two-2' ) ) {
 		return;
 	}
 
@@ -89,6 +98,8 @@ function sample_admin_notice__success2() {
 	</div>
 	<?php
 }
+
+add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
 add_action( 'admin_notices', 'sample_admin_notice__success2' );
 ```
 
