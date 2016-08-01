@@ -68,7 +68,7 @@ $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
 /*
- * Initiate Persist Admin notices Dismissal.
+ * Initialize Persist Admin notices Dismissal.
  *
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
