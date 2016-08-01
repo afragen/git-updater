@@ -61,13 +61,6 @@ class Settings extends Base {
 			&$this,
 			'plugin_action_links',
 		) );
-
-		// Make sure array values exist.
-		foreach ( array_keys( self::$remote_management ) as $key ) {
-			if ( empty( parent::$options_remote[ $key ] ) ) {
-				parent::$options_remote[ $key ] = null;
-			}
-		}
 	}
 
 	/**
@@ -656,9 +649,10 @@ class Settings extends Base {
 	 * @param $args
 	 */
 	public function token_callback_checkbox( $args ) {
+		$checked = isset( parent::$options[ $args['id'] ] ) ? parent::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options[ $args['id'] ], true ); ?> >
+			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
 		</label>
 		<?php
 	}
@@ -672,9 +666,10 @@ class Settings extends Base {
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
+		$checked = isset( parent::$options_remote[ $args['id'] ] ) ? parent::$options_remote[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options_remote[ $args['id'] ], true ); ?> >
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
 		</label>
 		<?php
 	}
