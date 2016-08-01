@@ -5,6 +5,7 @@
 * fixed re-activation of RESTful plugin update, multisite vs single site
 * when creating Settings page, check current Plugin/Theme class instance, not transient. Fixes issue where remote install of private repo not having private settings saved.
 * fixed PHP errors in Settings page
+* fixed saving issues with checkboxes
 
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link
