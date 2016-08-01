@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           5.5.0.10
+ * Version:           5.5.0.11
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -54,6 +54,7 @@ $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 $extra_classes = array(
 	'Parser'      => __DIR__ . '/vendor/class-parser.php',
 	'Parsedown'   => __DIR__ . '/vendor/parsedown/Parsedown.php',
+	'PAnD'        => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
 	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
@@ -65,3 +66,10 @@ new $loader( $root, $extra_classes );
 // Instantiate class GitHub_Updater
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
+
+/*
+ * Initiate Persist Admin notices Dismissal.
+ *
+ * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
+ */
+add_action( 'admin_init', array( \PAnD::instance(), 'init' ) );
