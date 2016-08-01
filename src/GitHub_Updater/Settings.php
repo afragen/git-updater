@@ -356,9 +356,7 @@ class Settings extends Base {
 		}
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			$options = get_site_option( 'github_updater' );
-			$options = array_merge( $options, self::sanitize( $_POST['github_updater'] ) );
-			update_site_option( 'github_updater', $options );
+			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 			$this->redirect_on_save();
 		}
 	}
@@ -526,17 +524,13 @@ class Settings extends Base {
 			);
 		}
 
-		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array();
-			foreach ( array_keys( self::$remote_management ) as $key ) {
-				$options[ $key ] = null;
-			}
-			if ( isset( $_POST['github_updater_remote_management'] ) ) {
-				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
-			}
-			update_site_option( 'github_updater_remote_management', $options );
+		if ( isset( $_POST['option_page'] ) &&
+		     'github_updater_remote_management' === $_POST['option_page'] &&
+		     ! is_multisite()
+		) {
+			update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			$this->redirect_on_save();
 		}
-		$this->redirect_on_save();
 	}
 
 	/**
@@ -682,21 +676,12 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_network_setting() {
-
 		if ( 'github_updater' === $_POST['option_page'] ) {
 			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 		}
 		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array();
-			foreach ( array_keys( self::$remote_management ) as $key ) {
-				$options[ $key ] = null;
-			}
-			if ( isset( $_POST['github_updater_remote_management'] ) ) {
-				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
-			}
-			update_site_option( 'github_updater_remote_management', $options );
+			update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 		}
-
 		$this->redirect_on_save();
 	}
 
