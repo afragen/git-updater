@@ -537,7 +537,7 @@ class Base {
 		 */
 		if ( $this instanceof Plugin &&
 		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
+		     ( ! $this->config[ $slug ]->dot_org ||
 		       ( $this->tag && 'master' !== $this->tag ) )
 		) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
@@ -570,10 +570,11 @@ class Base {
 			$upgrader_object = $this;
 		}
 
-		foreach ( $upgrader_object->config as $repo ) {
+		foreach ( $upgrader_object->config as $dirname => $repo ) {
 			if ( $slug === $repo->repo ||
 			     $slug === $repo->extended_repo ||
-			     $rename === $repo->owner . '-' . $repo->repo
+			     $rename === $repo->owner . '-' . $repo->repo ||
+			     $slug === $dirname
 			) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;

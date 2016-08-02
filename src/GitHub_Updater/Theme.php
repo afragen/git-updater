@@ -178,7 +178,8 @@ class Theme extends Base {
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
-				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
+				$git_theme['slug']              = $theme->stylesheet;
+				$git_theme['local_path']              = get_theme_root() . "/$theme->stylesheet/";
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
@@ -193,7 +194,7 @@ class Theme extends Base {
 				continue;
 			}
 
-			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
+			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
 
 		return $git_themes;
@@ -214,12 +215,12 @@ class Theme extends Base {
 			 * Update theme transient with rollback data.
 			 */
 			if ( ! empty( $_GET['rollback'] ) &&
-			     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
+			     ( isset( $_GET['theme'] ) && get_stylesheet() === $_GET['theme'] )
 			) {
 				$this->tag         = $_GET['rollback'];
 				$updates_transient = get_site_transient( 'update_themes' );
 				$rollback          = array(
-					'theme'       => $theme->repo,
+					'theme'       => get_stylesheet(),
 					'new_version' => $this->tag,
 					'url'         => $theme->uri,
 					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
@@ -227,7 +228,7 @@ class Theme extends Base {
 				if ( array_key_exists( $this->tag, $theme->branches ) ) {
 					$rollback['new_version'] = '0.0.0';
 				}
-				$updates_transient->response[ $theme->repo ] = $rollback;
+				$updates_transient->response[ get_stylesheet() ] = $rollback;
 				set_site_transient( 'update_themes', $updates_transient );
 			}
 
@@ -237,8 +238,8 @@ class Theme extends Base {
 			if ( is_multisite() ) {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'multisite_branch_switcher' ), 15, 2 );
+					add_action( 'after_theme_row_' . get_stylesheet(), array( &$this, 'wp_theme_update_row' ), 10, 2 );
+					add_action( 'after_theme_row_' . get_stylesheet(), array( &$this, 'multisite_branch_switcher' ), 15, 2 );
 				}
 			}
 		}
@@ -281,8 +282,8 @@ class Theme extends Base {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
-			if ( $response->slug === $theme->repo ) {
-				$response->slug         = $theme->repo;
+			if ( $response->slug === $theme->slug ) {
+				$response->slug         = $theme->slug;
 				$response->name         = $theme->name;
 				$response->homepage     = $theme->uri;
 				$response->donate_link  = $theme->donate_link;
@@ -527,16 +528,16 @@ class Theme extends Base {
 	public function customize_theme_update_html( $prepared_themes ) {
 
 		foreach ( (array) $this->config as $theme ) {
-			if ( empty( $prepared_themes[ $theme->repo ] ) ) {
+			if ( empty( $prepared_themes[ get_stylesheet() ] ) ) {
 				continue;
 			}
 
-			if ( ! empty( $prepared_themes[ $theme->repo ]['hasUpdate'] ) ) {
-				$prepared_themes[ $theme->repo ]['update'] = $this->append_theme_actions_content( $theme );
+			if ( ! empty( $prepared_themes[ get_stylesheet() ]['hasUpdate'] ) ) {
+				$prepared_themes[ get_stylesheet() ]['update'] = $this->append_theme_actions_content( $theme );
 			} else {
-				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
+				$prepared_themes[ get_stylesheet() ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			$prepared_themes[ $theme->repo ]['description'] .= $this->single_install_switcher( $theme );
+			$prepared_themes[ get_stylesheet() ]['description'] .= $this->single_install_switcher( $theme );
 		}
 
 		return $prepared_themes;
@@ -557,15 +558,15 @@ class Theme extends Base {
 		$details_url       = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
-				'theme'     => $theme->repo,
+				'theme'     => get_stylesheet(),
 				'TB_iframe' => 'true',
 				'width'     => 270,
 				'height'    => 400,
 			),
 			self_admin_url( "theme-install.php" ) ) );
 		$nonced_update_url = wp_nonce_url(
-			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
-			'upgrade-theme_' . $theme->repo
+			$this->get_update_url( 'theme', 'upgrade-theme', get_stylesheet() ),
+			'upgrade-theme_' . get_stylesheet()
 		);
 
 		$theme_update_transient = get_site_transient( 'update_themes' );
@@ -574,7 +575,7 @@ class Theme extends Base {
 		 * Display theme update links.
 		 */
 		ob_start();
-		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
+		if ( empty( $theme_update_transient->up_to_date[ get_stylesheet() ] ) ) {
 			?>
 			<p>
 				<strong>
@@ -589,7 +590,7 @@ class Theme extends Base {
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 						$theme->remote_version,
 						'</a>',
-						sprintf( '<a aria-label="%1$s ' . $theme->name . ' %2$s" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+						sprintf( '<a aria-label="%1$s ' . $theme->name . ' %2$s" id="update-theme" data-slug="' . get_stylesheet() . '" href="' . $nonced_update_url . '">',
 							esc_html__( 'Update', 'github-updater' ),
 							esc_html__( 'now', 'github-updater' )
 						),
@@ -618,8 +619,8 @@ class Theme extends Base {
 		$options                = get_site_option( 'github_updater' );
 		$theme_update_transient = get_site_transient( 'update_themes' );
 		$nonced_update_url      = wp_nonce_url(
-			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
-			'upgrade-theme_' . $theme->repo
+			$this->get_update_url( 'theme', 'upgrade-theme', get_stylesheet() ),
+			'upgrade-theme_' . get_stylesheet()
 		);
 		$rollback_url           = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
@@ -645,15 +646,15 @@ class Theme extends Base {
 							echo '<option>' . $branch . '</option>';
 						}
 					}
-					if ( isset( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
-						$rollback = array_slice( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'], 0, 4, true );
+					if ( isset( $theme_update_transient->up_to_date[ get_stylesheet() ] ) ) {
+						$rollback = array_slice( $theme_update_transient->up_to_date[ get_stylesheet() ]['rollback'], 0, 4, true );
 						array_shift( $rollback ); // Dump current tag.
 						foreach ( array_keys( $rollback ) as $version ) {
 							echo '<option>' . $version . '</option>';
 						}
 					}
 					if ( empty( $options['branch_switch'] ) &&
-					     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
+					     empty( $theme_update_transient->up_to_date[ get_stylesheet() ]['rollback'] )
 					) {
 						echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
 						$show_button = false;
@@ -685,17 +686,17 @@ class Theme extends Base {
 			}
 
 			$update = array(
-				'theme'       => $theme->repo,
+				'theme'       => get_stylesheet(),
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
 			);
 
 			if ( $this->can_update( $theme ) ) {
-				$transient->response[ $theme->repo ] = $update;
+				$transient->response[ get_stylesheet() ] = $update;
 			} else { // up-to-date!
-				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
-				$transient->up_to_date[ $theme->repo ]['response'] = $update;
+				$transient->up_to_date[ get_stylesheet() ]['rollback'] = $theme->rollback;
+				$transient->up_to_date[ get_stylesheet() ]['response'] = $update;
 			}
 		}
 
