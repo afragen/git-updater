@@ -127,6 +127,11 @@ if ( ! class_exists( 'PAnD' ) ) {
 
 			$db_record = get_option( $option_name );
 
+			// @TODO remove from release
+			if ( absint( $db_record ) > ( time() * 2 ) ) {
+				delete_option( $option_name );
+			}
+
 			if ( 'forever' == $db_record ) {
 				return false;
 			} elseif ( absint( $db_record ) >= time() ) {
