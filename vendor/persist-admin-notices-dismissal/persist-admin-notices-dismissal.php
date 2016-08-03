@@ -103,7 +103,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 			$dismissible_length = sanitize_text_field( $_POST['dismissible_length'] );
 
 			if ( 'forever' != $dismissible_length ) {
-				$dismissible_length = time() + strtotime( absint( $dismissible_length ) . 'days' );
+				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
 			if ( is_integer( wp_verify_nonce( $_REQUEST['nonce'], 'PAnD-dismissible-notice' ) ) && ( false !== strpos( $option_name, 'data-' ) ) ) {
