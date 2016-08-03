@@ -45,6 +45,7 @@ function sample_admin_notice__success() {
 	</div>
 	<?php
 }
+add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
 add_action( 'admin_notices', 'sample_admin_notice__success' );
 ```
 
