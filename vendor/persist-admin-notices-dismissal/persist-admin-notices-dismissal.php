@@ -106,7 +106,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
-			if ( is_integer( wp_verify_nonce( $_REQUEST['nonce'], 'PAnD-dismissible-notice' ) ) && ( false !== strpos( $option_name, 'data-' ) ) ) {
+			if ( false !== wp_verify_nonce( $_REQUEST['nonce'], 'PAnD-dismissible-notice' ) ) {
 				add_option( $option_name, $dismissible_length );
 			}
 
