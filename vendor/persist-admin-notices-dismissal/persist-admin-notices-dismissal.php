@@ -106,10 +106,8 @@ if ( ! class_exists( 'PAnD' ) ) {
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
-			if ( false !== wp_verify_nonce( $_REQUEST['nonce'], 'PAnD-dismissible-notice' ) ) {
-				add_option( $option_name, $dismissible_length );
-			}
-
+			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce', true );
+			add_option( $option_name, $dismissible_length );
 			wp_die();
 		}
 
