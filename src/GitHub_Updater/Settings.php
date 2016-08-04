@@ -357,8 +357,8 @@ class Settings extends Base {
 
 		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
 			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
-			$this->redirect_on_save();
 		}
+		$this->redirect_on_save();
 	}
 
 	/**
