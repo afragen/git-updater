@@ -107,7 +107,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 			}
 
 			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce', true );
-			add_option( $option_name, $dismissible_length );
+			update_option( $option_name, $dismissible_length );
 			wp_die();
 		}
 
