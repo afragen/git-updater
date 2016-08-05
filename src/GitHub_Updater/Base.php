@@ -1031,7 +1031,9 @@ class Base {
 			$repo_base = dirname( $repo_name );
 		}
 
-		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '">
+		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
+		<div class="update-message">';
 
 		$enclosure = array(
 			'open'  => $open,
