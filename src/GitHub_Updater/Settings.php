@@ -660,7 +660,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Update settings when single site or network activated.
+	 * Update settings for single site or network activated.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
