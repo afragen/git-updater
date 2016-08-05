@@ -53,7 +53,7 @@ class Settings extends Base {
 		$this->ensure_api_key_is_set();
 
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
-		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_network_setting' ) );
+		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
@@ -355,10 +355,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
-		}
-		$this->redirect_on_save();
+		$this->update_settings();
 	}
 
 	/**
@@ -524,13 +521,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( isset( $_POST['option_page'] ) &&
-		     'github_updater_remote_management' === $_POST['option_page'] &&
-		     ! is_multisite()
-		) {
-			update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
-			$this->redirect_on_save();
-		}
+		$this->update_settings();
 	}
 
 	/**
@@ -669,18 +660,19 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Update network settings.
-	 * Used when plugin is network activated to save settings.
+	 * Update settings when single site or network activated.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
-	public function update_network_setting() {
-		if ( 'github_updater' === $_POST['option_page'] ) {
-			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
-		}
-		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-			update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+	public function update_settings() {
+		if ( isset( $_POST['option_page'] ) ) {
+			if ( 'github_updater' === $_POST['option_page'] ) {
+				update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+			}
+			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
+				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			}
 		}
 		$this->redirect_on_save();
 	}

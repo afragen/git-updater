@@ -7,6 +7,7 @@
 * fixed PHP errors in Settings page
 * fixed saving issues with checkboxes
 * added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal), well my PR of it ;-)
+* refactored function to update settings to work for both single/multisite
 
 #### 5.5.0
 * better internationalization for changing plugin _View details_ link
