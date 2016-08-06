@@ -52,7 +52,7 @@ add_action( 'admin_notices', 'sample_admin_notice__success' );
 ## Autoloaders
 When using the framework with an autoloader you **must** also load the class outside of the `admin_notices` or `network_admin_notices` hooks. The reason is that these hooks come after the `admin_enqueue_script` hook that loads the javascript.
 
-Just add the following in your main plugin.
+Just add the following in your main plugin file.
 
 ```
 add_action( 'admin_init', array( PAnD::instance(), 'init' ) );
@@ -65,7 +65,7 @@ Say you have two notices displayed when certain actions are triggered; firstly, 
 
 To make the first notice never appear forever when dismissed, its `data-dismissible` attribute will be `data-dismissible="data-notice-one-forever"` where `data-notice-one` is its unique identifier.
 
-To make the second notice only hidden for 2 days, its `data-dismissible` attribute will be `data-dismissible="data-notice-two-2"` where `data-notice-one` is its unique identifier and the `2` the number of days it will be hidden.
+To make the second notice only hidden for 2 days, its `data-dismissible` attribute will be `data-dismissible="data-notice-two-2"` where `data-notice-two` is its unique identifier and the `2` the number of days it will be hidden.
 
 To actually make the dismissed admin notice not to appear, use the `is_admin_notice_active()` function like so:
 
