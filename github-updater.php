@@ -25,7 +25,7 @@
  * Requires PHP:      5.3
  */
 
-/*
+/**
  * Exit if called directly.
  * PHP version check and exit.
  */
@@ -67,7 +67,7 @@ new $loader( $root, $extra_classes );
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
-/*
+/**
  * Initialize Persist Admin notices Dismissal.
  *
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
