@@ -1,4 +1,4 @@
-#### 5.6.0
+#### [unreleased]
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
 * switched to modified version of [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php), now accepts _Markdownified_ readme.txt files
@@ -9,7 +9,7 @@
 * added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal), well my PR of it ;-)
 * Settings page now uses same function to update settings for both single/multisite
 
-#### 5.5.0
+#### 5.5.0 - 2016-07-02
 * better internationalization for changing plugin _View details_ link
 * refactored and improved `class Additions` for `GitHub Updater Additions` plugin
 * fixed using GitLab CE private token with using `class Install`
@@ -27,7 +27,7 @@
 * added _aria-labels_ for screen readers
 * always display theme rollback/branch switcher in single site installation [#411](https://github.com/afragen/github-updater/issues/411)
 
-#### 5.4.1
+#### 5.4.1 - 2016-04-21
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
 * ManageWP now works for Remote Management.
 * fixed bug in `GitLab_API` to use `path` and not `name`. Thanks @marbetschar
@@ -41,7 +41,7 @@
 * now supports MainWP for remote management, thanks @ruben-
 * typecast `readme.txt` response to array, fix for occasional malformed `readme.txt` file
 
-#### 5.4.0
+#### 5.4.0 - 2016-3-18
 * fixed deprecated PHP4 constructor in vendor class.
 * added `class Additions` to process JSON config from hook to add repos to GitHub Updater, see [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
 * added necessary code in `class Plugin` and `class Theme` for above
@@ -53,19 +53,19 @@
 * added _Other Notes_ section to View details
 * updated readme.txt with _Other Notes_ information
 
-#### 5.3.4
+#### 5.3.4 - 2016-01-24
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
 * fixed display of branch switching themes on single install.
 * fixed bug in getting Bitbucket branch names.
 * fixed to hide checkbox when active as mu-plugin.
 * work better with shiny updates.
 
-#### 5.3.3
+#### 5.3.3 - 2016-01-04
 * removed added filters, below as they didn't add functionality to this plugin.
 * try to use references to `&$this`
 * added PHPUnit testing setup, I could use help writing tests. A great way to contribute. :-)
 
-#### 5.3.2
+#### 5.3.2 - 2015-12-21
 * code simplification for `upgrader_source_selection`
 * fixed plugin branch switching to override _up-to-date_ message (most of the time)
 * added filters for developers, well I wanted them anyway ;-)
@@ -76,11 +76,11 @@
 	* `github_updater_append_theme_action`
 * fixed renaming of updating plugins that were never initially renamed when first installed. Strange bug.
 
-#### 5.3.1
+#### 5.3.1 - 2015-12-03
 * fixed PHP notice during remote installation
 * fixed remote install [#325](https://github.com/afragen/github-updater/issues/325)
 
-#### 5.3.0
+#### 5.3.0 - 2015-11-25
 * fixed parsing of `readme.txt` for donate link
 * refactored transient storage resulting in significantly few database calls, more performant.
 * moved `{get|set}_transient` functions to `abstract class API`
@@ -88,23 +88,23 @@
 * fixed shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
 * overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra'] to `upgrader_source_selection` filter. Thanks @dd32!
 
-#### 5.2.0
+#### 5.2.0 - 2015-10-14
 * fixed [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
 * added setting for GitHub Enterprise personal access token
 * new `function _add_access_token()` for `class GitHub_API`
 * updatede `erusev/parsedown` to current release
 
-#### 5.1.2
+#### 5.1.2 - 2015-09-25
 * added `upgrader_source_selection` filter back for correct updating of current, active theme.
 * fixed [#293](https://github.com/afragen/github-updater/issues/293) and [#297](https://github.com/afragen/github-updater/issues/297)
 * removed `pre_http_request` filter blocking
 * fixed javascript for theme rollback - @scarstens
 * play nice with current master branch of wp-update-php
 
-#### 5.1.1
+#### 5.1.1 - 2015-09-09
 * hotfix to comment out `pre_http_request` filter. Updating of plugin doesn't work. I need to re-think this one.
 
-#### 5.1.0
+#### 5.1.0 - 2015-09-09
 * refactored Plugin and Theme constructors moving code calling APIs getting remote data to separate functions
 * fixed [#281](https://github.com/afragen/github-updater/issues/281), removed 'Activate Plugin/Theme' buttons post-install
 * fixed [#284](https://github.com/afragen/github-updater/issues/284) for GitLab CE/Enterprise install and update
@@ -117,11 +117,11 @@
 * fixed `API::return_repo_type` to add 'type' to array; allows easier instance creation of API classes
 * updated POT file
 
-#### 5.0.1
+#### 5.0.1 - 2015-08-18
 * updated to current `erusev/parsedown` release, fixes PHP7 issue
 * updated to current `WPupdatePHP/wp-update-php/release-1-1-0` branch
 
-#### 5.0.0
+#### 5.0.0 - 2015-08-15
 * fix rollback for GitLab themes
 * add branch switcher for themes
 * escape all printed strings
