@@ -20,7 +20,7 @@
                 'dismissible_length': dismissible_length,
                 'nonce': dismissible_notice.nonce
             };
-            
+
             // We can also pass the url value separately from ajaxurl for front end AJAX implementations
             $.post(ajaxurl, data);
         });

@@ -22,7 +22,7 @@
  * @author  Agbonghama Collins
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 /**
@@ -47,37 +47,17 @@ if ( ! class_exists( 'PAnD' ) ) {
 	class PAnD {
 
 		/**
-		 * Singleton variable.
-		 *
-		 * @var bool
-		 */
-		private static $instance = false;
-
-		/**
-		 * Singleton.
-		 *
-		 * @return bool|\PAnD
-		 */
-		public static function instance() {
-			if ( false === self::$instance ) {
-				self::$instance = new self();
-			}
-
-			return self::$instance;
-		}
-
-		/**
 		 * Init hooks.
 		 */
-		public function init() {
-			add_action( 'admin_enqueue_scripts', array( $this, 'load_script' ) );
-			add_action( 'wp_ajax_dismiss_admin_notice', array( $this, 'dismiss_admin_notice' ) );
+		public static function init() {
+			add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_script' ) );
+			add_action( 'wp_ajax_dismiss_admin_notice', array( __CLASS__, 'dismiss_admin_notice' ) );
 		}
 
 		/**
 		 * Enqueue javascript and variables.
 		 */
-		public function load_script() {
+		public static function load_script() {
 			wp_enqueue_script(
 				'dismissible-notices',
 				plugins_url( 'dismiss-notice.js', __FILE__ ),
@@ -97,8 +77,9 @@ if ( ! class_exists( 'PAnD' ) ) {
 
 		/**
 		 * Handles Ajax request to persist notices dismissal.
+		 * Uses check_ajax_referer to verify nonce.
 		 */
-		public function dismiss_admin_notice() {
+		public static function dismiss_admin_notice() {
 			$option_name        = sanitize_text_field( $_POST['option_name'] );
 			$dismissible_length = sanitize_text_field( $_POST['dismissible_length'] );
 
@@ -106,7 +87,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
-			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce', true );
+			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce' );
 			update_option( $option_name, $dismissible_length );
 			wp_die();
 		}
@@ -122,13 +103,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 			$array       = explode( '-', $arg );
 			$length      = array_pop( $array );
 			$option_name = implode( '-', $array );
-
-			$db_record = get_option( $option_name );
-
-			// @TODO remove from release
-			if ( absint( $db_record ) > ( time() * 2 ) ) {
-				delete_option( $option_name );
-			}
+			$db_record   = get_option( $option_name );
 
 			if ( 'forever' == $db_record ) {
 				return false;

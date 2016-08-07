@@ -72,4 +72,4 @@ new $instantiate;
  *
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
-add_action( 'admin_init', array( \PAnD::instance(), 'init' ) );
+add_action( 'admin_init', array( '\PAnD', 'init' ) );
