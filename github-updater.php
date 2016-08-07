@@ -25,7 +25,7 @@
  * Requires PHP:      5.3
  */
 
-/**
+/*
  * Exit if called directly.
  * PHP version check and exit.
  */
