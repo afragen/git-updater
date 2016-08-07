@@ -6,7 +6,7 @@
 * when creating Settings page, check current Plugin/Theme class instance, not transient. Fixes issue where remote install of private repo not having private settings saved.
 * fixed PHP errors in Settings page
 * fixed saving issues with checkboxes
-* added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal), well my PR of it ;-)
+* added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal)
 * Settings page now uses same function to update settings for both single/multisite
 
 #### 5.5.0 / 2016-07-02
