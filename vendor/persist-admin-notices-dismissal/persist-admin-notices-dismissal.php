@@ -118,7 +118,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 		 *
 		 * @return bool
 		 */
-		public function is_admin_notice_active( $arg ) {
+		public static function is_admin_notice_active( $arg ) {
 			$array       = explode( '-', $arg );
 			$length      = array_pop( $array );
 			$option_name = implode( '-', $array );

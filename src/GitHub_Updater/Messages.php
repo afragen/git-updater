@@ -106,7 +106,7 @@ class Messages extends Base {
 		foreach ( self::$error_code as $repo ) {
 			if ( 403 === $repo['code'] && 'github' === $repo['git'] && ! $_403 ) {
 				$_403 = true;
-				if ( ! \PAnD::instance()->is_admin_notice_active( 'data-403-error-1' ) ) {
+				if ( ! \PAnD::is_admin_notice_active( 'data-403-error-1' ) ) {
 					return;
 				}
 				?>
@@ -144,7 +144,7 @@ class Messages extends Base {
 		foreach ( self::$error_code as $repo ) {
 			if ( 401 === $repo['code'] && ! $_401 ) {
 				$_401 = true;
-				if ( ! \PAnD::instance()->is_admin_notice_active( 'data-401-error-1' ) ) {
+				if ( ! \PAnD::is_admin_notice_active( 'data-401-error-1' ) ) {
 					return;
 				}
 				?>
@@ -172,7 +172,7 @@ class Messages extends Base {
 		     ( empty( parent::$options['gitlab_private_token'] ) &&
 		       parent::$auth_required['gitlab'] )
 		) {
-			if ( ! \PAnD::instance()->is_admin_notice_active( 'data-gitlab-error-1' ) ) {
+			if ( ! \PAnD::is_admin_notice_active( 'data-gitlab-error-1' ) ) {
 				return;
 			}
 			?>
@@ -189,7 +189,7 @@ class Messages extends Base {
 	 * Generate error message for WP_Error.
 	 */
 	public function show_wp_error() {
-		if ( ! \PAnD::instance()->is_admin_notice_active( 'data-wp-error-1' ) ) {
+		if ( ! \PAnD::is_admin_notice_active( 'data-wp-error-1' ) ) {
 			return;
 		}
 		?>
