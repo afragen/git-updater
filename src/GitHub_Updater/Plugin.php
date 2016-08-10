@@ -184,6 +184,7 @@ class Plugin extends Base {
 				) );
 				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
 				$git_plugin['slug']                = $plugin;
+//				$git_plugin['dirname']          =
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
@@ -198,7 +199,8 @@ class Plugin extends Base {
 				$git_plugin['dot_org'] = true;
 			}
 
-			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
+//			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
+			$git_plugins[ dirname( $git_plugin['slug'] ) ] = (object) $git_plugin;
 		}
 
 		return $git_plugins;
@@ -277,7 +279,7 @@ class Plugin extends Base {
 
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
-			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+			$branches = isset( $this->config[ dirname( $plugin_file ) ] ) ? $this->config[ dirname( $plugin_file ) ]->branches : null;
 		} else {
 			return false;
 		}
@@ -343,7 +345,7 @@ class Plugin extends Base {
 		/*
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
-		if ( array_key_exists( $repo, $this->config ) ) {
+		if ( array_key_exists( dirname( $file ), $this->config ) ) {
 			if ( ! is_null( $repo ) ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
