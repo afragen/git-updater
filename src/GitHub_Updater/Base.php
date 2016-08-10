@@ -524,7 +524,7 @@ class Base {
 		/*
 		 * Revert extended naming if previously present.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     $slug !== $repo['repo']
 		) {
@@ -535,10 +535,10 @@ class Base {
 		 * Extended naming.
 		 * Only for plugins and not for 'master' === branch && .org hosted.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
-		       ( $this->tag && 'master' !== $this->tag ) )
+		     ( ! $upgrader_object->config[ $repo['repo'] ]->dot_org ||
+		       ( $upgrader_object->tag && 'master' !== $upgrader_object->tag ) )
 		) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',

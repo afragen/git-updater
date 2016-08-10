@@ -26,6 +26,7 @@
 * fixed pesky PHP notice when updating from 5.4.1.3 [#403](https://github.com/afragen/github-updater/issues/403)
 * added _aria-labels_ for screen readers
 * always display theme rollback/branch switcher in single site installation [#411](https://github.com/afragen/github-updater/issues/411)
+* fixed extended naming issue when branch switching, [#429](https://github.com/afragen/github-updater/issues/429)
 
 #### 5.4.1 / 2016-04-21
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
