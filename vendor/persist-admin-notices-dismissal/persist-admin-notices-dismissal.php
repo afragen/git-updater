@@ -39,6 +39,10 @@ if ( isset( $_REQUEST['action'] ) && 'heartbeat' === $_REQUEST['action'] ) {
 	return;
 }
 
+if ( class_exists( 'Admin_Notice_Dismissal' ) ) {
+	return;
+}
+
 if ( ! class_exists( 'PAnD' ) ) {
 
 	/**
