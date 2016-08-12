@@ -89,7 +89,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
-			$transient = 60;
+			//$transient = 60;
 
 			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce' );
 			set_site_transient( $option_name, $dismissible_length, $transient );
