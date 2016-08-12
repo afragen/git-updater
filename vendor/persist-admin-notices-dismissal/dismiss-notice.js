@@ -3,11 +3,11 @@
     $(function () {
         $('div[data-dismissible] button.notice-dismiss').click(function (event) {
             event.preventDefault();
-            var $el = $('div[data-dismissible]');
+			var $this = $(this);
 
             var attr_value, option_name, dismissible_length, data;
 
-            attr_value = $el.attr('data-dismissible').split('-');
+			attr_value = $this.parent().attr('data-dismissible').split('-');
 
             // remove the dismissible length from the attribute value and rejoin the array.
             dismissible_length = attr_value.pop();
