@@ -85,11 +85,10 @@ if ( ! class_exists( 'PAnD' ) ) {
 			$transient          = 0;
 
 			if ( 'forever' != $dismissible_length ) {
-				$transient          = $dismissible_length * DAY_IN_SECONDS;
+				$dismissible_length = ( 0 == absint( $dismissible_length ) ) ? 1 : $dismissible_length;
+				$transient          = absint( $dismissible_length ) * DAY_IN_SECONDS;
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
-
-			//$transient = 60;
 
 			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce' );
 			set_site_transient( $option_name, $dismissible_length, $transient );
