@@ -497,7 +497,7 @@ class Base {
 
 		/*
 		 * Directory is misnamed to start.
-		 * Make cause deactivation.
+		 * May cause deactivation.
 		 */
 		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
 		     ! isset( self::$options['github_updater_install_repo'] )
