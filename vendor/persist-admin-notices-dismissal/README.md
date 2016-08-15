@@ -10,7 +10,7 @@ Run `composer require collizo4sky/persist-admin-notices-dismissal`
 
 Alternatively, clone or download this repo into the `vendor/` folder in your plugin, and include/require the `persist-admin-notices-dismissal.php` file like so
 
-```
+```php
 require  __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php'
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
 ```
@@ -23,7 +23,7 @@ Firstly, install and activate this library within a plugin.
 Say you have the following markup as your admin notice,
 
 
-```
+```php
 function sample_admin_notice__success() {
 	?>
 	<div class="updated notice notice-success is-dismissible">
@@ -37,7 +37,7 @@ add_action( 'admin_notices', 'sample_admin_notice__success' );
 To make it hidden forever when dismissed, add the following data attribute `data-dismissible="disable-done-notice-forever"` to the div markup like so:
 
 
-```
+```php
 function sample_admin_notice__success() {
 	if ( ! PAnD::is_admin_notice_active( 'disable-done-notice-forever' ) ) {
 		return;
@@ -58,7 +58,7 @@ When using the framework with an autoloader you **must** also load the class out
 
 Just add the following in your main plugin file.
 
-```
+```php
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
 ```
  
@@ -74,7 +74,7 @@ You **must** append the dismissal time period to the end of your unique identifi
 To actually make the dismissed admin notice not to appear, use the `is_admin_notice_active()` function like so:
 
 
-```
+```php
 function sample_admin_notice__success1() {
 	if ( ! PAnD::is_admin_notice_active( 'notice-one-forever' ) ) {
 		return;
