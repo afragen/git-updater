@@ -233,6 +233,7 @@ class Rest_Update extends Base {
 			}
 
 			$github_webhook_tag = $this->get_tag_from_github_webhook();
+			$tag = 'master';
 
 			if ( isset( $_REQUEST['tag'] ) ) {
 				$tag = $_REQUEST['tag'];
