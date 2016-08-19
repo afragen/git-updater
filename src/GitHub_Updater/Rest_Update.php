@@ -198,6 +198,23 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * See if a tag came in through a github webhook. If so, return it,
+	 * otherwise return null. It is good to check this tag from github and
+	 * be explicit when specifying the tag we want to update to. If we don't
+	 * do this there is a chance for a race condition, since the default
+	 * zip file on github might not have been created yet.
+	 */
+	private function get_tag_from_github_webhook() {
+		$request_body = file_get_contents('php://input');
+		$request_data = json_decode($request_body, TRUE);
+
+		if (isset($request_data["after"]))
+			return $request_data["after"];
+
+		return NULL;
+	}
+
+	/**
 	 * Process request.
 	 * Relies on data in $_REQUEST, prints out json and exits.
 	 */
@@ -215,12 +232,14 @@ class Rest_Update extends Base {
 				throw new \Exception( esc_html__( 'Bad api key.', 'github-updater' ) );
 			}
 
-			$tag = 'master';
+			$github_webhook_tag = $this->get_tag_from_github_webhook();
 
 			if ( isset( $_REQUEST['tag'] ) ) {
 				$tag = $_REQUEST['tag'];
 			} elseif ( isset( $_REQUEST['committish'] ) ) {
 				$tag = $_REQUEST['committish'];
+			} elseif ($github_webhook_tag) {
+				$tag = $github_webhook_tag;
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
