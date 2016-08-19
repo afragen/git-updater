@@ -323,6 +323,8 @@ And our plugin is updated! The messages displayed are those that otherwise would
 
 When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
 
+If the incoming request looks like it is push event from a [GitHub Webhook](https://developer.github.com/v3/activity/events/types/#pushevent), and if the `tag` attribute is not explicitly specified in the URL, then the `tag` attribute will be picked up from the request payload from GitHub.
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
