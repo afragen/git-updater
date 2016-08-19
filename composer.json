@@ -1,7 +1,13 @@
 {
   "name": "afragen/github-updater",
   "type": "wordpress-plugin",
-  "keywords": ["wordpress", "plugin", "theme", "updater", "install"],
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "theme",
+    "updater",
+    "install"
+  ],
   "license": "GPLv2",
   "repositories": [
     {
@@ -9,10 +15,6 @@
       "url": "https://github.com/afragen/github-updater"
     }
   ],
-  "require": {
-    "composer/installers": "^1.0",
-    "php": ">=5.3"
-  },
   "authors": [
     {
       "name": "Andy Fragen",
@@ -21,5 +23,17 @@
       "role": "Developer"
     }
   ],
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require": {
+    "composer/installers": "^1.0",
+    "php": ">=5.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Fragen\\GitHub_Updater\\": "src/GitHub_Updater/"
+    },
+    "classmap": [
+      "vendor/"
+    ]
+  }
 }

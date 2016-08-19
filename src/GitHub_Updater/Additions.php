@@ -17,9 +17,9 @@ class Additions {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var
+	 * @var bool|Additions
 	 */
-	private static $instance;
+	private static $instance = false;
 
 	/**
 	 * Holds array of plugin/theme headers to add to GitHub Updater.
@@ -31,11 +31,11 @@ class Additions {
 	/**
 	 * Singleton
 	 *
-	 * @return object
+	 * @return object $instance Additions
 	 */
 	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
+		if ( false === self::$instance ) {
+			self::$instance = new self();
 		}
 
 		return self::$instance;
@@ -46,6 +46,7 @@ class Additions {
 	 *
 	 * @param $config
 	 * @param $repos
+	 * @param $type
 	 *
 	 * @return bool
 	 */
@@ -54,6 +55,9 @@ class Additions {
 			return false;
 		}
 		if ( null === ( $config = json_decode( $config, true ) ) ) {
+			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
+			Messages::instance()->create_error_message( $error );
+
 			return false;
 		}
 

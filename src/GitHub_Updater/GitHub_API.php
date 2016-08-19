@@ -186,8 +186,9 @@ class GitHub_API extends API {
 		}
 
 		if ( $response && isset( $response->content ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( base64_decode( $response->content ) );
+			$file     = base64_decode( $response->content );
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
 			$this->set_transient( 'readme', $response );
 		}
 
@@ -207,13 +208,14 @@ class GitHub_API extends API {
 	 */
 	public function get_repo_meta() {
 		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
+		$response   = ! isset( $response->items ) ? $response : false;
 		$repos      = isset( $this->response[ $this->type->owner ] ) ? $this->response[ $this->type->owner ] : false;
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
 		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
-		
+
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
 			$response = ! empty( $response->items[0] ) ? $response->items[0] : false;

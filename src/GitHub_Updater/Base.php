@@ -187,14 +187,6 @@ class Base {
 			$force_meta_update = true;
 		}
 
-		// Added for ajax plugin updating.
-		if ( 'admin-ajax.php' === $pagenow &&
-		     ( isset( $_POST['action'] ) && 'update-plugin' === $_POST['action'] )
-		) {
-			$force_meta_update = true;
-			add_filter( 'wp_ajax_update_plugin_result', array( &$this, 'wp_ajax_update_plugin_result' ), 10, 1 );
-		}
-
 		if ( current_user_can( 'update_plugins' ) ) {
 			if ( $force_meta_update ) {
 				$this->forced_meta_update_plugins();
@@ -216,7 +208,7 @@ class Base {
 	}
 
 	/**
-	 * Ajax endpoint for rest updates.
+	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
 		$rest_update = new Rest_Update();
@@ -317,7 +309,11 @@ class Base {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
 			self::$options['branch_switch'] = null;
 		}
-		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
+
+		if ( ! isset( $this->$type->repo ) ) {
+			$this->$type       = new \stdClass();
+			$this->$type->repo = null;
+		} elseif ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
@@ -378,7 +374,7 @@ class Base {
 				break;
 		}
 
-		if ( is_null( $this->repo_api ) ) {
+		if ( null === $this->repo_api ) {
 			return false;
 		}
 
@@ -501,14 +497,26 @@ class Base {
 
 		/*
 		 * Directory is misnamed to start.
-		 * Make cause deactivation.
+		 * May cause deactivation.
 		 */
-		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) ) {
-			foreach ( $upgrader_object->config as $plugin ) {
-				if ( $slug === dirname( $plugin->slug ) ) {
-					$slug       = $plugin->repo;
-					$new_source = trailingslashit( $remote_source ) . $slug;
-					break;
+		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
+		     ! isset( self::$options['github_updater_install_repo'] )
+		) {
+			if ( $upgrader instanceof \Plugin_Upgrader ) {
+				foreach ( $upgrader_object->config as $plugin ) {
+					if ( $slug === dirname( $plugin->slug ) ) {
+						$slug       = $plugin->repo;
+						$new_source = trailingslashit( $remote_source ) . $slug;
+						break;
+					}
+				}
+			}
+			if ( $upgrader instanceof \Theme_Upgrader ) {
+				foreach ( $upgrader_object->config as $theme ) {
+					if ( $slug === $theme->repo ) {
+						$new_source = trailingslashit( $remote_source ) . $slug;
+						break;
+					}
 				}
 			}
 		}
@@ -516,7 +524,7 @@ class Base {
 		/*
 		 * Revert extended naming if previously present.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     $slug !== $repo['repo']
 		) {
@@ -527,10 +535,10 @@ class Base {
 		 * Extended naming.
 		 * Only for plugins and not for 'master' === branch && .org hosted.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
-		       ( $this->tag && 'master' !== $this->tag ) )
+		     ( ! $upgrader_object->config[ $repo['repo'] ]->dot_org ||
+		       ( $upgrader_object->tag && 'master' !== $upgrader_object->tag ) )
 		) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
@@ -702,15 +710,13 @@ class Base {
 	 * @return array
 	 */
 	protected function parse_header_uri( $repo_header ) {
-		$header_parts         = parse_url( $repo_header );
-		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo           = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo           = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
-		$header['path']       = $owner_repo;
-		$owner_repo           = explode( '/', $owner_repo );
-		$header['owner']      = $owner_repo[0];
-		$header['repo']       = $owner_repo[1];
+		$header_parts     = parse_url( $repo_header );
+		$header['scheme'] = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']   = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$owner_repo       = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$owner_repo       = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
+		$header['path']   = $owner_repo;
+		list( $header['owner'], $header['repo'] ) = explode( '/', $owner_repo );
 		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
@@ -773,21 +779,20 @@ class Base {
 			delete_site_transient( $transient );
 		}
 		delete_site_transient( 'ghu-' . $type );
-		delete_site_transient( 'ghu_' . $type );
 
 		return true;
 	}
 
 	/**
-	 * Create transient of $type transients for force-check.
+	 * Create transient of $type transients for clearing transients.
 	 *
 	 * @param $type
 	 *
 	 * @return void|bool
 	 */
-	protected function make_force_check_transient( $type ) {
-		$transient = get_site_transient( 'ghu-' . $type );
-		if ( $transient ) {
+	protected function make_transient_list( $type ) {
+		$transients = get_site_transient( 'ghu-' . $type );
+		if ( $transients ) {
 			return false;
 		}
 		set_site_transient( 'ghu-' . $type, self::$transients, ( self::$hours * HOUR_IN_SECONDS ) );
@@ -902,15 +907,17 @@ class Base {
 			}
 		}
 
-		$response['sections']['other_notes'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
+		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
 		if ( empty( $response['sections']['other_notes'] ) ) {
 			unset( $response['sections']['other_notes'] );
+		} else {
+			$response['sections']['other_notes'] .= $response['remaining_content'];
 		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested_up_to'];
-		$this->type->requires     = $response['requires_at_least'];
+		$this->type->tested       = $response['tested'];
+		$this->type->requires     = $response['requires'];
 		$this->type->donate_link  = $response['donate_link'];
 		$this->type->contributors = $response['contributors'];
 
@@ -954,7 +961,7 @@ class Base {
 
 			return empty( $options['branch_switch'] );
 		}
-		if ( ! isset( $_GET['force-check'] ) ) {
+		if ( ! isset( $_GET['refresh_transients'] ) ) {
 			if ( ! $response && ! $this->can_update( $this->type ) ) {
 				return true;
 			}
@@ -974,7 +981,7 @@ class Base {
 	protected function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			return $response;
 		}
 
@@ -1018,17 +1025,22 @@ class Base {
 		global $wp_version;
 		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$repo_base     = $repo_name;
+		$shiny_classes = ' notice inline notice-warning notice-alt';
 
 		if ( 'plugin' === $type ) {
 			$repo_base = dirname( $repo_name );
 		}
 
+		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '">
+		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
+		<div class="update-message">';
+
 		$enclosure = array(
-			'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">',
+			'open'  => $open,
 			'close' => '</div></td></tr>',
 		);
 
-		if ( version_compare( $wp_version, '4.6', '>=' ) || function_exists( 'su_init' ) ) {
+		if ( version_compare( $wp_version, '4.6', '>=' ) ) {
 			$open_p  = '<p>';
 			$close_p = '</p>';
 			if ( $branch_switcher ) {
@@ -1036,12 +1048,34 @@ class Base {
 				$close_p = '';
 			}
 			$enclosure = array(
-				'open'  => '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt">' . $open_p,
+				'open'  => substr_replace( $open, $shiny_classes, - 2, 0 ) . $open_p,
 				'close' => $close_p . '</div></td></tr>',
 			);
 		}
 
 		return $enclosure;
+	}
+
+	/**
+	 * Generate update URL.
+	 *
+	 * @param string $type ( plugin or theme )
+	 * @param string $action
+	 * @param string $repo_name
+	 *
+	 * @return string|void
+	 */
+	protected function get_update_url( $type, $action, $repo_name ) {
+		$update_url = esc_attr(
+			add_query_arg(
+				array(
+					'action' => $action,
+					$type    => urlencode( $repo_name ),
+				),
+				self_admin_url( 'update.php' )
+			) );
+
+		return $update_url;
 	}
 
 }

@@ -34,7 +34,7 @@ class Plugin extends Base {
 	 *
 	 * @var bool|Plugin
 	 */
-	protected static $object = false;
+	private static $instance = false;
 
 	/**
 	 * Rollback variable
@@ -47,7 +47,7 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
@@ -63,6 +63,8 @@ class Plugin extends Base {
 
 	/**
 	 * Returns an array of configurations for the known plugins.
+	 *
+	 * @return array
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
@@ -73,15 +75,14 @@ class Plugin extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return Plugin
+	 * @return object $instance Plugin
 	 */
 	public static function instance() {
-		$class = __CLASS__;
-		if ( false === self::$object ) {
-			self::$object = new $class();
+		if ( false === self::$instance ) {
+			self::$instance = new self();
 		}
 
-		return self::$object;
+		return self::$instance;
 	}
 
 	/**
@@ -191,7 +192,6 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['private']                 = true;
 				$git_plugin['dot_org']                 = false;
 			}
 			if ( isset( $all_plugins[ $plugin ]->id ) ) {
@@ -205,15 +205,15 @@ class Plugin extends Base {
 	}
 
 	/**
-	 * Get remote plugin meta to populate $config plugin objects. 
-	 * Calls to remote APIs to get data. 
+	 * Get remote plugin meta to populate $config plugin objects.
+	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
 
 			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
 				continue;
-			};
+			}
 
 			/*
 			 * Update plugin transient with rollback (branch switching) data.
@@ -241,7 +241,7 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->make_force_check_transient( 'plugins' );
+		$this->make_transient_list( 'plugins' );
 		$this->load_pre_filters();
 	}
 
@@ -268,8 +268,13 @@ class Plugin extends Base {
 			return false;
 		}
 
-		$enclosure = $this->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin    = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$enclosure         = $this->update_row_enclosure( $plugin_file, 'plugin', true );
+		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$nonced_update_url = wp_nonce_url(
+			$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
+			'upgrade-plugin_' . $plugin_file
+		);
+
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
 			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
@@ -300,8 +305,8 @@ class Plugin extends Base {
 
 		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
 		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s">%s</a></li>',
-				wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . urlencode( $plugin_file ) ), 'upgrade-plugin_' . $plugin_file ),
+			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+				$nonced_update_url,
 				'&rollback=' . urlencode( $branch ),
 				esc_attr( $branch )
 			);
@@ -342,8 +347,18 @@ class Plugin extends Base {
 			if ( ! is_null( $repo ) ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
-					esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $repo .
-					                            '&TB_iframe=true&width=600&height=550' ) ),
+					esc_url(
+						add_query_arg(
+							array(
+								'tab'       => 'plugin-information',
+								'plugin'    => $repo,
+								'TB_iframe' => 'true',
+								'width'     => 600,
+								'height'    => 550,
+							),
+							network_admin_url( 'plugin-install.php' )
+						)
+					),
 					esc_html__( 'View details', 'github-updater' )
 				);
 			}

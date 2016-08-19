@@ -54,7 +54,7 @@ class GitLab_API extends API {
 			empty( self::$options['gitlab_private_token'] ) ||
 			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
 		) {
-			Messages::create_error_message( 'gitlab' );
+			Messages::instance()->create_error_message( 'gitlab' );
 		}
 		add_site_option( 'github_updater', self::$options );
 	}
@@ -219,13 +219,13 @@ class GitLab_API extends API {
 			self::$method = 'readme';
 			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=readme.txt' );
 
-			if ( $response ) {
-				$parser   = new Readme_Parser;
-				$response = $parser->parse_readme( base64_decode( $response->content ) );
-				$this->set_transient( 'readme', $response );
-			}
 		}
-
+		if ( $response && isset( $response->content ) ) {
+			$file     = base64_decode( $response->content );
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
+			$this->set_transient( 'readme', $response );
+		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
