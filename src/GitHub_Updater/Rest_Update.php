@@ -198,20 +198,33 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * See if a tag came in through a github webhook. If so, return it,
-	 * otherwise return null. It is good to check this tag from github and
+	 * See if a tag came in through a github webhook. If so, return an
+	 * array containing the keys branch and hash related to the commit.
+	 * It is good to use this latest commited hash from github and
 	 * be explicit when specifying the tag we want to update to. If we don't
 	 * do this there is a chance for a race condition, since the default
 	 * zip file on github might not have been created yet.
 	 */
-	private function get_tag_from_github_webhook() {
+	private function get_github_webhook_data() {
 		$request_body = file_get_contents('php://input');
 		$request_data = json_decode($request_body, TRUE);
 
-		if (isset($request_data["after"]))
-			return $request_data["after"];
+		if (!$request_data) {
+			return NULL;
+		}
 
-		return NULL;
+		if (!isset($request_data["ref"]) || !isset($request_data["after"])) {
+			return NULL;
+		}
+
+		$res = array();
+		$res["hash"] = $request_data["after"];
+		$res["branch"] = substr(
+			$request_data["ref"],
+			strrpos($request_data["ref"], '/') + 1
+		);
+
+		return $res;
 	}
 
 	/**
@@ -232,15 +245,16 @@ class Rest_Update extends Base {
 				throw new \Exception( esc_html__( 'Bad api key.', 'github-updater' ) );
 			}
 
-			$github_webhook_tag = $this->get_tag_from_github_webhook();
 			$tag = 'master';
-
 			if ( isset( $_REQUEST['tag'] ) ) {
 				$tag = $_REQUEST['tag'];
 			} elseif ( isset( $_REQUEST['committish'] ) ) {
 				$tag = $_REQUEST['committish'];
-			} elseif ($github_webhook_tag) {
-				$tag = $github_webhook_tag;
+			}
+
+			$hook_data = $this->get_github_webhook_data();
+			if ($hook_data && $tag == $hook_data["branch"]) {
+				$tag = $hook_data["hash"];
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
