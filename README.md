@@ -225,12 +225,6 @@ Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the
 
 **You must tag your releases to use this feature.**
 
-## Deleting Transients
-
-Use the **Clear Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour.
-
-Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
-
 ## Hosting Plugin in WP.org Repository
 
 If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
@@ -242,6 +236,12 @@ The same applies for Bitbucket or GitLab hosted plugins.
 From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format. The URI is case sensitive, so make sure the repo name is correctly entered.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
+
+## Refreshing Transients
+
+Use the **Refresh Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
+
+Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 
 ## Error Messages
 
