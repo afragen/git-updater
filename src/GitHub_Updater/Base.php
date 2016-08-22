@@ -961,13 +961,8 @@ class Base {
 
 			return empty( $options['branch_switch'] );
 		}
-		if ( ! isset( $_GET['refresh_transients'] ) ) {
-			if ( ! $response && ! $this->can_update( $this->type ) ) {
-				return true;
-			}
-		}
 
-		return false;
+		return ( ! isset( $_GET['refresh_transients'] ) && ! $response && ! $this->can_update( $this->type ) );
 	}
 
 	/**
