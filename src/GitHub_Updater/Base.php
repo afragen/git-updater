@@ -1073,4 +1073,22 @@ class Base {
 		return $update_url;
 	}
 
+	/**
+	 * Checks to see if a heartbeat is resulting in activity.
+	 *
+	 * @return bool
+	 */
+	protected static function is_heartbeat() {
+		return ( isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'] );
+	}
+
+	/**
+	 * Checks to see if DOING_AJAX.
+	 *
+	 * @return bool
+	 */
+	protected static function is_doing_ajax() {
+		return ( defined( 'DOING_AJAX') && DOING_AJAX);
+	}
+
 }
