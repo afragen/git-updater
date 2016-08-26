@@ -228,6 +228,52 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * See if a tag came in through a bitbucket webhook. It returns data
+	 * on the same format as get_github_webhook_data.
+	 *
+	 * We assume here that changes contains one single entry, not sure if
+	 * this is a safe assumption:
+	 *
+	 * http://stackoverflow.com/questions/39165255/how-do-i-get-the-latest-hash-from-a-bitbucket-push-payload-why-is-changes-an
+	 */
+	private function get_bitbucket_webhook_data() {
+		$request_body = file_get_contents('php://input');
+		$request_data = json_decode($request_body, TRUE);
+
+		if (!$request_data) {
+			return NULL;
+		}
+
+		if (!isset($request_data["push"]) ||
+			!isset($request_data["push"]["changes"])) {
+			return NULL;
+		}
+
+		$changes = $request_data["push"]["changes"];
+
+		if (!$changes || !sizeof($changes)) {
+			return NULL;
+		}
+
+		// Just use the first entry, assume that it is the right one.
+		$change = $changes[0];
+		$new = $change["new"];
+
+		// What else could this be? For now, just expect branch.
+		if ($new["type"] != "branch") {
+			return NULL;
+		}
+
+		$hash = $new["target"]["hash"];
+		$branch = $new["name"];
+
+		return array(
+			"branch" => $branch,
+			"hash" => $hash
+		);
+	}
+
+	/**
 	 * Process request.
 	 * Relies on data in $_REQUEST, prints out json and exits.
 	 */
@@ -253,6 +299,11 @@ class Rest_Update extends Base {
 			}
 
 			$hook_data = $this->get_github_webhook_data();
+			if ($hook_data && $tag == $hook_data["branch"]) {
+				$tag = $hook_data["hash"];
+			}
+
+			$hook_data = $this->get_bitbucket_webhook_data();
 			if ($hook_data && $tag == $hook_data["branch"]) {
 				$tag = $hook_data["hash"];
 			}
