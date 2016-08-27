@@ -207,6 +207,7 @@ class Rest_Update extends Base {
 	private function get_github_webhook_data() {
 		$request_body = file_get_contents('php://input');
 		$request_data = json_decode($request_body, TRUE);
+		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
 
 		if ( !$request_data ) {
 			return NULL;
@@ -215,10 +216,6 @@ class Rest_Update extends Base {
 		$res = array();
 		$res["webhook"] = "github";
 		$res["hash"] = $request_data["after"];
-		$res["branch"] = substr(
-			$request_data["ref"],
-			strrpos($request_data["ref"], '/') + 1
-		);
 
 		return $res;
 	}
@@ -241,10 +238,7 @@ class Rest_Update extends Base {
 		$res = array();
 		$res["webhook"] = "gitlab";
 		$res["hash"] = $request_data["after"];
-		$res["branch"] = substr(
-			$request_data["ref"],
-			strrpos($request_data["ref"], '/') + 1
-		);
+		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
 
 		return $res;
 	}
