@@ -198,26 +198,18 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * See if a tag came in through a github webhook. If so, return an
-	 * array containing the keys branch and hash related to the commit.
-	 * It is good to use this latest commited hash from github and
-	 * be explicit when specifying the tag we want to update to. If we don't
-	 * do this there is a chance for a race condition, since the default
-	 * zip file on github might not have been created yet.
+	 * Parse GitHub webhook data.
 	 */
 	private function get_github_webhook_data() {
 		$request_body = file_get_contents('php://input');
 		$request_data = json_decode($request_body, TRUE);
 
-		if (!$request_data) {
-			return NULL;
-		}
-
-		if (!isset($request_data["ref"]) || !isset($request_data["after"])) {
+		if ( !$request_data ) {
 			return NULL;
 		}
 
 		$res = array();
+		$res["webhook"] = "github";
 		$res["hash"] = $request_data["after"];
 		$res["branch"] = substr(
 			$request_data["ref"],
@@ -228,8 +220,29 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * See if a tag came in through a bitbucket webhook. It returns data
-	 * on the same format as get_github_webhook_data.
+	 * Parse GitLab webhook data.
+	 */
+	private function get_gitlab_webhook_data() {
+		$request_body = file_get_contents('php://input');
+		$request_data = json_decode($request_body, TRUE);
+
+		if ( !$request_data ) {
+			return NULL;
+		}
+
+		$res = array();
+		$res["webhook"] = "gitlab";
+		$res["hash"] = $request_data["after"];
+		$res["branch"] = substr(
+			$request_data["ref"],
+			strrpos($request_data["ref"], '/') + 1
+		);
+
+		return $res;
+	}
+
+	/**
+	 * Parse Bitbucket webhook data.
 	 *
 	 * We assume here that changes contains one single entry, not sure if
 	 * this is a safe assumption:
@@ -240,42 +253,70 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents('php://input');
 		$request_data = json_decode($request_body, TRUE);
 
-		if (!$request_data) {
-			return NULL;
-		}
-
-		if (!isset($request_data["push"]) ||
-			!isset($request_data["push"]["changes"])) {
+		if ( !$request_data ) {
 			return NULL;
 		}
 
 		$changes = $request_data["push"]["changes"];
-
-		if (!$changes || !sizeof($changes)) {
-			return NULL;
-		}
 
 		// Just use the first entry, assume that it is the right one.
 		$change = $changes[0];
 		$new = $change["new"];
 
 		// What else could this be? For now, just expect branch.
-		if ($new["type"] != "branch") {
+		if ( $new["type"] != "branch" ) {
 			return NULL;
 		}
 
-		$hash = $new["target"]["hash"];
-		$branch = $new["name"];
+		$res = array();
+		$res["webhook"] = "bitbucket";
+		$res["hash"] = $new["target"]["hash"];
+		$res["branch"] = $new["name"];
 
-		return array(
-			"branch" => $branch,
-			"hash" => $hash
-		);
+		return $res;
+	}
+
+	/**
+	 * Check the headers of the request and parse webhook data accordingly.
+	 * This function returns an array containing the elements:
+	 *
+	 *   branch   - The branch that was pushed to.
+	 *   hash     - The most recent hash.
+	 *   webhook  - The type of webhook, i.e. github or bitbucket.
+	 *
+	 * If the request did not come from a webhook, this function returns NULL.
+     *
+	 * We need to rely on the latest commited hash from the remote repository
+	 * and be explicit when specifying the tag we want to update to. If we
+	 * don't do this there is a chance for a race condition, since the default
+	 * zip file on the repository service might not have been created yet.
+	 */
+	private function get_webhook_data() {
+
+		// GitHub
+		if ( $_SERVER["HTTP_X_GITHUB_EVENT"] == "push" ) {
+			return $this->get_github_webhook_data();
+		}
+
+		// Bitbucket
+		if ( $_SERVER["HTTP_X_EVENT_KEY"] == "repo:push" ) {
+			return $this->get_bitbucket_webhook_data();
+		}
+
+		// GitLab
+		if ( $_SERVER["HTTP_X_GITLAB_EVENT"] == "Push Hook" ) {
+			return $this->get_gitlab_webhook_data();
+		}
+
+		return NULL;
 	}
 
 	/**
 	 * Process request.
 	 * Relies on data in $_REQUEST, prints out json and exits.
+	 * If the request came through a webhook, and if the branch in the
+	 * webhook matches the branch specified by the url, use the latest
+	 * update available as specified in the webhook payload.
 	 */
 	public function process_request() {
 		try {
@@ -298,12 +339,7 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			$hook_data = $this->get_github_webhook_data();
-			if ($hook_data && $tag == $hook_data["branch"]) {
-				$tag = $hook_data["hash"];
-			}
-
-			$hook_data = $this->get_bitbucket_webhook_data();
+			$hook_data = $this->get_webhook_data();
 			if ($hook_data && $tag == $hook_data["branch"]) {
 				$tag = $hook_data["hash"];
 			}
@@ -338,6 +374,14 @@ class Rest_Update extends Base {
 			$response = $this->show_updates( $response );
 		}
 
+		if ( $hook_data ) {
+			$response["webhook"] = $hook_data["webhook"];
+		}
+
+		// Log the response for debugging. Should be commented out in
+		// checked in code. Should we have some proper logging facility?
+		// file_put_contents(__DIR__."/request.txt",print_r($response,TRUE));
+
 		if ( $this->is_error() ) {
 			$response['error'] = true;
 			http_response_code( 500 );
@@ -348,5 +392,4 @@ class Rest_Update extends Base {
 		echo json_encode( $response, $json_encode_flags ) . "\n";
 		exit;
 	}
-
 }
