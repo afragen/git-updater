@@ -273,6 +273,20 @@ class Rest_Update extends Base {
 		);
 	}
 
+	private function get_webhook_data() {
+		// GitHub
+		if ($_SERVER["HTTP_X_GITHUB_EVENT"] == "push") {
+			return $this->get_github_webhook_data();
+		}
+
+		// Bitbucket
+		if ($_SERVER["HTTP_X_EVENT_KEY"] == "repo:push") {
+			return $this->get_bitbucket_webhook_data();
+		}
+
+		return NULL;
+	}
+
 	/**
 	 * Process request.
 	 * Relies on data in $_REQUEST, prints out json and exits.
@@ -298,7 +312,12 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			$hook_data = $this->get_github_webhook_data();
+			$hook_data = $this->get_webhook_data();
+			if ($hook_data && $tag == $hook_data["branch"]) {
+				$tag = $hook_data["hash"];
+			}
+
+			/*$hook_data = $this->get_github_webhook_data();
 			if ($hook_data && $tag == $hook_data["branch"]) {
 				$tag = $hook_data["hash"];
 			}
@@ -306,7 +325,7 @@ class Rest_Update extends Base {
 			$hook_data = $this->get_bitbucket_webhook_data();
 			if ($hook_data && $tag == $hook_data["branch"]) {
 				$tag = $hook_data["hash"];
-			}
+			}*/
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
