@@ -198,7 +198,11 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Parse GitHub webhook data.
+	 * Parses GitHub webhook data.
+	 *
+	 * @param array $request_data
+	 *
+	 * @return array $response
 	 */
 	private function get_github_webhook_data() {
 		$request_body = file_get_contents('php://input');
@@ -220,7 +224,11 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Parse GitLab webhook data.
+	 * Parses GitLab webhook data.
+	 *
+	 * @param array $request_data
+	 *
+	 * @return array $response
 	 */
 	private function get_gitlab_webhook_data() {
 		$request_body = file_get_contents('php://input');
@@ -242,12 +250,16 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Parse Bitbucket webhook data.
+	 * Parses Bitbucket webhook data.
 	 *
 	 * We assume here that changes contains one single entry, not sure if
 	 * this is a safe assumption:
 	 *
-	 * http://stackoverflow.com/questions/39165255/how-do-i-get-the-latest-hash-from-a-bitbucket-push-payload-why-is-changes-an
+	 * @link http://stackoverflow.com/questions/39165255/how-do-i-get-the-latest-hash-from-a-bitbucket-push-payload-why-is-changes-an
+	 *
+	 * @param array $request_data
+	 *
+	 * @return bool|array $response
 	 */
 	private function get_bitbucket_webhook_data() {
 		$request_body = file_get_contents('php://input');
@@ -277,19 +289,10 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Check the headers of the request and parse webhook data accordingly.
-	 * This function returns an array containing the elements:
+	 * Checks the headers of the request and sends webhook data to be parsed.
+	 * If the request did not come from a webhook, this function returns false.
 	 *
-	 *   branch   - The branch that was pushed to.
-	 *   hash     - The most recent hash.
-	 *   webhook  - The type of webhook, i.e. github or bitbucket.
-	 *
-	 * If the request did not come from a webhook, this function returns NULL.
-     *
-	 * We need to rely on the latest commited hash from the remote repository
-	 * and be explicit when specifying the tag we want to update to. If we
-	 * don't do this there is a chance for a race condition, since the default
-	 * zip file on the repository service might not have been created yet.
+	 * @return bool|array false if no data; array of parsed webhook response
 	 */
 	private function get_webhook_data() {
 
