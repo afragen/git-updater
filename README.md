@@ -323,7 +323,7 @@ And our plugin is updated! The messages displayed are those that otherwise would
 
 When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
 
-The RESTful api is useful, among other things, for automatically updating themes and plugins on events sent as Webhooks from GitHub and the other services supported by this plugin. Some special functionality has been implemented to support this in order avoid race conditions, i.e. to make sure that the updated version is really the version that was just pushed to the repository. Specifically, GitHub Updater checks the headers to see if the incoming request is from a 
+The RESTful endpoints are useful for automatically updating themes and plugins on events sent as webhooks from GitHub and the other services supported by this plugin. Some special functionality has been implemented to support this in order avoid race conditions, i.e. to make sure that the updated version is really the version that was just pushed to the repository. Specifically, GitHub Updater checks the headers to see if the incoming request is from a 
 [GitHub Webhook](https://developer.github.com/v3/activity/events/types/#pushevent), a [Bitbucket Webhook](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-Push) or a [GitLab Webhook](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md#push-events). If this is the case, and if the branch that was pushed to matches the branch specified in the `tag` attribute, then the update will be made according to the latest commit specified in the event.
 
 ## Extended Naming

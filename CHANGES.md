@@ -8,6 +8,7 @@
 * fixed saving issues with checkboxes
 * added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal)
 * Settings page now uses same function to update settings for both single/multisite
+* fixed `class Rest_Update` to avoid potential race conditions when RESTful endpoint is used as a webhook
 
 #### 5.5.0 / 2016-07-02
 * better internationalization for changing plugin _View details_ link
