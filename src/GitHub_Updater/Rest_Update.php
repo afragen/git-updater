@@ -204,20 +204,12 @@ class Rest_Update extends Base {
 	 *
 	 * @return array $response
 	 */
-	private function get_github_webhook_data() {
-		$request_body = file_get_contents('php://input');
-		$request_data = json_decode($request_body, TRUE);
+	private function parse_github_webhook( $request_data ) {
+		$response            = array();
+		$response['hash']    = $request_data['after'];
 		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
 
-		if ( !$request_data ) {
-			return NULL;
-		}
-
-		$res = array();
-		$res["webhook"] = "github";
-		$res["hash"] = $request_data["after"];
-
-		return $res;
+		return $response;
 	}
 
 	/**
@@ -227,20 +219,12 @@ class Rest_Update extends Base {
 	 *
 	 * @return array $response
 	 */
-	private function get_gitlab_webhook_data() {
-		$request_body = file_get_contents('php://input');
-		$request_data = json_decode($request_body, TRUE);
-
-		if ( !$request_data ) {
-			return NULL;
-		}
-
-		$res = array();
-		$res["webhook"] = "gitlab";
-		$res["hash"] = $request_data["after"];
+	private function parse_gitlab_webhook( $request_data ) {
+		$response            = array();
+		$response['hash']    = $request_data['after'];
 		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
 
-		return $res;
+		return $response;
 	}
 
 	/**
@@ -255,31 +239,23 @@ class Rest_Update extends Base {
 	 *
 	 * @return bool|array $response
 	 */
-	private function get_bitbucket_webhook_data() {
-		$request_body = file_get_contents('php://input');
-		$request_data = json_decode($request_body, TRUE);
-
-		if ( !$request_data ) {
-			return NULL;
-		}
-
-		$changes = $request_data["push"]["changes"];
+	private function parse_bitbucket_webhook( $request_data ) {
+		$changes = $request_data['push']['changes'];
 
 		// Just use the first entry, assume that it is the right one.
 		$change = $changes[0];
-		$new = $change["new"];
+		$new    = $change['new'];
 
 		// What else could this be? For now, just expect branch.
-		if ( $new["type"] != "branch" ) {
-			return NULL;
+		if ( 'branch' != $new['type'] ) {
+			return false;
 		}
 
-		$res = array();
-		$res["webhook"] = "bitbucket";
-		$res["hash"] = $new["target"]["hash"];
-		$res["branch"] = $new["name"];
+		$response            = array();
+		$response['hash']    = $new['target']['hash'];
+		$response['branch']  = $new['name'];
 
-		return $res;
+		return $response;
 	}
 
 	/**
@@ -289,23 +265,29 @@ class Rest_Update extends Base {
 	 * @return bool|array false if no data; array of parsed webhook response
 	 */
 	private function get_webhook_data() {
+		$request_body = file_get_contents( 'php://input' );
+		$request_data = json_decode( $request_body, true );
+
+		if ( empty( $request_data ) ) {
+			return false;
+		}
 
 		// GitHub
-		if ( $_SERVER["HTTP_X_GITHUB_EVENT"] == "push" ) {
-			return $this->get_github_webhook_data();
+		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+			return $this->parse_github_webhook( $request_data );
 		}
 
 		// Bitbucket
-		if ( $_SERVER["HTTP_X_EVENT_KEY"] == "repo:push" ) {
-			return $this->get_bitbucket_webhook_data();
+		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
+			return $this->parse_bitbucket_webhook( $request_data );
 		}
 
 		// GitLab
-		if ( $_SERVER["HTTP_X_GITLAB_EVENT"] == "Push Hook" ) {
-			return $this->get_gitlab_webhook_data();
+		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ) {
+			return $this->parse_gitlab_webhook( $request_data );
 		}
 
-		return NULL;
+		return false;
 	}
 
 	/**
@@ -336,9 +318,13 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			$hook_data = $this->get_webhook_data();
-			if ($hook_data && $tag == $hook_data["branch"]) {
-				$tag = $hook_data["hash"];
+			/**
+			 * Parse webhook response and convert 'tag' to 'committish'.
+			 * This will avoid potential race conditions.
+			 */
+			$webhook_response = $this->get_webhook_data();
+			if ( $webhook_response && $tag === $webhook_response['branch'] ) {
+				$tag = $webhook_response['hash'];
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
@@ -370,14 +356,6 @@ class Rest_Update extends Base {
 		if ( $show_updates ) {
 			$response = $this->show_updates( $response );
 		}
-
-		if ( $hook_data ) {
-			$response["webhook"] = $hook_data["webhook"];
-		}
-
-		// Log the response for debugging. Should be commented out in
-		// checked in code. Should we have some proper logging facility?
-		// file_put_contents(__DIR__."/request.txt",print_r($response,TRUE));
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
