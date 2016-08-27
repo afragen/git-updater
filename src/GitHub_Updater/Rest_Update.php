@@ -220,6 +220,28 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * Parse GitLab webhook data.
+	 */
+	private function get_gitlab_webhook_data() {
+		$request_body = file_get_contents('php://input');
+		$request_data = json_decode($request_body, TRUE);
+
+		if ( !$request_data ) {
+			return NULL;
+		}
+
+		$res = array();
+		$res["webhook"] = "gitlab";
+		$res["hash"] = $request_data["after"];
+		$res["branch"] = substr(
+			$request_data["ref"],
+			strrpos($request_data["ref"], '/') + 1
+		);
+
+		return $res;
+	}
+
+	/**
 	 * Parse Bitbucket webhook data.
 	 *
 	 * We assume here that changes contains one single entry, not sure if
@@ -279,6 +301,11 @@ class Rest_Update extends Base {
 		// Bitbucket
 		if ( $_SERVER["HTTP_X_EVENT_KEY"] == "repo:push" ) {
 			return $this->get_bitbucket_webhook_data();
+		}
+
+		// GitLab
+		if ( $_SERVER["HTTP_X_GITLAB_EVENT"] == "Push Hook" ) {
+			return $this->get_gitlab_webhook_data();
 		}
 
 		return NULL;
@@ -350,6 +377,10 @@ class Rest_Update extends Base {
 		if ( $hook_data ) {
 			$response["webhook"] = $hook_data["webhook"];
 		}
+
+		// Log the response for debugging. Should be commented out in
+		// checked in code. Should we have some proper logging facility?
+		// file_put_contents(__DIR__."/request.txt",print_r($response,TRUE));
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
