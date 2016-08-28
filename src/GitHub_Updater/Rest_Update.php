@@ -48,8 +48,8 @@ class Rest_Update extends Base {
 	/**
 	 * Update plugin.
 	 *
-	 * @param  string $plugin_slug
-	 * @param string  $tag
+	 * @param string $plugin_slug
+	 * @param string $tag
 	 *
 	 * @throws \Exception
 	 */
@@ -198,100 +198,8 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Parses GitHub webhook data.
-	 *
-	 * @param array $request_data
-	 *
-	 * @return array $response
-	 */
-	private function parse_github_webhook( $request_data ) {
-		$response            = array();
-		$response['hash']    = $request_data['after'];
-		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
-
-		return $response;
-	}
-
-	/**
-	 * Parses GitLab webhook data.
-	 *
-	 * @param array $request_data
-	 *
-	 * @return array $response
-	 */
-	private function parse_gitlab_webhook( $request_data ) {
-		$response            = array();
-		$response['hash']    = $request_data['after'];
-		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
-
-		return $response;
-	}
-
-	/**
-	 * Parses Bitbucket webhook data.
-	 *
-	 * We assume here that changes contains one single entry, not sure if
-	 * this is a safe assumption:
-	 *
-	 * @link http://stackoverflow.com/questions/39165255/how-do-i-get-the-latest-hash-from-a-bitbucket-push-payload-why-is-changes-an
-	 *
-	 * @param array $request_data
-	 *
-	 * @return bool|array $response
-	 */
-	private function parse_bitbucket_webhook( $request_data ) {
-		$changes = $request_data['push']['changes'];
-
-		// Just use the first entry, assume that it is the right one.
-		$change = $changes[0];
-		$new    = $change['new'];
-
-		// What else could this be? For now, just expect branch.
-		if ( 'branch' != $new['type'] ) {
-			return false;
-		}
-
-		$response            = array();
-		$response['hash']    = $new['target']['hash'];
-		$response['branch']  = $new['name'];
-
-		return $response;
-	}
-
-	/**
-	 * Checks the headers of the request and sends webhook data to be parsed.
-	 * If the request did not come from a webhook, this function returns false.
-	 *
-	 * @return bool|array false if no data; array of parsed webhook response
-	 */
-	private function get_webhook_data() {
-		$request_body = file_get_contents( 'php://input' );
-		$request_data = json_decode( $request_body, true );
-
-		if ( empty( $request_data ) ) {
-			return false;
-		}
-
-		// GitHub
-		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
-			return $this->parse_github_webhook( $request_data );
-		}
-
-		// Bitbucket
-		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
-			return $this->parse_bitbucket_webhook( $request_data );
-		}
-
-		// GitLab
-		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ) {
-			return $this->parse_gitlab_webhook( $request_data );
-		}
-
-		return false;
-	}
-
-	/**
 	 * Process request.
+	 *
 	 * Relies on data in $_REQUEST, prints out json and exits.
 	 * If the request came through a webhook, and if the branch in the
 	 * webhook matches the branch specified by the url, use the latest
@@ -367,4 +275,98 @@ class Rest_Update extends Base {
 		echo json_encode( $response, $json_encode_flags ) . "\n";
 		exit;
 	}
+
+	/**
+	 * Checks the headers of the request and sends webhook data to be parsed.
+	 * If the request did not come from a webhook, this function returns false.
+	 *
+	 * @return bool|array false if no data; array of parsed webhook response
+	 */
+	private function get_webhook_data() {
+		$request_body = file_get_contents( 'php://input' );
+		$request_data = json_decode( $request_body, true );
+
+		if ( empty( $request_data ) ) {
+			return false;
+		}
+
+		// GitHub
+		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+			return $this->parse_github_webhook( $request_data );
+		}
+
+		// Bitbucket
+		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
+			return $this->parse_bitbucket_webhook( $request_data );
+		}
+
+		// GitLab
+		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ) {
+			return $this->parse_gitlab_webhook( $request_data );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Parses GitHub webhook data.
+	 *
+	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
+	 *
+	 * @param array $request_data
+	 *
+	 * @return array $response
+	 */
+	private function parse_github_webhook( $request_data ) {
+		$response           = array();
+		$response['hash']   = $request_data['after'];
+		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+
+		return $response;
+	}
+
+	/**
+	 * Parses GitLab webhook data.
+	 *
+	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
+	 *
+	 * @param array $request_data
+	 *
+	 * @return array $response
+	 */
+	private function parse_gitlab_webhook( $request_data ) {
+		$response           = array();
+		$response['hash']   = $request_data['after'];
+		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+
+		return $response;
+	}
+
+	/**
+	 * Parses Bitbucket webhook data.
+	 *
+	 * We assume here that changes contains one single entry and that first
+	 * entry is the correct one.
+	 *
+	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
+	 *
+	 * @param array $request_data
+	 *
+	 * @return bool|array $response
+	 */
+	private function parse_bitbucket_webhook( $request_data ) {
+		$new = $request_data['push']['changes'][0]['new'];
+
+		// What else could this be? For now, just expect branch.
+		if ( empty( $new ) || 'branch' != $new['type'] ) {
+			return false;
+		}
+
+		$response           = array();
+		$response['hash']   = $new['target']['hash'];
+		$response['branch'] = $new['name'];
+
+		return $response;
+	}
+
 }
