@@ -9,6 +9,7 @@
 * added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal)
 * Settings page now uses same function to update settings for both single/multisite
 * temporary fix for AJAX updates of private Bitbucket repos [#432](https://github.com/afragen/github-updater/issues/432), can only do one per page load, not very AJAXy :P
+* fixed `class Rest_Update` to avoid potential race conditions when RESTful endpoint is used as a webhook
 
 #### 5.5.0 / 2016-07-02
 * better internationalization for changing plugin _View details_ link

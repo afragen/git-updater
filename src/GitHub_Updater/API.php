@@ -93,7 +93,7 @@ abstract class API extends Base {
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
 		}
-		
+
 		return $arr;
 	}
 
