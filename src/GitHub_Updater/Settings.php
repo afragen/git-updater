@@ -360,8 +360,6 @@ class Settings extends Base {
 
 	/**
 	 * Create and return settings fields for private repositories.
-	 *
-	 * @return void
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
@@ -439,18 +437,19 @@ class Settings extends Base {
 			$setting_field['title'] = $type . $token->name;
 			$setting_field['page']  = 'github_updater_install_settings';
 
-			switch ( $token->type ) {
-				case ( strpos( $token->type, 'github' ) ):
+			$token_type = explode( '_', $token->type );
+			switch ( $token_type[0] ) {
+				case 'github':
 					$setting_field['section']         = 'github_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case ( strpos( $token->type, 'bitbucket' ) ):
+				case 'bitbucket':
 					$setting_field['section']         = 'bitbucket_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case ( strpos( $token->type, 'gitlab' ) ):
+				case 'gitlab':
 					$setting_field['section']         = 'gitlab_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
