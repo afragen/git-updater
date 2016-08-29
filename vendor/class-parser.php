@@ -1,11 +1,6 @@
 <?php
 
 /**
- * Minor modifications by Andy Fragen.
- * Needed to account for changelog elements.
- */
-
-/**
  * WordPress.org Plugin Readme Parser.
  *
  * Based on Baikonur_ReadmeParser from https://github.com/rmccue/WordPress-Readme-Parser
@@ -70,6 +65,11 @@ class Parser {
 	public $screenshots = array();
 
 	/**
+	 * @var array
+	 */
+	public $faq = array();
+
+	/**
 	 * These are the readme sections that we expect.
 	 *
 	 * @var array
@@ -125,11 +125,16 @@ class Parser {
 	/**
 	 * @param string $file
 	 *
-	 * @return bool|object
+	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
+
+		/**
+		 * Mod for GitHub Updater.
+		 */
 		//$contents = file_get_contents( $file );
 		$contents = $file;
+
 		$contents = preg_split( '!\R!', $contents );
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
@@ -268,19 +273,6 @@ class Parser {
 				}
 				continue;
 			}
-			/**
-			 * Add changelog elements account for older style `= 1.0 =`
-			 *
-			 * @author Andy Fragen
-			 */
-			if ( 'changelog' === $section_name ) {
-				if ( '=' === $line[0] ) {
-					$current .= '<h4>' . trim( $line, "= \t" ) . '</h4>';
-					continue;
-				}
-				$current .= "\n" . $line . "\n";
-				continue;
-			}
 
 			$current .= $line . "\n";
 		}
@@ -294,7 +286,7 @@ class Parser {
 
 		// Use the first line of the description for the short description if not provided.
 		if ( empty( $this->short_description ) && ! empty( $this->sections['description'] ) ) {
-			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) );
+			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
 		}
 
 		// Use the short description for the description section if not provided.
@@ -304,36 +296,21 @@ class Parser {
 
 		// Parse out the Upgrade Notice section into it's own data.
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
-			$lines   = explode( "\n", $this->sections['upgrade_notice'] );
-			$version = null;
-			$current = '';
-			while ( ( $line = array_shift( $lines ) ) !== null ) {
-				$trimmed = trim( $line );
-				if ( empty( $trimmed ) ) {
-					continue;
-				}
-
-				if ( '=' === $trimmed[0] || '#' === $trimmed[0] ) {
-					if ( ! empty( $current ) ) {
-						$this->upgrade_notice[ $version ] = $this->sanitize_text( trim( $current ) );
-					}
-
-					$current = '';
-					$version = trim( $line, "#= \t" );
-					continue;
-				}
-
-				$current .= $line . "\n";
-			}
-			if ( ! empty( $version ) && ! empty( $current ) ) {
-				$this->upgrade_notice[ $version ] = $this->sanitize_text( trim( $current ) );
-			}
+			$this->upgrade_notice = $this->parse_section( $this->sections['upgrade_notice'] );
+			$this->upgrade_notice = array_map( array( $this, 'sanitize_text' ), $this->upgrade_notice );
 			unset( $this->sections['upgrade_notice'] );
+		}
+
+		// Display FAQs as a definition list.
+		if ( isset( $this->sections['faq'] ) ) {
+			$this->faq             = $this->parse_section( $this->sections['faq'] );
+			$this->sections['faq'] = '';
 		}
 
 		// Markdownify!
 		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
 		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
+		$this->faq            = array_map( array( $this, 'parse_markdown' ), $this->faq );
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
@@ -352,11 +329,26 @@ class Parser {
 			unset( $this->sections['screenshots'] );
 		}
 
+		if ( ! empty( $this->faq ) ) {
+			// If the FAQ contained data we couldn't parse, we'll treat it as freeform and display it before any questions which are found.
+			if ( isset( $this->faq[''] ) ) {
+				$this->sections['faq'] .= $this->faq[''];
+				unset( $this->faq[''] );
+			}
+
+			if ( $this->faq ) {
+				$this->sections['faq'] .= "\n<dl>\n";
+				foreach ( $this->faq as $question => $answer ) {
+					$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
+				}
+				$this->sections['faq'] .= "\n</dl>\n";
+			}
+		}
+
 		// Filter the HTML.
 		$this->sections = array_map( array( $this, 'filter_text' ), $this->sections );
 
-		//return true;
-		return $this;
+		return true;
 	}
 
 	/**
@@ -436,6 +428,9 @@ class Parser {
 			'strong'     => true,
 			'ul'         => true,
 			'ol'         => true,
+			'dl'         => true,
+			'dt'         => true,
+			'dd'         => true,
 			'li'         => true,
 			'h3'         => true,
 			'h4'         => true,
@@ -518,6 +513,53 @@ class Parser {
 		}
 
 		return $stable_tag;
+	}
+
+	/**
+	 * Parses a slice of lines from the file into an array of Heading => Content.
+	 *
+	 * We assume that every heading encountered is a new item, and not a sub heading.
+	 * We support headings which are either `= Heading`, `# Heading` or `** Heading`.
+	 *
+	 * @param string|array $lines The lines of the section to parse.
+	 *
+	 * @return array
+	 */
+	protected function parse_section( $lines ) {
+		$key    = $value = '';
+		$return = array();
+
+		if ( ! is_array( $lines ) ) {
+			$lines = explode( "\n", $lines );
+		}
+
+		while ( ( $line = array_shift( $lines ) ) !== null ) {
+			$trimmed = trim( $line );
+			if ( ! $trimmed ) {
+				$value .= "\n";
+				continue;
+			}
+
+			// Normal headings (##.. == ... ==) are matched if they exist, Bold is only used if it starts and ends the line.
+			if ( $trimmed[0] == '#' || $trimmed[0] == '=' || ( substr( $trimmed, 0, 2 ) == '**' && substr( $trimmed, - 2 ) == '**' ) ) {
+				if ( $value ) {
+					$return[ $key ] = trim( $value );
+				}
+
+				$value = '';
+				// Trim off the first character of the line, as we know that's the heading style we're expecting to remove.
+				$key = trim( $line, $trimmed[0] . " \t" );
+				continue;
+			}
+
+			$value .= $line . "\n";
+		}
+
+		if ( $key || $value ) {
+			$return[ $key ] = trim( $value );
+		}
+
+		return $return;
 	}
 
 	/**

@@ -71,22 +71,4 @@ class Readme_Parser extends \Parser {
 		return $users;
 	}
 
-	/**
-	 * @access protected
-	 *
-	 * @param string|array $text
-	 *
-	 * @return string
-	 */
-	protected function sanitize_text( $text ) { // not fancy
-		if ( is_array( $text ) ) {
-			$text = implode( "\n", $text );
-		}
-		$text = strip_tags( $text );
-		$text = esc_html( $text );
-		$text = trim( $text );
-
-		return $text;
-	}
-
 }
