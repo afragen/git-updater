@@ -1,5 +1,5 @@
 # GitHub Updater
-Contributors: afragen, garyj, sethmatics
+Contributors: afragen, garyj, sethmatics, limikael
 Donate link: http://thefragens.com/github-updater-donate
 Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 Requires at least: 4.0
