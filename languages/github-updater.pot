@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-08-01 09:46-0700\n"
+"POT-Creation-Date: 2016-08-29 15:56-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:544
+#: src/GitHub_Updater/Base.php:545
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -164,19 +164,19 @@ msgstr ""
 msgid "Available Updates"
 msgstr ""
 
-#: src/GitHub_Updater/Rest_Update.php:215
+#: src/GitHub_Updater/Rest_Update.php:219
 msgid "Bad api key."
 msgstr ""
 
-#: src/GitHub_Updater/Rest_Update.php:233
+#: src/GitHub_Updater/Rest_Update.php:245
 msgid "No plugin or theme specified for update."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:76 src/GitHub_Updater/Settings.php:773
+#: src/GitHub_Updater/Settings.php:76 src/GitHub_Updater/Settings.php:764
 msgid "Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:79 src/GitHub_Updater/Settings.php:511
+#: src/GitHub_Updater/Settings.php:79 src/GitHub_Updater/Settings.php:507
 msgid "Remote Management"
 msgstr ""
 
@@ -263,62 +263,62 @@ msgstr ""
 msgid "No private repositories are installed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:557
+#: src/GitHub_Updater/Settings.php:547
 #, php-format
 msgid "Extended Naming is %sactive%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:562
+#: src/GitHub_Updater/Settings.php:552
 #, php-format
 msgid "Extended Naming is %snot active%s."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:564
+#: src/GitHub_Updater/Settings.php:554
 #, php-format
 msgid ""
 "Extended Naming renames plugin directories %s to prevent possible conflicts "
 "with WP.org plugins."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:565
+#: src/GitHub_Updater/Settings.php:555
 #, php-format
 msgid "Activate Extended Naming by setting %s"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:566
+#: src/GitHub_Updater/Settings.php:556
 msgid "Check to enable branch switching from the Plugins or Themes page."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:573
+#: src/GitHub_Updater/Settings.php:563
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:580
+#: src/GitHub_Updater/Settings.php:570
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
 "API access limits."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:587
+#: src/GitHub_Updater/Settings.php:577
 msgid ""
 "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:594
+#: src/GitHub_Updater/Settings.php:584
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:601
+#: src/GitHub_Updater/Settings.php:591
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:616
+#: src/GitHub_Updater/Settings.php:606
 msgid ""
 "Please refer to README for complete list of attributes. RESTful endpoints "
 "begin at:"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:620
+#: src/GitHub_Updater/Settings.php:610
 msgid ""
 "Use of Remote Management services may result increase some page load speeds "
 "only for `admin` level users in the dashboard."
