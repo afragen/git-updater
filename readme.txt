@@ -48,11 +48,11 @@ The following headers are available for use depending upon your hosting source.
 
 There are two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
-Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
+Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 4.0`
 
 Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
 
-At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
+At the moment the default values are **WordPress 4.0** and **PHP 5.3.0**
 
 ## Release Assets
 
