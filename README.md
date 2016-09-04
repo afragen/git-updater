@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
 
 # GitHub Updater
-* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.0
 * Requires PHP: 5.3
@@ -111,7 +111,7 @@ GitHub Branch:     master
 
 There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
 
-~~~css
+~~~php
 /*
 Theme Name:       Test
 Theme URI:        http://thefragens.net/
@@ -326,6 +326,8 @@ When using the RESTful endpoints for updating themes or plugins, you need to spe
 The RESTful endpoints are useful for automatically updating themes and plugins on events sent as webhooks from GitHub and the other services supported by this plugin. Some special functionality has been implemented to support this in order avoid race conditions, i.e. to make sure that the updated version is really the version that was just pushed to the repository. Specifically, GitHub Updater checks the headers to see if the incoming request is from a 
 [GitHub Webhook](https://developer.github.com/v3/activity/events/types/#pushevent), a [Bitbucket Webhook](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-Push) or a [GitLab Webhook](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md#push-events). If this is the case, and if the branch that was pushed to matches the branch specified in the `tag` attribute, then the update will be made according to the latest commit specified in the event.
 
+Thanks to [Mikael Lindqvist](https://github.com/limikael) for the PRs, he really made this happen.
+
 ## Extended Naming
 
 There's a hidden preference to use extended naming for plugin directories. Extended Naming follows the convention `<git>-<owner>-<repo>`. The normal method is to name the plugin directory `<repo>`. Unfortunately there may be a _potential_ conflict with a WP.org plugin. This preference mitigates that potential conflict. If you switch between normal and extended naming you might have to reactivate your plugins.
@@ -405,7 +407,7 @@ The plugin updater class was originally based upon [codepress/github-plugin-upda
 Includes
 
 * [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
-* [Mark Jaquith's](https://github.com/markjaquith) [WordPress Plugin Readme Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser/tree/WordPress.org) for parsing `readme.txt`.
+* [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php) for parsing `readme.txt`.
 * [Coen Jacobs'](https://github.com/coenjacobs) [WPupdatePHP library](https://github.com/WPupdatePHP/wp-update-php)
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
