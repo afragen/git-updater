@@ -465,6 +465,8 @@ class Plugin extends Base {
 					'new_version' => $plugin->remote_version,
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,
+					'branch'      => $plugin->branch,
+					'branches'    => array_keys( $plugin->branches ),
 				);
 
 				/*

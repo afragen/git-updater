@@ -689,6 +689,8 @@ class Theme extends Base {
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
+				'branch'      => $theme->branch,
+				'branches'    => array_keys( $theme->branches ),
 			);
 
 			if ( $this->can_update( $theme ) ) {
