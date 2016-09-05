@@ -121,7 +121,7 @@
 * updated POT file
 
 #### 5.0.1 / 2015-08-18
-* updated to current `erusev/p``arsedown` release, fixes PHP7 issue
+* updated to current `erusev/parsedown` release, fixes PHP7 issue
 * updated to current `WPupdatePHP/wp-update-php/release-1-1-0` branch
 
 #### 5.0.0 / 2015-08-15
@@ -481,7 +481,7 @@
 * refactored `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` to use stdClass objects
 * further refactored base class `GitHub_Updater` to contain renaming code and create stdClass objects for data.
 * added some ability to see changelog for GitHub hosted plugins.
-* trying to follow <a href="https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate">WordPress Plugin Boilerplate</a>, so renamed `classes` to `includes`
+* trying to follow [WordPress Plugin Boilerplate](https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate), so renamed `classes` to `includes`
 * refactored putting all remote api calls in new `class GitHub_Plugin_Updater_API`.
 * Theme updating should now be able to have a specified branch.
 * works on WordPress 3.8
