@@ -282,6 +282,8 @@ Please go the Remote Management tab of the Settings page and check which remote 
 
 ### RESTful Endpoints for Remote Management
 
+For a tutorial, see: [Continuous Integration for WordPress](https://medium.com/@limikael/continuous-integration-for-wordpress-d152ec4852e5)
+
 GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the RESTful endpoints are available in GitHub Updater to update themes and plugins to the latest version from their repositories.
 
 On the Remote Management tab, you will see a URL that serves as the endpoint for this. This url will look something like this:
