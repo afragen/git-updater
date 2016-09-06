@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
 "POT-Creation-Date: 2016-09-05 14:12-0700\n"
-"PO-Revision-Date: 2016-09-05 14:12-0700\n"
+"PO-Revision-Date: 2016-09-06 16:02+0300\n"
 "Last-Translator: Corneliu Cirlan <corneliu@corneliucirlan.com>\n"
 "Language-Team: Corneliu Cirlan\n"
 "Language: ro_RO\n"
@@ -200,9 +200,8 @@ msgid "GitHub Updater"
 msgstr "GitHub Updater"
 
 #: src/GitHub_Updater/Settings.php:142
-#, fuzzy
 msgid "Settings saved."
-msgstr "Setari"
+msgstr "Setari salvate."
 
 #: src/GitHub_Updater/Settings.php:146
 msgid "RESTful key reset."
@@ -210,11 +209,11 @@ msgstr "Resetare cheie RESTful"
 
 #: src/GitHub_Updater/Settings.php:150
 msgid "Transients refreshed."
-msgstr ""
+msgstr "Tranzitori improspatati."
 
 #: src/GitHub_Updater/Settings.php:157
 msgid "Refresh Transients"
-msgstr ""
+msgstr "Improspateaza Tranzitori"
 
 #: src/GitHub_Updater/Settings.php:182
 msgid "Reset RESTful key"
