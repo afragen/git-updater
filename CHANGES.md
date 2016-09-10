@@ -11,7 +11,7 @@
 * temporary fix for AJAX updates of private Bitbucket repos [#432](https://github.com/afragen/github-updater/issues/432), can only do one per page load, not very AJAXy :P
 * fixed `class Rest_Update` to avoid potential race conditions when RESTful endpoint is used as a webhook
 * added `branch` and `branches` to update transient, might be able to use this in RESTful update sometime
-
+* fixed extended naming when installing forks of plugins and plugins
 
 #### 5.5.0 / 2016-07-02
 * better internationalization for changing plugin _View details_ link
