@@ -373,7 +373,7 @@ class GitHub_API extends API {
 				$response = json_decode( $contents );
 
 				foreach ( $response as $locale ) {
-					$response->{$locale->language}->package = 'https://raw.github.com/' . $headers['owner'] . '/' . $headers['repo'] . $locale->package;
+					$response->{$locale->language}->package = 'https://github.com/' . $headers['owner'] . '/' . $headers['repo'] . '/blob/master' . $locale->package . '?raw=true';
 					$type                                   = explode( '_', $this->type->type );
 					$response->{$locale->language}->type    = $type[1];
 					$response->{$locale->language}->version = $this->type->remote_version;
