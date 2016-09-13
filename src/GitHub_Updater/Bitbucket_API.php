@@ -255,7 +255,7 @@ class Bitbucket_API extends API {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->_add_meta_repo_object();
+		$this->add_meta_repo_object();
 
 		return true;
 	}
@@ -350,7 +350,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @access private
 	 */
-	private function _add_meta_repo_object() {
+	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;

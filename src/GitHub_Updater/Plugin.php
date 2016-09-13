@@ -206,10 +206,8 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['dot_org']                 = false;
-			}
-			if ( isset( $all_plugins[ $plugin ]->id ) ) {
-				$git_plugin['dot_org'] = true;
+				$git_plugin['dot_org']                 = isset( $all_plugins[ $plugin ]->id ) ? true : false;
+				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
