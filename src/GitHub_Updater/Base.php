@@ -43,6 +43,8 @@ class Base {
 	 */
 	protected $repo_api;
 
+	protected $languages;
+
 	/**
 	 * Variable for setting update transient hours.
 	 *
@@ -105,6 +107,7 @@ class Base {
 		'branch'     => 'Branch',
 		'enterprise' => 'Enterprise',
 		'gitlab_ce'  => 'CE',
+		'languages'  => 'Languages',
 	);
 
 	/**
@@ -393,6 +396,7 @@ class Base {
 			$this->repo_api->get_remote_branches();
 			$repo->download_link = $this->repo_api->construct_download_link();
 		}
+		$this->languages = new Language_Pack( $repo, $this->repo_api );
 
 		return true;
 	}

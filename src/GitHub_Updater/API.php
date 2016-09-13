@@ -48,6 +48,8 @@ abstract class API extends Base {
 
 	abstract public function construct_download_link();
 
+	abstract public function get_language_pack( $headers );
+
 	abstract protected function add_endpoints( $git, $endpoint );
 
 	/**

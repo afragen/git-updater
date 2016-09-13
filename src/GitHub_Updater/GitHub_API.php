@@ -349,6 +349,43 @@ class GitHub_API extends API {
 	}
 
 	/**
+	 * Get/process Language Packs.
+	 * Language Packs cannot reside on GitHub Enterprise.
+	 *
+	 * @TODO Figure out how to serve raw file from GitHub Enterprise.
+	 *
+	 * @param array $headers Array of headers of Language Pack.
+	 *
+	 * @return bool If invalid response.
+	 */
+	public function get_language_pack( $headers ) {
+		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
+			if ( $response ) {
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
+
+				foreach ( $response as $locale ) {
+					$response->{$locale->language}->package = 'https://raw.github.com/' . $headers['owner'] . '/' . $headers['repo'] . $locale->package;
+					$type                                   = explode( '_', $this->type->type );
+					$response->{$locale->language}->type    = $type[1];
+					$response->{$locale->language}->version = $this->type->remote_version;
+				}
+
+				$this->set_transient( 'languages', $response );
+			}
+		}
+		$this->type->language_packs = $response;
+	}
+
+	/**
 	 * Add appropriate access token to endpoint.
 	 *
 	 * @param $git
@@ -398,6 +435,14 @@ class GitHub_API extends API {
 		}
 
 		$endpoint = $this->_add_access_token_endpoint( $git, $endpoint );
+		/*
+		 * Remove branch endpoint if a translation file.
+		 */
+		$repo = explode( '/', $endpoint );
+		if ( isset( $repo[3] ) && $repo[3] !== $git->type->repo ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+		}
+
 
 		/*
 		 * If using GitHub Enterprise header return this endpoint.

@@ -386,6 +386,8 @@ class GitLab_API extends API {
 		return $download_link_base . $endpoint;
 	}
 
+	public function get_language_pack( $headers ) {}
+
 	/**
 	 * Add remote data to type object.
 	 *

@@ -136,9 +136,15 @@ class Plugin extends Base {
 			foreach ( (array) self::$extra_headers as $value ) {
 				$repo_enterprise_uri = null;
 				$repo_enterprise_api = null;
+				$repo_languages      = null;
+
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Release Asset' ) ) ) {
+					continue;
+				}
 
 				if ( empty( $headers[ $value ] ) ||
-				     false === stristr( $value, 'Plugin' )
+				     ( false === stristr( $value, 'Plugin' ) &&
+				       false === stristr( $value, 'Languages' ) )
 				) {
 					continue;
 				}
@@ -155,7 +161,15 @@ class Plugin extends Base {
 					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
 					     ! empty( $headers[ $repo_parts[ $part ] ] )
 					) {
-						$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+						switch ( $part ) {
+							case 'languages':
+								$repo_languages = $headers[ $repo_parts[ $part ] ];
+								break;
+							case 'enterprise':
+							case 'gitlab_ce':
+								$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+								break;
+						}
 					}
 				}
 
@@ -458,6 +472,7 @@ class Plugin extends Base {
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
+			$locale = get_locale();
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
@@ -486,6 +501,9 @@ class Plugin extends Base {
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
+				if ( isset( $plugin->language_packs ) && array_key_exists( $locale, $plugin->language_packs ) ) {
+					$transient->translations[] = (array) $plugin->language_packs->$locale;
+				}
 			}
 		}
 
