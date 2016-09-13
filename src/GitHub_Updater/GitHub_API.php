@@ -244,7 +244,7 @@ class GitHub_API extends API {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->_add_meta_repo_object();
+		$this->add_meta_repo_object();
 
 		return true;
 	}
@@ -343,7 +343,7 @@ class GitHub_API extends API {
 			$endpoint = $branch_switch;
 		}
 
-		$endpoint = $this->_add_access_token_endpoint( $this, $endpoint );
+		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
 	}
@@ -356,7 +356,7 @@ class GitHub_API extends API {
 	 *
 	 * @return string
 	 */
-	private function _add_access_token_endpoint( $git, $endpoint ) {
+	private function add_access_token_endpoint( $git, $endpoint ) {
 		// Add GitHub.com access token.
 		if ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
@@ -397,7 +397,7 @@ class GitHub_API extends API {
 			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 		}
 
-		$endpoint = $this->_add_access_token_endpoint( $git, $endpoint );
+		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
 		 * If using GitHub Enterprise header return this endpoint.
@@ -414,7 +414,7 @@ class GitHub_API extends API {
 	 *
 	 * @access private
 	 */
-	private function _add_meta_repo_object() {
+	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->pushed_at;
 		$this->type->num_ratings  = $this->type->repo_meta->watchers;

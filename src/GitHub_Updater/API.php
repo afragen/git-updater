@@ -109,7 +109,7 @@ abstract class API extends Base {
 	 */
 	protected function api( $url ) {
 		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $this->_get_api_url( $url ) );
+		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
@@ -149,7 +149,7 @@ abstract class API extends Base {
 	 *
 	 * @return string $endpoint
 	 */
-	private function _get_api_url( $endpoint ) {
+	private function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner' => $this->type->owner,
