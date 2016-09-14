@@ -1,11 +1,13 @@
 #### [unreleased]
+
+#### 5.6.0 / 2016-09-14
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
 * switched to slightly modified version of [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php), now accepts _Markdownified_ readme.txt files
 * fixed re-activation of RESTful plugin update, multisite vs single site
 * when creating Settings page, check current Plugin/Theme class instance, not transient. Fixes issue where remote install of private repo not having private settings saved.
 * fixed PHP errors in Settings page
-* fixed saving issues with checkboxes
+* fixed saving issues with checkboxes during remote install of private Bitbucket repo
 * added one day dismissal of admin notices using [persist-admin-notices-dismissal library](https://github.com/collizo4sky/persist-admin-notices-dismissal)
 * Settings page now uses same function to update settings for both single/multisite
 * temporary fix for AJAX updates of private Bitbucket repos [#432](https://github.com/afragen/github-updater/issues/432), can only do one per page load, not very AJAXy :P
