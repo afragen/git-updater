@@ -35,12 +35,19 @@ abstract class API extends Base {
 	 * The following functions must be in any repository API.
 	 */
 	abstract public function get_remote_info( $file );
+
 	abstract public function get_remote_tag();
+
 	abstract public function get_remote_changes( $changes );
+
 	abstract public function get_remote_readme();
+
 	abstract public function get_repo_meta();
+
 	abstract public function get_remote_branches();
+
 	abstract public function construct_download_link();
+
 	abstract protected function add_endpoints( $git, $endpoint );
 
 	/**
@@ -65,28 +72,26 @@ abstract class API extends Base {
 	 * @return array
 	 */
 	protected function return_repo_type() {
-		$arr = array();
-		switch ( $this->type->type ) {
-			case ( stristr( $this->type->type, 'github' ) ):
+		$type        = explode( '_', $this->type->type );
+		$arr         = array();
+		$arr['type'] = $type[1];
+
+		switch ( $type[0] ) {
+			case 'github':
 				$arr['repo']          = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
 				$arr['base_download'] = 'https://github.com';
 				break;
-			case ( stristr( $this->type->type, 'bitbucket' ) ):
+			case 'bitbucket':
 				$arr['repo']          = 'bitbucket';
 				$arr['base_uri']      = 'https://bitbucket.org/api';
 				$arr['base_download'] = 'https://bitbucket.org';
 				break;
-			case ( stristr( $this->type->type, 'gitlab' ) ):
+			case 'gitlab':
 				$arr['repo']          = 'gitlab';
 				$arr['base_uri']      = 'https://gitlab.com/api/v3';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
-		}
-		if ( false !== stristr( $this->type->type, 'plugin' ) ) {
-			$arr['type'] = 'plugin';
-		} elseif ( false !== stristr( $this->type->type, 'theme' ) ) {
-			$arr['type'] = 'theme';
 		}
 
 		return $arr;
@@ -104,7 +109,7 @@ abstract class API extends Base {
 	 */
 	protected function api( $url ) {
 		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $this->_get_api_url( $url ) );
+		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
@@ -144,7 +149,7 @@ abstract class API extends Base {
 	 *
 	 * @return string $endpoint
 	 */
-	private function _get_api_url( $endpoint ) {
+	private function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner' => $this->type->owner,

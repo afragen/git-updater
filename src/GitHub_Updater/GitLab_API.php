@@ -221,8 +221,9 @@ class GitLab_API extends API {
 
 		}
 		if ( $response && isset( $response->content ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( base64_decode( $response->content ) );
+			$file     = base64_decode( $response->content );
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
 			$this->set_transient( 'readme', $response );
 		}
 
@@ -269,7 +270,7 @@ class GitLab_API extends API {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->_add_meta_repo_object();
+		$this->add_meta_repo_object();
 
 		return true;
 	}
@@ -390,7 +391,7 @@ class GitLab_API extends API {
 	 *
 	 * @access private
 	 */
-	private function _add_meta_repo_object() {
+	private function add_meta_repo_object() {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
 		//$this->type->num_ratings  = $this->type->repo_meta->watchers;

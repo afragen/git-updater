@@ -49,7 +49,7 @@ class Theme extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			$this->delete_all_transients( 'themes' );
 		}
 
@@ -80,6 +80,8 @@ class Theme extends Base {
 
 	/**
 	 * Returns an array of configurations for the known themes.
+	 *
+	 * @return array
 	 */
 	public function get_theme_configs() {
 		return $this->config;
@@ -240,7 +242,7 @@ class Theme extends Base {
 				}
 			}
 		}
-		$this->make_force_check_transient( 'themes' );
+		$this->make_transient_list( 'themes' );
 		$this->load_pre_filters();
 	}
 
@@ -687,6 +689,8 @@ class Theme extends Base {
 				'new_version' => $theme->remote_version,
 				'url'         => $theme->uri,
 				'package'     => $theme->download_link,
+				'branch'      => $theme->branch,
+				'branches'    => array_keys( $theme->branches ),
 			);
 
 			if ( $this->can_update( $theme ) ) {

@@ -215,8 +215,9 @@ class Bitbucket_API extends API {
 		}
 
 		if ( $response && isset( $response->data ) ) {
-			$parser   = new Readme_Parser;
-			$response = $parser->parse_readme( $response->data );
+			$file     = $response->data;
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
 			$this->set_transient( 'readme', $response );
 		}
 
@@ -254,7 +255,7 @@ class Bitbucket_API extends API {
 		}
 
 		$this->type->repo_meta = $response;
-		$this->_add_meta_repo_object();
+		$this->add_meta_repo_object();
 
 		return true;
 	}
@@ -347,7 +348,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @access private
 	 */
-	private function _add_meta_repo_object() {
+	private function add_meta_repo_object() {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
@@ -429,5 +430,29 @@ class Bitbucket_API extends API {
 	 * @param $endpoint
 	 */
 	protected function add_endpoints( $git, $endpoint ) {}
+
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private Bitbucket repositories only during AJAX.
+	 *
+	 * @param $args
+	 * @param $url
+	 *
+	 * @return mixed
+	 */
+	public static function ajax_maybe_authenticate_http( $args, $url ) {
+		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
+		     ( isset( $_POST['slug'] ) && 1 == parent::$options[ $_POST['slug'] ] &&
+		       false !== stristr( $url, $_POST['slug'] ) )
+		) {
+			$username                         = parent::$options['bitbucket_username'];
+			$password                         = parent::$options['bitbucket_password'];
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+
+			return $args;
+		}
+
+		return $args;
+	}
 
 }

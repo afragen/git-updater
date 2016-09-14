@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
 
 # GitHub Updater
-* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/scarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.0
 * Requires PHP: 5.3
@@ -111,7 +111,7 @@ GitHub Branch:     master
 
 There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
 
-~~~css
+~~~php
 /*
 Theme Name:       Test
 Theme URI:        http://thefragens.net/
@@ -225,12 +225,6 @@ Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the
 
 **You must tag your releases to use this feature.**
 
-## Deleting Transients
-
-If you use the **Check Again** button in the WordPress Updates screen then all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour.
-
-Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
-
 ## Hosting Plugin in WP.org Repository
 
 If you develop your plugin on GitHub and it also resides in the WP.org repo, the plugin will preferentially pull updates from WP.org if `GitHub Branch: master`. If `GitHub Branch` is anything other than `master` then the update will pull from GitHub. Make sure that the version of your plugin uploaded to WP.org has `GitHub Branch: master`.
@@ -242,6 +236,12 @@ The same applies for Bitbucket or GitLab hosted plugins.
 From the `GitHub Updater Settings Page` there is a tabbed interface for remote installation of plugins or themes. You may use either a full URI or short `<owner>/<repo>` format. The URI is case sensitive, so make sure the repo name is correctly entered.
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
+
+## Refreshing Transients
+
+Use the **Refresh Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
+
+Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 
 ## Error Messages
 
@@ -281,6 +281,8 @@ Please go the Remote Management tab of the Settings page and check which remote 
 ![Remote Management Tab](./assets/screenshot-3.png)
 
 ### RESTful Endpoints for Remote Management
+
+For a tutorial, see: [Continuous Integration for WordPress](https://medium.com/@limikael/continuous-integration-for-wordpress-d152ec4852e5)
 
 GitHub Updater also supports other customized continuous integration workflows. It is possible to integrate with other services than those discussed above. For this, the RESTful endpoints are available in GitHub Updater to update themes and plugins to the latest version from their repositories.
 
@@ -322,6 +324,11 @@ And our plugin is updated! The messages displayed are those that otherwise would
 * __updates__ - Displays available updates.
 
 When using the RESTful endpoints for updating themes or plugins, you need to specify at least the `key` attribute, as well as one of the attributes `plugin`, `theme`, or `updates`. All other attributes are optional.
+
+The RESTful endpoints are useful for automatically updating themes and plugins on events sent as webhooks from GitHub and the other services supported by this plugin. Some special functionality has been implemented to support this in order avoid race conditions, i.e. to make sure that the updated version is really the version that was just pushed to the repository. Specifically, GitHub Updater checks the headers to see if the incoming request is from a 
+[GitHub Webhook](https://developer.github.com/v3/activity/events/types/#pushevent), a [Bitbucket Webhook](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-Push) or a [GitLab Webhook](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md#push-events). If this is the case, and if the branch that was pushed to matches the branch specified in the `tag` attribute, then the update will be made according to the latest commit specified in the event.
+
+Thanks to [Mikael Lindqvist](https://github.com/limikael) for the PRs, he really made this happen.
 
 ## Extended Naming
 
@@ -402,7 +409,7 @@ The plugin updater class was originally based upon [codepress/github-plugin-upda
 Includes
 
 * [Emanuil Rusev's](https://github.com/erusev) [Parsedown](https://github.com/erusev/parsedown) for rendering ChangeLogs.
-* [Mark Jaquith's](https://github.com/markjaquith) [WordPress Plugin Readme Parser](https://github.com/markjaquith/WordPress-Plugin-Readme-Parser/tree/WordPress.org) for parsing `readme.txt`.
+* [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php) for parsing `readme.txt`.
 * [Coen Jacobs'](https://github.com/coenjacobs) [WPupdatePHP library](https://github.com/WPupdatePHP/wp-update-php)
 
 GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).

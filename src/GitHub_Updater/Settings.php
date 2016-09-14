@@ -53,7 +53,7 @@ class Settings extends Base {
 		$this->ensure_api_key_is_set();
 
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
-		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_network_setting' ) );
+		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
@@ -61,13 +61,6 @@ class Settings extends Base {
 			&$this,
 			'plugin_action_links',
 		) );
-
-		// Make sure array values exist.
-		foreach ( array_keys( self::$remote_management ) as $key ) {
-			if ( empty( parent::$options_remote[ $key ] ) ) {
-				parent::$options_remote[ $key ] = null;
-			}
-		}
 	}
 
 	/**
@@ -143,23 +136,35 @@ class Settings extends Base {
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
 			<?php $this->_options_tabs(); ?>
-			<?php if ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
-				<div class="updated">
-					<p><strong><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></strong></p>
-				</div>
-			<?php elseif ( ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
-				<div class="updated">
-					<p><strong><?php esc_html_e( 'Saved.', 'github-updater' ); ?></strong></p>
-				</div>
-			<?php endif; ?>
-			<?php if ( 'github_updater_settings' === $tab ) : ?>
-				<form method="post" action="<?php esc_attr_e( $action ); ?>">
-					<?php
-					settings_fields( 'github_updater' );
-					do_settings_sections( 'github_updater_install_settings' );
-					submit_button();
-					?>
-				</form>
+			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
+				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
+					</div>
+				<?php elseif ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
+					</div>
+				<?php elseif ( ( isset( $_GET['refresh_transients'] ) && true == $_GET['refresh_transients'] ) ) : ?>
+					<div class="updated">
+						<p><?php esc_html_e( 'Transients refreshed.', 'github-updater' ); ?></p>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( 'github_updater_settings' === $tab ) : ?>
+					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
+					<form method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+						<?php submit_button( esc_html__( 'Refresh Transients', 'github-updater' ) ); ?>
+					</form>
+
+					<form method="post" action="<?php esc_attr_e( $action ); ?>">
+						<?php
+						settings_fields( 'github_updater' );
+						do_settings_sections( 'github_updater_install_settings' );
+						submit_button();
+						?>
+					</form>
+				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php
@@ -350,41 +355,23 @@ class Settings extends Base {
 			);
 		}
 
-		if ( isset( $_POST['github_updater'] ) && ! is_multisite() ) {
-			$options = get_site_option( 'github_updater' );
-			$options = array_merge( $options, self::sanitize( $_POST['github_updater'] ) );
-			update_site_option( 'github_updater', $options );
-		}
+		$this->update_settings();
 	}
 
 	/**
 	 * Create and return settings fields for private repositories.
-	 *
-	 * @return void
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$plugin           = get_site_transient( 'ghu_plugins' );
-		$theme            = get_site_transient( 'ghu_themes' );
-		if ( ! $plugin ) {
-			$plugin = Plugin::instance();
-			$plugin->get_remote_plugin_meta();
-			set_site_transient( 'ghu_plugins', $plugin, ( self::$hours * HOUR_IN_SECONDS ) );
-
-		}
-		if ( ! $theme ) {
-			$theme = Theme::instance();
-			$theme->get_remote_theme_meta();
-			set_site_transient( 'ghu_themes', $theme, ( self::$hours * HOUR_IN_SECONDS ) );
-		}
-		$ghu_plugins = $plugin->config;
-		$ghu_themes  = $theme->config;
-		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+		$ghu_plugins      = Plugin::instance()->get_plugin_configs();
+		$ghu_themes       = Theme::instance()->get_theme_configs();
+		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
+			$token->private                   = isset( $token->private ) ? $token->private : true;
 
 			/*
 			 * Set boolean for Enterprise headers.
@@ -450,18 +437,19 @@ class Settings extends Base {
 			$setting_field['title'] = $type . $token->name;
 			$setting_field['page']  = 'github_updater_install_settings';
 
-			switch ( $token->type ) {
-				case ( strpos( $token->type, 'github' ) ):
+			$token_type = explode( '_', $token->type );
+			switch ( $token_type[0] ) {
+				case 'github':
 					$setting_field['section']         = 'github_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case ( strpos( $token->type, 'bitbucket' ) ):
+				case 'bitbucket':
 					$setting_field['section']         = 'bitbucket_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
-				case ( strpos( $token->type, 'gitlab' ) ):
+				case 'gitlab':
 					$setting_field['section']         = 'gitlab_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
@@ -532,29 +520,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( isset( $_POST['option_page'] ) && 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array();
-			foreach ( array_keys( self::$remote_management ) as $key ) {
-				$options[ $key ] = null;
-			}
-			if ( isset( $_POST['github_updater_remote_management'] ) ) {
-				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
-			}
-			update_site_option( 'github_updater_remote_management', $options );
-		}
-
-		if ( $this->reset_api_key() && ! is_multisite() ) {
-			$location = add_query_arg(
-				array(
-					'page'  => 'github-updater',
-					'tab'   => isset( $_REQUEST['tab'] ) ? $_REQUEST['tab'] : 'github_updater_settings',
-					'reset' => true,
-				),
-				admin_url( 'options-general.php' )
-			);
-			wp_redirect( $location );
-			exit;
-		}
+		$this->update_settings();
 	}
 
 	/**
@@ -667,9 +633,10 @@ class Settings extends Base {
 	 * @param $args
 	 */
 	public function token_callback_checkbox( $args ) {
+		$checked = isset( parent::$options[ $args['id'] ] ) ? parent::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options[ $args['id'] ], true ); ?> >
+			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
 		</label>
 		<?php
 	}
@@ -683,55 +650,68 @@ class Settings extends Base {
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
+		$checked = isset( parent::$options_remote[ $args['id'] ] ) ? parent::$options_remote[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', parent::$options_remote[ $args['id'] ], true ); ?> >
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
 		</label>
 		<?php
 	}
 
 	/**
-	 * Update network settings.
-	 * Used when plugin is network activated to save settings.
+	 * Update settings for single site or network activated.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
-	public function update_network_setting() {
-
-		if ( 'github_updater' === $_POST['option_page'] ) {
-			update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
-		}
-		if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-			$options = array();
-			foreach ( array_keys( self::$remote_management ) as $key ) {
-				$options[ $key ] = null;
+	public function update_settings() {
+		if ( isset( $_POST['option_page'] ) ) {
+			if ( 'github_updater' === $_POST['option_page'] ) {
+				update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
 			}
-			if ( isset( $_POST['github_updater_remote_management'] ) ) {
-				$options = array_replace( $options, (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
+				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 			}
-			update_site_option( 'github_updater_remote_management', $options );
+		}
+		$this->redirect_on_save();
+	}
+
+	/**
+	 * Redirect to correct Settings tab on Save.
+	 */
+	protected function redirect_on_save() {
+		$update             = false;
+		$refresh_transients = $this->refresh_transients();
+		$reset_api_key      = $this->reset_api_key();
+		$option_page        = array( 'github_updater', 'github_updater_remote_management' );
+
+		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
+		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page ) )
+
+		) {
+			$update = true;
 		}
 
-		$reset = $this->reset_api_key();
+		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		$query = parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY );
-		parse_str( $query, $arr );
-		if ( empty( $arr['tab'] ) ) {
-			$arr['tab'] = 'github_updater_settings';
+		if ( $update || $refresh_transients || $reset_api_key ) {
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY ) : null;
+			parse_str( $query, $arr );
+			$arr['tab'] = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
+
+			$location = add_query_arg(
+				array(
+					'page'               => 'github-updater',
+					'tab'                => $arr['tab'],
+					'refresh_transients' => $refresh_transients,
+					'reset'              => $reset_api_key,
+					'updated'            => $update,
+				),
+				$redirect_url
+			);
+			wp_redirect( $location );
+			exit;
 		}
-
-		$location = add_query_arg(
-			array(
-				'page'    => 'github-updater',
-				'updated' => true,
-				'tab'     => $arr['tab'],
-				'reset'   => empty( $reset ) ? false : true,
-			),
-			network_admin_url( 'settings.php' )
-		);
-		wp_redirect( $location );
-		exit;
 	}
 
 	/**
@@ -747,6 +727,21 @@ class Settings extends Base {
 			$_POST                     = $_REQUEST;
 			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
 			delete_site_option( 'github_updater_api_key' );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clear GitHub Updater transients.
+	 *
+	 * @return bool
+	 */
+	private function refresh_transients() {
+		if ( isset( $_REQUEST['github_updater_refresh_transients'] ) ) {
+			$_POST = $_REQUEST;
 
 			return true;
 		}

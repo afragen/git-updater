@@ -72,7 +72,7 @@ class Messages extends Base {
 			return false;
 		}
 
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		if ( is_admin() && ! parent::is_doing_ajax() ) {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
@@ -106,8 +106,11 @@ class Messages extends Base {
 		foreach ( self::$error_code as $repo ) {
 			if ( 403 === $repo['code'] && 'github' === $repo['git'] && ! $_403 ) {
 				$_403 = true;
+				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
+					return;
+				}
 				?>
-				<div class="error notice is-dismissible">
+				<div data-dismissible="403-error-1" class="error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
@@ -141,8 +144,11 @@ class Messages extends Base {
 		foreach ( self::$error_code as $repo ) {
 			if ( 401 === $repo['code'] && ! $_401 ) {
 				$_401 = true;
+				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
+					return;
+				}
 				?>
-				<div class="error notice is-dismissible">
+				<div data-dismissible="401-error-1" class="error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
@@ -166,8 +172,11 @@ class Messages extends Base {
 		     ( empty( parent::$options['gitlab_private_token'] ) &&
 		       parent::$auth_required['gitlab'] )
 		) {
+			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
+				return;
+			}
 			?>
-			<div class="error notice is-dismissible">
+			<div data-dismissible="gitlab-error-1" class="error notice is-dismissible">
 				<p>
 					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
 				</p>
@@ -180,8 +189,11 @@ class Messages extends Base {
 	 * Generate error message for WP_Error.
 	 */
 	public function show_wp_error() {
+		if ( ! \PAnD::is_admin_notice_active( 'wp-error-1' ) ) {
+			return;
+		}
 		?>
-		<div class="error notice is-dismissible">
+		<div data-dismissible="wp-error-1" class="error notice is-dismissible">
 			<p>
 				<?php
 				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );

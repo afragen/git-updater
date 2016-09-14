@@ -22,68 +22,53 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Readme_Parser extends \Automattic_Readme {
+class Readme_Parser extends \Parser {
 
 	/**
-	 * Constructor
+	 * Constructor.
+	 *
+	 * @param string $file_contents Contents of file.
 	 */
-	public function __construct() {
+	public function __construct( $file_contents ) {
+		if ( $file_contents ) {
+			$this->parse_readme( $file_contents );
+		}
 	}
 
 	/**
-	 * @param $file_contents
+	 * @param string $text
+	 *
+	 * @return string
+	 */
+	protected function parse_markdown( $text ) {
+		static $markdown = null;
+
+		if ( is_null( $markdown ) ) {
+			$markdown = new \Parsedown();
+		}
+
+		return $markdown->text( $text );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function parse_data() {
+		$data = array();
+		foreach ( $this as $key => $value ) {
+			$data[ $key ] = $value;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @param array $users
 	 *
 	 * @return array
 	 */
-	public function parse_readme( $file_contents ) {
-		return (array) $this->parse_readme_contents( $file_contents );
-	}
-
-	/**
-	 * @param      $text
-	 * @param bool $markdown
-	 *
-	 * @return mixed|string
-	 */
-	public function filter_text( $text, $markdown = false ) { // fancy, Markdown
-		$text = trim( $text );
-		$text = call_user_func( array(
-			get_parent_class( $this ),
-			'code_trick',
-		), $text, $markdown ); // A better parser than Markdown's for: backticks -> CODE
-
-		if ( $markdown ) { // Parse markdown.
-			$parser = new \Parsedown;
-			$text   = $parser->text( $text );
-		}
-
-		$allowed = array(
-			'a'          => array(
-				'href' => array(),
-				'title' => array(),
-				'rel' => array(),
-			),
-			'blockquote' => array( 'cite' => array() ),
-			'br'         => array(),
-			'cite'       => array(),
-			'p'          => array(),
-			'code'       => array(),
-			'pre'        => array(),
-			'em'         => array(),
-			'strong'     => array(),
-			'ul'         => array(),
-			'ol'         => array(),
-			'li'         => array(),
-			'h3'         => array(),
-			'h4'         => array(),
-		);
-
-		$text = balanceTags( $text );
-
-		$text = wp_kses( $text, $allowed );
-		$text = trim( $text );
-
-		return $text;
+	protected function sanitize_contributors( $users ) {
+		return $users;
 	}
 
 }

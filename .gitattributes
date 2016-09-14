@@ -7,12 +7,3 @@ composer.json export-ignore
 /bin export-ignore
 /tests export-ignore
 phpunit.xml export-ignore
-
-/vendor/parsedown/test export-ignore
-/vendor/parsedown/.travis.yml export-ignore
-/vendor/parsedown/composer.json export-ignore
-/vendor/parsedown/phpunit.xml.dist export-ignore
-
-/vendor/wp-update-php/spec export-ignore
-/vendor/wp-update-php/composer.json export-ignore
-/vendor/wp-update-php/.gitignore export-ignore

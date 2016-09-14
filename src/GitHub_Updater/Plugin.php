@@ -47,7 +47,7 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			$this->delete_all_transients( 'plugins' );
 		}
 
@@ -63,6 +63,8 @@ class Plugin extends Base {
 
 	/**
 	 * Returns an array of configurations for the known plugins.
+	 *
+	 * @return array
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
@@ -190,11 +192,7 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['private']                 = true;
-				$git_plugin['dot_org']                 = false;
-			}
-			if ( isset( $all_plugins[ $plugin ]->id ) ) {
-				$git_plugin['dot_org'] = true;
+				$git_plugin['dot_org']                 = isset( $all_plugins[ $plugin ]->id ) ? true : false;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -204,8 +202,8 @@ class Plugin extends Base {
 	}
 
 	/**
-	 * Get remote plugin meta to populate $config plugin objects. 
-	 * Calls to remote APIs to get data. 
+	 * Get remote plugin meta to populate $config plugin objects.
+	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
 		foreach ( (array) $this->config as $plugin ) {
@@ -240,7 +238,7 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->make_force_check_transient( 'plugins' );
+		$this->make_transient_list( 'plugins' );
 		$this->load_pre_filters();
 	}
 
@@ -464,6 +462,8 @@ class Plugin extends Base {
 					'new_version' => $plugin->remote_version,
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,
+					'branch'      => $plugin->branch,
+					'branches'    => array_keys( $plugin->branches ),
 				);
 
 				/*

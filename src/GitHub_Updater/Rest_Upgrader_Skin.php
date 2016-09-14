@@ -72,6 +72,8 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 
 	/**
 	 * Do nothing.
+	 *
+	 * @param $type
 	 */
 	protected function decrement_update_count( $type ) {}
 

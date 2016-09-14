@@ -143,6 +143,7 @@ class Base {
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
+		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\Bitbucket_API', 'ajax_maybe_authenticate_http' ), 15, 2 );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 	}
 
@@ -309,7 +310,11 @@ class Base {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
 			self::$options['branch_switch'] = null;
 		}
-		if ( ! isset( self::$options[ $this->$type->repo ] ) ) {
+
+		if ( ! isset( $this->$type->repo ) ) {
+			$this->$type       = new \stdClass();
+			$this->$type->repo = null;
+		} elseif ( ! isset( self::$options[ $this->$type->repo ] ) ) {
 			self::$options[ $this->$type->repo ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
@@ -335,7 +340,7 @@ class Base {
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
 		$this->$type->score                = 0;
-		$this->$type->requires_wp_version  = '3.8.0';
+		$this->$type->requires_wp_version  = '4.0';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
 	}
@@ -487,13 +492,13 @@ class Base {
 		 * Remote install source.
 		 */
 		if ( isset( self::$options['github_updater_install_repo'] ) ) {
-			$repo['repo'] = self::$options['github_updater_install_repo'];
+			$repo['repo'] = $repo['extended_repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
 		/*
 		 * Directory is misnamed to start.
-		 * Make cause deactivation.
+		 * May cause deactivation.
 		 */
 		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
 		     ! isset( self::$options['github_updater_install_repo'] )
@@ -520,7 +525,7 @@ class Base {
 		/*
 		 * Revert extended naming if previously present.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     $slug !== $repo['repo']
 		) {
@@ -531,10 +536,12 @@ class Base {
 		 * Extended naming.
 		 * Only for plugins and not for 'master' === branch && .org hosted.
 		 */
-		if ( $this instanceof Plugin &&
+		if ( $upgrader_object instanceof Plugin &&
 		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ! $this->config[ $repo['repo'] ]->dot_org ||
-		       ( $this->tag && 'master' !== $this->tag ) )
+		     ( ( isset( $upgrader_object->config[ $repo['repo'] ] ) &&
+		         ! $upgrader_object->config[ $repo['repo'] ]->dot_org ) ||
+		       ( $upgrader_object->tag && 'master' !== $upgrader_object->tag ) ||
+		       isset( self::$options['github_updater_install_repo'] ) )
 		) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
@@ -775,21 +782,20 @@ class Base {
 			delete_site_transient( $transient );
 		}
 		delete_site_transient( 'ghu-' . $type );
-		delete_site_transient( 'ghu_' . $type );
 
 		return true;
 	}
 
 	/**
-	 * Create transient of $type transients for force-check.
+	 * Create transient of $type transients for clearing transients.
 	 *
 	 * @param $type
 	 *
 	 * @return void|bool
 	 */
-	protected function make_force_check_transient( $type ) {
-		$transient = get_site_transient( 'ghu-' . $type );
-		if ( $transient ) {
+	protected function make_transient_list( $type ) {
+		$transients = get_site_transient( 'ghu-' . $type );
+		if ( $transients ) {
 			return false;
 		}
 		set_site_transient( 'ghu-' . $type, self::$transients, ( self::$hours * HOUR_IN_SECONDS ) );
@@ -904,15 +910,17 @@ class Base {
 			}
 		}
 
-		$response['sections']['other_notes'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
+		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
 		if ( empty( $response['sections']['other_notes'] ) ) {
 			unset( $response['sections']['other_notes'] );
+		} else {
+			$response['sections']['other_notes'] .= $response['remaining_content'];
 		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested_up_to'];
-		$this->type->requires     = $response['requires_at_least'];
+		$this->type->tested       = $response['tested'];
+		$this->type->requires     = $response['requires'];
 		$this->type->donate_link  = $response['donate_link'];
 		$this->type->contributors = $response['contributors'];
 
@@ -956,13 +964,8 @@ class Base {
 
 			return empty( $options['branch_switch'] );
 		}
-		if ( ! isset( $_GET['force-check'] ) ) {
-			if ( ! $response && ! $this->can_update( $this->type ) ) {
-				return true;
-			}
-		}
 
-		return false;
+		return ( ! isset( $_GET['refresh_transients'] ) && ! $response && ! $this->can_update( $this->type ) );
 	}
 
 	/**
@@ -976,7 +979,7 @@ class Base {
 	protected function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( isset( $_GET['force-check'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			return $response;
 		}
 
@@ -1026,14 +1029,16 @@ class Base {
 			$repo_base = dirname( $repo_name );
 		}
 
-		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '"><td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message">';
+		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '">
+		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
+		<div class="update-message">';
 
 		$enclosure = array(
 			'open'  => $open,
 			'close' => '</div></td></tr>',
 		);
 
-		if ( version_compare( $wp_version, '4.6-alpha-37714', '>=' ) ) {
+		if ( version_compare( $wp_version, '4.6', '>=' ) ) {
 			$open_p  = '<p>';
 			$close_p = '</p>';
 			if ( $branch_switcher ) {
@@ -1069,6 +1074,24 @@ class Base {
 			) );
 
 		return $update_url;
+	}
+
+	/**
+	 * Checks to see if a heartbeat is resulting in activity.
+	 *
+	 * @return bool
+	 */
+	protected static function is_heartbeat() {
+		return ( isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'] );
+	}
+
+	/**
+	 * Checks to see if DOING_AJAX.
+	 *
+	 * @return bool
+	 */
+	protected static function is_doing_ajax() {
+		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 	}
 
 }
