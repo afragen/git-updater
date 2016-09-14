@@ -43,6 +43,11 @@ class Base {
 	 */
 	protected $repo_api;
 
+	/**
+	 * Class Object for Language Packs.
+	 *
+	 * @var
+	 */
 	protected $languages;
 
 	/**
@@ -662,7 +667,7 @@ class Base {
 	 *
 	 * @param $type
 	 *
-	 * @return bool or variable
+	 * @return bool|string
 	 */
 	protected function get_changelog_filename( $type ) {
 		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
