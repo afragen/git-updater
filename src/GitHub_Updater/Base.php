@@ -397,7 +397,6 @@ class Base {
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages = new Language_Pack( $repo, $this->repo_api );
 		}
-		$this->languages = new Language_Pack( $repo, $this->repo_api );
 
 		return true;
 	}
