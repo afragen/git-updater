@@ -356,7 +356,7 @@ class GitHub_API extends API {
 	 *
 	 * @param array $headers Array of headers of Language Pack.
 	 *
-	 * @return bool If invalid response.
+	 * @return bool When invalid response.
 	 */
 	public function get_language_pack( $headers ) {
 		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
@@ -373,7 +373,11 @@ class GitHub_API extends API {
 				$response = json_decode( $contents );
 
 				foreach ( $response as $locale ) {
-					$response->{$locale->language}->package = 'https://github.com/' . $headers['owner'] . '/' . $headers['repo'] . '/blob/master' . $locale->package . '?raw=true';
+					$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
+					$package = implode( '/', $package ) . $locale->package;
+					$package = add_query_arg( array( 'raw' => 'true' ), $package );
+
+					$response->{$locale->language}->package = $package;
 					$type                                   = explode( '_', $this->type->type );
 					$response->{$locale->language}->type    = $type[1];
 					$response->{$locale->language}->version = $this->type->remote_version;
@@ -390,6 +394,8 @@ class GitHub_API extends API {
 	 *
 	 * @param $git
 	 * @param $endpoint
+	 *
+	 * @access private
 	 *
 	 * @return string
 	 */
