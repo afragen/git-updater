@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed PHP notices when parsine `readme.txt` with missing data
 
 #### 5.6.0 / 2016-09-14
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
