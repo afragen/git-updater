@@ -360,6 +360,7 @@ class GitHub_API extends API {
 	 */
 	public function get_language_pack( $headers ) {
 		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$type     = explode( '_', $this->type->type );
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
@@ -378,7 +379,6 @@ class GitHub_API extends API {
 					$package = add_query_arg( array( 'raw' => 'true' ), $package );
 
 					$response->{$locale->language}->package = $package;
-					$type                                   = explode( '_', $this->type->type );
 					$response->{$locale->language}->type    = $type[1];
 					$response->{$locale->language}->version = $this->type->remote_version;
 				}
