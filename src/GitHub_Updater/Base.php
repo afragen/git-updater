@@ -928,10 +928,10 @@ class Base {
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = $response['tested'];
-		$this->type->requires     = $response['requires'];
-		$this->type->donate_link  = $response['donate_link'];
-		$this->type->contributors = $response['contributors'];
+		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
+		$this->type->requires     = isset( $response['requires'] ) ? $response['requires'] : null;
+		$this->type->donate_link  = isset( $response['donate_link'] ) ? $response['donate_link'] : null;
+		$this->type->contributors = isset( $response['contributors'] ) ? $response['contributors'] : null;
 
 		return true;
 	}
