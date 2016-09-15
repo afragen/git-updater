@@ -441,6 +441,7 @@ class GitHub_API extends API {
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
+
 		/*
 		 * Remove branch endpoint if a translation file.
 		 */
