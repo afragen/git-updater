@@ -1,5 +1,7 @@
 <?php
 
+namespace WordPressdotorg\Plugin_Directory\Readme;
+
 /**
  * WordPress.org Plugin Readme Parser.
  *
