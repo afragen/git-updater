@@ -9,6 +9,7 @@
  */
 
 namespace Fragen\GitHub_Updater;
+use WordPressdotorg\Plugin_Directory\Readme\Parser as Parser;
 
 /*
  * Exit if called directly.
@@ -22,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Readme_Parser extends \Parser {
+class Readme_Parser extends Parser {
 
 	/**
 	 * Constructor.

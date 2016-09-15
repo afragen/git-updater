@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 5.6.1 / 2016-09-15
+* fixed PHP notices when parsing `readme.txt` with missing data
+* fixed PHP fatal by namespacing `class WordPressdotorg\Plugin_Directory\Readme\Parser`
+* fixed PHP fatal in `WordPressdotorg\Plugin_Directory\Readme\Parser` by avoiding dereferenced array call
+
 #### 5.6.0 / 2016-09-14
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
