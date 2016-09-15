@@ -286,7 +286,9 @@ class Parser {
 
 		// Use the first line of the description for the short description if not provided.
 		if ( empty( $this->short_description ) && ! empty( $this->sections['description'] ) ) {
-			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$description = array_filter( explode( "\n", $this->sections['description'] ) );
+			$this->short_description = $description[0];
+			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
 		}
 
 		// Use the short description for the description section if not provided.
