@@ -1,4 +1,6 @@
 #### [unreleased]
+* added `GitHub Languages` header for Language Pack updates
+* added Language Pack updates from separate Language Pack repository, only for GitHub at this time.
 
 #### 5.6.1 / 2016-09-15
 * fixed PHP notices when parsing `readme.txt` with missing data

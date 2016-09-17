@@ -125,6 +125,18 @@ GitHub Branch:    master
 */
 ~~~
 
+### Language Packs
+
+A separate repository may be used for updating Language Packs. This repository must be a public repository. What's the point of putting translation files in a private repository.
+
+Simply add the header `GitHub Languages`, `Bitbucket Languages`, or `GitLab Languages` to the headers of the plugin or theme. The URI for this header are in the same format as for the plugins or themes.
+
+In order to create your Language Pack repository. You will need to install and use the [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker). You will need to follow those directions to create a properly formatted language pack repository.
+
+See [GitHub Updater Translations](https://github.com/afragen/github-updater-translations) as an example. I have set `.gitignore` to hide the `vendor` directory.
+
+At this time it only works for GitHub hosted plugins/themes/language packs.
+
 ### Optional Headers
 
 `GitHub Branch`, `Bitbucket Branch`, and `GitLab Branch` are available but not required.
