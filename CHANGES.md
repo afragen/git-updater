@@ -1,6 +1,7 @@
 #### [unreleased]
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
 * throw Exception for webhook update if PUSH is to branch different from webhook
+* removed translations from RESTful endpoint responses, only visible from webhook or direct call
 
 #### 5.6.1 / 2016-09-15
 * fixed PHP notices when parsing `readme.txt` with missing data
