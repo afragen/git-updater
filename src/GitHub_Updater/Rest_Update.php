@@ -229,10 +229,17 @@ class Rest_Update extends Base {
 			/**
 			 * Parse webhook response and convert 'tag' to 'committish'.
 			 * This will avoid potential race conditions.
+			 *
+			 * Throw Exception if `$_REQUEST['tag'] !== webhook branch` this avoids
+			 * unnecessary updates for PUSH to different branch.
 			 */
 			$webhook_response = $this->get_webhook_data();
-			if ( $webhook_response && $tag === $webhook_response['branch'] ) {
-				$tag = $webhook_response['hash'];
+			if ( $webhook_response ) {
+				if ( $tag === $webhook_response['branch'] ) {
+					$tag = $webhook_response['hash'];
+				} else {
+					throw new \Exception( esc_html__( 'Request tag and webhook are not matching.', 'github-updater' ) );
+				}
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
