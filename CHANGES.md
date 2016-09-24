@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 5.6.2 / 2016-09-24
+* added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
+* throw Exception for webhook update if PUSH is to branch different from webhook
+* removed translations from RESTful endpoint responses, only visible from webhook or direct call
+* fixed PHP fatal during heartbeat for `class PAnD` not found, early exit in class too early, [#453](https://github.com/afragen/github-updater/issues/453)
+* fixed PHP notice in `Bitbucket_API`, [#451](https://github.com/afragen/github-updater/issues/451)
+
 #### 5.6.1 / 2016-09-15
 * fixed PHP notices when parsing `readme.txt` with missing data
 * fixed PHP fatal by namespacing `class WordPressdotorg\Plugin_Directory\Readme\Parser`

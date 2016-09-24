@@ -65,7 +65,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( esc_html__( 'Plugin not found or not updatable with GitHub Updater: ', 'github-updater' ) . $plugin_slug );
+			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
 		}
 
 		if ( is_plugin_active( $plugin->slug ) ) {
@@ -92,7 +92,7 @@ class Rest_Update extends Base {
 		if ( $is_plugin_active ) {
 			$activate = is_multisite() ? activate_plugin( $plugin->slug, null, true ) : activate_plugin( $plugin->slug );
 			if ( ! $activate ) {
-				$this->upgrader_skin->messages[] = esc_html__( 'Plugin reactivated successfully.', 'github-updater' );
+				$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 			}
 		}
 	}
@@ -116,7 +116,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( esc_html__( 'Theme not found or not updatable with GitHub Updater: ', 'github-updater' ) . $theme_slug );
+			throw new \Exception( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
@@ -176,7 +176,7 @@ class Rest_Update extends Base {
 			$show_themes[] = $theme;
 		}
 
-		$response['messages'] = esc_html__( 'Available Updates', 'github-updater' );
+		$response['messages'] = 'Available Updates';
 		$response['plugins']  = $show_plugins;
 		$response['themes']   = $show_themes;
 
@@ -216,7 +216,7 @@ class Rest_Update extends Base {
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
 			) {
-				throw new \Exception( esc_html__( 'Bad api key.', 'github-updater' ) );
+				throw new \Exception( 'Bad api key.' );
 			}
 
 			$tag = 'master';
@@ -229,10 +229,17 @@ class Rest_Update extends Base {
 			/**
 			 * Parse webhook response and convert 'tag' to 'committish'.
 			 * This will avoid potential race conditions.
+			 *
+			 * Throw Exception if `$_REQUEST['tag'] !== webhook branch` this avoids
+			 * unnecessary updates for PUSH to different branch.
 			 */
 			$webhook_response = $this->get_webhook_data();
-			if ( $webhook_response && $tag === $webhook_response['branch'] ) {
-				$tag = $webhook_response['hash'];
+			if ( $webhook_response ) {
+				if ( $tag === $webhook_response['branch'] ) {
+					$tag = $webhook_response['hash'];
+				} else {
+					throw new \Exception( 'Request tag and webhook are not matching.' );
+				}
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
@@ -242,7 +249,7 @@ class Rest_Update extends Base {
 			} elseif ( isset( $_REQUEST['updates'] ) ) {
 				$show_updates = true;
 			} else {
-				throw new \Exception( esc_html__( 'No plugin or theme specified for update.', 'github-updater' ) );
+				throw new \Exception( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
 			http_response_code( 500 );

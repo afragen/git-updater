@@ -782,6 +782,7 @@ class Base {
 			delete_site_transient( $transient );
 		}
 		delete_site_transient( 'ghu-' . $type );
+		set_site_transient( 'update_' . $type, null );
 
 		return true;
 	}
