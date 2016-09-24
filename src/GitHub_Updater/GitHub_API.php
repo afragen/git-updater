@@ -450,7 +450,6 @@ class GitHub_API extends API {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 		}
 
-
 		/*
 		 * If using GitHub Enterprise header return this endpoint.
 		 */

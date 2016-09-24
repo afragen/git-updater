@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-09-05 14:11-0700\n"
+"POT-Creation-Date: 2016-09-18 16:25-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:545
+#: src/GitHub_Updater/Base.php:547
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -135,41 +135,17 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:300 src/GitHub_Updater/Theme.php:456
+#: src/GitHub_Updater/Plugin.php:297 src/GitHub_Updater/Theme.php:456
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:308 src/GitHub_Updater/Theme.php:464
+#: src/GitHub_Updater/Plugin.php:305 src/GitHub_Updater/Theme.php:464
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:362
+#: src/GitHub_Updater/Plugin.php:359
 msgid "View details"
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:68
-msgid "Plugin not found or not updatable with GitHub Updater: "
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:95
-msgid "Plugin reactivated successfully."
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:119
-msgid "Theme not found or not updatable with GitHub Updater: "
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:179
-msgid "Available Updates"
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:219
-msgid "Bad api key."
-msgstr ""
-
-#: src/GitHub_Updater/Rest_Update.php:245
-msgid "No plugin or theme specified for update."
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:76 src/GitHub_Updater/Settings.php:764
