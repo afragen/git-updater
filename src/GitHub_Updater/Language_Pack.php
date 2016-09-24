@@ -75,7 +75,7 @@ class Language_Pack extends Base {
 	public function pre_set_site_transient( $transient ) {
 		$locale = get_locale();
 		$repos  = array();
-		
+
 		if ( 'pre_set_site_transient_update_plugins' === current_filter() ) {
 			$repos = Plugin::instance()->get_plugin_configs();
 		}
