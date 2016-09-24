@@ -60,6 +60,39 @@ class Language_Pack extends Base {
 	protected function run() {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
+
+		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient' ) );
+		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient' ) );
 	}
 
+	/**
+	 * Add language translations to update_plugins or update_themes transients.
+	 *
+	 * @param $transient
+	 *
+	 * @return mixed
+	 */
+	public function pre_set_site_transient( $transient ) {
+		$locale = get_locale();
+		$repos  = array();
+		
+		if ( 'pre_set_site_transient_update_plugins' === current_filter() ) {
+			$repos = Plugin::instance()->get_plugin_configs();
+		}
+		if ( 'pre_set_site_transient_update_themes' === current_filter() ) {
+			$repos = Theme::instance()->get_theme_configs();
+		}
+
+		$repos = array_filter( $repos, function( $e ) {
+			return isset( $e->language_packs );
+		} );
+
+		foreach ( $repos as $repo ) {
+			$transient->translations[] = (array) $repo->language_packs->$locale;
+		}
+
+		$transient->translations = array_unique( $transient->translations, SORT_REGULAR );
+
+		return $transient;
+	}
 }

@@ -470,7 +470,6 @@ class Plugin extends Base {
 		foreach ( (array) $this->config as $plugin ) {
 			$response = null;
 
-			$locale = get_locale();
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
@@ -499,9 +498,6 @@ class Plugin extends Base {
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
-				if ( isset( $plugin->language_packs ) && array_key_exists( $locale, $plugin->language_packs ) ) {
-					$transient->translations[] = (array) $plugin->language_packs->$locale;
-				}
 			}
 		}
 

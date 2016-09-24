@@ -708,11 +708,7 @@ class Theme extends Base {
 			);
 
 			if ( $this->can_update( $theme ) ) {
-				$locale                              = get_locale();
 				$transient->response[ $theme->repo ] = $update;
-				if ( isset( $theme->language_packs ) && array_key_exists( $locale, $theme->language_packs ) ) {
-					$transient->translations[] = (array) $theme->language_packs->$locale;
-				}
 			} else { // up-to-date!
 				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
 				$transient->up_to_date[ $theme->repo ]['response'] = $update;
