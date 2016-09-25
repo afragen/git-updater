@@ -95,7 +95,9 @@ class Language_Pack extends Base {
 
 		foreach ( $repos as $repo ) {
 			$lang_pack_mod   = strtotime( $repo->language_packs->$locale->updated );
-			$translation_mod = ! empty( $translations ) ? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] ) : 0;
+			$translation_mod = ! empty( $translations[ $repo->repo ] )
+				? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] )
+				: 0;
 			if ( $lang_pack_mod > $translation_mod ) {
 				$transient->translations[] = (array) $repo->language_packs->$locale;
 			}
