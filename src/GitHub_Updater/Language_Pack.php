@@ -76,15 +76,17 @@ class Language_Pack extends Base {
 		$locale = get_locale();
 		$repos  = array();
 
-		if ( ! isset( $transient->translations)){
+		if ( ! isset( $transient->translations ) ) {
 			return $transient;
 		}
 
 		if ( 'pre_set_site_transient_update_plugins' === current_filter() ) {
-			$repos = Plugin::instance()->get_plugin_configs();
+			$repos        = Plugin::instance()->get_plugin_configs();
+			$translations = wp_get_installed_translations( 'plugins' );
 		}
 		if ( 'pre_set_site_transient_update_themes' === current_filter() ) {
-			$repos = Theme::instance()->get_theme_configs();
+			$repos        = Theme::instance()->get_theme_configs();
+			$translations = wp_get_installed_translations( 'themes' );
 		}
 
 		$repos = array_filter( $repos, function( $e ) {
@@ -92,7 +94,11 @@ class Language_Pack extends Base {
 		} );
 
 		foreach ( $repos as $repo ) {
-			$transient->translations[] = (array) $repo->language_packs->$locale;
+			$lang_pack_mod   = strtotime( $repo->language_packs->$locale->updated );
+			$translation_mod = ! empty( $translations ) ? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] ) : 0;
+			if ( $lang_pack_mod > $translation_mod ) {
+				$transient->translations[] = (array) $repo->language_packs->$locale;
+			}
 		}
 
 		$transient->translations = array_unique( $transient->translations, SORT_REGULAR );

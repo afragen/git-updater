@@ -135,6 +135,8 @@ In order to create your Language Pack repository. You will need to install and u
 
 See [GitHub Updater Translations](https://github.com/afragen/github-updater-translations) as an example. I have set `.gitignore` to hide the `vendor` directory.
 
+Many thanks to [Ulrich Pogson](https://github.com/grappler).
+
 At this time it only works for GitHub hosted plugins/themes/language packs.
 
 ### Optional Headers
