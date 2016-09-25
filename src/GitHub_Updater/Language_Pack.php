@@ -73,8 +73,9 @@ class Language_Pack extends Base {
 	 * @return mixed
 	 */
 	public function pre_set_site_transient( $transient ) {
-		$locale = get_locale();
-		$repos  = array();
+		$locales = get_available_languages();
+		$locales = ! empty( $locales ) ? $locales : array( get_locale() );
+		$repos   = array();
 
 		if ( ! isset( $transient->translations ) ) {
 			return $transient;
@@ -94,12 +95,14 @@ class Language_Pack extends Base {
 		} );
 
 		foreach ( $repos as $repo ) {
-			$lang_pack_mod   = strtotime( $repo->language_packs->$locale->updated );
-			$translation_mod = ! empty( $translations[ $repo->repo ] )
-				? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] )
-				: 0;
-			if ( $lang_pack_mod > $translation_mod ) {
-				$transient->translations[] = (array) $repo->language_packs->$locale;
+			foreach ( $locales as $locale ) {
+				$lang_pack_mod   = strtotime( $repo->language_packs->$locale->updated );
+				$translation_mod = ! empty( $translations[ $repo->repo ][ $locale ] )
+					? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] )
+					: 0;
+				if ( $lang_pack_mod > $translation_mod ) {
+					$transient->translations[] = (array) $repo->language_packs->$locale;
+				}
 			}
 		}
 
