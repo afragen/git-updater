@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-09-18 16:25-0700\n"
+"POT-Creation-Date: 2016-09-26 11:44-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:547
+#: src/GitHub_Updater/Base.php:556
 #, php-format
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
@@ -135,16 +135,16 @@ msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:297 src/GitHub_Updater/Theme.php:456
+#: src/GitHub_Updater/Plugin.php:312 src/GitHub_Updater/Theme.php:470
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother branch%3$s."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:305 src/GitHub_Updater/Theme.php:464
+#: src/GitHub_Updater/Plugin.php:320 src/GitHub_Updater/Theme.php:478
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:359
+#: src/GitHub_Updater/Plugin.php:374
 msgid "View details"
 msgstr ""
 
@@ -300,65 +300,65 @@ msgid ""
 "only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:357
+#: src/GitHub_Updater/Theme.php:371
 msgid "Theme is up-to-date!"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:361
+#: src/GitHub_Updater/Theme.php:375
 msgid "Rollback to:"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:368
+#: src/GitHub_Updater/Theme.php:382
 msgid "Rollback"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:369 src/GitHub_Updater/Theme.php:408
-#: src/GitHub_Updater/Theme.php:594
+#: src/GitHub_Updater/Theme.php:383 src/GitHub_Updater/Theme.php:422
+#: src/GitHub_Updater/Theme.php:608
 msgid "now"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:379 src/GitHub_Updater/Theme.php:658
+#: src/GitHub_Updater/Theme.php:393 src/GitHub_Updater/Theme.php:672
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:388
+#: src/GitHub_Updater/Theme.php:402
 #, php-format
 msgid "GitHub Updater shows a new version of %s available."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:396
+#: src/GitHub_Updater/Theme.php:410
 #, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:400
+#: src/GitHub_Updater/Theme.php:414
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:403 src/GitHub_Updater/Theme.php:589
+#: src/GitHub_Updater/Theme.php:417 src/GitHub_Updater/Theme.php:603
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%4$s."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:407 src/GitHub_Updater/Theme.php:593
+#: src/GitHub_Updater/Theme.php:421 src/GitHub_Updater/Theme.php:607
 msgid "Update"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:582
+#: src/GitHub_Updater/Theme.php:596
 #, php-format
 msgid "There is a new version of %s available now."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:627
+#: src/GitHub_Updater/Theme.php:641
 #, php-format
 msgid "Current branch is `%s`. Try %sanother version%s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:641
+#: src/GitHub_Updater/Theme.php:655
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:664
+#: src/GitHub_Updater/Theme.php:678
 msgid "Install"
 msgstr ""
 
@@ -368,9 +368,9 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins "
-"and themes. It also allows for remote installation of plugins or themes into "
-"WordPress."
+"A plugin to automatically update GitHub, Bitbucket, or GitLab hosted "
+"plugins, themes, and language packs. It also allows for remote installation "
+"of plugins or themes into WordPress."
 msgstr ""
 
 #. Author of the plugin/theme
