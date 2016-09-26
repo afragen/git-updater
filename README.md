@@ -14,7 +14,7 @@
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
+A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -92,19 +92,20 @@ This way you get automatic updates and cannot deactivate the plugin.
 There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header.
 
 ~~~php
-/*
-Plugin Name:       GitHub Updater
-Plugin URI:        https://github.com/afragen/github-updater
-Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
-Version:           1.0.0
-Author:            Andy Fragen
-License:           GNU General Public License v2
-License URI:       http://www.gnu.org/licenses/gpl-2.0.html
-Domain Path:       /languages
-Text Domain:       github-updater
-GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     master
-*/
+/**
+ * Plugin Name:       GitHub Updater
+ * Plugin URI:        https://github.com/afragen/github-updater
+ * Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
+ * Version:           1.0.0
+ * Author:            Andy Fragen
+ * License:           GNU General Public License v2
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
+ * Domain Path:       /languages
+ * Text Domain:       github-updater
+ * GitHub Plugin URI: https://github.com/afragen/github-updater
+ * GitHub Branch:     master
+ * GitHub Languages:  https://github.com/afragen/github-updater-translations
+ */
 ~~~
 
 ### Themes
@@ -112,17 +113,17 @@ GitHub Branch:     master
 There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
 
 ~~~php
-/*
-Theme Name:       Test
-Theme URI:        http://thefragens.net/
-Version:          0.1.0
-Description:      Child theme of TwentyTwelve.
-Author:           Andy Fragen
-Template:         twentytwelve
-Template Version: 1.0.0
-GitHub Theme URI: https://github.com/afragen/test-child
-GitHub Branch:    master
-*/
+/**
+ * Theme Name:       Test
+ * Theme URI:        http://thefragens.net/
+ * Version:          0.1.0
+ * Description:      Child theme of TwentyTwelve.
+ * Author:           Andy Fragen
+ * Template:         twentytwelve
+ * Template Version: 1.0.0
+ * GitHub Theme URI: https://github.com/afragen/test-child
+ * GitHub Branch:    master
+ */
 ~~~
 
 ### Language Packs
