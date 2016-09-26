@@ -127,17 +127,17 @@ GitHub Branch:    master
 
 ### Language Packs
 
-A separate repository may be used for updating Language Packs. This repository must be a public repository. What's the point of putting translation files in a private repository.
+A separate git hosted repository may be used for updating Language Packs. This repository must be a public repository. What's the point of putting translation files in a private repository.
 
 Simply add the header `GitHub Languages`, `Bitbucket Languages`, or `GitLab Languages` to the headers of the plugin or theme. The URI for this header are in the same format as for the plugins or themes.
+
+Example, `GitHub Languages: https://github.com/afragen/github-updater-translations`
 
 In order to create your Language Pack repository. You will need to install and use the [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker). You will need to follow those directions to create a properly formatted language pack repository. All translation files must be in branch `master`.
 
 See [GitHub Updater Translations](https://github.com/afragen/github-updater-translations) as an example. I have set `.gitignore` to hide the `vendor` directory.
 
 Many thanks to [Ulrich Pogson](https://github.com/grappler).
-
-**At this time it only works for GitHub hosted plugins/themes/language packs.**
 
 ### Optional Headers
 
@@ -221,11 +221,11 @@ Do not include your username or password in the plugin or theme URI.
 
 There are two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
-Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
+Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 4.0`
 
-Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
+At the moment the default values are **WordPress 4.0** and **PHP 5.3**
 
 ## Release Assets
 
@@ -378,7 +378,7 @@ You can use the [GitHub Updater Additions](https://github.com/afragen/github-upd
 
 ### Translations
 
-Please submit translation PRs to [GitHub Updater Translations](https://github.com/afragen/github-updater-translations). This will allow me to keep language pack updates independent of the main plugin and much more timely.
+Please submit translation PRs to [GitHub Updater Translations](https://github.com/afragen/github-updater-translations). This will allow me to keep language pack updates decoupled and independent of the main plugin and much more timely.
 
 * French by
     * [Daniel Ménard](https://github.com/daniel-menard)
