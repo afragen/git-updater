@@ -349,10 +349,53 @@ class GitHub_API extends API {
 	}
 
 	/**
+	 * Get/process Language Packs.
+	 * Language Packs cannot reside on GitHub Enterprise.
+	 *
+	 * @TODO Figure out how to serve raw file from GitHub Enterprise.
+	 *
+	 * @param array $headers Array of headers of Language Pack.
+	 *
+	 * @return bool When invalid response.
+	 */
+	public function get_language_pack( $headers ) {
+		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$type     = explode( '_', $this->type->type );
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
+			if ( $response ) {
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
+
+				foreach ( $response as $locale ) {
+					$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
+					$package = implode( '/', $package ) . $locale->package;
+					$package = add_query_arg( array( 'raw' => 'true' ), $package );
+
+					$response->{$locale->language}->package = $package;
+					$response->{$locale->language}->type    = $type[1];
+					$response->{$locale->language}->version = $this->type->remote_version;
+				}
+
+				$this->set_transient( 'languages', $response );
+			}
+		}
+		$this->type->language_packs = $response;
+	}
+
+	/**
 	 * Add appropriate access token to endpoint.
 	 *
 	 * @param $git
 	 * @param $endpoint
+	 *
+	 * @access private
 	 *
 	 * @return string
 	 */
@@ -398,6 +441,14 @@ class GitHub_API extends API {
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
+
+		/*
+		 * Remove branch endpoint if a translation file.
+		 */
+		$repo = explode( '/', $endpoint );
+		if ( isset( $repo[3] ) && $repo[3] !== $git->type->repo ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+		}
 
 		/*
 		 * If using GitHub Enterprise header return this endpoint.

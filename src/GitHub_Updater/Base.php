@@ -44,6 +44,13 @@ class Base {
 	protected $repo_api;
 
 	/**
+	 * Class Object for Language Packs.
+	 *
+	 * @var
+	 */
+	protected $languages;
+
+	/**
 	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
@@ -105,6 +112,7 @@ class Base {
 		'branch'     => 'Branch',
 		'enterprise' => 'Enterprise',
 		'gitlab_ce'  => 'CE',
+		'languages'  => 'Languages',
 	);
 
 	/**
@@ -392,6 +400,7 @@ class Base {
 			$this->repo_api->get_remote_readme();
 			$this->repo_api->get_remote_branches();
 			$repo->download_link = $this->repo_api->construct_download_link();
+			$this->languages = new Language_Pack( $repo, $this->repo_api );
 		}
 
 		return true;
@@ -658,7 +667,7 @@ class Base {
 	 *
 	 * @param $type
 	 *
-	 * @return bool or variable
+	 * @return bool|string
 	 */
 	protected function get_changelog_filename( $type ) {
 		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );

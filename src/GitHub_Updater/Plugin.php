@@ -136,9 +136,15 @@ class Plugin extends Base {
 			foreach ( (array) self::$extra_headers as $value ) {
 				$repo_enterprise_uri = null;
 				$repo_enterprise_api = null;
+				$repo_languages      = null;
+
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Release Asset' ) ) ) {
+					continue;
+				}
 
 				if ( empty( $headers[ $value ] ) ||
-				     false === stristr( $value, 'Plugin' )
+				     ( false === stristr( $value, 'Plugin' ) &&
+				       false === stristr( $value, 'Languages' ) )
 				) {
 					continue;
 				}
@@ -155,7 +161,15 @@ class Plugin extends Base {
 					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
 					     ! empty( $headers[ $repo_parts[ $part ] ] )
 					) {
-						$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+						switch ( $part ) {
+							case 'languages':
+								$repo_languages = $headers[ $repo_parts[ $part ] ];
+								break;
+							case 'enterprise':
+							case 'gitlab_ce':
+								$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+								break;
+						}
 					}
 				}
 
@@ -193,6 +207,7 @@ class Plugin extends Base {
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['dot_org']                 = isset( $all_plugins[ $plugin ]->id ) ? true : false;
+				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;

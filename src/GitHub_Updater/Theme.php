@@ -115,6 +115,7 @@ class Theme extends Base {
 			$repo_uri            = null;
 			$repo_enterprise_uri = null;
 			$repo_enterprise_api = null;
+			$repo_languages      = null;
 
 			foreach ( (array) self::$extra_headers as $value ) {
 
@@ -133,7 +134,8 @@ class Theme extends Base {
 				}
 
 				if ( empty( $repo_uri ) ||
-				     false === stristr( $value, 'Theme' )
+				     ( false === stristr( $value, 'Theme' ) &&
+				       false === stristr( $value, 'Languages' ) )
 				) {
 					continue;
 				}
@@ -143,6 +145,9 @@ class Theme extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $repo_uri );
+					if ( $theme->stylesheet !== $header['repo'] ) {
+						continue;
+					}
 				}
 
 				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
@@ -150,7 +155,15 @@ class Theme extends Base {
 					$self_hosted = $theme->get( $repo_parts[ $part ] );
 
 					if ( ! empty( $self_hosted ) ) {
-						$repo_enterprise_uri = $self_hosted;
+						switch ( $part ) {
+							case 'languages':
+								$repo_languages = $self_hosted;
+								break;
+							case 'enterprise':
+							case 'gitlab_ce':
+								$repo_enterprise_uri = $self_hosted;
+								break;
+						}
 					}
 				}
 
@@ -182,6 +195,7 @@ class Theme extends Base {
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+				$git_theme['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
 
 				break;
 			}
