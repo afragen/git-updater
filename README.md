@@ -137,7 +137,7 @@ See [GitHub Updater Translations](https://github.com/afragen/github-updater-tran
 
 Many thanks to [Ulrich Pogson](https://github.com/grappler).
 
-At this time it only works for GitHub hosted plugins/themes/language packs.
+**At this time it only works for GitHub hosted plugins/themes/language packs.**
 
 ### Optional Headers
 
@@ -377,6 +377,8 @@ add_filter( 'github_updater_hide_settings', '__return_true' );
 You can use the [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) plugin to add plugins or themes that don't contain the proper headers via a JSON file. They can then be updated with GitHub Updater.
 
 ### Translations
+
+Please submit translation PRs to [GitHub Updater Translations](https://github.com/afragen/github-updater-translations). This will allow me to keep language pack updates independent of the main plugin and much more timely.
 
 * French by
     * [Daniel Ménard](https://github.com/daniel-menard)
