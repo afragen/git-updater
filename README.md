@@ -131,7 +131,7 @@ A separate repository may be used for updating Language Packs. This repository m
 
 Simply add the header `GitHub Languages`, `Bitbucket Languages`, or `GitLab Languages` to the headers of the plugin or theme. The URI for this header are in the same format as for the plugins or themes.
 
-In order to create your Language Pack repository. You will need to install and use the [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker). You will need to follow those directions to create a properly formatted language pack repository.
+In order to create your Language Pack repository. You will need to install and use the [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker). You will need to follow those directions to create a properly formatted language pack repository. All translation files must be in branch `master`.
 
 See [GitHub Updater Translations](https://github.com/afragen/github-updater-translations) as an example. I have set `.gitignore` to hide the `vendor` directory.
 
