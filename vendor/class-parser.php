@@ -199,6 +199,8 @@ class Parser {
 		if ( ! empty( $headers['tags'] ) ) {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
+			$this->tags = array_filter( $this->tags );
+			$this->tags = array_slice( $this->tags, 0, 5 );
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $headers['requires'];

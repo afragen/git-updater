@@ -1,7 +1,7 @@
 # GitHub Updater
 Contributors: afragen, garyj, sethmatics, limikael
 Donate link: http://thefragens.com/github-updater-donate
-Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
+Tags: plugin, theme, language pack, updater, remote install
 Requires at least: 4.0
 Tested up to: 4.6
 Stable tag: master
