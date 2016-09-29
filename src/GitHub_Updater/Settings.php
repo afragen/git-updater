@@ -242,7 +242,7 @@ class Settings extends Base {
 			array( &$this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'github_access_token',
-			array( 'id' => 'github_access_token' )
+			array( 'id' => 'github_access_token', 'token' => true )
 		);
 
 		if ( parent::$auth_required['github_enterprise'] ) {
@@ -252,7 +252,7 @@ class Settings extends Base {
 				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'github_access_token',
-				array( 'id' => 'github_enterprise_token' )
+				array( 'id' => 'github_enterprise_token', 'token' => true )
 			);
 		}
 
@@ -288,7 +288,7 @@ class Settings extends Base {
 				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_private_token' )
+				array( 'id' => 'gitlab_private_token', 'token' => true )
 			);
 		}
 
@@ -299,7 +299,7 @@ class Settings extends Base {
 				array( &$this, 'token_callback_text' ),
 				'github_updater_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_enterprise_token' )
+				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
 			);
 		}
 
@@ -328,7 +328,7 @@ class Settings extends Base {
 			array( &$this, 'token_callback_text' ),
 			'github_updater_install_settings',
 			'bitbucket_user',
-			array( 'id' => 'bitbucket_password' )
+			array( 'id' => 'bitbucket_password', 'token' => true )
 		);
 
 		/*
@@ -619,9 +619,7 @@ class Settings extends Base {
 	 */
 	public function token_callback_text( $args ) {
 		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
-		$type = ( stristr( $args['id'], 'password' ) || stristr( $args['id'], 'token' ) || isset( $args['token'] ) )
-			? 'password'
-			: 'text';
+		$type = ( isset( $args['token'] ) ) ? 'password' : 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
 			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
