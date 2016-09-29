@@ -1,6 +1,7 @@
 #### [unreleased]
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
 * added `GitHub Languages` header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
+* set token fields in Settings to `type='password'` so values are obfuscated, for @scarstens
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
