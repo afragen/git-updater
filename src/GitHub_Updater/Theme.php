@@ -469,7 +469,7 @@ class Theme extends Base {
 		echo $enclosure['open'];
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
-			'<a href="#" onclick="jQuery(\'#' . $id . '\').toggle();return false;">',
+			'<a href="javascript:$(\'#'. $id .'\').toggle()">',
 			'</a>'
 		);
 
