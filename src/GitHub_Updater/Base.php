@@ -782,6 +782,7 @@ class Base {
 	 * @return bool|void
 	 */
 	public function delete_all_transients( $type ) {
+		do_action('before_ghu_delete_all_transients');
 		$transients = get_site_transient( 'ghu-' . $type );
 		if ( ! $transients ) {
 			return false;
