@@ -640,7 +640,7 @@ class Theme extends Base {
 		ob_start();
 		printf( '<p>' . esc_html__( 'Current branch is `%s`. Try %sanother version%s', 'github-updater' ),
 			$theme->branch,
-			'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
+			'<a href="javascript:$(\'#ghu_versions\').toggle()">',
 			'</a></p>'
 		);
 		?>
