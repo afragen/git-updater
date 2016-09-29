@@ -462,7 +462,7 @@ class Settings extends Base {
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				array( 'id' => $setting_field['callback'] )
+				array( 'id' => $setting_field['callback'], 'token' => true )
 			);
 		}
 
@@ -619,7 +619,9 @@ class Settings extends Base {
 	 */
 	public function token_callback_text( $args ) {
 		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
-		$type = ( stristr( $args['id'], 'password' ) || stristr( $args['id'], 'token' ) ) ? 'password' : 'text';
+		$type = ( stristr( $args['id'], 'password' ) || stristr( $args['id'], 'token' ) || isset( $args['token'] ) )
+			? 'password'
+			: 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
 			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
