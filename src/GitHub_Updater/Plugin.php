@@ -311,7 +311,7 @@ class Plugin extends Base {
 		echo $enclosure['open'];
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
 			$branch,
-			'<a href="javascript:$(\'#'. $id .'\').toggle()">',
+			'<a href="javascript:jQuery(\'#' . $id . '\').toggle()">',
 			'</a>'
 		);
 
