@@ -199,15 +199,11 @@ class Base {
 			$force_meta_update = true;
 		}
 
-		if ( current_user_can( 'update_plugins' ) ) {
-			if ( $force_meta_update ) {
-				$this->forced_meta_update_plugins();
-			}
+		if ( current_user_can( 'update_plugins' ) && $force_meta_update ) {
+			$this->forced_meta_update_plugins();
 		}
-		if ( current_user_can( 'update_themes' ) ) {
-			if ( $force_meta_update ) {
-				$this->forced_meta_update_themes();
-			}
+		if ( current_user_can( 'update_themes' ) && $force_meta_update ) {
+			$this->forced_meta_update_themes();
 		}
 		if ( is_admin() &&
 		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) &&
