@@ -369,19 +369,7 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
-		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
-		}
-
-		/*
-		 * If using GitLab CE/Enterprise header return this endpoint.
-		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-			}
-		}
+		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
 	}
@@ -426,6 +414,35 @@ class GitLab_API extends API {
 			}
 		}
 		$this->type->language_packs = $response;
+	}
+
+	/**
+	 * Add appropriate access token to endpoint.
+	 *
+	 * @param $git
+	 * @param $endpoint
+	 *
+	 * @access private
+	 *
+	 * @return string
+	 */
+	private function add_access_token_endpoint( $git, $endpoint ) {
+
+		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
+		}
+
+		/*
+		 * If using GitLab CE/Enterprise header return this endpoint.
+		 */
+		if ( ! empty( $git->type->enterprise ) ) {
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
+			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
+				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+			}
+		}
+
+		return $endpoint;
 	}
 
 	/**
