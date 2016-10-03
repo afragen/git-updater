@@ -313,8 +313,13 @@ class GitHub_API extends API {
 		) );
 		$endpoint           = '';
 
+		/*
+		 * If release asset.
+		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			return $this->make_release_asset_download_link();
+			$download_link_base = $this->make_release_asset_download_link();
+
+			return $download_link_base . $this->add_access_token_endpoint( $this, $endpoint );
 		}
 
 		/*
