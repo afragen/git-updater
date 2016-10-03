@@ -158,13 +158,6 @@ abstract class API extends Base {
 			'repo'  => $this->type->repo,
 		);
 
-		/*
-		 * Add or filter the available segments that are used to replace placeholders.
-		 *
-		 * @param array $segments list of segments.
-		 */
-		$segments = apply_filters( 'github_updater_api_segments', $segments );
-
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}
