@@ -238,6 +238,8 @@ Your release asset filename is generated automatically and **must** have the fol
 
 Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the newest release tag, example `test-plugin-0.7.3.zip`.
 
+There is support for [GitLab Build Artifacts](https://gitlab.com/help/user/project/builds/artifacts.md) which may be used as a release asset. You must also add the header, `GitLab CI Job:`, with the build job name.
+
 **You must tag your releases to use this feature.**
 
 ## Hosting Plugin in WP.org Repository

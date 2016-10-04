@@ -48,6 +48,7 @@ The following headers are available for use depending upon your hosting source.
 * GitLab Enterprise
 * GitLab CE
 * GitLab Languages
+* GitLab CI Job
 
 ## WordPress and PHP Requirements
 
