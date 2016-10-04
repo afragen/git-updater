@@ -463,7 +463,6 @@ class GitLab_API extends API {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
 		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private = ! $this->type->repo_meta->public;
 	}
 
 	/**

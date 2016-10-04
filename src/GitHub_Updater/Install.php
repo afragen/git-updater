@@ -384,7 +384,7 @@ class Install extends Base {
 	/**
 	 * Setting for private repo.
 	 */
-	public function is_private() {
+	protected function is_private() {
 		?>
 		<label for="is_private">
 			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >

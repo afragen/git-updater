@@ -448,7 +448,7 @@ class Plugin extends Base {
 					$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 				}
 				$response->contributors = $contributors;
-				if ( ! $plugin->private ) {
+				if ( ! $this->is_private( $plugin ) ) {
 					$response->num_ratings = $plugin->num_ratings;
 					$response->rating      = $plugin->rating;
 				}

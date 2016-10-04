@@ -371,7 +371,6 @@ class Settings extends Base {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
-			$token->private                   = isset( $token->private ) ? $token->private : true;
 
 			/*
 			 * Set boolean for Enterprise headers.
@@ -399,7 +398,7 @@ class Settings extends Base {
 			/*
 			 * Check to see if it's a private repo and set variables.
 			 */
-			if ( $token->private ) {
+			if ( $this->is_private( $token ) ) {
 				if ( false !== strpos( $token->type, 'github' ) &&
 				     ! parent::$auth_required['github_private']
 				) {
@@ -425,7 +424,7 @@ class Settings extends Base {
 			/*
 			 * Next if not a private repo or token field not empty.
 			 */
-			if ( ! $token->private && empty( parent::$options[ $token->repo ] ) ) {
+			if ( ! $this->is_private( $token ) ) {
 				continue;
 			}
 

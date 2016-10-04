@@ -390,7 +390,6 @@ class Bitbucket_API extends API {
 		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->updated_on;
 		$this->type->num_ratings  = $this->type->watchers;
-		$this->type->private      = $this->type->repo_meta->is_private;
 	}
 
 	/**

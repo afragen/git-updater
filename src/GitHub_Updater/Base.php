@@ -343,7 +343,6 @@ class Base {
 		$this->$type->num_ratings          = 0;
 		$this->$type->transient            = array();
 		$this->$type->repo_meta            = array();
-		$this->$type->private              = true;
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
@@ -1131,6 +1130,19 @@ class Base {
 	 */
 	protected static function is_doing_ajax() {
 		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
+	}
+
+	/**
+	 * Is this a private repo?
+	 * Test for whether remote_version is set ( default = 0.0.0 ) or
+	 * a repo option is set/not empty.
+	 *
+	 * @param object $repo
+	 *
+	 * @return bool
+	 */
+	protected function is_private( $repo ) {
+		return ( 0 == $repo->remote_version || ! empty( self::$options[ $repo->repo ] ) );
 	}
 
 }
