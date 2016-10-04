@@ -319,7 +319,7 @@ class GitHub_API extends API {
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$download_link_base = $this->make_release_asset_download_link();
 
-			return $download_link_base . $this->add_access_token_endpoint( $this, $endpoint );
+			return $this->add_access_token_endpoint( $this, $download_link_base );
 		}
 
 		/*

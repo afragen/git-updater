@@ -113,6 +113,7 @@ class Base {
 		'enterprise' => 'Enterprise',
 		'gitlab_ce'  => 'CE',
 		'languages'  => 'Languages',
+		'ci_job'     => 'CI Job',
 	);
 
 	/**
@@ -410,10 +411,10 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param $source
-	 * @param $remote_source
-	 * @param $upgrader
-	 * @param $hook_extra
+	 * @param string $source
+	 * @param string $remote_source
+	 * @param object $upgrader
+	 * @param array  $hook_extra
 	 *
 	 * @return string
 	 */
@@ -557,9 +558,37 @@ class Base {
 			);
 		}
 
+		/*
+		 * Renaming if GitLab Release Asset.
+		 * It has a different download directory structure.
+		 */
+		if ( $upgrader_object->config[ $slug ]->release_asset &&
+		     ! empty( $upgrader_object->config[ $slug ]->ci_job )
+		) {
+			$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
+			add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+		}
+
 		$wp_filesystem->move( $source, $new_source );
 
 		return trailingslashit( $new_source );
+	}
+
+	/**
+	 * Delete $source when updating from GitLab Release Asset.
+	 *
+	 * @param bool  $true
+	 * @param array $hook_extra
+	 * @param array $result
+	 *
+	 * @return mixed
+	 */
+	public function upgrader_post_install( $true, $hook_extra, $result ) {
+		global $wp_filesystem;
+
+		$wp_filesystem->delete( $result['source'], true );
+
+		return $result;
 	}
 
 	/**
@@ -824,7 +853,7 @@ class Base {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->release_asset        = ! empty( $response['Release Asset'] ) && 'true' === $response['Release Asset'] ? true : false;
+		$this->type->release_asset        = ! empty( $response['Release Asset'] ) && true == $response['Release Asset'] ? true : false;
 	}
 
 	/**

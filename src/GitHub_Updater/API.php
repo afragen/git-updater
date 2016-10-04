@@ -263,6 +263,17 @@ abstract class API extends Base {
 					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
 				) );
 				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$download_link = implode( '/', array(
+					'https://gitlab.com/api/v3/projects',
+					urlencode( $this->type->owner . '/' . $this->type->repo ),
+					'builds/artifacts',
+					$this->type->newest_tag,
+					'download',
+				) );
+				$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
+				break;
 		}
 
 		return $download_link;

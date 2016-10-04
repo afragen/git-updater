@@ -138,7 +138,7 @@ class Plugin extends Base {
 				$repo_enterprise_api = null;
 				$repo_languages      = null;
 
-				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Release Asset' ) ) ) {
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP' ) ) ) {
 					continue;
 				}
 
@@ -168,6 +168,9 @@ class Plugin extends Base {
 							case 'enterprise':
 							case 'gitlab_ce':
 								$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
+								break;
+							case 'ci_job':
+								$repo_ci_job = $headers[ $repo_parts[ $part ] ];
 								break;
 						}
 					}
@@ -208,6 +211,8 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['dot_org']                 = isset( $all_plugins[ $plugin ]->id ) ? true : false;
 				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
+				$git_plugin['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
+				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -249,7 +254,7 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( ! is_multisite() || is_network_admin() ) {
+			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset ) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}

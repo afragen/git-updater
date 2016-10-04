@@ -163,6 +163,9 @@ class Theme extends Base {
 							case 'gitlab_ce':
 								$repo_enterprise_uri = $self_hosted;
 								break;
+							case 'ci_job':
+								$repo_ci_job = $self_hosted;
+								break;
 						}
 					}
 				}
@@ -196,6 +199,8 @@ class Theme extends Base {
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
 				$git_theme['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
+				$git_theme['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
+				$git_theme['release_asset']           = true == $theme->get( 'Release Asset' ) ? true : false;
 
 				break;
 			}
@@ -252,7 +257,9 @@ class Theme extends Base {
 				add_action( 'after_theme_row', array( &$this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
-					add_action( "after_theme_row_$theme->repo", array( &$this, 'multisite_branch_switcher' ), 15, 2 );
+					if ( ! $theme->release_asset ) {
+						add_action( "after_theme_row_$theme->repo", array( &$this, 'multisite_branch_switcher' ), 15, 2 );
+					}
 				}
 			}
 		}
@@ -550,7 +557,9 @@ class Theme extends Base {
 			} else {
 				$prepared_themes[ $theme->repo ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			$prepared_themes[ $theme->repo ]['description'] .= $this->single_install_switcher( $theme );
+			if ( ! $theme->release_asset ) {
+				$prepared_themes[ $theme->repo ]['description'] .= $this->single_install_switcher( $theme );
+			}
 		}
 
 		return $prepared_themes;
