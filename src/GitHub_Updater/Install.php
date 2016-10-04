@@ -309,7 +309,7 @@ class Install extends Base {
 		add_settings_field(
 			'is_private',
 			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			array( &$this, 'is_private' ),
+			array( &$this, 'is_private_repo' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -384,7 +384,7 @@ class Install extends Base {
 	/**
 	 * Setting for private repo.
 	 */
-	protected function is_private() {
+	public function is_private_repo() {
 		?>
 		<label for="is_private">
 			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
