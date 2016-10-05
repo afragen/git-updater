@@ -3,7 +3,7 @@
 * added `GitHub Languages` header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
 * obfuscated token/password values in Settings page, for @scarstens
 * added support for [GitLab Build Artifacts as Release Assets](https://gitlab.com/help/user/project/builds/artifacts.md), [#459](https://github.com/afragen/github-updater/issues/459)
-* refactored check for private repo
+* refactored check for private repo, removes public repos from Settings page when no updates are available
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
