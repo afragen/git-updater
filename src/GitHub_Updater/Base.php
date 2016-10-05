@@ -561,7 +561,8 @@ class Base {
 		 * Renaming if GitLab Release Asset.
 		 * It has a different download directory structure.
 		 */
-		if ( $upgrader_object->config[ $slug ]->release_asset &&
+		if ( ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
+		       $upgrader_object->config[ $slug ]->release_asset ) &&
 		     ! empty( $upgrader_object->config[ $slug ]->ci_job )
 		) {
 			$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
