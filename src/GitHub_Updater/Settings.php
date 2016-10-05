@@ -468,20 +468,32 @@ class Settings extends Base {
 		/*
 		 * Unset options that are no longer present and update options.
 		 */
-		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
-		unset( $ghu_unset_keys['github_access_token'] );
-		if ( parent::$auth_required['github_enterprise'] ) {
-			unset( $ghu_unset_keys['github_enterprise_token'] );
-		}
-		unset( $ghu_unset_keys['branch_switch'] );
-		unset( $ghu_unset_keys['bitbucket_username'] );
-		unset( $ghu_unset_keys['bitbucket_password'] );
-		if ( parent::$auth_required['gitlab'] ) {
-			unset( $ghu_unset_keys['gitlab_private_token'] );
-		}
-		if ( parent::$auth_required['gitlab_enterprise'] ) {
-			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
-		}
+		$ghu_unset_keys   = array_diff_key( parent::$options, $ghu_options_keys );
+		$always_unset = array(
+			'github_access_token',
+			'branch_switch',
+			'bitbucket_username',
+			'bitbucket_password',
+		);
+
+		array_filter( $always_unset, function( $e ) use ( &$ghu_unset_keys ) {
+			unset( $ghu_unset_keys[ $e ] );
+		} );
+
+		$auth_required = parent::$auth_required;
+		$auth_required_unset = array(
+			'github_enterprise' => 'github_enterprise_token',
+			'gitlab'            => 'gitlab_private_token',
+			'gitlab_enterprise' => 'gitlab_enterprise_token',
+		);
+
+		array_filter( $auth_required_unset, function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
+			$key = array_search( $e, $auth_required_unset );
+			if ( $auth_required[ $key ] ) {
+				unset( $ghu_unset_keys[ $e ] );
+			}
+		} );
+
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
