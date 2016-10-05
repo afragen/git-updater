@@ -1143,7 +1143,9 @@ class Base {
 	 * @return bool
 	 */
 	protected function is_private( $repo ) {
-		return ( 0 == $repo->remote_version || ! empty( self::$options[ $repo->repo ] ) );
+		if ( ! $this->is_doing_ajax() ) {
+			return ( 0 === $repo->remote_version || ! empty( self::$options[ $repo->repo ] ) );
+		}
 	}
 
 }
