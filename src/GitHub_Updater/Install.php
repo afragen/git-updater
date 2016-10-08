@@ -129,6 +129,12 @@ class Install extends Base {
 				if ( isset( self::$install['is_private'] ) ) {
 					parent::$options[ self::$install['repo'] ] = 1;
 				}
+				if ( isset( self::$install['bitbucket_username'] ) ) {
+					parent::$options['bitbucket_username'] = self::$install['bitbucket_username'];
+				}
+				if ( isset( self::$install['bitbucket_password'] ) ) {
+					parent::$options['bitbucket_password'] = self::$install['bitbucket_password'];
+				}
 
 				new Bitbucket_API( (object) $type );
 			}
@@ -184,7 +190,7 @@ class Install extends Base {
 				) );
 			}
 
-			update_site_option( 'github_updater', parent::$options );
+			update_site_option( 'github_updater', Settings::sanitize( parent::$options ) );
 			$url   = self::$install['download_link'];
 			$nonce = wp_nonce_url( $url );
 
@@ -307,17 +313,37 @@ class Install extends Base {
 		);
 
 		add_settings_field(
-			'is_private',
-			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			array( &$this, 'is_private_repo' ),
+			'github_access_token',
+			esc_html__( 'GitHub Access Token', 'github-updater' ),
+			array( &$this, 'access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
 
+		if ( empty( parent::$options['bitbucket_username'] ) ||
+		     empty( parent::$options['bitbucket_password'] )
+		) {
+			add_settings_field(
+				'bitbucket_username',
+				esc_html__( 'Bitbucket Username', 'github-updater' ),
+				array( &$this, 'bitbucket_username' ),
+				'github_updater_install_' . $type,
+				$type
+			);
+
+			add_settings_field(
+				'bitbucket_password',
+				esc_html__( 'Bitbucket Password', 'github-updater' ),
+				array( &$this, 'bitbucket_password' ),
+				'github_updater_install_' . $type,
+				$type
+			);
+		}
+
 		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'access_token' ),
+			'is_private',
+			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
+			array( &$this, 'is_private_repo' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -404,6 +430,34 @@ class Install extends Base {
 			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
 			<p class="description">
 				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
+			</p>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Bitbucket username for remote install.
+	 */
+	public function bitbucket_username() {
+		?>
+		<label for="bitbucket_username">
+			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_username" value="">
+			<p class="description">
+				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ) ?>
+			</p>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Bitbucket password for remote install.
+	 */
+	public function bitbucket_password() {
+		?>
+		<label for="bitbucket_password">
+			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_password" value="">
+			<p class="description">
+				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ) ?>
 			</p>
 		</label>
 		<?php

@@ -1,9 +1,12 @@
 #### [unreleased]
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
-* added `GitHub Languages` header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
+* added new header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
 * obfuscated token/password values in Settings page, for @scarstens
 * added support for [GitLab Build Artifacts as Release Assets](https://gitlab.com/help/user/project/builds/artifacts.md), [#459](https://github.com/afragen/github-updater/issues/459)
 * refactored check for private repo, removes public repos from Settings page when no updates are available
+* refactored to provide Settings page with dynamically displayed sub-tabs
+* added display of installed plugins/themes using GitHub Updater in Settings sub-tabs
+* added ability to enter Bitbucket credentials to Install tabs if not already present
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_

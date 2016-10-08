@@ -1,4 +1,28 @@
-div.install-theme-info { display: block !important; }
+div.install-theme-info {
+	display: block !important;
+}
 
 /* Remove star rating for themes. */
-#theme-installer div.install-theme-info div.star-rating { display: none; }
+#theme-installer div.install-theme-info div.star-rating {
+	display: none;
+}
+
+/* Position Settings input */
+input.ghu-callback-text {
+	width: 50%;
+}
+
+input.bitbucket_setting {
+	margin-top: 5px;
+}
+
+/* Position Save and Refresh buttons */
+form.settings p.submit {
+	float: left;
+	clear: right;
+	width: 40%;
+}
+
+form.settings.no-sub-tabs p.submit {
+	margin-top: 10px;
+}

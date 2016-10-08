@@ -137,7 +137,7 @@ class Parser {
 		//$contents = file_get_contents( $file );
 		$contents = $file;
 
-		$contents = preg_split( '!\R!', $contents );
+		$contents = preg_split( '!\R!u', $contents );
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
 		// Strip UTF8 BOM if present.
