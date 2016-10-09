@@ -190,7 +190,7 @@ class Install extends Base {
 				) );
 			}
 
-			update_site_option( 'github_updater', parent::$options );
+			update_site_option( 'github_updater', Settings::sanitize( parent::$options ) );
 			$url   = self::$install['download_link'];
 			$nonce = wp_nonce_url( $url );
 
