@@ -94,6 +94,7 @@ class Theme extends Base {
 	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
+		wp_cache_flush();
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
 
@@ -258,7 +259,10 @@ class Theme extends Base {
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_$theme->repo", array( &$this, 'wp_theme_update_row' ), 10, 2 );
 					if ( ! $theme->release_asset ) {
-						add_action( "after_theme_row_$theme->repo", array( &$this, 'multisite_branch_switcher' ), 15, 2 );
+						add_action( "after_theme_row_$theme->repo", array(
+							&$this,
+							'multisite_branch_switcher',
+						), 15, 2 );
 					}
 				}
 			}
