@@ -51,7 +51,13 @@ class Settings extends Base {
 	 */
 	public function __construct() {
 		$this->ensure_api_key_is_set();
+		$this->load_hooks();
+	}
 
+	/**
+	 * Load relevant action/filter hooks.
+	 */
+	public function load_hooks() {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
