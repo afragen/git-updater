@@ -8,6 +8,7 @@
 * added display of installed plugins/themes using GitHub Updater in Settings sub-tabs
 * added ability to enter Bitbucket credentials to Install tabs if not already present
 * added a couple of `wp_cache_flush()` calls to ensure extra headers load
+* moved action/filter hook calls out of constructors, make @carlalexander happy
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
