@@ -56,7 +56,6 @@ class Theme extends Base {
 		/*
 		 * Get details of installed git sourced themes.
 		 */
-		wp_cache_flush();
 		$this->config = $this->get_theme_meta();
 
 		if ( empty( $this->config ) ) {
