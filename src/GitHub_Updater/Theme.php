@@ -641,14 +641,13 @@ class Theme extends Base {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
-		$show_button            = true;
-		$options                = get_site_option( 'github_updater' );
-		$theme_update_transient = get_site_transient( 'update_themes' );
-		$nonced_update_url      = wp_nonce_url(
+		$show_button       = true;
+		$options           = get_site_option( 'github_updater' );
+		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo
 		);
-		$rollback_url           = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
+		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
 		printf( '<p>' . esc_html__( 'Current branch is `%s`. Try %sanother version%s', 'github-updater' ),
@@ -672,15 +671,15 @@ class Theme extends Base {
 							echo '<option>' . $branch . '</option>';
 						}
 					}
-					if ( isset( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
-						$rollback = array_slice( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'], 0, 4, true );
+					if ( ! empty( $theme->rollback ) ) {
+						$rollback = array_slice( $theme->rollback, 0, 4, true );
 						array_shift( $rollback ); // Dump current tag.
 						foreach ( array_keys( $rollback ) as $version ) {
 							echo '<option>' . $version . '</option>';
 						}
 					}
 					if ( empty( $options['branch_switch'] ) &&
-					     empty( $theme_update_transient->up_to_date[ $theme->repo ]['rollback'] )
+					     empty( $theme->rollback )
 					) {
 						echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
 						$show_button = false;
