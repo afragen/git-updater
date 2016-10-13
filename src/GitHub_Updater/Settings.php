@@ -346,7 +346,7 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'github_access_token',
-			esc_html__( 'Personal GitHub Access Token', 'github-updater' ),
+			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
 			array( &$this, 'print_section_github_access_token' ),
 			'github_updater_github_install_settings'
 		);
@@ -385,32 +385,41 @@ class Settings extends Base {
 
 		/*
 		 * Add setting for GitLab.com, GitLab Community Edition.
-		 * or GitLab Enterprise Private Token.
+		 * or GitLab Enterprise Access Token.
 		 */
 		if ( parent::$auth_required['gitlab'] || parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
-				esc_html__( 'GitLab Private Settings', 'github-updater' ),
+				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
 				array( &$this, 'print_section_gitlab_token' ),
+				'github_updater_gitlab_install_settings'
+			);
+		}
+
+		if ( parent::$auth_required['gitlab_private'] ) {
+			add_settings_section(
+				'gitlab_id',
+				esc_html__( 'GitLab Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_gitlab_info' ),
 				'github_updater_gitlab_install_settings'
 			);
 		}
 
 		if ( parent::$auth_required['gitlab'] ) {
 			add_settings_field(
-				'gitlab_private_token',
-				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
+				'gitlab_access_token',
+				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
 				array( &$this, 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_private_token', 'token' => true )
+				array( 'id' => 'gitlab_access_token', 'token' => true )
 			);
 		}
 
 		if ( parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
-				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
+				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
 				array( &$this, 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
@@ -533,6 +542,11 @@ class Settings extends Base {
 				) {
 					parent::$auth_required['bitbucket_private'] = true;
 				}
+				if ( false !== strpos( $token->type, 'gitlab' ) &&
+				     ! parent::$auth_required['gitlab_private']
+				) {
+					parent::$auth_required['gitlab_private'] = true;
+				}
 			}
 
 			/*
@@ -576,7 +590,7 @@ class Settings extends Base {
 				case 'gitlab':
 					$setting_field['page']            = 'github_updater_gitlab_install_settings';
 					$setting_field['section']         = 'gitlab_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
+					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
 			}
@@ -611,7 +625,7 @@ class Settings extends Base {
 		$auth_required       = parent::$auth_required;
 		$auth_required_unset = array(
 			'github_enterprise' => 'github_enterprise_token',
-			'gitlab'            => 'gitlab_private_token',
+			'gitlab'            => 'gitlab_access_token',
 			'gitlab_enterprise' => 'gitlab_enterprise_token',
 		);
 
@@ -620,6 +634,15 @@ class Settings extends Base {
 				$key = array_search( $e, $auth_required_unset );
 				if ( $auth_required[ $key ] ) {
 					unset( $ghu_unset_keys[ $e ] );
+				}
+			} );
+
+		// Unset if value set.
+		array_filter( $ghu_unset_keys,
+			function( $e ) use ( &$ghu_unset_keys ) {
+				$key = array_search( $e, $ghu_unset_keys );
+				if ( $ghu_unset_keys[ $key ] ) {
+					unset( $ghu_unset_keys[ $key ] );
 				}
 			} );
 
@@ -725,10 +748,17 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitLab Private Token text.
+	 * Print the GitLab text.
+	 */
+	public function print_section_gitlab_info() {
+		esc_html_e( 'Enter your GitLab Access Token.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitLab Access Token text.
 	 */
 	public function print_section_gitlab_token() {
-		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
+		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' );
 	}
 
 	/**
@@ -832,7 +862,7 @@ class Settings extends Base {
 			'github_access_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'gitlab_private_token',
+			'gitlab_access_token',
 			'gitlab_enterprise_token',
 			'branch_switch',
 		);

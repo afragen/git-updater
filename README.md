@@ -194,7 +194,10 @@ Instead of the `GitHub Theme URI` header you will need to use the `GitLab Theme 
 
 The `GitLab Branch` header is supported for both plugins and themes.
 
-You must set a GitLab private token. Go to your GitLab profile page under Edit Account. From here you can retrieve or reset your GitLab private token.
+You must set a GitLab private token or a GitLab personal access token. 
+
+* Go to your GitLab Settings page under the Account tab. From here you can retrieve or reset your GitLab private token.
+* Go to your GitLab Profile Settings page under the Access Tokens tab. From here you can create a personal access token.
 
 ## Private Repositories
 

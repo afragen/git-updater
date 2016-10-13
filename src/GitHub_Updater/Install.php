@@ -160,18 +160,19 @@ class Install extends Base {
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
 
 				/*
-				 * Add private token.
+				 * Add access token.
 				 */
-				if ( ! empty( self::$install['gitlab_private_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'private_token', self::$install['gitlab_private_token'], self::$install['download_link'] );
+				if ( ! empty( self::$install['gitlab_access_token'] ) ) {
+					self::$install['download_link']            = add_query_arg( 'private_token', self::$install['gitlab_access_token'], self::$install['download_link'] );
+					parent::$options[ self::$install['repo'] ] = self::$install['gitlab_access_token'];
 					if ( 'gitlab.com' === $headers['host'] ) {
-						parent::$options['gitlab_private_token'] = self::$install['gitlab_private_token'];
+						parent::$options['gitlab_access_token'] = empty( parent::$options['gitlab_access_token'] ) ? self::$install['gitlab_access_token'] : parent::$options['gitlab_access_token'];
 					} else {
-						parent::$options['gitlab_enterprise_token'] = self::$install['gitlab_private_token'];
+						parent::$options['gitlab_enterprise_token'] = empty( parent::$options['gitlab_enterprise_token'] ) ? self::$install['gitlab_access_token'] : parent::$options['gitlab_enterprise_token'];
 					}
 				} else {
 					if ( 'gitlab.com' === $headers['host'] ) {
-						self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], self::$install['download_link'] );
+						self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], self::$install['download_link'] );
 					} else {
 						self::$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], self::$install['download_link'] );
 					}
@@ -315,7 +316,7 @@ class Install extends Base {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'access_token' ),
+			array( &$this, 'github_access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -348,13 +349,13 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['gitlab_private_token'] ) ||
+		if ( empty( parent::$options['gitlab_access_token'] ) ||
 		     empty( parent::$options['gitlab_enterprise_token'] )
 		) {
 			add_settings_field(
-				'gitlab_private_token',
-				esc_html__( 'GitLab Private Token', 'github-updater' ),
-				array( &$this, 'private_token' ),
+				'gitlab_access_token',
+				esc_html__( 'GitLab Access Token', 'github-updater' ),
+				array( &$this, 'gitlab_access_token' ),
 				'github_updater_install_' . $type,
 				$type
 			);
@@ -424,7 +425,7 @@ class Install extends Base {
 	/**
 	 * GitHub Access Token for remote install.
 	 */
-	public function access_token() {
+	public function github_access_token() {
 		?>
 		<label for="github_access_token">
 			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
@@ -464,14 +465,14 @@ class Install extends Base {
 	}
 
 	/**
-	 * GitLab Private Token for remote install.
+	 * GitLab Access Token for remote install.
 	 */
-	public function private_token() {
+	public function gitlab_access_token() {
 		?>
-		<label for="gitlab_private_token">
-			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_private_token" value="">
+		<label for="gitlab_access_token">
+			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_access_token" value="">
 			<p class="description">
-				<?php esc_html_e( 'Enter GitLab Private Token for private GitLab repositories.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ) ?>
 			</p>
 		</label>
 		<?php

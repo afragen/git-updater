@@ -44,14 +44,14 @@ class GitLab_API extends API {
 		parent::$hours  = 12;
 		$this->response = $this->get_transient();
 
-		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
-			self::$options['gitlab_private_token'] = null;
+		if ( ! isset( self::$options['gitlab_access_token'] ) ) {
+			self::$options['gitlab_access_token'] = null;
 		}
 		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
 			self::$options['gitlab_enterprise_token'] = null;
 		}
 		if (
-			empty( self::$options['gitlab_private_token'] ) ||
+			empty( self::$options['gitlab_access_token'] ) ||
 			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
 		) {
 			Messages::instance()->create_error_message( 'gitlab' );
@@ -437,18 +437,23 @@ class GitLab_API extends API {
 	 */
 	private function add_access_token_endpoint( $git, $endpoint ) {
 
-		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
+		// Add GitLab.com Access Token.
+		if ( ! empty( parent::$options['gitlab_access_token'] ) ) {
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
 		}
 
-		/*
-		 * If using GitLab CE/Enterprise header return this endpoint.
-		 */
-		if ( ! empty( $git->type->enterprise ) ) {
+		// If using GitLab CE/Enterprise header return this endpoint.
+		if ( ! empty( $git->type->enterprise ) &&
+		     ! empty( parent::$options['gitlab_enterprise_token'] )
+		) {
 			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-			}
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+		}
+
+		// Add repo access token.
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
+			$endpoint = add_query_arg( 'private_token', parent::$options[ $git->type->repo ], $endpoint );
 		}
 
 		return $endpoint;
@@ -474,9 +479,6 @@ class GitLab_API extends API {
 	 * @return string
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
-		}
 
 		switch ( self::$method ) {
 			case 'projects':
@@ -495,15 +497,12 @@ class GitLab_API extends API {
 				break;
 		}
 
+		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
+
 		/*
 		 * If using GitLab CE/Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-			}
-
 			return $git->type->enterprise_api . $endpoint;
 		}
 

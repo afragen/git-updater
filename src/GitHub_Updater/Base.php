@@ -127,6 +127,7 @@ class Base {
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
 		'gitlab'            => false,
+		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
 	);
 

@@ -169,7 +169,7 @@ class Messages extends Base {
 	public function gitlab_error() {
 		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
 		       parent::$auth_required['gitlab_enterprise'] ) ||
-		     ( empty( parent::$options['gitlab_private_token'] ) &&
+		     ( empty( parent::$options['gitlab_access_token'] ) &&
 		       parent::$auth_required['gitlab'] )
 		) {
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
@@ -178,7 +178,7 @@ class Messages extends Base {
 			?>
 			<div data-dismissible="gitlab-error-1" class="error notice is-dismissible">
 				<p>
-					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' ); ?>
+					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' ); ?>
 				</p>
 			</div>
 			<?php
