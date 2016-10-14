@@ -349,18 +349,6 @@ class GitLab_API extends API {
 		}
 
 		/*
-		 * Check for rollback.
-		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
-		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
-		) {
-			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
-		} elseif ( ! empty( $this->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-
-		/*
 		 * If a branch has been given, only check that for the remote info.
 		 * If it's not been given, GitLab will use the Default branch.
 		 * If branch is master and tags are used, use newest tag.
@@ -368,6 +356,20 @@ class GitLab_API extends API {
 		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
+		}
+
+		/*
+		 * Check for rollback.
+		 */
+		if ( ! empty( $_GET['rollback'] ) &&
+		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
+		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
+		) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
+		} elseif ( ! empty( $this->type->branch ) ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
 
 		/*
