@@ -350,12 +350,14 @@ class GitLab_API extends API {
 
 		/*
 		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitLab will use the Default branch.
-		 * If branch is master and tags are used, use newest tag.
+		 * If branch is master (default) and tags are used, use newest tag.
 		 */
 		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
+		} elseif ( ! empty( $this->type->branch ) ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
 
 		/*
@@ -367,9 +369,6 @@ class GitLab_API extends API {
 		) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
-		} elseif ( ! empty( $this->type->branch ) ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
 		}
 
 		/*
