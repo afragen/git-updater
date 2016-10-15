@@ -398,14 +398,18 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $this->repo_api->get_remote_info( $file ) ) {
-			$this->repo_api->get_repo_meta();
 			$this->repo_api->get_remote_tag();
-			$changelog = $this->get_changelog_filename( $repo->type );
-			if ( $changelog ) {
-				$this->repo_api->get_remote_changes( $changelog );
+			if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
+				$this->repo_api->get_repo_meta();
+				$changelog = $this->get_changelog_filename( $repo->type );
+				if ( $changelog ) {
+					$this->repo_api->get_remote_changes( $changelog );
+				}
+				$this->repo_api->get_remote_readme();
 			}
-			$this->repo_api->get_remote_readme();
-			$this->repo_api->get_remote_branches();
+			if ( ! empty( self::$options['branch_switch'] ) ) {
+				$this->repo_api->get_remote_branches();
+			}
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
 		}
