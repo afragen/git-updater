@@ -641,7 +641,7 @@ class Settings extends Base {
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys ) {
 				$key = array_search( $e, $ghu_unset_keys );
-				if ( $ghu_unset_keys[ $key ] ) {
+				if ( $ghu_unset_keys[ $key ] && 'github_updater_install_repo' !== $key ) {
 					unset( $ghu_unset_keys[ $key ] );
 				}
 			} );
