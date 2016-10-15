@@ -164,6 +164,7 @@ class Base {
 			'ajax_maybe_authenticate_http',
 		), 15, 2 );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
+		add_filter( 'plugins_update_check_locales', array( &$this, 'forced_meta_update_plugins' ) );
 	}
 
 	/**
