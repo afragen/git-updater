@@ -210,6 +210,11 @@ abstract class API extends Base {
 			self::$transients[] = $transient;
 		}
 
+		// Allows advanced caching plugins to control REST transients to avoid double caching
+		if ( false === apply_filters( 'ghu_use_remote_call_transients', true ) ) {
+			return false;
+		}
+
 		return get_site_transient( $transient );
 	}
 
@@ -227,6 +232,11 @@ abstract class API extends Base {
 		$this->response[ $id ] = $response;
 		if ( ! in_array( $transient, self::$transients, true ) ) {
 			self::$transients[] = $transient;
+		}
+
+		// Allows advanced caching plugins to control REST transients to avoid double caching
+		if ( false === apply_filters( 'ghu_use_remote_call_transients', true, $id, $response ) ) {
+			return false;
 		}
 		set_site_transient( $transient, $this->response, ( self::$hours * HOUR_IN_SECONDS ) );
 
