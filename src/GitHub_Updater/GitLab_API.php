@@ -513,15 +513,25 @@ class GitLab_API extends API {
 	/**
 	 * Get GitLab project ID.
 	 *
-	 * @return bool|null
+	 * @return string|int
 	 */
 	public function get_gitlab_id() {
 		$id       = null;
-		$response = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
+		$response = isset( $this->response['project_id'] ) ? $this->response['project_id'] : false;
 
 		if ( ! $response ) {
 			self::$method = 'projects';
 			$response     = $this->api( '/projects' );
+
+			foreach ( $response as $project ) {
+				if ( $this->type->repo === $project->path ) {
+					$id = $project->id;
+					$this->set_transient( 'project_id', $id );
+
+					return $id;
+				}
+			}
+
 			if ( empty( $response ) ) {
 				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
 
@@ -529,12 +539,9 @@ class GitLab_API extends API {
 			}
 		}
 
-		foreach ( $response as $project ) {
-			if ( $this->type->repo === $project->path ) {
-				$id = $project->id;
-				$this->set_transient( 'projects', $response );
-				break;
-			}
+		return $response;
+	}
+
 		}
 
 		return $id;
