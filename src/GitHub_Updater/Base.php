@@ -164,7 +164,15 @@ class Base {
 			'ajax_maybe_authenticate_http',
 		), 15, 2 );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
+
+		/*
+		 * The following hook needed to ensure transient is reset correctly after
+		 * shiny update. Due to where the hook is called a PHP warning is thrown on
+		 * `wp-includes/update.php:276` for null response, not array.
+		 */
 		add_filter( 'plugins_update_check_locales', array( &$this, 'forced_meta_update_plugins' ) );
+		//https://core.trac.wordpress.org/ticket/22377
+		add_filter( 'wp_update_plugins_response', array( &$this, 'forced_meta_update_plugins' ) );
 	}
 
 	/**
