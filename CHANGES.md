@@ -12,6 +12,7 @@
 * refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
 * skip API call for branches if branch switching not enabled
+* refactored most API responses to save only necessary data to transient. Makes for much smaller transient size. **WARNING** you may need to dump your transients (they all start with `ghu-`) if your site whitescreens. Sorry.
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
