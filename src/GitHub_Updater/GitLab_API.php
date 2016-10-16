@@ -123,6 +123,7 @@ class GitLab_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -542,9 +543,30 @@ class GitLab_API extends API {
 		return $response;
 	}
 
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object|array $response Response from API call for tags.
+	 *
+	 * @return object|array Array of tag numbers, object is error.
+	 */
+	private function parse_tag_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
 		}
 
-		return $id;
+		$arr = array();
+		array_map( function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+
+			return $arr;
+		}, (array) $response );
+
+		return $arr;
+	}
+
+		}
+
 	}
 
 }

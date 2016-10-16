@@ -897,39 +897,40 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						if ( isset( $tag->name, $tag->zipball_url ) ) {
-							$tags[]                 = $tag->name;
-							$rollback[ $tag->name ] = $tag->zipball_url;
-						}
+						$download_base    = implode( '/', array(
+							$repo_type['base_uri'],
+							'repos',
+							$this->type->owner,
+							$this->type->repo,
+							'zipball/',
+						) );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag;
 					}
 					break;
 				case 'bitbucket':
-					foreach ( (array) $response as $num => $tag ) {
-						$download_base = implode( '/', array(
+					foreach ( (array) $response as $tag ) {
+						$download_base    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'get/',
 						) );
-						if ( isset( $num ) ) {
-							$tags[]           = $num;
-							$rollback[ $num ] = $download_base . $num . '.zip';
-						}
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag . '.zip';
 					}
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link = implode( '/', array(
+						$download_link    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'repository/archive.zip',
 						) );
-						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
-						if ( isset( $tag->name ) ) {
-							$tags[]                 = $tag->name;
-							$rollback[ $tag->name ] = $download_link;
-						}
+						$download_link    = add_query_arg( 'ref', $tag, $download_link );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_link;
 					}
 					break;
 			}

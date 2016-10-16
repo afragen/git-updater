@@ -111,6 +111,7 @@ class Bitbucket_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -499,6 +500,21 @@ class Bitbucket_API extends API {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object Array of tag numbers, object is error.
+	 */
+	private function parse_tag_response( $response ) {
+		if ( isset( $response->messages ) ) {
+			return $response;
+		}
+
+		return array_keys( (array) $response );
 	}
 
 }
