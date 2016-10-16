@@ -45,10 +45,10 @@ if ( ! $updatePhp->does_it_meet_required_php_version( PHP_VERSION ) ) {
 	return false;
 }
 
-// Load textdomain
+// Load textdomain.
 load_plugin_textdomain( 'github-updater' );
 
-// Plugin namespace root
+// Plugin namespace root.
 $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
 // Add extra classes
@@ -65,9 +65,16 @@ require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
 $loader = 'Fragen\\GitHub_Updater\\Autoloader';
 new $loader( $root, $extra_classes );
 
-// Instantiate class GitHub_Updater
+// Instantiate class GitHub_Updater.
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
+
+// Delete all GitHub Updater transients on activation.
+register_activation_hook( __FILE__, function() {
+	$base = new Fragen\GitHub_Updater\Base();
+	$base->delete_all_transients( 'plugins' );
+	$base->delete_all_transients( 'themes' );
+} );
 
 /**
  * Initialize Persist Admin notices Dismissal.
