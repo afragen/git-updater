@@ -508,4 +508,5 @@ class Plugin extends Base {
 
 		return $transient;
 	}
+
 }

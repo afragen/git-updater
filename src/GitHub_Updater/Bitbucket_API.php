@@ -48,6 +48,9 @@ class Bitbucket_API extends API {
 		add_site_option( 'github_updater', self::$options );
 	}
 
+	/**
+	 * Load hooks for Bitbucket authentication headers.
+	 */
 	public function load_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
