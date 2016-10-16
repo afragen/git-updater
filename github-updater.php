@@ -70,11 +70,8 @@ $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 
 // Delete all GitHub Updater transients on activation.
-register_activation_hook( __FILE__, function() {
-	$base = new Fragen\GitHub_Updater\Base();
-	$base->delete_all_transients( 'plugins' );
-	$base->delete_all_transients( 'themes' );
-} );
+$base = new Fragen\GitHub_Updater\Base();
+register_activation_hook( __FILE__, array( $base, 'delete_all_transients_on_activation' ) );
 
 /**
  * Initialize Persist Admin notices Dismissal.

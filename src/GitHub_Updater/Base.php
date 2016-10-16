@@ -852,6 +852,15 @@ class Base {
 	}
 
 	/**
+	 * Delete all transients on activation/re-activation.
+	 * Hopefully avoid issues when transient format changes.
+	 */
+	public static function delete_all_transients_on_activation(){
+		self::delete_all_transients('plugins');
+		self::delete_all_transients('themes');
+	}
+
+	/**
 	 * Create transient of $type transients for clearing transients.
 	 *
 	 * @param $type
