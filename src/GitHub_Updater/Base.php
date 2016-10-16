@@ -994,6 +994,18 @@ class Base {
 	}
 
 	/**
+	 * Add remote data to type object.
+	 *
+	 * @access private
+	 */
+	protected function add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta['last_updated'];
+		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
+		$this->type->is_private   = $this->type->repo_meta['private'];
+	}
+
+	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
@@ -1002,10 +1014,10 @@ class Base {
 	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
-		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
-		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
-		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
+		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
+		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
+		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
+		$score       = empty( $repo_meta['score'] ) ? $this->type->score : $repo_meta['score']; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 

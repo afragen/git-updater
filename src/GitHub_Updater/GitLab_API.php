@@ -258,6 +258,7 @@ class GitLab_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -458,17 +459,6 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
-		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
-	}
-
-	/**
 	 * Create GitLab API endpoints.
 	 *
 	 * @param $git      object
@@ -557,6 +547,29 @@ class GitLab_API extends API {
 
 			return $arr;
 		}, (array) $response );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	private function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->public;
+			$arr['last_updated'] = $e->last_activity_at;
+			$arr['watchers']     = 0;
+			$arr['forks']        = $e->forks_count;
+			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
+			$arr['score']        = 0;
+		} );
 
 		return $arr;
 	}

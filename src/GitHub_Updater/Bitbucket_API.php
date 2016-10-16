@@ -250,6 +250,7 @@ class Bitbucket_API extends API {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -386,17 +387,6 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->updated_on;
-		$this->type->num_ratings  = $this->type->watchers;
-	}
-
-	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private Bitbucket repositories only.
 	 *
@@ -511,6 +501,29 @@ class Bitbucket_API extends API {
 		}
 
 		return array_keys( (array) $response );
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	private function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->is_private;
+			$arr['last_updated'] = $e->updated_on;
+			$arr['watchers']     = 0;
+			$arr['forks']        = 0;
+			$arr['open_issues']  = 0;
+			$arr['score']        = 0;
+		} );
+
+		return $arr;
 	}
 
 	/**
