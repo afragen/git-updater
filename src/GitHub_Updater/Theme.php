@@ -49,9 +49,6 @@ class Theme extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['refresh_transients'] ) ) {
-			$this->delete_all_transients( 'themes' );
-		}
 
 		/*
 		 * Get details of installed git sourced themes.
@@ -267,7 +264,6 @@ class Theme extends Base {
 				}
 			}
 		}
-		$this->make_transient_list( 'themes' );
 		$this->load_pre_filters();
 	}
 
