@@ -901,20 +901,20 @@ class Base {
 							$this->type->repo,
 							'zipball/',
 						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag;
+						$tags[]           = $tag->name;
+						$rollback[ $tag->name ] = $download_base . $tag->name;
 					}
 					break;
 				case 'bitbucket':
-					foreach ( (array) $response as $tag ) {
+					foreach ( (array) $response as $num => $tag ) {
 						$download_base    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'get/',
 						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag . '.zip';
+						$tags[]           = $num;
+						$rollback[ $num ] = $download_base . $num . '.zip';
 					}
 					break;
 				case 'gitlab':
@@ -926,8 +926,8 @@ class Base {
 							'repository/archive.zip',
 						) );
 						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link;
+						$tags[]           = $tag->name;
+						$rollback[ $tag->name ] = $download_link;
 					}
 					break;
 			}
