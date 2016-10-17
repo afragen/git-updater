@@ -596,10 +596,14 @@ class Base {
 		$wp_filesystem->move( $source, $new_source );
 
 		if ( 'github-updater' === $slug ) {
-			$this->delete_all_transients();
+			add_action( 'upgrader_process_complete', array( &$this, 'upgrader_process_complete'), 15 );
 		}
-
+		
 		return trailingslashit( $new_source );
+	}
+
+	public function upgrader_process_complete() {
+		$this->delete_all_transients();
 	}
 
 	/**
