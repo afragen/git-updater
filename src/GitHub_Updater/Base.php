@@ -592,8 +592,8 @@ class Base {
 		$wp_filesystem->move( $source, $new_source );
 
 		if ( 'github-updater' === $slug ) {
-			$this->delete_all_transients('plugins');
-			$this->delete_all_transients('themes');
+			$this->delete_all_transients( 'plugins' );
+			$this->forced_meta_update_plugins();
 		}
 
 		return trailingslashit( $new_source );
@@ -832,31 +832,33 @@ class Base {
 	 *
 	 * @param $type
 	 *
-	 * @return bool|void
+	 * @return bool
 	 */
 	public function delete_all_transients( $type ) {
-		do_action( 'before_ghu_delete_all_transients', $type );
-		$transients = get_site_transient( 'ghu-' . $type );
-		if ( ! $transients ) {
-			return false;
-		}
+		global $wpdb;
 
-		foreach ( $transients as $transient ) {
-			delete_site_transient( $transient );
-		}
-		delete_site_transient( 'ghu-' . $type );
+		do_action( 'before_ghu_delete_all_transients', $type );
+
+		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column        = is_multisite() ? 'meta_key' : 'option_name';
+		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
+
+		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
+
+
+		/*		$transients = get_site_transient( 'ghu-' . $type );
+				if ( ! $transients ) {
+					return false;
+				}
+
+				foreach ( $transients as $transient ) {
+					delete_site_transient( $transient );
+				}
+				delete_site_transient( 'ghu-' . $type );
+		*/
 		set_site_transient( 'update_' . $type, null );
 
 		return true;
-	}
-
-	/**
-	 * Delete all transients on deactivation.
-	 * Hopefully avoid issues when transient format changes.
-	 */
-	public static function delete_all_transients_on_deactivation(){
-		self::delete_all_transients('plugins');
-		self::delete_all_transients('themes');
 	}
 
 	/**
