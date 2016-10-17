@@ -596,15 +596,10 @@ class Base {
 		$wp_filesystem->move( $source, $new_source );
 
 		if ( 'github-updater' === $slug ) {
-			add_filter( 'upgrader_post_install', array( &$this, 'post_github_updater_install' ) );
+			$this->delete_all_transients();
 		}
 
 		return trailingslashit( $new_source );
-	}
-
-	public function post_github_updater_install() {
-		$this->delete_all_transients();
-		$this->forced_meta_update_plugins();
 	}
 
 	/**
