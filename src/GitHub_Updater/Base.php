@@ -591,6 +591,11 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
+		if ( 'github-updater' === $slug ) {
+			$this->delete_all_transients('plugins');
+			$this->delete_all_transients('themes');
+		}
+
 		return trailingslashit( $new_source );
 	}
 
