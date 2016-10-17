@@ -832,7 +832,7 @@ class Base {
 	}
 
 	/**
-	 * Delete all transients from array of transient ids.
+	 * Delete all `_ghu-` transients from database table.
 	 *
 	 * @return bool
 	 */
@@ -846,38 +846,6 @@ class Base {
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
 		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
-
-
-		/*		$transients = get_site_transient( 'ghu-' . $type );
-				if ( ! $transients ) {
-					return false;
-				}
-
-				foreach ( $transients as $transient ) {
-					delete_site_transient( $transient );
-				}
-				delete_site_transient( 'ghu-' . $type );
-		*/
-		set_site_transient( 'update_plugins', null );
-		set_site_transient( 'update_themes', null );
-
-		return true;
-	}
-
-	/**
-	 * Create transient of $type transients for clearing transients.
-	 *
-	 * @param $type
-	 *
-	 * @return void|bool
-	 */
-	protected function make_transient_list( $type ) {
-		$transients = get_site_transient( 'ghu-' . $type );
-		if ( $transients ) {
-			return false;
-		}
-		set_site_transient( 'ghu-' . $type, self::$transients, ( self::$hours * HOUR_IN_SECONDS ) );
-		self::$transients = array();
 
 		return true;
 	}

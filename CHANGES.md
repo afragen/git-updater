@@ -11,7 +11,9 @@
 * moved action/filter hook calls out of constructors, make @carlalexander happy
 * refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
+* added hooks to transients for @scarstens and [WP REST Cache](https://github.com/afragen/wordpress-rest-cache)
 * skip API call for branches if branch switching not enabled
+* refactored `delete_all_transients()` to delete from database, only called in `class Base`
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
