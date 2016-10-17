@@ -47,9 +47,6 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['refresh_transients'] ) ) {
-			$this->delete_all_transients( 'plugins' );
-		}
 
 		/*
 		 * Get details of installed git sourced plugins.
@@ -258,7 +255,6 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->make_transient_list( 'plugins' );
 		$this->load_pre_filters();
 	}
 

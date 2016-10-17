@@ -136,6 +136,10 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
+		if ( isset( $_GET['refresh_transients'] ) ) {
+			$this->delete_all_transients();
+		}
+
 		$this->ensure_api_key_is_set();
 
 		self::$options        = get_site_option( 'github_updater', array() );
@@ -591,6 +595,11 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
+		if ( 'github-updater' === $slug ) {
+			$this->delete_all_transients();
+			$this->forced_meta_update_plugins();
+		}
+
 		return trailingslashit( $new_source );
 	}
 
@@ -831,22 +840,32 @@ class Base {
 	/**
 	 * Delete all transients from array of transient ids.
 	 *
-	 * @param $type
-	 *
-	 * @return bool|void
+	 * @return bool
 	 */
-	public function delete_all_transients( $type ) {
-		do_action( 'before_ghu_delete_all_transients', $type );
-		$transients = get_site_transient( 'ghu-' . $type );
-		if ( ! $transients ) {
-			return false;
-		}
+	public function delete_all_transients() {
+		global $wpdb;
 
-		foreach ( $transients as $transient ) {
-			delete_site_transient( $transient );
-		}
-		delete_site_transient( 'ghu-' . $type );
-		set_site_transient( 'update_' . $type, null );
+		do_action( 'before_ghu_delete_all_transients' );
+
+		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column        = is_multisite() ? 'meta_key' : 'option_name';
+		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
+
+		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
+
+
+		/*		$transients = get_site_transient( 'ghu-' . $type );
+				if ( ! $transients ) {
+					return false;
+				}
+
+				foreach ( $transients as $transient ) {
+					delete_site_transient( $transient );
+				}
+				delete_site_transient( 'ghu-' . $type );
+		*/
+		set_site_transient( 'update_plugins', null );
+		set_site_transient( 'update_themes', null );
 
 		return true;
 	}
