@@ -595,14 +595,21 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
+		// Delete transients after update of this plugin.
 		if ( 'github-updater' === $slug ) {
-			add_action( 'upgrader_process_complete', array( &$this, 'upgrader_process_complete'), 15 );
+			add_action( 'upgrader_process_complete', array( &$this, 'delete_transients_ghu_update' ), 15 );
 		}
-		
+
 		return trailingslashit( $new_source );
 	}
 
-	public function upgrader_process_complete() {
+	/**
+	 * Delete transients after upgrade for GHU.
+	 *
+	 * Run on `upgrader_process_complete` filter hook so rebuilt transients
+	 * are from updated plugin code.
+	 */
+	public function delete_transients_ghu_update() {
 		$this->delete_all_transients();
 	}
 
@@ -718,6 +725,12 @@ class Base {
 				$all_headers[ $field ] = '';
 			}
 		}
+
+		// Reduce array to only headers with data.
+		$all_headers = array_filter( $all_headers,
+			function( $e ) use ( &$all_headers ) {
+				return ! empty( $e );
+			} );
 
 		return $all_headers;
 	}
@@ -881,39 +894,40 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						if ( isset( $tag->name, $tag->zipball_url ) ) {
-							$tags[]                 = $tag->name;
-							$rollback[ $tag->name ] = $tag->zipball_url;
-						}
+						$download_base    = implode( '/', array(
+							$repo_type['base_uri'],
+							'repos',
+							$this->type->owner,
+							$this->type->repo,
+							'zipball/',
+						) );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag;
 					}
 					break;
 				case 'bitbucket':
-					foreach ( (array) $response as $num => $tag ) {
-						$download_base = implode( '/', array(
+					foreach ( (array) $response as $tag ) {
+						$download_base    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'get/',
 						) );
-						if ( isset( $num ) ) {
-							$tags[]           = $num;
-							$rollback[ $num ] = $download_base . $num . '.zip';
-						}
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag . '.zip';
 					}
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link = implode( '/', array(
+						$download_link    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'repository/archive.zip',
 						) );
-						$download_link = add_query_arg( 'ref', $tag->name, $download_link );
-						if ( isset( $tag->name ) ) {
-							$tags[]                 = $tag->name;
-							$rollback[ $tag->name ] = $download_link;
-						}
+						$download_link    = add_query_arg( 'ref', $tag, $download_link );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_link;
 					}
 					break;
 			}
@@ -977,6 +991,18 @@ class Base {
 	}
 
 	/**
+	 * Add remote data to type object.
+	 *
+	 * @access private
+	 */
+	protected function add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta['last_updated'];
+		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
+		$this->type->is_private   = $this->type->repo_meta['private'];
+	}
+
+	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
@@ -985,10 +1011,10 @@ class Base {
 	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
-		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
-		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
-		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
+		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
+		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
+		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
+		$score       = empty( $repo_meta['score'] ) ? $this->type->score : $repo_meta['score']; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 
