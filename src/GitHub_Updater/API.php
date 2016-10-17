@@ -201,7 +201,7 @@ abstract class API extends Base {
 	/**
 	 * Returns site_transient and checks/stores transient id in array.
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	protected function get_transient() {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';

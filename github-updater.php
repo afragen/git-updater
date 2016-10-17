@@ -51,7 +51,7 @@ load_plugin_textdomain( 'github-updater' );
 // Plugin namespace root.
 $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
-// Add extra classes
+// Add extra classes.
 $extra_classes = array(
 	'WordPressdotorg\Plugin_Directory\Readme\Parser' => __DIR__ . '/vendor/class-parser.php',
 
@@ -60,7 +60,7 @@ $extra_classes = array(
 	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
-// Load Autoloader
+// Load Autoloader.
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
 $loader = 'Fragen\\GitHub_Updater\\Autoloader';
 new $loader( $root, $extra_classes );
