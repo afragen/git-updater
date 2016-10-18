@@ -210,7 +210,12 @@ abstract class API extends Base {
 			self::$transients[] = $transient;
 		}
 
-		// Allows advanced caching plugins to control REST transients to avoid double caching
+		/**
+		 * Filter to allow advanced caching plugins to control retrieval of transients.
+		 *
+		 * @since 6.0.0
+		 * @return bool
+		 */
 		if ( false === apply_filters( 'ghu_use_remote_call_transients', true ) ) {
 			return false;
 		}
@@ -234,7 +239,16 @@ abstract class API extends Base {
 			self::$transients[] = $transient;
 		}
 
-		// Allows advanced caching plugins to control REST transients to avoid double caching
+		/**
+		 * Filter to allow advanced caching plugins to control transient saving.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param string $id       Transient ID
+		 * @param mixed  $response Data to be stored.
+		 *
+		 * @return bool
+		 */
 		if ( false === apply_filters( 'ghu_use_remote_call_transients', true, $id, $response ) ) {
 			return false;
 		}
