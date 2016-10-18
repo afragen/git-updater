@@ -233,6 +233,15 @@ class Base {
 			new Settings();
 		}
 
+		if ( isset( $_GET['refresh_transients'] ) ) {
+			/**
+			 * Fires later in cycle when Refreshing Transients.
+			 *
+			 * @since 6.0.0
+			 */
+			do_action( 'ghu_refresh_transients' );
+		}
+
 		return true;
 	}
 
@@ -854,8 +863,6 @@ class Base {
 	 */
 	public function delete_all_transients() {
 		global $wpdb;
-
-		do_action( 'before_ghu_delete_all_transients' );
 
 		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
