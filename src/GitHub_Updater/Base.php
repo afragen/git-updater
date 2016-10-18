@@ -281,13 +281,13 @@ class Base {
 	 * Allows developers to use 'github_updater_token_distribution' hook to set GitHub Access Tokens.
 	 * Saves results of filter hook to self::$options.
 	 *
-	 * Hook requires return of single element array.
+	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 */
 	public function token_distribution() {
 		$config = apply_filters( 'github_updater_token_distribution', array() );
-		if ( ! empty( $config ) && 1 === count( $config ) ) {
+		if ( ! empty( $config ) ) {
 			$config        = Settings::sanitize( $config );
 			self::$options = array_merge( get_site_option( 'github_updater' ), $config );
 			update_site_option( 'github_updater', self::$options );
