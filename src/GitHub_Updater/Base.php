@@ -233,6 +233,15 @@ class Base {
 			new Settings();
 		}
 
+		if ( isset( $_GET['refresh_transients'] ) ) {
+			/**
+			 * Fires later in cycle when Refreshing Transients.
+			 *
+			 * @since 6.0.0
+			 */
+			do_action( 'ghu_refresh_transients' );
+		}
+
 		return true;
 	}
 
