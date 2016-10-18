@@ -226,8 +226,8 @@ abstract class API extends Base {
 	/**
 	 * Used to set_site_transient and checks/stores transient id in array.
 	 *
-	 * @param $id
-	 * @param $response
+	 * @param string $id       Transient ID.
+	 * @param mixed  $response Data to be stored.
 	 *
 	 * @return bool
 	 */
@@ -244,7 +244,7 @@ abstract class API extends Base {
 		 *
 		 * @since 6.0.0
 		 *
-		 * @param string $id       Transient ID
+		 * @param string $id       Transient ID.
 		 * @param mixed  $response Data to be stored.
 		 *
 		 * @return bool
