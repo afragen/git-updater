@@ -1131,10 +1131,10 @@ class Base {
 	protected function make_branch_switch_row( $data ) {
 		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? array() : $this->config[ $data['slug'] ]->rollback;
 
-		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s.', 'github-updater' ),
+		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
 			'<a href="javascript:jQuery(\'#' . $data['id'] . '\').toggle()">',
-			'</a>'
+			'</a>.'
 		);
 
 		print( '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">' );
