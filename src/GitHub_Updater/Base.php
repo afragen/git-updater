@@ -171,12 +171,9 @@ class Base {
 
 		/*
 		 * The following hook needed to ensure transient is reset correctly after
-		 * shiny update. Due to where the hook is called a PHP warning is thrown on
-		 * `wp-includes/update.php:276` for null response, not array.
+		 * shiny updates.
 		 */
-		add_filter( 'plugins_update_check_locales', array( &$this, 'forced_meta_update_plugins' ) );
-		//https://core.trac.wordpress.org/ticket/22377
-		add_filter( 'wp_update_plugins_response', array( &$this, 'forced_meta_update_plugins' ) );
+		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
 	/**
@@ -901,14 +898,14 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
+						$download_base          = implode( '/', array(
 							$repo_type['base_uri'],
 							'repos',
 							$this->type->owner,
 							$this->type->repo,
 							'zipball/',
 						) );
-						$tags[]           = $tag->name;
+						$tags[]                 = $tag->name;
 						$rollback[ $tag->name ] = $download_base . $tag->name;
 					}
 					break;
@@ -926,14 +923,14 @@ class Base {
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
+						$download_link          = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'repository/archive.zip',
 						) );
-						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag->name;
+						$download_link          = add_query_arg( 'ref', $tag, $download_link );
+						$tags[]                 = $tag->name;
 						$rollback[ $tag->name ] = $download_link;
 					}
 					break;

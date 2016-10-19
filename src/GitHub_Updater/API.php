@@ -69,6 +69,31 @@ abstract class API extends Base {
 	}
 
 	/**
+	 * Shiny updates results in the update transient being reset with only the wp.org data.
+	 * This catches the response and reloads the transients.
+	 *
+	 * @param mixed  $response HTTP server response.
+	 * @param array  $args     HTTP response arguments.
+	 * @param string $url      URL of HTTP response.
+	 *
+	 * @return mixed $response Just a pass through, no manipulation.
+	 */
+	public static function wp_update_response( $response, $args, $url ) {
+		$parsed_url = parse_url( $url );
+
+		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
+			if ( isset( $args['body']['plugins'] ) && current_user_can( 'update_plugins' ) ) {
+				Plugin::instance()->forced_meta_update_plugins();
+			}
+			if ( isset( $args['body']['themes'] ) && current_user_can( 'update_themes' ) ) {
+				Theme::instance()->forced_meta_update_themes();
+			}
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Return repo data for API calls.
 	 *
 	 * @return array
