@@ -252,7 +252,7 @@ class Plugin extends Base {
 			}
 
 			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset &&
-			     'init' === current_filter() //added do to calling hook for shiny updates
+			     'init' === current_filter() //added due to calling hook for shiny updates
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
