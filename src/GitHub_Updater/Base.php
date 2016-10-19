@@ -416,7 +416,6 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $this->repo_api->get_remote_info( $file ) ) {
-			$this->repo_api->get_remote_tag();
 			if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 				$this->repo_api->get_repo_meta();
 				$changelog = $this->get_changelog_filename( $repo->type );
@@ -427,6 +426,7 @@ class Base {
 			}
 			if ( ! empty( self::$options['branch_switch'] ) ) {
 				$this->repo_api->get_remote_branches();
+				$this->repo_api->get_remote_tag();
 			}
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
@@ -1119,6 +1119,52 @@ class Base {
 		}
 
 		return $enclosure;
+	}
+
+	/**
+	 * Make branch switch row.
+	 *
+	 * @param array $data Parameters for creating branch switching row.
+	 *
+	 * @return mixed
+	 */
+	protected function make_branch_switch_row( $data ) {
+		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? array() : $this->config[ $data['slug'] ]->rollback;
+
+		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s.', 'github-updater' ),
+			$data['branch'],
+			'<a href="javascript:jQuery(\'#' . $data['id'] . '\').toggle()">',
+			'</a>'
+		);
+
+		print( '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">' );
+
+		foreach ( array_keys( $data['branches'] ) as $branch ) {
+			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+				$data['nonced_update_url'],
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
+			);
+		}
+
+		if ( ! empty( $rollback ) ) {
+			$rollback = array_keys( $rollback );
+			usort( $rollback, 'version_compare' );
+			krsort( $rollback );
+			$rollback = array_splice( $rollback, 0, 4, true );
+			array_shift( $rollback ); // Dump current tag.
+			foreach ( $rollback as $tag ) {
+				printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . $tag . '">%s</a></li>',
+					$data['nonced_update_url'],
+					'&rollback=' . urlencode( $tag ),
+					esc_attr( $tag )
+				);
+			}
+		} else {
+			esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
+		}
+
+		print( '</ul>' );
 	}
 
 	/**
