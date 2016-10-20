@@ -12,9 +12,9 @@
 * refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
 * added hooks to transients for @scarstens and [WP REST Cache](https://github.com/afragen/wordpress-rest-cache)
-* skip API call for branches if branch switching not enabled
-* refactored most API responses to save only necessary data to transient. Makes for much smaller transient size. **WARNING** you may need to dump your transients (they all start with `ghu-`) if your site whitescreens. Sorry.
+* skip API calls for branches and tags if branch switching not enabled
 * refactored `delete_all_transients()` to delete from database, only called in `class Base`
+* refactored _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_

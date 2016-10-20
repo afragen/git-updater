@@ -171,12 +171,9 @@ class Base {
 
 		/*
 		 * The following hook needed to ensure transient is reset correctly after
-		 * shiny update. Due to where the hook is called a PHP warning is thrown on
-		 * `wp-includes/update.php:276` for null response, not array.
+		 * shiny updates.
 		 */
-		add_filter( 'plugins_update_check_locales', array( &$this, 'forced_meta_update_plugins' ) );
-		//https://core.trac.wordpress.org/ticket/22377
-		add_filter( 'wp_update_plugins_response', array( &$this, 'forced_meta_update_plugins' ) );
+		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
 	/**
@@ -218,6 +215,15 @@ class Base {
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
+		}
+
+		if ( isset( $_GET['refresh_transients'] ) ) {
+			/**
+			 * Fires later in cycle when Refreshing Transients.
+			 *
+			 * @since 6.0.0
+			 */
+			do_action( 'ghu_refresh_transients' );
 		}
 
 		if ( current_user_can( 'update_plugins' ) && $force_meta_update ) {
@@ -290,13 +296,13 @@ class Base {
 	 * Allows developers to use 'github_updater_token_distribution' hook to set GitHub Access Tokens.
 	 * Saves results of filter hook to self::$options.
 	 *
-	 * Hook requires return of single element array.
+	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 */
 	public function token_distribution() {
 		$config = apply_filters( 'github_updater_token_distribution', array() );
-		if ( ! empty( $config ) && 1 === count( $config ) ) {
+		if ( ! empty( $config ) ) {
 			$config        = Settings::sanitize( $config );
 			self::$options = array_merge( get_site_option( 'github_updater' ), $config );
 			update_site_option( 'github_updater', self::$options );
@@ -419,7 +425,6 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $this->repo_api->get_remote_info( $file ) ) {
-			$this->repo_api->get_remote_tag();
 			if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 				$this->repo_api->get_repo_meta();
 				$changelog = $this->get_changelog_filename( $repo->type );
@@ -430,6 +435,7 @@ class Base {
 			}
 			if ( ! empty( self::$options['branch_switch'] ) ) {
 				$this->repo_api->get_remote_branches();
+				$this->repo_api->get_remote_tag();
 			}
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
@@ -604,14 +610,25 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
+		// Delete transients after update of this plugin.
 		if ( 'github-updater' === $slug ) {
-			add_action( 'upgrader_process_complete', array( &$this, 'upgrader_process_complete'), 15 );
+			add_action( 'upgrader_process_complete', array( &$this, 'delete_transients_ghu_update' ), 15 );
 		}
 
 		return trailingslashit( $new_source );
 	}
 
 	public function upgrader_process_complete(){
+		$this->delete_all_transients();
+	}
+
+	/**
+	 * Delete transients after upgrade for GHU.
+	 *
+	 * Run on `upgrader_process_complete` filter hook so rebuilt transients
+	 * are from updated plugin code.
+	 */
+	public function delete_transients_ghu_update() {
 		$this->delete_all_transients();
 	}
 
@@ -1036,6 +1053,16 @@ class Base {
 	 * @return bool
 	 */
 	protected function exit_no_update( $response, $branch = false ) {
+		/**
+		 * Filters the return value of exit_no_update.
+		 *
+		 * @since 6.0.0
+		 * @return bool `true` will exit this function early, default will not.
+		 */
+		if ( apply_filters( 'ghu_always_fetch_update', false ) ) {
+			return false;
+		}
+
 		if ( $branch ) {
 			$options = get_site_option( 'github_updater' );
 
@@ -1129,6 +1156,52 @@ class Base {
 		}
 
 		return $enclosure;
+	}
+
+	/**
+	 * Make branch switch row.
+	 *
+	 * @param array $data Parameters for creating branch switching row.
+	 *
+	 * @return mixed
+	 */
+	protected function make_branch_switch_row( $data ) {
+		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? array() : $this->config[ $data['slug'] ]->rollback;
+
+		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
+			$data['branch'],
+			'<a href="javascript:jQuery(\'#' . $data['id'] . '\').toggle()">',
+			'</a>.'
+		);
+
+		print( '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">' );
+
+		foreach ( array_keys( $data['branches'] ) as $branch ) {
+			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+				$data['nonced_update_url'],
+				'&rollback=' . urlencode( $branch ),
+				esc_attr( $branch )
+			);
+		}
+
+		if ( ! empty( $rollback ) ) {
+			$rollback = array_keys( $rollback );
+			usort( $rollback, 'version_compare' );
+			krsort( $rollback );
+			$rollback = array_splice( $rollback, 0, 4, true );
+			array_shift( $rollback ); // Dump current tag.
+			foreach ( $rollback as $tag ) {
+				printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . $tag . '">%s</a></li>',
+					$data['nonced_update_url'],
+					'&rollback=' . urlencode( $tag ),
+					esc_attr( $tag )
+				);
+			}
+		} else {
+			esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
+		}
+
+		print( '</ul>' );
 	}
 
 	/**

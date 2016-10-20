@@ -69,6 +69,31 @@ abstract class API extends Base {
 	}
 
 	/**
+	 * Shiny updates results in the update transient being reset with only the wp.org data.
+	 * This catches the response and reloads the transients.
+	 *
+	 * @param mixed  $response HTTP server response.
+	 * @param array  $args     HTTP response arguments.
+	 * @param string $url      URL of HTTP response.
+	 *
+	 * @return mixed $response Just a pass through, no manipulation.
+	 */
+	public static function wp_update_response( $response, $args, $url ) {
+		$parsed_url = parse_url( $url );
+
+		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
+			if ( isset( $args['body']['plugins'] ) && current_user_can( 'update_plugins' ) ) {
+				Plugin::instance()->forced_meta_update_plugins();
+			}
+			if ( isset( $args['body']['themes'] ) && current_user_can( 'update_themes' ) ) {
+				Theme::instance()->forced_meta_update_themes();
+			}
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Return repo data for API calls.
 	 *
 	 * @return array
@@ -210,7 +235,12 @@ abstract class API extends Base {
 			self::$transients[] = $transient;
 		}
 
-		// Allows advanced caching plugins to control REST transients to avoid double caching
+		/**
+		 * Filter to allow advanced caching plugins to control retrieval of transients.
+		 *
+		 * @since 6.0.0
+		 * @return bool
+		 */
 		if ( false === apply_filters( 'ghu_use_remote_call_transients', true ) ) {
 			return false;
 		}
@@ -221,8 +251,8 @@ abstract class API extends Base {
 	/**
 	 * Used to set_site_transient and checks/stores transient id in array.
 	 *
-	 * @param $id
-	 * @param $response
+	 * @param string $id       Transient ID.
+	 * @param mixed  $response Data to be stored.
 	 *
 	 * @return bool
 	 */
@@ -234,7 +264,16 @@ abstract class API extends Base {
 			self::$transients[] = $transient;
 		}
 
-		// Allows advanced caching plugins to control REST transients to avoid double caching
+		/**
+		 * Filter to allow advanced caching plugins to control transient saving.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param string $id       Transient ID.
+		 * @param mixed  $response Data to be stored.
+		 *
+		 * @return bool
+		 */
 		if ( false === apply_filters( 'ghu_use_remote_call_transients', true, $id, $response ) ) {
 			return false;
 		}

@@ -370,38 +370,6 @@ class Theme extends Base {
 			$this->pre_set_site_transient_update_themes( $current );
 		}
 
-		if ( isset( $current->up_to_date[ $theme_key ] ) ) {
-			$rollback = array_splice( $current->up_to_date[ $theme_key ]['rollback'], 0, 4, true );
-			array_shift( $rollback ); // Dump current tag.
-
-			echo $enclosure['open'];
-			esc_html_e( 'Theme is up-to-date!', 'github-updater' );
-			echo '&nbsp';
-			if ( ! empty( $rollback ) ) {
-				echo '<strong>';
-				esc_html_e( 'Rollback to:', 'github-updater' );
-				echo '</strong> ';
-				foreach ( array_keys( $rollback ) as $version ) {
-					printf( '<a href="%1$s%2$s" aria-label="%3$s">%4$s</a>',
-						$nonced_update_url,
-						'&rollback=' . urlencode( $version ),
-						sprintf( '%1$s ' . $theme_name . ' %2$s',
-							esc_html__( 'Rollback', 'github-updater' ),
-							esc_html__( 'now', 'github-updater' )
-						),
-						$version
-					);
-					array_shift( $rollback );
-					if ( ! empty( $rollback ) ) {
-						echo ', ';
-					}
-				}
-			} else {
-				esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
-			}
-			echo $enclosure['close'];
-		}
-
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$response = $current->response[ $theme_key ];
 			echo $enclosure['open'];
@@ -424,9 +392,8 @@ class Theme extends Base {
 				printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 					$response['new_version'],
 					'</a>',
-					sprintf( '<a href="' . $nonced_update_url . '" class="update-link" aria-label="%1$s ' . $theme_name . ' %2$s">',
-						esc_html__( 'Update', 'github-updater' ),
-						esc_html__( 'now', 'github-updater' )
+					sprintf( '<a href="' . $nonced_update_url . '" class="update-link" aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '">',
+						$theme_name
 					),
 					'</a>'
 				);
@@ -470,26 +437,21 @@ class Theme extends Base {
 			}
 		}
 
+		$branch_switch_data                      = array();
+		$branch_switch_data['slug']              = $theme_key;
+		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
+		$branch_switch_data['id']                = $id;
+		$branch_switch_data['branch']            = $branch;
+		$branch_switch_data['branches']          = $branches;
+
 		/*
 		 * Create after_theme_row_
 		 */
 		echo $enclosure['open'];
-		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
-			$branch,
-			'<a href="javascript:jQuery(\'#' . $id . '\').toggle()">',
-			'</a>'
-		);
-
-		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
-				$nonced_update_url,
-				'&rollback=' . urlencode( $branch ),
-				esc_attr( $branch )
-			);
-		}
-		print( '</ul>' );
+		$this->make_branch_switch_row( $branch_switch_data );
 		echo $enclosure['close'];
+
+		return true;
 	}
 
 	/**
@@ -612,9 +574,8 @@ class Theme extends Base {
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
 						$theme->remote_version,
 						'</a>',
-						sprintf( '<a aria-label="%1$s ' . $theme->name . ' %2$s" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
-							esc_html__( 'Update', 'github-updater' ),
-							esc_html__( 'now', 'github-updater' )
+						sprintf( '<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
+							$theme->name
 						),
 						'</a>'
 					);
@@ -646,47 +607,51 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		printf( '<p>' . esc_html__( 'Current branch is `%s`. Try %sanother version%s', 'github-updater' ),
-			$theme->branch,
-			'<a href="javascript:jQuery(\'#ghu_versions\').toggle()">',
-			'</a></p>'
-		);
-		?>
-		<div id="ghu_versions" style="display:none; width: 100%;">
-			<label><select style="width: 60%;"
-			               onchange="if(jQuery(this).val() != '') {
-				               jQuery(this).parent().next().show();
-				               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
-				               }
-				               else jQuery(this).parent().next().hide();
-				               ">
-					<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
-					<?php
-					if ( ! empty( $options['branch_switch'] ) ) {
+		if ( ! empty( $options['branch_switch'] ) ) {
+			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
+				$theme->branch,
+				'<a href="javascript:jQuery(\'#ghu_versions\').toggle()">',
+				'</a>.</p>'
+			);
+			?>
+			<div id="ghu_versions" style="display:none; width: 100%;">
+				<label><select style="width: 60%;"
+				               onchange="if(jQuery(this).val() != '') {
+					               jQuery(this).parent().next().show();
+					               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
+					               }
+					               else jQuery(this).parent().next().hide();
+					               ">
+						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
+						<?php
 						foreach ( array_keys( $theme->branches ) as $branch ) {
 							echo '<option>' . $branch . '</option>';
 						}
-					}
-					if ( ! empty( $theme->rollback ) ) {
-						$rollback = array_slice( $theme->rollback, 0, 4, true );
-						array_shift( $rollback ); // Dump current tag.
-						foreach ( array_keys( $rollback ) as $version ) {
-							echo '<option>' . $version . '</option>';
+						if ( ! empty( $theme->rollback ) ) {
+							$rollback = array_keys( $theme->rollback );
+							usort( $rollback, 'version_compare' );
+							krsort( $rollback );
+							$rollback = array_splice( $rollback, 0, 4, true );
+							array_shift( $rollback ); // Dump current tag.
+							foreach ( $rollback as $tag ) {
+								echo '<option>' . $tag . '</option>';
+							}
 						}
-					}
-					if ( empty( $options['branch_switch'] ) &&
-					     empty( $theme->rollback )
-					) {
-						echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
-						$show_button = false;
-					}
-					?>
-				</select></label>
-			<?php if ( $show_button ) : ?>
-				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
-			<?php endif; ?>
-		</div>
-		<?php
+						if ( empty( $options['branch_switch'] ) &&
+						     empty( $theme->rollback )
+						) {
+							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+							$show_button = false;
+						}
+						?>
+					</select></label>
+				<?php if ( $show_button ) : ?>
+					<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
+				<?php endif; ?>
+			</div>
+			<?php
+
+		}
 
 		return trim( ob_get_clean(), '1' );
 	}

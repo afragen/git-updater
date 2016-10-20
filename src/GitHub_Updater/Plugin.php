@@ -251,7 +251,9 @@ class Plugin extends Base {
 				set_site_transient( 'update_plugins', $updates_transient );
 			}
 
-			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset ) {
+			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset &&
+			     'init' === current_filter() //added due to calling hook for shiny updates
+			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
@@ -306,25 +308,18 @@ class Plugin extends Base {
 			}
 		}
 
+		$branch_switch_data                      = array();
+		$branch_switch_data['slug']              = $plugin['repo'];
+		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
+		$branch_switch_data['id']                = $id;
+		$branch_switch_data['branch']            = $branch;
+		$branch_switch_data['branches']          = $branches;
+
 		/*
 		 * Create after_plugin_row_
 		 */
 		echo $enclosure['open'];
-		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother branch%3$s.', 'github-updater' ),
-			$branch,
-			'<a href="javascript:jQuery(\'#' . $id . '\').toggle()">',
-			'</a>'
-		);
-
-		print( '<ul id="' . $id . '" style="display:none; width: 100%;">' );
-		foreach ( $branches as $branch => $uri ) {
-			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
-				$nonced_update_url,
-				'&rollback=' . urlencode( $branch ),
-				esc_attr( $branch )
-			);
-		}
-		print( '</ul>' );
+		$this->make_branch_switch_row( $branch_switch_data );
 		echo $enclosure['close'];
 
 		return true;
