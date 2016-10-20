@@ -1027,6 +1027,16 @@ class Base {
 	 * @return bool
 	 */
 	protected function exit_no_update( $response, $branch = false ) {
+		/**
+		 * Filters the return value of exit_no_update.
+		 *
+		 * @since 6.0.0
+		 * @return bool `true` will exit this function early, default will not.
+		 */
+		if ( apply_filters( 'ghu_always_fetch_update', false ) ) {
+			return false;
+		}
+
 		if ( $branch ) {
 			$options = get_site_option( 'github_updater' );
 
