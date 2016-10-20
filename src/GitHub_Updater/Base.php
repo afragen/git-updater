@@ -217,6 +217,15 @@ class Base {
 			$force_meta_update = true;
 		}
 
+		if ( isset( $_GET['refresh_transients'] ) ) {
+			/**
+			 * Fires later in cycle when Refreshing Transients.
+			 *
+			 * @since 6.0.0
+			 */
+			do_action( 'ghu_refresh_transients' );
+		}
+
 		if ( current_user_can( 'update_plugins' ) && $force_meta_update ) {
 			$this->forced_meta_update_plugins();
 		}
@@ -230,14 +239,6 @@ class Base {
 			new Settings();
 		}
 
-		if ( isset( $_GET['refresh_transients'] ) ) {
-			/**
-			 * Fires later in cycle when Refreshing Transients.
-			 *
-			 * @since 6.0.0
-			 */
-			do_action( 'ghu_refresh_transients' );
-		}
 
 		return true;
 	}
