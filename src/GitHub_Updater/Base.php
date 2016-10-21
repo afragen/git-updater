@@ -247,7 +247,6 @@ class Base {
 			new Settings();
 		}
 
-
 		return true;
 	}
 
