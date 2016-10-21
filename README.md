@@ -455,4 +455,4 @@ GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 Pull requests are welcome. Please fork and submit pull requests against the `develop` branch.
 
-Loving crafted with [PhpStorm](https://www.jetbrains.com/phpstorm/)
+Lovingly crafted with [PhpStorm](https://www.jetbrains.com/phpstorm/)
