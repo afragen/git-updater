@@ -62,7 +62,8 @@ abstract class API extends Base {
 	public static function http_request_args( $args, $url ) {
 		$args['sslverify'] = true;
 		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent'] = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+			$args['user-agent']    = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+			$args['wp-rest-cache'] = array( 'tag' => 'github-updater' );
 		}
 
 		return $args;
@@ -135,6 +136,9 @@ abstract class API extends Base {
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
+
+		add_filter( 'http_request_args', array( &$this, 'http_request_args' ), 10, 2 );
+
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (integer) wp_remote_retrieve_response_code( $response );

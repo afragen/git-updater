@@ -54,6 +54,16 @@ class Bitbucket_API extends API {
 	public function load_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
+		add_filter( 'http_request_args', array( &$this, 'ajax_maybe_authenticate_http' ), 15, 2 );
+	}
+
+	/**
+	 * Remove hooks for Bitbucket authentication headers.
+	 */
+	public function remove_hooks() {
+		remove_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ) );
+		remove_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ) );
+		remove_filter( 'http_request_args', array( &$this, 'ajax_maybe_authenticate_http' ) );
 	}
 
 	/**
@@ -472,7 +482,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @return mixed
 	 */
-	public static function ajax_maybe_authenticate_http( $args, $url ) {
+	public function ajax_maybe_authenticate_http( $args, $url ) {
 		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
 		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
 		       1 == parent::$options[ $_POST['slug'] ] &&
