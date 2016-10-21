@@ -135,6 +135,9 @@ abstract class API extends Base {
 	 * @return boolean|object
 	 */
 	protected function api( $url ) {
+
+		add_filter( 'http_request_args', array( &$this, 'http_request_args' ), 10, 2 );
+
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (integer) wp_remote_retrieve_response_code( $response );

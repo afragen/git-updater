@@ -162,11 +162,6 @@ class Base {
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ), 10, 2 );
-		add_filter( 'http_request_args', array(
-			'Fragen\\GitHub_Updater\\Bitbucket_API',
-			'ajax_maybe_authenticate_http',
-		), 15, 2 );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 
 		/*
@@ -174,6 +169,19 @@ class Base {
 		 * shiny updates.
 		 */
 		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
+	}
+
+	/**
+	 * Remove hooks after use.
+	 */
+	public function remove_hooks() {
+		remove_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
+		remove_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
+		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
+
+		if ( $this->repo_api instanceof Bitbucket_API ) {
+			$this->repo_api->remove_hooks();
+		}
 	}
 
 	/**
@@ -432,6 +440,8 @@ class Base {
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
 		}
+
+		$this->remove_hooks();
 
 		return true;
 	}
