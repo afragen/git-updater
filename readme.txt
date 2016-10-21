@@ -89,7 +89,7 @@ The second hook will simply make the Settings page unavailable.
 
 `add_filter( 'github_updater_hide_settings', '__return_true' );`
 
-There is a hook to bypass the `wp_remote_get` calls for repo meta, readme.txt, and changelogs. These data provide for a richer experience in _View details_. If you are running GitHub Updater at scale you will certain get more performance by omitting these API calls. Add the following hook to enable.
+There is a hook to bypass the `wp_remote_get` calls for repo meta, readme.txt, and changelogs. These data provide for a richer experience in _View details_. If you are running GitHub Updater at scale you will certainly get more performance by omitting these API calls. Add the following hook to enable.
 
 `add_filter( 'github_updater_run_at_scale', '__return_true' );`
 
