@@ -619,10 +619,6 @@ class Base {
 		return trailingslashit( $new_source );
 	}
 
-	public function upgrader_process_complete(){
-		$this->delete_all_transients();
-	}
-
 	/**
 	 * Delete transients after upgrade for GHU.
 	 *
