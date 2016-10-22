@@ -11,7 +11,7 @@
 * moved action/filter hook calls out of constructors, make @carlalexander happy
 * refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
-* added several hooks for  [WP REST Cache](https://github.com/afragen/wordpress-rest-cache)and @scarstens
+* added several hooks for  [WP REST Cache](https://github.com/afragen/wordpress-rest-cache) and @scarstens
 * skip API calls for branches and tags if branch switching not enabled
 * refactored `delete_all_transients()` to delete from database, only called in `class Base`
 * refactored _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
