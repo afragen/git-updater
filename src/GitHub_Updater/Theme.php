@@ -374,7 +374,7 @@ class Theme extends Base {
 			$response = $current->response[ $theme_key ];
 			echo $enclosure['open'];
 
-			printf( esc_html__( 'GitHub Updater shows a new version of %s available.', 'github-updater' ),
+			printf( esc_html__( 'There is a new version of %s available.', 'github-updater' ),
 				$theme_name
 			);
 			printf( ' <a href="%s" class="thickbox" title="%s"> ',
@@ -564,7 +564,7 @@ class Theme extends Base {
 			<p>
 				<strong>
 					<?php
-					printf( esc_html__( 'There is a new version of %s available now.', 'github-updater' ),
+					printf( esc_html__( 'There is a new version of %s available.', 'github-updater' ),
 						$theme->name
 					);
 					printf( ' <a href="%s" class="thickbox open-plugin-details-modal" title="%s">',
