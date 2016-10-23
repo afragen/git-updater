@@ -665,11 +665,10 @@ class Base {
 			$upgrader_object = $this;
 		}
 
-		foreach ( array_reverse( $upgrader_object->config ) as $repo ) {
-			if ( $slug === $repo->repo ||
-			     $slug === $repo->extended_repo ||
-			     $rename === $repo->owner . '-' . $repo->repo ||
-			     $rename === $repo->repo
+		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
+		foreach ( $upgrader_object->config as $repo ) {
+			if ( ( $slug === $repo->repo || $slug === $repo->extended_repo ) ||
+			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;
