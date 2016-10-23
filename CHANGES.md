@@ -15,6 +15,7 @@
 * skip API calls for branches and tags if branch switching not enabled
 * refactored `delete_all_transients()` to delete from database, only called in `class Base`
 * refactored _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
+* fixed `get_repo_slugs()` for initially misnamed repository, ie `github-updater-develop`
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
