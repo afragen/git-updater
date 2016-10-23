@@ -665,7 +665,7 @@ class Base {
 			$upgrader_object = $this;
 		}
 
-		foreach ( $upgrader_object->config as $repo ) {
+		foreach ( array_reverse( $upgrader_object->config ) as $repo ) {
 			if ( $slug === $repo->repo ||
 			     $slug === $repo->extended_repo ||
 			     $rename === $repo->owner . '-' . $repo->repo ||
