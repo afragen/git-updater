@@ -668,7 +668,8 @@ class Base {
 		foreach ( $upgrader_object->config as $repo ) {
 			if ( $slug === $repo->repo ||
 			     $slug === $repo->extended_repo ||
-			     $rename === $repo->owner . '-' . $repo->repo
+			     $rename === $repo->owner . '-' . $repo->repo ||
+			     $rename === $repo->repo
 			) {
 				$arr['repo']          = $repo->repo;
 				$arr['extended_repo'] = $repo->extended_repo;
