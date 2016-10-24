@@ -2,14 +2,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-10-22 09:22-0700\n"
+"POT-Creation-Date: 2016-10-24 14:24-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.10\n"
+"X-Generator: Poedit 1.8.11\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-WPHeader: github-updater.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -212,11 +212,11 @@ msgid "RESTful key reset."
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:224
-msgid "Transients refreshed."
+msgid "Cache refreshed."
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:275
-msgid "Refresh Transients"
+msgid "Refresh Cache"
 msgstr ""
 
 #: src/GitHub_Updater/Settings.php:300
