@@ -264,9 +264,9 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
-## Refreshing Transients
+## Refreshing Cache
 
-Use the **Refresh Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
+Use the **Refresh Cache** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
 
 Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 

@@ -227,7 +227,7 @@ class Base {
 
 		if ( isset( $_GET['refresh_transients'] ) ) {
 			/**
-			 * Fires later in cycle when Refreshing Transients.
+			 * Fires later in cycle when Refreshing Cache.
 			 *
 			 * @since 6.0.0
 			 */
