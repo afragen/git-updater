@@ -96,3 +96,7 @@ There is a hook to bypass the `wp_remote_get` calls for repo meta, readme.txt, a
 There is a hook to enter into the _Refresh Transients_ path. I would be used in the following manner.
 
 `add_action( 'ghu_refresh_transients', 'my_function_when_transients_are_deleted' );`
+
+## Slack
+
+We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please ping me for an invite.
