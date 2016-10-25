@@ -144,6 +144,7 @@ class Base {
 
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+
 		wp_cache_flush();
 		$this->load_hooks();
 	}
