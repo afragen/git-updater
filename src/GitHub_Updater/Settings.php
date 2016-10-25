@@ -51,6 +51,7 @@ class Settings extends Base {
 	 */
 	public function __construct() {
 		$this->ensure_api_key_is_set();
+		$this->load_options();
 		$this->load_hooks();
 	}
 

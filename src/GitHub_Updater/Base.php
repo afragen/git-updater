@@ -140,13 +140,15 @@ class Base {
 			$this->delete_all_transients();
 		}
 
-		$this->ensure_api_key_is_set();
+		//$this->ensure_api_key_is_set();
 
+		//$this->load_options();
+		$this->load_hooks();
+	}
+
+	public function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
-
-		wp_cache_flush();
-		$this->load_hooks();
 	}
 
 	/**
@@ -254,6 +256,7 @@ class Base {
 	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
+		$this->load_options();
 		$rest_update = new Rest_Update();
 		$rest_update->process_request();
 	}
@@ -272,6 +275,7 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function forced_meta_update_plugins() {
+		$this->load_options();
 		Plugin::instance()->get_remote_plugin_meta();
 	}
 
@@ -279,6 +283,7 @@ class Base {
 	 * Performs actual theme metadata fetching.
 	 */
 	public function forced_meta_update_themes() {
+		$this->load_options();
 		Theme::instance()->get_remote_theme_meta();
 	}
 
