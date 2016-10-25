@@ -553,13 +553,13 @@ class Theme extends Base {
 			'upgrade-theme_' . $theme->repo
 		);
 
-		$theme_update_transient = get_site_transient( 'update_themes' );
+		$current = get_site_transient( 'update_themes' );
 
 		/**
 		 * Display theme update links.
 		 */
 		ob_start();
-		if ( empty( $theme_update_transient->up_to_date[ $theme->repo ] ) ) {
+		if ( isset( $current->response[ $theme->repo ] ) ) {
 			?>
 			<p>
 				<strong>
