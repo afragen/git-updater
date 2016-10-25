@@ -7,7 +7,6 @@
 * refactored to provide Settings page with dynamically displayed sub-tabs
 * added display of installed plugins/themes using GitHub Updater in Settings sub-tabs
 * added ability to enter Bitbucket credentials to Install tabs if not already present
-* added a couple of `wp_cache_flush()` calls to ensure extra headers load
 * moved action/filter hook calls out of constructors, make @carlalexander happy
 * refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
@@ -17,6 +16,7 @@
 * refactored _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
 * fixed `get_repo_slugs()` for initially misnamed repository, ie `github-updater-develop`
 * renamed `Refresh Transients` to `Refresh Cache`, hopefully to provide more clarity
+* refactored to only load GHU site options and other database queries for privileges users
 
 #### 5.6.2 / 2016-09-24
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_

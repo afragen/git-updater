@@ -125,6 +125,12 @@ class Base {
 	);
 
 	/**
+	 * Variable to hold boolean to load remote meta
+	 * @var bool
+	 */
+	protected static $load_repo_meta;
+
+	/**
 	 * Constructor.
 	 * Loads options to private static variable.
 	 */
@@ -197,6 +203,10 @@ class Base {
 	public function init() {
 		global $pagenow;
 
+		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) ) ? true : false;
+		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) ) ? true : false;
+		self::$load_repo_meta = $load_multisite || $load_single_site;
+
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
 		$admin_pages       = array(
@@ -229,14 +239,13 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		if ( current_user_can( 'update_plugins' ) && $force_meta_update ) {
+		if ( $force_meta_update ) {
 			$this->forced_meta_update_plugins();
 		}
-		if ( current_user_can( 'update_themes' ) && $force_meta_update ) {
+		if ( $force_meta_update ) {
 			$this->forced_meta_update_themes();
 		}
-		if ( is_admin() &&
-		     ( current_user_can( 'update_plugins' ) || current_user_can( 'update_themes' ) ) &&
+		if ( is_admin() && self::$load_repo_meta &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
 			new Settings();
@@ -268,16 +277,20 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function forced_meta_update_plugins() {
-		$this->load_options();
-		Plugin::instance()->get_remote_plugin_meta();
+		if ( self::$load_repo_meta ) {
+			$this->load_options();
+			Plugin::instance()->get_remote_plugin_meta();
+		}
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
 	 */
 	public function forced_meta_update_themes() {
-		$this->load_options();
-		Theme::instance()->get_remote_theme_meta();
+		if ( self::$load_repo_meta ) {
+			$this->load_options();
+			Theme::instance()->get_remote_theme_meta();
+		}
 	}
 
 	/**

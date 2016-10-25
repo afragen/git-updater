@@ -437,6 +437,8 @@ When first downloading and installing a plugin from GitHub you might have to do 
 
 W3 Total Cache object cache also clears the transient cache. Unfortunately this hampers GitHub Updater's storage of API data using the Transient API. The solution is to turn off the object cache.
 
+If a plugin loads earlier than GitHub Updater and calls `wp_get_theme()` that will prevent the current theme from seeing updates if it uses this plugin. The only solution to this is adding a call to `wp_cache_flush()` after that call. The only location inside of GHU that works is in `Base::__construct` but this will cause anyone using Redis to flush the cache with almost every page load.
+
 ## ChangeLog
 
 See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELOG.md` file.
