@@ -47,7 +47,7 @@ class Settings extends Base {
 	);
 
 	/**
-	 * Start up
+	 * Start up.
 	 */
 	public function __construct() {
 		$this->ensure_api_key_is_set();

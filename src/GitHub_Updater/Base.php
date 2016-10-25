@@ -140,13 +140,13 @@ class Base {
 			$this->delete_all_transients();
 		}
 
-		//$this->ensure_api_key_is_set();
-
-		//$this->load_options();
 		$this->load_hooks();
 	}
 
-	public function load_options() {
+	/**
+	 * Load site options.
+	 */
+	protected function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 	}
