@@ -144,6 +144,7 @@ class Base {
 
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		wp_cache_flush();
 		$this->load_hooks();
 	}
 
@@ -152,8 +153,6 @@ class Base {
 	 * Use 'init' hook for user capabilities.
 	 */
 	public function load_hooks() {
-		wp_cache_flush();
-
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'token_distribution' ) );

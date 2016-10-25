@@ -91,7 +91,6 @@ class Theme extends Base {
 	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
-		wp_cache_flush();
 		$git_themes = array();
 		$themes     = wp_get_themes( array( 'errors' => null ) );
 
