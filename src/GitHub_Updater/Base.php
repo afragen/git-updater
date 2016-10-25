@@ -58,13 +58,6 @@ class Base {
 	protected static $hours;
 
 	/**
-	 * Variable for holding transient ids.
-	 *
-	 * @var array
-	 */
-	protected static $transients = array();
-
-	/**
 	 * Variable for holding extra theme and plugin headers.
 	 *
 	 * @var array

@@ -235,9 +235,6 @@ abstract class API extends Base {
 	protected function get_transient() {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		$transient = 'ghu-' . md5( $repo );
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
 
 		/**
 		 * Filter to allow advanced caching plugins to control retrieval of transients.
@@ -264,9 +261,6 @@ abstract class API extends Base {
 		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
 		$transient             = 'ghu-' . md5( $repo );
 		$this->response[ $id ] = $response;
-		if ( ! in_array( $transient, self::$transients, true ) ) {
-			self::$transients[] = $transient;
-		}
 
 		/**
 		 * Filter to allow advanced caching plugins to control transient saving.
