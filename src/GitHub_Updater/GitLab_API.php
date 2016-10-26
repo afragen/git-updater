@@ -525,7 +525,7 @@ class GitLab_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$response     = $this->api( '/projects' );
+			$response     = $this->api( '/projects?per_page=100' );
 			if ( empty( $response ) ) {
 				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
 
