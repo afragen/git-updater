@@ -250,6 +250,8 @@ Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the
 
 There is support for [GitLab Build Artifacts](https://gitlab.com/help/user/project/builds/artifacts.md) which may be used as a release asset. You must also add the header, `GitLab CI Job:`, with the build job name.
 
+Release assets do not work for private GitHub repositories at this time. [#475](https://github.com/afragen/github-updater/issues/475)
+
 **You must tag your releases to use this feature.**
 
 ## Hosting Plugin in WP.org Repository
