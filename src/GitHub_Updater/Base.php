@@ -125,7 +125,9 @@ class Base {
 	);
 
 	/**
-	 * Variable to hold boolean to load remote meta
+	 * Variable to hold boolean to load remote meta.
+	 * Checks user privileges and when to load.
+	 *
 	 * @var bool
 	 */
 	protected static $load_repo_meta;
@@ -203,8 +205,8 @@ class Base {
 	public function init() {
 		global $pagenow;
 
-		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) ) ? true : false;
-		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) ) ? true : false;
+		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) );
+		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) );
 		self::$load_repo_meta = $load_multisite || $load_single_site;
 
 		// Set $force_meta_update = true on appropriate admin pages.
