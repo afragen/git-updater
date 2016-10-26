@@ -11,8 +11,8 @@
 /**
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
- * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           5.6.2
+ * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
+ * Version:           6.0.0
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,7 @@
  * Network:           true
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Branch:     master
+ * GitHub Languages:  https://github.com/afragen/github-updater-translations
  * Requires WP:       4.0
  * Requires PHP:      5.3
  */
@@ -44,13 +45,13 @@ if ( ! $updatePhp->does_it_meet_required_php_version( PHP_VERSION ) ) {
 	return false;
 }
 
-// Load textdomain
-load_plugin_textdomain( 'github-updater', false, basename( __DIR__ ) . '/languages' );
+// Load textdomain.
+load_plugin_textdomain( 'github-updater' );
 
-// Plugin namespace root
+// Plugin namespace root.
 $root = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
 
-// Add extra classes
+// Add extra classes.
 $extra_classes = array(
 	'WordPressdotorg\Plugin_Directory\Readme\Parser' => __DIR__ . '/vendor/class-parser.php',
 
@@ -59,12 +60,12 @@ $extra_classes = array(
 	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
-// Load Autoloader
+// Load Autoloader.
 require_once( __DIR__ . '/src/GitHub_Updater/Autoloader.php' );
 $loader = 'Fragen\\GitHub_Updater\\Autoloader';
 new $loader( $root, $extra_classes );
 
-// Instantiate class GitHub_Updater
+// Instantiate class GitHub_Updater.
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
 new $instantiate;
 

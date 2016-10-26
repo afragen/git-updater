@@ -7,14 +7,14 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.0
 * Requires PHP: 5.3
-* Tested up to: 4.6
+* Tested up to: 4.7
 * Stable tag: master
 * Donate link: http://thefragens.com/github-updater-donate
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins and themes. It also allows for the remote installation of plugins or themes.
+A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
 
 This plugin is [not allowed in the wp.org repo](https://github.com/afragen/github-updater/issues/34). :frowning:
 
@@ -30,7 +30,11 @@ or
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
+
+## Slack
+
+We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please ping me for an invite.
 
 ## Installation
 
@@ -92,19 +96,20 @@ This way you get automatic updates and cannot deactivate the plugin.
 There must be a `GitHub Plugin URI`, `Bitbucket Plugin URI`, or `GitLab Plugin URI` declaration in the plugin's header.
 
 ~~~php
-/*
-Plugin Name:       GitHub Updater
-Plugin URI:        https://github.com/afragen/github-updater
-Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
-Version:           1.0.0
-Author:            Andy Fragen
-License:           GNU General Public License v2
-License URI:       http://www.gnu.org/licenses/gpl-2.0.html
-Domain Path:       /languages
-Text Domain:       github-updater
-GitHub Plugin URI: https://github.com/afragen/github-updater
-GitHub Branch:     master
-*/
+/**
+ * Plugin Name:       GitHub Updater
+ * Plugin URI:        https://github.com/afragen/github-updater
+ * Description:       A plugin to automatically update GitHub, Bitbucket or GitLab hosted plugins and themes. It also allows for remote installation of plugins or themes into WordPress.
+ * Version:           1.0.0
+ * Author:            Andy Fragen
+ * License:           GNU General Public License v2
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
+ * Domain Path:       /languages
+ * Text Domain:       github-updater
+ * GitHub Plugin URI: https://github.com/afragen/github-updater
+ * GitHub Branch:     master
+ * GitHub Languages:  https://github.com/afragen/github-updater-translations
+ */
 ~~~
 
 ### Themes
@@ -112,18 +117,32 @@ GitHub Branch:     master
 There must be a `GitHub Theme URI`, `Bitbucket Theme URI`, or `GitLab Theme URI` declaration in the `style.css` file. When initially adding a theme, the directory **must** be identical to the repo name.
 
 ~~~php
-/*
-Theme Name:       Test
-Theme URI:        http://thefragens.net/
-Version:          0.1.0
-Description:      Child theme of TwentyTwelve.
-Author:           Andy Fragen
-Template:         twentytwelve
-Template Version: 1.0.0
-GitHub Theme URI: https://github.com/afragen/test-child
-GitHub Branch:    master
-*/
+/**
+ * Theme Name:       Test
+ * Theme URI:        http://thefragens.net/
+ * Version:          0.1.0
+ * Description:      Child theme of TwentyTwelve.
+ * Author:           Andy Fragen
+ * Template:         twentytwelve
+ * Template Version: 1.0.0
+ * GitHub Theme URI: https://github.com/afragen/test-child
+ * GitHub Branch:    master
+ */
 ~~~
+
+### Language Packs
+
+A separate git hosted repository may be used for updating Language Packs. This repository must be a public repository. What's the point of putting translation files in a private repository.
+
+Simply add the header `GitHub Languages`, `Bitbucket Languages`, or `GitLab Languages` to the headers of the plugin or theme. The URI for this header are in the same format as for the plugins or themes.
+
+Example, `GitHub Languages: https://github.com/afragen/github-updater-translations`
+
+In order to create your Language Pack repository. You will need to install and use the [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker). You will need to follow those directions to create a properly formatted language pack repository. All translation files must be in branch `master`.
+
+See [GitHub Updater Translations](https://github.com/afragen/github-updater-translations) as an example. I have set `.gitignore` to hide the `vendor` directory.
+
+Many thanks to [Ulrich Pogson](https://github.com/grappler).
 
 ### Optional Headers
 
@@ -179,23 +198,29 @@ Instead of the `GitHub Theme URI` header you will need to use the `GitLab Theme 
 
 The `GitLab Branch` header is supported for both plugins and themes.
 
-You must set a GitLab private token. Go to your GitLab profile page under Edit Account. From here you can retrieve or reset your GitLab private token.
+You must set a GitLab private token or a GitLab personal access token. 
+
+* Go to your GitLab Settings page under the Account tab. From here you can retrieve or reset your GitLab private token.
+* Go to your GitLab Profile Settings page under the Access Tokens tab. From here you can create a personal access token.
 
 ## Private Repositories
 
-Only private repositories will show up in the Settings page.
+Only private repositories that require some sort of additional authentication or acknowledgment will show up in the Settings page.
 
-![Settings Tab](./assets/screenshot-1.png)
 
 ### GitHub Private Repositories
 
-In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token to the appropriate plugin or theme in the Settings tab.
+![GitHub Settings Tab](./assets/screenshot-1.png)
 
-Leave this empty if the plugin or theme is in a public repository.
+In order to specify a private repository you will need to obtain a [personal access token](https://github.com/settings/tokens/new). Once you have this, simply add the token in the GitHub Settings tab. If a plugin or theme will not work with your personal access token; add the appropriate access token in the Install tab.
+
+Leave this empty if the plugin or theme is in a public repository. If your personal access token allows `read` access to a private repository, that repository will not display as needing an access token.
 
 ### Bitbucket Private Repositories
 
-Add your personal Bitbucket username and password in the Settings tab. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
+![Bitbucket Settings Tab](./assets/screenshot-4.png)
+
+Add your personal Bitbucket username and password in the Bitbucket Settings tab or in the Install tab. In order to authenticate with the Bitbucket API you will need to have at least `read` privileges for the Bitbucket private repository.
 
 In order to specify a private repository you will need to check the box next to the repository name in the Settings tab.
 
@@ -207,11 +232,11 @@ Do not include your username or password in the plugin or theme URI.
 
 There are two **optional** headers for setting minimum requirements for both WordPress and PHP.
 
-Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 3.8`
+Use `Requires WP:` to set the minimum required version of WordPress needed for your plugin or theme. eg. `Requires WP: 4.0`
 
-Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3.0`
+Use `Requires PHP:` to set the minimum required version of PHP needed for your plugin or theme. eg. `Requires PHP: 5.3`
 
-At the moment the default values are **WordPress 3.8.0** and **PHP 5.3.0**
+At the moment the default values are **WordPress 4.0** and **PHP 5.3**
 
 ## Release Assets
 
@@ -222,6 +247,10 @@ Use `Release Asset:`. eg., `Release Asset: true`.
 Your release asset filename is generated automatically and **must** have the following format or there will be an update error.
 
 Example, `$repo-$tag.zip` where `$repo` is the repository slug and `$tag` is the newest release tag, example `test-plugin-0.7.3.zip`.
+
+There is support for [GitLab Build Artifacts](https://gitlab.com/help/user/project/builds/artifacts.md) which may be used as a release asset. You must also add the header, `GitLab CI Job:`, with the build job name.
+
+Release assets do not work for private GitHub repositories at this time. [#475](https://github.com/afragen/github-updater/issues/475)
 
 **You must tag your releases to use this feature.**
 
@@ -237,9 +266,9 @@ From the `GitHub Updater Settings Page` there is a tabbed interface for remote i
 
 ![Remote Install of Plugin Tab](./assets/screenshot-2.png)
 
-## Refreshing Transients
+## Refreshing Cache
 
-Use the **Refresh Transients** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
+Use the **Refresh Cache** button in the `GitHub Updater Settings Page` screen and all the transients will be deleted and the API will be queried again. This may cause timeout issues against the API, especially the GitHub API which only allows 60 unauthenticated calls per hour. Please set a Personal GitHub Access Token to avoid these timeouts.
 
 Be careful about refreshing the browser window after this as you may be continually deleting the transients and hitting the API. 
 
@@ -340,7 +369,7 @@ To set Extended Naming add `define( 'GITHUB_UPDATER_EXTENDED_NAMING', true );` i
 
 There are 2 added filter hooks specifically for developers wanting to distribute private themes/plugins to clients without the client having to interact with the Settings page.
 
-The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return a **single** key/value pair where the key is the plugin/theme repo slug and the value is the token.
+The first allows the developer to set the GitHub Access Token for a specific plugin or theme. The anonymous function must return key/value pairs where the key is the plugin/theme repo slug and the value is the token. You could also set the GitHub Access Token in a similar fashion where the key is `'github_access_token'`.
 
 ~~~php
 add_filter( 'github_updater_token_distribution',
@@ -355,6 +384,18 @@ The second hook will simply make the Settings page unavailable.
 add_filter( 'github_updater_hide_settings', '__return_true' );
 ~~~
 
+There is a hook to bypass the `wp_remote_get` calls for repo meta, readme.txt, and changelogs. These data provide for a richer experience in _View details_. If you are running GitHub Updater at scale you will certain get more performance by omitting these API calls. Add the following hook to enable.
+
+~~~php
+add_filter( 'github_updater_run_at_scale', '__return_true' );
+~~~
+
+There is a hook to enter into the _Refresh Transients_ path. I would be used in the following manner.
+
+~~~php
+add_action( 'ghu_refresh_transients', 'my_function_when_transients_are_deleted' );
+~~~
+
 ## Extras
 
 [szepeviktor](https://github.com/szepeviktor) has created an add-on plugin to GitHub Updater that identifies all plugins with an icon in the plugin view for GitHub or Bitbucket depending upon where they get updates. It's very clever.
@@ -363,6 +404,8 @@ add_filter( 'github_updater_hide_settings', '__return_true' );
 You can use the [GitHub Updater Additions](https://github.com/afragen/github-updater-additions) plugin to add plugins or themes that don't contain the proper headers via a JSON file. They can then be updated with GitHub Updater.
 
 ### Translations
+
+Please submit translation PRs to [GitHub Updater Translations](https://github.com/afragen/github-updater-translations). This will allow me to keep language pack updates decoupled and independent of the main plugin and much more timely.
 
 * French by
     * [Daniel Ménard](https://github.com/daniel-menard)
@@ -396,6 +439,8 @@ When first downloading and installing a plugin from GitHub you might have to do 
 
 W3 Total Cache object cache also clears the transient cache. Unfortunately this hampers GitHub Updater's storage of API data using the Transient API. The solution is to turn off the object cache.
 
+If a plugin loads earlier than GitHub Updater and calls `wp_get_theme()` that will prevent the current theme from seeing updates if it uses this plugin. The only solution to this is adding a call to `wp_cache_flush()` after that call. The only location inside of GHU that works is in `Base::__construct` but this will cause anyone using Redis to flush the cache with almost every page load.
+
 ## ChangeLog
 
 See [CHANGES.md](CHANGES.md). In your project create a `CHANGES.md` or `CHANGELOG.md` file.
@@ -418,4 +463,4 @@ GitHub Updater logo by [LogoMajestic](http://www.logomajestic.com).
 
 Pull requests are welcome. Please fork and submit pull requests against the `develop` branch.
 
-Loving crafted with [PhpStorm](https://www.jetbrains.com/phpstorm/)
+Lovingly crafted with [PhpStorm](https://www.jetbrains.com/phpstorm/)

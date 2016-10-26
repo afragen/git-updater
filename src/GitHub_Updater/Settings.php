@@ -47,11 +47,18 @@ class Settings extends Base {
 	);
 
 	/**
-	 * Start up
+	 * Start up.
 	 */
 	public function __construct() {
 		$this->ensure_api_key_is_set();
+		$this->load_options();
+		$this->load_hooks();
+	}
 
+	/**
+	 * Load relevant action/filter hooks.
+	 */
+	public function load_hooks() {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
@@ -68,16 +75,67 @@ class Settings extends Base {
 	 * By defining in a method, strings can be translated.
 	 *
 	 * @access private
-	 *
 	 * @return array
 	 */
-	private function _settings_tabs() {
+	private function settings_tabs() {
 		return array(
 			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
 			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
 			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
 			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
 		);
+	}
+
+	/**
+	 * Set up the Settings Sub-tabs.
+	 *
+	 * @access private
+	 * @return array
+	 */
+	private function settings_sub_tabs() {
+		$subtabs          = array();
+		$gits             = $this->installed_git_repos();
+		$default_subtabs  = array(
+			'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ),
+			'github'         => esc_html__( 'GitHub', 'github-updater' ),
+		);
+		$bitbucket_subtab = array( 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) );
+		$gitlab_subtab    = array( 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) );
+		if ( in_array( 'bitbucket', $gits ) ) {
+			$subtabs = array_merge( $subtabs, $bitbucket_subtab );
+		}
+		if ( in_array( 'gitlab', $gits ) ) {
+			$subtabs = array_merge( $subtabs, $gitlab_subtab );
+		}
+
+		return array_merge( $default_subtabs, $subtabs );
+	}
+
+	/**
+	 * Return an array of the installed repository types.
+	 *
+	 * @access private
+	 * @return array
+	 */
+	private function installed_git_repos() {
+		$plugins = Plugin::instance()->get_plugin_configs();
+		$themes  = Theme::instance()->get_theme_configs();
+
+		$repos = array_merge( $plugins, $themes );
+		$gits  = array_map( function( $e ) {
+			return $e->type;
+		}, $repos );
+
+		$gits = array_unique( array_values( $gits ) );
+
+		$gits = array_map( function( $e ) {
+			$e = explode( '_', $e );
+
+			return $e[0];
+		}, $gits );
+
+
+		return array_unique( $gits );
 	}
 
 	/**
@@ -112,14 +170,30 @@ class Settings extends Base {
 	 *
 	 * @access private
 	 */
-	private function _options_tabs() {
+	private function options_tabs() {
 		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		echo '<h2 class="nav-tab-wrapper">';
-		foreach ( $this->_settings_tabs() as $key => $name ) {
+		foreach ( $this->settings_tabs() as $key => $name ) {
 			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
 			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>';
 		}
 		echo '</h2>';
+	}
+
+	/**
+	 * Render the settings sub-tabs.
+	 *
+	 * @access private
+	 */
+	private function options_sub_tabs() {
+		$current_tab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
+		echo '<h3 class="nav-tab-wrapper">';
+		foreach ( $this->settings_sub_tabs() as $key => $name ) {
+			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
+			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>';
+		}
+		echo '</h3>';
+
 	}
 
 	/**
@@ -128,6 +202,7 @@ class Settings extends Base {
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
+		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
 		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' );
 		?>
 		<div class="wrap">
@@ -135,7 +210,7 @@ class Settings extends Base {
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h2>
-			<?php $this->_options_tabs(); ?>
+			<?php $this->options_tabs(); ?>
 			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
 				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
 					<div class="updated">
@@ -147,22 +222,58 @@ class Settings extends Base {
 					</div>
 				<?php elseif ( ( isset( $_GET['refresh_transients'] ) && true == $_GET['refresh_transients'] ) ) : ?>
 					<div class="updated">
-						<p><?php esc_html_e( 'Transients refreshed.', 'github-updater' ); ?></p>
+						<p><?php esc_html_e( 'Cache refreshed.', 'github-updater' ); ?></p>
 					</div>
 				<?php endif; ?>
 
 				<?php if ( 'github_updater_settings' === $tab ) : ?>
-					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
-					<form method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Transients', 'github-updater' ) ); ?>
-					</form>
-
-					<form method="post" action="<?php esc_attr_e( $action ); ?>">
+					<?php $this->options_sub_tabs(); ?>
+					<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 						<?php
 						settings_fields( 'github_updater' );
-						do_settings_sections( 'github_updater_install_settings' );
+						switch ( $subtab ) {
+							case 'github_updater':
+								do_settings_sections( 'github_updater_install_settings' );
+								echo '<div style="display:none;">';
+								do_settings_sections( 'github_updater_github_install_settings' );
+								do_settings_sections( 'github_updater_bitbucket_install_settings' );
+								do_settings_sections( 'github_updater_gitlab_install_settings' );
+								echo '</div>';
+								break;
+							case 'github':
+								do_settings_sections( 'github_updater_github_install_settings' );
+								$this->display_ghu_repos( 'github' );
+								echo '<div style="display:none;">';
+								do_settings_sections( 'github_updater_install_settings' );
+								do_settings_sections( 'github_updater_bitbucket_install_settings' );
+								do_settings_sections( 'github_updater_gitlab_install_settings' );
+								echo '</div>';
+								break;
+							case 'bitbucket':
+								do_settings_sections( 'github_updater_bitbucket_install_settings' );
+								$this->display_ghu_repos( 'bitbucket' );
+								echo '<div style="display:none;">';
+								do_settings_sections( 'github_updater_install_settings' );
+								do_settings_sections( 'github_updater_github_install_settings' );
+								do_settings_sections( 'github_updater_gitlab_install_settings' );
+								echo '</div>';
+								break;
+							case 'gitlab':
+								do_settings_sections( 'github_updater_gitlab_install_settings' );
+								$this->display_ghu_repos( 'gitlab' );
+								echo '<div style="display:none;">';
+								do_settings_sections( 'github_updater_install_settings' );
+								do_settings_sections( 'github_updater_github_install_settings' );
+								do_settings_sections( 'github_updater_bitbucket_install_settings' );
+								echo '</div>';
+								break;
+						}
 						submit_button();
 						?>
+					</form>
+					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
+					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ) ); ?>
 					</form>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -177,16 +288,17 @@ class Settings extends Base {
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
 				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
-				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
-				<form method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
-				</form>
-				<form method="post" action="<?php esc_attr_e( $action ); ?>">
+
+				<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
 					settings_fields( 'github_updater_remote_management' );
 					do_settings_sections( 'github_updater_remote_settings' );
 					submit_button();
 					?>
+				</form>
+				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
+				<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
+					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
 				</form>
 			<?php endif; ?>
 		</div>
@@ -198,6 +310,10 @@ class Settings extends Base {
 	 * Check to see if it's a private repo.
 	 */
 	public function page_init() {
+
+		if ( $this->is_doing_ajax() ) {
+			return;
+		}
 
 		register_setting(
 			'github_updater',           // Option group
@@ -231,18 +347,18 @@ class Settings extends Base {
 		 */
 		add_settings_section(
 			'github_access_token',
-			esc_html__( 'Personal GitHub Access Token', 'github-updater' ),
+			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
 			array( &$this, 'print_section_github_access_token' ),
-			'github_updater_install_settings'
+			'github_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
 			array( &$this, 'token_callback_text' ),
-			'github_updater_install_settings',
+			'github_updater_github_install_settings',
 			'github_access_token',
-			array( 'id' => 'github_access_token' )
+			array( 'id' => 'github_access_token', 'token' => true )
 		);
 
 		if ( parent::$auth_required['github_enterprise'] ) {
@@ -250,9 +366,9 @@ class Settings extends Base {
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
 				array( &$this, 'token_callback_text' ),
-				'github_updater_install_settings',
+				'github_updater_github_install_settings',
 				'github_access_token',
-				array( 'id' => 'github_enterprise_token' )
+				array( 'id' => 'github_enterprise_token', 'token' => true )
 			);
 		}
 
@@ -264,42 +380,51 @@ class Settings extends Base {
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
 				array( &$this, 'print_section_github_info' ),
-				'github_updater_install_settings'
+				'github_updater_github_install_settings'
 			);
 		}
 
 		/*
 		 * Add setting for GitLab.com, GitLab Community Edition.
-		 * or GitLab Enterprise Private Token.
+		 * or GitLab Enterprise Access Token.
 		 */
 		if ( parent::$auth_required['gitlab'] || parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
-				esc_html__( 'GitLab Private Settings', 'github-updater' ),
+				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
 				array( &$this, 'print_section_gitlab_token' ),
-				'github_updater_install_settings'
+				'github_updater_gitlab_install_settings'
+			);
+		}
+
+		if ( parent::$auth_required['gitlab_private'] ) {
+			add_settings_section(
+				'gitlab_id',
+				esc_html__( 'GitLab Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_gitlab_info' ),
+				'github_updater_gitlab_install_settings'
 			);
 		}
 
 		if ( parent::$auth_required['gitlab'] ) {
 			add_settings_field(
-				'gitlab_private_token',
-				esc_html__( 'GitLab.com Private Token', 'github-updater' ),
+				'gitlab_access_token',
+				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
 				array( &$this, 'token_callback_text' ),
-				'github_updater_install_settings',
+				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_private_token' )
+				array( 'id' => 'gitlab_access_token', 'token' => true )
 			);
 		}
 
 		if ( parent::$auth_required['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
-				esc_html__( 'GitLab CE or GitLab Enterprise Private Token', 'github-updater' ),
+				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
 				array( &$this, 'token_callback_text' ),
-				'github_updater_install_settings',
+				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_enterprise_token' )
+				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
 			);
 		}
 
@@ -310,14 +435,14 @@ class Settings extends Base {
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
 			array( &$this, 'print_section_bitbucket_username' ),
-			'github_updater_install_settings'
+			'github_updater_bitbucket_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_username',
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
 			array( &$this, 'token_callback_text' ),
-			'github_updater_install_settings',
+			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_username' )
 		);
@@ -326,9 +451,9 @@ class Settings extends Base {
 			'bitbucket_password',
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
 			array( &$this, 'token_callback_text' ),
-			'github_updater_install_settings',
+			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
-			array( 'id' => 'bitbucket_password' )
+			array( 'id' => 'bitbucket_password', 'token' => true )
 		);
 
 		/*
@@ -339,21 +464,30 @@ class Settings extends Base {
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
 				array( &$this, 'print_section_bitbucket_info' ),
-				'github_updater_install_settings'
+				'github_updater_bitbucket_install_settings'
 			);
 		}
 
 		/*
 		 * Show if no private repositories are present.
 		 */
-		if ( ! parent::$auth_required['github_private'] && ! parent::$auth_required['bitbucket_private'] ) {
+		if ( ! parent::$auth_required['github_private'] ) {
 			add_settings_section(
 				null,
-				esc_html__( 'No private repositories are installed.', 'github-updater' ),
+				esc_html__( 'Private repositories are not installed, are cached, or are using your personal access token.', 'github-updater' ),
 				array(),
-				'github_updater_install_settings'
+				'github_updater_github_install_settings'
 			);
 		}
+		if ( ! parent::$auth_required['bitbucket_private'] ) {
+			add_settings_section(
+				null,
+				esc_html__( 'Private repositories are not installed or are cached.', 'github-updater' ),
+				array(),
+				'github_updater_bitbucket_install_settings'
+			);
+		}
+
 
 		$this->update_settings();
 	}
@@ -371,7 +505,6 @@ class Settings extends Base {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = array();
 			$ghu_options_keys[ $token->repo ] = null;
-			$token->private                   = isset( $token->private ) ? $token->private : true;
 
 			/*
 			 * Set boolean for Enterprise headers.
@@ -399,7 +532,7 @@ class Settings extends Base {
 			/*
 			 * Check to see if it's a private repo and set variables.
 			 */
-			if ( $token->private ) {
+			if ( $this->is_private( $token ) ) {
 				if ( false !== strpos( $token->type, 'github' ) &&
 				     ! parent::$auth_required['github_private']
 				) {
@@ -409,6 +542,11 @@ class Settings extends Base {
 				     ! parent::$auth_required['bitbucket_private']
 				) {
 					parent::$auth_required['bitbucket_private'] = true;
+				}
+				if ( false !== strpos( $token->type, 'gitlab' ) &&
+				     ! parent::$auth_required['gitlab_private']
+				) {
+					parent::$auth_required['gitlab_private'] = true;
 				}
 			}
 
@@ -425,7 +563,7 @@ class Settings extends Base {
 			/*
 			 * Next if not a private repo or token field not empty.
 			 */
-			if ( ! $token->private && empty( parent::$options[ $token->repo ] ) ) {
+			if ( ! $this->is_private( $token ) ) {
 				continue;
 			}
 
@@ -435,23 +573,25 @@ class Settings extends Base {
 
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . $token->name;
-			$setting_field['page']  = 'github_updater_install_settings';
 
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
+					$setting_field['page']            = 'github_updater_github_install_settings';
 					$setting_field['section']         = 'github_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
 				case 'bitbucket':
+					$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 					$setting_field['section']         = 'bitbucket_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 					$setting_field['callback']        = $token->repo;
 					break;
 				case 'gitlab':
+					$setting_field['page']            = 'github_updater_gitlab_install_settings';
 					$setting_field['section']         = 'gitlab_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
+					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
 					$setting_field['callback']        = $token->repo;
 					break;
 			}
@@ -462,7 +602,7 @@ class Settings extends Base {
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				array( 'id' => $setting_field['callback'] )
+				array( 'id' => $setting_field['callback'], 'token' => true )
 			);
 		}
 
@@ -470,19 +610,43 @@ class Settings extends Base {
 		 * Unset options that are no longer present and update options.
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
-		unset( $ghu_unset_keys['github_access_token'] );
-		if ( parent::$auth_required['github_enterprise'] ) {
-			unset( $ghu_unset_keys['github_enterprise_token'] );
-		}
-		unset( $ghu_unset_keys['branch_switch'] );
-		unset( $ghu_unset_keys['bitbucket_username'] );
-		unset( $ghu_unset_keys['bitbucket_password'] );
-		if ( parent::$auth_required['gitlab'] ) {
-			unset( $ghu_unset_keys['gitlab_private_token'] );
-		}
-		if ( parent::$auth_required['gitlab_enterprise'] ) {
-			unset( $ghu_unset_keys['gitlab_enterprise_token'] );
-		}
+		$always_unset   = array(
+			'branch_switch',
+			'github_access_token',
+			'github_enterprise_token',
+			'bitbucket_username',
+			'bitbucket_password',
+		);
+
+		array_filter( $always_unset,
+			function( $e ) use ( &$ghu_unset_keys ) {
+				unset( $ghu_unset_keys[ $e ] );
+			} );
+
+		$auth_required       = parent::$auth_required;
+		$auth_required_unset = array(
+			'github_enterprise' => 'github_enterprise_token',
+			'gitlab'            => 'gitlab_access_token',
+			'gitlab_enterprise' => 'gitlab_enterprise_token',
+		);
+
+		array_filter( $auth_required_unset,
+			function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
+				$key = array_search( $e, $auth_required_unset );
+				if ( $auth_required[ $key ] ) {
+					unset( $ghu_unset_keys[ $e ] );
+				}
+			} );
+
+		// Unset if value set.
+		array_filter( $ghu_unset_keys,
+			function( $e ) use ( &$ghu_unset_keys ) {
+				$key = array_search( $e, $ghu_unset_keys );
+				if ( $ghu_unset_keys[ $key ] && 'github_updater_install_repo' !== $key ) {
+					unset( $ghu_unset_keys[ $key ] );
+				}
+			} );
+
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( parent::$options [ $key ] );
@@ -585,10 +749,17 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitLab Private Token text.
+	 * Print the GitLab text.
+	 */
+	public function print_section_gitlab_info() {
+		esc_html_e( 'Enter your GitLab Access Token.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitLab Access Token text.
 	 */
 	public function print_section_gitlab_token() {
-		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Private Token.', 'github-updater' );
+		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' );
 	}
 
 	/**
@@ -619,10 +790,10 @@ class Settings extends Base {
 	 */
 	public function token_callback_text( $args ) {
 		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
-		$type = stristr( $args['id'], 'password' ) ? 'password' : 'text';
+		$type = ( isset( $args['token'] ) ) ? 'password' : 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input type="<?php esc_attr_e( $type ); ?>" style="width:50%;" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
+			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
 		</label>
 		<?php
 	}
@@ -667,13 +838,50 @@ class Settings extends Base {
 	public function update_settings() {
 		if ( isset( $_POST['option_page'] ) ) {
 			if ( 'github_updater' === $_POST['option_page'] ) {
-				update_site_option( 'github_updater', self::sanitize( $_POST['github_updater'] ) );
+				$options = $this->filter_options();
+				update_site_option( 'github_updater', self::sanitize( $options ) );
 			}
 			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
 				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
 			}
 		}
 		$this->redirect_on_save();
+	}
+
+	/**
+	 * Filter options so that sub-tab options are grouped in single $options variable.
+	 *
+	 * @access private
+	 * @return array|mixed
+	 */
+	private function filter_options() {
+		$plugins          = Plugin::instance()->get_plugin_configs();
+		$themes           = Theme::instance()->get_theme_configs();
+		$repos            = array_merge( $plugins, $themes );
+		$options          = parent::$options;
+		$non_repo_options = array(
+			'github_access_token',
+			'bitbucket_username',
+			'bitbucket_password',
+			'gitlab_access_token',
+			'gitlab_enterprise_token',
+			'branch_switch',
+		);
+
+		$repos = array_map( function( $e ) {
+			return $e->repo = null;
+		}, $repos );
+
+		array_filter( $non_repo_options,
+			function( $e ) use ( &$options ) {
+				unset( $options[ $e ] );
+			}
+		);
+
+		$intersect = array_intersect( $options, $repos );
+		$options   = array_merge( $intersect, $_POST['github_updater'] );
+
+		return $options;
 	}
 
 	/**
@@ -697,12 +905,14 @@ class Settings extends Base {
 		if ( $update || $refresh_transients || $reset_api_key ) {
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
-			$arr['tab'] = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
+			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
+			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'github_updater';
 
 			$location = add_query_arg(
 				array(
 					'page'               => 'github-updater',
 					'tab'                => $arr['tab'],
+					'subtab'             => $arr['subtab'],
 					'refresh_transients' => $refresh_transients,
 					'reset'              => $reset_api_key,
 					'updated'            => $update,
@@ -764,6 +974,38 @@ class Settings extends Base {
 		$link          = array( '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' );
 
 		return array_merge( $links, $link );
+	}
+
+	/**
+	 * Write out listing of installed plugins and themes using GitHub Updater.
+	 *
+	 * @param $type
+	 */
+	private function display_ghu_repos( $type ) {
+		$plugins = Plugin::instance()->get_plugin_configs();
+		$themes  = Theme::instance()->get_theme_configs();
+		$repos   = array_merge( $plugins, $themes );
+
+		$type_repos = array_filter( $repos, function( $e ) use ( $type ) {
+			return false !== stristr( $e->type, $type );
+		} );
+
+		$display_data = array_map( function( $e ) {
+			return $e = array(
+				'type' => $e->type,
+				'repo' => $e->repo,
+				'name' => $e->name,
+			);
+		}, $type_repos );
+
+		printf( '<h4>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h4>' );
+		foreach ( $display_data as $data ) {
+			$dashicon = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			if ( false !== strpos( $data['type'], 'theme' ) ) {
+				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
+			}
+			printf( '<p>' . $dashicon . ' ' . $data['name'] . '</p>' );
+		}
 	}
 
 }

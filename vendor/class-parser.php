@@ -137,7 +137,7 @@ class Parser {
 		//$contents = file_get_contents( $file );
 		$contents = $file;
 
-		$contents = preg_split( '!\R!', $contents );
+		$contents = preg_split( '!\R!u', $contents );
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
 		// Strip UTF8 BOM if present.
@@ -199,6 +199,8 @@ class Parser {
 		if ( ! empty( $headers['tags'] ) ) {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
+			$this->tags = array_filter( $this->tags );
+			$this->tags = array_slice( $this->tags, 0, 5 );
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $headers['requires'];

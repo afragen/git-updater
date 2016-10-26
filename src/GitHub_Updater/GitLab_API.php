@@ -44,14 +44,14 @@ class GitLab_API extends API {
 		parent::$hours  = 12;
 		$this->response = $this->get_transient();
 
-		if ( ! isset( self::$options['gitlab_private_token'] ) ) {
-			self::$options['gitlab_private_token'] = null;
+		if ( ! isset( self::$options['gitlab_access_token'] ) ) {
+			self::$options['gitlab_access_token'] = null;
 		}
 		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
 			self::$options['gitlab_enterprise_token'] = null;
 		}
 		if (
-			empty( self::$options['gitlab_private_token'] ) ||
+			empty( self::$options['gitlab_access_token'] ) ||
 			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
 		) {
 			Messages::instance()->create_error_message( 'gitlab' );
@@ -108,7 +108,7 @@ class GitLab_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response ) && 'theme' !== $repo_type['type'] ) {
+		if ( $this->exit_no_update( $response, true ) ) {
 			return false;
 		}
 
@@ -244,6 +244,10 @@ class GitLab_API extends API {
 	public function get_repo_meta() {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
 		if ( ! $response ) {
 			self::$method = 'meta';
 			$projects     = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
@@ -340,25 +344,35 @@ class GitLab_API extends API {
 		$endpoint           = '';
 
 		/*
+		 * If release asset.
+		 */
+		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
+			$download_link_base = $this->make_release_asset_download_link();
+
+			return $this->add_access_token_endpoint( $this, $download_link_base );
+		}
+
+		/*
+		 * If a branch has been given, only check that for the remote info.
+		 * If branch is master (default) and tags are used, use newest tag.
+		 */
+		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
+		} elseif ( ! empty( $this->type->branch ) ) {
+			$endpoint = remove_query_arg( 'ref', $endpoint );
+			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
+		}
+
+		/*
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
 		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
-		} elseif ( ! empty( $this->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-
-		/*
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitLab will use the Default branch.
-		 * If branch is master and tags are used, use newest tag.
-		 */
-		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
+			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
 		}
 
 		/*
@@ -369,21 +383,85 @@ class GitLab_API extends API {
 			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
 		}
 
-		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
-		}
-
-		/*
-		 * If using GitLab CE/Enterprise header return this endpoint.
-		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-			}
-		}
+		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Get/process Language Packs.
+	 * Language Packs cannot reside on GitLab CE/Enterprise.
+	 *
+	 * @TODO GitLab CE/Enterprise.
+	 *
+	 * @param array $headers Array of headers of Language Pack.
+	 *
+	 * @return bool When invalid response.
+	 */
+	public function get_language_pack( $headers ) {
+		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$type     = explode( '_', $this->type->type );
+
+		if ( ! $response ) {
+			self::$method = 'translation';
+			$id           = urlencode( $headers['owner'] . '/' . $headers['repo'] );
+			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
+			if ( $response ) {
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
+
+				foreach ( $response as $locale ) {
+					$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
+					$package = implode( '/', $package ) . $locale->package;
+
+					$response->{$locale->language}->package = $package;
+					$response->{$locale->language}->type    = $type[1];
+					$response->{$locale->language}->version = $this->type->remote_version;
+				}
+
+				$this->set_transient( 'languages', $response );
+			}
+		}
+		$this->type->language_packs = $response;
+	}
+
+	/**
+	 * Add appropriate access token to endpoint.
+	 *
+	 * @param $git
+	 * @param $endpoint
+	 *
+	 * @access private
+	 *
+	 * @return string
+	 */
+	private function add_access_token_endpoint( $git, $endpoint ) {
+
+		// Add GitLab.com Access Token.
+		if ( ! empty( parent::$options['gitlab_access_token'] ) ) {
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
+		}
+
+		// If using GitLab CE/Enterprise header return this endpoint.
+		if ( ! empty( $git->type->enterprise ) &&
+		     ! empty( parent::$options['gitlab_enterprise_token'] )
+		) {
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
+			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
+		}
+
+		// Add repo access token.
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = remove_query_arg( 'private_token', $endpoint );
+			$endpoint = add_query_arg( 'private_token', parent::$options[ $git->type->repo ], $endpoint );
+		}
+
+		return $endpoint;
 	}
 
 	/**
@@ -395,7 +473,6 @@ class GitLab_API extends API {
 		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
 		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
-		$this->type->private = ! $this->type->repo_meta->public;
 	}
 
 	/**
@@ -407,9 +484,6 @@ class GitLab_API extends API {
 	 * @return string
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-		if ( ! empty( parent::$options['gitlab_private_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_private_token'], $endpoint );
-		}
 
 		switch ( self::$method ) {
 			case 'projects':
@@ -421,19 +495,19 @@ class GitLab_API extends API {
 			case 'readme':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
+			case 'translation':
+				$endpoint = add_query_arg( 'ref', 'master', $endpoint );
+				break;
 			default:
 				break;
 		}
+
+		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
 		 * If using GitLab CE/Enterprise header return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			if ( ! empty( parent::$options['gitlab_enterprise_token'] ) ) {
-				$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-			}
-
 			return $git->type->enterprise_api . $endpoint;
 		}
 
@@ -451,7 +525,7 @@ class GitLab_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$response     = $this->api( '/projects' );
+			$response     = $this->api( '/projects?per_page=100' );
 			if ( empty( $response ) ) {
 				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
 
