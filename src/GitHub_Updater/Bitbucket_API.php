@@ -48,6 +48,9 @@ class Bitbucket_API extends API {
 		add_site_option( 'github_updater', self::$options );
 	}
 
+	/**
+	 * Load hooks for Bitbucket authentication headers.
+	 */
 	public function load_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
@@ -118,6 +121,7 @@ class Bitbucket_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -145,10 +149,10 @@ class Bitbucket_API extends API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->data = $content;
+				$response['changes'] = $content;
 				$this->set_transient( 'changes', $response );
 			} else {
 				$response = false;
@@ -167,6 +171,7 @@ class Bitbucket_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_changelog_response( $response );
 				$this->set_transient( 'changes', $response );
 			}
 		}
@@ -175,13 +180,8 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
-		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
-
-		if ( ! $changelog ) {
-			$parser    = new \Parsedown;
-			$changelog = $parser->text( $response->data );
-			$this->set_transient( 'changelog', $changelog );
-		}
+		$parser    = new \Parsedown;
+		$changelog = $parser->text( $response['changes'] );
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -260,6 +260,7 @@ class Bitbucket_API extends API {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -396,17 +397,6 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->updated_on;
-		$this->type->num_ratings  = $this->type->watchers;
-	}
-
-	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private Bitbucket repositories only.
 	 *
@@ -506,6 +496,66 @@ class Bitbucket_API extends API {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object Array of tag numbers, object is error.
+	 */
+	private function parse_tag_response( $response ) {
+		if ( isset( $response->messages ) ) {
+			return $response;
+		}
+
+		return array_keys( (array) $response );
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	private function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->is_private;
+			$arr['last_updated'] = $e->updated_on;
+			$arr['watchers']     = 0;
+			$arr['forks']        = 0;
+			$arr['open_issues']  = 0;
+			$arr['score']        = 0;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog in base64.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object $arr Array of changes in base64, object if error.
+	 */
+	private function parse_changelog_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['changes'] = $e->data;
+		} );
+
+		return $arr;
 	}
 
 }

@@ -1,4 +1,5 @@
 #### [unreleased]
+* refactored transient saving to save optimized version of transient rather that whole API response
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.

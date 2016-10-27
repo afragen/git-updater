@@ -921,40 +921,40 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						$download_base          = implode( '/', array(
+						$download_base    = implode( '/', array(
 							$repo_type['base_uri'],
 							'repos',
 							$this->type->owner,
 							$this->type->repo,
 							'zipball/',
 						) );
-						$tags[]                 = $tag->name;
-						$rollback[ $tag->name ] = $download_base . $tag->name;
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag;
 					}
 					break;
 				case 'bitbucket':
-					foreach ( (array) $response as $num => $tag ) {
+					foreach ( (array) $response as $tag ) {
 						$download_base    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'get/',
 						) );
-						$tags[]           = $num;
-						$rollback[ $num ] = $download_base . $num . '.zip';
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_base . $tag . '.zip';
 					}
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link          = implode( '/', array(
+						$download_link    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'repository/archive.zip',
 						) );
-						$download_link          = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]                 = $tag->name;
-						$rollback[ $tag->name ] = $download_link;
+						$download_link    = add_query_arg( 'ref', $tag, $download_link );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_link;
 					}
 					break;
 			}
@@ -1018,6 +1018,18 @@ class Base {
 	}
 
 	/**
+	 * Add remote data to type object.
+	 *
+	 * @access protected
+	 */
+	protected function add_meta_repo_object() {
+		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
+		$this->type->last_updated = $this->type->repo_meta['last_updated'];
+		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
+		$this->type->is_private   = $this->type->repo_meta['private'];
+	}
+
+	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
@@ -1026,10 +1038,10 @@ class Base {
 	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
-		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
-		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
-		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
+		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
+		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
+		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
+		$score       = empty( $repo_meta['score'] ) ? $this->type->score : $repo_meta['score']; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 

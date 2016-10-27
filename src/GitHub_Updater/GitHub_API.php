@@ -92,6 +92,7 @@ class GitHub_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -119,10 +120,10 @@ class GitHub_API extends API {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->content = $content;
+				$response['changes'] = $content;
 				$this->set_transient( 'changes', $response );
 			} else {
 				$response = false;
@@ -133,6 +134,7 @@ class GitHub_API extends API {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
+				$response = $this->parse_changelog_response( $response );
 				$this->set_transient( 'changes', $response );
 			}
 		}
@@ -141,13 +143,8 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
-
-		if ( ! $changelog ) {
-			$parser    = new \Parsedown;
-			$changelog = $parser->text( base64_decode( $response->content ) );
-			$this->set_transient( 'changelog', $changelog );
-		}
+		$parser    = new \Parsedown;
+		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -222,7 +219,8 @@ class GitHub_API extends API {
 
 			if ( ! $repos ) {
 				$repos = $this->api( '/users/' . $this->type->owner . '/repos' );
-				$this->set_transient( $this->type->owner, $response );
+				$repos = $this->parse_repos_response( $repos );
+				$this->set_transient( $this->type->owner, $repos );
 			}
 
 			if ( ! $response ) {
@@ -235,6 +233,7 @@ class GitHub_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -466,17 +465,6 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-	}
-
-	/**
 	 * Calculate and store time until rate limit reset.
 	 *
 	 * @param $response
@@ -491,6 +479,86 @@ class GitHub_API extends API {
 				'wait' => $wait,
 			) );
 		}
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object|array $response Response from API call.
+	 *
+	 * @return object|array $arr Array of tag numbers, object is error.
+	 */
+	private function parse_tag_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
+		$arr = array();
+		array_map( function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+
+			return $arr;
+		}, (array) $response );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	private function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->private;
+			$arr['last_updated'] = $e->pushed_at;
+			$arr['watchers']     = $e->watchers;
+			$arr['forks']        = $e->forks;
+			$arr['open_issues']  = $e->open_issues;
+			$arr['score']        = $e->score;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of owner's repos.
+	 *
+	 * @param array $response Response from API call.
+	 *
+	 * @return array $arr Array of owner's repos.
+	 */
+	private function parse_repos_response( $response ) {
+		$arr = array();
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog in base64.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of changes in base64.
+	 */
+	private function parse_changelog_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['changes'] = $e->content;
+		} );
+
+		return $arr;
 	}
 
 }

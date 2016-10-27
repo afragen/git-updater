@@ -123,6 +123,7 @@ class GitLab_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -150,10 +151,10 @@ class GitLab_API extends API {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->content = $content;
+				$response['content'] = $content;
 				$this->set_transient( 'changes', $response );
 			} else {
 				$response = false;
@@ -166,6 +167,7 @@ class GitLab_API extends API {
 			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $changes );
 
 			if ( $response ) {
+				$response = $this->parse_changelog_response( $response );
 				$this->set_transient( 'changes', $response );
 			}
 		}
@@ -174,13 +176,8 @@ class GitLab_API extends API {
 			return false;
 		}
 
-		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
-
-		if ( ! $changelog ) {
-			$parser    = new \Parsedown;
-			$changelog = $parser->text( base64_decode( $response->content ) );
-			$this->set_transient( 'changelog', $changelog );
-		}
+		$parser    = new \Parsedown;
+		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -265,6 +262,7 @@ class GitLab_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -465,17 +463,6 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		//$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->last_activity_at;
-		//$this->type->num_ratings  = $this->type->repo_meta->watchers;
-	}
-
-	/**
 	 * Create GitLab API endpoints.
 	 *
 	 * @param $git      object
@@ -517,15 +504,25 @@ class GitLab_API extends API {
 	/**
 	 * Get GitLab project ID.
 	 *
-	 * @return bool|null
+	 * @return string|int
 	 */
 	public function get_gitlab_id() {
 		$id       = null;
-		$response = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
+		$response = isset( $this->response['project_id'] ) ? $this->response['project_id'] : false;
 
 		if ( ! $response ) {
 			self::$method = 'projects';
 			$response     = $this->api( '/projects?per_page=100' );
+
+			foreach ( $response as $project ) {
+				if ( $this->type->repo === $project->path ) {
+					$id = $project->id;
+					$this->set_transient( 'project_id', $id );
+
+					return $id;
+				}
+			}
+
 			if ( empty( $response ) ) {
 				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
 
@@ -533,15 +530,74 @@ class GitLab_API extends API {
 			}
 		}
 
-		foreach ( $response as $project ) {
-			if ( $this->type->repo === $project->path ) {
-				$id = $project->id;
-				$this->set_transient( 'projects', $response );
-				break;
-			}
+		return $response;
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object|array $response Response from API call for tags.
+	 *
+	 * @return object|array Array of tag numbers, object is error.
+	 */
+	private function parse_tag_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
 		}
 
-		return $id;
+		$arr = array();
+		array_map( function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+
+			return $arr;
+		}, (array) $response );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	private function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->public;
+			$arr['last_updated'] = $e->last_activity_at;
+			$arr['watchers']     = 0;
+			$arr['forks']        = $e->forks_count;
+			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
+			$arr['score']        = 0;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog in base64.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object $arr Array of changes in base64, object if error.
+	 */
+	private function parse_changelog_response( $response ) {
+		if ( isset( $response->messages ) ) {
+			return $response;
+		}
+
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['changes'] = $e->content;
+		} );
+
+		return $arr;
 	}
 
 }
