@@ -52,6 +52,12 @@ abstract class API extends Base {
 
 	abstract protected function add_endpoints( $git, $endpoint );
 
+	abstract protected function parse_tag_response( $response );
+
+	abstract protected function parse_meta_response( $response );
+
+	abstract protected function parse_changelog_response( $response );
+
 	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *

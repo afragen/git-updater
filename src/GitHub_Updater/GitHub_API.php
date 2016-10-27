@@ -488,7 +488,7 @@ class GitHub_API extends API {
 	 *
 	 * @return object|array $arr Array of tag numbers, object is error.
 	 */
-	private function parse_tag_response( $response ) {
+	protected function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
@@ -510,7 +510,7 @@ class GitHub_API extends API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	private function parse_meta_response( $response ) {
+	protected function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -550,7 +550,7 @@ class GitHub_API extends API {
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
-	private function parse_changelog_response( $response ) {
+	protected function parse_changelog_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 

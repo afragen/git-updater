@@ -540,7 +540,7 @@ class GitLab_API extends API {
 	 *
 	 * @return object|array Array of tag numbers, object is error.
 	 */
-	private function parse_tag_response( $response ) {
+	protected function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
@@ -562,7 +562,7 @@ class GitLab_API extends API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	private function parse_meta_response( $response ) {
+	protected function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -585,7 +585,7 @@ class GitLab_API extends API {
 	 *
 	 * @return array|object $arr Array of changes in base64, object if error.
 	 */
-	private function parse_changelog_response( $response ) {
+	protected function parse_changelog_response( $response ) {
 		if ( isset( $response->messages ) ) {
 			return $response;
 		}
