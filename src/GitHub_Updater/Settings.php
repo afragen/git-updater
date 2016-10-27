@@ -273,7 +273,7 @@ class Settings extends Base {
 					</form>
 					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
 					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ) ); ?>
+						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache', true ); ?>
 					</form>
 				<?php endif; ?>
 			<?php endif; ?>

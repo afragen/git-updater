@@ -137,7 +137,7 @@ class Base {
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( isset( $_GET['refresh_transients'] ) ) {
+		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			$this->delete_all_transients();
 		}
 
@@ -232,7 +232,7 @@ class Base {
 			$force_meta_update = true;
 		}
 
-		if ( isset( $_GET['refresh_transients'] ) ) {
+		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *
@@ -883,8 +883,6 @@ class Base {
 	 */
 	public function delete_all_transients() {
 		global $wpdb;
-
-		unset( $_GET['refresh_transients'] );
 
 		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
