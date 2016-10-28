@@ -344,13 +344,11 @@ class Parser {
 
 			if ( $this->faq ) {
 				//$this->sections['faq'] .= "\n<dl>\n";
-				//foreach ( $this->faq as $question => $answer ) {
-				//	$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
-				//}
-				//$this->sections['faq'] .= "\n</dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
+					//$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
 					$this->sections['faq'] .= "<h4>{$question}</h4><p>{$answer}</p>";
 				}
+				//$this->sections['faq'] .= "\n</dl>\n";
 			}
 		}
 
