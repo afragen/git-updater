@@ -163,6 +163,14 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
+		/*
+		 * Load hooks for Bitbucket authentication headers.
+		 */
+		$bitbucket = new Bitbucket_API( new \stdClass() );
+		add_filter( 'http_request_args', array( &$bitbucket, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$bitbucket, 'http_release_asset_auth' ), 15, 2 );
+		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
+
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
