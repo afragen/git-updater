@@ -482,13 +482,22 @@ class Bitbucket_API extends API {
 	 * @return mixed
 	 */
 	public function ajax_maybe_authenticate_http( $args, $url ) {
+		global $wp_current_filter;
+
+		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
+		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
+
+		if ( ! empty( $is_ajax_update ) ) {
+			$this->load_options();
+		}
+
 		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
-		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
-		       1 == parent::$options[ $_POST['slug'] ] &&
+		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], self::$options ) &&
+		       1 == self::$options[ $_POST['slug'] ] &&
 		       false !== stristr( $url, $_POST['slug'] ) )
 		) {
-			$username                         = parent::$options['bitbucket_username'];
-			$password                         = parent::$options['bitbucket_password'];
+			$username                         = self::$options['bitbucket_username'];
+			$password                         = self::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 
 			return $args;
