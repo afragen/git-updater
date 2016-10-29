@@ -33,8 +33,8 @@ class Bitbucket_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type     = $type;
 		parent::$hours  = 12;
+		$this->type     = $type;
 		$this->response = $this->get_transient();
 
 		$this->load_hooks();

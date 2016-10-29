@@ -40,8 +40,8 @@ class GitLab_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type     = $type;
 		parent::$hours  = 12;
+		$this->type     = $type;
 		$this->response = $this->get_transient();
 
 		if ( ! isset( self::$options['gitlab_access_token'] ) ) {
@@ -439,6 +439,10 @@ class GitLab_API extends API {
 	 * @return string
 	 */
 	private function add_access_token_endpoint( $git, $endpoint ) {
+		// This will return if checking during shiny updates.
+		if ( ! isset( parent::$options ) ) {
+			return $endpoint;
+		}
 
 		// Add GitLab.com Access Token.
 		if ( ! empty( parent::$options['gitlab_access_token'] ) ) {

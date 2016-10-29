@@ -1,23 +1,24 @@
 #### [unreleased]
-* refactored transient saving to save optimized version of transient rather that whole API response
+* improved transient saving to save optimized version of transient rather that whole API response
 * changed _Refresh Cache_ to POST to only run once.
+* fixed `API::wp_update_response` to properly reset the update transient after a shiny update
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
 * added new header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
 * obfuscated token/password values in Settings page, for @scarstens
 * added support for [GitLab Build Artifacts as Release Assets](https://gitlab.com/help/user/project/builds/artifacts.md), [#459](https://github.com/afragen/github-updater/issues/459)
-* refactored check for private repo, removes public repos from Settings page when no updates are available
-* refactored to provide Settings page with dynamically displayed sub-tabs
+* improved check for private repo, removes public repos from Settings page when no updates are available
+* improved to provide Settings page with dynamically displayed sub-tabs
 * added display of installed plugins/themes using GitHub Updater in Settings sub-tabs
 * added ability to enter Bitbucket credentials to Install tabs if not already present
 * moved action/filter hook calls out of constructors, make @carlalexander happy
-* refactored to incorporate GitLab personal access tokens, users will need to reset tokens.
+* improved to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
 * added several hooks for  [WP REST Cache](https://github.com/afragen/wordpress-rest-cache) and @scarstens
 * skip API calls for branches and tags if branch switching not enabled
 * refactored `delete_all_transients()` to delete from database, only called in `class Base`
-* refactored _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
+* refactored and improved _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
 * fixed `get_repo_slugs()` for initially misnamed repository, ie `github-updater-develop`
 * renamed `Refresh Transients` to `Refresh Cache`, hopefully to provide more clarity
 * refactored to only load GHU site options and other database queries for privileges users on backend only

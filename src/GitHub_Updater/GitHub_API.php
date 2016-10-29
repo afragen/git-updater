@@ -404,6 +404,11 @@ class GitHub_API extends API {
 	 * @return string
 	 */
 	private function add_access_token_endpoint( $git, $endpoint ) {
+		// This will return if checking during shiny updates.
+		if ( ! isset( parent::$options ) ) {
+			return $endpoint;
+		}
+
 		// Add GitHub.com access token.
 		if ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );

@@ -282,9 +282,11 @@ class Base {
 
 	/**
 	 * Performs actual plugin metadata fetching.
+	 *
+	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_plugins() {
-		if ( self::$load_repo_meta ) {
+	public function forced_meta_update_plugins( $true = false ) {
+		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
 			Plugin::instance()->get_remote_plugin_meta();
 		}
@@ -292,9 +294,11 @@ class Base {
 
 	/**
 	 * Performs actual theme metadata fetching.
+	 *
+	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_themes() {
-		if ( self::$load_repo_meta ) {
+	public function forced_meta_update_themes( $true = false ) {
+		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
 			Theme::instance()->get_remote_theme_meta();
 		}
