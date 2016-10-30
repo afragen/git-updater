@@ -4,6 +4,7 @@
 * fixed `API::wp_update_response` to properly reset the update transient after a shiny update
 * fixed Bitbucket authentication during AJAX update
 * changed to use dashicon to identify private repos in Settings
+* fixed transient update when doing shiny updates
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
@@ -23,7 +24,7 @@
 * refactored and improved _branch switching_ to be consistent among plugins and themes. This means plugins now can rollback to one of the previous 3 tagged releases.
 * fixed `get_repo_slugs()` for initially misnamed repository, ie `github-updater-develop`
 * renamed `Refresh Transients` to `Refresh Cache`, hopefully to provide more clarity
-* refactored to only load GHU site options and other database queries for privileges users on backend only
+* refactored to only load GHU site options and other database queries for privileged users on backend only
 * added query arg of `?per_page=100` to GitLab query for project IDs, this is max number able to be retrieved, yes an edge case [#465](https://github.com/afragen/github-updater/issues/465)
 
 #### 5.6.2 / 2016-09-24
