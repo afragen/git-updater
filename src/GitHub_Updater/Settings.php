@@ -979,7 +979,7 @@ class Settings extends Base {
 			);
 		}, $type_repos );
 
-		$lock = '<span class="dashicons dashicons-lock"></span>&nbsp;';
+		$lock = '&nbsp;<span class="dashicons dashicons-lock"></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$dashicon   = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
@@ -987,7 +987,7 @@ class Settings extends Base {
 			if ( false !== strpos( $data['type'], 'theme' ) ) {
 				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
 			}
-			printf( '<p>' . $dashicon . $is_private . $data['name'] . '</p>' );
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . '</p>' );
 		}
 	}
 
