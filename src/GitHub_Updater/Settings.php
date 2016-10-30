@@ -468,27 +468,6 @@ class Settings extends Base {
 			);
 		}
 
-		/*
-		 * Show if no private repositories are present.
-		 */
-		if ( ! parent::$auth_required['github_private'] ) {
-			add_settings_section(
-				null,
-				esc_html__( 'Private repositories are not installed, are cached, or are using your personal access token.', 'github-updater' ),
-				array(),
-				'github_updater_github_install_settings'
-			);
-		}
-		if ( ! parent::$auth_required['bitbucket_private'] ) {
-			add_settings_section(
-				null,
-				esc_html__( 'Private repositories are not installed or are cached.', 'github-updater' ),
-				array(),
-				'github_updater_bitbucket_install_settings'
-			);
-		}
-
-
 		$this->update_settings();
 	}
 
