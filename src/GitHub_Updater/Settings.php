@@ -957,6 +957,7 @@ class Settings extends Base {
 
 	/**
 	 * Write out listing of installed plugins and themes using GitHub Updater.
+	 * Places a lock dashicon before the repo name if it's a private repo.
 	 *
 	 * @param $type
 	 */
@@ -971,19 +972,22 @@ class Settings extends Base {
 
 		$display_data = array_map( function( $e ) {
 			return $e = array(
-				'type' => $e->type,
-				'repo' => $e->repo,
-				'name' => $e->name,
+				'type'    => $e->type,
+				'repo'    => $e->repo,
+				'name'    => $e->name,
+				'private' => isset( $e->is_private ) ? $e->is_private : false,
 			);
 		}, $type_repos );
 
-		printf( '<h4>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h4>' );
+		$lock = '<span class="dashicons dashicons-lock"></span>&nbsp;';
+		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			$dashicon   = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+			$is_private = $data['private'] ? $lock : null;
 			if ( false !== strpos( $data['type'], 'theme' ) ) {
-				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
+				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
 			}
-			printf( '<p>' . $dashicon . ' ' . $data['name'] . '</p>' );
+			printf( '<p>' . $dashicon . $is_private . $data['name'] . '</p>' );
 		}
 	}
 
