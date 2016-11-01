@@ -514,7 +514,7 @@ class Bitbucket_API extends API {
 	 * @return array|object Array of tag numbers, object is error.
 	 */
 	protected function parse_tag_response( $response ) {
-		if ( isset( $response->messages ) ) {
+		if ( isset( $response->message ) ) {
 			return $response;
 		}
 
