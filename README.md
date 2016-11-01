@@ -16,7 +16,7 @@
 
 A simple plugin to enable automatic updates to your GitHub, Bitbucket, or GitLab hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
 
-[Comprehensive information regarding GitHub Updater](https://afragen.github.io/github-updater) is available.
+[Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
 
 ## Description
 
