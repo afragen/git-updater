@@ -1,4 +1,4 @@
-![GitHub Updater](./assets/GitHub_Updater_logo.png)
+![GitHub Updater](./assets/GitHub_Updater_logo_small.png)
 
 [![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
 
