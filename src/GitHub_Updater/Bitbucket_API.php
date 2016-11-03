@@ -37,8 +37,6 @@ class Bitbucket_API extends API {
 		$this->type     = $type;
 		$this->response = $this->get_transient();
 
-		$this->load_hooks();
-
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
 		}
@@ -50,6 +48,7 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
+	 * Call after every instantiation of class Bitbucket_API.
 	 */
 	public function load_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 5, 2 );

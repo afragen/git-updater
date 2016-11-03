@@ -136,7 +136,8 @@ class Install extends Base {
 					parent::$options['bitbucket_password'] = self::$install['bitbucket_password'];
 				}
 
-				new Bitbucket_API( (object) $type );
+				$bitbucket = new Bitbucket_API( (object) $type );
+				$bitbucket->load_hooks();
 			}
 
 			/*

@@ -140,8 +140,6 @@ class Base {
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			$this->delete_all_transients();
 		}
-
-		$this->load_hooks();
 	}
 
 	/**
@@ -155,6 +153,7 @@ class Base {
 	/**
 	 * Load relevant action/filter hooks.
 	 * Use 'init' hook for user capabilities.
+	 * Called in github-updater.php.
 	 */
 	public function load_hooks() {
 		add_action( 'init', array( &$this, 'init' ) );
@@ -165,6 +164,7 @@ class Base {
 
 		// Load hook for shiny updates Bitbucket authentication headers.
 		$bitbucket = new Bitbucket_API( new \stdClass() );
+		$bitbucket->load_hooks();
 		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -431,6 +431,7 @@ class Base {
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				$this->repo_api = new Bitbucket_API( $repo );
+				$this->repo_api->load_hooks();
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
