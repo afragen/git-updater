@@ -5,6 +5,7 @@
 * fixed Bitbucket authentication during AJAX update
 * changed to use dashicon to identify private repos in Settings
 * fixed transient update when doing shiny updates
+* moved action/filter hook calls completely out of constructors, make @carlalexander happy
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
@@ -15,7 +16,6 @@
 * improved to provide Settings page with dynamically displayed sub-tabs
 * added display of installed plugins/themes using GitHub Updater in Settings sub-tabs
 * added ability to enter Bitbucket credentials to Install tabs if not already present
-* moved action/filter hook calls out of constructors, make @carlalexander happy
 * improved to incorporate GitLab personal access tokens, users will need to reset tokens.
 * added a filter hook `'github_updater_run_at_scale'` to skip several API calls making GitHub Updater at scale more performant, see README for usage details
 * added several hooks for  [WP REST Cache](https://github.com/afragen/wordpress-rest-cache) and @scarstens
