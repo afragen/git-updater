@@ -61,7 +61,8 @@ abstract class API extends Base {
 	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *
-	 * @param  array $args Existing HTTP Request arguments.
+	 * @param array  $args Existing HTTP Request arguments.
+	 * @param string $url  URL being passed.
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
