@@ -316,9 +316,7 @@ class GitHub_API extends API {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$download_link_base = $this->make_release_asset_download_link();
-
-			return $this->add_access_token_endpoint( $this, $download_link_base );
+			return $this->get_github_release_asset_url();
 		}
 
 		/*
@@ -566,4 +564,71 @@ class GitHub_API extends API {
 		return $arr;
 	}
 
+	/**
+	 * Return the AWS download link for a GitHub release asset.
+	 *
+	 * @since 6.1.0
+	 * @uses  Requests, requires WP 4.6
+	 *
+	 * @return array|bool|object|\stdClass
+	 */
+	private function get_github_release_asset_url() {
+		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
+
+		if ( $this->exit_no_update( $response, true ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
+
+			if ( ! $response ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
+
+			if ( $response ) {
+				add_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+
+				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
+				$response_new = wp_remote_get( $url );
+
+				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+
+				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
+					$response_object  = $response_new['http_response']->get_response_object();
+					$response_headers = $response_object->history[0]->headers;
+					$download_link    = $response_headers->getValues( 'location' );
+				} else {
+					return false;
+				}
+
+				$response = array();
+				$response = $download_link[0];
+				$this->set_transient( 'release_asset_url', $response );
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Set HTTP header for following GitHub release assets.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param        $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function set_github_release_asset_header( $args, $url = '' ) {
+		$args['headers']['accept'] = 'application/octet-stream';
+
+		return $args;
+	}
 }
