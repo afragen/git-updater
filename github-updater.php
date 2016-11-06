@@ -34,14 +34,15 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! class_exists( 'WPUpdatePhp' ) ) {
-	require_once( plugin_dir_path( __FILE__ ) . '/vendor/wp-update-php/src/WPUpdatePhp.php' );
-}
-$updatePhp = new WPUpdatePhp( '5.3.0' );
-if ( method_exists( $updatePhp, 'set_plugin_name' ) ) {
-	$updatePhp->set_plugin_name( 'GitHub Updater' );
-}
-if ( ! $updatePhp->does_it_meet_required_php_version( PHP_VERSION ) ) {
+if ( version_compare( '5.3.0', PHP_VERSION, '>=' ) ) {
+	?>
+	<div class="error notice is-dismissible">
+		<p>
+			<?php esc_html_e( 'GitHub Updater cannot run on PHP versions older than 5.3.0. Please contact your hosting provider to update your site.', 'github-updater' ); ?>
+		</p>
+	</div>
+	<?php
+
 	return false;
 }
 
@@ -57,7 +58,6 @@ $extra_classes = array(
 
 	'Parsedown'   => __DIR__ . '/vendor/parsedown/Parsedown.php',
 	'PAnD'        => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
-	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
 // Load Autoloader.
