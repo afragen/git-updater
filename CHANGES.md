@@ -7,6 +7,7 @@
 * fixed transient update when doing shiny updates
 * added ability to update from GitHub release asset
 * added our own PHP version check
+* oops, added back a reset of _'update\_plugins'_ and _'update\_themes'_ transients with our `delete_all_transients()` which helps to show new updates quicker
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
