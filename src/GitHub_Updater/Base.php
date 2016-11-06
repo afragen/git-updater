@@ -899,6 +899,9 @@ class Base {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
 
+		set_site_transient( 'update_plugins', null );
+		set_site_transient( 'update_themes', null );
+
 		return true;
 	}
 
