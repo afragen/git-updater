@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2016-10-29 17:35-0700\n"
+"POT-Creation-Date: 2016-11-06 09:41-0800\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,6 +19,12 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
+#: github-updater.php:41
+msgid ""
+"GitHub Updater cannot run on PHP versions older than 5.3.0. Please contact "
+"your hosting provider to update your site."
+msgstr ""
+
 #: mu/ghu-loader.php:68
 msgid "Activated as mu-plugin"
 msgstr ""
@@ -28,20 +34,20 @@ msgstr ""
 msgid "Rename successful using extended name to %1$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1188 src/GitHub_Updater/Theme.php:610
+#: src/GitHub_Updater/Base.php:1191 src/GitHub_Updater/Theme.php:610
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1197
+#: src/GitHub_Updater/Base.php:1200
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1211
+#: src/GitHub_Updater/Base.php:1214
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1218 src/GitHub_Updater/Theme.php:642
+#: src/GitHub_Updater/Base.php:1221 src/GitHub_Updater/Theme.php:642
 msgid "No previous tags to rollback to."
 msgstr ""
 
