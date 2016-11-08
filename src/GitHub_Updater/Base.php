@@ -1089,7 +1089,7 @@ class Base {
 			return empty( $options['branch_switch'] );
 		}
 
-		return ( ! isset( $_GET['refresh_transients'] ) && ! $response && ! $this->can_update( $this->type ) );
+		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update( $this->type ) );
 	}
 
 	/**
@@ -1103,7 +1103,7 @@ class Base {
 	protected function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( isset( $_GET['refresh_transients'] ) ) {
+		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			return $response;
 		}
 
