@@ -29,22 +29,22 @@ class GHU_Upgrade extends Base {
 	 *
 	 * @var int
 	 */
-	private $db_version = 610;
+	private $db_version = 6100;
 
 	/**
 	 * GHU_Upgrade constructor.
 	 */
 	public function __construct() {
 		$this->load_options();
-		$db_version = isset( self::$options['db_version'] ) ? self::$options['db_version'] : 600;
+		$db_version = isset( self::$options['db_version'] ) ? self::$options['db_version'] : 6000;
 
 		if ( $db_version === $this->db_version ) {
 			return;
 		}
 
 		switch ( $db_version ) {
-			case 600:
-				$this->upgrade_600();
+			case 6000:
+				$this->upgrade_6000();
 				break;
 			default:
 				break;
@@ -55,9 +55,9 @@ class GHU_Upgrade extends Base {
 	}
 
 	/**
-	 * Upgrade from version less than 6.0.0.
+	 * Upgrade from version less than 6.0.0.0.
 	 */
-	private function upgrade_600() {
+	private function upgrade_6000() {
 		$this->delete_all_transients();
 	}
 
