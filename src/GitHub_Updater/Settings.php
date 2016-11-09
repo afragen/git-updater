@@ -590,6 +590,7 @@ class Settings extends Base {
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		$always_unset   = array(
+			'db_version',
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',

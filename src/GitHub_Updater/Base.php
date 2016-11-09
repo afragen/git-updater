@@ -141,6 +141,9 @@ class Base {
 			$this->delete_all_transients();
 		}
 
+		// Run GitHub Updater upgrade functions.
+		new GHU_Upgrade();
+
 		$this->load_hooks();
 	}
 
