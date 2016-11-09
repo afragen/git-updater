@@ -636,22 +636,7 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
-		// Delete transients after update of this plugin.
-		if ( 'github-updater' === $slug ) {
-			add_action( 'upgrader_process_complete', array( &$this, 'delete_transients_ghu_update' ), 15 );
-		}
-
 		return trailingslashit( $new_source );
-	}
-
-	/**
-	 * Delete transients after upgrade for GHU.
-	 *
-	 * Run on `upgrader_process_complete` filter hook so rebuilt transients
-	 * are from updated plugin code.
-	 */
-	public function delete_transients_ghu_update() {
-		$this->delete_all_transients();
 	}
 
 	/**
