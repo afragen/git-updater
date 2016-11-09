@@ -226,7 +226,7 @@ class Theme extends Base {
 				continue;
 			}
 
-			// Update theme transient with rollback data.
+			// Update theme transient with rollback (branch switching) data.
 			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
 
 			/*
