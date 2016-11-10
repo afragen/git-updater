@@ -595,6 +595,12 @@ class GitHub_API extends API {
 
 				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
 
+				if ( is_wp_error( $response_new ) ) {
+					Messages::instance()->create_error_message( $response_new );
+
+					return false;
+				}
+
 				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
 					$response_object  = $response_new['http_response']->get_response_object();
 					$response_headers = $response_object->history[0]->headers;
