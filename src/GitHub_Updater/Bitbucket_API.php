@@ -106,7 +106,7 @@ class Bitbucket_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
+		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
 

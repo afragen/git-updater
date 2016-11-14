@@ -79,7 +79,7 @@ class GitHub_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
+		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
@@ -575,7 +575,7 @@ class GitHub_API extends API {
 	private function get_github_release_asset_url() {
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
+		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
