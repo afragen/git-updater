@@ -846,6 +846,7 @@ class Settings extends Base {
 			'gitlab_access_token',
 			'gitlab_enterprise_token',
 			'branch_switch',
+			'db_version',
 		);
 
 		$repos = array_map( function( $e ) {
@@ -858,8 +859,9 @@ class Settings extends Base {
 			}
 		);
 
-		$intersect = array_intersect( $options, $repos );
-		$options   = array_merge( $intersect, $_POST['github_updater'] );
+		$intersect  = array_intersect( $options, $repos );
+		$db_version = array( 'db_version' => parent::$options['db_version'] );
+		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version );
 
 		return $options;
 	}
