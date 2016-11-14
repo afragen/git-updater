@@ -397,7 +397,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$auth_required['gitlab_private'] ) {
+		if ( parent::$auth_required['gitlab'] ) {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -521,11 +521,6 @@ class Settings extends Base {
 				     ! parent::$auth_required['bitbucket_private']
 				) {
 					parent::$auth_required['bitbucket_private'] = true;
-				}
-				if ( false !== strpos( $token->type, 'gitlab' ) &&
-				     ! parent::$auth_required['gitlab_private']
-				) {
-					parent::$auth_required['gitlab_private'] = true;
 				}
 			}
 
