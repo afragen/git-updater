@@ -459,8 +459,8 @@ class Base {
 			}
 			if ( ! empty( self::$options['branch_switch'] ) ) {
 				$this->repo_api->get_remote_branches();
-				$this->repo_api->get_remote_tag();
 			}
+			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
 		}
