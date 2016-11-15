@@ -34,4 +34,4 @@ or
 
 ## Slack
 
-We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please ping me for an invite.
+We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.signup.team).
