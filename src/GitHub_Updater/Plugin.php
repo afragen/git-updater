@@ -248,6 +248,7 @@ class Plugin extends Base {
 		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'load-plugins.php', array( &$this, 'pre_set_site_transient_update_plugins' ), 15, 1 );
 	}
 
 	/**
@@ -462,6 +463,10 @@ class Plugin extends Base {
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
+					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
+					if ( isset( $transient->response[ $plugin->slug ] ) ) {
+						unset( $transient->response[ $plugin->slug ] );
+					}
 					continue;
 				}
 
@@ -477,6 +482,7 @@ class Plugin extends Base {
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 		}
+		remove_filter( 'load-plugins.php', array( &$this, 'pre_set_site_transient_update_plugins' ), 15 );
 
 		return $transient;
 	}
