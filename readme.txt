@@ -50,7 +50,7 @@ The following headers are available for use depending upon your hosting source.
 * GitLab Languages
 * GitLab CI Job
 
-[Comprehensive information regarding GitHub Updater](https://afragen.github.io/github-updater) is available.
+[Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
 
 ## Slack
 
