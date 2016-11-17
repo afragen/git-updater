@@ -373,14 +373,6 @@ class Plugin extends Base {
 			return $response;
 		}
 
-		if ( $plugin->dot_org && 'master' === $plugin->branch ) {
-			return $plugin->dot_org;
-		}
-
-		if ( is_object( $plugin->dot_org ) ) {
-			$response = $plugin->dot_org;
-		}
-
 		/*
 		 * Fix for extended naming.
 		 */

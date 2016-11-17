@@ -354,11 +354,11 @@ abstract class API extends Base {
 				return false;
 			}
 			$wp_repo_body = unserialize( $response['body'] );
-			$response     = is_object( $wp_repo_body ) ? $wp_repo_body : 'not in dot org';
+			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_transient( 'dot_org', $response );
 		}
-		$response = is_object( $response ) ? $response : false;
+		$response = ( 'in dot org' === $response ) ? true : false;
 
 		return $response;
 	}
