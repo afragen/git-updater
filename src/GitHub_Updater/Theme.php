@@ -282,27 +282,23 @@ class Theme extends Base {
 			return $false;
 		}
 
-		foreach ( (array) $this->config as $theme ) {
-			if ( $response->slug === $theme->repo ) {
-				$response->slug         = $theme->repo;
-				$response->name         = $theme->name;
-				$response->homepage     = $theme->uri;
-				$response->donate_link  = $theme->donate_link;
-				$response->version      = $theme->remote_version;
-				$response->sections     = $theme->sections;
-				$response->description  = implode( "\n", $theme->sections );
-				$response->author       = $theme->author;
-				$response->preview_url  = $theme->theme_uri;
-				$response->requires     = $theme->requires;
-				$response->tested       = $theme->tested;
-				$response->downloaded   = $theme->downloaded;
-				$response->last_updated = $theme->last_updated;
-				$response->rating       = $theme->rating;
-				$response->num_ratings  = $theme->num_ratings;
+		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : $response;
 
-				break;
-			}
-		}
+		$response->slug         = $theme->repo;
+		$response->name         = $theme->name;
+		$response->homepage     = $theme->uri;
+		$response->donate_link  = $theme->donate_link;
+		$response->version      = $theme->remote_version;
+		$response->sections     = $theme->sections;
+		$response->description  = implode( "\n", $theme->sections );
+		$response->author       = $theme->author;
+		$response->preview_url  = $theme->theme_uri;
+		$response->requires     = $theme->requires;
+		$response->tested       = $theme->tested;
+		$response->downloaded   = $theme->downloaded;
+		$response->last_updated = $theme->last_updated;
+		$response->rating       = $theme->rating;
+		$response->num_ratings  = $theme->num_ratings;
 
 		return $response;
 	}
