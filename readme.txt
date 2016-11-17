@@ -54,4 +54,4 @@ The following headers are available for use depending upon your hosting source.
 
 ## Slack
 
-We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please ping me for an invite.
+We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#random_ channels. Please take a look at other channels too.
