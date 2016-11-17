@@ -93,18 +93,8 @@ class Plugin extends Base {
 		 */
 		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
 
-		$plugins        = get_plugins();
-		$git_plugins    = array();
-		$all_plugins    = array();
-		$update_plugins = get_site_transient( 'update_plugins' );
-
-		if ( empty( $update_plugins ) ) {
-			wp_update_plugins();
-			$update_plugins = get_site_transient( 'update_plugins' );
-		}
-		if ( isset( $update_plugins->response, $update_plugins->no_update ) ) {
-			$all_plugins = array_merge( (array) $update_plugins->response, (array) $update_plugins->no_update );
-		}
+		$plugins     = get_plugins();
+		$git_plugins = array();
 
 		/**
 		 * Filter to add plugins not containing appropriate header line.
@@ -206,7 +196,6 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['dot_org']                 = isset( $all_plugins[ $plugin ]->id ) ? true : false;
 				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
 				$git_plugin['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
 				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
@@ -366,70 +355,53 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		$match = false;
+		$contributors = array();
 		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
 		}
 
-		$transient    = 'ghu-' . md5( $response->slug . 'wporg' );
-		$wp_repo_data = get_site_transient( $transient );
-		if ( ! $wp_repo_data ) {
-			$wp_repo_data = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
-			if ( is_wp_error( $wp_repo_data ) ) {
-				return false;
-			}
-			set_site_transient( $transient, $wp_repo_data, ( 12 * HOUR_IN_SECONDS ) );
+		$plugin = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+
+		if ( ! $plugin ) {
+			return $response;
 		}
 
-		$wp_repo_body = unserialize( $wp_repo_data['body'] );
-		if ( is_object( $wp_repo_body ) ) {
-			$response = $wp_repo_body;
+		if ( $plugin->dot_org && 'master' === $plugin->branch ) {
+			return $plugin->dot_org;
 		}
 
-		foreach ( (array) $this->config as $plugin ) {
-			/*
-			 * Fix for extended naming.
-			 */
-			$repos = $this->get_repo_slugs( $plugin->repo );
-			if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
-				$response->slug = $repos['repo'];
-				$match          = true;
-			} else {
-				continue;
-			}
-			$contributors = array();
-			if ( strtolower( $response->slug ) === strtolower( $plugin->repo ) ) {
-				if ( is_object( $wp_repo_body ) && 'master' === $plugin->branch ) {
-					return $response;
-				}
-
-				$response->slug          = $plugin->repo;
-				$response->plugin_name   = $plugin->name;
-				$response->name          = $plugin->name;
-				$response->author        = $plugin->author;
-				$response->homepage      = $plugin->uri;
-				$response->donate_link   = $plugin->donate_link;
-				$response->version       = $plugin->remote_version;
-				$response->sections      = $plugin->sections;
-				$response->requires      = $plugin->requires;
-				$response->tested        = $plugin->tested;
-				$response->downloaded    = $plugin->downloaded;
-				$response->last_updated  = $plugin->last_updated;
-				$response->download_link = $plugin->download_link;
-				foreach ( $plugin->contributors as $contributor ) {
-					$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
-				}
-				$response->contributors = $contributors;
-				if ( ! $this->is_private( $plugin ) ) {
-					$response->num_ratings = $plugin->num_ratings;
-					$response->rating      = $plugin->rating;
-				}
-			}
-			break;
+		if ( is_object( $plugin->dot_org ) ) {
+			$response = $plugin->dot_org;
 		}
 
-		if ( ! $match ) {
-			return $false;
+		/*
+		 * Fix for extended naming.
+		 */
+		$repos = $this->get_repo_slugs( $plugin->repo );
+		if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
+			$response->slug = $repos['repo'];
+		}
+
+		$response->slug          = $plugin->repo;
+		$response->plugin_name   = $plugin->name;
+		$response->name          = $plugin->name;
+		$response->author        = $plugin->author;
+		$response->homepage      = $plugin->uri;
+		$response->donate_link   = $plugin->donate_link;
+		$response->version       = $plugin->remote_version;
+		$response->sections      = $plugin->sections;
+		$response->requires      = $plugin->requires;
+		$response->tested        = $plugin->tested;
+		$response->downloaded    = $plugin->downloaded;
+		$response->last_updated  = $plugin->last_updated;
+		$response->download_link = $plugin->download_link;
+		foreach ( $plugin->contributors as $contributor ) {
+			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
+		}
+		$response->contributors = $contributors;
+		if ( ! $this->is_private( $plugin ) ) {
+			$response->num_ratings = $plugin->num_ratings;
+			$response->rating      = $plugin->rating;
 		}
 
 		return $response;
@@ -463,7 +435,9 @@ class Plugin extends Base {
 				 */
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
-					if ( isset( $transient->response[ $plugin->slug ] ) ) {
+					if ( isset( $transient->response[ $plugin->slug ] ) &&
+					     ! isset( $transient->response[ $plugin->slug ]->id )
+					) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
 					continue;
