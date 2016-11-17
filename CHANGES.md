@@ -12,6 +12,7 @@
 * added `class GHU_Upgrade` to run upgrade functions if needed
 * fixed initial display of update for dot org plugins with higher version numbers on git repos when they should be updating from dot org [496](https://github.com/afragen/github-updater/issues/496)
 * refactored query to wp.org for plugin data
+* revert javascript href call because Firefox can't have nice things
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.

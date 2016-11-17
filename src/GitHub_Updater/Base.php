@@ -1179,7 +1179,7 @@ class Base {
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
-			'<a href="javascript:jQuery(\'#' . $data['id'] . '\').toggle()">',
+			'<a href="#" onclick="jQuery(\'#' . $data['id'] . '\').toggle();return false;">',
 			'</a>.'
 		);
 
