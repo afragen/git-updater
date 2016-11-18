@@ -657,7 +657,8 @@ class Theme extends Base {
 				'branches'    => array_keys( $theme->branches ),
 			);
 
-			if ( $this->can_update( $theme ) ) {
+			// Can update and not a rollback.
+			if ( $this->can_update( $theme ) && ! $this->tag ) {
 				$transient->response[ $theme->repo ] = $update;
 			} else { // up-to-date!
 				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
