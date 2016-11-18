@@ -416,7 +416,6 @@ class Plugin extends Base {
 	public function pre_set_site_transient_update_plugins( $transient ) {
 
 		foreach ( (array) $this->config as $plugin ) {
-			$response = null;
 
 			if ( $this->can_update( $plugin ) ) {
 				$response = array(
@@ -443,7 +442,7 @@ class Plugin extends Base {
 				}
 
 				/*
-				 * Don't overwrite if branch switching.
+				 * Skip on branch switching or rollback.
 				 */
 				if ( $this->tag &&
 				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )

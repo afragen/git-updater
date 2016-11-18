@@ -644,25 +644,27 @@ class Theme extends Base {
 	public function pre_set_site_transient_update_themes( $transient ) {
 
 		foreach ( (array) $this->config as $theme ) {
-			if ( empty( $theme->uri ) ) {
-				continue;
-			}
 
-			$update = array(
-				'theme'       => $theme->repo,
-				'new_version' => $theme->remote_version,
-				'url'         => $theme->uri,
-				'package'     => $theme->download_link,
-				'branch'      => $theme->branch,
-				'branches'    => array_keys( $theme->branches ),
-			);
+			if ( $this->can_update( $theme ) ) {
+				$response = array(
+					'theme'       => $theme->repo,
+					'new_version' => $theme->remote_version,
+					'url'         => $theme->uri,
+					'package'     => $theme->download_link,
+					'branch'      => $theme->branch,
+					'branches'    => array_keys( $theme->branches ),
+				);
 
-			// Can update and not a rollback.
-			if ( $this->can_update( $theme ) && ! $this->tag ) {
-				$transient->response[ $theme->repo ] = $update;
-			} else { // up-to-date!
-				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
-				$transient->up_to_date[ $theme->repo ]['response'] = $update;
+				/*
+				 * Skip on branch switching or rollback.
+				 */
+				if ( $this->tag &&
+				     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
+				) {
+					continue;
+				}
+
+				$transient->response[ $theme->repo ] = $response;
 			}
 		}
 
