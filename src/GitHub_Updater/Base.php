@@ -240,7 +240,7 @@ class Base {
 			new GHU_Upgrade();
 
 			// Ensure transient updated on plugins.php and themes.php pages.
-			add_filter( 'admin_init', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 0 );
+			add_action( 'admin_init', array( &$this, 'transient_update_admin_pages' ) );
 		}
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
@@ -1310,6 +1310,29 @@ class Base {
 			$updates_transient->response[ $slug ] = (array) $rollback;
 		}
 		set_site_transient( $transient, $updates_transient );
+	}
+
+	/**
+	 * Ensure update transient update to date on admin pages.
+	 */
+	public function transient_update_admin_pages() {
+		global $pagenow;
+
+		$admin_pages   = array( 'plugins.php', 'themes.php' );
+		$is_admin_page = in_array( $pagenow, $admin_pages ) ? true : false;
+		$capability    = 'update_' . rtrim( $pagenow, '.php' );
+
+		if ( current_user_can( $capability ) && $is_admin_page ) {
+			$current = get_site_transient( $capability );
+			if ( 'plugins.php' === $pagenow ) {
+				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+			}
+			if ( 'themes.php' === $pagenow ) {
+				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+			}
+			set_site_transient( $capability, $current );
+		}
+		remove_filter( 'admin_init', array( &$this, 'transient_update_admin_pages' ) );
 	}
 
 	/**

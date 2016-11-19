@@ -1,7 +1,8 @@
 #### [unreleased]
 * improved transient saving to save optimized version of transient rather that whole API response
 * changed _Refresh Cache_ to POST to only run once.
-* fixed `API::wp_update_response` to properly reset the update transient after a shiny update, cache flush, or on plugins.php or themes.php pages
+* fixed `API::wp_update_response` to properly reset the update transient after a shiny update or cache flush
+* added `Base::transient_update_admin_pages` to properly reset the update transient on plugins.php and themes.php pages
 * fixed Bitbucket authentication during AJAX update
 * changed to use dashicon to identify private repos in Settings
 * fixed transient update when doing shiny updates
