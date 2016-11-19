@@ -275,14 +275,12 @@ class Theme extends Base {
 			return $false;
 		}
 
-		/*
-		 * Early return $false for adding themes from repo
-		 */
-		if ( isset( $response->fields ) && ! $response->fields['sections'] ) {
+		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+
+		// wp.org theme.
+		if ( ! $theme ) {
 			return $false;
 		}
-
-		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : $response;
 
 		$response->slug         = $theme->repo;
 		$response->name         = $theme->name;

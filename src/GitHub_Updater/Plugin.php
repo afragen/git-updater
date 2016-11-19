@@ -364,13 +364,7 @@ class Plugin extends Base {
 
 		// wp.org only plugin.
 		if ( ! $plugin ) {
-			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $response->slug );
-			if ( is_wp_error( $response ) ) {
-				return false;
-			}
-			$response = unserialize( $response['body'] );
-
-			return $response;
+			return $false;
 		}
 
 		/*
