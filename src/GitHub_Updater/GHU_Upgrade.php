@@ -50,7 +50,7 @@ class GHU_Upgrade extends Base {
 				break;
 		}
 
-		$options = array_merge( self::$options, array( 'db_version' => $this->db_version ) );
+		$options = array_merge( (array) self::$options, array( 'db_version' => $this->db_version ) );
 		update_site_option( 'github_updater', $options );
 	}
 
