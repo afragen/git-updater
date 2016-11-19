@@ -238,6 +238,9 @@ class Base {
 
 			// Run GitHub Updater upgrade functions.
 			new GHU_Upgrade();
+
+			// Ensure transient updated on plugins.php and themes.php pages.
+			add_filter( 'admin_init', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 0 );
 		}
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
@@ -886,9 +889,6 @@ class Base {
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
 		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
-
-		set_site_transient( 'update_plugins', null );
-		set_site_transient( 'update_themes', null );
 
 		return true;
 	}

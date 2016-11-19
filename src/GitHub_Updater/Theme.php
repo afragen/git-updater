@@ -259,9 +259,6 @@ class Theme extends Base {
 		}
 		add_filter( 'themes_api', array( &$this, 'themes_api' ), 99, 3 );
 		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient_update_themes' ) );
-
-		// Ensure transient reset after updates.
-		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
 	/**

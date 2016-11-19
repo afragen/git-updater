@@ -79,6 +79,7 @@ abstract class API extends Base {
 	/**
 	 * Shiny updates results in the update transient being reset with only the wp.org data.
 	 * This catches the response and reloads the transients.
+	 * This function also ensures that transients are fresh when on plugin or theme page.
 	 *
 	 * @param mixed  $response HTTP server response.
 	 * @param array  $args     HTTP response arguments.
@@ -86,22 +87,47 @@ abstract class API extends Base {
 	 *
 	 * @return mixed $response Just a pass through, no manipulation.
 	 */
-	public static function wp_update_response( $response, $args, $url ) {
+	public static function wp_update_response( $response = null, $args = array(), $url = '' ) {
+		/*
+		 * Run when WordPress API calling for update plugins or themes.
+		 */
 		$parsed_url = parse_url( $url );
+		$api_wp_org = ( ! empty( $url ) && ( 'api.wordpress.org' === $parsed_url['host'] ) ) ? true : false;
 
-		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
-			if ( isset( $args['body']['plugins'] ) && current_user_can( 'update_plugins' ) ) {
+		if ( $api_wp_org && ! empty( $args['body'] ) ) {
+			if ( current_user_can( 'update_plugins' ) && isset( $args['body']['plugins'] ) ) {
 				$current = get_site_transient( 'update_plugins' );
 				Plugin::instance()->forced_meta_update_plugins( true );
 				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
 				set_site_transient( 'update_plugins', $current );
 			}
-			if ( isset( $args['body']['themes'] ) && current_user_can( 'update_themes' ) ) {
+			if ( current_user_can( 'update_themes' ) && isset( $args['body']['themes'] ) ) {
 				$current = get_site_transient( 'update_themes' );
 				Theme::instance()->forced_meta_update_themes( true );
 				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 				set_site_transient( 'update_themes', $current );
 			}
+		}
+
+		/*
+		 * Run when on plugins.php or themes.php pages.
+		 */
+		global $pagenow;
+
+		$admin_pages = array( 'plugins.php', 'themes.php' );
+		$admin_page  = in_array( $pagenow, $admin_pages ) ? true : false;
+		$capability  = 'update_' . rtrim( $pagenow, '.php' );
+
+		if ( current_user_can( $capability ) && $admin_page && empty( $args['body'] ) ) {
+			$current = get_site_transient( $capability );
+			if ( 'plugins.php' === $pagenow ) {
+				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+			}
+			if ( 'themes.php' === $pagenow ) {
+				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+			}
+			set_site_transient( $capability, $current );
+			remove_filter( 'admin_init', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 		}
 
 		return $response;

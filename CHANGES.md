@@ -1,13 +1,12 @@
 #### [unreleased]
 * improved transient saving to save optimized version of transient rather that whole API response
 * changed _Refresh Cache_ to POST to only run once.
-* fixed `API::wp_update_response` to properly reset the update transient after a shiny update and cache flush
+* fixed `API::wp_update_response` to properly reset the update transient after a shiny update, cache flush, or on plugins.php or themes.php pages
 * fixed Bitbucket authentication during AJAX update
 * changed to use dashicon to identify private repos in Settings
 * fixed transient update when doing shiny updates
 * added ability to update from GitHub release asset
 * added our own PHP version check
-* oops, added back a reset of _'update\_plugins'_ and _'update\_themes'_ transients with our `delete_all_transients()` which helps to show new updates quicker
 * refactored setting of update transient during rollback, should eliminate the _up to date_ message and rollback failures
 * added `class GHU_Upgrade` to run upgrade functions if needed
 * fixed initial display of update for dot org plugins with higher version numbers on git repos when they should be updating from dot org [496](https://github.com/afragen/github-updater/issues/496)
