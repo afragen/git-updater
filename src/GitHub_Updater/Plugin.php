@@ -376,12 +376,9 @@ class Plugin extends Base {
 		/*
 		 * Fix for extended naming.
 		 */
-		$repos = $this->get_repo_slugs( $plugin->repo );
-		if ( $response->slug === $repos['repo'] || $response->slug === $repos['extended_repo'] ) {
-			$response->slug = $repos['repo'];
-		}
+		$repos          = $this->get_repo_slugs( $plugin->repo );
+		$response->slug = ( $response->slug === $repos['extended_repo'] ) ? $repos['repo'] : $plugin->repo;
 
-		$response->slug          = $plugin->repo;
 		$response->plugin_name   = $plugin->name;
 		$response->name          = $plugin->name;
 		$response->author        = $plugin->author;
