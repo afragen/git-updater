@@ -141,9 +141,6 @@ class Base {
 			$this->delete_all_transients();
 		}
 
-		// Run GitHub Updater upgrade functions.
-		new GHU_Upgrade();
-
 		$this->load_hooks();
 	}
 
@@ -238,6 +235,9 @@ class Base {
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
+
+			// Run GitHub Updater upgrade functions.
+			new GHU_Upgrade();
 		}
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
