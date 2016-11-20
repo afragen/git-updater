@@ -240,7 +240,7 @@ class Base {
 			new GHU_Upgrade();
 
 			// Ensure transient updated on plugins.php and themes.php pages.
-			add_action( 'admin_init', array( &$this, 'transient_update_admin_pages' ) );
+			add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 		}
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
@@ -1313,9 +1313,9 @@ class Base {
 	}
 
 	/**
-	 * Ensure update transient update to date on admin pages.
+	 * Ensure update transient is update to date on admin pages.
 	 */
-	public function transient_update_admin_pages() {
+	public function admin_pages_update_transient() {
 		global $pagenow;
 
 		$admin_pages   = array( 'plugins.php', 'themes.php' );
@@ -1332,7 +1332,7 @@ class Base {
 			}
 			set_site_transient( $capability, $current );
 		}
-		remove_filter( 'admin_init', array( &$this, 'transient_update_admin_pages' ) );
+		remove_filter( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 	}
 
 	/**
