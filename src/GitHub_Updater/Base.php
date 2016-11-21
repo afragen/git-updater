@@ -131,13 +131,37 @@ class Base {
 	 * @var bool
 	 */
 	protected static $load_repo_meta;
+	
+	/**
+	 * @var string[] Option keys refer to option names, option names are used to save value on database
+	 */
+	//TODO: these should be used on any other part where setting options are used (i.e. the Settings class)
+	protected static $options_names = array(
+		'github_access_token' => 'github_access_token',
+		'bitbucket_username' => 'bitbucket_username',
+		'bitbucket_password' => 'bitbucket_password',
+		'gitlab_access_token' => 'gitlab_access_token',
+		'gitlab_enterprise_token' => 'gitlab_enterprise_token',
+		'branch_switch' => 'branch_switch',
+	);
+	
+	/**
+	 * @var string[] Option keys refer to option names, option names are used to save value on database
+	 */
+	//TODO: these should be used on any other part where setting options are used (i.e. the Settings class)
+	protected static $options_remote_names = array(
+		'ithemes_sync' => 'ithemes_sync',
+		'infinitewp'   => 'infinitewp',
+		'managewp'     => 'managewp',
+		'mainwp'       => 'mainwp',
+	);
 
 	/**
 	 * Constructor.
 	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			$this->delete_all_transients();
 		}
 
@@ -150,6 +174,42 @@ class Base {
 	protected function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		
+		/*
+		 * Filter singular options for better control over time
+		 * (i.e. if we need structure of our option array)
+		 */
+		//TODO: move theme and plugins options inside an array with keys 'themes' and 'plugins', now they are at the same level of global options
+		//TODO: some checks on functions returned values
+		foreach(self::$options_names as $key => $name){
+			self::$options[$key] = $this->filter_option($name);
+		}
+		
+		foreach(self::$options_names as $key => $name){
+			self::$options_remote[$key] = $this->filter_option_remote($name);
+		}
+	}
+	
+	/**
+	 * Create a filter for current $name option
+	 * @param $name string The filtered option name
+	 * @return string The filtered option value
+	 */
+	protected function filter_option($name){
+		return ( array_key_exists( $name, self::$options ) ) ?
+			apply_filters('github_updater_filter_option_'.$name, self::$options[$name]) :
+			apply_filters('github_updater_filter_option_'.$name, '');
+	}
+	
+	/**
+	 * Create a filter for current $name option
+	 * @param $name string The filtered option name
+	 * @return string The filtered option value
+	 */
+	protected function filter_option_remote($name){
+		return ( array_key_exists( $name, self::$options_remote ) ) ?
+			apply_filters('github_updater_filter_option_remote_'.$name, self::$options_remote[$name]) :
+			apply_filters('github_updater_filter_option_remote_'.$name, '');
 	}
 
 	/**
@@ -162,10 +222,6 @@ class Base {
 		add_action( 'init', array( &$this, 'token_distribution' ) );
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
-
-		// Load hook for shiny updates Bitbucket authentication headers.
-		$bitbucket = new Bitbucket_API( new \stdClass() );
-		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
@@ -185,7 +241,6 @@ class Base {
 		remove_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		remove_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
-		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
 			$this->repo_api->remove_hooks();
@@ -235,15 +290,9 @@ class Base {
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
-
-			// Run GitHub Updater upgrade functions.
-			new GHU_Upgrade();
-
-			// Ensure transient updated on plugins.php and themes.php pages.
-			add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 		}
 
-		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *
@@ -288,11 +337,9 @@ class Base {
 
 	/**
 	 * Performs actual plugin metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_plugins( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
+	public function forced_meta_update_plugins() {
+		if ( self::$load_repo_meta ) {
 			$this->load_options();
 			Plugin::instance()->get_remote_plugin_meta();
 		}
@@ -300,11 +347,9 @@ class Base {
 
 	/**
 	 * Performs actual theme metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_themes( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
+	public function forced_meta_update_themes() {
+		if ( self::$load_repo_meta ) {
 			$this->load_options();
 			Theme::instance()->get_remote_theme_meta();
 		}
@@ -462,8 +507,8 @@ class Base {
 			}
 			if ( ! empty( self::$options['branch_switch'] ) ) {
 				$this->repo_api->get_remote_branches();
+				$this->repo_api->get_remote_tag();
 			}
-			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
 			$this->languages     = new Language_Pack( $repo, $this->repo_api );
 		}
@@ -639,7 +684,22 @@ class Base {
 
 		$wp_filesystem->move( $source, $new_source );
 
+		// Delete transients after update of this plugin.
+		if ( 'github-updater' === $slug ) {
+			add_action( 'upgrader_process_complete', array( &$this, 'delete_transients_ghu_update' ), 15 );
+		}
+
 		return trailingslashit( $new_source );
+	}
+
+	/**
+	 * Delete transients after upgrade for GHU.
+	 *
+	 * Run on `upgrader_process_complete` filter hook so rebuilt transients
+	 * are from updated plugin code.
+	 */
+	public function delete_transients_ghu_update() {
+		$this->delete_all_transients();
 	}
 
 	/**
@@ -904,7 +964,6 @@ class Base {
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
 		$this->type->release_asset        = ! empty( $response['Release Asset'] ) && true == $response['Release Asset'] ? true : false;
-		$this->type->dot_org              = $response['dot_org'];
 	}
 
 	/**
@@ -922,40 +981,40 @@ class Base {
 			switch ( $repo_type['repo'] ) {
 				case 'github':
 					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
+						$download_base          = implode( '/', array(
 							$repo_type['base_uri'],
 							'repos',
 							$this->type->owner,
 							$this->type->repo,
 							'zipball/',
 						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag;
+						$tags[]                 = $tag->name;
+						$rollback[ $tag->name ] = $download_base . $tag->name;
 					}
 					break;
 				case 'bitbucket':
-					foreach ( (array) $response as $tag ) {
+					foreach ( (array) $response as $num => $tag ) {
 						$download_base    = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'get/',
 						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag . '.zip';
+						$tags[]           = $num;
+						$rollback[ $num ] = $download_base . $num . '.zip';
 					}
 					break;
 				case 'gitlab':
 					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
+						$download_link          = implode( '/', array(
 							$repo_type['base_download'],
 							$this->type->owner,
 							$this->type->repo,
 							'repository/archive.zip',
 						) );
-						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link;
+						$download_link          = add_query_arg( 'ref', $tag, $download_link );
+						$tags[]                 = $tag->name;
+						$rollback[ $tag->name ] = $download_link;
 					}
 					break;
 			}
@@ -1019,18 +1078,6 @@ class Base {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access protected
-	 */
-	protected function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta['last_updated'];
-		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
-		$this->type->is_private   = $this->type->repo_meta['private'];
-	}
-
-	/**
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
@@ -1039,10 +1086,10 @@ class Base {
 	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
-		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
-		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
-		$score       = empty( $repo_meta['score'] ) ? $this->type->score : $repo_meta['score']; //what is this anyway?
+		$watchers    = empty( $repo_meta->watchers ) ? $this->type->watchers : $repo_meta->watchers;
+		$forks       = empty( $repo_meta->forks ) ? $this->type->forks : $repo_meta->forks;
+		$open_issues = empty( $repo_meta->open_issues ) ? $this->type->open_issues : $repo_meta->open_issues;
+		$score       = empty( $repo_meta->score ) ? $this->type->score : $repo_meta->score; //what is this anyway?
 
 		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
 
@@ -1078,7 +1125,7 @@ class Base {
 			return empty( $options['branch_switch'] );
 		}
 
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update( $this->type ) );
+		return ( ! isset( $_GET['refresh_transients'] ) && ! $response && ! $this->can_update( $this->type ) );
 	}
 
 	/**
@@ -1092,7 +1139,7 @@ class Base {
 	protected function get_local_info( $repo, $file ) {
 		$response = null;
 
-		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
+		if ( isset( $_GET['refresh_transients'] ) ) {
 			return $response;
 		}
 
@@ -1179,7 +1226,7 @@ class Base {
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
-			'<a href="#" onclick="jQuery(\'#' . $data['id'] . '\').toggle();return false;">',
+			'<a href="javascript:jQuery(\'#' . $data['id'] . '\').toggle()">',
 			'</a>.'
 		);
 
@@ -1233,106 +1280,6 @@ class Base {
 			) );
 
 		return $update_url;
-	}
-
-	/**
-	 * Test if rollback and then run `set_rollback_transient`.
-	 *
-	 * @uses filter hook 'wp_get_update_data'
-	 *
-	 * @param mixed $update_data
-	 *
-	 * @return mixed $update_data
-	 */
-	public function set_rollback( $update_data ) {
-		if ( empty( $_GET['rollback'] ) && ! isset( $_GET['action'] ) ) {
-			return $update_data;
-		}
-
-		if ( isset( $_GET['plugin'] ) && 'upgrade-plugin' === $_GET['action'] ) {
-			$slug = dirname( $_GET['plugin'] );
-			$type = 'plugin';
-		}
-
-		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
-			$slug = $_GET['theme'];
-			$type = 'theme';
-		}
-
-		if ( ! empty( $slug ) && array_key_exists( $slug, $this->config ) ) {
-			$repo = $this->config[ $slug ];
-			$this->set_rollback_transient( $type, $repo );
-		}
-
-		return $update_data;
-	}
-
-	/**
-	 * Update transient for rollback or branch switch.
-	 *
-	 * @param string $type plugin|theme
-	 * @param object $repo
-	 */
-	private function set_rollback_transient( $type, $repo ) {
-		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$this->repo_api = new GitHub_API( $repo );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $repo );
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				$this->repo_api = new GitLab_API( $repo );
-				break;
-		}
-
-		$transient         = 'update_' . $type . 's';
-		$this->tag         = $_GET['rollback'];
-		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
-		$updates_transient = get_site_transient( $transient );
-		$rollback          = array(
-			$type         => $slug,
-			'new_version' => $this->tag,
-			'url'         => $repo->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
-			'branch'      => $repo->branch,
-			'branches'    => $repo->branches,
-		);
-
-		if ( 'plugin' === $type ) {
-			$rollback['slug']                     = $repo->repo;
-			$updates_transient->response[ $slug ] = (object) $rollback;
-		}
-		if ( 'theme' === $type ) {
-			$updates_transient->response[ $slug ] = (array) $rollback;
-		}
-		set_site_transient( $transient, $updates_transient );
-	}
-
-	/**
-	 * Ensure update transient is update to date on admin pages.
-	 */
-	public function admin_pages_update_transient() {
-		global $pagenow;
-
-		$admin_pages   = array( 'plugins.php', 'themes.php' );
-		$is_admin_page = in_array( $pagenow, $admin_pages ) ? true : false;
-		$capability    = 'update_' . rtrim( $pagenow, '.php' );
-
-		if ( current_user_can( $capability ) && $is_admin_page ) {
-			$current = get_site_transient( $capability );
-			if ( 'plugins.php' === $pagenow ) {
-				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
-			}
-			if ( 'themes.php' === $pagenow ) {
-				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
-			}
-			set_site_transient( $capability, $current );
-		}
-		remove_filter( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 	}
 
 	/**
