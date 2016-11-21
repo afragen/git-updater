@@ -14,6 +14,8 @@
 * refactored query to wp.org for plugin data
 * revert javascript href call because Firefox can't have nice things
 * fixed to allow themes to rollback at any time
+* renamed filter hook `github_updater_token_distribution` to `github_updater_set_options` as more descriptive
+* added deprecated hook notice for `github_updater_token_distribution`
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.

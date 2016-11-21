@@ -159,7 +159,7 @@ class Base {
 	public function load_hooks() {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
-		add_action( 'init', array( &$this, 'token_distribution' ) );
+		add_action( 'init', array( &$this, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
@@ -320,15 +320,24 @@ class Base {
 	}
 
 	/**
-	 * Allows developers to use 'github_updater_token_distribution' hook to set GitHub Access Tokens.
+	 * Allows developers to use 'github_updater_set_options' hook to set access tokens or other settings.
 	 * Saves results of filter hook to self::$options.
 	 *
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
+	 *
+	 * @TODO Set `Requires WP: 4.6` and only use current filter and apply_filters_deprecated
 	 */
-	public function token_distribution() {
-		$config = apply_filters( 'github_updater_token_distribution', array() );
+	public function set_options_filter() {
+		// Single plugin/theme should not be using both hooks.
+		$config = apply_filters( 'github_updater_set_options', array() );
+		if ( empty( $config ) ) {
+			$config = function_exists( 'apply_filters_deprecated' ) ?
+				apply_filters_deprecated( 'github_updater_token_distribution', array( null ), '6.1.0', 'github_updater_set_options' ) :
+				apply_filters( 'github_updater_token_distribution', array() );
+		}
+
 		if ( ! empty( $config ) ) {
 			$config        = Settings::sanitize( $config );
 			self::$options = array_merge( get_site_option( 'github_updater' ), $config );
