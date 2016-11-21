@@ -515,7 +515,7 @@ class GitLab_API extends API {
 			self::$method = 'projects';
 			$response     = $this->api( '/projects?per_page=100' );
 
-			foreach ( $response as $project ) {
+			foreach ( (array) $response as $project ) {
 				if ( $this->type->repo === $project->path ) {
 					$id = $project->id;
 					$this->set_transient( 'project_id', $id );
