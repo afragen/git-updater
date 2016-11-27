@@ -240,23 +240,19 @@ class GitLab_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'meta';
-			$projects     = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
+			$project      = isset( $this->response['project'] ) ? $this->response['project'] : false;
 
 			// exit if transient is empty
-			if ( ! $projects ) {
+			if ( ! $project ) {
 				return false;
 			}
 
-			foreach ( $projects as $project ) {
-				if ( $this->type->repo === $project->path ) {
-					$response = $project;
-					break;
-				}
-			}
+			$response = ( $this->type->repo === $project->path ) ? $project : false;
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
+				$this->set_transient( 'project', null );
 			}
 		}
 
@@ -515,6 +511,7 @@ class GitLab_API extends API {
 				if ( $this->type->repo === $project->path ) {
 					$id = $project->id;
 					$this->set_transient( 'project_id', $id );
+					$this->set_transient( 'project', $project );
 
 					return $id;
 				}
