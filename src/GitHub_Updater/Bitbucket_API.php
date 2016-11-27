@@ -248,10 +248,6 @@ class Bitbucket_API extends API {
 	public function get_repo_meta() {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 

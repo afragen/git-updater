@@ -238,10 +238,6 @@ class GitLab_API extends API {
 	public function get_repo_meta() {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			self::$method = 'meta';
 			$projects     = isset( $this->response['projects'] ) ? $this->response['projects'] : false;
