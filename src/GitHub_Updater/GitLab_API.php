@@ -564,7 +564,7 @@ class GitLab_API extends API {
 		$response = array( $response );
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['private']      = $e->public;
+			$arr['private']      = ! $e->public;
 			$arr['last_updated'] = $e->last_activity_at;
 			$arr['watchers']     = 0;
 			$arr['forks']        = $e->forks_count;
