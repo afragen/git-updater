@@ -495,7 +495,7 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Get GitLab project ID.
+	 * Get GitLab project ID and project meta.
 	 *
 	 * @return string|int
 	 */
