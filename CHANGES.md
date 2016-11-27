@@ -16,6 +16,8 @@
 * fixed to allow themes to rollback at any time
 * renamed filter hook `github_updater_token_distribution` to `github_updater_set_options` as more descriptive
 * added deprecated hook notice for `github_updater_token_distribution`
+* fixed setting of GitLab meta
+* changed to not skip setting meta when no update available
 
 #### 6.0.0 / 2016-10-26
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
