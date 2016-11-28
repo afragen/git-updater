@@ -33,8 +33,8 @@ class Bitbucket_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type     = $type;
 		parent::$hours  = 12;
+		$this->type     = $type;
 		$this->response = $this->get_transient();
 
 		$this->load_hooks();
@@ -48,10 +48,12 @@ class Bitbucket_API extends API {
 		add_site_option( 'github_updater', self::$options );
 	}
 
+	/**
+	 * Load hooks for Bitbucket authentication headers.
+	 */
 	public function load_hooks() {
-		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 10, 2 );
+		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 5, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
-		add_filter( 'http_request_args', array( &$this, 'ajax_maybe_authenticate_http' ), 15, 2 );
 	}
 
 	/**
@@ -90,6 +92,7 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
+		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 
 		return true;
@@ -104,10 +107,6 @@ class Bitbucket_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
 			$arr_resp = (array) $response;
@@ -118,6 +117,7 @@ class Bitbucket_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -145,10 +145,10 @@ class Bitbucket_API extends API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->data = $content;
+				$response['changes'] = $content;
 				$this->set_transient( 'changes', $response );
 			} else {
 				$response = false;
@@ -167,6 +167,7 @@ class Bitbucket_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_changelog_response( $response );
 				$this->set_transient( 'changes', $response );
 			}
 		}
@@ -175,13 +176,8 @@ class Bitbucket_API extends API {
 			return false;
 		}
 
-		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
-
-		if ( ! $changelog ) {
-			$parser    = new \Parsedown;
-			$changelog = $parser->text( $response->data );
-			$this->set_transient( 'changelog', $changelog );
-		}
+		$parser    = new \Parsedown;
+		$changelog = $parser->text( $response['changes'] );
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -252,14 +248,11 @@ class Bitbucket_API extends API {
 	public function get_repo_meta() {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			$response = $this->api( '/2.0/repositories/:owner/:repo' );
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -396,17 +389,6 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->updated_on;
-		$this->type->num_ratings  = $this->type->watchers;
-	}
-
-	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private Bitbucket repositories only.
 	 *
@@ -493,19 +475,88 @@ class Bitbucket_API extends API {
 	 * @return mixed
 	 */
 	public function ajax_maybe_authenticate_http( $args, $url ) {
+		global $wp_current_filter;
+
+		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
+		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
+
+		if ( ! empty( $is_ajax_update ) ) {
+			$this->load_options();
+		}
+
 		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
-		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
-		       1 == parent::$options[ $_POST['slug'] ] &&
+		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], self::$options ) &&
+		       1 == self::$options[ $_POST['slug'] ] &&
 		       false !== stristr( $url, $_POST['slug'] ) )
 		) {
-			$username                         = parent::$options['bitbucket_username'];
-			$password                         = parent::$options['bitbucket_password'];
+			$username                         = self::$options['bitbucket_username'];
+			$password                         = self::$options['bitbucket_password'];
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 
 			return $args;
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object Array of tag numbers, object is error.
+	 */
+	protected function parse_tag_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
+		return array_keys( (array) $response );
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	protected function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->is_private;
+			$arr['last_updated'] = $e->updated_on;
+			$arr['watchers']     = 0;
+			$arr['forks']        = 0;
+			$arr['open_issues']  = 0;
+			$arr['score']        = 0;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog in base64.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array|object $arr Array of changes in base64, object if error.
+	 */
+	protected function parse_changelog_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['changes'] = $e->data;
+		} );
+
+		return $arr;
 	}
 
 }

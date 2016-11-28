@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           6.0.0
+ * Version:           6.1.0
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -34,14 +34,15 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! class_exists( 'WPUpdatePhp' ) ) {
-	require_once( plugin_dir_path( __FILE__ ) . '/vendor/wp-update-php/src/WPUpdatePhp.php' );
-}
-$updatePhp = new WPUpdatePhp( '5.3.0' );
-if ( method_exists( $updatePhp, 'set_plugin_name' ) ) {
-	$updatePhp->set_plugin_name( 'GitHub Updater' );
-}
-if ( ! $updatePhp->does_it_meet_required_php_version( PHP_VERSION ) ) {
+if ( version_compare( '5.3.0', PHP_VERSION, '>=' ) ) {
+	?>
+	<div class="error notice is-dismissible">
+		<p>
+			<?php esc_html_e( 'GitHub Updater cannot run on PHP versions older than 5.3.0. Please contact your hosting provider to update your site.', 'github-updater' ); ?>
+		</p>
+	</div>
+	<?php
+
 	return false;
 }
 
@@ -57,7 +58,6 @@ $extra_classes = array(
 
 	'Parsedown'   => __DIR__ . '/vendor/parsedown/Parsedown.php',
 	'PAnD'        => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
-	'WPUpdatePHP' => __DIR__ . '/vendor/wp-update-php/src/WPUpdatePhp.php',
 );
 
 // Load Autoloader.

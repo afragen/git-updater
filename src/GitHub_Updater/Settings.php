@@ -206,10 +206,10 @@ class Settings extends Base {
 		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' );
 		?>
 		<div class="wrap">
-			<h2>
+			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
-			</h2>
+			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
 				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
@@ -273,7 +273,7 @@ class Settings extends Base {
 					</form>
 					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
 					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ) ); ?>
+						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache', true ); ?>
 					</form>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -397,7 +397,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$auth_required['gitlab_private'] ) {
+		if ( parent::$auth_required['gitlab'] ) {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -468,27 +468,6 @@ class Settings extends Base {
 			);
 		}
 
-		/*
-		 * Show if no private repositories are present.
-		 */
-		if ( ! parent::$auth_required['github_private'] ) {
-			add_settings_section(
-				null,
-				esc_html__( 'Private repositories are not installed, are cached, or are using your personal access token.', 'github-updater' ),
-				array(),
-				'github_updater_github_install_settings'
-			);
-		}
-		if ( ! parent::$auth_required['bitbucket_private'] ) {
-			add_settings_section(
-				null,
-				esc_html__( 'Private repositories are not installed or are cached.', 'github-updater' ),
-				array(),
-				'github_updater_bitbucket_install_settings'
-			);
-		}
-
-
 		$this->update_settings();
 	}
 
@@ -542,11 +521,6 @@ class Settings extends Base {
 				     ! parent::$auth_required['bitbucket_private']
 				) {
 					parent::$auth_required['bitbucket_private'] = true;
-				}
-				if ( false !== strpos( $token->type, 'gitlab' ) &&
-				     ! parent::$auth_required['gitlab_private']
-				) {
-					parent::$auth_required['gitlab_private'] = true;
 				}
 			}
 
@@ -611,6 +585,7 @@ class Settings extends Base {
 		 */
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		$always_unset   = array(
+			'db_version',
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
@@ -866,6 +841,7 @@ class Settings extends Base {
 			'gitlab_access_token',
 			'gitlab_enterprise_token',
 			'branch_switch',
+			'db_version',
 		);
 
 		$repos = array_map( function( $e ) {
@@ -878,8 +854,9 @@ class Settings extends Base {
 			}
 		);
 
-		$intersect = array_intersect( $options, $repos );
-		$options   = array_merge( $intersect, $_POST['github_updater'] );
+		$intersect  = array_intersect( $options, $repos );
+		$db_version = array( 'db_version' => parent::$options['db_version'] );
+		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version );
 
 		return $options;
 	}
@@ -978,6 +955,7 @@ class Settings extends Base {
 
 	/**
 	 * Write out listing of installed plugins and themes using GitHub Updater.
+	 * Places a lock dashicon before the repo name if it's a private repo.
 	 *
 	 * @param $type
 	 */
@@ -992,19 +970,22 @@ class Settings extends Base {
 
 		$display_data = array_map( function( $e ) {
 			return $e = array(
-				'type' => $e->type,
-				'repo' => $e->repo,
-				'name' => $e->name,
+				'type'    => $e->type,
+				'repo'    => $e->repo,
+				'name'    => $e->name,
+				'private' => isset( $e->is_private ) ? $e->is_private : false,
 			);
 		}, $type_repos );
 
-		printf( '<h4>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h4>' );
+		$lock = '&nbsp;<span class="dashicons dashicons-lock"></span>';
+		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			$dashicon   = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+			$is_private = $data['private'] ? $lock : null;
 			if ( false !== strpos( $data['type'], 'theme' ) ) {
-				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
+				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
 			}
-			printf( '<p>' . $dashicon . ' ' . $data['name'] . '</p>' );
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . '</p>' );
 		}
 	}
 

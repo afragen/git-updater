@@ -226,26 +226,8 @@ class Theme extends Base {
 				continue;
 			}
 
-			/*
-			 * Update theme transient with rollback data.
-			 */
-			if ( ! empty( $_GET['rollback'] ) &&
-			     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
-			) {
-				$this->tag         = $_GET['rollback'];
-				$updates_transient = get_site_transient( 'update_themes' );
-				$rollback          = array(
-					'theme'       => $theme->repo,
-					'new_version' => $this->tag,
-					'url'         => $theme->uri,
-					'package'     => $this->repo_api->construct_download_link( $this->tag, false ),
-				);
-				if ( array_key_exists( $this->tag, $theme->branches ) ) {
-					$rollback['new_version'] = '0.0.0';
-				}
-				$updates_transient->response[ $theme->repo ] = $rollback;
-				set_site_transient( 'update_themes', $updates_transient );
-			}
+			// Update theme transient with rollback (branch switching) data.
+			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
 
 			/*
 			 * Add update row to theme row, only in multisite.
@@ -293,34 +275,28 @@ class Theme extends Base {
 			return $false;
 		}
 
-		/*
-		 * Early return $false for adding themes from repo
-		 */
-		if ( isset( $response->fields ) && ! $response->fields['sections'] ) {
+		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+
+		// wp.org theme.
+		if ( ! $theme ) {
 			return $false;
 		}
 
-		foreach ( (array) $this->config as $theme ) {
-			if ( $response->slug === $theme->repo ) {
-				$response->slug         = $theme->repo;
-				$response->name         = $theme->name;
-				$response->homepage     = $theme->uri;
-				$response->donate_link  = $theme->donate_link;
-				$response->version      = $theme->remote_version;
-				$response->sections     = $theme->sections;
-				$response->description  = implode( "\n", $theme->sections );
-				$response->author       = $theme->author;
-				$response->preview_url  = $theme->theme_uri;
-				$response->requires     = $theme->requires;
-				$response->tested       = $theme->tested;
-				$response->downloaded   = $theme->downloaded;
-				$response->last_updated = $theme->last_updated;
-				$response->rating       = $theme->rating;
-				$response->num_ratings  = $theme->num_ratings;
-
-				break;
-			}
-		}
+		$response->slug         = $theme->repo;
+		$response->name         = $theme->name;
+		$response->homepage     = $theme->uri;
+		$response->donate_link  = $theme->donate_link;
+		$response->version      = $theme->remote_version;
+		$response->sections     = $theme->sections;
+		$response->description  = implode( "\n", $theme->sections );
+		$response->author       = $theme->author;
+		$response->preview_url  = $theme->theme_uri;
+		$response->requires     = $theme->requires;
+		$response->tested       = $theme->tested;
+		$response->downloaded   = $theme->downloaded;
+		$response->last_updated = $theme->last_updated;
+		$response->rating       = $theme->rating;
+		$response->num_ratings  = $theme->num_ratings;
 
 		return $response;
 	}
@@ -609,7 +585,7 @@ class Theme extends Base {
 		if ( ! empty( $options['branch_switch'] ) ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
-				'<a href="javascript:jQuery(\'#ghu_versions\').toggle()">',
+				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 				'</a>.</p>'
 			);
 			?>
@@ -666,24 +642,27 @@ class Theme extends Base {
 	public function pre_set_site_transient_update_themes( $transient ) {
 
 		foreach ( (array) $this->config as $theme ) {
-			if ( empty( $theme->uri ) ) {
-				continue;
-			}
-
-			$update = array(
-				'theme'       => $theme->repo,
-				'new_version' => $theme->remote_version,
-				'url'         => $theme->uri,
-				'package'     => $theme->download_link,
-				'branch'      => $theme->branch,
-				'branches'    => array_keys( $theme->branches ),
-			);
 
 			if ( $this->can_update( $theme ) ) {
-				$transient->response[ $theme->repo ] = $update;
-			} else { // up-to-date!
-				$transient->up_to_date[ $theme->repo ]['rollback'] = $theme->rollback;
-				$transient->up_to_date[ $theme->repo ]['response'] = $update;
+				$response = array(
+					'theme'       => $theme->repo,
+					'new_version' => $theme->remote_version,
+					'url'         => $theme->uri,
+					'package'     => $theme->download_link,
+					'branch'      => $theme->branch,
+					'branches'    => array_keys( $theme->branches ),
+				);
+
+				/*
+				 * Skip on branch switching or rollback.
+				 */
+				if ( $this->tag &&
+				     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
+				) {
+					continue;
+				}
+
+				$transient->response[ $theme->repo ] = $response;
 			}
 		}
 

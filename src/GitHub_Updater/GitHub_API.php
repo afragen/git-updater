@@ -65,6 +65,7 @@ class GitHub_API extends API {
 			return false;
 		}
 
+		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 
 		return true;
@@ -79,10 +80,6 @@ class GitHub_API extends API {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
@@ -92,6 +89,7 @@ class GitHub_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_tag_response( $response );
 				$this->set_transient( 'tags', $response );
 			}
 		}
@@ -119,10 +117,10 @@ class GitHub_API extends API {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->content = $content;
+				$response['changes'] = $content;
 				$this->set_transient( 'changes', $response );
 			} else {
 				$response = false;
@@ -133,6 +131,7 @@ class GitHub_API extends API {
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
+				$response = $this->parse_changelog_response( $response );
 				$this->set_transient( 'changes', $response );
 			}
 		}
@@ -141,13 +140,8 @@ class GitHub_API extends API {
 			return false;
 		}
 
-		$changelog = isset( $this->response['changelog'] ) ? $this->response['changelog'] : false;
-
-		if ( ! $changelog ) {
-			$parser    = new \Parsedown;
-			$changelog = $parser->text( base64_decode( $response->content ) );
-			$this->set_transient( 'changelog', $changelog );
-		}
+		$parser    = new \Parsedown;
+		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -212,17 +206,14 @@ class GitHub_API extends API {
 		$repos      = isset( $this->response[ $this->type->owner ] ) ? $this->response[ $this->type->owner ] : false;
 		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
 
-		if ( $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
 			$response = ! empty( $response->items[0] ) ? $response->items[0] : false;
 
 			if ( ! $repos ) {
 				$repos = $this->api( '/users/' . $this->type->owner . '/repos' );
-				$this->set_transient( $this->type->owner, $response );
+				$repos = $this->parse_repos_response( $repos );
+				$this->set_transient( $this->type->owner, $repos );
 			}
 
 			if ( ! $response ) {
@@ -235,6 +226,7 @@ class GitHub_API extends API {
 			}
 
 			if ( $response ) {
+				$response = $this->parse_meta_response( $response );
 				$this->set_transient( 'meta', $response );
 			}
 		}
@@ -317,9 +309,7 @@ class GitHub_API extends API {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$download_link_base = $this->make_release_asset_download_link();
-
-			return $this->add_access_token_endpoint( $this, $download_link_base );
+			return $this->get_github_release_asset_url();
 		}
 
 		/*
@@ -405,6 +395,11 @@ class GitHub_API extends API {
 	 * @return string
 	 */
 	private function add_access_token_endpoint( $git, $endpoint ) {
+		// This will return if checking during shiny updates.
+		if ( ! isset( parent::$options ) ) {
+			return $endpoint;
+		}
+
 		// Add GitHub.com access token.
 		if ( ! empty( parent::$options['github_access_token'] ) ) {
 			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
@@ -466,17 +461,6 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Add remote data to type object.
-	 *
-	 * @access private
-	 */
-	private function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta->pushed_at;
-		$this->type->num_ratings  = $this->type->repo_meta->watchers;
-	}
-
-	/**
 	 * Calculate and store time until rate limit reset.
 	 *
 	 * @param $response
@@ -493,4 +477,157 @@ class GitHub_API extends API {
 		}
 	}
 
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param object|array $response Response from API call.
+	 *
+	 * @return object|array $arr Array of tag numbers, object is error.
+	 */
+	protected function parse_tag_response( $response ) {
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
+		$arr = array();
+		array_map( function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+
+			return $arr;
+		}, (array) $response );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	protected function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = $e->private;
+			$arr['last_updated'] = $e->pushed_at;
+			$arr['watchers']     = $e->watchers;
+			$arr['forks']        = $e->forks;
+			$arr['open_issues']  = $e->open_issues;
+			$arr['score']        = $e->score;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array of owner's repos.
+	 *
+	 * @param array $response Response from API call.
+	 *
+	 * @return array $arr Array of owner's repos.
+	 */
+	private function parse_repos_response( $response ) {
+		$arr = array();
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr[] = $e->name;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog in base64.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of changes in base64.
+	 */
+	protected function parse_changelog_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
+
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['changes'] = $e->content;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Return the AWS download link for a GitHub release asset.
+	 *
+	 * @since 6.1.0
+	 * @uses  Requests, requires WP 4.6
+	 *
+	 * @return array|bool|object|\stdClass
+	 */
+	private function get_github_release_asset_url() {
+		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
+
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
+
+			if ( ! $response ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
+
+			if ( $response ) {
+				add_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+
+				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
+				$response_new = wp_remote_get( $url );
+
+				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+
+				if ( is_wp_error( $response_new ) ) {
+					Messages::instance()->create_error_message( $response_new );
+
+					return false;
+				}
+
+				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
+					$response_object  = $response_new['http_response']->get_response_object();
+					$response_headers = $response_object->history[0]->headers;
+					$download_link    = $response_headers->getValues( 'location' );
+				} else {
+					return false;
+				}
+
+				$response = array();
+				$response = $download_link[0];
+				$this->set_transient( 'release_asset_url', $response );
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Set HTTP header for following GitHub release assets.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param        $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function set_github_release_asset_header( $args, $url = '' ) {
+		$args['headers']['accept'] = 'application/octet-stream';
+
+		return $args;
+	}
 }

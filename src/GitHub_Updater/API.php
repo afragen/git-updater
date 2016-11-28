@@ -52,10 +52,17 @@ abstract class API extends Base {
 
 	abstract protected function add_endpoints( $git, $endpoint );
 
+	abstract protected function parse_tag_response( $response );
+
+	abstract protected function parse_meta_response( $response );
+
+	abstract protected function parse_changelog_response( $response );
+
 	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *
-	 * @param  array $args Existing HTTP Request arguments.
+	 * @param array  $args Existing HTTP Request arguments.
+	 * @param string $url  URL being passed.
 	 *
 	 * @return array Amended HTTP Request arguments.
 	 */
@@ -83,11 +90,17 @@ abstract class API extends Base {
 		$parsed_url = parse_url( $url );
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
-			if ( isset( $args['body']['plugins'] ) && current_user_can( 'update_plugins' ) ) {
-				Plugin::instance()->forced_meta_update_plugins();
+			if ( current_user_can( 'update_plugins' ) && isset( $args['body']['plugins'] ) ) {
+				$current = get_site_transient( 'update_plugins' );
+				Plugin::instance()->forced_meta_update_plugins( true );
+				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+				set_site_transient( 'update_plugins', $current );
 			}
-			if ( isset( $args['body']['themes'] ) && current_user_can( 'update_themes' ) ) {
-				Theme::instance()->forced_meta_update_themes();
+			if ( current_user_can( 'update_themes' ) && isset( $args['body']['themes'] ) ) {
+				$current = get_site_transient( 'update_themes' );
+				Theme::instance()->forced_meta_update_themes( true );
+				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+				set_site_transient( 'update_themes', $current );
 			}
 		}
 
@@ -324,6 +337,30 @@ abstract class API extends Base {
 		}
 
 		return $download_link;
+	}
+
+	/**
+	 * Query wp.org for plugin information.
+	 *
+	 * @return array|bool|mixed|string|\WP_Error
+	 */
+	protected function get_dot_org_data() {
+		$slug     = $this->type->repo;
+		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
+
+		if ( ! $response ) {
+			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug );
+			if ( is_wp_error( $response ) ) {
+				return false;
+			}
+			$wp_repo_body = unserialize( $response['body'] );
+			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
+
+			$this->set_transient( 'dot_org', $response );
+		}
+		$response = ( 'in dot org' === $response ) ? true : false;
+
+		return $response;
 	}
 
 }
