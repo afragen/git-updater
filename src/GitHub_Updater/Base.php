@@ -142,6 +142,10 @@ class Base {
 		}
 
 		$this->load_hooks();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once __DIR__ . '/GitHub_Updater_CLI.php';
+		}
 	}
 
 	/**

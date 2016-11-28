@@ -1,4 +1,5 @@
 #### [unreleased]
+* added WP-CLI compatibility
 
 #### 6.1.0 / 2016-11-28
 * improved transient saving to save optimized version of transient rather that whole API response

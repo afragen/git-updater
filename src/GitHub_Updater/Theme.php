@@ -385,7 +385,7 @@ class Theme extends Base {
 	 * @param $theme_key
 	 * @param $theme
 	 *
-	 * @return bool|void
+	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
 		$options = get_site_option( 'github_updater' );
