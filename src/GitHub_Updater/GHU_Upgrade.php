@@ -58,7 +58,7 @@ class GHU_Upgrade extends Base {
 	}
 
 	/**
-	 * Upgrade from version less than 6.0.0.0.
+	 * Upgrade from version less than 6.0.0.0 and flush cache.
 	 */
 	private function upgrade_6000() {
 		wp_cache_flush();
