@@ -1,6 +1,9 @@
 #### [unreleased]
 * added WP-CLI compatibility
 
+#### 6.1.1 / 2016-11-29
+* hotfix to flush cache during upgrade routine
+
 #### 6.1.0 / 2016-11-28
 * improved transient saving to save optimized version of transient rather that whole API response
 * changed _Refresh Cache_ to POST to only run once.
