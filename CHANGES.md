@@ -1,5 +1,6 @@
 #### [unreleased]
 * added WP-CLI compatibility
+* fixed some PHP notices [#508](https://github.com/afragen/github-updater/issues/508)
 
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine
