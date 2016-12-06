@@ -1331,23 +1331,49 @@ class Base {
 	public function admin_pages_update_transient() {
 		global $pagenow;
 
-		$admin_pages   = array( 'plugins.php', 'themes.php' );
+		$admin_pages   = array( 'plugins.php', 'themes.php', 'update-core.php' );
 		$is_admin_page = in_array( $pagenow, $admin_pages ) ? true : false;
-		$capability    = 'update_' . rtrim( $pagenow, '.php' );
+		$transient     = 'update_' . rtrim( $pagenow, '.php' );
+		$transient     = 'update_update-core' === $transient ? 'update_core' : $transient;
 
-		if ( current_user_can( $capability ) && $is_admin_page ) {
-			$current = get_site_transient( $capability );
-			if ( 'plugins.php' === $pagenow ) {
-				Plugin::instance()->forced_meta_update_plugins( true );
-				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
-			}
-			if ( 'themes.php' === $pagenow ) {
-				Theme::instance()->forced_meta_update_themes( true );
-				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
-			}
-			set_site_transient( $capability, $current );
+		if ( $is_admin_page ) {
+			$this->make_update_transient_current( $transient );
 		}
+
 		remove_filter( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
+	}
+
+	/**
+	 * Checks user capabilities then updates the update transient to ensure
+	 * our repositories display update notices correctly.
+	 *
+	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' )
+	 */
+	public function make_update_transient_current( $transient ) {
+		if ( ! in_array( $transient, array( 'update_plugins', 'update_themes', 'update_core' ) ) ) {
+			return;
+		}
+
+		if ( current_user_can( $transient ) ) {
+			$current = get_site_transient( $transient );
+			switch ( $transient ) {
+				case 'update_plugins':
+					Plugin::instance()->forced_meta_update_plugins( true );
+					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+					break;
+				case 'update_themes':
+					Theme::instance()->forced_meta_update_themes( true );
+					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+					break;
+				case 'update_core':
+					Plugin::instance()->forced_meta_update_plugins( true );
+					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+					Theme::instance()->forced_meta_update_themes( true );
+					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+					break;
+			}
+			set_site_transient( $transient, $current );
+		}
 	}
 
 	/**

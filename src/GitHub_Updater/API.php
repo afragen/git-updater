@@ -88,19 +88,14 @@ abstract class API extends Base {
 	 */
 	public static function wp_update_response( $response, $args, $url ) {
 		$parsed_url = parse_url( $url );
+		$base       = new Base();
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
-			if ( current_user_can( 'update_plugins' ) && isset( $args['body']['plugins'] ) ) {
-				$current = get_site_transient( 'update_plugins' );
-				Plugin::instance()->forced_meta_update_plugins( true );
-				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
-				set_site_transient( 'update_plugins', $current );
+			if ( isset( $args['body']['plugins'] ) ) {
+				$base->make_update_transient_current( 'update_plugins' );
 			}
-			if ( current_user_can( 'update_themes' ) && isset( $args['body']['themes'] ) ) {
-				$current = get_site_transient( 'update_themes' );
-				Theme::instance()->forced_meta_update_themes( true );
-				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
-				set_site_transient( 'update_themes', $current );
+			if ( isset( $args['body']['themes'] ) ) {
+				$base->make_update_transient_current( 'update_themes' );
 			}
 		}
 
