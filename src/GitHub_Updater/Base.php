@@ -1338,9 +1338,11 @@ class Base {
 		if ( current_user_can( $capability ) && $is_admin_page ) {
 			$current = get_site_transient( $capability );
 			if ( 'plugins.php' === $pagenow ) {
+				Plugin::instance()->forced_meta_update_plugins( true );
 				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
 			}
 			if ( 'themes.php' === $pagenow ) {
+				Theme::instance()->forced_meta_update_themes( true );
 				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 			}
 			set_site_transient( $capability, $current );
