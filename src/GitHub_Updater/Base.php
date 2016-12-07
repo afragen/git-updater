@@ -1358,17 +1358,17 @@ class Base {
 			$current = get_site_transient( $transient );
 			switch ( $transient ) {
 				case 'update_plugins':
-					Plugin::instance()->forced_meta_update_plugins( true );
+					$this->forced_meta_update_plugins( true );
 					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
-					Theme::instance()->forced_meta_update_themes( true );
+					$this->forced_meta_update_themes( true );
 					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
-					Plugin::instance()->forced_meta_update_plugins( true );
+					$this->forced_meta_update_plugins( true );
 					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
-					Theme::instance()->forced_meta_update_themes( true );
+					$this->forced_meta_update_themes( true );
 					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 					break;
 			}
