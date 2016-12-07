@@ -22,6 +22,14 @@ use Fragen\GitHub_Updater\Base,
 class GitHub_Updater_CLI extends WP_CLI_Command {
 
 	/**
+	 * GitHub_Updater_CLI constructor.
+	 */
+	public function __construct() {
+		$this->init_plugins();
+		$this->init_themes();
+	}
+
+	/**
 	 * Update plugin update transient for GitHub Updater repositories.
 	 *
 	 * After running your are able to use any of the standard
@@ -39,7 +47,7 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 		$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
 
-		WP_CLI::success( sprintf( esc_html__( 'Now use %s commands with GitHub Updater repositories.', 'github-updater' ), '`wp plugin`' ) );
+		//WP_CLI::success( sprintf( esc_html__( 'Now use %s commands with GitHub Updater repositories.', 'github-updater' ), '`wp plugin`' ) );
 	}
 
 	/**
@@ -60,7 +68,7 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 		$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
 
-		WP_CLI::success( sprintf( esc_html__( 'Now use %s commands with GitHub Updater repositories.', 'github-updater' ), '`wp theme`' ) );
+		//WP_CLI::success( sprintf( esc_html__( 'Now use %s commands with GitHub Updater repositories.', 'github-updater' ), '`wp theme`' ) );
 	}
 
 	/**
@@ -152,8 +160,8 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 }
 
 $ghu_cli = new GitHub_Updater_CLI();
-WP_CLI::add_command( 'plugin github-updater-init', array( $ghu_cli, 'init_plugins' ) );
-WP_CLI::add_command( 'theme github-updater-init', array( $ghu_cli, 'init_themes' ) );
+//WP_CLI::add_command( 'plugin github-updater-init', array( $ghu_cli, 'init_plugins' ) );
+//WP_CLI::add_command( 'theme github-updater-init', array( $ghu_cli, 'init_themes' ) );
 WP_CLI::add_command( 'plugin github-updater-install', array( $ghu_cli, 'install_plugin' ) );
 WP_CLI::add_command( 'theme github-updater-install', array( $ghu_cli, 'install_theme' ) );
 
