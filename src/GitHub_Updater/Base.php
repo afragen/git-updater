@@ -1233,7 +1233,7 @@ class Base {
 	 * @param string $action
 	 * @param string $repo_name
 	 *
-	 * @return string|void
+	 * @return string
 	 */
 	protected function get_update_url( $type, $action, $repo_name ) {
 		$update_url = esc_attr(
