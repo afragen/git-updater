@@ -1,6 +1,7 @@
 #### [unreleased]
 * added WP-CLI compatibility
 * refactored `Base::admin_pages_update_transient()` and `API::wp_update_response()` to use `Base::make_update_transient_current()`, this fixed some PHP notices [#508](https://github.com/afragen/github-updater/issues/508)
+* added banner display to plugin `View details` iframe
 
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine

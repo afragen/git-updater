@@ -199,6 +199,17 @@ class Plugin extends Base {
 				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
 				$git_plugin['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
 				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
+
+				$git_plugin['banners']['high'] =
+					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )
+						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-1544x500.png'
+						: null;
+
+				$git_plugin['banners']['low'] =
+					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-772x250.png' )
+						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
+						: null;
+
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -385,6 +396,7 @@ class Plugin extends Base {
 		$response->downloaded    = $plugin->downloaded;
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
+		$response->banners       = $plugin->banners;
 		foreach ( $plugin->contributors as $contributor ) {
 			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 		}
