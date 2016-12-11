@@ -373,8 +373,8 @@ class Plugin extends Base {
 
 		$plugin = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 
-		// wp.org only plugin.
-		if ( ! $plugin ) {
+		// wp.org plugin.
+		if ( ! $plugin || $plugin->dot_org ) {
 			return $false;
 		}
 
