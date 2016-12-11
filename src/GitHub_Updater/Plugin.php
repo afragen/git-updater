@@ -374,7 +374,7 @@ class Plugin extends Base {
 		$plugin = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 
 		// wp.org plugin.
-		if ( ! $plugin || $plugin->dot_org ) {
+		if ( ! $plugin || ( $plugin->dot_org && 'master' === $plugin->branch ) ) {
 			return $false;
 		}
 
