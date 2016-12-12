@@ -144,6 +144,7 @@ class Base {
 		$this->load_hooks();
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once __DIR__ . '/GitHub_Updater_Repository_CLI.php';
 			include_once __DIR__ . '/GitHub_Updater_CLI.php';
 		}
 	}
@@ -199,7 +200,7 @@ class Base {
 	/**
 	 * Ensure api key is set.
 	 */
-	protected function ensure_api_key_is_set() {
+	public function ensure_api_key_is_set() {
 		$api_key = get_site_option( 'github_updater_api_key' );
 		if ( ! $api_key ) {
 			update_site_option( 'github_updater_api_key', md5( uniqid( rand(), true ) ) );
