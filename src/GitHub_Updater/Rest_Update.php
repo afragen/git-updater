@@ -146,8 +146,8 @@ class Rest_Update extends Base {
 	public function show_updates( $response ) {
 		$themes       = get_site_transient( 'update_themes' );
 		$plugins      = get_site_transient( 'update_plugins' );
-		$show_plugins = null;
-		$show_themes  = null;
+		$show_plugins = array();
+		$show_themes  = array();
 
 		/*
 		 * Ensure update data is up to date.
