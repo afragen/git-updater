@@ -39,7 +39,7 @@ class Settings extends Base {
 	 *
 	 * @var array
 	 */
-	protected static $remote_management = array(
+	public static $remote_management = array(
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
 		'managewp'     => 'ManageWP',

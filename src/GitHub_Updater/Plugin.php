@@ -41,7 +41,7 @@ class Plugin extends Base {
 	 *
 	 * @var string branch
 	 */
-	protected $tag = false;
+	public $tag = false;
 
 	/**
 	 * Constructor.
