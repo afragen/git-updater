@@ -14,12 +14,17 @@ use Fragen\GitHub_Updater\Base,
 	Fragen\GitHub_Updater\Install;
 
 
+// Add WP-CLI commands.
+$class = new GitHub_Updater_CLI_Integration();
+WP_CLI::add_command( 'plugin github-updater-install', array( $class, 'install_plugin' ) );
+WP_CLI::add_command( 'theme github-updater-install', array( $class, 'install_theme' ) );
+
 /**
  * Manage GitHub Updater repository commands.
  *
- * Class GitHub_Updater_Repository_CLI
+ * Class GitHub_Updater_CLI_Integration
  */
-class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
+class GitHub_Updater_CLI_Integration extends WP_CLI_Command {
 
 	/**
 	 * @var \Fragen\GitHub_Updater\Base
@@ -27,7 +32,7 @@ class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
 	private $base;
 
 	/**
-	 * GitHub_Updater_Repository_CLI constructor.
+	 * GitHub_Updater_CLI_Integration constructor.
 	 */
 	public function __construct() {
 		$this->base = new Base();
@@ -149,11 +154,7 @@ class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
 
 }
 
-$class = new GitHub_Updater_Repository_CLI();
-WP_CLI::add_command( 'plugin github-updater-install', array( $class, 'install_plugin' ) );
-WP_CLI::add_command( 'theme github-updater-install', array( $class, 'install_theme' ) );
-
-require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skins.php';
 
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin

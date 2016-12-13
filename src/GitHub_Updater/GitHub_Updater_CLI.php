@@ -11,6 +11,9 @@
 use Fragen\GitHub_Updater\Base;
 
 
+// Add WP-CLI commands.
+WP_CLI::add_command( 'github-updater', 'GitHub_Updater_CLI' );
+
 /**
  * Manage GitHub Updater commands.
  *
@@ -79,5 +82,3 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 	}
 
 }
-
-WP_CLI::add_command( 'github-updater', 'GitHub_Updater_CLI' );
