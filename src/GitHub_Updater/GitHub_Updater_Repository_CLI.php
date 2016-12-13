@@ -22,9 +22,15 @@ use Fragen\GitHub_Updater\Base,
 class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
 
 	/**
+	 * @var \Fragen\GitHub_Updater\Base
+	 */
+	private $base;
+
+	/**
 	 * GitHub_Updater_Repository_CLI constructor.
 	 */
 	public function __construct() {
+		$this->base = new Base();
 		$this->init_plugins();
 		$this->init_themes();
 	}
@@ -36,8 +42,7 @@ class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
 	 * `wp plugin` commands with GitHub Updater repositories.
 	 */
 	public function init_plugins() {
-		$base = new Base();
-		$base->forced_meta_update_plugins( true );
+		$this->base->forced_meta_update_plugins( true );
 		$current = get_site_transient( 'update_plugins' );
 		$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
@@ -50,8 +55,7 @@ class GitHub_Updater_Repository_CLI extends WP_CLI_Command {
 	 * `wp theme` commands with GitHub Updater repositories.
 	 */
 	public function init_themes() {
-		$base = new Base();
-		$base->forced_meta_update_themes( true );
+		$this->base->forced_meta_update_themes( true );
 		$current = get_site_transient( 'update_themes' );
 		$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );

@@ -19,6 +19,18 @@ use Fragen\GitHub_Updater\Base;
 class GitHub_Updater_CLI extends WP_CLI_Command {
 
 	/**
+	 * @var \Fragen\GitHub_Updater\Base
+	 */
+	private $base;
+
+	/**
+	 * GitHub_Updater_CLI constructor.
+	 */
+	public function __construct() {
+		$this->base = new Base();
+	}
+
+	/**
 	 * Clear GitHub Updater transients.
 	 *
 	 * ## OPTIONS
@@ -37,8 +49,7 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 	public function cache( $args ) {
 		list( $action ) = $args;
 		if ( 'delete' === $action ) {
-			$base = new Base();
-			$base->delete_all_transients();
+			$this->base->delete_all_transients();
 			WP_CLI::success( sprintf( esc_html__( 'GitHub Updater cache has been cleared.', 'github-updater' ) ) );
 		} else {
 			WP_CLI::error( sprintf( esc_html__( 'Incorrect command syntax, see %s for proper syntax.', 'github-updater' ), '`wp help github-updater cache`' ) );
@@ -56,8 +67,7 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 	 */
 	public function reset_api_key() {
 		delete_site_option( 'github_updater_api_key' );
-		$base = new Base();
-		$base->ensure_api_key_is_set();
+		$this->base->ensure_api_key_is_set();
 		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',
