@@ -583,7 +583,7 @@ class Base {
 		/*
 		 * Remote install source.
 		 */
-		if ( isset( self::$options['github_updater_install_repo'] ) ) {
+		if ( isset( self::$options['github_updater_install_repo'] ) && empty( $repo ) ) {
 			$repo['repo'] = $repo['extended_repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
