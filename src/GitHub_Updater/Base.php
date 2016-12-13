@@ -1396,6 +1396,14 @@ class Base {
 	}
 
 	/**
+	 * Checks to see if WP_CLI.
+	 *
+	 * @return bool
+	 */
+	protected function is_wp_cli() {
+		return ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+	/**
 	 * Is this a private repo?
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
