@@ -41,7 +41,7 @@ class GitHub_Updater_CLI extends WP_CLI_Command {
 			$base->delete_all_transients();
 			WP_CLI::success( sprintf( esc_html__( 'GitHub Updater cache has been cleared.', 'github-updater' ) ) );
 		} else {
-			WP_CLI::warning( sprintf( esc_html__( 'Incorrect command syntax, see %s for proper syntax.', 'github-updater' ), '`wp help github-updater cache`' ) );
+			WP_CLI::error( sprintf( esc_html__( 'Incorrect command syntax, see %s for proper syntax.', 'github-updater' ), '`wp help github-updater cache`' ) );
 		}
 	}
 
