@@ -8,14 +8,13 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-use Fragen\GitHub_Updater\Base,
-	Fragen\GitHub_Updater\Plugin,
-	Fragen\GitHub_Updater\Theme,
-	Fragen\GitHub_Updater\Install;
+namespace Fragen\GitHub_Updater;
 
+use WP_CLI,
+	WP_CLI_Command;
 
 // Add WP-CLI commands.
-$class = new GitHub_Updater_CLI_Integration();
+$class = new CLI_Integration();
 WP_CLI::add_command( 'plugin github-updater-install', array( $class, 'install_plugin' ) );
 WP_CLI::add_command( 'theme github-updater-install', array( $class, 'install_theme' ) );
 
@@ -24,7 +23,7 @@ WP_CLI::add_command( 'theme github-updater-install', array( $class, 'install_the
  *
  * Class GitHub_Updater_CLI_Integration
  */
-class GitHub_Updater_CLI_Integration extends WP_CLI_Command {
+class CLI_Integration extends WP_CLI_Command {
 
 	/**
 	 * @var \Fragen\GitHub_Updater\Base
@@ -162,7 +161,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skins.php';
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
-class GitHub_Upgrader_CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
+class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 	public function header() {}
 	public function footer() {}
 	public function error( $errors ) {
@@ -176,7 +175,7 @@ class GitHub_Upgrader_CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 /**
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
-class GitHub_Upgrader_CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
+class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
 	public function header() {}
 	public function footer() {}
 	public function error( $errors ) {

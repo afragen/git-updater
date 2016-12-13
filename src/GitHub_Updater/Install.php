@@ -231,7 +231,7 @@ class Install extends Base {
 				 * Create a new instance of Plugin_Upgrader.
 				 */
 				$skin     = $wp_cli
-					? new \GitHub_Upgrader_CLI_Plugin_Installer_Skin()
+					? new CLI_Plugin_Installer_Skin()
 					: new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
 				add_filter( 'install_plugin_complete_actions', array(
@@ -247,7 +247,7 @@ class Install extends Base {
 				 * Create a new instance of Theme_Upgrader.
 				 */
 				$skin     = $wp_cli
-					? new \GitHub_Upgrader_CLI_Theme_Installer_Skin()
+					? new CLI_Theme_Installer_Skin()
 					: new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
 				add_filter( 'install_theme_complete_actions', array(

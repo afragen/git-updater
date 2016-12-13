@@ -144,8 +144,8 @@ class Base {
 		$this->load_hooks();
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once __DIR__ . '/GitHub_Updater_CLI.php';
-			include_once __DIR__ . '/GitHub_Updater_CLI_Integration.php';
+			include_once __DIR__ . '/CLI.php';
+			include_once __DIR__ . '/CLI_Integration.php';
 		}
 	}
 

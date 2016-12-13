@@ -8,18 +8,20 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-use Fragen\GitHub_Updater\Base;
+namespace Fragen\GitHub_Updater;
 
+use WP_CLI,
+	WP_CLI_Command;
 
 // Add WP-CLI commands.
-WP_CLI::add_command( 'github-updater', 'GitHub_Updater_CLI' );
+WP_CLI::add_command( 'github-updater', '\\Fragen\\GitHub_Updater\\CLI' );
 
 /**
  * Manage GitHub Updater commands.
  *
  * Class GitHub_Updater_CLI
  */
-class GitHub_Updater_CLI extends WP_CLI_Command {
+class CLI extends WP_CLI_Command {
 
 	/**
 	 * @var \Fragen\GitHub_Updater\Base
