@@ -15,8 +15,8 @@ use WP_CLI,
 
 // Add WP-CLI commands.
 $class = new CLI_Integration();
-WP_CLI::add_command( 'plugin github-updater-install', array( $class, 'install_plugin' ) );
-WP_CLI::add_command( 'theme github-updater-install', array( $class, 'install_theme' ) );
+WP_CLI::add_command( 'plugin install-git', array( $class, 'install_plugin' ) );
+WP_CLI::add_command( 'theme install-git', array( $class, 'install_theme' ) );
 
 /**
  * Manage GitHub Updater repository commands.
@@ -66,12 +66,18 @@ class CLI_Integration extends WP_CLI_Command {
 	}
 
 	/**
-	 * Install plugin using GitHub Updater.
+	 * Install plugin from GitHub, Bitbucket, or GitLab using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
 	 * <uri>
 	 * : URI to the repo being installed
+	 *
+	 * [--branch=<branch_name>]
+	 * : String indicating the branch name to be installed
+	 * ---
+	 * default: master
+	 * ---
 	 *
 	 * [--field=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
@@ -87,16 +93,18 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp plugin github-updater-install https://github.com/afragen/test-plugin
+	 *     wp plugin install-git https://github.com/afragen/my-plugin
 	 *
-	 *     wp plugin github-updater-install https://bitbucket.org/afragen/my-private-repo --bitbucket-private=true
+	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop
 	 *
-	 *     wp plugin github-updater-install https://github.com/afragen/my-private-repo --field=lks9823evalki
+	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --bitbucket-private=true
+	 *
+	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --field=lks9823evalki
 	 *
 	 * @param array $args       An array of $uri
 	 * @param array $assoc_args Array of optional arguments.
 	 *
-	 * @subcommand github-updater-install
+	 * @subcommand install-git
 	 */
 	public function install_plugin( $args, $assoc_args ) {
 		$cli_config = array();
@@ -117,12 +125,18 @@ class CLI_Integration extends WP_CLI_Command {
 	}
 
 	/**
-	 * Install theme using GitHub Updater.
+	 * Install theme from GitHub, Bitbucket, or GitLab using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
 	 * <uri>
 	 * : URI to the repo being installed
+	 *
+	 * [--branch=<branch_name>]
+	 * : String indicating the branch name to be installed
+	 * ---
+	 * default: master
+	 * ---
 	 *
 	 * [--field=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
@@ -138,16 +152,18 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp theme github-updater-install https://bitbucket.org/afragen/test-bitbucket-child
+	 *     wp theme install-git https://github.com/afragen/my-theme
 	 *
-	 *     wp theme github-updater-install https://bitbucket.org/afragen/my-private-repo --bitbucket-private=true
+	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop
 	 *
-	 *     wp theme github-updater-install https://github.com/afragen/my-private-repo --field=lks9823evalki
+	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --bitbucket-private=true
+	 *
+	 *     wp theme install-git https://github.com/afragen/my-private-theme --field=lks9823evalki
 	 *
 	 * @param array $args       An array of $uri
 	 * @param array $assoc_args Array of optional arguments.
 	 *
-	 * @subcommand github-updater-install
+	 * @subcommand install-git
 	 */
 	public function install_theme( $args, $assoc_args ) {
 		$cli_config = array();
