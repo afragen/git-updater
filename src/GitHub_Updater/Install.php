@@ -37,13 +37,12 @@ class Install extends Base {
 	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
 	 *
-	 * @param string      $type
-	 * @param string      $wp_cli_url
-	 * @param bool|string $wp_cli_private
+	 * @param string $type
+	 * @param array  $wp_cli_config
 	 */
-	public function __construct( $type, $wp_cli_url = '', $wp_cli_private = false ) {
+	public function __construct( $type, $wp_cli_config = array() ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		$this->install( $type, $wp_cli_url, $wp_cli_private );
+		$this->install( $type, $wp_cli_config );
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
 	}
@@ -51,33 +50,35 @@ class Install extends Base {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string      $type
-	 * @param string      $wp_cli_url
-	 * @param bool|string $wp_cli_private
+	 * @param string $type
+	 * @param array  $wp_cli_config
 	 *
 	 * @return bool
 	 */
-	public function install( $type, $wp_cli_url, $wp_cli_private ) {
+	public function install( $type, $wp_cli_config ) {
 		$wp_cli = false;
 
-		if ( ! empty( $wp_cli_url ) ) {
+		if ( ! empty( $wp_cli_config['uri'] ) ) {
 			$wp_cli  = true;
-			$headers = Base::parse_header_uri( $wp_cli_url );
-			$api     = false !== strstr( $headers['host'], '.com' ) ? rtrim( $headers['host'], '.com' ) : rtrim( $headers['host'], '.org' );
+			$headers = Base::parse_header_uri( $wp_cli_config['uri'] );
+			$api     = false !== strstr( $headers['host'], '.com' )
+				? rtrim( $headers['host'], '.com' )
+				: rtrim( $headers['host'], '.org' );
 
-			$_POST['github_updater_repo'] = $wp_cli_url;
-			$_POST['github_updater_api']  = $api;
-			$_POST['option_page']         = 'github_updater_install';
+			$_POST['github_updater_repo']   = $wp_cli_config['uri'];
+			$_POST['github_updater_branch'] = $wp_cli_config['branch'];
+			$_POST['github_updater_api']    = $api;
+			$_POST['option_page']           = 'github_updater_install';
 
 			switch ( $api ) {
 				case 'github':
-					$_POST['github_access_token'] = $wp_cli_private ? $wp_cli_private : null;
+					$_POST['github_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
 					break;
 				case 'bitbucket':
-					$_POST['is_private'] = $wp_cli_private ? '1' : null;
+					$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
 					break;
 				case 'gitlab':
-					$_POST['gitlab_access_token'] = $wp_cli_private ? $wp_cli_private : null;
+					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
 					break;
 			}
 

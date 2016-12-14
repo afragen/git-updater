@@ -99,11 +99,19 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @subcommand github-updater-install
 	 */
 	public function install_plugin( $args, $assoc_args ) {
+		$cli_config = array();
 		list( $uri ) = $args;
-		$private = isset( $assoc_args['field'] ) ? $assoc_args['field'] : $assoc_args['bitbucket-private'];
+		$cli_config['uri'] = $uri;
+		$cli_config['private'] = isset( $assoc_args['field'] )
+			? $assoc_args['field']
+			: $assoc_args['bitbucket-private'];
+		$cli_config['branch'] = isset( $assoc_args['branch'])
+			? $assoc_args['branch']
+			: 'master';
+
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
-		new Install( 'plugin', $uri, $private );
+		new Install( 'plugin', $cli_config );
 
 		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
 	}
@@ -142,11 +150,19 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @subcommand github-updater-install
 	 */
 	public function install_theme( $args, $assoc_args ) {
+		$cli_config = array();
 		list( $uri ) = $args;
-		$private = isset( $assoc_args['field'] ) ? $assoc_args['field'] : $assoc_args['bitbucket-private'];
+		$cli_config['uri'] = $uri;
+		$cli_config['private'] = isset( $assoc_args['field'] )
+			? $assoc_args['field']
+			: $assoc_args['bitbucket-private'];
+		$cli_config['branch'] = isset( $assoc_args['branch'])
+			? $assoc_args['branch']
+			: 'master';
+
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
-		new Install( 'theme', $uri, $private );
+		new Install( 'theme', $cli_config );
 
 		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
 	}
