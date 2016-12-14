@@ -79,7 +79,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * default: master
 	 * ---
 	 *
-	 * [--field=<access_token>]
+	 * [--token=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
 	 *
 	 * [--bitbucket-private=<boolean>]
@@ -99,7 +99,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --bitbucket-private=true
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --field=lks9823evalki
+	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
 	 *
 	 * @param array $args       An array of $uri
 	 * @param array $assoc_args Array of optional arguments.
@@ -110,8 +110,8 @@ class CLI_Integration extends WP_CLI_Command {
 		$cli_config = array();
 		list( $uri ) = $args;
 		$cli_config['uri'] = $uri;
-		$cli_config['private'] = isset( $assoc_args['field'] )
-			? $assoc_args['field']
+		$cli_config['private'] = isset( $assoc_args['token'] )
+			? $assoc_args['token']
 			: $assoc_args['bitbucket-private'];
 		$cli_config['branch'] = isset( $assoc_args['branch'])
 			? $assoc_args['branch']
@@ -138,7 +138,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * default: master
 	 * ---
 	 *
-	 * [--field=<access_token>]
+	 * [--token=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
 	 *
 	 * [--bitbucket-private=<boolean>]
@@ -158,7 +158,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --bitbucket-private=true
 	 *
-	 *     wp theme install-git https://github.com/afragen/my-private-theme --field=lks9823evalki
+	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
 	 *
 	 * @param array $args       An array of $uri
 	 * @param array $assoc_args Array of optional arguments.
@@ -169,8 +169,8 @@ class CLI_Integration extends WP_CLI_Command {
 		$cli_config = array();
 		list( $uri ) = $args;
 		$cli_config['uri'] = $uri;
-		$cli_config['private'] = isset( $assoc_args['field'] )
-			? $assoc_args['field']
+		$cli_config['private'] = isset( $assoc_args['token'] )
+			? $assoc_args['token']
 			: $assoc_args['bitbucket-private'];
 		$cli_config['branch'] = isset( $assoc_args['branch'])
 			? $assoc_args['branch']
