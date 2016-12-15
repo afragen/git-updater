@@ -113,32 +113,12 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @subcommand install-git
 	 */
 	public function install_plugin( $args, $assoc_args ) {
-		$cli_config = array();
 		list( $uri ) = $args;
-		$cli_config['uri']     = $uri;
-		$cli_config['private'] = isset( $assoc_args['token'] )
-			? $assoc_args['token']
-			: $assoc_args['bitbucket-private'];
-		$cli_config['branch']  = isset( $assoc_args['branch'] )
-			? $assoc_args['branch']
-			: 'master';
-
-		switch ( $assoc_args ) {
-			case isset( $assoc_args['github'] ):
-				$cli_config['git'] = 'github';
-				break;
-			case isset( $assoc_args['bitbucket'] ):
-				$cli_config['git'] = 'bitbucket';
-				break;
-			case isset( $assoc_args['gitlab'] ):
-				$cli_config['git'] = 'gitlab';
-				break;
-		}
+		$cli_config = $this->process_args( $uri, $assoc_args );
+		new Install( 'plugin', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
-		new Install( 'plugin', $cli_config );
-
 		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
 	}
 
@@ -190,8 +170,25 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @subcommand install-git
 	 */
 	public function install_theme( $args, $assoc_args ) {
-		$cli_config = array();
 		list( $uri ) = $args;
+		$cli_config = $this->process_args( $uri, $assoc_args );
+		new Install( 'theme', $cli_config );
+
+		$headers = parse_url( $uri, PHP_URL_PATH );
+		$slug    = basename( $headers );
+		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
+	}
+
+	/**
+	 * Process WP-CLI config data.
+	 *
+	 * @param string $uri
+	 * @param array  $assoc_args
+	 *
+	 * @return array $cli_config
+	 */
+	private function process_args( $uri, $assoc_args ) {
+		$cli_config            = array();
 		$cli_config['uri']     = $uri;
 		$cli_config['private'] = isset( $assoc_args['token'] )
 			? $assoc_args['token']
@@ -212,11 +209,7 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 		}
 
-		$headers = parse_url( $uri, PHP_URL_PATH );
-		$slug    = basename( $headers );
-		new Install( 'theme', $cli_config );
-
-		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
+		return $cli_config;
 	}
 
 }
