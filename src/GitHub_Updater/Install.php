@@ -65,6 +65,8 @@ class Install extends Base {
 				? rtrim( $headers['host'], '.com' )
 				: rtrim( $headers['host'], '.org' );
 
+			$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
+
 			$_POST['github_updater_repo']   = $wp_cli_config['uri'];
 			$_POST['github_updater_branch'] = $wp_cli_config['branch'];
 			$_POST['github_updater_api']    = $api;

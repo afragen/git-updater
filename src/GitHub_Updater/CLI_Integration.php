@@ -82,22 +82,28 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--token=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
 	 *
-	 * [--bitbucket-private=<boolean>]
-	 * : Boolean indicating private Bitbucket repository
-	 * ---
-	 * default: false
-	 * options:
-	 *   - true
-	 *   - false
-	 * ---
+	 * [--bitbucket-private]
+	 * : Indicates a private Bitbucket repository
+	 *
+	 * [--github]
+	 * : Optional to denote a GitHub repository
+	 * Required when installing from a self-hosted GitHub installation
+	 *
+	 * [--bitbucket]
+	 * : Optional switch to denote a Bitbucket repository
+	 * Required when installing from a self-hosted Bitbucket installation
+	 *
+	 * [--gitlab]
+	 * : Optional switch to denote a GitLab repository
+	 * Required when installing from a self-hosted GitLab installation
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-plugin
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop
+	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop --github
 	 *
-	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --bitbucket-private=true
+	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --bitbucket-private
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
 	 *
@@ -109,13 +115,25 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_plugin( $args, $assoc_args ) {
 		$cli_config = array();
 		list( $uri ) = $args;
-		$cli_config['uri'] = $uri;
+		$cli_config['uri']     = $uri;
 		$cli_config['private'] = isset( $assoc_args['token'] )
 			? $assoc_args['token']
 			: $assoc_args['bitbucket-private'];
-		$cli_config['branch'] = isset( $assoc_args['branch'])
+		$cli_config['branch']  = isset( $assoc_args['branch'] )
 			? $assoc_args['branch']
 			: 'master';
+
+		switch ( $assoc_args ) {
+			case isset( $assoc_args['github'] ):
+				$cli_config['git'] = 'github';
+				break;
+			case isset( $assoc_args['bitbucket'] ):
+				$cli_config['git'] = 'bitbucket';
+				break;
+			case isset( $assoc_args['gitlab'] ):
+				$cli_config['git'] = 'gitlab';
+				break;
+		}
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
@@ -141,22 +159,28 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--token=<access_token>]
 	 * : GitHub or GitLab access token if not already saved
 	 *
-	 * [--bitbucket-private=<boolean>]
-	 * : Boolean indicating private Bitbucket repository
-	 * ---
-	 * default: false
-	 * options:
-	 *   - true
-	 *   - false
-	 * ---
+	 * [--bitbucket-private]
+	 * : Indicates a private Bitbucket repository
+	 *
+	 * [--github]
+	 * : Optional to denote a GitHub repository
+	 * Required when installing from a self-hosted GitHub installation
+	 *
+	 * [--bitbucket]
+	 * : Optional switch to denote a Bitbucket repository
+	 * Required when installing from a self-hosted Bitbucket installation
+	 *
+	 * [--gitlab]
+	 * : Optional switch to denote a GitLab repository
+	 * Required when installing from a self-hosted GitLab installation
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-theme
 	 *
-	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop
+	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop --bitbucket
 	 *
-	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --bitbucket-private=true
+	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --bitbucket-private
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
 	 *
@@ -168,13 +192,25 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_theme( $args, $assoc_args ) {
 		$cli_config = array();
 		list( $uri ) = $args;
-		$cli_config['uri'] = $uri;
+		$cli_config['uri']     = $uri;
 		$cli_config['private'] = isset( $assoc_args['token'] )
 			? $assoc_args['token']
 			: $assoc_args['bitbucket-private'];
-		$cli_config['branch'] = isset( $assoc_args['branch'])
+		$cli_config['branch']  = isset( $assoc_args['branch'] )
 			? $assoc_args['branch']
 			: 'master';
+
+		switch ( $assoc_args ) {
+			case isset( $assoc_args['github'] ):
+				$cli_config['git'] = 'github';
+				break;
+			case isset( $assoc_args['bitbucket'] ):
+				$cli_config['git'] = 'bitbucket';
+				break;
+			case isset( $assoc_args['gitlab'] ):
+				$cli_config['git'] = 'gitlab';
+				break;
+		}
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
