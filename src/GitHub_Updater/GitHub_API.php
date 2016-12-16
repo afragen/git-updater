@@ -204,7 +204,7 @@ class GitHub_API extends API {
 		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 		$response   = ! isset( $response->items ) ? $response : false;
 		$repos      = isset( $this->response[ $this->type->owner ] ) ? $this->response[ $this->type->owner ] : false;
-		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
+		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner . '+fork:true';
 
 		if ( ! $response ) {
 			$response = $this->api( '/search/repositories' . $meta_query );
