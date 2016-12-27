@@ -344,11 +344,11 @@ abstract class API extends Base {
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug );
+			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug . '.json' );
 			if ( is_wp_error( $response ) ) {
 				return false;
 			}
-			$wp_repo_body = maybe_unserialize( $response['body'] );
+			$wp_repo_body = json_decode( $response['body'] );
 			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_transient( 'dot_org', $response );
