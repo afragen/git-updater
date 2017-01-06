@@ -507,6 +507,12 @@ class GitLab_API extends API {
 			self::$method = 'projects';
 			$response     = $this->api( '/projects?per_page=100' );
 
+			if ( empty( $response ) ) {
+				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
+
+				return $id;
+			}
+
 			foreach ( (array) $response as $project ) {
 				if ( $this->type->repo === $project->path ) {
 					$id = $project->id;
@@ -517,11 +523,6 @@ class GitLab_API extends API {
 				}
 			}
 
-			if ( empty( $response ) ) {
-				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
-
-				return $id;
-			}
 		}
 
 		return $response;
