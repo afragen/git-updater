@@ -217,7 +217,7 @@ class CLI_Integration extends WP_CLI_Command {
 /**
  * Use custom installer skins to display error messages.
  */
-require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skins.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
