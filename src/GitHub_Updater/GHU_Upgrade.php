@@ -44,8 +44,6 @@ class GHU_Upgrade extends Base {
 
 		switch ( $db_version ) {
 			case 6000:
-				$this->upgrade_6000();
-				break;
 			case 6100:
 				$this->upgrade_6000();
 				break;
