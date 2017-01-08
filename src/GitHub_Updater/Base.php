@@ -671,6 +671,7 @@ class Base {
 		global $wp_filesystem;
 
 		$wp_filesystem->delete( $result['source'], true );
+		remove_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ) );
 
 		return $result;
 	}
@@ -1405,6 +1406,7 @@ class Base {
 	protected function is_wp_cli() {
 		return ( defined( 'WP_CLI' ) && WP_CLI );
 	}
+
 	/**
 	 * Is this a private repo?
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
