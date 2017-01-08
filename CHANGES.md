@@ -5,6 +5,7 @@
 * fixed PHP notice by allowing `GitHub_API` to pull repo meta info from forks [#512](https://github.com/afragen/github-updater/issues/512) thanks @egifford
 * change `API::get_dot_org_data` to use JSON response to avoid PHP notices
 * refactored `GitHub_API::get_repo_meta()` for simplification
+* moved some repo renaming to their own methods from `Base::upgrader_source_selection()` to `Base::fix_misnamed_directory()`, `Base::extended_naming()`, and `Base::fix_gitlab_release_asset_directory()`
 
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine

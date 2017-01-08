@@ -588,14 +588,32 @@ class Base {
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
-		/*
-		 * Directory is misnamed to start.
-		 * May cause deactivation.
-		 */
+		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
+		$new_source = $this->extended_naming( $new_source, $remote_source, $upgrader_object, $repo );
+		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
+
+		$wp_filesystem->move( $source, $new_source );
+
+		return trailingslashit( $new_source );
+	}
+
+	/**
+	 * Correctly rename an initially misnamed directory.
+	 * This usually occurs when initial installation not using GitHub Updater.
+	 * May cause plugin/theme deactivation.
+	 *
+	 * @param string $new_source
+	 * @param string $remote_source
+	 * @param object $upgrader_object
+	 * @param string $slug
+	 *
+	 * @return string $new_source
+	 */
+	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
 		     ! isset( self::$options['github_updater_install_repo'] )
 		) {
-			if ( $upgrader instanceof \Plugin_Upgrader ) {
+			if ( $upgrader_object instanceof Plugin ) {
 				foreach ( $upgrader_object->config as $plugin ) {
 					if ( $slug === dirname( $plugin->slug ) ) {
 						$slug       = $plugin->repo;
@@ -604,7 +622,7 @@ class Base {
 					}
 				}
 			}
-			if ( $upgrader instanceof \Theme_Upgrader ) {
+			if ( $upgrader_object instanceof Theme ) {
 				foreach ( $upgrader_object->config as $theme ) {
 					if ( $slug === $theme->repo ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
@@ -614,20 +632,21 @@ class Base {
 			}
 		}
 
-		/*
-		 * Revert extended naming if previously present.
-		 */
-		if ( $upgrader_object instanceof Plugin &&
-		     ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) || ! GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     $slug !== $repo['repo']
-		) {
-			$new_source = trailingslashit( $remote_source ) . $repo['repo'];
-		}
+		return $new_source;
+	}
 
-		/*
-		 * Extended naming.
-		 * Only for plugins and not for 'master' === branch && .org hosted.
-		 */
+	/**
+	 * Extended naming.
+	 * Only for plugins and not for 'master' === branch && .org hosted.
+	 *
+	 * @param string $new_source
+	 * @param string $remote_source
+	 * @param object $upgrader_object
+	 * @param array  $repo
+	 *
+	 * @return string $new_source
+	 */
+	private function extended_naming( $new_source, $remote_source, $upgrader_object, $repo ) {
 		if ( $upgrader_object instanceof Plugin &&
 		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
 		     ( ( isset( $upgrader_object->config[ $repo['repo'] ] ) &&
@@ -641,10 +660,21 @@ class Base {
 			);
 		}
 
-		/*
-		 * Renaming if GitLab Release Asset.
-		 * It has a different download directory structure.
-		 */
+		return $new_source;
+	}
+
+	/**
+	 * Renaming if using a GitLab Release Asset.
+	 * It has a different download directory structure.
+	 *
+	 * @param string $new_source
+	 * @param string $remote_source
+	 * @param object $upgrader_object
+	 * @param string $slug
+	 *
+	 * @return string $new_source
+	 */
+	private function fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		if ( ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
 		       $upgrader_object->config[ $slug ]->release_asset ) &&
 		     ! empty( $upgrader_object->config[ $slug ]->ci_job )
@@ -653,9 +683,7 @@ class Base {
 			add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
 		}
 
-		$wp_filesystem->move( $source, $new_source );
-
-		return trailingslashit( $new_source );
+		return $new_source;
 	}
 
 	/**
