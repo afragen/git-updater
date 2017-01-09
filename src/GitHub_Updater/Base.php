@@ -143,7 +143,7 @@ class Base {
 
 		$this->load_hooks();
 
-		if ( $this->is_wp_cli() ) {
+		if ( self::is_wp_cli() ) {
 			include_once __DIR__ . '/CLI.php';
 			include_once __DIR__ . '/CLI_Integration.php';
 		}
@@ -466,7 +466,7 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $this->repo_api->get_remote_info( $file ) ) {
-			if ( ! $this->is_wp_cli() ) {
+			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 					$this->repo_api->get_repo_meta();
 					$changelog = $this->get_changelog_filename( $repo->type );
@@ -1431,7 +1431,7 @@ class Base {
 	 *
 	 * @return bool
 	 */
-	protected function is_wp_cli() {
+	protected static function is_wp_cli() {
 		return ( defined( 'WP_CLI' ) && WP_CLI );
 	}
 
@@ -1445,7 +1445,7 @@ class Base {
 	 * @return bool
 	 */
 	protected function is_private( $repo ) {
-		if ( ! $this->is_doing_ajax() && isset( $repo->remote_version ) ) {
+		if ( ! self::is_doing_ajax() && isset( $repo->remote_version ) ) {
 			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
 		}
 	}
