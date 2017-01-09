@@ -6,9 +6,11 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
  */
 
 namespace Fragen\GitHub_Updater;
+
 use WordPressdotorg\Plugin_Directory\Readme\Parser as Parser;
 use Parsedown;
 
@@ -75,12 +77,13 @@ class Readme_Parser extends Parser {
 
 	/**
 	 * Makes generation of short description PHP 5.3 compliant.
-	 * Original requires PHP 5.4 or greater.
+	 * Original requires PHP 5.4 for array dereference.
 	 *
 	 * @return string $description[0]
 	 */
 	protected function short_description_53() {
 		$description = array_filter( explode( "\n", $this->sections['description'] ) );
+
 		return $description[0];
 	}
 
