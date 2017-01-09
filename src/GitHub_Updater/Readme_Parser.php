@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 use WordPressdotorg\Plugin_Directory\Readme\Parser as Parser;
+use Parsedown;
 
 /*
  * Exit if called directly.
@@ -45,7 +46,7 @@ class Readme_Parser extends Parser {
 		static $markdown = null;
 
 		if ( is_null( $markdown ) ) {
-			$markdown = new \Parsedown();
+			$markdown = new Parsedown();
 		}
 
 		return $markdown->text( $text );
