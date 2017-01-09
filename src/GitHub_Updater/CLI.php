@@ -66,9 +66,9 @@ class CLI extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp github-updater reset_api_key
+	 *     wp github-updater reset-api-key
 	 *
-	 * @subcommand reset_api_key
+	 * @subcommand reset-api-key
 	 */
 	public function reset_api_key() {
 		delete_site_option( 'github_updater_api_key' );
