@@ -519,23 +519,6 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Parse API response and return array of owner's repos.
-	 *
-	 * @param array $response Response from API call.
-	 *
-	 * @return array $arr Array of owner's repos.
-	 */
-	private function parse_repos_response( $response ) {
-		$arr = array();
-
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr[] = $e->name;
-		} );
-
-		return $arr;
-	}
-
-	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
 	 * @param object $response Response from API call.
