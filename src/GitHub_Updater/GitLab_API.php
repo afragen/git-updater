@@ -567,7 +567,6 @@ class GitLab_API extends API {
 			$arr['watchers']     = 0;
 			$arr['forks']        = $e->forks_count;
 			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
-			$arr['score']        = 0;
 		} );
 
 		return $arr;

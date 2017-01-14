@@ -512,7 +512,6 @@ class GitHub_API extends API {
 			$arr['watchers']     = $e->watchers;
 			$arr['forks']        = $e->forks;
 			$arr['open_issues']  = $e->open_issues;
-			$arr['score']        = $e->score;
 		} );
 
 		return $arr;

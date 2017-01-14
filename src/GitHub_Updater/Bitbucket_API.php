@@ -531,7 +531,6 @@ class Bitbucket_API extends API {
 			$arr['watchers']     = 0;
 			$arr['forks']        = 0;
 			$arr['open_issues']  = 0;
-			$arr['score']        = 0;
 		} );
 
 		return $arr;

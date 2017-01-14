@@ -422,7 +422,6 @@ class Base {
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
-		$this->$type->score                = 0;
 		$this->$type->requires_wp_version  = '4.0';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
@@ -1087,9 +1086,8 @@ class Base {
 		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
 		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
 		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
-		$score       = empty( $repo_meta['score'] ) ? $this->type->score : $repo_meta['score']; //what is this anyway?
 
-		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues + $score );
+		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
 
 		if ( 100 < $rating ) {
 			return 100;
