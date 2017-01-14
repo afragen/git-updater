@@ -201,25 +201,10 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
-		$response   = ! isset( $response->items ) ? $response : false;
-		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner . '+fork:true';
+		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/search/repositories' . $meta_query );
-			$response = ! empty( $response->items[0] ) ? $response->items[0] : false;
-
-			if ( ! $response ) {
-				$repos = $this->api( '/users/' . $this->type->owner . '/repos' );
-				$repos = ! $repos ? array() : $repos;
-
-				foreach ( $repos as $repo ) {
-					if ( $this->type->repo === $repo->name ) {
-						$response = $repo;
-						break;
-					}
-				}
-			}
+			$response = $this->api( '/repos/' . $this->type->owner . '/' . $this->type->repo );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
