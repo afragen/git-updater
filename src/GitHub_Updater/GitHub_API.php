@@ -204,7 +204,7 @@ class GitHub_API extends API {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/' . $this->type->owner . '/' . $this->type->repo );
+			$response = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
