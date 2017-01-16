@@ -195,6 +195,8 @@ abstract class API extends Base {
 			'repo'  => $this->type->repo,
 		);
 
+		$segments['branch'] = empty( $this->type->branch ) ? 'master' : $this->type->branch;
+
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
 		}

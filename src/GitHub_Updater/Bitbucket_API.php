@@ -76,10 +76,7 @@ class Bitbucket_API extends API {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			if ( empty( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $file );
 
 			if ( $response ) {
 				$contents = $response->data;
@@ -156,10 +153,7 @@ class Bitbucket_API extends API {
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $changes );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -212,10 +206,7 @@ class Bitbucket_API extends API {
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . 'readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
