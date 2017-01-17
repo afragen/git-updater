@@ -7,6 +7,7 @@
 * moved some repo renaming to their own methods from `Base::upgrader_source_selection()` to `Base::fix_misnamed_directory()`, `Base::extended_naming()`, and `Base::fix_gitlab_release_asset_directory()`
 * moved a couple `class-parser.php` mods to separate functions in `class Readme_Parser`
 * refactored `GitHub_API::get_repo_meta()` to use more efficient API call, gets forks also, thanks @egifford
+* introduce some variability to transient expiration per plugin, check against dot org weekly
 
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine

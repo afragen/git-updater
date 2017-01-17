@@ -33,7 +33,6 @@ class GitHub_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		parent::$hours  = 12;
 		$this->type     = $type;
 		$this->response = $this->get_transient();
 	}

@@ -436,6 +436,7 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
+		self::$hours    = 6 + rand( 0, 12 );
 		$this->repo_api = null;
 		$file           = 'style.css';
 		if ( false !== stristr( $repo->type, 'plugin' ) ) {
