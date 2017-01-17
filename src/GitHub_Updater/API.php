@@ -246,16 +246,6 @@ abstract class API extends Base {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		$transient = 'ghu-' . md5( $repo );
 
-		/**
-		 * Filter to allow advanced caching plugins to control retrieval of transients.
-		 *
-		 * @since 6.0.0
-		 * @return bool
-		 */
-		if ( false === apply_filters( 'ghu_use_remote_call_transients', true ) ) {
-			return false;
-		}
-
 		return get_site_transient( $transient );
 	}
 
@@ -272,19 +262,6 @@ abstract class API extends Base {
 		$transient             = 'ghu-' . md5( $repo );
 		$this->response[ $id ] = $response;
 
-		/**
-		 * Filter to allow advanced caching plugins to control transient saving.
-		 *
-		 * @since 6.0.0
-		 *
-		 * @param string $id       Transient ID.
-		 * @param mixed  $response Data to be stored.
-		 *
-		 * @return bool
-		 */
-		if ( false === apply_filters( 'ghu_use_remote_call_transients', true, $id, $response ) ) {
-			return false;
-		}
 		set_site_transient( $transient, $this->response, ( self::$hours * HOUR_IN_SECONDS ) );
 
 		return true;
