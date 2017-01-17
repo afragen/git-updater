@@ -237,34 +237,39 @@ abstract class API extends Base {
 	}
 
 	/**
-	 * Returns site_transient and checks/stores transient id in array.
+	 * Returns repo cached data.
 	 *
-	 * @return array|bool
+	 * @return array|bool false for expired cache
 	 */
-	protected function get_transient() {
+	protected function get_repo_cache() {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
-		$transient = 'ghu-' . md5( $repo );
+		$cache_key = 'ghu-' . md5( $repo );
+		$cache     = get_site_option( $cache_key );
 
-		return get_site_transient( $transient );
+		if ( empty( $cache['timeout'] ) || current_time( 'timestamp' ) > $cache['timeout'] ) {
+			return false;
+		}
+
+		return $cache;
 	}
 
 	/**
-	 * Used to set_site_transient and checks/stores transient id in array.
+	 * Sets repo data for cache in site option.
 	 *
-	 * @param string $id       Transient ID.
+	 * @param string $id       Data Identifier.
 	 * @param mixed  $response Data to be stored.
 	 *
 	 * @return bool
 	 */
-	protected function set_transient( $id, $response ) {
-		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
-		$transient             = 'ghu-' . md5( $repo );
-		$this->response[ $id ] = $response;
-		$expiration            = 'dot_org' === $id
-			? self::$hours * DAY_IN_SECONDS
-			: self::$hours * HOUR_IN_SECONDS;
+	protected function set_repo_cache( $id, $response ) {
+		$repo      = isset( $this->type ) ? $this->type->repo : 'ghu';
+		$cache_key = 'ghu-' . md5( $repo );
+		$timeout   = '+' . self::$hours . ' hours';
 
-		set_site_transient( $transient, $this->response, $expiration );
+		$this->response['timeout'] = strtotime( $timeout, current_time( 'timestamp' ) );
+		$this->response[ $id ]     = $response;
+
+		update_site_option( $cache_key, $this->response );
 
 		return true;
 	}
@@ -332,7 +337,7 @@ abstract class API extends Base {
 			$wp_repo_body = json_decode( $response['body'] );
 			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
 
-			$this->set_transient( 'dot_org', $response );
+			$this->set_repo_cache( 'dot_org', $response );
 		}
 		$response = ( 'in dot org' === $response ) ? true : false;
 

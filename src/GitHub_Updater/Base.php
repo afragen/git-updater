@@ -138,7 +138,7 @@ class Base {
 	 */
 	public function __construct() {
 		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
-			$this->delete_all_transients();
+			$this->delete_all_cached_data();
 		}
 
 		$this->load_hooks();
@@ -922,18 +922,18 @@ class Base {
 	}
 
 	/**
-	 * Delete all `_ghu-` transients from database table.
+	 * Delete all `ghu-` prefixed data from options table.
 	 *
 	 * @return bool
 	 */
-	public function delete_all_transients() {
+	public function delete_all_cached_data() {
 		global $wpdb;
 
 		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		$wpdb->query( $wpdb->prepare( $delete_string, array( '%_ghu-%' ) ) );
+		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
 
 		return true;
 	}

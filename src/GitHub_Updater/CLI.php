@@ -54,7 +54,7 @@ class CLI extends WP_CLI_Command {
 	public function cache( $args ) {
 		list( $action ) = $args;
 		if ( 'delete' === $action ) {
-			$this->base->delete_all_transients();
+			$this->base->delete_all_cached_data();
 			WP_CLI::success( sprintf( esc_html__( 'GitHub Updater cache has been cleared.', 'github-updater' ) ) );
 		} else {
 			WP_CLI::error( sprintf( esc_html__( 'Incorrect command syntax, see %s for proper syntax.', 'github-updater' ), '`wp help github-updater cache`' ) );

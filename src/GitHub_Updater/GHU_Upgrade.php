@@ -60,7 +60,7 @@ class GHU_Upgrade extends Base {
 	 */
 	private function upgrade_6000() {
 		wp_cache_flush();
-		$this->delete_all_transients();
+		$this->delete_all_cached_data();
 	}
 
 }

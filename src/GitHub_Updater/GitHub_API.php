@@ -34,7 +34,7 @@ class GitHub_API extends API {
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
-		$this->response = $this->get_transient();
+		$this->response = $this->get_repo_cache();
 	}
 
 	/**
@@ -56,7 +56,7 @@ class GitHub_API extends API {
 			if ( $response ) {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_transient( $file, $response );
+				$this->set_repo_cache( $file, $response );
 			}
 		}
 
@@ -89,7 +89,7 @@ class GitHub_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_tag_response( $response );
-				$this->set_transient( 'tags', $response );
+				$this->set_repo_cache( 'tags', $response );
 			}
 		}
 
@@ -120,7 +120,7 @@ class GitHub_API extends API {
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			} else {
 				$response = false;
 			}
@@ -131,7 +131,7 @@ class GitHub_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			}
 		}
 
@@ -182,7 +182,7 @@ class GitHub_API extends API {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
 			$response = $parser->parse_data();
-			$this->set_transient( 'readme', $response );
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -207,7 +207,7 @@ class GitHub_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
-				$this->set_transient( 'meta', $response );
+				$this->set_repo_cache( 'meta', $response );
 			}
 		}
 
@@ -242,7 +242,7 @@ class GitHub_API extends API {
 					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
 				}
 				$this->type->branches = $branches;
-				$this->set_transient( 'branches', $branches );
+				$this->set_repo_cache( 'branches', $branches );
 
 				return true;
 			}
@@ -358,7 +358,7 @@ class GitHub_API extends API {
 					$response->{$locale->language}->version = $this->type->remote_version;
 				}
 
-				$this->set_transient( 'languages', $response );
+				$this->set_repo_cache( 'languages', $response );
 			}
 		}
 		$this->type->language_packs = $response;
@@ -566,7 +566,7 @@ class GitHub_API extends API {
 
 				$response = array();
 				$response = $download_link[0];
-				$this->set_transient( 'release_asset_url', $response );
+				$this->set_repo_cache( 'release_asset_url', $response );
 			}
 		}
 
