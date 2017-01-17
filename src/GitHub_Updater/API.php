@@ -191,11 +191,10 @@ abstract class API extends Base {
 	private function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
-			'owner' => $this->type->owner,
-			'repo'  => $this->type->repo,
+			'owner'  => $this->type->owner,
+			'repo'   => $this->type->repo,
+			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
 		);
-
-		$segments['branch'] = empty( $this->type->branch ) ? 'master' : $this->type->branch;
 
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
