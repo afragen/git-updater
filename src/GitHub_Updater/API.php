@@ -260,7 +260,9 @@ abstract class API extends Base {
 		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
 		$transient             = 'ghu-' . md5( $repo );
 		$this->response[ $id ] = $response;
-		$expiration            = 'dot_org' === $id ? self::$hours * DAY_IN_SECONDS : self::$hours * HOUR_IN_SECONDS;
+		$expiration            = 'dot_org' === $id
+			? self::$hours * DAY_IN_SECONDS
+			: self::$hours * HOUR_IN_SECONDS;
 
 		set_site_transient( $transient, $this->response, $expiration );
 
