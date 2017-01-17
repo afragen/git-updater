@@ -197,7 +197,7 @@ abstract class API extends Base {
 		);
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
+			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
 		switch ( $type['repo'] ) {
