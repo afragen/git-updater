@@ -137,53 +137,6 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Return listing of available updates.
-	 *
-	 * @param $response
-	 *
-	 * @return mixed
-	 */
-	public function show_updates( $response ) {
-		$themes       = get_site_transient( 'update_themes' );
-		$plugins      = get_site_transient( 'update_plugins' );
-		$show_plugins = array();
-		$show_themes  = array();
-
-		/*
-		 * Ensure update data is up to date.
-		 */
-		$this->forced_meta_update_remote_management();
-		$themes  = Theme::instance()->pre_set_site_transient_update_themes( $themes );
-		$plugins = Plugin::instance()->pre_set_site_transient_update_plugins( $plugins );
-
-		foreach ( $plugins->response as $plugin ) {
-			$plugin->plugin = $plugin->slug;
-			unset( $plugin->slug );
-			unset( $plugin->url );
-			unset( $plugin->package );
-
-			if ( isset( $plugin->id, $plugin->tested, $plugin->compatibility ) ) {
-				unset( $plugin->id );
-				unset( $plugin->tested );
-				unset( $plugin->compatibility );
-			}
-			$show_plugins[] = $plugin;
-		}
-
-		foreach ( $themes->response as $theme ) {
-			unset( $theme['url'] );
-			unset( $theme['package'] );
-			$show_themes[] = $theme;
-		}
-
-		$response['messages'] = 'Available Updates';
-		$response['plugins']  = $show_plugins;
-		$response['themes']   = $show_themes;
-
-		return $response;
-	}
-
-	/**
 	 * Is there an error?
 	 */
 	public function is_error() {
