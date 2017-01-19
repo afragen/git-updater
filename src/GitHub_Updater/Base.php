@@ -1296,6 +1296,14 @@ class Base {
 		if ( isset( $_GET['plugin'] ) && 'upgrade-plugin' === $_GET['action'] ) {
 			$slug = dirname( $_GET['plugin'] );
 			$type = 'plugin';
+
+			// For extended naming
+			foreach ( $this->config as $repo ) {
+				if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
+					$slug = $repo->repo;
+					break;
+				}
+			}
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
