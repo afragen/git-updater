@@ -262,7 +262,7 @@ abstract class API extends Base {
 	 * @return bool
 	 */
 	protected function set_repo_cache( $id, $response ) {
-		$repo      = isset( $this->type ) ? $this->type->repo : 'ghu';
+		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = '+' . self::$hours . ' hours';
 
