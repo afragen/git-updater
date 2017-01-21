@@ -160,7 +160,6 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
-			$show_updates      = false;
 			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
 			if ( defined( 'JSON_PRETTY_PRINT' ) ) {
 				$json_encode_flags = JSON_PRETTY_PRINT;
@@ -199,8 +198,6 @@ class Rest_Update extends Base {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
-			} elseif ( isset( $_REQUEST['updates'] ) ) {
-				$show_updates = true;
 			} else {
 				throw new \Exception( 'No plugin or theme specified for update.' );
 			}
@@ -220,10 +217,6 @@ class Rest_Update extends Base {
 		$response = array(
 			'messages' => $this->get_messages(),
 		);
-
-		if ( $show_updates ) {
-			$response = $this->show_updates( $response );
-		}
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
