@@ -245,7 +245,7 @@ class Rest_Update extends Base {
 
 		// GitHub
 		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
-		     'release' == $_SERVER['HTTP_X_GITHUB_EVENT']
+		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
 		) {
 			return $this->parse_github_webhook( $request_data );
 		}
@@ -273,14 +273,12 @@ class Rest_Update extends Base {
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_data ) {
-		$response = array();
-		if ( array_key_exists( 'ref', $request_data ) ) {
-			$response['hash']   = $request_data['after'];
-			$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
-		}
-		if ( array_key_exists( 'action', $request_data ) ) {
-			$response['hash']   = $request_data['release']['tag_name'];
-			$response['branch'] = $request_data['release']['target_commitish'];
+		$response           = array();
+		$response['hash']   = $request_data['after'];
+		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+		if ( array_key_exists( 'ref_type', $request_data ) && 'tag' === $request_data['ref_type'] ) {
+			$response['hash']   = $request_data['release']['ref'];
+			$response['branch'] = $request_data['release']['master_branch'];
 		}
 
 		return $response;
