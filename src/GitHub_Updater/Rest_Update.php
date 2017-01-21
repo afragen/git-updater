@@ -239,6 +239,19 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents( 'php://input' );
 		$request_data = json_decode( $request_body, true );
 
+		//GitHub API create event
+		if ( empty( $request_data ) && 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+			$request_data = urldecode( $request_body );
+			if ( ( $pos = strpos( $request_data, '{' ) ) !== false ) {
+				$request_data = substr( $request_data, $pos );
+			}
+
+			if ( ( $pos = strpos( $request_data, '}}' ) ) !== false ) {
+				$request_data = substr( $request_data, 0, $pos ) . '}}';
+			}
+			$request_data = json_decode( $request_data, true );
+		}
+
 		if ( empty( $request_data ) ) {
 			return false;
 		}
@@ -274,12 +287,12 @@ class Rest_Update extends Base {
 	 */
 	private function parse_github_webhook( $request_data ) {
 		$response           = array();
-		$response['hash']   = $request_data['after'];
-		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
-		if ( array_key_exists( 'ref_type', $request_data ) && 'tag' === $request_data['ref_type'] ) {
-			$response['hash']   = $request_data['ref'];
-			$response['branch'] = $request_data['master_branch'];
-		}
+		$response['hash']   = isset( $request_data['ref_type'] )
+			? $request_data['ref']
+			: $request_data['after'];
+		$response['branch'] = isset( $request_data['ref_type'] )
+			? $request_data['master_branch']
+			: array_pop( explode( '/', $request_data['ref'] ) );
 
 		return $response;
 	}
