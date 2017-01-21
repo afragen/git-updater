@@ -277,8 +277,8 @@ class Rest_Update extends Base {
 		$response['hash']   = $request_data['after'];
 		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
 		if ( array_key_exists( 'ref_type', $request_data ) && 'tag' === $request_data['ref_type'] ) {
-			$response['hash']   = $request_data['release']['ref'];
-			$response['branch'] = $request_data['release']['master_branch'];
+			$response['hash']   = $request_data['ref'];
+			$response['branch'] = $request_data['master_branch'];
 		}
 
 		return $response;
