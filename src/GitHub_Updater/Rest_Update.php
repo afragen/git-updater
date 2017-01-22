@@ -334,15 +334,10 @@ class Rest_Update extends Base {
 
 		$new = $request_data['push']['changes'][0]['new'];
 
-		// What else could this be? For now, just expect branch.
-		if ( empty( $new ) || 'branch' != $new['type'] ) {
-			//return false;
-		}
-
 		$response            = array();
-		$response['hash']    = $new['target']['hash'];
-		$response['branch']  = $new['name'];
-		$response['payload'] = $request_data;
+		$response['hash']    = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
+		$response['branch']  = 'tag' === $new['type'] ? 'master' : $new['name'];
+		//$response['payload'] = $new;
 
 		return $response;
 	}
