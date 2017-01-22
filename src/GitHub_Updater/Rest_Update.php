@@ -238,7 +238,6 @@ class Rest_Update extends Base {
 	 */
 	private function get_webhook_data() {
 		$request_body = file_get_contents( 'php://input' );
-		$request_data = json_decode( $request_body, true );
 
 		//GitHub API create event
 		if ( empty( $request_data ) && 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
@@ -261,17 +260,19 @@ class Rest_Update extends Base {
 		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
 		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
 		) {
-			return $this->parse_github_webhook( $request_data );
+			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
 		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
-			return $this->parse_bitbucket_webhook( $request_data );
+			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ) {
-			return $this->parse_gitlab_webhook( $request_data );
+		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ||
+		     'Tag Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT']
+		) {
+			return $this->parse_gitlab_webhook( $request_body );
 		}
 
 		return false;
@@ -282,16 +283,18 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return array $response
 	 */
-	private function parse_github_webhook( $request_data ) {
-		$response           = array();
-		$response['hash']   = isset( $request_data['ref_type'] )
+	private function parse_github_webhook( $request_body ) {
+		$response = array();
+		$request_data = json_decode( $request_body, true );
+
+		$response['hash']    = isset( $request_data['ref_type'] )
 			? $request_data['ref']
 			: $request_data['after'];
-		$response['branch'] = isset( $request_data['ref_type'] )
+		$response['branch']  = isset( $request_data['ref_type'] )
 			? $request_data['master_branch']
 			: array_pop( explode( '/', $request_data['ref'] ) );
 		$response['testing'] = $request_data;
@@ -304,14 +307,16 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return array $response
 	 */
-	private function parse_gitlab_webhook( $request_data ) {
-		$response           = array();
-		$response['hash']   = $request_data['after'];
-		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+	private function parse_gitlab_webhook( $request_body ) {
+		$request_data = json_decode( $request_body, true );
+
+		$response            = array();
+		$response['hash']    = $request_data['after'];
+		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
 		$response['testing'] = $request_data;
 
 		return $response;
@@ -325,21 +330,23 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return bool|array $response
 	 */
-	private function parse_bitbucket_webhook( $request_data ) {
+	private function parse_bitbucket_webhook( $request_body ) {
+		$request_data = json_decode( $request_body, true );
+
 		$new = $request_data['push']['changes'][0]['new'];
 
 		// What else could this be? For now, just expect branch.
 		if ( empty( $new ) || 'branch' != $new['type'] ) {
-			return false;
+			//return false;
 		}
 
-		$response           = array();
-		$response['hash']   = $new['target']['hash'];
-		$response['branch'] = $new['name'];
+		$response            = array();
+		$response['hash']    = $new['target']['hash'];
+		$response['branch']  = $new['name'];
 		$response['testing'] = $request_data;
 
 		return $response;
