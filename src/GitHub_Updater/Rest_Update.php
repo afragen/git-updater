@@ -239,23 +239,6 @@ class Rest_Update extends Base {
 	private function get_webhook_data() {
 		$request_body = file_get_contents( 'php://input' );
 
-		//GitHub API create event
-		if ( empty( $request_data ) && 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
-			$request_data = urldecode( $request_body );
-			if ( ( $pos = strpos( $request_data, '{' ) ) !== false ) {
-				$request_data = substr( $request_data, $pos );
-			}
-
-			if ( ( $pos = strpos( $request_data, '}}' ) ) !== false ) {
-				$request_data = substr( $request_data, 0, $pos ) . '}}';
-			}
-			$request_data = json_decode( $request_data, true );
-		}
-
-		if ( empty( $request_data ) ) {
-			return false;
-		}
-
 		// GitHub
 		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
 		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
@@ -289,6 +272,18 @@ class Rest_Update extends Base {
 	 */
 	private function parse_github_webhook( $request_body ) {
 		$response = array();
+
+		if ( 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+			$request_body = urldecode( $request_body );
+			if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+				$request_body = substr( $request_body, $pos );
+			}
+
+			if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+				$request_body = substr( $request_body, 0, $pos ) . '}}';
+			}
+		}
+
 		$request_data = json_decode( $request_body, true );
 
 		$response['hash']    = isset( $request_data['ref_type'] )
