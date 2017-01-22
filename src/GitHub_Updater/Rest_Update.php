@@ -292,7 +292,7 @@ class Rest_Update extends Base {
 		$response['branch']  = isset( $request_data['ref_type'] )
 			? $request_data['master_branch']
 			: array_pop( explode( '/', $request_data['ref'] ) );
-		$response['testing'] = $request_data;
+		$response['request_data'] = $request_data;
 
 		return $response;
 	}
@@ -312,7 +312,7 @@ class Rest_Update extends Base {
 		$response            = array();
 		$response['hash']    = $request_data['after'];
 		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
-		$response['testing'] = $request_data;
+		$response['request_data'] = $request_data;
 
 		return $response;
 	}
@@ -342,7 +342,7 @@ class Rest_Update extends Base {
 		$response            = array();
 		$response['hash']    = $new['target']['hash'];
 		$response['branch']  = $new['name'];
-		$response['testing'] = $request_data;
+		$response['request_data'] = $request_data;
 
 		return $response;
 	}
