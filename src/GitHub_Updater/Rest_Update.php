@@ -283,8 +283,8 @@ class Rest_Update extends Base {
 		}
 
 		$request_data = json_decode( $request_body, true );
-		$response     = array();
 
+		$response           = array();
 		$response['hash']   = isset( $request_data['ref_type'] )
 			? $request_data['ref']
 			: $request_data['after'];
