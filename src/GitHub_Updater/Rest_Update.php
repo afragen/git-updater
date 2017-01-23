@@ -216,7 +216,7 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'testing'  => $webhook_response,
+			'response' => $webhook_response,
 		);
 
 		if ( $this->is_error() ) {
@@ -271,8 +271,6 @@ class Rest_Update extends Base {
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_body ) {
-		$response = array();
-
 		if ( 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			$request_body = urldecode( $request_body );
 			if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
@@ -285,14 +283,16 @@ class Rest_Update extends Base {
 		}
 
 		$request_data = json_decode( $request_body, true );
+		$response     = array();
 
-		$response['hash']    = isset( $request_data['ref_type'] )
+		$response['hash']   = isset( $request_data['ref_type'] )
 			? $request_data['ref']
 			: $request_data['after'];
-		$response['branch']  = isset( $request_data['ref_type'] )
+		$response['branch'] = isset( $request_data['ref_type'] )
 			? $request_data['master_branch']
 			: array_pop( explode( '/', $request_data['ref'] ) );
-		$response['payload'] = $request_data;
+
+		//$response['payload'] = $request_data;
 
 		return $response;
 	}
@@ -309,10 +309,11 @@ class Rest_Update extends Base {
 	private function parse_gitlab_webhook( $request_body ) {
 		$request_data = json_decode( $request_body, true );
 
-		$response            = array();
-		$response['hash']    = $request_data['after'];
-		$response['branch']  = array_pop( explode( '/', $request_data['ref'] ) );
-		$response['payload'] = $request_data;
+		$response           = array();
+		$response['hash']   = $request_data['after'];
+		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+
+		//$response['payload'] = $request_data;
 
 		return $response;
 	}
@@ -334,9 +335,10 @@ class Rest_Update extends Base {
 
 		$new = $request_data['push']['changes'][0]['new'];
 
-		$response            = array();
-		$response['hash']    = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
-		$response['branch']  = 'tag' === $new['type'] ? 'master' : $new['name'];
+		$response           = array();
+		$response['hash']   = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
+		$response['branch'] = 'tag' === $new['type'] ? 'master' : $new['name'];
+
 		//$response['payload'] = $new;
 
 		return $response;
