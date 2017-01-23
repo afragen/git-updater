@@ -10,6 +10,7 @@
 * introduce some variability to transient expiration per plugin
 * switch to storing repo data in options table instead of using transients
 * fixed branch switching with extended naming [#520](https://github.com/afragen/github-updater/issues/520), thanks @joelworsham
+* updated continuous integration via RESTful endpoints to also update based upon a new tag/release of the repo
 
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine
