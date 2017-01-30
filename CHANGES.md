@@ -8,7 +8,7 @@
 * moved a couple `class-parser.php` mods to separate functions in `class Readme_Parser`
 * refactored `GitHub_API::get_repo_meta()` to use more efficient API call, gets forks also, thanks @egifford
 * introduce some variability to transient expiration per plugin
-* switch to storing repo data in options table instead of using transients
+* switch to storing repo data in options table instead of using transients, this should help with object caching which doesn't like transients
 * fixed branch switching with extended naming [#520](https://github.com/afragen/github-updater/issues/520), thanks @joelworsham
 * updated continuous integration via RESTful endpoints to also update based upon a new tag/release of the repo
 
