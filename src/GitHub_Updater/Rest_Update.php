@@ -137,53 +137,6 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Return listing of available updates.
-	 *
-	 * @param $response
-	 *
-	 * @return mixed
-	 */
-	public function show_updates( $response ) {
-		$themes       = get_site_transient( 'update_themes' );
-		$plugins      = get_site_transient( 'update_plugins' );
-		$show_plugins = null;
-		$show_themes  = null;
-
-		/*
-		 * Ensure update data is up to date.
-		 */
-		$this->forced_meta_update_remote_management();
-		$themes  = Theme::instance()->pre_set_site_transient_update_themes( $themes );
-		$plugins = Plugin::instance()->pre_set_site_transient_update_plugins( $plugins );
-
-		foreach ( $plugins->response as $plugin ) {
-			$plugin->plugin = $plugin->slug;
-			unset( $plugin->slug );
-			unset( $plugin->url );
-			unset( $plugin->package );
-
-			if ( isset( $plugin->id, $plugin->tested, $plugin->compatibility ) ) {
-				unset( $plugin->id );
-				unset( $plugin->tested );
-				unset( $plugin->compatibility );
-			}
-			$show_plugins[] = $plugin;
-		}
-
-		foreach ( $themes->response as $theme ) {
-			unset( $theme['url'] );
-			unset( $theme['package'] );
-			$show_themes[] = $theme;
-		}
-
-		$response['messages'] = 'Available Updates';
-		$response['plugins']  = $show_plugins;
-		$response['themes']   = $show_themes;
-
-		return $response;
-	}
-
-	/**
 	 * Is there an error?
 	 */
 	public function is_error() {
@@ -207,7 +160,6 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
-			$show_updates      = false;
 			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
 			if ( defined( 'JSON_PRETTY_PRINT' ) ) {
 				$json_encode_flags = JSON_PRETTY_PRINT;
@@ -246,8 +198,6 @@ class Rest_Update extends Base {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
-			} elseif ( isset( $_REQUEST['updates'] ) ) {
-				$show_updates = true;
 			} else {
 				throw new \Exception( 'No plugin or theme specified for update.' );
 			}
@@ -266,11 +216,8 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
+			'response' => $webhook_response,
 		);
-
-		if ( $show_updates ) {
-			$response = $this->show_updates( $response );
-		}
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
@@ -291,25 +238,24 @@ class Rest_Update extends Base {
 	 */
 	private function get_webhook_data() {
 		$request_body = file_get_contents( 'php://input' );
-		$request_data = json_decode( $request_body, true );
-
-		if ( empty( $request_data ) ) {
-			return false;
-		}
 
 		// GitHub
-		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
-			return $this->parse_github_webhook( $request_data );
+		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
+		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
+		) {
+			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
 		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
-			return $this->parse_bitbucket_webhook( $request_data );
+			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ) {
-			return $this->parse_gitlab_webhook( $request_data );
+		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ||
+		     'Tag Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT']
+		) {
+			return $this->parse_gitlab_webhook( $request_body );
 		}
 
 		return false;
@@ -320,14 +266,33 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return array $response
 	 */
-	private function parse_github_webhook( $request_data ) {
+	private function parse_github_webhook( $request_body ) {
+		if ( 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+			$request_body = urldecode( $request_body );
+			if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+				$request_body = substr( $request_body, $pos );
+			}
+
+			if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+				$request_body = substr( $request_body, 0, $pos ) . '}}';
+			}
+		}
+
+		$request_data = json_decode( $request_body, true );
+
 		$response           = array();
-		$response['hash']   = $request_data['after'];
-		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+		$response['hash']   = isset( $request_data['ref_type'] )
+			? $request_data['ref']
+			: $request_data['after'];
+		$response['branch'] = isset( $request_data['ref_type'] )
+			? $request_data['master_branch']
+			: array_pop( explode( '/', $request_data['ref'] ) );
+
+		//$response['payload'] = $request_data;
 
 		return $response;
 	}
@@ -337,14 +302,18 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return array $response
 	 */
-	private function parse_gitlab_webhook( $request_data ) {
+	private function parse_gitlab_webhook( $request_body ) {
+		$request_data = json_decode( $request_body, true );
+
 		$response           = array();
 		$response['hash']   = $request_data['after'];
 		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+
+		//$response['payload'] = $request_data;
 
 		return $response;
 	}
@@ -357,21 +326,20 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
 	 *
-	 * @param array $request_data
+	 * @param array $request_body
 	 *
 	 * @return bool|array $response
 	 */
-	private function parse_bitbucket_webhook( $request_data ) {
+	private function parse_bitbucket_webhook( $request_body ) {
+		$request_data = json_decode( $request_body, true );
+
 		$new = $request_data['push']['changes'][0]['new'];
 
-		// What else could this be? For now, just expect branch.
-		if ( empty( $new ) || 'branch' != $new['type'] ) {
-			return false;
-		}
-
 		$response           = array();
-		$response['hash']   = $new['target']['hash'];
-		$response['branch'] = $new['name'];
+		$response['hash']   = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
+		$response['branch'] = 'tag' === $new['type'] ? 'master' : $new['name'];
+
+		//$response['payload'] = $new;
 
 		return $response;
 	}

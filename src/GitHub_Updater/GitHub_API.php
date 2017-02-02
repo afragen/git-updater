@@ -33,9 +33,8 @@ class GitHub_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		parent::$hours  = 12;
 		$this->type     = $type;
-		$this->response = $this->get_transient();
+		$this->response = $this->get_repo_cache();
 	}
 
 	/**
@@ -57,7 +56,7 @@ class GitHub_API extends API {
 			if ( $response ) {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_transient( $file, $response );
+				$this->set_repo_cache( $file, $response );
 			}
 		}
 
@@ -90,7 +89,7 @@ class GitHub_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_tag_response( $response );
-				$this->set_transient( 'tags', $response );
+				$this->set_repo_cache( 'tags', $response );
 			}
 		}
 
@@ -121,7 +120,7 @@ class GitHub_API extends API {
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			} else {
 				$response = false;
 			}
@@ -132,7 +131,7 @@ class GitHub_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			}
 		}
 
@@ -183,7 +182,7 @@ class GitHub_API extends API {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
 			$response = $parser->parse_data();
-			$this->set_transient( 'readme', $response );
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -201,33 +200,14 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response   = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
-		$response   = ! isset( $response->items ) ? $response : false;
-		$repos      = isset( $this->response[ $this->type->owner ] ) ? $this->response[ $this->type->owner ] : false;
-		$meta_query = '?q=' . $this->type->repo . '+user:' . $this->type->owner;
+		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/search/repositories' . $meta_query );
-			$response = ! empty( $response->items[0] ) ? $response->items[0] : false;
-
-			if ( ! $repos ) {
-				$repos = $this->api( '/users/' . $this->type->owner . '/repos' );
-				$repos = $this->parse_repos_response( $repos );
-				$this->set_transient( $this->type->owner, $repos );
-			}
-
-			if ( ! $response ) {
-				foreach ( $repos as $repo ) {
-					if ( $this->type->repo === $repo->name ) {
-						$response = $repo;
-						break;
-					}
-				}
-			}
+			$response = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
-				$this->set_transient( 'meta', $response );
+				$this->set_repo_cache( 'meta', $response );
 			}
 		}
 
@@ -262,7 +242,7 @@ class GitHub_API extends API {
 					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
 				}
 				$this->type->branches = $branches;
-				$this->set_transient( 'branches', $branches );
+				$this->set_repo_cache( 'branches', $branches );
 
 				return true;
 			}
@@ -378,7 +358,7 @@ class GitHub_API extends API {
 					$response->{$locale->language}->version = $this->type->remote_version;
 				}
 
-				$this->set_transient( 'languages', $response );
+				$this->set_repo_cache( 'languages', $response );
 			}
 		}
 		$this->type->language_packs = $response;
@@ -466,7 +446,7 @@ class GitHub_API extends API {
 	 * @param $response
 	 * @param $repo
 	 */
-	protected static function ratelimit_reset( $response, $repo ) {
+	public static function ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
@@ -516,24 +496,6 @@ class GitHub_API extends API {
 			$arr['watchers']     = $e->watchers;
 			$arr['forks']        = $e->forks;
 			$arr['open_issues']  = $e->open_issues;
-			$arr['score']        = $e->score;
-		} );
-
-		return $arr;
-	}
-
-	/**
-	 * Parse API response and return array of owner's repos.
-	 *
-	 * @param array $response Response from API call.
-	 *
-	 * @return array $arr Array of owner's repos.
-	 */
-	private function parse_repos_response( $response ) {
-		$arr = array();
-
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr[] = $e->name;
 		} );
 
 		return $arr;
@@ -604,7 +566,7 @@ class GitHub_API extends API {
 
 				$response = array();
 				$response = $download_link[0];
-				$this->set_transient( 'release_asset_url', $response );
+				$this->set_repo_cache( 'release_asset_url', $response );
 			}
 		}
 

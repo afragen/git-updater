@@ -37,11 +37,12 @@ class Install extends Base {
 	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
 	 *
-	 * @param $type
+	 * @param string $type
+	 * @param array  $wp_cli_config
 	 */
-	public function __construct( $type ) {
+	public function __construct( $type, $wp_cli_config = array() ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		$this->install( $type );
+		$this->install( $type, $wp_cli_config );
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
 	}
@@ -50,10 +51,41 @@ class Install extends Base {
 	 * Install remote plugin or theme.
 	 *
 	 * @param string $type
+	 * @param array  $wp_cli_config
 	 *
 	 * @return bool
 	 */
-	public function install( $type ) {
+	public function install( $type, $wp_cli_config ) {
+		$wp_cli = false;
+
+		if ( ! empty( $wp_cli_config['uri'] ) ) {
+			$wp_cli  = true;
+			$headers = Base::parse_header_uri( $wp_cli_config['uri'] );
+			$api     = false !== strstr( $headers['host'], '.com' )
+				? rtrim( $headers['host'], '.com' )
+				: rtrim( $headers['host'], '.org' );
+
+			$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
+
+			$_POST['github_updater_repo']   = $wp_cli_config['uri'];
+			$_POST['github_updater_branch'] = $wp_cli_config['branch'];
+			$_POST['github_updater_api']    = $api;
+			$_POST['option_page']           = 'github_updater_install';
+
+			switch ( $api ) {
+				case 'github':
+					$_POST['github_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
+					break;
+				case 'bitbucket':
+					$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
+					break;
+				case 'gitlab':
+					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
+					break;
+			}
+
+			$this->load_options();
+		}
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' == $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
@@ -201,7 +233,10 @@ class Install extends Base {
 				/*
 				 * Create a new instance of Plugin_Upgrader.
 				 */
-				$upgrader = new \Plugin_Upgrader( $skin = new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
+				$skin     = $wp_cli
+					? new CLI_Plugin_Installer_Skin()
+					: new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) );
+				$upgrader = new \Plugin_Upgrader( $skin );
 				add_filter( 'install_plugin_complete_actions', array(
 					&$this,
 					'install_plugin_complete_actions',
@@ -214,7 +249,10 @@ class Install extends Base {
 				/*
 				 * Create a new instance of Theme_Upgrader.
 				 */
-				$upgrader = new \Theme_Upgrader( $skin = new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) ) );
+				$skin     = $wp_cli
+					? new CLI_Theme_Installer_Skin()
+					: new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) );
+				$upgrader = new \Theme_Upgrader( $skin );
 				add_filter( 'install_theme_complete_actions', array(
 					&$this,
 					'install_theme_complete_actions',
@@ -227,6 +265,10 @@ class Install extends Base {
 			 */
 			$upgrader->install( $url );
 			wp_cache_flush();
+		}
+
+		if ( $wp_cli ) {
+			return true;
 		}
 
 		if ( ! isset( $_POST['option_page'] ) || ! ( 'github_updater_install' === $_POST['option_page'] ) ) {

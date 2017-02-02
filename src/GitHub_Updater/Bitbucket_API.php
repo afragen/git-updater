@@ -33,9 +33,8 @@ class Bitbucket_API extends API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		parent::$hours  = 12;
 		$this->type     = $type;
-		$this->response = $this->get_transient();
+		$this->response = $this->get_repo_cache();
 
 		$this->load_hooks();
 
@@ -76,15 +75,12 @@ class Bitbucket_API extends API {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			if ( empty( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $file );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $file );
 
 			if ( $response ) {
 				$contents = $response->data;
 				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_transient( $file, $response );
+				$this->set_repo_cache( $file, $response );
 			}
 		}
 
@@ -118,7 +114,7 @@ class Bitbucket_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_tag_response( $response );
-				$this->set_transient( 'tags', $response );
+				$this->set_repo_cache( 'tags', $response );
 			}
 		}
 
@@ -149,17 +145,14 @@ class Bitbucket_API extends API {
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			} else {
 				$response = false;
 			}
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . $changes );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $changes );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -168,7 +161,7 @@ class Bitbucket_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
-				$this->set_transient( 'changes', $response );
+				$this->set_repo_cache( 'changes', $response );
 			}
 		}
 
@@ -212,10 +205,7 @@ class Bitbucket_API extends API {
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/' . trailingslashit( $this->type->branch ) . 'readme.txt' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . 'readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -228,7 +218,7 @@ class Bitbucket_API extends API {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
 			$response = $parser->parse_data();
-			$this->set_transient( 'readme', $response );
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -253,7 +243,7 @@ class Bitbucket_API extends API {
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
-				$this->set_transient( 'meta', $response );
+				$this->set_repo_cache( 'meta', $response );
 			}
 		}
 
@@ -288,7 +278,7 @@ class Bitbucket_API extends API {
 					$branches[ $branch ] = $this->construct_download_link( false, $branch );
 				}
 				$this->type->branches = $branches;
-				$this->set_transient( 'branches', $branches );
+				$this->set_repo_cache( 'branches', $branches );
 
 				return true;
 			}
@@ -382,7 +372,7 @@ class Bitbucket_API extends API {
 					$response->{$locale->language}->version = $this->type->remote_version;
 				}
 
-				$this->set_transient( 'languages', $response );
+				$this->set_repo_cache( 'languages', $response );
 			}
 		}
 		$this->type->language_packs = $response;
@@ -531,7 +521,6 @@ class Bitbucket_API extends API {
 			$arr['watchers']     = 0;
 			$arr['forks']        = 0;
 			$arr['open_issues']  = 0;
-			$arr['score']        = 0;
 		} );
 
 		return $arr;

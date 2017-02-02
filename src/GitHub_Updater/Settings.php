@@ -39,7 +39,7 @@ class Settings extends Base {
 	 *
 	 * @var array
 	 */
-	protected static $remote_management = array(
+	public static $remote_management = array(
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
 		'managewp'     => 'ManageWP',
@@ -142,24 +142,17 @@ class Settings extends Base {
 	 * Add options page.
 	 */
 	public function add_plugin_page() {
-		if ( is_multisite() ) {
-			add_submenu_page(
-				'settings.php',
-				esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-				esc_html__( 'GitHub Updater', 'github-updater' ),
-				'manage_network',
-				'github-updater',
-				array( &$this, 'create_admin_page' )
-			);
-		} else {
-			add_options_page(
-				esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-				esc_html__( 'GitHub Updater', 'github-updater' ),
-				'manage_options',
-				'github-updater',
-				array( &$this, 'create_admin_page' )
-			);
-		}
+		$parent     = is_multisite() ? 'settings.php' : 'options-general.php';
+		$capability = is_multisite() ? 'manage_network' : 'manage_options';
+
+		add_submenu_page(
+			$parent,
+			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
+			esc_html__( 'GitHub Updater', 'github-updater' ),
+			$capability,
+			'github-updater',
+			array( &$this, 'create_admin_page' )
+		);
 	}
 
 	/**

@@ -385,7 +385,7 @@ class Theme extends Base {
 	 * @param $theme_key
 	 * @param $theme
 	 *
-	 * @return bool|void
+	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
 		$options = get_site_option( 'github_updater' );
@@ -591,12 +591,12 @@ class Theme extends Base {
 			?>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<label><select style="width: 60%;"
-				               onchange="if(jQuery(this).val() != '') {
-					               jQuery(this).parent().next().show();
-					               jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
-					               }
-					               else jQuery(this).parent().next().hide();
-					               ">
+							   onchange="if(jQuery(this).val() != '') {
+								   jQuery(this).parent().next().show();
+								   jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ) ?>'+jQuery(this).val());
+								   }
+								   else jQuery(this).parent().next().hide();
+								   ">
 						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 						<?php
 						foreach ( array_keys( $theme->branches ) as $branch ) {

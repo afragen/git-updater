@@ -1,5 +1,19 @@
 #### [unreleased]
 
+#### 6.2.0 / 2017-02-02
+* added WP-CLI compatibility
+* refactored `Base::admin_pages_update_transient()` and `API::wp_update_response()` to use `Base::make_update_transient_current()`, this fixed some PHP notices [#508](https://github.com/afragen/github-updater/issues/508)
+* added banner display to plugin `View details` iframe
+* change `API::get_dot_org_data` to use JSON response to avoid PHP notices
+* refactored `GitHub_API::get_repo_meta()` for simplification
+* moved some repo renaming to their own methods from `Base::upgrader_source_selection()` to `Base::fix_misnamed_directory()`, `Base::extended_naming()`, and `Base::fix_gitlab_release_asset_directory()`
+* moved a couple `class-parser.php` mods to separate functions in `class Readme_Parser`
+* refactored `GitHub_API::get_repo_meta()` to use more efficient API call, gets forks also, thanks @egifford
+* introduce some variability to transient expiration per plugin
+* switch to storing repo data in options table instead of using transients, this should help with object caching which doesn't like transients
+* fixed branch switching with extended naming [#520](https://github.com/afragen/github-updater/issues/520), thanks @joelworsham
+* updated continuous integration via RESTful endpoints to also update based upon a new tag/release of the repo
+
 #### 6.1.1 / 2016-11-29
 * hotfix to flush cache during upgrade routine
 

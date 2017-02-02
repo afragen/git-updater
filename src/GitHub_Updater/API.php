@@ -88,19 +88,14 @@ abstract class API extends Base {
 	 */
 	public static function wp_update_response( $response, $args, $url ) {
 		$parsed_url = parse_url( $url );
+		$base       = new Base();
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
-			if ( current_user_can( 'update_plugins' ) && isset( $args['body']['plugins'] ) ) {
-				$current = get_site_transient( 'update_plugins' );
-				Plugin::instance()->forced_meta_update_plugins( true );
-				$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
-				set_site_transient( 'update_plugins', $current );
+			if ( isset( $args['body']['plugins'] ) ) {
+				$base->make_update_transient_current( 'update_plugins' );
 			}
-			if ( current_user_can( 'update_themes' ) && isset( $args['body']['themes'] ) ) {
-				$current = get_site_transient( 'update_themes' );
-				Theme::instance()->forced_meta_update_themes( true );
-				$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
-				set_site_transient( 'update_themes', $current );
+			if ( isset( $args['body']['themes'] ) ) {
+				$base->make_update_transient_current( 'update_themes' );
 			}
 		}
 
@@ -196,12 +191,13 @@ abstract class API extends Base {
 	private function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
-			'owner' => $this->type->owner,
-			'repo'  => $this->type->repo,
+			'owner'  => $this->type->owner,
+			'repo'   => $this->type->repo,
+			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
 		);
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . sanitize_key( $segment ), '/' . sanitize_text_field( $value ), $endpoint );
+			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
 		switch ( $type['repo'] ) {
@@ -241,54 +237,39 @@ abstract class API extends Base {
 	}
 
 	/**
-	 * Returns site_transient and checks/stores transient id in array.
+	 * Returns repo cached data.
 	 *
-	 * @return array|bool
+	 * @return array|bool false for expired cache
 	 */
-	protected function get_transient() {
+	protected function get_repo_cache() {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
-		$transient = 'ghu-' . md5( $repo );
+		$cache_key = 'ghu-' . md5( $repo );
+		$cache     = get_site_option( $cache_key );
 
-		/**
-		 * Filter to allow advanced caching plugins to control retrieval of transients.
-		 *
-		 * @since 6.0.0
-		 * @return bool
-		 */
-		if ( false === apply_filters( 'ghu_use_remote_call_transients', true ) ) {
+		if ( empty( $cache['timeout'] ) || current_time( 'timestamp' ) > $cache['timeout'] ) {
 			return false;
 		}
 
-		return get_site_transient( $transient );
+		return $cache;
 	}
 
 	/**
-	 * Used to set_site_transient and checks/stores transient id in array.
+	 * Sets repo data for cache in site option.
 	 *
-	 * @param string $id       Transient ID.
+	 * @param string $id       Data Identifier.
 	 * @param mixed  $response Data to be stored.
 	 *
 	 * @return bool
 	 */
-	protected function set_transient( $id, $response ) {
-		$repo                  = isset( $this->type ) ? $this->type->repo : 'ghu';
-		$transient             = 'ghu-' . md5( $repo );
-		$this->response[ $id ] = $response;
+	protected function set_repo_cache( $id, $response ) {
+		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		$cache_key = 'ghu-' . md5( $repo );
+		$timeout   = '+' . self::$hours . ' hours';
 
-		/**
-		 * Filter to allow advanced caching plugins to control transient saving.
-		 *
-		 * @since 6.0.0
-		 *
-		 * @param string $id       Transient ID.
-		 * @param mixed  $response Data to be stored.
-		 *
-		 * @return bool
-		 */
-		if ( false === apply_filters( 'ghu_use_remote_call_transients', true, $id, $response ) ) {
-			return false;
-		}
-		set_site_transient( $transient, $this->response, ( self::$hours * HOUR_IN_SECONDS ) );
+		$this->response['timeout'] = strtotime( $timeout, current_time( 'timestamp' ) );
+		$this->response[ $id ]     = $response;
+
+		update_site_option( $cache_key, $this->response );
 
 		return true;
 	}
@@ -349,14 +330,14 @@ abstract class API extends Base {
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug );
+			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug . '.json' );
 			if ( is_wp_error( $response ) ) {
 				return false;
 			}
-			$wp_repo_body = unserialize( $response['body'] );
+			$wp_repo_body = json_decode( $response['body'] );
 			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
 
-			$this->set_transient( 'dot_org', $response );
+			$this->set_repo_cache( 'dot_org', $response );
 		}
 		$response = ( 'in dot org' === $response ) ? true : false;
 

@@ -39,4 +39,4 @@ delete_option( 'github_updater_remote_management' );
 
 include_once( 'github-updater.php' );
 $base = new Fragen\GitHub_Updater\Base();
-$base->delete_all_transients();
+$base->delete_all_cached_data();

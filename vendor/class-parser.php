@@ -290,9 +290,8 @@ class Parser {
 
 		// Use the first line of the description for the short description if not provided.
 		if ( empty( $this->short_description ) && ! empty( $this->sections['description'] ) ) {
-			$description = array_filter( explode( "\n", $this->sections['description'] ) );
-			$this->short_description = $description[0];
 			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->short_description = $this->short_description_53();
 		}
 
 		// Use the short description for the description section if not provided.
@@ -343,12 +342,12 @@ class Parser {
 			}
 
 			if ( $this->faq ) {
-				//$this->sections['faq'] .= "\n<dl>\n";
+				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
-					//$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
-					$this->sections['faq'] .= "<h4>{$question}</h4><p>{$answer}</p>";
+					$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
-				//$this->sections['faq'] .= "\n</dl>\n";
+				$this->sections['faq'] .= "\n</dl>\n";
+				$this->faq_as_h4();
 			}
 		}
 
