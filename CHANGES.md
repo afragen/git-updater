@@ -1,4 +1,5 @@
 #### [unreleased]
+* remove `wp_cache_flush()` for Install page, not needed with `Base->
 
 #### 6.2.0 / 2017-02-02
 * added WP-CLI compatibility
