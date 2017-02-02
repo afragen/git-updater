@@ -1,5 +1,5 @@
 #### [unreleased]
-* remove `wp_cache_flush()` for Install page, not needed with `Base->
+* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
 
 #### 6.2.0 / 2017-02-02
 * added WP-CLI compatibility
