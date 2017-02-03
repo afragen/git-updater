@@ -1,6 +1,6 @@
 #### [unreleased]
-* fix for updating via webhook from GitHub tagged release, declare branch as `master
-`
+* fix for updating via webhook from GitHub tagged release, declare branch as `master`
+
 #### 6.2.1 / 2017-02-02
 * removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
 * hotfix for upgrade routine to properly flush caches :P
