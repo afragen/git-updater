@@ -45,14 +45,14 @@ class GHU_Upgrade extends Base {
 		switch ( $db_version ) {
 			case 6000:
 			case 6100:
-			case 6200:
+			case 6110:
 				$this->upgrade_6000();
 				break;
 			default:
 				break;
 		}
 
-		$options = array_merge( (array) self::$options, array( 'db_version' => $this->db_version ) );
+		$options = array_merge( (array) self::$options, array( 'db_version' => (int) $this->db_version ) );
 		update_site_option( 'github_updater', $options );
 	}
 
