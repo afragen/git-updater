@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 6.2.1 / 2017-02-02
+* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
+* hotfix for upgrade routine to properly flush caches :P
+
 #### 6.2.0 / 2017-02-02
 * added WP-CLI compatibility
 * refactored `Base::admin_pages_update_transient()` and `API::wp_update_response()` to use `Base::make_update_transient_current()`, this fixed some PHP notices [#508](https://github.com/afragen/github-updater/issues/508)

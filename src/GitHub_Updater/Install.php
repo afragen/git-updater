@@ -260,11 +260,9 @@ class Install extends Base {
 			}
 
 			/*
-			 * Perform the action and install the plugin from the $source urldecode().
-			 * Flush cache so we can make sure that the installed plugins/themes list is always up to date.
+			 * Perform the action and install the repo from the $source urldecode().
 			 */
 			$upgrader->install( $url );
-			wp_cache_flush();
 		}
 
 		if ( $wp_cli ) {
