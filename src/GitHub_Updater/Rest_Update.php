@@ -289,7 +289,7 @@ class Rest_Update extends Base {
 			? $request_data['ref']
 			: $request_data['after'];
 		$response['branch'] = isset( $request_data['ref_type'] )
-			? $request_data['master_branch']
+			? 'master'
 			: array_pop( explode( '/', $request_data['ref'] ) );
 
 		//$response['payload'] = $request_data;
