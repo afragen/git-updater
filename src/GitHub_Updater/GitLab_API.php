@@ -82,7 +82,7 @@ class GitLab_API extends API {
 				return false;
 			}
 
-			if ( $response ) {
+			if ( $response && isset( $response->content ) ) {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );

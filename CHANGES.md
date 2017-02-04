@@ -1,6 +1,7 @@
 #### [unreleased]
 * fix for updating via webhook from GitHub tagged release, declare branch as `master`
 * refactored Install download link generation
+* fixed PHP notices [#525](https://github.com/afragen/github-updater/issues/525)
 
 #### 6.2.1 / 2017-02-02
 * removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
