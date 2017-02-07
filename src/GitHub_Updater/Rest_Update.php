@@ -190,7 +190,7 @@ class Rest_Update extends Base {
 				if ( $tag === $webhook_response['branch'] ) {
 					$tag = $webhook_response['hash'];
 				} else {
-					throw new \Exception( 'Request tag and webhook are not matching.' );
+					throw new \Exception( 'Request tag and webhook are not matching.' . "\nResponse: " . http_build_query( $webhook_response, null, "\n" ) );
 				}
 			}
 
