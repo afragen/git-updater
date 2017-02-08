@@ -271,15 +271,13 @@ class Rest_Update extends Base {
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_body ) {
-		if ( 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
-			$request_body = urldecode( $request_body );
-			if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
-				$request_body = substr( $request_body, $pos );
-			}
+		$request_body = urldecode( $request_body );
+		if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+			$request_body = substr( $request_body, $pos );
+		}
 
-			if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
-				$request_body = substr( $request_body, 0, $pos ) . '}}';
-			}
+		if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+			$request_body = substr( $request_body, 0, $pos ) . '}}';
 		}
 
 		$request_data = json_decode( $request_body, true );
