@@ -98,4 +98,27 @@ class Readme_Parser extends Parser {
 		}
 	}
 
+	/**
+	 * Replace parent method as some users don't have `mb_strrpos()`.
+	 *
+	 * @access protected
+	 *
+	 * @param string $desc
+	 * @param int    $length
+	 *
+	 * @return string
+	 */
+	protected function trim_length( $desc, $length = 150 ) {
+		if ( mb_strlen( $desc ) > $length ) {
+			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
+
+			// If not a full sentence, and one ends within 20% of the end, trim it to that.
+			if ( '.' !== mb_substr( $desc, - 1 ) && ( $pos = strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
+				$desc = mb_substr( $desc, 0, $pos + 1 );
+			}
+		}
+
+		return trim( $desc );
+	}
+
 }
