@@ -292,7 +292,7 @@ class Rest_Update extends Base {
 			? 'master'
 			: array_pop( explode( '/', $request_data['ref'] ) );
 
-		//$response['payload'] = $request_data;
+		$response['payload'] = $request_data;
 
 		return $response;
 	}
