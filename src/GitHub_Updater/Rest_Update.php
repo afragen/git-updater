@@ -291,6 +291,7 @@ class Rest_Update extends Base {
 		$response['branch'] = isset( $request_data['ref_type'] )
 			? 'master'
 			: array_pop( explode( '/', $request_data['ref'] ) );
+		$response['error'] = json_last_error_msg();
 
 		$response['payload'] = $request_data;
 
