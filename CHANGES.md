@@ -1,11 +1,13 @@
 #### [unreleased]
+
+#### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
 * refactored Install download link generation
 * fixed PHP notices [#525](https://github.com/afragen/github-updater/issues/525)
 * replaced method with `mb_strrpos()` in `class-parser.php` as some users don't have this function
 * fixed JSON syntax error in GitHub webhook payload
-* fixed GitLab Install tab to always show private token
-* fixed GitLab Settings to show individual private tokens
+* fixed GitLab Install tab to always show access token
+* fixed GitLab Settings to show individual access tokens
 
 #### 6.2.1 / 2017-02-02
 * removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
