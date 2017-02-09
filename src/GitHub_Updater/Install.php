@@ -209,7 +209,7 @@ class Install extends Base {
 				self::$install['download_link'] = add_query_arg( 'ref', self::$install['github_updater_branch'], self::$install['download_link'] );
 
 				/*
-				 * Add access token.
+				 * Add access token if present.
 				 */
 				if ( ! empty( self::$install['gitlab_access_token'] ) ) {
 					self::$install['download_link']            = add_query_arg( 'private_token', self::$install['gitlab_access_token'], self::$install['download_link'] );
@@ -406,17 +406,13 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['gitlab_access_token'] ) ||
-		     empty( parent::$options['gitlab_enterprise_token'] )
-		) {
-			add_settings_field(
-				'gitlab_access_token',
-				esc_html__( 'GitLab Access Token', 'github-updater' ),
-				array( &$this, 'gitlab_access_token' ),
-				'github_updater_install_' . $type,
-				$type
-			);
-		}
+		add_settings_field(
+			'gitlab_access_token',
+			esc_html__( 'GitLab Access Token', 'github-updater' ),
+			array( &$this, 'gitlab_access_token' ),
+			'github_updater_install_' . $type,
+			$type
+		);
 
 	}
 
