@@ -77,7 +77,7 @@ class Bitbucket_API extends API {
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $file );
 
-			if ( $response ) {
+			if ( $response && isset( $response->data ) ) {
 				$contents = $response->data;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );

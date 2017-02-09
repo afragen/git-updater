@@ -190,7 +190,7 @@ class Rest_Update extends Base {
 				if ( $tag === $webhook_response['branch'] ) {
 					$tag = $webhook_response['hash'];
 				} else {
-					throw new \Exception( 'Request tag and webhook are not matching.' );
+					throw new \Exception( 'Request tag and webhook are not matching. ' . 'Response: ' . http_build_query( $webhook_response, null, ', ' ) );
 				}
 			}
 
@@ -271,26 +271,25 @@ class Rest_Update extends Base {
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_body ) {
-		if ( 'create' == $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
-			$request_body = urldecode( $request_body );
-			if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
-				$request_body = substr( $request_body, $pos );
-			}
+		$request_body = urldecode( $request_body );
+		if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+			$request_body = substr( $request_body, $pos );
+		}
 
-			if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
-				$request_body = substr( $request_body, 0, $pos ) . '}}';
-			}
+		if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+			$request_body = substr( $request_body, 0, $pos ) . '}}';
 		}
 
 		$request_data = json_decode( $request_body, true );
 
-		$response           = array();
-		$response['hash']   = isset( $request_data['ref_type'] )
+		$response               = array();
+		$response['hash']       = isset( $request_data['ref_type'] )
 			? $request_data['ref']
 			: $request_data['after'];
-		$response['branch'] = isset( $request_data['ref_type'] )
-			? $request_data['master_branch']
+		$response['branch']     = isset( $request_data['ref_type'] )
+			? 'master'
 			: array_pop( explode( '/', $request_data['ref'] ) );
+		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;
 
@@ -309,9 +308,10 @@ class Rest_Update extends Base {
 	private function parse_gitlab_webhook( $request_body ) {
 		$request_data = json_decode( $request_body, true );
 
-		$response           = array();
-		$response['hash']   = $request_data['after'];
-		$response['branch'] = array_pop( explode( '/', $request_data['ref'] ) );
+		$response               = array();
+		$response['hash']       = $request_data['after'];
+		$response['branch']     = array_pop( explode( '/', $request_data['ref'] ) );
+		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;
 
@@ -335,9 +335,10 @@ class Rest_Update extends Base {
 
 		$new = $request_data['push']['changes'][0]['new'];
 
-		$response           = array();
-		$response['hash']   = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
-		$response['branch'] = 'tag' === $new['type'] ? 'master' : $new['name'];
+		$response               = array();
+		$response['hash']       = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
+		$response['branch']     = 'tag' === $new['type'] ? 'master' : $new['name'];
+		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $new;
 
