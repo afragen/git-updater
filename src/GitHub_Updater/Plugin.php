@@ -141,6 +141,9 @@ class Plugin extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $headers[ $value ] );
+					if ( empty( $header ) ) {
+						continue;
+					}
 				}
 
 				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
