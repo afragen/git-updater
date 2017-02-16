@@ -238,7 +238,10 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->load_pre_filters();
+
+		if ( ! $this->is_wp_cli() ) {
+			$this->load_pre_filters();
+		}
 	}
 
 	/**

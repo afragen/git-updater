@@ -245,7 +245,10 @@ class Theme extends Base {
 				}
 			}
 		}
-		$this->load_pre_filters();
+
+		if ( ! $this->is_wp_cli() ) {
+			$this->load_pre_filters();
+		}
 	}
 
 	/**

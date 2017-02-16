@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
