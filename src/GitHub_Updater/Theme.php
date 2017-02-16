@@ -179,6 +179,10 @@ class Theme extends Base {
 					}
 				}
 
+				if ( in_array( 'Languages', $header_parts ) ) {
+					continue;
+				}
+
 				$git_theme['type']                    = $repo_parts['type'];
 				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
 				$git_theme['enterprise']              = $repo_enterprise_uri;

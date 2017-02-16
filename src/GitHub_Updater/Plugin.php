@@ -124,7 +124,6 @@ class Plugin extends Base {
 				$repo_enterprise_uri = null;
 				$repo_enterprise_api = null;
 				$repo_languages      = null;
-				$header              = null;
 
 				if ( in_array( $value, array( 'Requires PHP', 'Requires WP' ) ) ) {
 					continue;
@@ -142,9 +141,6 @@ class Plugin extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $headers[ $value ] );
-				}
-				if ( empty( $header ) ) {
-					continue;
 				}
 
 				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
@@ -177,6 +173,10 @@ class Plugin extends Base {
 							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
 							break;
 					}
+				}
+
+				if ( in_array( 'Languages', $header_parts ) ) {
+					continue;
 				}
 
 				$git_plugin['type']                = $repo_parts['type'];
