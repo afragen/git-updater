@@ -142,7 +142,7 @@ class Theme extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $repo_uri );
-					if ( $theme->stylesheet !== $header['repo'] ) {
+					if ( $theme->stylesheet !== $header['repo'] || empty( $header ) ) {
 						continue;
 					}
 				}
