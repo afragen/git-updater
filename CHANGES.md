@@ -1,7 +1,8 @@
 #### [unreleased]
 * fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
 * hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output
-* added a singleton to `class Settings` to avoid duplicate loads
+* added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
+* refactored subtabs for Settings page
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`

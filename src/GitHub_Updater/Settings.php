@@ -114,22 +114,19 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_sub_tabs() {
-		$subtabs          = array();
-		$gits             = $this->installed_git_repos();
-		$default_subtabs  = array(
-			'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ),
-			'github'         => esc_html__( 'GitHub', 'github-updater' ),
-		);
-		$bitbucket_subtab = array( 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) );
-		$gitlab_subtab    = array( 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) );
-		if ( in_array( 'bitbucket', $gits ) ) {
-			$subtabs = array_merge( $subtabs, $bitbucket_subtab );
-		}
-		if ( in_array( 'gitlab', $gits ) ) {
-			$subtabs = array_merge( $subtabs, $gitlab_subtab );
+		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
+		$gits    = $this->installed_git_repos();
+
+		$github    = array( 'github' => esc_html__( 'GitHub', 'github-updater' ) );
+		$bitbucket = array( 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) );
+		$gitlab    = array( 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) );
+
+		foreach ( $gits as $git ) {
+			$git_subtab = (array) ${$git};
+			$subtabs    = array_merge( $subtabs, $git_subtab );
 		}
 
-		return array_merge( $default_subtabs, $subtabs );
+		return $subtabs;
 	}
 
 	/**
