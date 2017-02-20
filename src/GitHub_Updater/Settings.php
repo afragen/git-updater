@@ -58,7 +58,7 @@ class Settings extends Base {
 	/**
 	 * Load relevant action/filter hooks.
 	 */
-	public function load_hooks() {
+	protected function load_hooks() {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );

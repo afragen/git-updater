@@ -161,7 +161,7 @@ class Base {
 	 * Load relevant action/filter hooks.
 	 * Use 'init' hook for user capabilities.
 	 */
-	public function load_hooks() {
+	protected function load_hooks() {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'set_options_filter' ) );
