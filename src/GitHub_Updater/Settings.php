@@ -246,40 +246,16 @@ class Settings extends Base {
 						<?php
 						settings_fields( 'github_updater' );
 						switch ( $subtab ) {
-							case 'github_updater':
-								do_settings_sections( 'github_updater_install_settings' );
-								echo '<div style="display:none;">';
-								do_settings_sections( 'github_updater_github_install_settings' );
-								do_settings_sections( 'github_updater_bitbucket_install_settings' );
-								do_settings_sections( 'github_updater_gitlab_install_settings' );
-								echo '</div>';
-								break;
 							case 'github':
-								do_settings_sections( 'github_updater_github_install_settings' );
-								$this->display_ghu_repos( 'github' );
-								echo '<div style="display:none;">';
-								do_settings_sections( 'github_updater_install_settings' );
-								do_settings_sections( 'github_updater_bitbucket_install_settings' );
-								do_settings_sections( 'github_updater_gitlab_install_settings' );
-								echo '</div>';
-								break;
 							case 'bitbucket':
-								do_settings_sections( 'github_updater_bitbucket_install_settings' );
-								$this->display_ghu_repos( 'bitbucket' );
-								echo '<div style="display:none;">';
-								do_settings_sections( 'github_updater_install_settings' );
-								do_settings_sections( 'github_updater_github_install_settings' );
-								do_settings_sections( 'github_updater_gitlab_install_settings' );
-								echo '</div>';
-								break;
 							case 'gitlab':
-								do_settings_sections( 'github_updater_gitlab_install_settings' );
-								$this->display_ghu_repos( 'gitlab' );
-								echo '<div style="display:none;">';
+								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
+								$this->display_ghu_repos( $subtab );
+								$this->add_hidden_settings_sections( $subtab );
+								break;
+							default:
 								do_settings_sections( 'github_updater_install_settings' );
-								do_settings_sections( 'github_updater_github_install_settings' );
-								do_settings_sections( 'github_updater_bitbucket_install_settings' );
-								echo '</div>';
+								$this->add_hidden_settings_sections();
 								break;
 						}
 						submit_button();
@@ -970,6 +946,25 @@ class Settings extends Base {
 		$link          = array( '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' );
 
 		return array_merge( $links, $link );
+	}
+
+	/**
+	 * Create settings sections that are hidden.
+	 * Required to preserve subtab settings during saves.
+	 *
+	 * @param array $subtab Subtab to display
+	 */
+	private function add_hidden_settings_sections( $subtab = array() ) {
+		$subtabs   = array_keys( parent::$git_servers );
+		$hide_tabs = array_diff( $subtabs, (array) $subtab );
+		echo '<div style="display:none;">';
+		if ( ! empty( $subtab ) ) {
+			do_settings_sections( 'github_updater_install_settings' );
+		}
+		foreach ( $hide_tabs as $hide_tab ) {
+			do_settings_sections( 'github_updater_' . $hide_tab . '_install_settings' );
+		}
+		echo '</div>';
 	}
 
 	/**
