@@ -266,7 +266,7 @@ class Base {
 		if ( is_admin() && self::$load_repo_meta &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
-			new Settings();
+			Settings::instance();
 		}
 
 		return true;

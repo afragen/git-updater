@@ -28,6 +28,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Settings extends Base {
 
 	/**
+	 * Settings object.
+	 *
+	 * @var bool|Settings
+	 */
+	private static $instance = false;
+
+	/**
 	 * Holds the plugin basename.
 	 *
 	 * @var string
@@ -53,6 +60,20 @@ class Settings extends Base {
 		$this->ensure_api_key_is_set();
 		$this->load_options();
 		$this->load_hooks();
+	}
+
+	/**
+	 * The Settings object can be created/obtained via this
+	 * method - this prevents potential duplicate loading.
+	 *
+	 * @return object $instance Settings
+	 */
+	public static function instance() {
+		if ( false === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
 	}
 
 	/**
