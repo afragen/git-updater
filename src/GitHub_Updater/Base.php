@@ -320,8 +320,8 @@ class Base {
 	 * for remote management services.
 	 */
 	public function forced_meta_update_remote_management() {
-		$this->forced_meta_update_plugins();
-		$this->forced_meta_update_themes();
+		$this->forced_meta_update_plugins( true );
+		$this->forced_meta_update_themes( true );
 	}
 
 	/**
