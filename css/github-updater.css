@@ -26,3 +26,7 @@ form.settings p.submit {
 form.settings.no-sub-tabs p.submit {
 	margin-top: 10px;
 }
+
+div.hide-github-updater-settings {
+	display: none;
+}

@@ -954,14 +954,16 @@ class Settings extends Base {
 	private function add_hidden_settings_sections( $subtab = array() ) {
 		$subtabs   = array_keys( parent::$git_servers );
 		$hide_tabs = array_diff( $subtabs, (array) $subtab );
-		echo '<div style="display:none;">';
 		if ( ! empty( $subtab ) ) {
+			echo '<div class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_install_settings' );
+			echo '</div>';
 		}
 		foreach ( $hide_tabs as $hide_tab ) {
+			echo '<div class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_' . $hide_tab . '_install_settings' );
+			echo '</div>';
 		}
-		echo '</div>';
 	}
 
 	/**
