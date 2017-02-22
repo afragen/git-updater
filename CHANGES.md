@@ -3,6 +3,7 @@
 * hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output
 * added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
 * refactored subtabs for Settings page
+* refactored parsing of extra headers, `Enterprise` and `CE` headers no longer needed
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
