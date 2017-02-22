@@ -117,12 +117,14 @@ class Settings extends Base {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->installed_git_repos();
 
-		$github    = array( 'github' => esc_html__( 'GitHub', 'github-updater' ) );
-		$bitbucket = array( 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) );
-		$gitlab    = array( 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) );
+		$ghu_subtabs = array(
+			'github'    => esc_html__( 'GitHub', 'github-updater' ),
+			'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ),
+			'gitlab'    => esc_html__( 'GitLab', 'github-updater' ),
+		);
 
 		foreach ( $gits as $git ) {
-			$git_subtab = (array) ${$git};
+			$git_subtab = array( $git => $ghu_subtabs[ $git ] );
 			$subtabs    = array_merge( $subtabs, $git_subtab );
 		}
 
