@@ -1441,9 +1441,7 @@ class Base {
 					$header['enterprise_api'] = $header['enterprise_uri'] . '/api/v3';
 					break;
 				case 'Bitbucket':
-					$header['enterprise_api'] = $header['enterprise_uri'];
-					break;
-				default:
+					$header['enterprise_api'] = $header['enterprise_uri'] . '/rest/api';
 					break;
 			}
 		}
