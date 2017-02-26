@@ -114,12 +114,13 @@ class Base {
 	 * @var bool
 	 */
 	protected static $auth_required = array(
-		'github_private'    => false,
-		'github_enterprise' => false,
-		'bitbucket_private' => false,
-		'gitlab'            => false,
-		'gitlab_private'    => false,
-		'gitlab_enterprise' => false,
+		'github_private'       => false,
+		'github_enterprise'    => false,
+		'bitbucket_private'    => false,
+		'bitbucket_enterprise' => false,
+		'gitlab'               => false,
+		'gitlab_private'       => false,
+		'gitlab_enterprise'    => false,
 	);
 
 	/**
@@ -190,7 +191,7 @@ class Base {
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
-		if ( $this->repo_api instanceof Bitbucket_API ) {
+		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Enterprise_API ) {
 			$this->repo_api->remove_hooks();
 		}
 	}
@@ -420,7 +421,7 @@ class Base {
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
-		$this->$type->requires_wp_version  = '4.0';
+		$this->$type->requires_wp_version  = '4.4//';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
 	}
@@ -448,7 +449,11 @@ class Base {
 				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $repo );
+				if ( $repo->enterprise_api ) {
+					$this->repo_api = new Bitbucket_Enterprise_API( $repo );
+				} else {
+					$this->repo_api = new Bitbucket_API( $repo );
+				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
@@ -500,7 +505,7 @@ class Base {
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
-		global $wp_filesystem, $plugins, $themes;
+		global $wp_filesystem;
 		$slug            = null;
 		$repo            = null;
 		$new_source      = null;
@@ -515,28 +520,6 @@ class Base {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			if ( $plugins && empty( $hook_extra ) ) {
-				foreach ( array_reverse( $plugins ) as $plugin ) {
-					$slug = dirname( $plugin );
-					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
-						$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
-						break;
-					}
-				}
-			}
-			if ( ! $plugins && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->plugin ) ) {
-					$slug = dirname( $upgrader->skin->plugin );
-				}
-				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
-					$slug = sanitize_text_field( $_POST['slug'] );
-				}
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
 		}
 
 		/*
@@ -546,25 +529,6 @@ class Base {
 			$upgrader_object = Theme::instance();
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			if ( $themes && empty( $hook_extra ) ) {
-				foreach ( $themes as $theme ) {
-					$slug = $theme;
-					if ( false !== stristr( basename( $source ), $theme ) ) {
-						$new_source = trailingslashit( $remote_source ) . $theme;
-						break;
-					}
-				}
-			}
-			if ( ! $themes && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->theme ) ) {
-					$slug = $upgrader->skin->theme;
-				}
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 		}
@@ -1132,7 +1096,7 @@ class Base {
 	 * @return null|string
 	 */
 	protected function get_local_info( $repo, $file ) {
-		$response = null;
+		$response = false;
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			return $response;
@@ -1309,7 +1273,7 @@ class Base {
 			$type = 'theme';
 		}
 
-		if ( ! empty( $slug ) && array_key_exists( $slug, $this->config ) ) {
+		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
 			$repo = $this->config[ $slug ];
 			$this->set_rollback_transient( $type, $repo );
 		}
@@ -1331,7 +1295,11 @@ class Base {
 				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $repo );
+				if ( ! empty( $repo->enterprise ) ) {
+					$this->repo_api = new Bitbucket_Enterprise_API( $repo );
+				} else {
+					$this->repo_api = new Bitbucket_API( $repo );
+				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
@@ -1340,7 +1308,7 @@ class Base {
 		}
 
 		$transient         = 'update_' . $type . 's';
-		$this->tag         = $_GET['rollback'];
+		$this->tag         = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$updates_transient = get_site_transient( $transient );
 		$rollback          = array(

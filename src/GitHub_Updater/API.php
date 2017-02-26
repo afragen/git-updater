@@ -119,9 +119,15 @@ abstract class API extends Base {
 				$arr['base_download'] = 'https://github.com';
 				break;
 			case 'bitbucket':
-				$arr['repo']          = 'bitbucket';
-				$arr['base_uri']      = 'https://bitbucket.org/api';
-				$arr['base_download'] = 'https://bitbucket.org';
+				$arr['repo'] = 'bitbucket';
+				if ( empty( $this->type->enterprise ) ) {
+					$arr['base_uri']      = 'https://bitbucket.org/api';
+					$arr['base_download'] = 'https://bitbucket.org';
+
+				} else {
+					$arr['base_uri']      = $this->type->enterprise_api;
+					$arr['base_download'] = $this->type->enterprise;
+				}
 				break;
 			case 'gitlab':
 				$arr['repo']          = 'gitlab';
@@ -182,13 +188,13 @@ abstract class API extends Base {
 	/**
 	 * Return API url.
 	 *
-	 * @access private
+	 * @access protected
 	 *
 	 * @param string $endpoint
 	 *
 	 * @return string $endpoint
 	 */
-	private function get_api_url( $endpoint ) {
+	protected function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner'  => $this->type->owner,
@@ -213,6 +219,14 @@ abstract class API extends Base {
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				if ( $this->type->enterprise_api ) {
 					return $endpoint;
+				}
+				break;
+			case 'bitbucket':
+				if ( $this->type->enterprise_api ) {
+					$api      = new Bitbucket_Enterprise_API( new \stdClass() );
+					$endpoint = $api->add_endpoints( $this, $endpoint );
+
+					return $this->type->enterprise_api . $endpoint;
 				}
 				break;
 			default:
@@ -342,6 +356,24 @@ abstract class API extends Base {
 		$response = ( 'in dot org' === $response ) ? true : false;
 
 		return $response;
+	}
+
+	/**
+	 * Check if a local file for the repository exists.
+	 * Only checks the root directory of the repository.
+	 *
+	 * @param $filename
+	 *
+	 * @return bool
+	 */
+	protected function exists_local_file( $filename ) {
+		if ( file_exists( $this->type->local_path . $filename ) ||
+		     file_exists( $this->type->local_path_extended . $filename )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 }

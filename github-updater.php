@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           6.2.2.5
+ * Version:           6.2.2.10
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -22,7 +22,7 @@
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Branch:     develop
  * GitHub Languages:  https://github.com/afragen/github-updater-translations
- * Requires WP:       4.0
+ * Requires WP:       4.4
  * Requires PHP:      5.3
  */
 
