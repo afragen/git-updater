@@ -223,7 +223,7 @@ abstract class API extends Base {
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
-					$api      = new Bitbucket_Enterprise_API( new \stdClass() );
+					$api      = new Bitbucket_Server_API( new \stdClass() );
 					$endpoint = $api->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;

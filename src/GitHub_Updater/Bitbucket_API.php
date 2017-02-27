@@ -299,22 +299,7 @@ class Bitbucket_API extends API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-
-		if ( ! empty( $this->type->enterprise_api ) ) {
-			$download_link_base = implode( '/', array(
-				$this->type->enterprise_api,
-				$this->type->owner,
-				'repos',
-				$this->type->repo,
-			) );
-		} else {
-			$download_link_base = implode( '/', array(
-				'https://bitbucket.org',
-				$this->type->owner,
-				$this->type->repo,
-				'get/',
-			) );
-		}
+		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 
 		$endpoint = '';
 
@@ -363,7 +348,7 @@ class Bitbucket_API extends API {
 	/**
 	 * Get/process Language Packs.
 	 *
-	 * @TODO Bitbucket Enterprise
+	 * @TODO Bitbucket Server
 	 *
 	 * @param array $headers Array of headers of Language Pack.
 	 *
@@ -433,15 +418,15 @@ class Bitbucket_API extends API {
 		     'bitbucket' === $_POST['github_updater_api'] &&
 		     ( ( ! empty( parent::$options['bitbucket_username'] ) &&
 		         ! empty( parent::$options['bitbucket_password'] ) ) ||
-		       ( ! empty( parent::$options['bitbucket_enterprise_username'] ) &&
-		         ! empty( parent::$options['bitbucket_enterprise_password'] ) ) )
+		       ( ! empty( parent::$options['bitbucket_server_username'] ) &&
+		         ! empty( parent::$options['bitbucket_server_password'] ) ) )
 		) {
 			$bitbucket_private_install = true;
 		}
 
 		if ( $bitbucket_private || $bitbucket_private_install ) {
-			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_enterprise_username'];
-			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_enterprise_password'];
+			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_server_username'];
+			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_server_password'];
 
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
@@ -505,8 +490,8 @@ class Bitbucket_API extends API {
 		       1 == parent::$options[ $_POST['slug'] ] &&
 		       false !== stristr( $url, $_POST['slug'] ) )
 		) {
-			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_enterprise_username'];
-			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_enterprise_password'];
+			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_server_username'];
+			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_server_password'];
 
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}

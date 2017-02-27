@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Bitbucket_Enterprise_API
+ * Class Bitbucket_Server_API
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
-class Bitbucket_Enterprise_API extends Bitbucket_API {
+class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
 	 * Holds loose class method name.
@@ -47,11 +47,11 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		$this->load_hooks();
 
-		if ( ! isset( self::$options['bitbucket_enterprise_username'] ) ) {
-			self::$options['bitbucket_enterprise_username'] = null;
+		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
+			self::$options['bitbucket_server_username'] = null;
 		}
-		if ( ! isset( self::$options['bitbucket_enterprise_password'] ) ) {
-			self::$options['bitbucket_enterprise_password'] = null;
+		if ( ! isset( self::$options['bitbucket_server_password'] ) ) {
+			self::$options['bitbucket_server_password'] = null;
 		}
 		add_site_option( 'github_updater', self::$options );
 	}
@@ -90,7 +90,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 			$response = $this->api( $path );
 
 			if ( $response ) {
-				$contents = $this->bbenterprise_recombine_response( $response );
+				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 			}
@@ -167,7 +167,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->bbenterprise_fetch_raw_file( $changes );
+			$response     = $this->bbserver_fetch_raw_file( $changes );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -220,7 +220,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response     = $this->bbenterprise_fetch_raw_file( 'readme.txt' );
+			$response     = $this->bbserver_fetch_raw_file( 'readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -317,7 +317,12 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Bitbucket API
+	 * Construct $this->type->download_link using Bitbucket Server API.
+	 *
+	 * Downloads requires the official stash-archive plugin which enables
+	 * subdirectory support using the prefix query argument.
+	 *
+	 * @link https://bitbucket.org/atlassian/stash-archive
 	 *
 	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
@@ -325,20 +330,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/**
-		 * Downloads requires the official stash-archive plugin which enables
-		 * subdirectory support using the prefix query argument
-		 *
-		 * @link https://bitbucket.org/atlassian/stash-archive
-		 */
-		$download_link_base = implode( '/', array(
-			$this->type->enterprise,
-			'rest/archive/1.0/projects',
-			$this->type->owner,
-			'repos',
-			$this->type->repo,
-			'archive',
-		) );
+		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
 
 		self::$method = 'download_link';
 		$endpoint     = $this->add_endpoints( $this, '' );
@@ -348,6 +340,44 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 		}
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Get/process Language Packs.
+	 *
+	 * @TODO Bitbucket Server
+	 *
+	 * @param array $headers Array of headers of Language Pack.
+	 *
+	 * @return bool When invalid response.
+	 */
+	public function get_language_pack( $headers ) {
+		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$type     = explode( '_', $this->type->type );
+
+		if ( ! $response ) {
+			$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
+			if ( $response ) {
+				$response = json_decode( $response->data );
+
+				foreach ( $response as $locale ) {
+					$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
+					$package = implode( '/', $package ) . $locale->package;
+
+					$response->{$locale->language}->package = $package;
+					$response->{$locale->language}->type    = $type[1];
+					$response->{$locale->language}->version = $this->type->remote_version;
+				}
+
+				$this->set_repo_cache( 'languages', $response );
+			}
+		}
+		$this->type->language_packs = $response;
 	}
 
 	/**
@@ -391,44 +421,6 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	}
 
 	/**
-	 * Get/process Language Packs.
-	 *
-	 * @TODO Bitbucket Enterprise
-	 *
-	 * @param array $headers Array of headers of Language Pack.
-	 *
-	 * @return bool When invalid response.
-	 */
-	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
-
-		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$response = json_decode( $response->data );
-
-				foreach ( $response as $locale ) {
-					$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
-					$package = implode( '/', $package ) . $locale->package;
-
-					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
-					$response->{$locale->language}->version = $this->type->remote_version;
-				}
-
-				$this->set_repo_cache( 'languages', $response );
-			}
-		}
-		$this->type->language_packs = $response;
-	}
-
-	/**
 	 * The Bitbucket Server REST API does not support downloading files directly at the moment
 	 * therefore we'll use this to construct urls to fetch the raw files ourselves.
 	 *
@@ -436,7 +428,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 *
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/
-	private function bbenterprise_fetch_raw_file( $file ) {
+	private function bbserver_fetch_raw_file( $file ) {
 		$file         = urlencode( $file );
 		$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
 		$download_url = $this->add_endpoints( $this, $download_url );
@@ -459,7 +451,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
-	private function bbenterprise_recombine_response( $response ) {
+	private function bbserver_recombine_response( $response ) {
 		$remote_info_file = '';
 		$json_decoded     = is_string( $response ) ? json_decode( $response ) : null;
 		$response         = empty( $json_decoded ) ? $response : $json_decoded;
@@ -502,7 +494,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	protected function parse_changelog_response( $response ) {
-		return array( 'changes' => $this->bbenterprise_recombine_response( $response ) );
+		return array( 'changes' => $this->bbserver_recombine_response( $response ) );
 	}
 
 	/**
@@ -513,7 +505,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * @return object $response
 	 */
 	protected function parse_readme_response( $response ) {
-		$content        = $this->bbenterprise_recombine_response( $response );
+		$content        = $this->bbserver_recombine_response( $response );
 		$response       = new \stdClass();
 		$response->data = $content;
 

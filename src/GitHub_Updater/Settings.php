@@ -118,10 +118,10 @@ class Settings extends Base {
 		$gits    = $this->installed_git_repos();
 
 		$ghu_subtabs = array(
-			'github'       => esc_html__( 'GitHub', 'github-updater' ),
-			'bitbucket'    => esc_html__( 'Bitbucket', 'github-updater' ),
-			'bbenterprise' => esc_html__( 'Bitbucket Enterprise', 'github-updater' ),
-			'gitlab'       => esc_html__( 'GitLab', 'github-updater' ),
+			'github'    => esc_html__( 'GitHub', 'github-updater' ),
+			'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ),
+			'bbserver'  => esc_html__( 'Bitbucket Server', 'github-updater' ),
+			'gitlab'    => esc_html__( 'GitLab', 'github-updater' ),
 		);
 
 		foreach ( $gits as $git ) {
@@ -145,7 +145,7 @@ class Settings extends Base {
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
 			if ( ! empty( $e->enterprise ) && false !== stristr( $e->type, 'bitbucket' ) ) {
-				return 'bbenterprise';
+				return 'bbserver';
 			}
 
 			return $e->type;
@@ -252,7 +252,7 @@ class Settings extends Base {
 						switch ( $subtab ) {
 							case 'github':
 							case 'bitbucket':
-							case 'bbenterprise':
+							case 'bbserver':
 							case 'gitlab':
 								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
 								$this->display_ghu_repos( $subtab );
@@ -464,43 +464,43 @@ class Settings extends Base {
 		}
 
 		/*
-		 * Add settings for Bitbucket Enterprise Username and Password.
+		 * Add settings for Bitbucket Server Username and Password.
 		 */
 
 		add_settings_section(
-			'bitbucket_enterprise_user',
-			esc_html__( 'Bitbucket Enterprise Private Settings', 'github-updater' ),
+			'bitbucket_server_user',
+			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
 			array( &$this, 'print_section_bitbucket_username' ),
-			'github_updater_bbenterprise_install_settings'
+			'github_updater_bbserver_install_settings'
 		);
 
 		add_settings_field(
-			'bitbucket_enterprise_username',
-			esc_html__( 'Bitbucket Enterprise Username', 'github-updater' ),
+			'bitbucket_server_username',
+			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
 			array( &$this, 'token_callback_text' ),
-			'github_updater_bbenterprise_install_settings',
-			'bitbucket_enterprise_user',
-			array( 'id' => 'bitbucket_enterprise_username' )
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_username' )
 		);
 
 		add_settings_field(
-			'bitbucket_enterprise_password',
-			esc_html__( 'Bitbucket Enterprise Password', 'github-updater' ),
+			'bitbucket_server_password',
+			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
 			array( &$this, 'token_callback_text' ),
-			'github_updater_bbenterprise_install_settings',
-			'bitbucket_enterprise_user',
-			array( 'id' => 'bitbucket_enterprise_password', 'token' => true )
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_password', 'token' => true )
 		);
 
 		/*
-		 * Show section for private Bitbucket Enterprise repositories.
+		 * Show section for private Bitbucket Server repositories.
 		 */
-		if ( parent::$auth_required['bitbucket_enterprise'] ) {
+		if ( parent::$auth_required['bitbucket_server'] ) {
 			add_settings_section(
 				'bitbucket_server_id',
-				esc_html__( 'Bitbucket Enterprise Private Repositories', 'github-updater' ),
+				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
 				array( &$this, 'print_section_bitbucket_info' ),
-				'github_updater_bbenterprise_install_settings'
+				'github_updater_bbserver_install_settings'
 			);
 		}
 
@@ -548,9 +548,9 @@ class Settings extends Base {
 				 */
 				if ( false !== strpos( $token->type, 'bitbucket' ) &&
 				     ! empty( $token->enterprise ) &&
-				     ! parent::$auth_required['bitbucket_enterprise']
+				     ! parent::$auth_required['bitbucket_server']
 				) {
-					parent::$auth_required['bitbucket_enterprise'] = true;
+					parent::$auth_required['bitbucket_server'] = true;
 				}
 
 			}
@@ -615,7 +615,7 @@ class Settings extends Base {
 						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 						$setting_field['callback']        = $token->repo;
 					} else {
-						$setting_field['page']            = 'github_updater_bbenterprise_install_settings';
+						$setting_field['page']            = 'github_updater_bbserver_install_settings';
 						$setting_field['section']         = 'bitbucket_server_id';
 						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
 						$setting_field['callback']        = $token->repo;
@@ -650,8 +650,8 @@ class Settings extends Base {
 			'github_enterprise_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'bitbucket_enterprise_username',
-			'bitbucket_enterprise_password',
+			'bitbucket_server_username',
+			'bitbucket_server_password',
 		);
 
 		array_filter( $always_unset,
@@ -899,8 +899,8 @@ class Settings extends Base {
 			'github_access_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'bitbucket_enterprise_username',
-			'bitbucket_enterprise_password',
+			'bitbucket_server_username',
+			'bitbucket_server_password',
 			'gitlab_access_token',
 			'gitlab_enterprise_token',
 			'branch_switch',
@@ -1044,14 +1044,14 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
-		$plugins      = Plugin::instance()->get_plugin_configs();
-		$themes       = Theme::instance()->get_theme_configs();
-		$repos        = array_merge( $plugins, $themes );
-		$bbenterprise = array( 'bitbucket', 'bbenterprise' );
+		$plugins  = Plugin::instance()->get_plugin_configs();
+		$themes   = Theme::instance()->get_theme_configs();
+		$repos    = array_merge( $plugins, $themes );
+		$bbserver = array( 'bitbucket', 'bbserver' );
 
-		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbenterprise ) {
-			if ( ! empty( $e->enterprise ) && in_array( $type, $bbenterprise ) ) {
-				return ( false !== stristr( $e->type, 'bitbucket' ) && 'bbenterprise' === $type );
+		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbserver ) {
+			if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver ) ) {
+				return ( false !== stristr( $e->type, 'bitbucket' ) && 'bbserver' === $type );
 			}
 
 			return ( false !== stristr( $e->type, $type ) );

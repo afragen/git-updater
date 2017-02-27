@@ -114,13 +114,13 @@ class Base {
 	 * @var bool
 	 */
 	protected static $auth_required = array(
-		'github_private'       => false,
-		'github_enterprise'    => false,
-		'bitbucket_private'    => false,
-		'bitbucket_enterprise' => false,
-		'gitlab'               => false,
-		'gitlab_private'       => false,
-		'gitlab_enterprise'    => false,
+		'github_private'    => false,
+		'github_enterprise' => false,
+		'bitbucket_private' => false,
+		'bitbucket_server'  => false,
+		'gitlab'            => false,
+		'gitlab_private'    => false,
+		'gitlab_enterprise' => false,
 	);
 
 	/**
@@ -191,7 +191,7 @@ class Base {
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
-		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Enterprise_API ) {
+		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
 			$this->repo_api->remove_hooks();
 		}
 	}
@@ -450,7 +450,7 @@ class Base {
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				if ( $repo->enterprise_api ) {
-					$this->repo_api = new Bitbucket_Enterprise_API( $repo );
+					$this->repo_api = new Bitbucket_Server_API( $repo );
 				} else {
 					$this->repo_api = new Bitbucket_API( $repo );
 				}
@@ -1296,7 +1296,7 @@ class Base {
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				if ( ! empty( $repo->enterprise ) ) {
-					$this->repo_api = new Bitbucket_Enterprise_API( $repo );
+					$this->repo_api = new Bitbucket_Server_API( $repo );
 				} else {
 					$this->repo_api = new Bitbucket_API( $repo );
 				}

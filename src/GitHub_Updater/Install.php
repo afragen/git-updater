@@ -210,13 +210,13 @@ class Install extends Base {
 						parent::$options[ self::$install['repo'] ] = 1;
 					}
 					if ( ! empty( self::$install['bitbucket_username'] ) ) {
-						parent::$options['bitbucket_enterprise_username'] = self::$install['bitbucket_username'];
+						parent::$options['bitbucket_server_username'] = self::$install['bitbucket_username'];
 					}
 					if ( ! empty( self::$install['bitbucket_password'] ) ) {
-						parent::$options['bitbucket_enterprise_password'] = self::$install['bitbucket_password'];
+						parent::$options['bitbucket_server_password'] = self::$install['bitbucket_password'];
 					}
 
-					new Bitbucket_Enterprise_API( (object) $type );
+					new Bitbucket_Server_API( (object) $type );
 				}
 			}
 
@@ -413,8 +413,8 @@ class Install extends Base {
 		if ( ( empty( parent::$options['bitbucket_username'] ) ||
 		       empty( parent::$options['bitbucket_password'] ) ) ||
 		     (
-		     ( empty( parent::$options['bitbucket_enterprise_username'] ) ||
-		       empty( parent::$options['bitbucket_enterprise_password'] ) )
+		     ( empty( parent::$options['bitbucket_server_username'] ) ||
+		       empty( parent::$options['bitbucket_server_password'] ) )
 		     )
 		) {
 			add_settings_field(
