@@ -258,7 +258,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo' );
+			self::$method = 'meta';
+			$response     = $this->api( '/1.0/projects/:owner/repos/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
