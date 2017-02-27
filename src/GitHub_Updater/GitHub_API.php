@@ -323,8 +323,6 @@ class GitHub_API extends API {
 	 * Get/process Language Packs.
 	 * Language Packs cannot reside on GitHub Enterprise.
 	 *
-	 * @TODO Figure out how to serve raw file from GitHub Enterprise.
-	 *
 	 * @param array $headers Array of headers of Language Pack.
 	 *
 	 * @return bool When invalid response.

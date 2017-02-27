@@ -358,8 +358,6 @@ class GitLab_API extends API {
 	 * Get/process Language Packs.
 	 * Language Packs cannot reside on GitLab CE/Enterprise.
 	 *
-	 * @TODO GitLab CE/Enterprise.
-	 *
 	 * @param array $headers Array of headers of Language Pack.
 	 *
 	 * @return bool When invalid response.

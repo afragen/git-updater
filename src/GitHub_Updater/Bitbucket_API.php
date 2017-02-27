@@ -347,8 +347,7 @@ class Bitbucket_API extends API {
 
 	/**
 	 * Get/process Language Packs.
-	 *
-	 * @TODO Bitbucket Server
+	 * Language Packs cannot reside on Bitbucket Server.
 	 *
 	 * @param array $headers Array of headers of Language Pack.
 	 *
