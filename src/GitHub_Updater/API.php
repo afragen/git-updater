@@ -194,7 +194,7 @@ abstract class API extends Base {
 	 *
 	 * @return string $endpoint
 	 */
-	protected function get_api_url( $endpoint ) {
+	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner'  => $this->type->owner,
@@ -208,21 +208,38 @@ abstract class API extends Base {
 
 		switch ( $type['repo'] ) {
 			case 'github':
+				if ( ! $this->type->enterprise && $download_link ) {
+					$type['base_download'] = $type['base_uri'];
+					break;
+				}
+				if ( $this->type->enterprise_api ) {
+					$type['base_download'] = $this->type->enterprise_api;
+					if ( $download_link ) {
+						break;
+					}
+				}
 				$api      = new GitHub_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
-				if ( $this->type->enterprise_api ) {
-					return $endpoint;
-				}
 				break;
 			case 'gitlab':
+				if ( ! $this->type->enterprise && $download_link ) {
+					break;
+				}
+				if ( $this->type->enterprise ) {
+					$type['base_download'] = $this->type->enterprise;
+					$type['base_uri']      = null;
+					if ( $download_link ) {
+						break;
+					}
+				}
 				$api      = new GitLab_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
-				if ( $this->type->enterprise_api ) {
-					return $endpoint;
-				}
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
+					if ( $download_link ) {
+						break;
+					}
 					$api      = new Bitbucket_Server_API( new \stdClass() );
 					$endpoint = $api->add_endpoints( $this, $endpoint );
 
@@ -232,7 +249,9 @@ abstract class API extends Base {
 			default:
 		}
 
-		return $type['base_uri'] . $endpoint;
+		$base = $download_link ? $type['base_download'] : $type['base_uri'];
+
+		return $base . $endpoint;
 	}
 
 	/**

@@ -306,21 +306,7 @@ class GitLab_API extends API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/*
-		 * Check if using GitLab CE/Enterprise.
-		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$gitlab_base = $this->type->enterprise;
-		} else {
-			$gitlab_base = 'https://gitlab.com';
-		}
-
-		$download_link_base = implode( '/', array(
-			$gitlab_base,
-			$this->type->owner,
-			$this->type->repo,
-			'repository/archive.zip',
-		) );
+		$download_link_base = $this->get_api_url( '/:owner/:repo/repository/archive.zip', true );
 		$endpoint           = '';
 
 		/*

@@ -278,22 +278,7 @@ class GitHub_API extends API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/*
-		 * Check if using GitHub Self-Hosted.
-		 */
-		if ( ! empty( $this->type->enterprise_api ) ) {
-			$github_base = $this->type->enterprise_api;
-		} else {
-			$github_base = 'https://api.github.com';
-		}
-
-		$download_link_base = implode( '/', array(
-			$github_base,
-			'repos',
-			$this->type->owner,
-			$this->type->repo,
-			'zipball/',
-		) );
+		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
 
 		/*
