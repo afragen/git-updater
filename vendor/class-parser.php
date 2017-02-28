@@ -1,5 +1,4 @@
 <?php
-
 namespace WordPressdotorg\Plugin_Directory\Readme;
 
 /**
@@ -50,6 +49,16 @@ class Parser {
 	 * @var string
 	 */
 	public $short_description = '';
+
+	/**
+	 * @var string
+	 */
+	public $license = '';
+
+	/**
+	 * @var string
+	 */
+	public $license_uri = '';
 
 	/**
 	 * @var array
@@ -111,6 +120,18 @@ class Parser {
 		'contributors'      => 'contributors',
 		'donate link'       => 'donate_link',
 		'stable tag'        => 'stable_tag',
+		'license'           => 'license',
+		'license uri'       => 'license_uri',
+	);
+
+	/**
+	 * These plugin tags are ignored.
+	 *
+	 * @var array
+	 */
+	private $ignore_tags = array(
+		'plugin',
+		'wordpress',
 	);
 
 	/**
@@ -126,7 +147,6 @@ class Parser {
 
 	/**
 	 * @param string $file
-	 *
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
@@ -137,7 +157,11 @@ class Parser {
 		//$contents = file_get_contents( $file );
 		$contents = $file;
 
-		$contents = preg_split( '!\R!u', $contents );
+
+		if ( preg_match( '!!u', $contents ) )
+			$contents = preg_split( '!\R!u', $contents );
+		else
+			$contents = preg_split( '!\R!', $contents ); // regex failed due to invalid UTF8 in $contents, see #2298
 		$contents = array_map( array( $this, 'strip_newlines' ), $contents );
 
 		// Strip UTF8 BOM if present.
@@ -200,6 +224,7 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
+			$this->tags = array_diff( $this->tags, $this->ignore_tags );
 			$this->tags = array_slice( $this->tags, 0, 5 );
 		}
 		if ( ! empty( $headers['requires'] ) ) {
@@ -218,6 +243,17 @@ class Parser {
 		}
 		if ( ! empty( $headers['donate_link'] ) ) {
 			$this->donate_link = $headers['donate_link'];
+		}
+		if ( ! empty( $headers['license'] ) ) {
+			// Handle the many cases of "License: GPLv2 - http://..."
+			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
+				$headers['license_uri'] = $url[1];
+				$headers['license'] = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
+			}
+			$this->license = $headers['license'];
+		}
+		if ( ! empty( $headers['license_uri'] ) ) {
+			$this->license_uri = $headers['license_uri'];
 		}
 
 		// Parse the short description.
@@ -299,6 +335,12 @@ class Parser {
 			$this->sections['description'] = $this->short_description;
 		}
 
+		// Suffix the Other Notes section to the description.
+		if ( !empty( $this->sections['other_notes'] ) ) {
+			$this->sections['description'] .= "\n" . $this->sections['other_notes'];
+			unset( $this->sections['other_notes'] );
+		}
+
 		// Parse out the Upgrade Notice section into it's own data.
 		if ( isset( $this->sections['upgrade_notice'] ) ) {
 			$this->upgrade_notice = $this->parse_section( $this->sections['upgrade_notice'] );
@@ -308,7 +350,7 @@ class Parser {
 
 		// Display FAQs as a definition list.
 		if ( isset( $this->sections['faq'] ) ) {
-			$this->faq             = $this->parse_section( $this->sections['faq'] );
+			$this->faq = $this->parse_section( $this->sections['faq'] );
 			$this->sections['faq'] = '';
 		}
 
@@ -328,7 +370,7 @@ class Parser {
 			if ( $screenshots ) {
 				$i = 1; // Screenshots start from 1.
 				foreach ( $screenshots as $ss ) {
-					$this->screenshots[ $i ++ ] = $this->filter_text( $ss[1] );
+					$this->screenshots[ $i++ ] = $this->filter_text( $ss[1] );
 				}
 			}
 			unset( $this->sections['screenshots'] );
@@ -361,7 +403,6 @@ class Parser {
 	 * @access protected
 	 *
 	 * @param string $contents
-	 *
 	 * @return string
 	 */
 	protected function get_first_nonwhitespace( &$contents ) {
@@ -379,7 +420,6 @@ class Parser {
 	 * @access protected
 	 *
 	 * @param string $line
-	 *
 	 * @return string
 	 */
 	protected function strip_newlines( $line ) {
@@ -391,7 +431,6 @@ class Parser {
 	 *
 	 * @param string $desc
 	 * @param int    $length
-	 *
 	 * @return string
 	 */
 	protected function trim_length( $desc, $length = 150 ) {
@@ -399,7 +438,7 @@ class Parser {
 			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
 
 			// If not a full sentence, and one ends within 20% of the end, trim it to that.
-			if ( '.' !== mb_substr( $desc, - 1 ) && ( $pos = mb_strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
+			if ( '.' !== mb_substr( $desc, -1 ) && ( $pos = mb_strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
 				$desc = mb_substr( $desc, 0, $pos + 1 );
 			}
 		}
@@ -411,7 +450,6 @@ class Parser {
 	 * @access protected
 	 *
 	 * @param string $text
-	 *
 	 * @return string
 	 */
 	protected function filter_text( $text ) {
@@ -424,7 +462,7 @@ class Parser {
 				'rel'   => true,
 			),
 			'blockquote' => array(
-				'cite' => true,
+				'cite' => true
 			),
 			'br'         => true,
 			'p'          => true,
@@ -448,8 +486,9 @@ class Parser {
 
 		$text = wp_kses( $text, $allowed );
 
-		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want.
-		$text = preg_replace( "/(?<![> ])\n/", ' ', $text );
+		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
+		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.
+		//$text = preg_replace( "/(?<![> ])\n/", ' ', $text );
 
 		$text = trim( $text );
 
@@ -460,7 +499,6 @@ class Parser {
 	 * @access protected
 	 *
 	 * @param string $text
-	 *
 	 * @return string
 	 */
 	protected function sanitize_text( $text ) { // not fancy
@@ -475,26 +513,26 @@ class Parser {
 	 * Sanitize provided contributors to valid WordPress users
 	 *
 	 * @param array $users Array of user_login's or user_nicename's.
-	 *
 	 * @return array Array of user_logins.
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
-			if ( $user = get_user_by( 'login', $name ) ) {
+			// Contributors should be listed by their WordPress.org Login name (Example: 'Joe Bloggs')
+			$user = get_user_by( 'login', $name );
 
-				// Check the case of the user login matches.
-				if ( $name !== $user->user_login ) {
-					$users[ $i ] = $user->user_login;
-				}
-			} elseif ( false !== ( $user = get_user_by( 'slug', $name ) ) ) {
-
-				// Overwrite the nicename with the user_login.
-				$users[ $i ] = $user->user_login;
-			} else {
-
-				// Unknown user, we'll skip these entirely to encourage correct readme files.
-				unset( $users[ $i ] );
+			// Or failing that, by their user_nicename field (Example: 'joe-bloggs')
+			if ( ! $user ) {
+				$user = get_user_by( 'slug', $name );
 			}
+
+			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
+			if ( ! $user ) {
+				unset( $users[ $i ] );
+				continue;
+			}
+
+			// Overwrite whatever the author has specified with the sanitized nicename.
+			$users[ $i ] = $user->user_nicename;
 		}
 
 		return $users;
@@ -504,7 +542,6 @@ class Parser {
 	 * Sanitize the provided stable tag to something we expect.
 	 *
 	 * @param string $stable_tag the raw Stable Tag line from the readme.
-	 *
 	 * @return string The sanitized $stable_tag.
 	 */
 	protected function sanitize_stable_tag( $stable_tag ) {
@@ -528,33 +565,54 @@ class Parser {
 	 * We support headings which are either `= Heading`, `# Heading` or `** Heading`.
 	 *
 	 * @param string|array $lines The lines of the section to parse.
-	 *
 	 * @return array
 	 */
 	protected function parse_section( $lines ) {
-		$key    = $value = '';
+		$key = $value = '';
 		$return = array();
 
 		if ( ! is_array( $lines ) ) {
 			$lines = explode( "\n", $lines );
 		}
+		$trimmed_lines = array_map( 'trim', $lines );
 
-		while ( ( $line = array_shift( $lines ) ) !== null ) {
-			$trimmed = trim( $line );
+		/*
+		 * The heading style being matched in the block. Can be 'heading' or 'bold'.
+		 * Standard Markdown headings (## .. and == ... ==) are used, but if none are present.
+		 * full line bolding will be used as a heading style.
+		 */
+		$heading_style = 'bold'; // 'heading' or 'bold'
+		foreach ( $trimmed_lines as $trimmed ) {
+			if ( $trimmed[0] == '#' || $trimmed[0] == '=' ) {
+				$heading_style = 'heading';
+				break;
+			}
+		}
+
+		$line_count = count( $lines );
+		for ( $i = 0; $i < $line_count; $i++ ) {
+			$line = &$lines[ $i ];
+			$trimmed = &$trimmed_lines[ $i ];
 			if ( ! $trimmed ) {
 				$value .= "\n";
 				continue;
 			}
 
-			// Normal headings (##.. == ... ==) are matched if they exist, Bold is only used if it starts and ends the line.
-			if ( $trimmed[0] == '#' || $trimmed[0] == '=' || ( substr( $trimmed, 0, 2 ) == '**' && substr( $trimmed, - 2 ) == '**' ) ) {
+			$is_heading = false;
+			if ( 'heading' == $heading_style && ( $trimmed[0] == '#' || $trimmed[0] == '=' ) ) {
+				$is_heading = true;
+			} elseif ( 'bold' == $heading_style && ( substr( $trimmed, 0, 2 ) == '**' && substr( $trimmed, -2 ) == '**' ) ) {
+				$is_heading = true;
+			}
+
+			if ( $is_heading ) {
 				if ( $value ) {
 					$return[ $key ] = trim( $value );
 				}
 
 				$value = '';
 				// Trim off the first character of the line, as we know that's the heading style we're expecting to remove.
-				$key = trim( $line, $trimmed[0] . " \t" );
+				$key   = trim( $line, $trimmed[0] . " \t" );
 				continue;
 			}
 
@@ -570,7 +628,6 @@ class Parser {
 
 	/**
 	 * @param string $text
-	 *
 	 * @return string
 	 */
 	protected function parse_markdown( $text ) {

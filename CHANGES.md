@@ -7,6 +7,7 @@
 * added support for Bitbucket Server!! Thanks @lkistenkas for access and especially to @BjornW for kicking it off
 * refactored `add_endpoints()` to use everywhere
 * now requires WordPress 4.4 and above
+* update to latest wp.org `class-parser.php`
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`

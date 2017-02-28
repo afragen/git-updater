@@ -29,17 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Readme_Parser extends Parser {
 
 	/**
-	 * Constructor.
-	 *
-	 * @param string $file_contents Contents of file.
-	 */
-	public function __construct( $file_contents ) {
-		if ( $file_contents ) {
-			$this->parse_readme( $file_contents );
-		}
-	}
-
-	/**
 	 * @param string $text
 	 *
 	 * @return string
