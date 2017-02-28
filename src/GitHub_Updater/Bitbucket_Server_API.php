@@ -292,7 +292,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
-			if ( $response->values ) {
+			if ( $response && isset( $response->values ) ) {
 				foreach ( $response->values as $value ) {
 					$branch              = $value->displayId;
 					$branches[ $branch ] = $this->construct_download_link( false, $branch );
