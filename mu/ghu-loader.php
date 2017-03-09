@@ -8,8 +8,6 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-use Fragen\GitHub_Updater;
-
 /**
  * Plugin Name:       GitHub Updater MU loader
  * Plugin URI:        https://github.com/afragen/github-updater
