@@ -218,8 +218,6 @@ class Theme extends Base {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		wp_enqueue_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
-
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}

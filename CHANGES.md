@@ -8,6 +8,7 @@
 * refactored `add_endpoints()` to use everywhere
 * now requires WordPress 4.4 and above
 * update to latest wp.org `class-parser.php`
+* move enqueuing of plugin CSS to `Base::init()`
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`

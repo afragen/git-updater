@@ -240,6 +240,9 @@ class Base {
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
 
+			// Load plugin stylesheet.
+			wp_enqueue_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+
 			// Run GitHub Updater upgrade functions.
 			new GHU_Upgrade();
 
