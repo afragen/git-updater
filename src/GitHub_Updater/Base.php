@@ -487,7 +487,7 @@ class Base {
 			}
 			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
-			$this->languages     = new Language_Pack( $repo, $this->repo_api );
+			$this->languages     = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 		}
 
 		$this->remove_hooks();

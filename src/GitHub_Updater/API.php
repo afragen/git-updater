@@ -48,8 +48,6 @@ abstract class API extends Base {
 
 	abstract public function construct_download_link();
 
-	abstract public function get_language_pack( $headers );
-
 	abstract protected function add_endpoints( $git, $endpoint );
 
 	abstract protected function parse_tag_response( $response );
@@ -247,6 +245,7 @@ abstract class API extends Base {
 				}
 				break;
 			default:
+				break;
 		}
 
 		$base = $download_link ? $type['base_download'] : $type['base_uri'];

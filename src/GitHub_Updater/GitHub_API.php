@@ -320,46 +320,6 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Get/process Language Packs.
-	 * Language Packs cannot reside on GitHub Enterprise.
-	 *
-	 * @param array $headers Array of headers of Language Pack.
-	 *
-	 * @return bool When invalid response.
-	 */
-	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
-
-		if ( ! $response ) {
-			self::$method = 'translation';
-			$response     = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
-
-				foreach ( $response as $locale ) {
-					$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
-					$package = implode( '/', $package ) . $locale->package;
-					$package = add_query_arg( array( 'raw' => 'true' ), $package );
-
-					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
-					$response->{$locale->language}->version = $this->type->remote_version;
-				}
-
-				$this->set_repo_cache( 'languages', $response );
-			}
-		}
-		$this->type->language_packs = $response;
-	}
-
-	/**
 	 * Add appropriate access token to endpoint.
 	 *
 	 * @param $git
@@ -406,7 +366,7 @@ class GitHub_API extends API {
 	 * @return string $endpoint
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-		switch ( self::$method ) {
+		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );

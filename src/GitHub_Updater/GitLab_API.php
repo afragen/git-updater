@@ -355,46 +355,6 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Get/process Language Packs.
-	 * Language Packs cannot reside on GitLab CE/Enterprise.
-	 *
-	 * @param array $headers Array of headers of Language Pack.
-	 *
-	 * @return bool When invalid response.
-	 */
-	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
-
-		if ( ! $response ) {
-			self::$method = 'translation';
-			$id           = urlencode( $headers['owner'] . '/' . $headers['repo'] );
-			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
-
-				foreach ( $response as $locale ) {
-					$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
-					$package = implode( '/', $package ) . $locale->package;
-
-					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
-					$response->{$locale->language}->version = $this->type->remote_version;
-				}
-
-				$this->set_repo_cache( 'languages', $response );
-			}
-		}
-		$this->type->language_packs = $response;
-	}
-
-	/**
 	 * Add appropriate access token to endpoint.
 	 *
 	 * @param $git
@@ -442,7 +402,7 @@ class GitLab_API extends API {
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
 
-		switch ( self::$method ) {
+		switch ( $git::$method ) {
 			case 'projects':
 			case 'meta':
 			case 'tags':
