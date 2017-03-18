@@ -10,6 +10,7 @@
 * update to latest wp.org `class-parser.php`
 * move enqueuing of plugin CSS to `Base::init()`
 * refactored Language Pack updating to their own classes
+* split out abstract classes from `abstract class API` to `interface API_Interface`
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`

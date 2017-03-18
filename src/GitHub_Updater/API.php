@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
+
 /*
  * Exit if called directly.
  */
@@ -30,31 +31,6 @@ abstract class API extends Base {
 	 * @var array
 	 */
 	protected $response = array();
-
-	/*
-	 * The following functions must be in any repository API.
-	 */
-	abstract public function get_remote_info( $file );
-
-	abstract public function get_remote_tag();
-
-	abstract public function get_remote_changes( $changes );
-
-	abstract public function get_remote_readme();
-
-	abstract public function get_repo_meta();
-
-	abstract public function get_remote_branches();
-
-	abstract public function construct_download_link();
-
-	abstract protected function add_endpoints( $git, $endpoint );
-
-	abstract protected function parse_tag_response( $response );
-
-	abstract protected function parse_meta_response( $response );
-
-	abstract protected function parse_changelog_response( $response );
 
 	/**
 	 * Adds custom user agent for GitHub Updater.
