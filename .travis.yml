@@ -22,6 +22,8 @@ matrix:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - composer config --list --global
+  - export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
   - composer global require "phpunit/phpunit=5.7.*"
   - phpunit --version
 
