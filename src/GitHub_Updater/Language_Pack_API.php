@@ -19,42 +19,6 @@ namespace Fragen\GitHub_Updater;
 class Language_Pack_API extends API {
 
 	/**
-	 * Unused but required functions.
-	 */
-	public function get_remote_info( $file ) {
-	}
-
-	public function get_remote_tag() {
-	}
-
-	public function get_remote_changes( $changes ) {
-	}
-
-	public function get_remote_readme() {
-	}
-
-	public function get_repo_meta() {
-	}
-
-	public function get_remote_branches() {
-	}
-
-	public function construct_download_link() {
-	}
-
-	protected function add_endpoints( $git, $endpoint ) {
-	}
-
-	protected function parse_tag_response( $response ) {
-	}
-
-	protected function parse_meta_response( $response ) {
-	}
-
-	protected function parse_changelog_response( $response ) {
-	}
-
-	/**
 	 * Holds loose class method name.
 	 *
 	 * @var null

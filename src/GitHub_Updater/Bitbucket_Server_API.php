@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
-class Bitbucket_Server_API extends Bitbucket_API {
+class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 
 	/**
 	 * Holds loose class method name.
@@ -76,7 +76,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param $file
+	 * @param string $file Filename.
 	 *
 	 * @return bool
 	 */
@@ -144,7 +144,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Read the remote CHANGES.md file
 	 *
-	 * @param $changes
+	 * @param string $changes Changelog filename.
 	 *
 	 * @return bool
 	 */
@@ -342,12 +342,12 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Create Bitbucket Server API endpoints.
 	 *
-	 * @param $git      object
-	 * @param $endpoint string
+	 * @param object $git
+	 * @param string $endpoint
 	 *
-	 * @return string
+	 * @return string $endpoint
 	 */
-	protected function add_endpoints( $git, $endpoint ) {
+	public function add_endpoints( $git, $endpoint ) {
 		switch ( self::$method ) {
 			case 'meta':
 			case 'tags':
@@ -430,7 +430,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	protected function parse_meta_response( $response ) {
+	public function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -452,7 +452,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
-	protected function parse_changelog_response( $response ) {
+	public function parse_changelog_response( $response ) {
 		return array( 'changes' => $this->bbserver_recombine_response( $response ) );
 	}
 

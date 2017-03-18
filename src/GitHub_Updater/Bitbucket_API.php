@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class Bitbucket_API extends API {
+class Bitbucket_API extends API implements API_Interface {
 
 	/**
 	 * Constructor.
@@ -67,7 +67,7 @@ class Bitbucket_API extends API {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param $file
+	 * @param string $file
 	 *
 	 * @return bool
 	 */
@@ -130,7 +130,7 @@ class Bitbucket_API extends API {
 	/**
 	 * Read the remote CHANGES.md file
 	 *
-	 * @param $changes
+	 * @param string $changes
 	 *
 	 * @return bool
 	 */
@@ -349,8 +349,8 @@ class Bitbucket_API extends API {
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private Bitbucket repositories only.
 	 *
-	 * @param  $args
-	 * @param  $url
+	 * @param  mixed  $args
+	 * @param  string $url
 	 *
 	 * @return mixed $args
 	 */
@@ -402,10 +402,10 @@ class Bitbucket_API extends API {
 	 *
 	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
 	 *
-	 * @param $args
-	 * @param $url
+	 * @param mixed  $args
+	 * @param string $url
 	 *
-	 * @return mixed
+	 * @return mixed $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
 		$arrURL = parse_url( $url );
@@ -417,22 +417,24 @@ class Bitbucket_API extends API {
 	}
 
 	/**
-	 * Added due to abstract class designation, not used for Bitbucket.
+	 * Added due to interface contract, not used for Bitbucket.
 	 *
-	 * @param $git
-	 * @param $endpoint
+	 * @param object $git
+	 * @param string $endpoint
+	 *
+	 * @return string $endpoint
 	 */
-	protected function add_endpoints( $git, $endpoint ) {
+	public function add_endpoints( $git, $endpoint ) {
 	}
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private Bitbucket repositories only during AJAX.
 	 *
-	 * @param $args
-	 * @param $url
+	 * @param mixed  $args
+	 * @param string $url
 	 *
-	 * @return mixed
+	 * @return mixed $args
 	 */
 	public function ajax_maybe_authenticate_http( $args, $url ) {
 		global $wp_current_filter;
@@ -468,7 +470,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @return array|object Array of tag numbers, object is error.
 	 */
-	protected function parse_tag_response( $response ) {
+	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
@@ -483,7 +485,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	protected function parse_meta_response( $response ) {
+	public function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -505,7 +507,7 @@ class Bitbucket_API extends API {
 	 *
 	 * @return array|object $arr Array of changes in base64, object if error.
 	 */
-	protected function parse_changelog_response( $response ) {
+	public function parse_changelog_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
