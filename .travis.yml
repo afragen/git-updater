@@ -23,9 +23,18 @@ matrix:
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
 
-  - composer config --list --global
-  - export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
-  - composer global require "phpunit/phpunit=4.8.*"
+  - |
+    stable='^[0-9\.]+$'
+    if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then
+      phpenv config-rm xdebug.ini
+    fi
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+      composer global require "phpunit/phpunit=5.7.*"
+    elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+      composer global require "phpunit/phpunit=4.8.*"
+    fi
   - phpunit --version
 
 script: phpunit
