@@ -11,6 +11,7 @@
 * move enqueuing of plugin CSS to `Base::init()`
 * refactored Language Pack updating to their own classes
 * split out abstract methods from `abstract class API` to `interface API_Interface`
+* make Autoloader better functioning as a drop-in
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
