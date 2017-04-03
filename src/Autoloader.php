@@ -62,7 +62,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		protected function autoload( $class ) {
 			// Check for a static mapping first of all
 			if ( isset( $this->map[ $class ] ) && file_exists( $this->map[ $class ] ) ) {
-				include $this->map[ $class ];
+				include_once $this->map[ $class ];
 
 				return;
 			}
@@ -81,7 +81,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 
 				// Test for its existence and load if present
 				if ( file_exists( $path ) ) {
-					include $path;
+					include_once $path;
 				}
 			}
 		}
