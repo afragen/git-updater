@@ -12,6 +12,7 @@
 * refactored Language Pack updating to their own classes
 * split out abstract methods from `abstract class API` to `interface API_Interface`
 * make Autoloader better functioning as a drop-in
+* switched logic for plugin branch switching and setting the update transient
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`

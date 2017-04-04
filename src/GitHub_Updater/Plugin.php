@@ -403,6 +403,15 @@ class Plugin extends Base {
 				);
 
 				/*
+				 * Skip on branch switching or rollback.
+				 */
+				if ( $this->tag &&
+				     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+				) {
+					continue;
+				}
+
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
@@ -412,15 +421,6 @@ class Plugin extends Base {
 					) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
-					continue;
-				}
-
-				/*
-				 * Skip on branch switching or rollback.
-				 */
-				if ( $this->tag &&
-				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
-				) {
 					continue;
 				}
 
