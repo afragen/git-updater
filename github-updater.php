@@ -75,3 +75,16 @@ new $instantiate;
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
+
+register_activation_hook( __FILE__, 'ghu_maybe_rename_on_activation' );
+
+function ghu_maybe_rename_on_activation() {
+	global $wp_filesystem;
+
+	$basename     = plugin_basename( __FILE__ );
+	$current_path = trailingslashit( WP_PLUGIN_DIR ) . $basename;
+	$correct_path = WP_PLUGIN_DIR . '/github-updater/github-updater.php';
+	if ( $current_path !== $correct_path ) {
+		$wp_filesystem->move( $current_path, $correct_path );
+	}
+}
