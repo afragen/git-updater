@@ -495,18 +495,6 @@ class Base {
 		return true;
 	}
 
-	public function maybe_rename_on_activation() {
-		global $wp_filesystem;
-
-		$_1 = GHU_FILEPATH;
-		$basename     = plugin_basename( GHU_FILEPATH );
-		$current_path = trailingslashit( WP_PLUGIN_DIR ) . $basename;
-		$correct_path = WP_PLUGIN_DIR . '/github-updater/github-updater.php';
-		if ( $current_path !== $correct_path ) {
-			$wp_filesystem->move( $current_path, $correct_path );
-		}
-	}
-
 	/**
 	 * Used for renaming of sources to ensure correct directory name.
 	 *

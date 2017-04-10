@@ -75,6 +75,3 @@ $base = new $instantiate;
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
-
-define( 'GHU_FILEPATH', __FILE__ );
-register_activation_hook( __FILE__, array( $base, 'maybe_rename_on_activation' ) );
