@@ -67,7 +67,7 @@ new $loader( $root, $extra_classes );
 
 // Instantiate class GitHub_Updater.
 $instantiate = 'Fragen\\GitHub_Updater\\Base';
-$base = new $instantiate;
+new $instantiate;
 
 /**
  * Initialize Persist Admin notices Dismissal.
