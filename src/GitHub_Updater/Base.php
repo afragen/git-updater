@@ -169,7 +169,7 @@ class Base {
 
 		// Load hook for shiny updates Bitbucket authentication headers.
 		$bitbucket = new Bitbucket_API( new \stdClass() );
-		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
+		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_basic_authenticate_http' ), 15, 2 );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
