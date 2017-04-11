@@ -51,7 +51,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Load hooks for Bitbucket authentication headers.
 	 */
 	public function load_hooks() {
-		add_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ), 5, 2 );
+		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
 	}
 
@@ -59,9 +59,9 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Remove hooks for Bitbucket authentication headers.
 	 */
 	public function remove_hooks() {
-		remove_filter( 'http_request_args', array( &$this, 'maybe_authenticate_http' ) );
+		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
 		remove_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ) );
-		remove_filter( 'http_request_args', array( &$this, 'ajax_maybe_authenticate_http' ) );
+		remove_filter( 'http_request_args', array( &$this, 'ajax_maybe_basic_authenticate_http' ) );
 	}
 
 	/**
@@ -346,77 +346,6 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private Bitbucket repositories only.
-	 *
-	 * @param  mixed  $args
-	 * @param  string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function maybe_authenticate_http( $args, $url ) {
-		$headers       = parse_url( $url );
-		$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
-
-		$bitbucket_private         = false;
-		$bitbucket_private_install = false;
-
-		/*
-		 * Check whether attempting to update private Bitbucket repo.
-		 */
-		if ( isset( $this->type->repo ) &&
-		     ! empty( parent::$options[ $this->type->repo ] ) &&
-		     false !== strpos( $url, $this->type->repo )
-		) {
-			$bitbucket_private = true;
-		}
-
-		/*
-		 * Check whether attempting to install private Bitbucket repo
-		 * and abort if Bitbucket user/pass not set.
-		 */
-		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-		     'github_updater_install' === $_POST['option_page'] &&
-		     'bitbucket' === $_POST['github_updater_api'] &&
-		     ( ( ! empty( parent::$options['bitbucket_username'] ) &&
-		         ! empty( parent::$options['bitbucket_password'] ) ) ||
-		       ( ! empty( parent::$options['bitbucket_server_username'] ) &&
-		         ! empty( parent::$options['bitbucket_server_password'] ) ) )
-		) {
-			$bitbucket_private_install = true;
-		}
-
-		if ( $bitbucket_private || $bitbucket_private_install ) {
-			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_server_username'];
-			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_server_password'];
-
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
-
-		return $args;
-	}
-
-	/**
-	 * Removes Basic Authentication header for Bitbucket Release Assets.
-	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
-	 *
-	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
-	 *
-	 * @param mixed  $args
-	 * @param string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function http_release_asset_auth( $args, $url ) {
-		$arrURL = parse_url( $url );
-		if ( isset( $arrURL['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arrURL['host'] ) {
-			unset( $args['headers']['Authorization'] );
-		}
-
-		return $args;
-	}
-
-	/**
 	 * Added due to interface contract, not used for Bitbucket.
 	 *
 	 * @param object $git
@@ -425,42 +354,6 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function add_endpoints( $git, $endpoint ) {
-	}
-
-	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private Bitbucket repositories only during AJAX.
-	 *
-	 * @param mixed  $args
-	 * @param string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function ajax_maybe_authenticate_http( $args, $url ) {
-		global $wp_current_filter;
-
-		$headers       = parse_url( $url );
-		$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
-
-		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
-		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
-
-		if ( ! empty( $is_ajax_update ) ) {
-			$this->load_options();
-		}
-
-		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
-		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
-		       1 == parent::$options[ $_POST['slug'] ] &&
-		       false !== stristr( $url, $_POST['slug'] ) )
-		) {
-			$username = $bitbucket_org ? parent::$options['bitbucket_username'] : parent::$options['bitbucket_server_username'];
-			$password = $bitbucket_org ? parent::$options['bitbucket_password'] : parent::$options['bitbucket_server_password'];
-
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
-
-		return $args;
 	}
 
 	/**

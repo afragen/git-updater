@@ -426,4 +426,128 @@ abstract class API extends Base {
 		return $endpoint;
 	}
 
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private repositories only.
+	 *
+	 * @param  mixed  $args
+	 * @param  string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function maybe_basic_authenticate_http( $args, $url ) {
+		$private         = false;
+		$private_install = false;
+		$headers         = parse_url( $url );
+		$wordpress_api   = 'api.wordpress.org' === $headers['host'] ? true : false;
+		$bitbucket_org   = 'bitbucket.org' === $headers['host'] ? true : false;
+		$username        = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
+		$password        = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+
+		if ( isset( parent::$options[ $username ], parent::$options[ $password ] ) ) {
+			$username = parent::$options[ $username ];
+			$password = parent::$options[ $password ];
+		}
+
+		$is_set_credentials = empty( $username ) && empty( $password ) ? false : true;
+
+		/*
+		 * Check whether attempting to update private repo.
+		 */
+		if ( isset( $this->type->repo ) &&
+		     ! empty( parent::$options[ $this->type->repo ] ) &&
+		     false !== strpos( $url, $this->type->repo )
+		) {
+			$private = true;
+		}
+
+		/*
+		 * Check whether attempting to install private repo
+		 * and abort if user/pass not set.
+		 */
+		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
+		     'github_updater_install' === $_POST['option_page'] &&
+		     'bitbucket' === $_POST['github_updater_api'] &&
+		     $is_set_credentials
+		) {
+			$private_install = true;
+		}
+
+		if ( ( $private || $private_install ) && ! $wordpress_api ) {
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook
+	 * for private repositories only during AJAX.
+	 *
+	 * @param mixed  $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function ajax_maybe_basic_authenticate_http( $args, $url ) {
+		global $wp_current_filter;
+
+		$headers        = parse_url( $url );
+		$bitbucket_org  = 'bitbucket.org' === $headers['host'] ? true : false;
+		$username       = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
+		$password       = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
+		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
+		$add_header     = false;
+
+		if ( ! empty( $is_ajax_update ) ) {
+			$this->load_options();
+		}
+
+		if ( isset( parent::$options[ $username ], parent::$options[ $password ] ) ) {
+			$username = parent::$options[ $username ];
+			$password = parent::$options[ $password ];
+		}
+
+		$is_set_credentials = empty( $username ) && empty( $password ) ? false : true;
+
+		/*
+		 * Check whether attempting to update private repo
+		 * abort if user/pass not set.
+		 */
+		if ( ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
+		       1 == parent::$options[ $_POST['slug'] ] &&
+		       false !== stristr( $url, $_POST['slug'] ) ) &&
+		     $is_set_credentials
+		) {
+			$add_header = true;
+		}
+
+		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() && $add_header ) {
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Removes Basic Authentication header for Bitbucket Release Assets.
+	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
+	 *
+	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
+	 *
+	 * @param mixed  $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function http_release_asset_auth( $args, $url ) {
+		$arrURL = parse_url( $url );
+		if ( isset( $arrURL['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arrURL['host'] ) {
+			unset( $args['headers']['Authorization'] );
+		}
+
+		return $args;
+	}
+
 }
