@@ -355,44 +355,6 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Add appropriate access token to endpoint.
-	 *
-	 * @param object $git
-	 * @param string $endpoint
-	 *
-	 * @access private
-	 *
-	 * @return string $endpoint
-	 */
-	private function add_access_token_endpoint( $git, $endpoint ) {
-		// This will return if checking during shiny updates.
-		if ( ! isset( parent::$options ) ) {
-			return $endpoint;
-		}
-
-		// Add GitLab.com Access Token.
-		if ( ! empty( parent::$options['gitlab_access_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
-		}
-
-		// If using GitLab CE/Enterprise header return this endpoint.
-		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( parent::$options['gitlab_enterprise_token'] )
-		) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-		}
-
-		// Add repo access token.
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			$endpoint = add_query_arg( 'private_token', parent::$options[ $git->type->repo ], $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Create GitLab API endpoints.
 	 *
 	 * @param object $git
