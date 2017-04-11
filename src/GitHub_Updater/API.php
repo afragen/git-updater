@@ -370,4 +370,60 @@ abstract class API extends Base {
 		return false;
 	}
 
+	/**
+	 * Add appropriate access token to endpoint.
+	 *
+	 * @param object $git
+	 * @param string $endpoint
+	 *
+	 * @access private
+	 *
+	 * @return string $endpoint
+	 */
+	protected function add_access_token_endpoint( $git, $endpoint ) {
+		// This will return if checking during shiny updates.
+		if ( ! isset( parent::$options ) ) {
+			return $endpoint;
+		}
+		$key              = null;
+		$token            = null;
+		$token_enterprise = null;
+
+		switch ( $git->type->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$key              = 'access_token';
+				$token            = 'github_access_token';
+				$token_enterprise = 'github_enterprise_token';
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$key              = 'private_token';
+				$token            = 'gitlab_access_token';
+				$token_enterprise = 'gitlab_enterprise_token';
+				break;
+		}
+
+		// Add hosted access token.
+		if ( ! empty( parent::$options[ $token ] ) ) {
+			$endpoint = add_query_arg( $key, parent::$options[ $token ], $endpoint );
+		}
+
+		// Add Enterprise access token.
+		if ( ! empty( $git->type->enterprise ) &&
+		     ! empty( parent::$options[ $token_enterprise ] )
+		) {
+			$endpoint = remove_query_arg( $key, $endpoint );
+			$endpoint = add_query_arg( $key, parent::$options[ $token_enterprise ], $endpoint );
+		}
+
+		// Add repo access token.
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = remove_query_arg( $key, $endpoint );
+			$endpoint = add_query_arg( $key, parent::$options[ $git->type->repo ], $endpoint );
+		}
+
+		return $endpoint;
+	}
+
 }

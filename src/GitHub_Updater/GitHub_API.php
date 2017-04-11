@@ -320,44 +320,6 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Add appropriate access token to endpoint.
-	 *
-	 * @param object $git
-	 * @param string $endpoint
-	 *
-	 * @access private
-	 *
-	 * @return string $endpoint
-	 */
-	private function add_access_token_endpoint( $git, $endpoint ) {
-		// This will return if checking during shiny updates.
-		if ( ! isset( parent::$options ) ) {
-			return $endpoint;
-		}
-
-		// Add GitHub.com access token.
-		if ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
-
-		// Add GitHub Enterprise access token.
-		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( parent::$options['github_enterprise_token'] )
-		) {
-			$endpoint = remove_query_arg( 'access_token', $endpoint );
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $endpoint );
-		}
-
-		// Add repo access token.
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = remove_query_arg( 'access_token', $endpoint );
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Create GitHub API endpoints.
 	 *
 	 * @param object $git
