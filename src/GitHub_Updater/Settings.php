@@ -84,6 +84,7 @@ class Settings extends Base {
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
+		add_action( 'admin_head-settings_page_github-updater', array( &$this, 'style_settings' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array(
 			&$this,
@@ -330,11 +331,11 @@ class Settings extends Base {
 
 		add_settings_field(
 			'branch_switch',
-			esc_html__( 'Enable Branch Switching', 'github-updater' ),
+			null,
 			array( &$this, 'token_callback_checkbox' ),
 			'github_updater_install_settings',
 			'github_updater_settings',
-			array( 'id' => 'branch_switch' )
+			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
 		/*
@@ -598,7 +599,7 @@ class Settings extends Base {
 			}
 
 			$setting_field['id']    = $token->repo;
-			$setting_field['title'] = $type . $token->name;
+			$setting_field['title'] = $type . esc_html( $token->name );
 
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
@@ -629,13 +630,14 @@ class Settings extends Base {
 					break;
 			}
 
+			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
 			add_settings_field(
 				$setting_field['id'],
-				$setting_field['title'],
+				$title,
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				array( 'id' => $setting_field['callback'], 'token' => true )
+				array( 'id' => $setting_field['callback'], 'token' => true, 'title' => $setting_field['title'] )
 			);
 		}
 
@@ -712,11 +714,11 @@ class Settings extends Base {
 		foreach ( self::$remote_management as $id => $name ) {
 			add_settings_field(
 				$id,
-				esc_html__( $name ),
+				null,
 				array( &$this, 'token_callback_checkbox_remote' ),
 				'github_updater_remote_settings',
 				'remote_management',
-				array( 'id' => $id )
+				array( 'id' => $id, 'title' => esc_html( $name ) )
 			);
 		}
 
@@ -844,6 +846,7 @@ class Settings extends Base {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
+			<?php echo $args['title']; ?>
 		</label>
 		<?php
 	}
@@ -861,6 +864,7 @@ class Settings extends Base {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
+			<?php echo $args['title']; ?>
 		</label>
 		<?php
 	}
@@ -1076,6 +1080,20 @@ class Settings extends Base {
 			}
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . '</p>' );
 		}
+	}
+
+	/**
+	 * Style settings.
+	 */
+	public function style_settings() {
+		?>
+		<!-- GitHub Updater -->
+		<style>
+			.form-table th[scope='row']:empty {
+				display: none;
+			}
+		</style>
+		<?php
 	}
 
 }

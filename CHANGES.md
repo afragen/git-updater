@@ -15,6 +15,7 @@
 * switched logic for plugin branch switching and setting the update transient
 * refactor `add_access_token_endpoint()` to `class API`
 * refactor addition of Basic Authentication headers to `class API`
+* moved checkboxes before titles in Settings
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
