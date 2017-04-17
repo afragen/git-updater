@@ -217,6 +217,7 @@ class Base {
 		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) );
 		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) );
 		self::$load_repo_meta = $load_multisite || $load_single_site;
+		$this->load_options();
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
