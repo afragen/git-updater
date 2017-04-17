@@ -84,7 +84,6 @@ class Settings extends Base {
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
 		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
-		add_action( 'admin_head-settings_page_github-updater', array( &$this, 'style_settings' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array(
 			&$this,
@@ -1080,20 +1079,6 @@ class Settings extends Base {
 			}
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . '</p>' );
 		}
-	}
-
-	/**
-	 * Style settings.
-	 */
-	public function style_settings() {
-		?>
-		<!-- GitHub Updater -->
-		<style>
-			.form-table th[scope='row']:empty {
-				display: none;
-			}
-		</style>
-		<?php
 	}
 
 }
