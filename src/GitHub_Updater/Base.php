@@ -231,6 +231,7 @@ class Base {
 			'options-general.php',
 			'settings.php',
 		);
+
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
 			if ( is_admin() && ! empty( self::$options_remote[ $key ] ) ) {
@@ -242,7 +243,10 @@ class Base {
 			$force_meta_update = true;
 
 			// Load plugin stylesheet.
-			wp_enqueue_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+			add_action( 'admin_enqueue_scripts', function() {
+				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+				wp_enqueue_style( 'github-updater' );
+			} );
 
 			// Run GitHub Updater upgrade functions.
 			new GHU_Upgrade();
