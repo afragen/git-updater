@@ -45,7 +45,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 
-		$this->load_hooks();
+		$this->load_authentication_hooks();
 
 		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
 			self::$options['bitbucket_server_username'] = null;

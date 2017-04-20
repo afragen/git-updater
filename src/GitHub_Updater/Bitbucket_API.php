@@ -36,7 +36,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 
-		$this->load_hooks();
+		$this->load_authentication_hooks();
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
@@ -50,7 +50,7 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Load hooks for Bitbucket authentication headers.
 	 */
-	public function load_hooks() {
+	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
 	}
@@ -58,7 +58,7 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Remove hooks for Bitbucket authentication headers.
 	 */
-	public function remove_hooks() {
+	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
 		remove_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ) );
 		remove_filter( 'http_request_args', array( &$this, 'ajax_maybe_basic_authenticate_http' ) );

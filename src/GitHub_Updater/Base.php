@@ -192,7 +192,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
-			$this->repo_api->remove_hooks();
+			$this->repo_api->remove_authentication_hooks();
 		}
 	}
 
