@@ -472,7 +472,10 @@ class GitHub_API extends API implements API_Interface {
 				}
 
 				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
-					$response_object  = $response_new['http_response']->get_response_object();
+					$response_object = $response_new['http_response']->get_response_object();
+					if ( ! $response_object->success ) {
+						return false;
+					}
 					$response_headers = $response_object->history[0]->headers;
 					$download_link    = $response_headers->getValues( 'location' );
 				} else {
