@@ -438,18 +438,8 @@ abstract class API extends Base {
 	public function maybe_basic_authenticate_http( $args, $url ) {
 		$private         = false;
 		$private_install = false;
-		$headers         = parse_url( $url );
-		$wordpress_api   = 'api.wordpress.org' === $headers['host'] ? true : false;
-		$bitbucket_org   = 'bitbucket.org' === $headers['host'] ? true : false;
-		$username        = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
-		$password        = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 
-		if ( isset( parent::$options[ $username ], parent::$options[ $password ] ) ) {
-			$username = parent::$options[ $username ];
-			$password = parent::$options[ $password ];
-		}
-
-		$is_set_credentials = empty( $username ) && empty( $password ) ? false : true;
+		$credentials = $this->get_credentials( $url );
 
 		/*
 		 * Check whether attempting to update private repo.
@@ -468,12 +458,15 @@ abstract class API extends Base {
 		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
 		     'github_updater_install' === $_POST['option_page'] &&
 		     'bitbucket' === $_POST['github_updater_api'] &&
-		     $is_set_credentials
+		     $credentials['isset']
 		) {
 			$private_install = true;
 		}
 
-		if ( ( $private || $private_install ) && ! $wordpress_api ) {
+		if ( ( $private || $private_install ) && ! $credentials['api.wordpress'] ) {
+			$username = $credentials['username'];
+			$password = $credentials['password'];
+
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 
@@ -492,24 +485,15 @@ abstract class API extends Base {
 	public function ajax_maybe_basic_authenticate_http( $args, $url ) {
 		global $wp_current_filter;
 
-		$headers        = parse_url( $url );
-		$bitbucket_org  = 'bitbucket.org' === $headers['host'] ? true : false;
-		$username       = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
-		$password       = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
 		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
 		$add_header     = false;
 
+		$credentials = $this->get_credentials( $url );
+
 		if ( ! empty( $is_ajax_update ) ) {
 			$this->load_options();
 		}
-
-		if ( isset( parent::$options[ $username ], parent::$options[ $password ] ) ) {
-			$username = parent::$options[ $username ];
-			$password = parent::$options[ $password ];
-		}
-
-		$is_set_credentials = empty( $username ) && empty( $password ) ? false : true;
 
 		/*
 		 * Check whether attempting to update private repo
@@ -518,16 +502,57 @@ abstract class API extends Base {
 		if ( ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
 		       1 == parent::$options[ $_POST['slug'] ] &&
 		       false !== stristr( $url, $_POST['slug'] ) ) &&
-		     $is_set_credentials
+		     $credentials['isset']
 		) {
 			$add_header = true;
 		}
 
 		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() && $add_header ) {
+			$username = $credentials['username'];
+			$password = $credentials['password'];
+
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Get credentials (username/password) for Basic Authentication.
+	 *
+	 * @param string $url
+	 *
+	 * @return array $credentials
+	 */
+	private function get_credentials( $url ) {
+		$headers      = parse_url( $url );
+		$username_key = null;
+		$password_key = null;
+		$credentials  = array(
+			'username'      => null,
+			'password'      => null,
+			'api.wordpress' => 'api.wordpress.org' === $headers['host'] ? true : false,
+			'isset'         => false,
+		);
+
+		$type = isset( $this->type->type ) ? explode( '_', $this->type->type ) : array( false );
+
+		// Use switch statement for future API development.
+		switch ( $type[0] ) {
+			case 'bitbucket':
+				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
+				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
+				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+				break;
+		}
+
+		if ( isset( parent::$options[ $username_key ], parent::$options[ $password_key ] ) ) {
+			$credentials['username'] = parent::$options[ $username_key ];
+			$credentials['password'] = parent::$options[ $password_key ];
+			$credentials['isset']    = true;
+		}
+
+		return $credentials;
 	}
 
 	/**
