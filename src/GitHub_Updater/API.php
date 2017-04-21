@@ -487,7 +487,7 @@ abstract class API extends Base {
 
 		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
 		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
-		$add_header     = false;
+		$private        = false;
 
 		$credentials = $this->get_credentials( $url );
 
@@ -504,10 +504,10 @@ abstract class API extends Base {
 		       false !== stristr( $url, $_POST['slug'] ) ) &&
 		     $credentials['isset']
 		) {
-			$add_header = true;
+			$private = true;
 		}
 
-		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() && $add_header ) {
+		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() && $private ) {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
