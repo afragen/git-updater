@@ -678,7 +678,7 @@ class Settings extends Base {
 				}
 			} );
 
-		// Unset if value set.
+		// Unset if value set AND if associated with a repo
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys );
