@@ -651,9 +651,12 @@ class Settings extends Base {
 			'github_enterprise_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'bitbucket_server_username',
-			'bitbucket_server_password',
 		);
+
+		$bbserver_auth = array_key_exists( 'bbserver', $this->settings_sub_tabs() )
+			? array( 'bitbucket_server_username', 'bitbucket_server_password' )
+			: array();
+		$always_unset  = array_merge( $always_unset, $bbserver_auth );
 
 		array_filter( $always_unset,
 			function( $e ) use ( &$ghu_unset_keys ) {
@@ -677,9 +680,11 @@ class Settings extends Base {
 
 		// Unset if value set.
 		array_filter( $ghu_unset_keys,
-			function( $e ) use ( &$ghu_unset_keys ) {
+			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys );
-				if ( $ghu_unset_keys[ $key ] && 'github_updater_install_repo' !== $key ) {
+				if ( array_key_exists( $key, $ghu_unset_keys )
+				     && array_key_exists( $key, $ghu_tokens )
+				) {
 					unset( $ghu_unset_keys[ $key ] );
 				}
 			} );
