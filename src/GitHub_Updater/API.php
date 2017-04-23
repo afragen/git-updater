@@ -449,42 +449,7 @@ abstract class API extends Base {
 
 		return $args;
 	}
-
-	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private repositories only during AJAX.
-	 *
-	 * @uses $this->get_credentials()
-	 *
-	 * @param mixed  $args
-	 * @param string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function ajax_maybe_basic_authenticate_http( $args, $url ) {
-		global $wp_current_filter;
-
-		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
-		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
-
-		$credentials = $this->get_credentials( $url );
-
-		if ( ! empty( $is_ajax_update ) ) {
-			//$this->load_options();
-		}
-
-		if ( parent::is_doing_ajax() && ! parent::is_heartbeat()
-		     && $credentials['private'] && $credentials['isset']
-		) {
-			$username = $credentials['username'];
-			$password = $credentials['password'];
-
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
-
-		return $args;
-	}
-
+	
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
