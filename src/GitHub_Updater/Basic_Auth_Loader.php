@@ -20,12 +20,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 class Basic_Auth_Loader {
 
+	private static $options;
 	/**
 	 * Basic_Auth_Loader object.
 	 *
 	 * @var bool|object
 	 */
 	private static $instance = false;
+
+	public function __construct() {
+		self::$options = get_site_option( 'github_updater', array() );
+	}
 
 	/**
 	 * The Basic_Auth_Loader object can be created/obtained via this
