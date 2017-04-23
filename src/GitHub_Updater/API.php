@@ -526,6 +526,8 @@ abstract class API extends Base {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
+		$type         = false;
+		$slug         = false;
 		$username_key = null;
 		$password_key = null;
 		$credentials  = array(
@@ -535,7 +537,20 @@ abstract class API extends Base {
 			'isset'         => false,
 		);
 
-		$type = isset( $this->type->type ) ? explode( '_', $this->type->type ) : array( false );
+		if ( isset( $_REQUEST['rollback'] ) ) {
+			$slug = isset( $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : $_REQUEST['theme'];
+		}
+		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
+
+		if ( $slug ) {
+			$ghu_plugins = Plugin::instance()->get_plugin_configs();
+			$ghu_themes  = Theme::instance()->get_theme_configs();
+			$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+
+			$type = $ghu_tokens[ $slug ]->type;
+		}
+
+		$type = $type ? explode( '_', $type ) : array( false );
 
 		// Use switch statement for future API development.
 		switch ( $type[0] ) {
