@@ -526,8 +526,6 @@ abstract class API extends Base {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = false;
-		$slug         = false;
 		$username_key = null;
 		$password_key = null;
 		$credentials  = array(
@@ -537,24 +535,9 @@ abstract class API extends Base {
 			'isset'         => false,
 		);
 
-		if ( isset( $_REQUEST['rollback'] ) ) {
-			$slug = isset( $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : $_REQUEST['theme'];
-		}
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
-
-		if ( $slug ) {
-			$ghu_plugins = Plugin::instance()->get_plugin_configs();
-			$ghu_themes  = Theme::instance()->get_theme_configs();
-			$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
-
-			$type = $ghu_tokens[ $slug ]->type;
-		}
-
-		$type = $type ? explode( '_', $type ) : array( false );
-
-		// Use switch statement for future API development.
-		switch ( $type[0] ) {
-			case 'bitbucket':
+		switch ( $this ) {
+			case ( $this instanceof Bitbucket_API ):
+			case ( $this instanceof Bitbucket_Server_API ):
 				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
