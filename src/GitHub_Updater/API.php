@@ -430,40 +430,17 @@ abstract class API extends Base {
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private repositories only.
 	 *
+	 * @uses $this->get_credentials()
+	 *
 	 * @param  mixed  $args
 	 * @param  string $url
 	 *
 	 * @return mixed $args
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
-		$private         = false;
-		$private_install = false;
-
 		$credentials = $this->get_credentials( $url );
 
-		/*
-		 * Check whether attempting to update private repo.
-		 */
-		if ( isset( $this->type->repo ) &&
-		     ! empty( parent::$options[ $this->type->repo ] ) &&
-		     false !== strpos( $url, $this->type->repo )
-		) {
-			$private = true;
-		}
-
-		/*
-		 * Check whether attempting to install private repo
-		 * and abort if user/pass not set.
-		 */
-		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-		     'github_updater_install' === $_POST['option_page'] &&
-		     'bitbucket' === $_POST['github_updater_api'] &&
-		     $credentials['isset']
-		) {
-			$private_install = true;
-		}
-
-		if ( ( $private || $private_install ) && ! $credentials['api.wordpress'] ) {
+		if ( $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
@@ -477,6 +454,8 @@ abstract class API extends Base {
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private repositories only during AJAX.
 	 *
+	 * @uses $this->get_credentials()
+	 *
 	 * @param mixed  $args
 	 * @param string $url
 	 *
@@ -487,27 +466,16 @@ abstract class API extends Base {
 
 		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
 		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
-		$private        = false;
 
 		$credentials = $this->get_credentials( $url );
 
 		if ( ! empty( $is_ajax_update ) ) {
-			$this->load_options();
+			//$this->load_options();
 		}
 
-		/*
-		 * Check whether attempting to update private repo
-		 * abort if user/pass not set.
-		 */
-		if ( ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], parent::$options ) &&
-		       1 == parent::$options[ $_POST['slug'] ] &&
-		       false !== stristr( $url, $_POST['slug'] ) ) &&
-		     $credentials['isset']
+		if ( parent::is_doing_ajax() && ! parent::is_heartbeat()
+		     && $credentials['private'] && $credentials['isset']
 		) {
-			$private = true;
-		}
-
-		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() && $private ) {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
@@ -519,6 +487,8 @@ abstract class API extends Base {
 
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
+	 *
+	 * @uses $this->is_repo_private()
 	 *
 	 * @param string $url
 	 *
@@ -533,6 +503,7 @@ abstract class API extends Base {
 			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'] ? true : false,
 			'isset'         => false,
+			'private'       => false,
 		);
 
 		switch ( $this ) {
@@ -548,9 +519,49 @@ abstract class API extends Base {
 			$credentials['username'] = parent::$options[ $username_key ];
 			$credentials['password'] = parent::$options[ $password_key ];
 			$credentials['isset']    = true;
+			$credentials['private']  = $this->is_repo_private( $url );
 		}
 
 		return $credentials;
+	}
+
+	/**
+	 * Determine if repo is private.
+	 *
+	 * @param string $url
+	 *
+	 * @return bool true if private
+	 */
+	private function is_repo_private( $url ) {
+		// Used when updating.
+		$slug = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
+		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
+		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
+
+		if ( ( $slug && array_key_exists( $slug, parent::$options ) &&
+		       1 == parent::$options[ $slug ] &&
+		       false !== stristr( $url, $slug ) )
+		) {
+			return true;
+		}
+
+		// Used for remote install tab.
+		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
+		     'github_updater_install' === $_POST['option_page']
+		) {
+			return true;
+		}
+
+		// Used for refreshing cache.
+		foreach ( array_keys( parent::$options ) as $option ) {
+			if ( 1 == parent::$options[ $option ] &&
+			     false !== strpos( $url, $option )
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
