@@ -449,7 +449,7 @@ abstract class API extends Base {
 
 		return $args;
 	}
-	
+
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
 	 *

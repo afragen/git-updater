@@ -170,7 +170,9 @@ class Base {
 		// Load hook for shiny updates Bitbucket authentication headers.
 		// Loads Bitbucket::load_authentication_hooks()
 		// @TODO make loading class
-		new Bitbucket_API( new \stdClass() );
+		//new Bitbucket_API( new \stdClass() );
+		//$basic_auth_loader = new Basic_Auth_Loader();
+		Basic_Auth_Loader::instance()->load_authentication_hooks();
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
@@ -193,7 +195,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
-			$this->repo_api->remove_authentication_hooks();
+			Basic_Auth_Loader::instance()->remove_authentication_hooks();
 		}
 	}
 
