@@ -171,7 +171,7 @@ class Base {
 		// Loads Bitbucket::load_authentication_hooks()
 		// @TODO make loading class
 		//new Bitbucket_API( new \stdClass() );
-		//$basic_auth_loader = new Basic_Auth_Loader();
+		//$basic_auth_loader = Basic_Auth_Loader::instance();
 		Basic_Auth_Loader::instance()->load_authentication_hooks();
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );

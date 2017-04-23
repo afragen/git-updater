@@ -11,13 +11,19 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
-class Basic_Auth_Loader extends API {
+class Basic_Auth_Loader {
 
 	/**
 	 * Basic_Auth_Loader object.
 	 *
-	 * @var bool|\Fragen\GitHub_Updater\Basic_Auth_Loader
+	 * @var bool|object
 	 */
 	private static $instance = false;
 
