@@ -43,6 +43,7 @@ class Basic_Auth_Loader {
 	public static function instance() {
 		if ( false === self::$instance ) {
 			self::$instance = new self();
+			self::$calling_object = debug_backtrace()[1]['object'];
 		}
 
 		return self::$instance;
@@ -52,7 +53,6 @@ class Basic_Auth_Loader {
 	 * Load hooks for Bitbucket authentication headers.
 	 */
 	public function load_authentication_hooks() {
-		self::$calling_object = debug_backtrace()[1]['object'];
 		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
 		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
 	}
