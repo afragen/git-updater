@@ -172,7 +172,9 @@ class Base {
 		 * Can't load directly as calling class is Base and this in
 		 * causes issues with Basic_Auth_Loader::$calling_object.
 		 */
-		new Bitbucket_API( new \stdClass() );
+		if ( self::is_doing_ajax() ) {
+			new Bitbucket_API( new \stdClass() );
+		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
