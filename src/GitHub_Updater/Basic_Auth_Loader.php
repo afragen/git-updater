@@ -18,9 +18,25 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * Class Basic_Auth_Loader
+ *
+ * @package Fragen\GitHub_Updater
+ */
 class Basic_Auth_Loader {
 
+	/**
+	 * Stores Basic::$options.
+	 *
+	 * @var mixed
+	 */
 	private static $options;
+
+	/**
+	 * Stores the object calling Basic_Auth_Loader.
+	 *
+	 * @var
+	 */
 	private static $calling_object;
 
 	/**
@@ -30,6 +46,9 @@ class Basic_Auth_Loader {
 	 */
 	private static $instance = false;
 
+	/**
+	 * Basic_Auth_Loader constructor.
+	 */
 	public function __construct() {
 		self::$options = get_site_option( 'github_updater', array() );
 	}
