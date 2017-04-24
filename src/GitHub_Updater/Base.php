@@ -167,8 +167,12 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
-		// Load hook for shiny updates Basic Authentication headers.
-		Basic_Auth_Loader::instance()->load_authentication_hooks();
+		/*
+		 * Load hook for shiny updates Basic Authentication headers.
+		 * Can't load directly as calling class is Base and this in
+		 * causes issues with Basic_Auth_Loader::$calling_object.
+		 */
+		new Bitbucket_API( new \stdClass() );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
