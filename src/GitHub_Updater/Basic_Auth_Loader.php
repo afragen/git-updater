@@ -32,6 +32,13 @@ class Basic_Auth_Loader {
 	private static $options;
 
 	/**
+	 * Stores the object calling Basic_Auth_Loader.
+	 *
+	 * @var
+	 */
+	private static $object;
+
+	/**
 	 * Basic_Auth_Loader object.
 	 *
 	 * @var bool|object
@@ -60,6 +67,8 @@ class Basic_Auth_Loader {
 	public static function instance( $options ) {
 		if ( false === self::$instance ) {
 			self::$instance = new static( $options );
+			$backtrace      = debug_backtrace();
+			self::$object   = $backtrace[1]['object'];
 		}
 
 		return self::$instance;
@@ -126,6 +135,11 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
+		// @TODO figure out how to get object of updating repo from Base
+		switch ( self::$object ) {
+			case ( self::$object instanceof Base ):
+			case ( self::$object instanceof Bitbucket_API ):
+			case ( self::$object instanceof Bitbucket_Server_API ):
 				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
