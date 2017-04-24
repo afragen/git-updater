@@ -125,6 +125,7 @@ class Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
+		$type         = self::$object;
 		$username_key = null;
 		$password_key = null;
 		$credentials  = array(
@@ -135,11 +136,24 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		// @TODO figure out how to get object of updating repo from Base
-		switch ( self::$object ) {
-			case ( self::$object instanceof Base ):
-			case ( self::$object instanceof Bitbucket_API ):
-			case ( self::$object instanceof Bitbucket_Server_API ):
+		$slug = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
+		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
+		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
+
+		if ( $slug ) {
+			$repos = array_merge(
+				Plugin::instance()->get_plugin_configs(),
+				Theme::instance()->get_theme_configs()
+			);
+			$type  = $repos[ $slug ]->type;
+		}
+
+
+		switch ( $type ) {
+			case ( 'bitbucket_plugin' ):
+			case ( 'bitbucket_theme' ):
+			case ( $type instanceof Bitbucket_API ):
+			case ( $type instanceof Bitbucket_Server_API ):
 				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';

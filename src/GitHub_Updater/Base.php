@@ -169,7 +169,6 @@ class Base {
 
 		/*
 		 * Load hook for shiny updates Basic Authentication headers.
-		 * @TODO figure out how to load hooks but not reference Base as calling class.
 		 */
 		if ( self::is_doing_ajax() ) {
 			Basic_Auth_Loader::instance( self::$options )->load_authentication_hooks();
