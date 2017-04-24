@@ -14,7 +14,7 @@
 * make Autoloader better functioning as a drop-in
 * switched logic for plugin branch switching and setting the update transient
 * refactor `add_access_token_endpoint()` to `class API`
-* refactor addition of Basic Authentication headers to `class API`
+* refactor Basic Authentication headers to `class Basic_Auth_Loader`
 * moved checkboxes before titles in Settings
 * updated wiki screenshots
 * fixed to call `load_options()` in `Base::init()` to properly utilize options

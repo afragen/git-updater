@@ -167,10 +167,12 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
-		// Load hook for shiny updates Bitbucket authentication headers.
-		// Loads Bitbucket::load_authentication_hooks()
-		// @TODO make loading class
-		new Bitbucket_API( new \stdClass() );
+		/*
+		 * Load hook for shiny updates Basic Authentication headers.
+		 */
+		if ( self::is_doing_ajax() ) {
+			Basic_Auth_Loader::instance( self::$options )->load_authentication_hooks();
+		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
@@ -193,7 +195,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
-			$this->repo_api->remove_authentication_hooks();
+			Basic_Auth_Loader::instance( null, null )->remove_authentication_hooks();
 		}
 	}
 
