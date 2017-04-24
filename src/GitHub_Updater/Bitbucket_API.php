@@ -36,7 +36,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 
-		Basic_Auth_Loader::instance()->load_authentication_hooks();
+		Basic_Auth_Loader::instance( parent::$options )->load_authentication_hooks();
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;

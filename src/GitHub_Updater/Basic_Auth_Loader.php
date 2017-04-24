@@ -4,7 +4,6 @@
  *
  * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
- * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  */
@@ -37,7 +36,7 @@ class Basic_Auth_Loader {
 	 *
 	 * @var
 	 */
-	private static $calling_object;
+	private static $object;
 
 	/**
 	 * Basic_Auth_Loader object.
@@ -48,21 +47,28 @@ class Basic_Auth_Loader {
 
 	/**
 	 * Basic_Auth_Loader constructor.
+	 *
+	 * @param array $options
 	 */
-	public function __construct() {
-		self::$options = get_site_option( 'github_updater', array() );
+	public function __construct( $options ) {
+		self::$options = empty( $options )
+			? get_site_option( 'github_updater', array() )
+			: $options;
 	}
 
 	/**
 	 * The Basic_Auth_Loader object can be created/obtained via this
 	 * method - this prevents potential duplicate loading.
 	 *
+	 * @param array $options
+	 *
 	 * @return object $instance Basic_Auth_Loader
 	 */
-	public static function instance() {
+	public static function instance( $options ) {
 		if ( false === self::$instance ) {
-			self::$instance = new self();
-			self::$calling_object = debug_backtrace()[1]['object'];
+			self::$instance = new static( $options );
+			$backtrace      = debug_backtrace();
+			self::$object   = $backtrace[1]['object'];
 		}
 
 		return self::$instance;
@@ -129,9 +135,11 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		switch ( self::$calling_object ) {
-			case ( self::$calling_object instanceof Bitbucket_API ):
-			case ( self::$calling_object instanceof Bitbucket_Server_API ):
+		// @TODO figure out how to get object of updating repo from Base
+		switch ( self::$object ) {
+			case ( self::$object instanceof Base ):
+			case ( self::$object instanceof Bitbucket_API ):
+			case ( self::$object instanceof Bitbucket_Server_API ):
 				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
