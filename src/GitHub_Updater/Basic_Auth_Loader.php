@@ -136,18 +136,16 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
-
-		if ( $slug ) {
-			$repos = array_merge(
+		$slug  = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
+		$slug  = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
+		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
+		$repos = isset( $_REQUEST )
+			? array_merge(
 				Plugin::instance()->get_plugin_configs(),
 				Theme::instance()->get_theme_configs()
-			);
-			$type  = $repos[ $slug ]->type;
-		}
-
+			)
+			: array();
+		$type  = $slug ? $repos[ $slug ]->type : $type;
 
 		switch ( $type ) {
 			case ( 'bitbucket_plugin' ):
