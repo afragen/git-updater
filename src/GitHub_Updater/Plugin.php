@@ -167,6 +167,7 @@ class Plugin extends Base {
 				$git_plugin['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_plugin['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
 				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
+				$git_plugin['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
 
 				$git_plugin['banners']['high'] =
 					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )

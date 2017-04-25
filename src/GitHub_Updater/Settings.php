@@ -1071,18 +1071,21 @@ class Settings extends Base {
 				'repo'    => $e->repo,
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
+				'broken'  => $e->broken ? $e->broken : false,
 			);
 		}, $type_repos );
 
-		$lock = '&nbsp;<span class="dashicons dashicons-lock"></span>';
+		$lock   = '&nbsp;<span class="dashicons dashicons-lock"></span>';
+		$broken = '&nbsp;<span style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$dashicon   = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private = $data['private'] ? $lock : null;
+			$is_broken  = $data['broken'] ? $broken : null;
 			if ( false !== strpos( $data['type'], 'theme' ) ) {
 				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
 			}
-			printf( '<p>' . $dashicon . $data['name'] . $is_private . '</p>' );
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_broken . '</p>' );
 		}
 	}
 
