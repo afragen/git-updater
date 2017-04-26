@@ -150,13 +150,11 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
-
 		/**
 		 * Mod for GitHub Updater.
 		 */
 		//$contents = file_get_contents( $file );
 		$contents = $file;
-
 
 		if ( preg_match( '!!u', $contents ) )
 			$contents = preg_split( '!\R!u', $contents );
@@ -324,12 +322,6 @@ class Parser {
 		// Filter out any empty sections.
 		$this->sections = array_filter( $this->sections );
 
-		// Use the first line of the description for the short description if not provided.
-		if ( empty( $this->short_description ) && ! empty( $this->sections['description'] ) ) {
-			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-			$this->short_description = $this->short_description_53();
-		}
-
 		// Use the short description for the description section if not provided.
 		if ( empty( $this->sections['description'] ) ) {
 			$this->sections['description'] = $this->short_description;
@@ -354,10 +346,28 @@ class Parser {
 			$this->sections['faq'] = '';
 		}
 
+		// Prefix Installation Instructions as a FAQ entry
+		if ( $this->has_unique_installation_instructions() ) {
+			$this->faq = array_merge(
+				array(
+					__( 'Installation Instructions', 'wporg-plugins' ) => $this->sections['installation']
+				),
+				$this->faq
+			);
+			//unset( $this->sections['installation'] );
+			$this->sections['faq'] = ''; // Ensure it's set as per faq section above.
+		}
+
 		// Markdownify!
 		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
 		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );
 		$this->faq            = array_map( array( $this, 'parse_markdown' ), $this->faq );
+
+		// Use the first line of the description for the short description if not provided.
+		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
+			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->short_description = $this->short_description_53();
+		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
@@ -583,7 +593,7 @@ class Parser {
 		 */
 		$heading_style = 'bold'; // 'heading' or 'bold'
 		foreach ( $trimmed_lines as $trimmed ) {
-			if ( $trimmed[0] == '#' || $trimmed[0] == '=' ) {
+			if ( $trimmed && ( $trimmed[0] == '#' || $trimmed[0] == '=' ) ) {
 				$heading_style = 'heading';
 				break;
 			}
@@ -638,5 +648,30 @@ class Parser {
 		}
 
 		return $markdown->transform( $text );
+	}
+
+	/**
+	 * Determine if the readme contains unique installation instructions.
+	 *
+	 * When phrases are added here, the affected plugins will need to be reparsed to pick it up.
+	 *
+	 * @return bool Whether the instructions differ from default instructions.
+	 */
+	protected function has_unique_installation_instructions() {
+		if ( ! isset( $this->sections['installation'] ) ) {
+			return false;
+		}
+
+		// If the plugin installation section contains any of these phrases, skip it as it's not useful.
+		$common_phrases = array(
+			'This section describes how to install the plugin and get it working.', // Default readme.txt content
+		);
+		foreach ( $common_phrases as $phrase ) {
+			if ( false !== stripos( $this->sections['installation'], $phrase ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
