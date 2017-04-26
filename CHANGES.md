@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 6.3.0 / 2017-04-26
 * fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
 * hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output
 * added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
