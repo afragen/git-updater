@@ -25,14 +25,14 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitLab_API extends API {
+class GitLab_API extends API implements API_Interface {
 
 	/**
 	 * Holds loose class method name.
 	 *
 	 * @var null
 	 */
-	protected static $method = null;
+	private static $method = null;
 
 	/**
 	 * Constructor.
@@ -61,7 +61,7 @@ class GitLab_API extends API {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param $file
+	 * @param string $file Filename.
 	 *
 	 * @return bool
 	 */
@@ -71,10 +71,6 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
-
-			if ( empty( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
 
 			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
 
@@ -136,7 +132,7 @@ class GitLab_API extends API {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param $changes
+	 * @param string $changes Changelog filename.
 	 *
 	 * @return bool
 	 */
@@ -186,9 +182,7 @@ class GitLab_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
-		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
-		) {
+		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -312,21 +306,7 @@ class GitLab_API extends API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/*
-		 * Check if using GitLab CE/Enterprise.
-		 */
-		if ( ! empty( $this->type->enterprise ) ) {
-			$gitlab_base = $this->type->enterprise;
-		} else {
-			$gitlab_base = 'https://gitlab.com';
-		}
-
-		$download_link_base = implode( '/', array(
-			$gitlab_base,
-			$this->type->owner,
-			$this->type->repo,
-			'repository/archive.zip',
-		) );
+		$download_link_base = $this->get_api_url( '/:owner/:repo/repository/archive.zip', true );
 		$endpoint           = '';
 
 		/*
@@ -375,96 +355,16 @@ class GitLab_API extends API {
 	}
 
 	/**
-	 * Get/process Language Packs.
-	 * Language Packs cannot reside on GitLab CE/Enterprise.
-	 *
-	 * @TODO GitLab CE/Enterprise.
-	 *
-	 * @param array $headers Array of headers of Language Pack.
-	 *
-	 * @return bool When invalid response.
-	 */
-	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
-
-		if ( ! $response ) {
-			self::$method = 'translation';
-			$id           = urlencode( $headers['owner'] . '/' . $headers['repo'] );
-			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
-
-				foreach ( $response as $locale ) {
-					$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
-					$package = implode( '/', $package ) . $locale->package;
-
-					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
-					$response->{$locale->language}->version = $this->type->remote_version;
-				}
-
-				$this->set_repo_cache( 'languages', $response );
-			}
-		}
-		$this->type->language_packs = $response;
-	}
-
-	/**
-	 * Add appropriate access token to endpoint.
-	 *
-	 * @param $git
-	 * @param $endpoint
-	 *
-	 * @access private
-	 *
-	 * @return string
-	 */
-	private function add_access_token_endpoint( $git, $endpoint ) {
-		// This will return if checking during shiny updates.
-		if ( ! isset( parent::$options ) ) {
-			return $endpoint;
-		}
-
-		// Add GitLab.com Access Token.
-		if ( ! empty( parent::$options['gitlab_access_token'] ) ) {
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $endpoint );
-		}
-
-		// If using GitLab CE/Enterprise header return this endpoint.
-		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( parent::$options['gitlab_enterprise_token'] )
-		) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			$endpoint = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $endpoint );
-		}
-
-		// Add repo access token.
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = remove_query_arg( 'private_token', $endpoint );
-			$endpoint = add_query_arg( 'private_token', parent::$options[ $git->type->repo ], $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Create GitLab API endpoints.
 	 *
-	 * @param $git      object
-	 * @param $endpoint string
+	 * @param object $git
+	 * @param string $endpoint
 	 *
-	 * @return string
+	 * @return string $endpoint
 	 */
-	protected function add_endpoints( $git, $endpoint ) {
+	public function add_endpoints( $git, $endpoint ) {
 
-		switch ( self::$method ) {
+		switch ( $git::$method ) {
 			case 'projects':
 			case 'meta':
 			case 'tags':
@@ -484,7 +384,7 @@ class GitLab_API extends API {
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
-		 * If using GitLab CE/Enterprise header return this endpoint.
+		 * If GitLab CE/Enterprise return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
 			return $git->type->enterprise_api . $endpoint;
@@ -534,7 +434,7 @@ class GitLab_API extends API {
 	 *
 	 * @return object|array Array of tag numbers, object is error.
 	 */
-	protected function parse_tag_response( $response ) {
+	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
@@ -556,7 +456,7 @@ class GitLab_API extends API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	protected function parse_meta_response( $response ) {
+	public function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -578,7 +478,7 @@ class GitLab_API extends API {
 	 *
 	 * @return array|object $arr Array of changes in base64, object if error.
 	 */
-	protected function parse_changelog_response( $response ) {
+	public function parse_changelog_response( $response ) {
 		if ( isset( $response->messages ) ) {
 			return $response;
 		}

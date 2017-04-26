@@ -160,10 +160,11 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
-			$json_encode_flags = 128; // 128 == JSON_PRETTY_PRINT
-			if ( defined( 'JSON_PRETTY_PRINT' ) ) {
-				$json_encode_flags = JSON_PRETTY_PRINT;
-			}
+			/*
+			 * 128 == JSON_PRETTY_PRINT
+			 * 64 == JSON_UNESCAPED_SLASHES
+			 */
+			$json_encode_flags = 128 | 64;
 
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
@@ -339,6 +340,8 @@ class Rest_Update extends Base {
 		$response['hash']       = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
 		$response['branch']     = 'tag' === $new['type'] ? 'master' : $new['name'];
 		$response['json_error'] = json_last_error_msg();
+
+		//$response['payload'] = $new;
 
 		//$response['payload'] = $new;
 

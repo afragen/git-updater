@@ -102,11 +102,9 @@ class Base {
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
-		'branch'     => 'Branch',
-		'enterprise' => 'Enterprise',
-		'gitlab_ce'  => 'CE',
-		'languages'  => 'Languages',
-		'ci_job'     => 'CI Job',
+		'branch'    => 'Branch',
+		'languages' => 'Languages',
+		'ci_job'    => 'CI Job',
 	);
 
 	/**
@@ -119,6 +117,7 @@ class Base {
 		'github_private'    => false,
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
+		'bitbucket_server'  => false,
 		'gitlab'            => false,
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
@@ -161,16 +160,19 @@ class Base {
 	 * Load relevant action/filter hooks.
 	 * Use 'init' hook for user capabilities.
 	 */
-	public function load_hooks() {
+	protected function load_hooks() {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'init', array( &$this, 'background_update' ) );
 		add_action( 'init', array( &$this, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
-		// Load hook for shiny updates Bitbucket authentication headers.
-		$bitbucket = new Bitbucket_API( new \stdClass() );
-		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
+		/*
+		 * Load hook for shiny updates Basic Authentication headers.
+		 */
+		if ( self::is_doing_ajax() ) {
+			Basic_Auth_Loader::instance( self::$options )->load_authentication_hooks();
+		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
@@ -192,8 +194,8 @@ class Base {
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
-		if ( $this->repo_api instanceof Bitbucket_API ) {
-			$this->repo_api->remove_hooks();
+		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
+			Basic_Auth_Loader::instance( self::$options )->remove_authentication_hooks();
 		}
 	}
 
@@ -218,6 +220,7 @@ class Base {
 		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) );
 		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) );
 		self::$load_repo_meta = $load_multisite || $load_single_site;
+		$this->load_options();
 
 		// Set $force_meta_update = true on appropriate admin pages.
 		$force_meta_update = false;
@@ -231,6 +234,7 @@ class Base {
 			'options-general.php',
 			'settings.php',
 		);
+
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
 			if ( is_admin() && ! empty( self::$options_remote[ $key ] ) ) {
@@ -240,6 +244,12 @@ class Base {
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
 			$force_meta_update = true;
+
+			// Load plugin stylesheet.
+			add_action( 'admin_enqueue_scripts', function() {
+				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+				wp_enqueue_style( 'github-updater' );
+			} );
 
 			// Run GitHub Updater upgrade functions.
 			new GHU_Upgrade();
@@ -266,7 +276,7 @@ class Base {
 		if ( is_admin() && self::$load_repo_meta &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
-			new Settings();
+			Settings::instance();
 		}
 
 		return true;
@@ -320,8 +330,8 @@ class Base {
 	 * for remote management services.
 	 */
 	public function forced_meta_update_remote_management() {
-		$this->forced_meta_update_plugins();
-		$this->forced_meta_update_themes();
+		$this->forced_meta_update_plugins( true );
+		$this->forced_meta_update_themes( true );
 	}
 
 	/**
@@ -422,7 +432,7 @@ class Base {
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
-		$this->$type->requires_wp_version  = '4.0';
+		$this->$type->requires_wp_version  = '4.4';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
 	}
@@ -450,7 +460,11 @@ class Base {
 				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $repo );
+				if ( $repo->enterprise_api ) {
+					$this->repo_api = new Bitbucket_Server_API( $repo );
+				} else {
+					$this->repo_api = new Bitbucket_API( $repo );
+				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
@@ -481,7 +495,7 @@ class Base {
 			}
 			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
-			$this->languages     = new Language_Pack( $repo, $this->repo_api );
+			$this->languages     = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 		}
 
 		$this->remove_hooks();
@@ -502,7 +516,7 @@ class Base {
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
-		global $wp_filesystem, $plugins, $themes;
+		global $wp_filesystem;
 		$slug            = null;
 		$repo            = null;
 		$new_source      = null;
@@ -517,28 +531,6 @@ class Base {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			if ( $plugins && empty( $hook_extra ) ) {
-				foreach ( array_reverse( $plugins ) as $plugin ) {
-					$slug = dirname( $plugin );
-					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
-						$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
-						break;
-					}
-				}
-			}
-			if ( ! $plugins && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->plugin ) ) {
-					$slug = dirname( $upgrader->skin->plugin );
-				}
-				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
-					$slug = sanitize_text_field( $_POST['slug'] );
-				}
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
 		}
 
 		/*
@@ -548,25 +540,6 @@ class Base {
 			$upgrader_object = Theme::instance();
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			if ( $themes && empty( $hook_extra ) ) {
-				foreach ( $themes as $theme ) {
-					$slug = $theme;
-					if ( false !== stristr( basename( $source ), $theme ) ) {
-						$new_source = trailingslashit( $remote_source ) . $theme;
-						break;
-					}
-				}
-			}
-			if ( ! $themes && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->theme ) ) {
-					$slug = $upgrader->skin->theme;
-				}
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
 		}
@@ -1134,7 +1107,7 @@ class Base {
 	 * @return null|string
 	 */
 	protected function get_local_info( $repo, $file ) {
-		$response = null;
+		$response = false;
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			return $response;
@@ -1311,7 +1284,7 @@ class Base {
 			$type = 'theme';
 		}
 
-		if ( ! empty( $slug ) && array_key_exists( $slug, $this->config ) ) {
+		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
 			$repo = $this->config[ $slug ];
 			$this->set_rollback_transient( $type, $repo );
 		}
@@ -1333,7 +1306,11 @@ class Base {
 				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
-				$this->repo_api = new Bitbucket_API( $repo );
+				if ( ! empty( $repo->enterprise ) ) {
+					$this->repo_api = new Bitbucket_Server_API( $repo );
+				} else {
+					$this->repo_api = new Bitbucket_API( $repo );
+				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
@@ -1342,7 +1319,7 @@ class Base {
 		}
 
 		$transient         = 'update_' . $type . 's';
-		$this->tag         = $_GET['rollback'];
+		$this->tag         = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$updates_transient = get_site_transient( $transient );
 		$rollback          = array(
@@ -1413,6 +1390,66 @@ class Base {
 			}
 			set_site_transient( $transient, $current );
 		}
+	}
+
+	/**
+	 * Parse Enterprise, Languages, and CI Job headers for plugins and themes.
+	 *
+	 * @param array           $header
+	 * @param array|\WP_Theme $headers
+	 * @param array           $header_parts
+	 * @param array           $repo_parts
+	 *
+	 * @return array $header
+	 */
+	protected function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
+		$hosted_domains = array( 'github.com', 'bitbucket.org', 'gitlab.com' );
+		$theme          = null;
+
+		$header['enterprise_uri'] = null;
+		$header['enterprise_api'] = null;
+		$header['languages']      = null;
+		$header['ci_job']         = false;
+
+		if ( ! in_array( $header['host'], $hosted_domains ) && ! empty( $header['host'] ) ) {
+			$header['enterprise_uri'] = $header['base_uri'];
+			$header['enterprise_uri'] = trim( $header['enterprise_uri'], '/' );
+			switch ( $header_parts[0] ) {
+				case 'GitHub':
+				case 'GitLab':
+					$header['enterprise_api'] = $header['enterprise_uri'] . '/api/v3';
+					break;
+				case 'Bitbucket':
+					$header['enterprise_api'] = $header['enterprise_uri'] . '/rest/api';
+					break;
+			}
+		}
+
+		if ( $headers instanceof \WP_Theme ) {
+			$theme   = $headers;
+			$headers = array();
+		}
+
+		$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+		foreach ( $self_hosted_parts as $part ) {
+			if ( $theme instanceof \WP_Theme ) {
+				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
+			}
+			if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
+			     ! empty( $headers[ $repo_parts[ $part ] ] )
+			) {
+				switch ( $part ) {
+					case 'languages':
+						$header['languages'] = $headers[ $repo_parts[ $part ] ];
+						break;
+					case 'ci_job':
+						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
+						break;
+				}
+			}
+		}
+
+		return $header;
 	}
 
 	/**

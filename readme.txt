@@ -2,8 +2,8 @@
 Contributors: afragen, garyj, scarstens, limikael
 Donate link: http://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
-Requires at least: 4.0
-Tested up to: 4.7
+Requires at least: 4.4
+Tested up to: 4.8
 Stable tag: master
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -32,21 +32,18 @@ The following headers are available for use depending upon your hosting source.
 * GitHub Plugin URI
 * GitHub Theme URI
 * GitHub Branch
-* GitHub Enterprise
 * GitHub Languages
 
-###Bitbucket
+### Bitbucket
 * Bitbucket Plugin URI
 * Bitbucket Theme URI
 * Bitbucket Branch
 * Bitbucket Languages
 
-###GitLab
+### GitLab
 * GitLab Plugin URI
 * GitLab Theme URI
 * GitLab Branch
-* GitLab Enterprise
-* GitLab CE
 * GitLab Languages
 * GitLab CI Job
 

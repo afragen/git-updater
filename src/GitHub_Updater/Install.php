@@ -161,31 +161,63 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
+				$bitbucket_org = true;
 
 				if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
 					$base            = 'https://bitbucket.org';
 					$headers['host'] = 'bitbucket.org';
 				} else {
-					$base = $headers['base_uri'];
+					$base          = $headers['base_uri'];
+					$bitbucket_org = false;
 				}
 
-				self::$install['download_link'] = implode( '/', array(
-					$base,
-					self::$install['github_updater_repo'],
-					'get',
-					self::$install['github_updater_branch'] . '.zip',
-				) );
-				if ( isset( self::$install['is_private'] ) ) {
-					parent::$options[ self::$install['repo'] ] = 1;
-				}
-				if ( isset( self::$install['bitbucket_username'] ) ) {
-					parent::$options['bitbucket_username'] = self::$install['bitbucket_username'];
-				}
-				if ( isset( self::$install['bitbucket_password'] ) ) {
-					parent::$options['bitbucket_password'] = self::$install['bitbucket_password'];
+				if ( $bitbucket_org ) {
+					self::$install['download_link'] = implode( '/', array(
+						$base,
+						self::$install['github_updater_repo'],
+						'get',
+						self::$install['github_updater_branch'] . '.zip',
+					) );
+					if ( isset( self::$install['is_private'] ) ) {
+						parent::$options[ self::$install['repo'] ] = 1;
+					}
+					if ( isset( self::$install['bitbucket_username'] ) ) {
+						parent::$options['bitbucket_username'] = self::$install['bitbucket_username'];
+					}
+					if ( isset( self::$install['bitbucket_password'] ) ) {
+						parent::$options['bitbucket_password'] = self::$install['bitbucket_password'];
+					}
+
+					new Bitbucket_API( (object) $type );
 				}
 
-				new Bitbucket_API( (object) $type );
+				if ( ! $bitbucket_org ) {
+					self::$install['download_link'] = implode( '/', array(
+						$base,
+						'rest/archive/1.0/projects',
+						$headers['owner'],
+						'repos',
+						$headers['repo'],
+						'archive',
+					) );
+
+					self::$install['download_link'] = add_query_arg( array(
+						'prefix' => $headers['repo'] . '/',
+						'at'     => self::$install['github_updater_branch'],
+					), self::$install['download_link'] );
+
+					if ( isset( self::$install['is_private'] ) ) {
+						parent::$options[ self::$install['repo'] ] = 1;
+					}
+					if ( ! empty( self::$install['bitbucket_username'] ) ) {
+						parent::$options['bitbucket_server_username'] = self::$install['bitbucket_username'];
+					}
+					if ( ! empty( self::$install['bitbucket_password'] ) ) {
+						parent::$options['bitbucket_server_password'] = self::$install['bitbucket_password'];
+					}
+
+					new Bitbucket_Server_API( (object) $type );
+				}
 			}
 
 			/*
@@ -378,8 +410,12 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['bitbucket_username'] ) ||
-		     empty( parent::$options['bitbucket_password'] )
+		if ( ( empty( parent::$options['bitbucket_username'] ) ||
+		       empty( parent::$options['bitbucket_password'] ) ) ||
+		     (
+		     ( empty( parent::$options['bitbucket_server_username'] ) ||
+		       empty( parent::$options['bitbucket_server_password'] ) )
+		     )
 		) {
 			add_settings_field(
 				'bitbucket_username',

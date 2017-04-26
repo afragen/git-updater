@@ -29,17 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Readme_Parser extends Parser {
 
 	/**
-	 * Constructor.
-	 *
-	 * @param string $file_contents Contents of file.
-	 */
-	public function __construct( $file_contents ) {
-		if ( $file_contents ) {
-			$this->parse_readme( $file_contents );
-		}
-	}
-
-	/**
 	 * @param string $text
 	 *
 	 * @return string
@@ -113,7 +102,12 @@ class Readme_Parser extends Parser {
 			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
 
 			// If not a full sentence, and one ends within 20% of the end, trim it to that.
-			if ( '.' !== mb_substr( $desc, - 1 ) && ( $pos = strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
+			if ( function_exists( 'mb_strrpos' ) ) {
+				$pos = mb_strrpos( $desc, '.' );
+			} else {
+				$pos = strrpos( $desc, '.' );
+			}
+			if ( '.' !== mb_substr( $desc, - 1 ) && $pos > ( 0.8 * $length ) ) {
 				$desc = mb_substr( $desc, 0, $pos + 1 );
 			}
 		}

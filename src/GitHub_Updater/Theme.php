@@ -108,14 +108,10 @@ class Theme extends Base {
 		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme           = array();
-			$repo_uri            = null;
-			$repo_enterprise_uri = null;
-			$repo_enterprise_api = null;
-			$repo_languages      = null;
+			$git_theme = array();
 
 			foreach ( (array) self::$extra_headers as $value ) {
-
+				$header   = null;
 				$repo_uri = $theme->get( $value );
 
 				/**
@@ -130,10 +126,7 @@ class Theme extends Base {
 					}
 				}
 
-				if ( empty( $repo_uri ) ||
-				     ( false === stristr( $value, 'Theme' ) &&
-				       false === stristr( $value, 'Languages' ) )
-				) {
+				if ( empty( $repo_uri ) || false === stristr( $value, 'Theme' ) ) {
 					continue;
 				}
 
@@ -142,47 +135,17 @@ class Theme extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $repo_uri );
-					if ( $theme->stylesheet !== $header['repo'] ) {
+					if ( $theme->stylesheet !== $header['repo'] || empty( $header ) ) {
 						continue;
 					}
 				}
 
-				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
-				foreach ( $self_hosted_parts as $part ) {
-					$self_hosted = $theme->get( $repo_parts[ $part ] );
-
-					if ( ! empty( $self_hosted ) ) {
-						switch ( $part ) {
-							case 'languages':
-								$repo_languages = $self_hosted;
-								break;
-							case 'enterprise':
-							case 'gitlab_ce':
-								$repo_enterprise_uri = $self_hosted;
-								break;
-							case 'ci_job':
-								$repo_ci_job = $self_hosted;
-								break;
-						}
-					}
-				}
-
-				if ( ! empty( $repo_enterprise_uri ) ) {
-					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
-					switch ( $header_parts[0] ) {
-						case 'GitHub':
-							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
-							break;
-						case 'GitLab':
-							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
-							break;
-					}
-				}
+				$header = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
 
 				$git_theme['type']                    = $repo_parts['type'];
-				$git_theme['uri']                     = $repo_parts['base_uri'] . $header['owner_repo'];
-				$git_theme['enterprise']              = $repo_enterprise_uri;
-				$git_theme['enterprise_api']          = $repo_enterprise_api;
+				$git_theme['uri']                     = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_theme['enterprise']              = $header['enterprise_uri'];
+				$git_theme['enterprise_api']          = $header['enterprise_api'];
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
 				$git_theme['extended_repo']           = $header['repo'];
@@ -195,9 +158,10 @@ class Theme extends Base {
 				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
-				$git_theme['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
-				$git_theme['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
+				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
+				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
 				$git_theme['release_asset']           = true == $theme->get( 'Release Asset' ) ? true : false;
+				$git_theme['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
 
 				break;
 			}
@@ -245,15 +209,16 @@ class Theme extends Base {
 				}
 			}
 		}
-		$this->load_pre_filters();
+
+		if ( ! $this->is_wp_cli() ) {
+			$this->load_pre_filters();
+		}
 	}
 
 	/**
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		wp_enqueue_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
-
 		if ( ! is_multisite() ) {
 			add_filter( 'wp_prepare_themes_for_js', array( &$this, 'customize_theme_update_html' ) );
 		}

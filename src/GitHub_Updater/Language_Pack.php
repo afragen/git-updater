@@ -41,10 +41,10 @@ class Language_Pack extends Base {
 	/**
 	 * Language_Pack constructor.
 	 *
-	 * @param object $repo Plugin/Theme object.
-	 * @param object $api  Git host API object.
+	 * @param object                                   $repo Plugin/Theme object.
+	 * @param \Fragen\GitHub_Updater\Language_Pack_API $api  Language_Pack_API object.
 	 */
-	public function __construct( $repo, $api ) {
+	public function __construct( $repo, Language_Pack_API $api ) {
 		if ( empty( $repo->languages ) ) {
 			return false;
 		}

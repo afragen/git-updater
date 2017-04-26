@@ -8,8 +8,6 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-use Fragen\GitHub_Updater;
-
 /**
  * Plugin Name:       GitHub Updater MU loader
  * Plugin URI:        https://github.com/afragen/github-updater
@@ -29,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 /*
  * Load normal plugin.
  */
-if ( ! class_exists( '\\Fragen\\GitHub_Updater\\Base' ) ) {
+if ( ! class_exists( 'Fragen\\GitHub_Updater\\Base' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	require trailingslashit( WP_PLUGIN_DIR ) . $ghu_plugin_file;
 }

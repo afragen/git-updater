@@ -25,7 +25,14 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
-class GitHub_API extends API {
+class GitHub_API extends API implements API_Interface {
+
+	/**
+	 * Holds loose class method name.
+	 *
+	 * @var null
+	 */
+	private static $method = null;
 
 	/**
 	 * Constructor.
@@ -40,7 +47,7 @@ class GitHub_API extends API {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param $file
+	 * @param string $file Filename.
 	 *
 	 * @return bool
 	 */
@@ -48,7 +55,8 @@ class GitHub_API extends API {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
+			self::$method = 'file';
+			$response     = $this->api( '/repos/:owner/:repo/contents/' . $file );
 			if ( ! isset( $response->content ) ) {
 				return false;
 			}
@@ -80,7 +88,8 @@ class GitHub_API extends API {
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/tags' );
+			self::$method = 'tags';
+			$response     = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -105,7 +114,7 @@ class GitHub_API extends API {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param $changes
+	 * @param string $changes Changelog filename.
 	 *
 	 * @return bool
 	 */
@@ -127,7 +136,8 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
+			self::$method = 'changes';
+			$response     = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -153,9 +163,7 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
-		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
-		) {
+		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -175,7 +183,8 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
+			self::$method = 'readme';
+			$response     = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
 		}
 
 		if ( $response && isset( $response->content ) ) {
@@ -203,7 +212,8 @@ class GitHub_API extends API {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo' );
+			self::$method = 'meta';
+			$response     = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
@@ -235,7 +245,8 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/branches' );
+			self::$method = 'branches';
+			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -258,7 +269,7 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API
+	 * Construct $this->type->download_link using Repository Contents API.
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @param boolean $rollback      for theme rollback
@@ -267,22 +278,7 @@ class GitHub_API extends API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		/*
-		 * Check if using GitHub Self-Hosted.
-		 */
-		if ( ! empty( $this->type->enterprise_api ) ) {
-			$github_base = $this->type->enterprise_api;
-		} else {
-			$github_base = 'https://api.github.com';
-		}
-
-		$download_link_base = implode( '/', array(
-			$github_base,
-			'repos',
-			$this->type->owner,
-			$this->type->repo,
-			'zipball/',
-		) );
+		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
 
 		/*
@@ -324,114 +320,33 @@ class GitHub_API extends API {
 	}
 
 	/**
-	 * Get/process Language Packs.
-	 * Language Packs cannot reside on GitHub Enterprise.
-	 *
-	 * @TODO Figure out how to serve raw file from GitHub Enterprise.
-	 *
-	 * @param array $headers Array of headers of Language Pack.
-	 *
-	 * @return bool When invalid response.
-	 */
-	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
-
-		if ( ! $response ) {
-			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
-
-				foreach ( $response as $locale ) {
-					$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
-					$package = implode( '/', $package ) . $locale->package;
-					$package = add_query_arg( array( 'raw' => 'true' ), $package );
-
-					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
-					$response->{$locale->language}->version = $this->type->remote_version;
-				}
-
-				$this->set_repo_cache( 'languages', $response );
-			}
-		}
-		$this->type->language_packs = $response;
-	}
-
-	/**
-	 * Add appropriate access token to endpoint.
-	 *
-	 * @param $git
-	 * @param $endpoint
-	 *
-	 * @access private
-	 *
-	 * @return string
-	 */
-	private function add_access_token_endpoint( $git, $endpoint ) {
-		// This will return if checking during shiny updates.
-		if ( ! isset( parent::$options ) ) {
-			return $endpoint;
-		}
-
-		// Add GitHub.com access token.
-		if ( ! empty( parent::$options['github_access_token'] ) ) {
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_access_token'], $endpoint );
-		}
-
-		// Add GitHub Enterprise access token.
-		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( parent::$options['github_enterprise_token'] )
-		) {
-			$endpoint = remove_query_arg( 'access_token', $endpoint );
-			$endpoint = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $endpoint );
-		}
-
-		// Add repo access token.
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
-			$endpoint = remove_query_arg( 'access_token', $endpoint );
-			$endpoint = add_query_arg( 'access_token', parent::$options[ $git->type->repo ], $endpoint );
-		}
-
-		return $endpoint;
-	}
-
-	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param $git      object
-	 * @param $endpoint string
+	 * @param object $git
+	 * @param string $endpoint
 	 *
 	 * @return string $endpoint
 	 */
-	protected function add_endpoints( $git, $endpoint ) {
-
-		/*
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitHub will use the Default branch.
-		 */
-		if ( ! empty( $git->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+	public function add_endpoints( $git, $endpoint ) {
+		switch ( $git::$method ) {
+			case 'file':
+			case 'readme':
+				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+				break;
+			case 'meta':
+			case 'tags':
+			case 'changes':
+			case 'download_link':
+			case 'translation':
+				break;
+			default:
+				break;
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
-		 * Remove branch endpoint if a translation file.
-		 */
-		$repo = explode( '/', $endpoint );
-		if ( isset( $repo[3] ) && $repo[3] !== $git->type->repo ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-		}
-
-		/*
-		 * If using GitHub Enterprise header return this endpoint.
+		 * If GitHub Enterprise return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
 			return $git->type->enterprise_api . $endpoint;
@@ -464,7 +379,7 @@ class GitHub_API extends API {
 	 *
 	 * @return object|array $arr Array of tag numbers, object is error.
 	 */
-	protected function parse_tag_response( $response ) {
+	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
 			return $response;
 		}
@@ -486,7 +401,7 @@ class GitHub_API extends API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	protected function parse_meta_response( $response ) {
+	public function parse_meta_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -508,7 +423,7 @@ class GitHub_API extends API {
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
-	protected function parse_changelog_response( $response ) {
+	public function parse_changelog_response( $response ) {
 		$arr      = array();
 		$response = array( $response );
 
@@ -557,7 +472,10 @@ class GitHub_API extends API {
 				}
 
 				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
-					$response_object  = $response_new['http_response']->get_response_object();
+					$response_object = $response_new['http_response']->get_response_object();
+					if ( ! $response_object->success ) {
+						return false;
+					}
 					$response_headers = $response_object->history[0]->headers;
 					$download_link    = $response_headers->getValues( 'location' );
 				} else {
@@ -592,4 +510,5 @@ class GitHub_API extends API {
 
 		return $args;
 	}
+
 }

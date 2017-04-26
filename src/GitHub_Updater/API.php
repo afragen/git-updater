@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
+
 /*
  * Exit if called directly.
  */
@@ -30,33 +31,6 @@ abstract class API extends Base {
 	 * @var array
 	 */
 	protected $response = array();
-
-	/*
-	 * The following functions must be in any repository API.
-	 */
-	abstract public function get_remote_info( $file );
-
-	abstract public function get_remote_tag();
-
-	abstract public function get_remote_changes( $changes );
-
-	abstract public function get_remote_readme();
-
-	abstract public function get_repo_meta();
-
-	abstract public function get_remote_branches();
-
-	abstract public function construct_download_link();
-
-	abstract public function get_language_pack( $headers );
-
-	abstract protected function add_endpoints( $git, $endpoint );
-
-	abstract protected function parse_tag_response( $response );
-
-	abstract protected function parse_meta_response( $response );
-
-	abstract protected function parse_changelog_response( $response );
 
 	/**
 	 * Adds custom user agent for GitHub Updater.
@@ -119,9 +93,15 @@ abstract class API extends Base {
 				$arr['base_download'] = 'https://github.com';
 				break;
 			case 'bitbucket':
-				$arr['repo']          = 'bitbucket';
-				$arr['base_uri']      = 'https://bitbucket.org/api';
-				$arr['base_download'] = 'https://bitbucket.org';
+				$arr['repo'] = 'bitbucket';
+				if ( empty( $this->type->enterprise ) ) {
+					$arr['base_uri']      = 'https://bitbucket.org/api';
+					$arr['base_download'] = 'https://bitbucket.org';
+
+				} else {
+					$arr['base_uri']      = $this->type->enterprise_api;
+					$arr['base_download'] = $this->type->enterprise;
+				}
 				break;
 			case 'gitlab':
 				$arr['repo']          = 'gitlab';
@@ -182,13 +162,13 @@ abstract class API extends Base {
 	/**
 	 * Return API url.
 	 *
-	 * @access private
+	 * @access protected
 	 *
 	 * @param string $endpoint
 	 *
 	 * @return string $endpoint
 	 */
-	private function get_api_url( $endpoint ) {
+	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner'  => $this->type->owner,
@@ -202,23 +182,51 @@ abstract class API extends Base {
 
 		switch ( $type['repo'] ) {
 			case 'github':
+				if ( ! $this->type->enterprise && $download_link ) {
+					$type['base_download'] = $type['base_uri'];
+					break;
+				}
+				if ( $this->type->enterprise_api ) {
+					$type['base_download'] = $this->type->enterprise_api;
+					if ( $download_link ) {
+						break;
+					}
+				}
 				$api      = new GitHub_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
-				if ( $this->type->enterprise_api ) {
-					return $endpoint;
-				}
 				break;
 			case 'gitlab':
+				if ( ! $this->type->enterprise && $download_link ) {
+					break;
+				}
+				if ( $this->type->enterprise ) {
+					$type['base_download'] = $this->type->enterprise;
+					$type['base_uri']      = null;
+					if ( $download_link ) {
+						break;
+					}
+				}
 				$api      = new GitLab_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
+				break;
+			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
-					return $endpoint;
+					if ( $download_link ) {
+						break;
+					}
+					$api      = new Bitbucket_Server_API( new \stdClass() );
+					$endpoint = $api->add_endpoints( $this, $endpoint );
+
+					return $this->type->enterprise_api . $endpoint;
 				}
 				break;
 			default:
+				break;
 		}
 
-		return $type['base_uri'] . $endpoint;
+		$base = $download_link ? $type['base_download'] : $type['base_uri'];
+
+		return $base . $endpoint;
 	}
 
 	/**
@@ -342,6 +350,80 @@ abstract class API extends Base {
 		$response = ( 'in dot org' === $response ) ? true : false;
 
 		return $response;
+	}
+
+	/**
+	 * Check if a local file for the repository exists.
+	 * Only checks the root directory of the repository.
+	 *
+	 * @param $filename
+	 *
+	 * @return bool
+	 */
+	protected function exists_local_file( $filename ) {
+		if ( file_exists( $this->type->local_path . $filename ) ||
+		     file_exists( $this->type->local_path_extended . $filename )
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add appropriate access token to endpoint.
+	 *
+	 * @param object $git
+	 * @param string $endpoint
+	 *
+	 * @access private
+	 *
+	 * @return string $endpoint
+	 */
+	protected function add_access_token_endpoint( $git, $endpoint ) {
+		// This will return if checking during shiny updates.
+		if ( ! isset( parent::$options ) ) {
+			return $endpoint;
+		}
+		$key              = null;
+		$token            = null;
+		$token_enterprise = null;
+
+		switch ( $git->type->type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$key              = 'access_token';
+				$token            = 'github_access_token';
+				$token_enterprise = 'github_enterprise_token';
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$key              = 'private_token';
+				$token            = 'gitlab_access_token';
+				$token_enterprise = 'gitlab_enterprise_token';
+				break;
+		}
+
+		// Add hosted access token.
+		if ( ! empty( parent::$options[ $token ] ) ) {
+			$endpoint = add_query_arg( $key, parent::$options[ $token ], $endpoint );
+		}
+
+		// Add Enterprise access token.
+		if ( ! empty( $git->type->enterprise ) &&
+		     ! empty( parent::$options[ $token_enterprise ] )
+		) {
+			$endpoint = remove_query_arg( $key, $endpoint );
+			$endpoint = add_query_arg( $key, parent::$options[ $token_enterprise ], $endpoint );
+		}
+
+		// Add repo access token.
+		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+			$endpoint = remove_query_arg( $key, $endpoint );
+			$endpoint = add_query_arg( $key, parent::$options[ $git->type->repo ], $endpoint );
+		}
+
+		return $endpoint;
 	}
 
 }

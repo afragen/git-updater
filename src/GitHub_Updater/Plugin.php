@@ -121,18 +121,13 @@ class Plugin extends Base {
 			}
 
 			foreach ( (array) self::$extra_headers as $value ) {
-				$repo_enterprise_uri = null;
-				$repo_enterprise_api = null;
-				$repo_languages      = null;
+				$header = null;
 
-				if ( in_array( $value, array( 'Requires PHP', 'Requires WP' ) ) ) {
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ) ) ) {
 					continue;
 				}
 
-				if ( empty( $headers[ $value ] ) ||
-				     ( false === stristr( $value, 'Plugin' ) &&
-				       false === stristr( $value, 'Languages' ) )
-				) {
+				if ( empty( $headers[ $value ] ) || false === stristr( $value, 'Plugin' ) ) {
 					continue;
 				}
 
@@ -141,44 +136,17 @@ class Plugin extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $headers[ $value ] );
-				}
-
-				$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
-				foreach ( $self_hosted_parts as $part ) {
-					if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
-					     ! empty( $headers[ $repo_parts[ $part ] ] )
-					) {
-						switch ( $part ) {
-							case 'languages':
-								$repo_languages = $headers[ $repo_parts[ $part ] ];
-								break;
-							case 'enterprise':
-							case 'gitlab_ce':
-								$repo_enterprise_uri = $headers[ $repo_parts[ $part ] ];
-								break;
-							case 'ci_job':
-								$repo_ci_job = $headers[ $repo_parts[ $part ] ];
-								break;
-						}
+					if ( empty( $header ) ) {
+						continue;
 					}
 				}
 
-				if ( ! empty( $repo_enterprise_uri ) ) {
-					$repo_enterprise_uri = trim( $repo_enterprise_uri, '/' );
-					switch ( $header_parts[0] ) {
-						case 'GitHub':
-							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
-							break;
-						case 'GitLab':
-							$repo_enterprise_api = $repo_enterprise_uri . '/api/v3';
-							break;
-					}
-				}
+				$header = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
 
 				$git_plugin['type']                = $repo_parts['type'];
-				$git_plugin['uri']                 = $repo_parts['base_uri'] . $header['owner_repo'];
-				$git_plugin['enterprise']          = $repo_enterprise_uri;
-				$git_plugin['enterprise_api']      = $repo_enterprise_api;
+				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['enterprise']          = $header['enterprise_uri'];
+				$git_plugin['enterprise_api']      = $header['enterprise_api'];
 				$git_plugin['owner']               = $header['owner'];
 				$git_plugin['repo']                = $header['repo'];
 				$git_plugin['extended_repo']       = implode( '-', array(
@@ -196,9 +164,10 @@ class Plugin extends Base {
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['languages']               = ! empty( $repo_languages ) ? $repo_languages : null;
-				$git_plugin['ci_job']                  = ! empty( $repo_ci_job ) ? $repo_ci_job : null;
+				$git_plugin['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
+				$git_plugin['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
 				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
+				$git_plugin['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
 
 				$git_plugin['banners']['high'] =
 					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )
@@ -238,7 +207,10 @@ class Plugin extends Base {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
-		$this->load_pre_filters();
+
+		if ( ! $this->is_wp_cli() ) {
+			$this->load_pre_filters();
+		}
 	}
 
 	/**
@@ -432,6 +404,15 @@ class Plugin extends Base {
 				);
 
 				/*
+				 * Skip on branch switching or rollback.
+				 */
+				if ( $this->tag &&
+				     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+				) {
+					continue;
+				}
+
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
@@ -441,15 +422,6 @@ class Plugin extends Base {
 					) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
-					continue;
-				}
-
-				/*
-				 * Skip on branch switching or rollback.
-				 */
-				if ( $this->tag &&
-				     ( isset( $_GET['plugin'] ) && $plugin->slug === $_GET['plugin'] )
-				) {
 					continue;
 				}
 

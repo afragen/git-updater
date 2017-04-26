@@ -1,5 +1,27 @@
 #### [unreleased]
 
+#### 6.3.0 / 2017-04-26
+* fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
+* hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output
+* added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
+* refactored subtabs for Settings page
+* refactored parsing of extra headers, `Enterprise` and `CE` headers no longer needed
+* added support for Bitbucket Server!! Thanks @lkistenkas for access and especially to @BjornW for kicking it off
+* refactored `add_endpoints()` to use everywhere
+* now requires WordPress 4.4 and above
+* update to latest wp.org `class-parser.php`
+* move enqueuing of plugin CSS to `Base::init()`
+* refactored Language Pack updating to their own classes
+* split out abstract methods from `abstract class API` to `interface API_Interface`
+* make Autoloader better functioning as a drop-in
+* switched logic for plugin branch switching and setting the update transient
+* refactor `add_access_token_endpoint()` to `class API`
+* refactor Basic Authentication headers to `class Basic_Auth_Loader`
+* moved checkboxes before titles in Settings
+* updated wiki screenshots
+* fixed to call `load_options()` in `Base::init()` to properly utilize options
+* add red (#f00) warning dashicon in Settings for repo with malformed header URI
+
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
 * refactored Install download link generation
