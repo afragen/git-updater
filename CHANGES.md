@@ -1,4 +1,6 @@
 #### [unreleased]
+* simplify uninstall.php
+* add Basic Auth headers for RESTful updating
 
 #### 6.3.0 / 2017-04-26
 * fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford

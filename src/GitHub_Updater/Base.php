@@ -287,8 +287,10 @@ class Base {
 	 */
 	public function ajax_update() {
 		$this->load_options();
+		Basic_Auth_Loader::instance( self::$options )->load_authentication_hooks();
 		$rest_update = new Rest_Update();
 		$rest_update->process_request();
+		Basic_Auth_Loader::instance( self::$options )->remove_authentication_hooks();
 	}
 
 	/**
