@@ -343,8 +343,6 @@ class Rest_Update extends Base {
 
 		//$response['payload'] = $new;
 
-		//$response['payload'] = $new;
-
 		return $response;
 	}
 
