@@ -29,7 +29,7 @@ class GHU_Upgrade extends Base {
 	 *
 	 * @var int
 	 */
-	private $db_version = 6200;
+	private $db_version = 6300;
 
 	/**
 	 * GHU_Upgrade constructor.
@@ -46,6 +46,7 @@ class GHU_Upgrade extends Base {
 			case 6000:
 			case 6100:
 			case 6110:
+			case 6200:
 				$this->upgrade_6000();
 				break;
 			default:
