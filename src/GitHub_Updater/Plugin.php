@@ -413,6 +413,15 @@ class Plugin extends Base {
 				}
 
 				/*
+				 * Skip on RESTful updating.
+				 */
+				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
+				     $response['slug'] === $_GET['plugin']
+				) {
+					continue;
+				}
+
+				/*
 				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
 				 */
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
