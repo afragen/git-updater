@@ -29,13 +29,19 @@ class GHU_Upgrade extends Base {
 	 *
 	 * @var int
 	 */
-	private $db_version = 6200;
+	private $db_version = 6300;
 
 	/**
 	 * GHU_Upgrade constructor.
 	 */
 	public function __construct() {
 		$this->load_options();
+	}
+
+	/**
+	 * Run update check against db_version.
+	 */
+	public function run() {
 		$db_version = isset( self::$options['db_version'] ) ? self::$options['db_version'] : 6000;
 
 		if ( $db_version === $this->db_version ) {
@@ -43,10 +49,8 @@ class GHU_Upgrade extends Base {
 		}
 
 		switch ( $db_version ) {
-			case 6000:
-			case 6100:
-			case 6110:
-				$this->upgrade_6000();
+			case ( $db_version < $this->db_version ):
+				$this->delete_flush_cache();
 				break;
 			default:
 				break;
@@ -57,10 +61,9 @@ class GHU_Upgrade extends Base {
 	}
 
 	/**
-	 * Upgrade from version less than 6.0.0.0 and flush cache.
 	 * Flush caches and delete cached options.
 	 */
-	private function upgrade_6000() {
+	private function delete_flush_cache() {
 		wp_cache_flush();
 		$this->delete_all_cached_data();
 	}

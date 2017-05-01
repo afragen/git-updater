@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 6.3.1 / 2017-05-01
+* simplify uninstall.php
+* ensure Basic Auth headers are loaded for RESTful updating [#547](https://github.com/afragen/github-updater/issues/547)
+
 #### 6.3.0 / 2017-04-26
 * fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
 * hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output

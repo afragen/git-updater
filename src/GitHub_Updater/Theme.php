@@ -627,6 +627,15 @@ class Theme extends Base {
 					continue;
 				}
 
+				/*
+				 * Skip on RESTful updating.
+				 */
+				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
+				     $response['theme'] === $_GET['theme']
+				) {
+					continue;
+				}
+
 				$transient->response[ $theme->repo ] = $response;
 			}
 		}

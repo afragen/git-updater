@@ -217,7 +217,7 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'response' => $webhook_response,
+			'response' => $webhook_response ? $webhook_response : $_GET,
 		);
 
 		if ( $this->is_error() ) {
@@ -340,8 +340,6 @@ class Rest_Update extends Base {
 		$response['hash']       = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
 		$response['branch']     = 'tag' === $new['type'] ? 'master' : $new['name'];
 		$response['json_error'] = json_last_error_msg();
-
-		//$response['payload'] = $new;
 
 		//$response['payload'] = $new;
 
