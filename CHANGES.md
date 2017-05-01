@@ -1,4 +1,5 @@
 #### [unreleased]
+* added _broken_ setting to repo not returning HTTP 200 for the main file
 
 #### 6.3.1 / 2017-05-01
 * simplify uninstall.php

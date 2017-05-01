@@ -156,6 +156,13 @@ abstract class API extends Base {
 			return false;
 		}
 
+		// Set 'broken' if main file doesn't return 200.
+		if ( false !== strrpos( basename( $url), 'php' ) ||
+		     false !== strrpos( basename( $url), 'css')
+		){
+			$this->type->broken = 200 != $code ? true : false;
+		}
+
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
