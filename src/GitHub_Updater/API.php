@@ -132,6 +132,13 @@ abstract class API extends Base {
 		$code          = (integer) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
+		// Set 'broken' if main file doesn't return 200.
+		if ( false !== strrpos( basename( $url), '.php' ) ||
+		     false !== strrpos( basename( $url), '.css')
+		){
+			$this->type->broken = 200 != $code ? true : false;
+		}
+
 		if ( is_wp_error( $response ) ) {
 			Messages::instance()->create_error_message( $response );
 
@@ -154,13 +161,6 @@ abstract class API extends Base {
 			Messages::instance()->create_error_message( $type['repo'] );
 
 			return false;
-		}
-
-		// Set 'broken' if main file doesn't return 200.
-		if ( false !== strrpos( basename( $url), 'php' ) ||
-		     false !== strrpos( basename( $url), 'css')
-		){
-			$this->type->broken = 200 != $code ? true : false;
 		}
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
