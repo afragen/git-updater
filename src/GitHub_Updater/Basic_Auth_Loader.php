@@ -145,7 +145,7 @@ class Basic_Auth_Loader {
 				Theme::instance()->get_theme_configs()
 			)
 			: array();
-		$type  = $slug ? $repos[ $slug ]->type : $type;
+		$type  = isset( $_REQUEST ) && $slug ? $repos[ $slug ]->type : $type;
 
 		switch ( $type ) {
 			case ( 'bitbucket_plugin' ):
