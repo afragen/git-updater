@@ -223,7 +223,7 @@ class Settings extends Base {
 		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
 		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' );
 		?>
-		<div class="wrap">
+		<div class="wrap github-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
