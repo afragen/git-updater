@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 6.3.2 / 2017-05-09
+* added _broken_ setting to repo not returning HTTP 200 for the main file
+* fixed PHP error [#549](https://github.com/afragen/github-updater/issues/549)
+* added div class to Settings page to create more specific CSS selectors
+
 #### 6.3.1 / 2017-05-01
 * simplify uninstall.php
 * ensure Basic Auth headers are loaded for RESTful updating [#547](https://github.com/afragen/github-updater/issues/547)
