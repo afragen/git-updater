@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Readme;
+//use WordPressdotorg\Plugin_Directory\Markdown;
 
 /**
  * WordPress.org Plugin Readme Parser.
@@ -366,7 +367,7 @@ class Parser {
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
 			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-			$this->short_description = $this->short_description_53();
+			$this->short_description = $this->short_description_53(); //GitHub Updater
 		}
 
 		// Sanitize and trim the short_description to match requirements.
@@ -399,7 +400,7 @@ class Parser {
 					$this->sections['faq'] .= "<dt>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
-				$this->faq_as_h4();
+				$this->faq_as_h4(); //GitHub Updater
 			}
 		}
 
@@ -472,22 +473,22 @@ class Parser {
 				'rel'   => true,
 			),
 			'blockquote' => array(
-				'cite' => true
+				'cite' => true,
 			),
-			'br'         => true,
-			'p'          => true,
-			'code'       => true,
-			'pre'        => true,
-			'em'         => true,
-			'strong'     => true,
-			'ul'         => true,
-			'ol'         => true,
-			'dl'         => true,
-			'dt'         => true,
-			'dd'         => true,
-			'li'         => true,
-			'h3'         => true,
-			'h4'         => true,
+			'br'         => array(),
+			'p'          => array(),
+			'code'       => array(),
+			'pre'        => array(),
+			'em'         => array(),
+			'strong'     => array(),
+			'ul'         => array(),
+			'ol'         => array(),
+			'dl'         => array(),
+			'dt'         => array(),
+			'dd'         => array(),
+			'li'         => array(),
+			'h3'         => array(),
+			'h4'         => array(),
 		);
 
 		$text = force_balance_tags( $text );

@@ -1,5 +1,6 @@
 #### [unreleased]
 * definitive fix for [#549](https://github.com/afragen/github-updater/issues/549)
+* update to `class-parser.php@5483`
 
 #### 6.3.2 / 2017-05-09
 * added _broken_ setting to repo not returning HTTP 200 for the main file
