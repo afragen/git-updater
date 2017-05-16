@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 6.3.3 / 2017-05-16
 * definitive fix for [#549](https://github.com/afragen/github-updater/issues/549)
 * update to `class-parser.php@5483`
 
