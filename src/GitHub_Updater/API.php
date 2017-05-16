@@ -133,9 +133,9 @@ abstract class API extends Base {
 		$allowed_codes = array( 200, 404 );
 
 		// Set 'broken' if main file doesn't return 200.
-		if ( false !== strrpos( basename( $url), '.php' ) ||
-		     false !== strrpos( basename( $url), '.css')
-		){
+		if ( false !== strrpos( basename( $url ), '.php' ) ||
+		     false !== strrpos( basename( $url ), '.css' )
+		) {
 			$this->type->broken = 200 != $code ? true : false;
 		}
 
