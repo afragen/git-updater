@@ -136,7 +136,7 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		$slug  = isset( $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : null;
+		$slug  = isset( $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
 		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 		$repos = isset( $_REQUEST )
@@ -145,7 +145,10 @@ class Basic_Auth_Loader {
 				Theme::instance()->get_theme_configs()
 			)
 			: false;
-		$type  = isset( $slug, $repos[ $slug ] ) ? $repos[ $slug ]->type : $type;
+		$type  = $slug && $repos &&
+		         isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
+			? $repos[ $slug ]->type
+			: $type;
 
 		switch ( $type ) {
 			case ( 'bitbucket_plugin' ):
