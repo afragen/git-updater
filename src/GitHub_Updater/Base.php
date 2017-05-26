@@ -130,6 +130,30 @@ class Base {
 	 * @var bool
 	 */
 	protected static $load_repo_meta;
+	
+	/**
+	 * @var string[] Option keys refer to option names, option names are used to save value on database
+	 */
+	//TODO: these should be used on any other part where setting options are used (i.e. the Settings class)
+	protected static $options_names = array(
+		'github_access_token' => 'github_access_token',
+		'bitbucket_username' => 'bitbucket_username',
+		'bitbucket_password' => 'bitbucket_password',
+		'gitlab_access_token' => 'gitlab_access_token',
+		'gitlab_enterprise_token' => 'gitlab_enterprise_token',
+		'branch_switch' => 'branch_switch',
+	);
+	
+	/**
+	 * @var string[] Option keys refer to option names, option names are used to save value on database
+	 */
+	//TODO: these should be used on any other part where setting options are used (i.e. the Settings class)
+	protected static $options_remote_names = array(
+		'ithemes_sync' => 'ithemes_sync',
+		'infinitewp'   => 'infinitewp',
+		'managewp'     => 'managewp',
+		'mainwp'       => 'mainwp',
+	);
 
 	/**
 	 * Constructor.
@@ -154,6 +178,42 @@ class Base {
 	protected function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		
+		/*
+		 * Filter singular options for better control over time
+		 * (i.e. if we need structure of our option array)
+		 */
+		//TODO: move theme and plugins options inside an array with keys 'themes' and 'plugins', now they are at the same level of global options
+		//TODO: some checks on functions returned values
+		foreach(self::$options_names as $key => $name){
+			self::$options[$key] = $this->filter_option($name);
+		}
+		
+		foreach(self::$options_names as $key => $name){
+			self::$options_remote[$key] = $this->filter_option_remote($name);
+		}
+	}
+	
+	/**
+	 * Create a filter for current $name option
+	 * @param $name string The filtered option name
+	 * @return string The filtered option value
+	 */
+	protected function filter_option($name){
+		return ( array_key_exists( $name, self::$options ) ) ?
+			apply_filters('github_updater_filter_option_'.$name, self::$options[$name]) :
+			apply_filters('github_updater_filter_option_'.$name, '');
+	}
+	
+	/**
+	 * Create a filter for current $name option
+	 * @param $name string The filtered option name
+	 * @return string The filtered option value
+	 */
+	protected function filter_option_remote($name){
+		return ( array_key_exists( $name, self::$options_remote ) ) ?
+			apply_filters('github_updater_filter_option_remote_'.$name, self::$options_remote[$name]) :
+			apply_filters('github_updater_filter_option_remote_'.$name, '');
 	}
 
 	/**
