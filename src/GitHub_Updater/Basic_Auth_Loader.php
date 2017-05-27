@@ -136,9 +136,9 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		$slug  = isset( $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
+		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
+		$slug  = isset( $_REQUEST['plugin'] ) && ! $slug ? $_REQUEST['plugin'] : $slug;
 		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
-		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 		$repos = isset( $_REQUEST )
 			? array_merge(
 				Plugin::instance()->get_plugin_configs(),
