@@ -332,6 +332,8 @@ class Rest_Update extends Base {
 	 * @return bool|array $response
 	 */
 	private function parse_bitbucket_webhook( $request_body ) {
+		Basic_Auth_Loader::instance( parent::$options )->load_authentication_hooks();
+
 		$request_data = json_decode( $request_body, true );
 
 		$new = $request_data['push']['changes'][0]['new'];
@@ -342,6 +344,8 @@ class Rest_Update extends Base {
 		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $new;
+
+		Basic_Auth_Loader::instance( self::$options )->remove_authentication_hooks();
 
 		return $response;
 	}

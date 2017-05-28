@@ -54,6 +54,8 @@ abstract class API extends Base {
 	 * Shiny updates results in the update transient being reset with only the wp.org data.
 	 * This catches the response and reloads the transients.
 	 *
+	 * @uses 'http_response' hook.
+	 *
 	 * @param mixed  $response HTTP server response.
 	 * @param array  $args     HTTP response arguments.
 	 * @param string $url      URL of HTTP response.
