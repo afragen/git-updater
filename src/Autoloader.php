@@ -1,4 +1,13 @@
 <?php
+/**
+ * Contains autoloading functionality.
+ *
+ * @package   Fragen\Autoloader
+ * @author    Andy Fragen <andy@thefragens.com>
+ * @license   GPL-2.0+
+ * @link      http://github.com/afragen/autoloader
+ * @copyright 2015 Andy Fragen
+ */
 
 namespace Fragen;
 
@@ -18,7 +27,6 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 	 * @package   Fragen\Autoloader
 	 * @author    Andy Fragen <andy@thefragens.com>
 	 * @author    Barry Hughes <barry@codingkillsme.com>
-	 * @license   GPL-2.0+
 	 * @link      http://github.com/afragen/autoloader
 	 * @copyright 2015 Andy Fragen
 	 * @version   2.0.0
