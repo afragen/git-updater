@@ -22,18 +22,22 @@ if ( ! defined( 'WPINC' ) ) {
  * Class API
  *
  * @package Fragen\GitHub_Updater
+ * @uses    Fragen\GitHub_Updater\Base
  */
 abstract class API extends Base {
 
 	/**
 	 * Variable to hold all repository remote info.
 	 *
-	 * @var array
+	 * @access protected
+	 * @var    array
 	 */
 	protected $response = array();
 
 	/**
 	 * Adds custom user agent for GitHub Updater.
+	 *
+	 * @access public
 	 *
 	 * @param array  $args Existing HTTP Request arguments.
 	 * @param string $url  URL being passed.
@@ -54,7 +58,8 @@ abstract class API extends Base {
 	 * Shiny updates results in the update transient being reset with only the wp.org data.
 	 * This catches the response and reloads the transients.
 	 *
-	 * @uses 'http_response' hook.
+	 * @uses Fragen\GitHub_Updater\Base
+	 * @uses Fragen\GitHub_Updater\Base::make_update_transient_current()
 	 *
 	 * @param mixed  $response HTTP server response.
 	 * @param array  $args     HTTP response arguments.
@@ -80,6 +85,8 @@ abstract class API extends Base {
 
 	/**
 	 * Return repo data for API calls.
+	 *
+	 * @access protected
 	 *
 	 * @return array
 	 */
@@ -119,9 +126,9 @@ abstract class API extends Base {
 	 * Call the API and return a json decoded body.
 	 * Create error messages.
 	 *
-	 * @see http://developer.github.com/v3/
+	 * @link http://developer.github.com/v3/
 	 *
-	 * @param string $url
+	 * @param string $url The URL to send the request to.
 	 *
 	 * @return boolean|object
 	 */
@@ -173,7 +180,8 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param string $endpoint
+	 * @param string $endpoint      The endpoint to access.
+	 * @param string $download_link The plugin or theme download link. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
@@ -241,7 +249,9 @@ abstract class API extends Base {
 	/**
 	 * Validate wp_remote_get response.
 	 *
-	 * @param $response
+	 * @access protected
+	 *
+	 * @param object $response The response.
 	 *
 	 * @return bool true if invalid
 	 */
@@ -256,7 +266,9 @@ abstract class API extends Base {
 	/**
 	 * Returns repo cached data.
 	 *
-	 * @return array|bool false for expired cache
+	 * @access protected
+	 *
+	 * @return array|bool The repo cache. False if expired.
 	 */
 	protected function get_repo_cache() {
 		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
@@ -272,6 +284,8 @@ abstract class API extends Base {
 
 	/**
 	 * Sets repo data for cache in site option.
+	 *
+	 * @access protected
 	 *
 	 * @param string $id       Data Identifier.
 	 * @param mixed  $response Data to be stored.
@@ -294,6 +308,8 @@ abstract class API extends Base {
 	/**
 	 * Create release asset download link.
 	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @access protected
 	 *
 	 * @return string $download_link
 	 */
@@ -340,6 +356,8 @@ abstract class API extends Base {
 	/**
 	 * Query wp.org for plugin information.
 	 *
+	 * @access protected
+	 *
 	 * @return array|bool|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
@@ -365,7 +383,9 @@ abstract class API extends Base {
 	 * Check if a local file for the repository exists.
 	 * Only checks the root directory of the repository.
 	 *
-	 * @param $filename
+	 * @access protected
+	 *
+	 * @param string $filename The filename to check for.
 	 *
 	 * @return bool
 	 */
@@ -382,10 +402,10 @@ abstract class API extends Base {
 	/**
 	 * Add appropriate access token to endpoint.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @access protected
 	 *
-	 * @access private
+	 * @param GitLab_API|GitLab_API $git      Class containing the Git API used.
+	 * @param string                $endpoint The endpoint being accessed.
 	 *
 	 * @return string $endpoint
 	 */
