@@ -163,7 +163,8 @@ abstract class API extends Base {
 						'name' => $this->type->name,
 						'git'  => $this->type->type,
 					),
-				) );
+				)
+			);
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
