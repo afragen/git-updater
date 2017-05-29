@@ -244,8 +244,8 @@ class Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arrURL = parse_url( $url );
-		if ( isset( $arrURL['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arrURL['host'] ) {
+		$arr_url = parse_url( $url );
+		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
 			unset( $args['headers']['Authorization'] );
 		}
 
