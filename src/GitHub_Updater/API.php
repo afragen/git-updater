@@ -2,7 +2,7 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
+ * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
