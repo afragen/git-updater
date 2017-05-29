@@ -27,28 +27,35 @@ class Basic_Auth_Loader {
 	/**
 	 * Stores Basic::$options.
 	 *
-	 * @var mixed
+	 * @access private
+	 * @var    mixed
 	 */
 	private static $options;
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
-	 * @var
+	 * @access private
+	 * @var    object
 	 */
 	private static $object;
 
 	/**
 	 * Basic_Auth_Loader object.
 	 *
-	 * @var bool|object
+	 * @access private
+	 * @var    bool|object
 	 */
 	private static $instance = false;
 
 	/**
 	 * Basic_Auth_Loader constructor.
 	 *
-	 * @param array $options
+	 * @access public
+	 *
+	 * @param array $options Options to pass to the updater.
+	 *
+	 * @return void
 	 */
 	public function __construct( $options ) {
 		self::$options = empty( $options )
@@ -57,12 +64,14 @@ class Basic_Auth_Loader {
 	}
 
 	/**
+	 * Gets an instance of the Basic_Auth_Loader class.
+	 *
 	 * The Basic_Auth_Loader object can be created/obtained via this
 	 * method - this prevents potential duplicate loading.
 	 *
-	 * @param array $options
+	 * @param array $options Additional options to pass to the instance.
 	 *
-	 * @return object $instance Basic_Auth_Loader
+	 * @return Basic_Auth_Loader
 	 */
 	public static function instance( $options ) {
 		if ( false === self::$instance ) {
@@ -76,6 +85,10 @@ class Basic_Auth_Loader {
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
+	 *
+	 * @access public
+	 *
+	 * @return void
 	 */
 	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
@@ -84,6 +97,10 @@ class Basic_Auth_Loader {
 
 	/**
 	 * Remove hooks for Bitbucket authentication headers.
+	 *
+	 * @access public
+	 *
+	 * @return void
 	 */
 	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
@@ -94,12 +111,13 @@ class Basic_Auth_Loader {
 	 * Add Basic Authentication $args to http_request_args filter hook
 	 * for private repositories only.
 	 *
-	 * @uses $this->get_credentials()
+	 * @access public
+	 * @uses   Fragen\GitHub_Updater\Basic_Auth_Loader::get_credentials()
 	 *
-	 * @param  mixed  $args
-	 * @param  string $url
+	 * @param  array  $args Args passed to the URL.
+	 * @param  string $url  The URL.
 	 *
-	 * @return mixed $args
+	 * @return array $args
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
@@ -117,9 +135,10 @@ class Basic_Auth_Loader {
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
-	 * @uses $this->is_repo_private()
+	 * @access public
+	 * @uses   Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
 	 *
-	 * @param string $url
+	 * @param string $url The URL.
 	 *
 	 * @return array $credentials
 	 */
@@ -174,7 +193,9 @@ class Basic_Auth_Loader {
 	/**
 	 * Determine if repo is private.
 	 *
-	 * @param string $url
+	 * @access private
+	 *
+	 * @param string $url The URL.
 	 *
 	 * @return bool true if private
 	 */
@@ -214,12 +235,13 @@ class Basic_Auth_Loader {
 	 * Removes Basic Authentication header for Bitbucket Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
 	 *
-	 * @link http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
+	 * @access public
+	 * @link   http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
 	 *
-	 * @param mixed  $args
-	 * @param string $url
+	 * @param array  $args The URL arguments passed.
+	 * @param string $url  The URL.
 	 *
-	 * @return mixed $args
+	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
 		$arrURL = parse_url( $url );

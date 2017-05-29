@@ -51,8 +51,12 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		/**
 		 * Constructor
 		 *
-		 * @param array $roots
-		 * @param array $static_map
+		 * @access public
+		 *
+		 * @param array      $roots      Roots to scan when autoloading.
+		 * @param array|null $static_map List of classes that deviate from convention. Defaults to null.
+		 *
+		 * @return void
 		 */
 		public function __construct( array $roots, array $static_map = null ) {
 			$this->roots = $roots;
@@ -65,29 +69,33 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		/**
 		 * Load classes
 		 *
-		 * @param $class
+		 * @access protected
+		 *
+		 * @param string $class The class name to autoload.
+		 *
+		 * @return void
 		 */
 		protected function autoload( $class ) {
-			// Check for a static mapping first of all
+			// Check for a static mapping first of all.
 			if ( isset( $this->map[ $class ] ) && file_exists( $this->map[ $class ] ) ) {
 				include_once $this->map[ $class ];
 
 				return;
 			}
 
-			// Else scan the namespace roots
+			// Else scan the namespace roots.
 			foreach ( $this->roots as $namespace => $root_dir ) {
-				// If the class doesn't belong to this namespace, move on to the next root
+				// If the class doesn't belong to this namespace, move on to the next root.
 				if ( 0 !== strpos( $class, $namespace ) ) {
 					continue;
 				}
 
-				// Determine the possible path to the class
+				// Determine the possible path to the class.
 				$path = substr( $class, strlen( $namespace ) + 1 );
 				$path = str_replace( '\\', DIRECTORY_SEPARATOR, $path );
 				$path = $root_dir . DIRECTORY_SEPARATOR . $path . '.php';
 
-				// Test for its existence and load if present
+				// Test for its existence and load if present.
 				if ( file_exists( $path ) ) {
 					include_once $path;
 				}
