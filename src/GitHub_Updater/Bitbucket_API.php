@@ -30,7 +30,12 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @access public
+	 * @uses   Basic_Auth_Loader::instance()
+	 *
+	 * @param object $type The repo type.
+	 *
+	 * @return void
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -50,7 +55,9 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param string $file
+	 * @access public
+	 *
+	 * @param string $file The file.
 	 *
 	 * @return bool
 	 */
@@ -79,6 +86,8 @@ class Bitbucket_API extends API implements API_Interface {
 
 	/**
 	 * Get the remote info for tags.
+	 *
+	 * @access public
 	 *
 	 * @return bool
 	 */
@@ -111,9 +120,11 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Read the remote CHANGES.md file
+	 * Read the remote CHANGES.md file.
 	 *
-	 * @param string $changes
+	 * @access public
+	 *
+	 * @param string $changes The changelog filename.
 	 *
 	 * @return bool
 	 */
@@ -276,8 +287,8 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Bitbucket API
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      For theme rollback. Defaults to false.
+	 * @param boolean $branch_switch For direct branch changing. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
@@ -299,7 +310,7 @@ class Bitbucket_API extends API implements API_Interface {
 		) {
 			$endpoint .= $rollback . '.zip';
 
-			// for users wanting to update against branch other than master or not using tags, else use newest_tag
+			// For users wanting to update against branch other than master or not using tags, else use newest_tag.
 		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {
 				$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
