@@ -32,20 +32,23 @@ class Additions {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var bool|Additions
+	 * @access private
+	 * @var    bool|Additions
 	 */
 	private static $instance = false;
 
 	/**
 	 * Holds array of plugin/theme headers to add to GitHub Updater.
 	 *
-	 * @var
+	 * @access public
+	 * @var    array
 	 */
 	public $add_to_github_updater = array();
 
 	/**
 	 * Singleton
 	 *
+	 * @access public
 	 * @return object $instance Additions
 	 */
 	public static function instance() {
@@ -59,9 +62,12 @@ class Additions {
 	/**
 	 * Register JSON config file.
 	 *
-	 * @param $config
-	 * @param $repos
-	 * @param $type
+	 * @access public
+	 * @uses   \Fragen\GitHub_Updater\Additions::add_headers()
+	 *
+	 * @param string $config The repo config, in JSON.
+	 * @param array  $repos  The repos to pull from.
+	 * @param string $type   The plugin type ('plugin' or 'theme').
 	 *
 	 * @return bool
 	 */
@@ -82,9 +88,14 @@ class Additions {
 	/**
 	 * Add GitHub Updater headers to plugins/themes via a filter hooks.
 	 *
-	 * @param $config
-	 * @param $repos
-	 * @param $type
+	 * @access public
+	 * @uses   \Fragen\GitHub_Updater\Additions::$add_to_github_updater
+	 *
+	 * @param array  $config The repo config.
+	 * @param array  $repos  The repos to pull from.
+	 * @param string $type   The plugin type ('plugin' or 'theme').
+	 *
+	 * @return void
 	 */
 	public function add_headers( $config, $repos, $type ) {
 		$this->add_to_github_updater = array();
