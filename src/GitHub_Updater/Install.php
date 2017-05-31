@@ -412,10 +412,9 @@ class Install extends Base {
 
 		if ( ( empty( parent::$options['bitbucket_username'] ) ||
 		       empty( parent::$options['bitbucket_password'] ) ) ||
-		     (
+
 		     ( empty( parent::$options['bitbucket_server_username'] ) ||
 		       empty( parent::$options['bitbucket_server_password'] ) )
-		     )
 		) {
 			add_settings_field(
 				'bitbucket_username',
