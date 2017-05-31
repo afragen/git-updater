@@ -89,7 +89,7 @@ class Additions {
 	 * Add GitHub Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @access public
-	 * @uses   \Fragen\GitHub_Updater\Additions::$add_to_github_updater
+	 * @uses   \Fragen\GitHub_Updater\Additions::add_to_github_updater()
 	 *
 	 * @param array  $config The repo config.
 	 * @param array  $repos  The repos to pull from.
