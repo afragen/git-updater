@@ -144,7 +144,7 @@ class Settings extends Base {
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) && false !== stristr( $e->type, 'bitbucket' ) ) {
+			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
 				return 'bbserver';
 			}
 
@@ -1059,10 +1059,10 @@ class Settings extends Base {
 
 		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbserver ) {
 			if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver ) ) {
-				return ( false !== stristr( $e->type, 'bitbucket' ) && 'bbserver' === $type );
+				return ( false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type );
 			}
 
-			return ( false !== stristr( $e->type, $type ) );
+			return ( false !== stripos( $e->type, $type ) );
 		} );
 
 		$display_data = array_map( function( $e ) {

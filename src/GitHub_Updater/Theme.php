@@ -126,7 +126,7 @@ class Theme extends Base {
 					}
 				}
 
-				if ( empty( $repo_uri ) || false === stristr( $value, 'Theme' ) ) {
+				if ( empty( $repo_uri ) || false === stripos( $value, 'Theme' ) ) {
 					continue;
 				}
 

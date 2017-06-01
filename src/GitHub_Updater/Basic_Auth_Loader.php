@@ -207,7 +207,7 @@ class Basic_Auth_Loader {
 
 		if ( ( $slug && array_key_exists( $slug, self::$options ) &&
 		       1 == self::$options[ $slug ] &&
-		       false !== stristr( $url, $slug ) )
+		       false !== stripos( $url, $slug ) )
 		) {
 			return true;
 		}

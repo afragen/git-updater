@@ -450,7 +450,7 @@ class Base {
 		self::$hours    = 6 + rand( 0, 12 );
 		$this->repo_api = null;
 		$file           = 'style.css';
-		if ( false !== stristr( $repo->type, 'plugin' ) ) {
+		if ( false !== stripos( $repo->type, 'plugin' ) ) {
 			$file = basename( $repo->slug );
 		}
 

@@ -127,7 +127,7 @@ class Plugin extends Base {
 					continue;
 				}
 
-				if ( empty( $headers[ $value ] ) || false === stristr( $value, 'Plugin' ) ) {
+				if ( empty( $headers[ $value ] ) || false === stripos( $value, 'Plugin' ) ) {
 					continue;
 				}
 
