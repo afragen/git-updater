@@ -1066,7 +1066,7 @@ class Settings extends Base {
 		} );
 
 		$display_data = array_map( function( $e ) {
-			return $e = array(
+			return array(
 				'type'    => $e->type,
 				'repo'    => $e->repo,
 				'name'    => $e->name,

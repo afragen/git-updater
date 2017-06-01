@@ -46,8 +46,8 @@ abstract class API extends Base {
 	 */
 	public static function http_request_args( $args, $url ) {
 		$args['sslverify'] = true;
-		if ( false === stristr( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent']    = $args['user-agent'] . '; GitHub Updater - https://github.com/afragen/github-updater';
+		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
+			$args['user-agent']    .= '; GitHub Updater - https://github.com/afragen/github-updater';
 			$args['wp-rest-cache'] = array( 'tag' => 'github-updater' );
 		}
 
