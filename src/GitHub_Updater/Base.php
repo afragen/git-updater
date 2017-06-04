@@ -1028,6 +1028,7 @@ class Base {
 		}
 		unset( $response['sections']['screenshots'] );
 		unset( $response['sections']['installation'] );
+		$response['sections']     = ! empty( $response['sections'] ) ? $response['sections'] : array();
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
 		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
 		$this->type->requires     = isset( $response['requires'] ) ? $response['requires'] : null;
