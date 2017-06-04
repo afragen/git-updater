@@ -61,7 +61,7 @@ $extra_classes = array(
 );
 
 // Load Autoloader.
-require_once( __DIR__ . '/src/Autoloader.php' );
+require_once __DIR__ . '/src/Autoloader.php';
 $loader = 'Fragen\\Autoloader';
 new $loader( $root, $extra_classes );
 
