@@ -49,7 +49,7 @@ class Additions {
 	 * Singleton
 	 *
 	 * @access public
-	 * @return object $instance Additions
+	 * @return object Additions
 	 */
 	public static function instance() {
 		if ( false === self::$instance ) {

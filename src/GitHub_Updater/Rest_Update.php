@@ -167,7 +167,7 @@ class Rest_Update extends Base {
 			$json_encode_flags = 128 | 64;
 
 			if ( ! isset( $_REQUEST['key'] ) ||
-			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
+			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
 				throw new \Exception( 'Bad api key.' );
 			}
@@ -241,20 +241,20 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents( 'php://input' );
 
 		// GitHub
-		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
-		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
+		if ( 'push' === $_SERVER['HTTP_X_GITHUB_EVENT'] ||
+		     'create' === $_SERVER['HTTP_X_GITHUB_EVENT']
 		) {
 			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
-		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
+		if ( 'repo:push' === $_SERVER['HTTP_X_EVENT_KEY'] ) {
 			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ||
-		     'Tag Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT']
+		if ( 'Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT'] ||
+		     'Tag Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT']
 		) {
 			return $this->parse_gitlab_webhook( $request_body );
 		}
@@ -267,17 +267,17 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
 	 *
-	 * @param array $request_body
+	 * @param string $request_body
 	 *
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_body ) {
 		$request_body = urldecode( $request_body );
-		if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+		if ( false !== $pos = strpos( $request_body, '{' ) ) {
 			$request_body = substr( $request_body, $pos );
 		}
 
-		if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+		if ( false !== $pos = strpos( $request_body, '}}' ) ) {
 			$request_body = substr( $request_body, 0, $pos ) . '}}';
 		}
 
@@ -302,7 +302,7 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
 	 *
-	 * @param array $request_body
+	 * @param string $request_body
 	 *
 	 * @return array $response
 	 */
@@ -327,7 +327,7 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
 	 *
-	 * @param array $request_body
+	 * @param string $request_body
 	 *
 	 * @return bool|array $response
 	 */

@@ -61,7 +61,7 @@ class Install extends Base {
 		if ( ! empty( $wp_cli_config['uri'] ) ) {
 			$wp_cli  = true;
 			$headers = Base::parse_header_uri( $wp_cli_config['uri'] );
-			$api     = false !== strstr( $headers['host'], '.com' )
+			$api     = false !== strpos( $headers['host'], '.com' )
 				? rtrim( $headers['host'], '.com' )
 				: rtrim( $headers['host'], '.org' );
 
@@ -74,20 +74,20 @@ class Install extends Base {
 
 			switch ( $api ) {
 				case 'github':
-					$_POST['github_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
+					$_POST['github_access_token'] = $wp_cli_config['private'] ?: null;
 					break;
 				case 'bitbucket':
 					$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
 					break;
 				case 'gitlab':
-					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ? $wp_cli_config['private'] : null;
+					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
 					break;
 			}
 
 			$this->load_options();
 		}
 
-		if ( isset( $_POST['option_page'] ) && 'github_updater_install' == $_POST['option_page'] ) {
+		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
 				$_POST['github_updater_branch'] = 'master';
 			}
@@ -576,8 +576,7 @@ class Install extends Base {
 	 * @return mixed
 	 */
 	public function install_plugin_complete_actions( $install_actions, $api, $plugin_file ) {
-		unset( $install_actions['activate_plugin'] );
-		unset( $install_actions['network_activate'] );
+		unset( $install_actions['activate_plugin'], $install_actions['network_activate'] );
 
 		return $install_actions;
 	}

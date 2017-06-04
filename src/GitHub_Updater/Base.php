@@ -46,7 +46,7 @@ class Base {
 	/**
 	 * Class Object for Language Packs.
 	 *
-	 * @var
+	 * @var object
 	 */
 	protected $languages;
 
@@ -111,7 +111,7 @@ class Base {
 	 * Holds boolean on whether or not the repo requires authentication.
 	 * Used by class Settings and class Messages.
 	 *
-	 * @var bool
+	 * @var array
 	 */
 	protected static $auth_required = array(
 		'github_private'    => false,
@@ -205,7 +205,7 @@ class Base {
 	public function ensure_api_key_is_set() {
 		$api_key = get_site_option( 'github_updater_api_key' );
 		if ( ! $api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( rand(), true ) ) );
+			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
 		}
 	}
 
@@ -242,7 +242,7 @@ class Base {
 			}
 		}
 
-		if ( in_array( $pagenow, array_unique( $admin_pages ) ) ) {
+		if ( in_array( $pagenow, array_unique( $admin_pages ), true ) ) {
 			$force_meta_update = true;
 
 			// Load plugin stylesheet.
@@ -447,7 +447,7 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		self::$hours    = 6 + rand( 0, 12 );
+		self::$hours    = 6 + mt_rand( 0, 12 );
 		$this->repo_api = null;
 		$file           = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
@@ -693,7 +693,7 @@ class Base {
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
-		if ( is_null( $upgrader_object ) ) {
+		if ( null === $upgrader_object ) {
 			$upgrader_object = $this;
 		}
 
@@ -922,7 +922,7 @@ class Base {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->release_asset        = ! empty( $response['Release Asset'] ) && true == $response['Release Asset'] ? true : false;
+		$this->type->release_asset        = ( ! empty( $response['Release Asset'] ) && true === $response['Release Asset'] );
 		$this->type->dot_org              = $response['dot_org'];
 	}
 
@@ -1026,8 +1026,7 @@ class Base {
 		} else {
 			$response['sections']['other_notes'] .= $response['remaining_content'];
 		}
-		unset( $response['sections']['screenshots'] );
-		unset( $response['sections']['installation'] );
+		unset( $response['sections']['screenshots'], $response['sections']['installation'] );
 		$response['sections']     = ! empty( $response['sections'] ) ? $response['sections'] : array();
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
 		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
@@ -1350,7 +1349,7 @@ class Base {
 		global $pagenow;
 
 		$admin_pages   = array( 'plugins.php', 'themes.php', 'update-core.php' );
-		$is_admin_page = in_array( $pagenow, $admin_pages ) ? true : false;
+		$is_admin_page = in_array( $pagenow, $admin_pages, true ) ? true : false;
 		$transient     = 'update_' . rtrim( $pagenow, '.php' );
 		$transient     = 'update_update-core' === $transient ? 'update_core' : $transient;
 

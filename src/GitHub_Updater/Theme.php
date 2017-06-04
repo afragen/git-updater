@@ -56,7 +56,7 @@ class Theme extends Base {
 		$this->config = $this->get_theme_meta();
 
 		if ( empty( $this->config ) ) {
-			return false;
+			return;
 		}
 	}
 
@@ -160,8 +160,8 @@ class Theme extends Base {
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_theme['release_asset']           = true == $theme->get( 'Release Asset' ) ? true : false;
-				$git_theme['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
+				$git_theme['release_asset']           = true === $theme->get( 'Release Asset' );
+				$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				break;
 			}
@@ -296,7 +296,7 @@ class Theme extends Base {
 				'width'     => 270,
 				'height'    => 400,
 			),
-			self_admin_url( "theme-install.php" ) ) );
+			self_admin_url( 'theme-install.php' ) ) );
 		$nonced_update_url  = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
@@ -487,7 +487,7 @@ class Theme extends Base {
 				'width'     => 270,
 				'height'    => 400,
 			),
-			self_admin_url( "theme-install.php" ) ) );
+			self_admin_url( 'theme-install.php' ) ) );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo

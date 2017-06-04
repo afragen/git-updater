@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
-class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
+class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
 	 * Holds loose class method name.
@@ -219,7 +219,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 		if ( $response && isset( $response->data ) ) {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
+			$response = $parser->parse_data( $this );
 			$this->set_repo_cache( 'readme', $response );
 		}
 

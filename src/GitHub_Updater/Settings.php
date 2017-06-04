@@ -192,7 +192,7 @@ class Settings extends Base {
 		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		echo '<h2 class="nav-tab-wrapper">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
-			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
+			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
 			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>';
 		}
 		echo '</h2>';
@@ -207,7 +207,7 @@ class Settings extends Base {
 		$current_tab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
 		echo '<h3 class="nav-tab-wrapper">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
-			$active = ( $current_tab == $key ) ? 'nav-tab-active' : '';
+			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
 			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>';
 		}
 		echo '</h3>';
@@ -230,15 +230,15 @@ class Settings extends Base {
 			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
-				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true == $_GET['updated'] ) ): ?>
+				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true === $_GET['updated'] ) ): ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
 					</div>
-				<?php elseif ( isset( $_GET['reset'] ) && true == $_GET['reset'] ): ?>
+				<?php elseif ( isset( $_GET['reset'] ) && true === $_GET['reset'] ): ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
 					</div>
-				<?php elseif ( ( isset( $_GET['refresh_transients'] ) && true == $_GET['refresh_transients'] ) ) : ?>
+				<?php elseif ( isset( $_GET['refresh_transients'] ) && true === $_GET['refresh_transients'] ) : ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'Cache refreshed.', 'github-updater' ); ?></p>
 					</div>
@@ -672,7 +672,7 @@ class Settings extends Base {
 
 		array_filter( $auth_required_unset,
 			function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
-				$key = array_search( $e, $auth_required_unset );
+				$key = array_search( $e, $auth_required_unset, true );
 				if ( $auth_required[ $key ] ) {
 					unset( $ghu_unset_keys[ $e ] );
 				}
@@ -681,7 +681,7 @@ class Settings extends Base {
 		// Unset if value set AND if associated with a repo
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
-				$key = array_search( $e, $ghu_unset_keys );
+				$key = array_search( $e, $ghu_unset_keys, true );
 				if ( array_key_exists( $key, $ghu_unset_keys )
 				     && array_key_exists( $key, $ghu_tokens )
 				) {
@@ -832,7 +832,7 @@ class Settings extends Base {
 	 */
 	public function token_callback_text( $args ) {
 		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
-		$type = ( isset( $args['token'] ) ) ? 'password' : 'text';
+		$type = isset( $args['token'] ) ? 'password' : 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
 			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
@@ -1058,7 +1058,7 @@ class Settings extends Base {
 		$bbserver = array( 'bitbucket', 'bbserver' );
 
 		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbserver ) {
-			if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver ) ) {
+			if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver, true ) ) {
 				return ( false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type );
 			}
 

@@ -181,8 +181,8 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param string $endpoint      The endpoint to access.
-	 * @param string $download_link The plugin or theme download link. Defaults to false.
+	 * @param string      $endpoint      The endpoint to access.
+	 * @param bool|string $download_link The plugin or theme download link. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
@@ -375,7 +375,7 @@ abstract class API extends Base {
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
-		$response = ( 'in dot org' === $response ) ? true : false;
+		$response = 'in dot org' === $response;
 
 		return $response;
 	}

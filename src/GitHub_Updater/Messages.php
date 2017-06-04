@@ -65,8 +65,8 @@ class Messages extends Base {
 		$settings_pages = array( 'settings.php', 'options-general.php' );
 
 		if (
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ) ) ||
-			( in_array( $pagenow, $settings_pages ) &&
+			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true ) ||
+			( in_array( $pagenow, $settings_pages, true ) &&
 			  ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) )
 		) {
 			return false;
@@ -76,7 +76,7 @@ class Messages extends Base {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					if ( false !== strstr( self::$error_message, 'timed out' ) ) {
+					if ( false !== strpos( self::$error_message, 'timed out' ) ) {
 						break;
 					}
 					add_action( 'admin_notices', array( &$this, 'show_wp_error' ) );

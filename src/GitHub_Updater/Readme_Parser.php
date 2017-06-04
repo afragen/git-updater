@@ -36,7 +36,7 @@ class Readme_Parser extends Parser {
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
 
-		if ( is_null( $markdown ) ) {
+		if ( null === $markdown ) {
 			$markdown = new Parsedown();
 		}
 
@@ -44,11 +44,13 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
+	 * @param object $api
+	 *
 	 * @return array
 	 */
-	public function parse_data() {
+	public function parse_data( $api ) {
 		$data = array();
-		foreach ( $this as $key => $value ) {
+		foreach ( $api as $key => $value ) {
 			$data[ $key ] = $value;
 		}
 

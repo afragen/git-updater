@@ -54,7 +54,7 @@ class Plugin extends Base {
 		$this->config = $this->get_plugin_meta();
 
 		if ( empty( $this->config ) ) {
-			return false;
+			return;
 		}
 	}
 
@@ -123,7 +123,7 @@ class Plugin extends Base {
 			foreach ( (array) self::$extra_headers as $value ) {
 				$header = null;
 
-				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ) ) ) {
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ), true ) ) {
 					continue;
 				}
 
@@ -166,8 +166,8 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_plugin['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
-				$git_plugin['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
+				$git_plugin['release_asset']           = true === $plugin_data['Release Asset'];
+				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				$git_plugin['banners']['high'] =
 					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )

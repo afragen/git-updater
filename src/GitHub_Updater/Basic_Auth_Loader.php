@@ -54,8 +54,6 @@ class Basic_Auth_Loader {
 	 * @access public
 	 *
 	 * @param array $options Options to pass to the updater.
-	 *
-	 * @return void
 	 */
 	public function __construct( $options ) {
 		self::$options = empty( $options )
@@ -87,8 +85,6 @@ class Basic_Auth_Loader {
 	 * Load hooks for Bitbucket authentication headers.
 	 *
 	 * @access public
-	 *
-	 * @return void
 	 */
 	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
@@ -99,8 +95,6 @@ class Basic_Auth_Loader {
 	 * Remove hooks for Bitbucket authentication headers.
 	 *
 	 * @access public
-	 *
-	 * @return void
 	 */
 	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
@@ -150,7 +144,7 @@ class Basic_Auth_Loader {
 		$credentials  = array(
 			'username'      => null,
 			'password'      => null,
-			'api.wordpress' => 'api.wordpress.org' === $headers['host'] ? true : false,
+			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
 		);
@@ -174,7 +168,7 @@ class Basic_Auth_Loader {
 			case ( 'bitbucket_theme' ):
 			case ( $type instanceof Bitbucket_API ):
 			case ( $type instanceof Bitbucket_Server_API ):
-				$bitbucket_org = 'bitbucket.org' === $headers['host'] ? true : false;
+				$bitbucket_org = 'bitbucket.org' === $headers['host'];
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 				break;
@@ -205,9 +199,9 @@ class Basic_Auth_Loader {
 		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 
-		if ( ( $slug && array_key_exists( $slug, self::$options ) &&
-		       1 == self::$options[ $slug ] &&
-		       false !== stripos( $url, $slug ) )
+		if ( $slug && array_key_exists( $slug, self::$options ) &&
+		     1 == self::$options[ $slug ] &&
+		     false !== stripos( $url, $slug )
 		) {
 			return true;
 		}

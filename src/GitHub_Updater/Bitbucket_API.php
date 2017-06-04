@@ -34,8 +34,6 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @uses   Basic_Auth_Loader::instance()
 	 *
 	 * @param object $type The repo type.
-	 *
-	 * @return void
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -208,7 +206,7 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( $response && isset( $response->data ) ) {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
+			$response = $parser->parse_data( $this );
 			$this->set_repo_cache( 'readme', $response );
 		}
 
@@ -311,7 +309,7 @@ class Bitbucket_API extends API implements API_Interface {
 			$endpoint .= $rollback . '.zip';
 
 			// For users wanting to update against branch other than master or not using tags, else use newest_tag.
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
+		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {
 				$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 			} else {
