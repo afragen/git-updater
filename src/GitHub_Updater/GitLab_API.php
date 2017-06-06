@@ -366,6 +366,8 @@ class GitLab_API extends API implements API_Interface {
 
 		switch ( $git::$method ) {
 			case 'projects':
+				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
+				break;
 			case 'meta':
 			case 'tags':
 			case 'branches':
@@ -405,7 +407,7 @@ class GitLab_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$response     = $this->api( '/projects?per_page=100' );
+			$response     = $this->api( '/projects' );
 
 			if ( empty( $response ) ) {
 				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
