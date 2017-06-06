@@ -339,6 +339,9 @@ class GitHub_API extends API implements API_Interface {
 			case 'download_link':
 			case 'translation':
 				break;
+			case 'branches':
+				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
+				break;
 			default:
 				break;
 		}
