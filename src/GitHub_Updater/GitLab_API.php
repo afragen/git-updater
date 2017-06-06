@@ -368,6 +368,7 @@ class GitLab_API extends API implements API_Interface {
 			case 'projects':
 			case 'meta':
 			case 'tags':
+			case 'branches':
 				break;
 			case 'file':
 			case 'changes':

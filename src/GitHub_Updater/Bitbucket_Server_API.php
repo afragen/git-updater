@@ -274,6 +274,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $response ) {
+			self::$method = 'branches';
 			$response = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
 			if ( $response && isset( $response->values ) ) {
 				foreach ( $response->values as $value ) {
@@ -335,6 +336,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			case 'meta':
 			case 'tags':
 			case 'translation':
+			case 'branches':
 				break;
 			case 'file':
 			case 'readme':
