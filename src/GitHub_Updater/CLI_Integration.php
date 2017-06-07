@@ -228,7 +228,7 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
-		};
+		}
 	}
 	public function feedback( $string ) {}
 }
@@ -242,7 +242,7 @@ class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
-		};
+		}
 	}
 	public function feedback( $string ) {}
 }

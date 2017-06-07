@@ -34,7 +34,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @var null
 	 */
-	private static $method = null;
+	private static $method;
 
 	/**
 	 * Constructor.
@@ -433,7 +433,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Parse API response and return array with changelog.
 	 *
-	 * @param object $response Response from API call.
+	 * @param string $response Response from API call.
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */

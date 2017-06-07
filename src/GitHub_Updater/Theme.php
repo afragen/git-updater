@@ -210,7 +210,7 @@ class Theme extends Base {
 			}
 		}
 
-		if ( ! $this->is_wp_cli() ) {
+		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
 	}
@@ -371,7 +371,7 @@ class Theme extends Base {
 		 */
 		foreach ( parent::$git_servers as $server ) {
 			$branch_key = $server . ' Branch';
-			$branch     = $theme->get( $branch_key ) ? $theme->get( $branch_key ) : 'master';
+			$branch     = $theme->get( $branch_key ) ?: 'master';
 			if ( 'master' !== $branch ) {
 				break;
 			}

@@ -217,7 +217,7 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'response' => $webhook_response ? $webhook_response : $_GET,
+			'response' => $webhook_response ?: $_GET,
 		);
 
 		if ( $this->is_error() ) {

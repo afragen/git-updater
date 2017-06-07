@@ -32,7 +32,7 @@ class GitLab_API extends API implements API_Interface {
 	 *
 	 * @var null
 	 */
-	private static $method = null;
+	private static $method;
 
 	/**
 	 * Constructor.

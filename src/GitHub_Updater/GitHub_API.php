@@ -32,7 +32,7 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @var null
 	 */
-	private static $method = null;
+	private static $method;
 
 	/**
 	 * Constructor.
@@ -301,7 +301,7 @@ class GitHub_API extends API implements API_Interface {
 			 * For users wanting to update against branch other than master
 			 * or if not using tags, else use newest_tag.
 			 */
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
+		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;

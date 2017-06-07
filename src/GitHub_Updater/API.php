@@ -145,7 +145,7 @@ abstract class API extends Base {
 		if ( false !== strrpos( basename( $url ), '.php' ) ||
 		     false !== strrpos( basename( $url ), '.css' )
 		) {
-			$this->type->broken = 200 != $code ? true : false;
+			$this->type->broken = 200 != $code;
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -257,11 +257,7 @@ abstract class API extends Base {
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {
-		if ( empty( $response ) || isset( $response->message ) ) {
-			return true;
-		}
-
-		return false;
+		return empty( $response ) || isset( $response->message );
 	}
 
 	/**
@@ -405,14 +401,14 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param GitLab_API|GitLab_API $git      Class containing the Git API used.
-	 * @param string                $endpoint The endpoint being accessed.
+	 * @param object $git      Class containing the GitAPI used.
+	 * @param string $endpoint The endpoint being accessed.
 	 *
 	 * @return string $endpoint
 	 */
 	protected function add_access_token_endpoint( $git, $endpoint ) {
 		// This will return if checking during shiny updates.
-		if ( ! isset( parent::$options ) ) {
+		if ( null === parent::$options ) {
 			return $endpoint;
 		}
 		$key              = null;

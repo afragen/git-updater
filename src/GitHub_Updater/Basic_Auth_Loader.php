@@ -152,7 +152,7 @@ class Basic_Auth_Loader {
 		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
 		$slug  = isset( $_REQUEST['plugin'] ) && ! $slug ? $_REQUEST['plugin'] : $slug;
 		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
-		$repos = isset( $_REQUEST )
+		$repos = null !== $_REQUEST
 			? array_merge(
 				Plugin::instance()->get_plugin_configs(),
 				Theme::instance()->get_theme_configs()

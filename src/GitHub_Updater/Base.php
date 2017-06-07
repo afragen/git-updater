@@ -194,7 +194,7 @@ class Base {
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
-		if ( $this->repo_api instanceof Bitbucket_API || $this->repo_api instanceof Bitbucket_Server_API ) {
+		if ( $this->repo_api instanceof Bitbucket_API ) {
 			Basic_Auth_Loader::instance( self::$options )->remove_authentication_hooks();
 		}
 	}
@@ -1367,7 +1367,7 @@ class Base {
 	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' )
 	 */
 	public function make_update_transient_current( $transient ) {
-		if ( ! in_array( $transient, array( 'update_plugins', 'update_themes', 'update_core' ) ) ) {
+		if ( ! in_array( $transient, array( 'update_plugins', 'update_themes', 'update_core' ), true ) ) {
 			return;
 		}
 

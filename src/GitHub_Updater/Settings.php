@@ -306,7 +306,7 @@ class Settings extends Base {
 	 */
 	public function page_init() {
 
-		if ( $this->is_doing_ajax() ) {
+		if ( static::is_doing_ajax() ) {
 			return;
 		}
 
@@ -942,7 +942,7 @@ class Settings extends Base {
 		$option_page        = array( 'github_updater', 'github_updater_remote_management' );
 
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page ) )
+		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
 
 		) {
 			$update = true;
@@ -1071,7 +1071,7 @@ class Settings extends Base {
 				'repo'    => $e->repo,
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
-				'broken'  => $e->broken ? $e->broken : false,
+				'broken'  => $e->broken ?: false,
 			);
 		}, $type_repos );
 

@@ -91,7 +91,7 @@ class Plugin extends Base {
 		/*
 		 * Ensure get_plugins() function is available.
 		 */
-		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
 		$git_plugins = array();
@@ -208,7 +208,7 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( ! $this->is_wp_cli() ) {
+		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
 	}
@@ -305,7 +305,7 @@ class Plugin extends Base {
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
 		if ( array_key_exists( $repo, $this->config ) ) {
-			if ( ! is_null( $repo ) ) {
+			if ( null !== $repo ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 					esc_url(
