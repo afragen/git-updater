@@ -148,6 +148,7 @@ class Plugin extends Base {
 				$git_plugin['enterprise']          = $header['enterprise_uri'];
 				$git_plugin['enterprise_api']      = $header['enterprise_api'];
 				$git_plugin['owner']               = $header['owner'];
+				$git_plugin['group']               = $header['group'];
 				$git_plugin['repo']                = $header['repo'];
 				$git_plugin['extended_repo']       = implode( '-', array(
 					$repo_parts['git_server'],

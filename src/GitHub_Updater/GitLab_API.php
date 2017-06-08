@@ -299,6 +299,7 @@ class GitLab_API extends API implements API_Interface {
 
 	/**
 	 * Construct $this->type->download_link using GitLab API.
+	 * Accounts for GitLab Groups.
 	 *
 	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
@@ -306,7 +307,10 @@ class GitLab_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = $this->get_api_url( '/:owner/:repo/repository/archive.zip', true );
+		$endpoint           = empty( $this->type->group )
+			? '/:owner/:repo/repository/archive.zip'
+			: '/:owner/:group/:repo/repository/archive.zip';
+		$download_link_base = $this->get_api_url( $endpoint, true );
 		$endpoint           = '';
 
 		/*
@@ -398,6 +402,7 @@ class GitLab_API extends API implements API_Interface {
 
 	/**
 	 * Get GitLab project ID and project meta.
+	 * Accounts for GitLab Groups.
 	 *
 	 * @return string|int
 	 */
@@ -410,7 +415,10 @@ class GitLab_API extends API implements API_Interface {
 			$response     = $this->api( '/projects' );
 
 			if ( empty( $response ) ) {
-				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
+				$id = empty( $this->type->group )
+					? implode( '/', array( $this->type->owner, $this->type->repo ) )
+					: implode( '/', array( $this->type->owner, $this->type->group, $this->type->repo ) );
+				$id = urlencode( $id );
 
 				return $id;
 			}

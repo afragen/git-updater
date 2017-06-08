@@ -843,16 +843,24 @@ class Base {
 	 * @return array
 	 */
 	protected function parse_header_uri( $repo_header ) {
-		$header_parts     = parse_url( $repo_header );
-		$header['scheme'] = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']   = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo       = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo       = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
-		$header['path']   = $owner_repo;
-		list( $header['owner'], $header['repo'] ) = explode( '/', $owner_repo );
-		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
-		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
-		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
+		$header_parts         = parse_url( $repo_header );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$path                 = trim( $header_parts['path'], '/' );  // strip surrounding slashes
+		$path                 = str_replace( '.git', '', $path ); //strip incorrect URI ending
+		$header['path']       = $path;
+		$path                 = explode( '/', $path );
+		$header['owner']      = array_shift( $path );
+		$header['repo']       = array_pop( $path );
+		$header['group']      = ! empty( $path ) ? $path[0] : null;
+		$header['owner_repo'] = isset( $header['owner'] )
+			? implode( '/', array( $header['owner'], $header['repo'] ) )
+			: null;
+		$header['owner_group_repo'] = isset( $header['owner'], $header['group'] )
+			? implode( '/', array( $header['owner'], $header['group'], $header['repo'], ) )
+			: $header['owner_repo'];
+		$header['base_uri'] = str_replace( $header_parts['path'], '', $repo_header );
+		$header['uri']      = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 
 		$header = Settings::sanitize( $header );
 

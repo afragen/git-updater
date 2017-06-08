@@ -107,7 +107,9 @@ class Install extends Base {
 			 * Transform URI to owner/repo
 			 */
 			$headers                      = Base::parse_header_uri( $_POST['github_updater_repo'] );
-			$_POST['github_updater_repo'] = $headers['owner_repo'];
+			$_POST['github_updater_repo'] = empty( $headers['group'] )
+				? $headers['owner_repo']
+				: $headers['owner_group_repo'];
 
 			self::$install         = Settings::sanitize( $_POST );
 			self::$install['repo'] = $headers['repo'];

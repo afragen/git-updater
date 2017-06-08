@@ -190,11 +190,15 @@ abstract class API extends Base {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner'  => $this->type->owner,
+			'group'  => empty( $this->type->group ) ? null : $this->type->group,
 			'repo'   => $this->type->repo,
 			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
 		);
 
 		foreach ( $segments as $segment => $value ) {
+			if ( empty( $value ) ) {
+				continue;
+			}
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
