@@ -136,7 +136,7 @@ class Install extends Base {
 				/*
 				 * If asset is entered install it.
 				 */
-				if ( false !== stripos( $headers['path'], 'releases/download' ) ) {
+				if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
 					self::$install['download_link'] = $headers['uri'];
 				}
 
