@@ -1,4 +1,5 @@
 #### [unreleased]
+* added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
 
 #### 6.3.4 / 2017-05-28
 * fixed [#547](https://github.com/afragen/github-updater/issues/547) for RESTful updating after breaking it again

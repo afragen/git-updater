@@ -838,19 +838,19 @@ class Base {
 	/**
 	 * Parse URI param returning array of parts.
 	 *
-	 * @param $repo_header
+	 * @param string $repo_header
 	 *
-	 * @return array
+	 * @return array $header
 	 */
 	protected function parse_header_uri( $repo_header ) {
-		$header_parts     = parse_url( $repo_header );
-		$header['scheme'] = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']   = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
-		$owner_repo       = trim( $header_parts['path'], '/' );  // strip surrounding slashes
-		$owner_repo       = str_replace( '.git', '', $owner_repo ); //strip incorrect URI ending
-		$header['path']   = $owner_repo;
-		list( $header['owner'], $header['repo'] ) = explode( '/', $owner_repo );
-		$header['owner_repo'] = isset( $header['owner'] ) ? $header['owner'] . '/' . $header['repo'] : null;
+		$repo_header          = str_replace( '.git', '', $repo_header );
+		$header_parts         = parse_url( $repo_header );
+		$header_path          = pathinfo( $header_parts['path'] );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$header['owner']      = trim( $header_path['dirname'], '/' );
+		$header['repo']       = $header_path['filename'];
+		$header['owner_repo'] = implode( '/', array( $header['owner'], $header['repo'] ) );
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 

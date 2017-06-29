@@ -410,7 +410,8 @@ class GitLab_API extends API implements API_Interface {
 			$response     = $this->api( '/projects' );
 
 			if ( empty( $response ) ) {
-				$id = urlencode( $this->type->owner . '/' . $this->type->repo );
+				$id = implode( '/', array( $this->type->owner, $this->type->repo ) );
+				$id = urlencode( $id );
 
 				return $id;
 			}
