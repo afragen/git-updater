@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 6.3.5 / 2017-06-29
+* hotfix to `composer.json` to remove classmap and files, I think I messed something up.
+
 #### 6.3.4 / 2017-05-28
 * fixed [#547](https://github.com/afragen/github-updater/issues/547) for RESTful updating after breaking it again
 * fixed PHP errors [#550](https://github.com/afragen/github-updater/issues/550)
