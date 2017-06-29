@@ -32,11 +32,7 @@
     "psr-4": {
       "Fragen\\GitHub_Updater\\": "src/GitHub_Updater/"
     },
-    "classmap": [
-      "vendor/"
-    ],
-    "files": [
-      "github-updater.php"
-    ]
+    "classmap": [],
+    "files": []
   }
 }
