@@ -117,6 +117,7 @@ class Settings extends Base {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->installed_git_repos();
 
+		$git_subtab  = array();
 		$ghu_subtabs = array(
 			'github'    => esc_html__( 'GitHub', 'github-updater' ),
 			'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ),
@@ -125,9 +126,9 @@ class Settings extends Base {
 		);
 
 		foreach ( $gits as $git ) {
-			$git_subtab = array( $git => $ghu_subtabs[ $git ] );
-			$subtabs    = array_merge( $subtabs, $git_subtab );
+			$git_subtab[ $git ] = $ghu_subtabs[ $git ];
 		}
+		$subtabs = array_merge( $subtabs, $git_subtab );
 
 		return $subtabs;
 	}
