@@ -843,7 +843,6 @@ class Base {
 	 * @return array $header
 	 */
 	protected function parse_header_uri( $repo_header ) {
-		$repo_header          = str_replace( '.git', '', $repo_header );
 		$header_parts         = parse_url( $repo_header );
 		$header_path          = pathinfo( $header_parts['path'] );
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
