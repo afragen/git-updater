@@ -161,11 +161,11 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				if ( parent::$loaded_apis['bitbucket_api'] ) {
+				if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
 					self::$install = parent::$loaded_apis['bitbucket_api']->remote_install( $headers, self::$install );
 				}
 
-				if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+				if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
 					self::$install = parent::$loaded_apis['bitbucket_server_api']->remote_install( $headers, self::$install );
 				}
 			}
@@ -175,7 +175,7 @@ class Install extends Base {
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( parent::$loaded_apis['gitlab_api'] ) {
+				if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
 					self::$install = parent::$loaded_apis['gitlab_api']->remote_install( $headers, self::$install );
 				}
 			}
@@ -330,11 +330,11 @@ class Install extends Base {
 			$type
 		);
 
-		if ( parent::$loaded_apis['bitbucket_api'] ) {
+		if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
 			parent::$loaded_apis['bitbucket_api']->add_install_settings_fields( $type );
 		}
 
-		if ( parent::$loaded_apis['gitlab_api'] ) {
+		if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
 			parent::$loaded_apis['gitlab_api']->add_install_settings_fields( $type );
 		}
 	}

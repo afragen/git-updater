@@ -406,15 +406,15 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$loaded_apis['gitlab_api'] ) {
+		if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
 			parent::$loaded_apis['gitlab_api']->add_settings();
 		}
 
-		if ( parent::$loaded_apis['bitbucket_api'] ) {
+		if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
 			parent::$loaded_apis['bitbucket_api']->add_settings();
 		}
 
-		if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+		if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
 			parent::$loaded_apis['bitbucket_server_api']->add_settings();
 		}
 
@@ -464,17 +464,17 @@ class Settings extends Base {
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						if ( parent::$loaded_apis['bitbucket_api'] ) {
+						if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
 							$repo_setting_field = parent::$loaded_apis['bitbucket_api']->add_repo_setting_field();
 						}
 					} else {
-						if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+						if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
 							$repo_setting_field = parent::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
-					if ( parent::$loaded_apis['gitlab_api'] ) {
+					if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
 						$repo_setting_field = parent::$loaded_apis['gitlab_api']->add_repo_setting_field();
 					}
 					break;
