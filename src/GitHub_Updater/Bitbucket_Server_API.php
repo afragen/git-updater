@@ -323,8 +323,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Create Bitbucket Server API endpoints.
 	 *
-	 * @param Bitbucket_Server_API $git
-	 * @param string               $endpoint
+	 * @param Bitbucket_Server_API|API $git
+	 * @param string                   $endpoint
 	 *
 	 * @return string $endpoint
 	 */

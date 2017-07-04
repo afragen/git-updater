@@ -357,8 +357,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Create GitLab API endpoints.
 	 *
-	 * @param GitLab_API $git
-	 * @param string     $endpoint
+	 * @param GitLab_API|API $git
+	 * @param string         $endpoint
 	 *
 	 * @return string $endpoint
 	 */

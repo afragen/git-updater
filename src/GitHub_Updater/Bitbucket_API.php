@@ -340,8 +340,8 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Added due to interface contract, not used for Bitbucket.
 	 *
-	 * @param Bitbucket_API $git
-	 * @param string        $endpoint
+	 * @param Bitbucket_API|API $git
+	 * @param string            $endpoint
 	 *
 	 * @return string $endpoint
 	 */

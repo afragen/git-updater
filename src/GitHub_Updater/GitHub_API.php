@@ -322,8 +322,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param GitHub_API $git
-	 * @param string     $endpoint
+	 * @param GitHub_API|API $git
+	 * @param string         $endpoint
 	 *
 	 * @return string $endpoint
 	 */
