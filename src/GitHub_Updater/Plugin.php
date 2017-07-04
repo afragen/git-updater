@@ -166,7 +166,7 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_plugin['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_plugin['release_asset']           = true === $plugin_data['Release Asset'];
+				$git_plugin['release_asset']           = 'true' === $plugin_data['Release Asset'];
 				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				$git_plugin['banners']['high'] =

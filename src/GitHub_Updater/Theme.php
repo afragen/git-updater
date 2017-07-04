@@ -160,7 +160,7 @@ class Theme extends Base {
 				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_theme['release_asset']           = true === $theme->get( 'Release Asset' );
+				$git_theme['release_asset']           = 'true' === $theme->get( 'Release Asset' );
 				$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				break;

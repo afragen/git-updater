@@ -951,7 +951,7 @@ class Base {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->release_asset        = ( ! empty( $response['Release Asset'] ) && true === $response['Release Asset'] );
+		$this->type->release_asset        = ( ! empty( $response['Release Asset'] ) && 'true' === $response['Release Asset'] );
 		$this->type->dot_org              = $response['dot_org'];
 	}
 
