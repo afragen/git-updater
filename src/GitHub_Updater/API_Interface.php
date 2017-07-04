@@ -93,8 +93,8 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API $git
+	 * @param string                                                   $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -105,9 +105,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param object $response API response.
+	 * @param \stdClass|array $response API response.
 	 *
-	 * @return array|object Array of tag numbers, object is error.
+	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response );
 
@@ -116,9 +116,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param object $response API response.
+	 * @param \stdClass|array $response API response.
 	 *
-	 * @return mixed Array of meta variables.
+	 * @return array|\stdClass Array of meta variables.
 	 */
 	public function parse_meta_response( $response );
 
@@ -127,9 +127,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param object $response API response.
+	 * @param \stdClass|array $response API response.
 	 *
-	 * @return array|object $arr Array of changes in base64, object if error.
+	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response );
 

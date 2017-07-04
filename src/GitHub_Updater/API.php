@@ -130,7 +130,7 @@ abstract class API extends Base {
 	 *
 	 * @param string $url The URL to send the request to.
 	 *
-	 * @return boolean|object
+	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
 
@@ -211,7 +211,7 @@ abstract class API extends Base {
 					}
 				}
 				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $api->add_endpoints( $api, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -225,7 +225,7 @@ abstract class API extends Base {
 					}
 				}
 				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $api->add_endpoints( $api, $endpoint );
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
@@ -233,7 +233,7 @@ abstract class API extends Base {
 						break;
 					}
 					$api      = new Bitbucket_Server_API( new \stdClass() );
-					$endpoint = $api->add_endpoints( $this, $endpoint );
+					$endpoint = $api->add_endpoints( $api, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -252,7 +252,7 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $response The response.
+	 * @param \stdClass $response The response.
 	 *
 	 * @return bool true if invalid
 	 */
@@ -401,8 +401,8 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $git      Class containing the GitAPI used.
-	 * @param string $endpoint The endpoint being accessed.
+	 * @param GitHub_API|GitLab_API $git      Class containing the GitAPI used.
+	 * @param string                $endpoint The endpoint being accessed.
 	 *
 	 * @return string $endpoint
 	 */
