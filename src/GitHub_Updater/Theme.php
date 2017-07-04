@@ -34,9 +34,9 @@ class Theme extends Base {
 	/**
 	 * Theme object.
 	 *
-	 * @var bool|Theme
+	 * @var Theme $instance
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Rollback variable.
@@ -55,7 +55,7 @@ class Theme extends Base {
 		 */
 		$this->config = $this->get_theme_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}
@@ -65,10 +65,10 @@ class Theme extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return object $instance Theme
+	 * @return Theme $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -190,9 +190,6 @@ class Theme extends Base {
 				continue;
 			}
 
-			// Update theme transient with rollback (branch switching) data.
-			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
-
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
@@ -209,6 +206,9 @@ class Theme extends Base {
 				}
 			}
 		}
+
+		// Update theme transient with rollback (branch switching) data.
+		add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
 
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
@@ -287,8 +287,8 @@ class Theme extends Base {
 			'strong'  => array(),
 		);
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$details_url        = esc_attr( add_query_arg(
+		//$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$details_url       = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
 				'theme'     => $theme_key,
@@ -297,11 +297,11 @@ class Theme extends Base {
 				'height'    => 400,
 			),
 			self_admin_url( 'theme-install.php' ) ) );
-		$nonced_update_url  = wp_nonce_url(
+		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
 		);
-		$enclosure          = $this->update_row_enclosure( $theme_key, 'theme' );
+		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme' );
 
 		/*
 		 * Update transient if necessary.
@@ -353,6 +353,7 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
+		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -433,9 +434,9 @@ class Theme extends Base {
 				continue;
 			}
 
-			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 			break;
 		}
+		remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
 	}
 
 	/**
@@ -474,7 +475,7 @@ class Theme extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $theme
+	 * @param \stdClass $theme
 	 *
 	 * @return string (content buffer)
 	 */
@@ -533,7 +534,7 @@ class Theme extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $theme
+	 * @param \stdClass $theme
 	 *
 	 * @return string
 	 */
@@ -577,9 +578,7 @@ class Theme extends Base {
 								echo '<option>' . $tag . '</option>';
 							}
 						}
-						if ( empty( $options['branch_switch'] ) &&
-						     empty( $theme->rollback )
-						) {
+						if ( empty( $theme->rollback ) ) {
 							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
 							$show_button = false;
 						}
@@ -602,7 +601,7 @@ class Theme extends Base {
 	 *
 	 * @param array $transient
 	 *
-	 * @return array|object
+	 * @return array|\stdClass
 	 */
 	public function pre_set_site_transient_update_themes( $transient ) {
 

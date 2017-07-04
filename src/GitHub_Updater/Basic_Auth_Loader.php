@@ -36,7 +36,7 @@ class Basic_Auth_Loader {
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
 	 * @access private
-	 * @var    object
+	 * @var    \stdClass
 	 */
 	private static $object;
 
@@ -44,9 +44,9 @@ class Basic_Auth_Loader {
 	 * Basic_Auth_Loader object.
 	 *
 	 * @access private
-	 * @var    bool|object
+	 * @var    Basic_Auth_Loader $instance
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Basic_Auth_Loader constructor.
@@ -72,7 +72,7 @@ class Basic_Auth_Loader {
 	 * @return Basic_Auth_Loader
 	 */
 	public static function instance( $options ) {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new static( $options );
 			$backtrace      = debug_backtrace();
 			self::$object   = $backtrace[1]['object'];
@@ -106,7 +106,7 @@ class Basic_Auth_Loader {
 	 * for private repositories only.
 	 *
 	 * @access public
-	 * @uses   Fragen\GitHub_Updater\Basic_Auth_Loader::get_credentials()
+	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::get_credentials()
 	 *
 	 * @param  array  $args Args passed to the URL.
 	 * @param  string $url  The URL.
@@ -130,7 +130,7 @@ class Basic_Auth_Loader {
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
 	 * @access public
-	 * @uses   Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
+	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
 	 *
 	 * @param string $url The URL.
 	 *

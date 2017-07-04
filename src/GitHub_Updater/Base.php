@@ -32,21 +32,21 @@ class Base {
 	/**
 	 * Store details of all repositories that are installed.
 	 *
-	 * @var object
+	 * @var \stdClass
 	 */
 	protected $config;
 
 	/**
 	 * Class Object for API.
 	 *
-	 * @var object
+	 * @var \stdClass
 	 */
 	protected $repo_api;
 
 	/**
 	 * Class Object for Language Packs.
 	 *
-	 * @var object
+	 * @var \stdClass
 	 */
 	protected $languages;
 
@@ -262,7 +262,7 @@ class Base {
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
-			if ( is_admin() && ! empty( self::$options_remote[ $key ] ) ) {
+			if ( ! empty( self::$options_remote[ $key ] ) && is_admin() ) {
 				$admin_pages = array_merge( $admin_pages, array( 'index.php', 'admin-ajax.php' ) );
 			}
 		}
@@ -299,7 +299,7 @@ class Base {
 		if ( $force_meta_update ) {
 			$this->forced_meta_update_themes();
 		}
-		if ( is_admin() && self::$load_repo_meta &&
+		if ( self::$load_repo_meta && is_admin() &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
 			Settings::instance();
@@ -394,6 +394,7 @@ class Base {
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
+		$uri_type          = '';
 		$ghu_extra_headers = array(
 			'Requires WP'   => 'Requires WP',
 			'Requires PHP'  => 'Requires PHP',
@@ -538,10 +539,10 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string $source
-	 * @param string $remote_source
-	 * @param object $upgrader
-	 * @param array  $hook_extra
+	 * @param string                           $source
+	 * @param string                           $remote_source
+	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader
+	 * @param array                            $hook_extra
 	 *
 	 * @return string
 	 */
@@ -586,7 +587,7 @@ class Base {
 		/*
 		 * Remote install source.
 		 */
-		if ( isset( self::$options['github_updater_install_repo'] ) && empty( $repo ) ) {
+		if ( empty( $repo ) && isset( self::$options['github_updater_install_repo'] ) ) {
 			$repo['repo'] = $repo['extended_repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
@@ -605,10 +606,10 @@ class Base {
 	 * This usually occurs when initial installation not using GitHub Updater.
 	 * May cause plugin/theme deactivation.
 	 *
-	 * @param string $new_source
-	 * @param string $remote_source
-	 * @param object $upgrader_object
-	 * @param string $slug
+	 * @param string       $new_source
+	 * @param string       $remote_source
+	 * @param Plugin|Theme $upgrader_object
+	 * @param string       $slug
 	 *
 	 * @return string $new_source
 	 */
@@ -617,7 +618,7 @@ class Base {
 		     ! isset( self::$options['github_updater_install_repo'] )
 		) {
 			if ( $upgrader_object instanceof Plugin ) {
-				foreach ( $upgrader_object->config as $plugin ) {
+				foreach ( (array) $upgrader_object->config as $plugin ) {
 					if ( $slug === dirname( $plugin->slug ) ) {
 						$slug       = $plugin->repo;
 						$new_source = trailingslashit( $remote_source ) . $slug;
@@ -626,7 +627,7 @@ class Base {
 				}
 			}
 			if ( $upgrader_object instanceof Theme ) {
-				foreach ( $upgrader_object->config as $theme ) {
+				foreach ( (array) $upgrader_object->config as $theme ) {
 					if ( $slug === $theme->repo ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
 						break;
@@ -642,10 +643,10 @@ class Base {
 	 * Extended naming.
 	 * Only for plugins and not for 'master' === branch && .org hosted.
 	 *
-	 * @param string $new_source
-	 * @param string $remote_source
-	 * @param object $upgrader_object
-	 * @param array  $repo
+	 * @param string       $new_source
+	 * @param string       $remote_source
+	 * @param Plugin|Theme $upgrader_object
+	 * @param array        $repo
 	 *
 	 * @return string $new_source
 	 */
@@ -670,10 +671,10 @@ class Base {
 	 * Renaming if using a GitLab Release Asset.
 	 * It has a different download directory structure.
 	 *
-	 * @param string $new_source
-	 * @param string $remote_source
-	 * @param object $upgrader_object
-	 * @param string $slug
+	 * @param string       $new_source
+	 * @param string       $remote_source
+	 * @param Plugin|Theme $upgrader_object
+	 * @param string       $slug
 	 *
 	 * @return string $new_source
 	 */
@@ -711,8 +712,8 @@ class Base {
 	 * Set array with normal and extended repo names.
 	 * Fix name even if installed without renaming originally.
 	 *
-	 * @param string $slug
-	 * @param object $upgrader_object
+	 * @param string       $slug
+	 * @param Plugin|Theme $upgrader_object
 	 *
 	 * @return array
 	 */
@@ -727,7 +728,7 @@ class Base {
 		}
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-		foreach ( $upgrader_object->config as $repo ) {
+		foreach ( (array) $upgrader_object->config as $repo ) {
 			if ( ( $slug === $repo->repo || $slug === $repo->extended_repo ) ||
 			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
@@ -749,7 +750,7 @@ class Base {
 	 * @return array
 	 */
 	protected function get_file_headers( $contents, $type ) {
-
+		$all_headers            = array();
 		$default_plugin_headers = array(
 			'Name'        => 'Plugin Name',
 			'PluginURI'   => 'Plugin URI',
@@ -792,7 +793,7 @@ class Base {
 		/*
 		 * Merge extra headers and default headers.
 		 */
-		$all_headers = array_merge( self::$extra_headers, (array) $all_headers );
+		$all_headers = array_merge( self::$extra_headers, $all_headers );
 		$all_headers = array_unique( $all_headers );
 
 		foreach ( $all_headers as $field => $regex ) {
@@ -825,9 +826,9 @@ class Base {
 		$local_files = null;
 
 		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path );
+			$local_files = scandir( $this->$type->local_path, SCANDIR_SORT_NONE );
 		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
-			$local_files = scandir( $this->$type->local_path_extended );
+			$local_files = scandir( $this->$type->local_path_extended, SCANDIR_SORT_NONE );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
@@ -1036,7 +1037,7 @@ class Base {
 	 */
 	protected function set_readme_info( $response ) {
 		$readme = array();
-		foreach ( $this->type->sections as $section => $value ) {
+		foreach ( (array) $this->type->sections as $section => $value ) {
 			if ( 'description' === $section ) {
 				continue;
 			}
@@ -1300,7 +1301,7 @@ class Base {
 			$type = 'plugin';
 
 			// For extended naming
-			foreach ( $this->config as $repo ) {
+			foreach ( (array) $this->config as $repo ) {
 				if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
 					$slug = $repo->repo;
 					break;
@@ -1324,8 +1325,8 @@ class Base {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string $type plugin|theme
-	 * @param object $repo
+	 * @param string    $type plugin|theme
+	 * @param \stdClass $repo
 	 */
 	private function set_rollback_transient( $type, $repo ) {
 		switch ( $repo->type ) {
@@ -1440,7 +1441,7 @@ class Base {
 		$header['languages']      = null;
 		$header['ci_job']         = false;
 
-		if ( ! in_array( $header['host'], $hosted_domains ) && ! empty( $header['host'] ) ) {
+		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
 			$header['enterprise_uri'] = trim( $header['enterprise_uri'], '/' );
 			switch ( $header_parts[0] ) {
@@ -1513,12 +1514,12 @@ class Base {
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
 	 *
-	 * @param object $repo
+	 * @param \stdClass $repo
 	 *
 	 * @return bool
 	 */
 	protected function is_private( $repo ) {
-		if ( ! self::is_doing_ajax() && isset( $repo->remote_version ) ) {
+		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
 			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
 		}
 	}

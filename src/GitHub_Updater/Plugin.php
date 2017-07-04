@@ -32,9 +32,9 @@ class Plugin extends Base {
 	/**
 	 * Plugin object.
 	 *
-	 * @var bool|Plugin
+	 * @var Plugin
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Rollback variable
@@ -53,7 +53,7 @@ class Plugin extends Base {
 		 */
 		$this->config = $this->get_plugin_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}
@@ -72,10 +72,10 @@ class Plugin extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return object $instance Plugin
+	 * @return Plugin $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -198,15 +198,16 @@ class Plugin extends Base {
 				continue;
 			}
 
-			// Update plugin transient with rollback (branch switching) data.
-			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
-
-			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset &&
-			     'init' === current_filter() //added due to calling hook for shiny updates, don't show row twice
+			//current_filter() check due to calling hook for shiny updates, don't show row twice
+			if ( ! $plugin->release_asset && 'init' === current_filter() &&
+			     ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
+
+		// Update plugin transient with rollback (branch switching) data.
+		add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
 
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
@@ -231,6 +232,7 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
+		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -369,7 +371,7 @@ class Plugin extends Base {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
-		foreach ( $plugin->contributors as $contributor ) {
+		foreach ( (array) $plugin->contributors as $contributor ) {
 			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 		}
 		$response->contributors = $contributors;

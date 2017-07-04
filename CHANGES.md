@@ -2,6 +2,8 @@
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
 * refactored Settings and Install to place API Settings data in individual API classes
 * refactored Settings to make smaller methods
+* simplfied `composer.json`, removed autoload section and no need to require `composer/installer`
+* more PHP linting fixes
 
 #### 6.3.5 / 2017-06-29
 * hotfix to `composer.json` to remove classmap and files, I think I messed something up.

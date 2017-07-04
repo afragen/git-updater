@@ -33,7 +33,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @access public
 	 * @uses   Basic_Auth_Loader::instance()
 	 *
-	 * @param object $type The repo type.
+	 * @param \stdClass $type The repo type.
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -340,8 +340,8 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Added due to interface contract, not used for Bitbucket.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param Bitbucket_API $git
+	 * @param string        $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -351,9 +351,9 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass $response Response from API call.
 	 *
-	 * @return array|object Array of tag numbers, object is error.
+	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -366,7 +366,7 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -388,9 +388,9 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array|object $arr Array of changes in base64, object if error.
+	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -521,10 +521,11 @@ class Bitbucket_API extends API implements API_Interface {
 	public function is_private_repo() {
 		?>
 		<label for="is_private">
-			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
-			<p class="description">
+			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false ) ?> >
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}
@@ -536,9 +537,10 @@ class Bitbucket_API extends API implements API_Interface {
 		?>
 		<label for="bitbucket_username">
 			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_username" value="">
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}
@@ -550,9 +552,10 @@ class Bitbucket_API extends API implements API_Interface {
 		?>
 		<label for="bitbucket_password">
 			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_password" value="">
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}

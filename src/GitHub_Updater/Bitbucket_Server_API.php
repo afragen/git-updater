@@ -39,7 +39,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		parent::__construct( $type );
@@ -274,7 +274,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			self::$method = 'branches';
 			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
 			if ( $response && isset( $response->values ) ) {
-				foreach ( $response->values as $value ) {
+				foreach ( (array) $response->values as $value ) {
 					$branch              = $value->displayId;
 					$branches[ $branch ] = $this->construct_download_link( false, $branch );
 				}
@@ -323,8 +323,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Create Bitbucket Server API endpoints.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param Bitbucket_Server_API $git
+	 * @param string               $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -388,16 +388,16 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * Combines separate text lines from API response into one string with \n line endings.
 	 * Code relying on raw text can now parse it.
 	 *
-	 * @param string $response
+	 * @param string|\stdClass|mixed $response
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
 	private function bbserver_recombine_response( $response ) {
 		$remote_info_file = '';
-		$json_decoded     = is_string( $response ) ? json_decode( $response ) : null;
+		$json_decoded     = is_string( $response ) ? json_decode( $response ) : '';
 		$response         = empty( $json_decoded ) ? $response : $json_decoded;
 		if ( isset( $response->lines ) ) {
-			foreach ( $response->lines as $line ) {
+			foreach ( (array) $response->lines as $line ) {
 				$remote_info_file .= $line->text . "\n";
 			}
 		}
@@ -408,7 +408,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -441,9 +441,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Parse API response and return object with readme body.
 	 *
-	 * @param string $response
+	 * @param string|\stdClass $response
 	 *
-	 * @return object $response
+	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
 		$content        = $this->bbserver_recombine_response( $response );

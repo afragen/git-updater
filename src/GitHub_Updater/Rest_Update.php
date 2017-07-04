@@ -65,7 +65,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
+			throw new \UnexpectedValueException( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
 		}
 
 		if ( is_plugin_active( $plugin->slug ) ) {
@@ -116,7 +116,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
+			throw new \UnexpectedValueException( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
@@ -169,7 +169,7 @@ class Rest_Update extends Base {
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
-				throw new \Exception( 'Bad api key.' );
+				throw new \UnexpectedValueException( 'Bad api key.' );
 			}
 
 			$tag = 'master';
@@ -200,7 +200,7 @@ class Rest_Update extends Base {
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
 			} else {
-				throw new \Exception( 'No plugin or theme specified for update.' );
+				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
 			http_response_code( 500 );
@@ -267,7 +267,7 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
 	 *
-	 * @param string $request_body
+	 * @param string|bool $request_body
 	 *
 	 * @return array $response
 	 */

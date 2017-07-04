@@ -27,9 +27,9 @@ class Messages extends Base {
 	/**
 	 * Holds instance of this object.
 	 *
-	 * @var bool|Messages
+	 * @var Messages $instance
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Holds WP_Error message.
@@ -41,10 +41,10 @@ class Messages extends Base {
 	/**
 	 * Singleton
 	 *
-	 * @return object $instance Messages
+	 * @return Messages $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -65,9 +65,10 @@ class Messages extends Base {
 		$settings_pages = array( 'settings.php', 'options-general.php' );
 
 		if (
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true ) ||
-			( in_array( $pagenow, $settings_pages, true ) &&
-			  ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) )
+			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
+			  in_array( $pagenow, $settings_pages, true ) ) ||
+			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
+
 		) {
 			return false;
 		}
@@ -104,7 +105,7 @@ class Messages extends Base {
 	public function show_403_error_message() {
 		$_403 = false;
 		foreach ( self::$error_code as $repo ) {
-			if ( 403 === $repo['code'] && 'github' === $repo['git'] && ! $_403 ) {
+			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
 				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
 					return;
@@ -142,7 +143,7 @@ class Messages extends Base {
 	public function show_401_error_message() {
 		$_401 = false;
 		foreach ( self::$error_code as $repo ) {
-			if ( 401 === $repo['code'] && ! $_401 ) {
+			if ( ! $_401 && 401 === $repo['code'] ) {
 				$_401 = true;
 				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
 					return;

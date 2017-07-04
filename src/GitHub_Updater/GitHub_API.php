@@ -37,7 +37,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -322,8 +322,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param GitHub_API $git
+	 * @param string     $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -378,9 +378,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param object|array $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return object|array $arr Array of tag numbers, object is error.
+	 * @return \stdClass|array $arr Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -400,7 +400,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -422,7 +422,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
@@ -443,7 +443,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
 	 *
-	 * @return array|bool|object|\stdClass
+	 * @return array|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;

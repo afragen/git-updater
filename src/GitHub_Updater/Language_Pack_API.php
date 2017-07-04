@@ -74,7 +74,7 @@ class Language_Pack_API extends API {
 	 * @param array  $headers
 	 * @param mixed  $response API response.
 	 *
-	 * @return array|bool|mixed|object
+	 * @return array|bool|mixed
 	 */
 	private function get_language_pack_json( $type, $headers, $response ) {
 		switch ( $type ) {

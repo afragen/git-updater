@@ -37,7 +37,7 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -85,7 +85,7 @@ class GitLab_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -357,8 +357,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Create GitLab API endpoints.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param GitLab_API $git
+	 * @param string     $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -433,9 +433,9 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param object|array $response Response from API call for tags.
+	 * @param \stdClass|array $response Response from API call for tags.
 	 *
-	 * @return object|array Array of tag numbers, object is error.
+	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -455,7 +455,7 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -477,9 +477,9 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array|object $arr Array of changes in base64, object if error.
+	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
 		if ( isset( $response->messages ) ) {
@@ -591,9 +591,10 @@ class GitLab_API extends API implements API_Interface {
 		?>
 		<label for="gitlab_access_token">
 			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_access_token" value="">
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}

@@ -30,9 +30,9 @@ class Settings extends Base {
 	/**
 	 * Settings object.
 	 *
-	 * @var bool|Settings
+	 * @var Settings $instance
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Holds the plugin basename.
@@ -67,10 +67,10 @@ class Settings extends Base {
 	 * The Settings object can be created/obtained via this
 	 * method - this prevents potential duplicate loading.
 	 *
-	 * @return object $instance Settings
+	 * @return Settings $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -257,7 +257,7 @@ class Settings extends Base {
 			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
-				<?php if ( is_multisite() && ( isset( $_GET['updated'] ) && true === $_GET['updated'] ) ): ?>
+				<?php if ( ( isset( $_GET['updated'] ) && true === $_GET['updated'] ) && is_multisite() ): ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
 					</div>
@@ -295,7 +295,7 @@ class Settings extends Base {
 					</form>
 					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
 					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache', true ); ?>
+						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
 					</form>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -549,9 +549,7 @@ class Settings extends Base {
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				if ( ! empty( $value ) ) {
-					unset( parent::$options [ $key ] );
-				}
+				unset( parent::$options [ $key ] );
 			}
 			update_site_option( 'github_updater', parent::$options );
 		}
@@ -739,7 +737,7 @@ class Settings extends Base {
 		$checked = isset( parent::$options[ $args['id'] ] ) ? parent::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
+			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
 			<?php echo $args['title']; ?>
 		</label>
 		<?php
@@ -757,7 +755,7 @@ class Settings extends Base {
 		$checked = isset( parent::$options_remote[ $args['id'] ] ) ? parent::$options_remote[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked, true ); ?> >
+			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
 			<?php echo $args['title']; ?>
 		</label>
 		<?php

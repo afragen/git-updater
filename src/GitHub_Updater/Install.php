@@ -193,8 +193,9 @@ class Install extends Base {
 			}
 
 			update_site_option( 'github_updater', Settings::sanitize( parent::$options ) );
-			$url   = self::$install['download_link'];
-			$nonce = wp_nonce_url( $url );
+			$url      = self::$install['download_link'];
+			$nonce    = wp_nonce_url( $url );
+			$upgrader = null;
 
 			if ( 'plugin' === $type ) {
 				$plugin = self::$install['repo'];
@@ -204,7 +205,7 @@ class Install extends Base {
 				 */
 				$skin     = $wp_cli
 					? new CLI_Plugin_Installer_Skin()
-					: new \Plugin_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'plugin', 'api' ) );
+					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
 				add_filter( 'install_plugin_complete_actions', array(
 					&$this,
@@ -220,7 +221,7 @@ class Install extends Base {
 				 */
 				$skin     = $wp_cli
 					? new CLI_Theme_Installer_Skin()
-					: new \Theme_Installer_Skin( compact( 'type', 'title', 'url', 'nonce', 'theme', 'api' ) );
+					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
 				add_filter( 'install_theme_complete_actions', array(
 					&$this,
@@ -274,10 +275,9 @@ class Install extends Base {
 	 * @param string $type
 	 */
 	public function register_settings( $type ) {
+		$repo_type = null;
 
-		/*
-		 * Place translatable strings into variables.
-		 */
+		// Place translatable strings into variables.
 		if ( 'plugin' === $type ) {
 			$repo_type = esc_html__( 'Plugin', 'github-updater' );
 		}
@@ -346,9 +346,10 @@ class Install extends Base {
 		?>
 		<label for="github_updater_repo">
 			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus>
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'URI is case sensitive.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}
@@ -360,9 +361,10 @@ class Install extends Base {
 		?>
 		<label for="github_updater_branch">
 			<input type="text" style="width:50%;" name="github_updater_branch" value="" placeholder="master">
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Enter branch name or leave empty for `master`', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}
@@ -376,7 +378,7 @@ class Install extends Base {
 			<select name="github_updater_api">
 				<?php foreach ( parent::$git_servers as $key => $value ): ?>
 					<?php if ( parent::$loaded_apis[ $key . '_api' ] ): ?>
-						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key, true, true ) ?> >
+						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>
 					<?php endif ?>
@@ -393,9 +395,10 @@ class Install extends Base {
 		?>
 		<label for="github_access_token">
 			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
-			<p class="description">
+			<br>
+			<span class="description">
 				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
-			</p>
+			</span>
 		</label>
 		<?php
 	}
