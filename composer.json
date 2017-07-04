@@ -25,14 +25,6 @@
   ],
   "prefer-stable": true,
   "require": {
-    "composer/installers": "^1.0",
     "php": ">=5.3"
-  },
-  "autoload": {
-    "psr-4": {
-      "Fragen\\GitHub_Updater\\": "src/GitHub_Updater/"
-    },
-    "classmap": [],
-    "files": []
   }
 }
