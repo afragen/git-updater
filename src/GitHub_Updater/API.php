@@ -211,7 +211,7 @@ abstract class API extends Base {
 					}
 				}
 				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $api, $endpoint );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -225,7 +225,7 @@ abstract class API extends Base {
 					}
 				}
 				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $api, $endpoint );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
@@ -233,7 +233,7 @@ abstract class API extends Base {
 						break;
 					}
 					$api      = new Bitbucket_Server_API( new \stdClass() );
-					$endpoint = $api->add_endpoints( $api, $endpoint );
+					$endpoint = $api->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
