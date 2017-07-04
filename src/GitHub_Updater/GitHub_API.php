@@ -163,7 +163,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -485,7 +485,6 @@ class GitHub_API extends API implements API_Interface {
 					return false;
 				}
 
-				$response = array();
 				$response = $download_link[0];
 				$this->set_repo_cache( 'release_asset_url', $response );
 			}

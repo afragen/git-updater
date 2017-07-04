@@ -108,6 +108,18 @@ class Base {
 	);
 
 	/**
+	 * Holds an array of loaded git APIs.
+	 *
+	 * @var array
+	 */
+	public static $loaded_apis = array(
+		'github_api'           => true,
+		'bitbucket_api'        => false,
+		'bitbucket_server_api' => false,
+		'gitlab_api'           => false,
+	);
+
+	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 * Used by class Settings and class Messages.
 	 *
@@ -140,11 +152,24 @@ class Base {
 			$this->delete_all_cached_data();
 		}
 
+		$this->set_loaded_apis();
 		$this->load_hooks();
 
 		if ( self::is_wp_cli() ) {
 			include_once __DIR__ . '/CLI.php';
 			include_once __DIR__ . '/CLI_Integration.php';
+		}
+	}
+
+	private function set_loaded_apis() {
+		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' ) ) {
+			self::$loaded_apis['bitbucket_server_api'] = true;
+		}
+		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_API' ) ) {
+			self::$loaded_apis['bitbucket_api'] = true;
+		}
+		if ( class_exists( 'Fragen\GitHub_Updater\GitLab_API' ) ) {
+			self::$loaded_apis['gitlab_api'] = true;
 		}
 	}
 
@@ -462,14 +487,18 @@ class Base {
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				if ( $repo->enterprise_api ) {
-					$this->repo_api = new Bitbucket_Server_API( $repo );
-				} else {
+					if ( self::$loaded_apis['bitbucket_server_api'] ) {
+						$this->repo_api = new Bitbucket_Server_API( $repo );
+					}
+				} elseif ( self::$loaded_apis['bitbucket_api'] ) {
 					$this->repo_api = new Bitbucket_API( $repo );
 				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
-				$this->repo_api = new GitLab_API( $repo );
+				if ( self::$loaded_apis['gitlab_api'] ) {
+					$this->repo_api = new GitLab_API( $repo );
+				}
 				break;
 		}
 

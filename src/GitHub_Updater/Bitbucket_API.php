@@ -175,7 +175,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -405,6 +405,198 @@ class Bitbucket_API extends API implements API_Interface {
 		} );
 
 		return $arr;
+	}
+
+	/**
+	 * Add settings for Bitbucket Username and Password.
+	 */
+	public function add_settings() {
+		add_settings_section(
+			'bitbucket_user',
+			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
+			array( &$this, 'print_section_bitbucket_username' ),
+			'github_updater_bitbucket_install_settings'
+		);
+
+		add_settings_field(
+			'bitbucket_username',
+			esc_html__( 'Bitbucket Username', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bitbucket_install_settings',
+			'bitbucket_user',
+			array( 'id' => 'bitbucket_username' )
+		);
+
+		add_settings_field(
+			'bitbucket_password',
+			esc_html__( 'Bitbucket Password', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bitbucket_install_settings',
+			'bitbucket_user',
+			array( 'id' => 'bitbucket_password', 'token' => true )
+		);
+
+		/*
+		 * Show section for private Bitbucket repositories.
+		 */
+		if ( parent::$auth_required['bitbucket_private'] ) {
+			add_settings_section(
+				'bitbucket_id',
+				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
+				array( &$this, 'print_section_bitbucket_info' ),
+				'github_updater_bitbucket_install_settings'
+			);
+		}
+
+	}
+
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field() {
+		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
+		$setting_field['section']         = 'bitbucket_id';
+		$setting_field['callback_method'] = array( Settings::instance(), 'token_callback_checkbox' );
+
+		return $setting_field;
+	}
+
+	/**
+	 * Print the Bitbucket repo Settings text.
+	 */
+	public function print_section_bitbucket_info() {
+		esc_html_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+	}
+
+	/**
+	 * Print the Bitbucket user/pass Settings text.
+	 */
+	public function print_section_bitbucket_username() {
+		esc_html_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+	}
+
+	/**
+	 * Add remote install settings fields.
+	 *
+	 * @param string $type
+	 */
+	public function add_install_settings_fields( $type ) {
+		if ( ( empty( parent::$options['bitbucket_username'] ) ||
+		       empty( parent::$options['bitbucket_password'] ) ) ||
+
+		     ( empty( parent::$options['bitbucket_server_username'] ) ||
+		       empty( parent::$options['bitbucket_server_password'] ) )
+		) {
+			add_settings_field(
+				'bitbucket_username',
+				esc_html__( 'Bitbucket Username', 'github-updater' ),
+				array( &$this, 'bitbucket_username' ),
+				'github_updater_install_' . $type,
+				$type
+			);
+
+			add_settings_field(
+				'bitbucket_password',
+				esc_html__( 'Bitbucket Password', 'github-updater' ),
+				array( &$this, 'bitbucket_password' ),
+				'github_updater_install_' . $type,
+				$type
+			);
+		}
+
+		add_settings_field(
+			'is_private',
+			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
+			array( &$this, 'is_private_repo' ),
+			'github_updater_install_' . $type,
+			$type
+		);
+	}
+
+	/**
+	 * Setting for private repo for remote install.
+	 */
+	public function is_private_repo() {
+		?>
+		<label for="is_private">
+			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false, true ) ?> >
+			<p class="description">
+				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ) ?>
+			</p>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Bitbucket username for remote install.
+	 */
+	public function bitbucket_username() {
+		?>
+		<label for="bitbucket_username">
+			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_username" value="">
+			<p class="description">
+				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ) ?>
+			</p>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Bitbucket password for remote install.
+	 */
+	public function bitbucket_password() {
+		?>
+		<label for="bitbucket_password">
+			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_password" value="">
+			<p class="description">
+				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ) ?>
+			</p>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Add remote install feature, create endpoint.
+	 *
+	 * @param array $headers
+	 * @param array $install
+	 *
+	 * @return mixed $install
+	 */
+	public function remote_install( $headers, $install ) {
+		$bitbucket_org = true;
+
+		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
+			$base            = 'https://bitbucket.org';
+			$headers['host'] = 'bitbucket.org';
+		} else {
+			$base          = $headers['base_uri'];
+			$bitbucket_org = false;
+		}
+
+		if ( $bitbucket_org ) {
+			$install['download_link'] = implode( '/', array(
+				$base,
+				$install['github_updater_repo'],
+				'get',
+				$install['github_updater_branch'] . '.zip',
+			) );
+			if ( isset( $install['is_private'] ) ) {
+				parent::$options[ $install['repo'] ] = 1;
+			}
+			if ( isset( $install['bitbucket_username'] ) ) {
+				parent::$options['bitbucket_username'] = $install['bitbucket_username'];
+			}
+			if ( isset( $install['bitbucket_password'] ) ) {
+				parent::$options['bitbucket_password'] = $install['bitbucket_password'];
+			}
+
+			new Bitbucket_API( new \stdClass() );
+		}
+
+		return $install;
 	}
 
 }

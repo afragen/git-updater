@@ -42,10 +42,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @param object $type
 	 */
 	public function __construct( $type ) {
-		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
-
-		Basic_Auth_Loader::instance( parent::$options )->load_authentication_hooks();
+		parent::__construct( $type );
 
 		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
 			self::$options['bitbucket_server_username'] = null;
@@ -182,7 +179,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -275,7 +272,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'branches';
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
+			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
 			if ( $response && isset( $response->values ) ) {
 				foreach ( $response->values as $value ) {
 					$branch              = $value->displayId;
@@ -455,4 +452,111 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		return $response;
 	}
+
+	/**
+	 * Add settings for Bitbucket Server Username and Password.
+	 */
+	public function add_settings() {
+		add_settings_section(
+			'bitbucket_server_user',
+			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
+			array( &$this, 'print_section_bitbucket_username' ),
+			'github_updater_bbserver_install_settings'
+		);
+
+		add_settings_field(
+			'bitbucket_server_username',
+			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_username' )
+		);
+
+		add_settings_field(
+			'bitbucket_server_password',
+			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_password', 'token' => true )
+		);
+
+		/*
+		 * Show section for private Bitbucket Server repositories.
+		 */
+		if ( parent::$auth_required['bitbucket_server'] ) {
+			add_settings_section(
+				'bitbucket_server_id',
+				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
+				array( &$this, 'print_section_bitbucket_info' ),
+				'github_updater_bbserver_install_settings'
+			);
+		}
+
+	}
+
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field() {
+		$setting_field['page']            = 'github_updater_bbserver_install_settings';
+		$setting_field['section']         = 'bitbucket_server_id';
+		$setting_field['callback_method'] = array( Settings::instance(), 'token_callback_checkbox' );
+
+		return $setting_field;
+	}
+
+	/**
+	 * Add remote install feature, create endpoint.
+	 *
+	 * @param array $headers
+	 * @param array $install
+	 *
+	 * @return array $install
+	 */
+	public function remote_install( $headers, $install ) {
+		$bitbucket_org = true;
+
+		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
+			$base            = 'https://bitbucket.org';
+			$headers['host'] = 'bitbucket.org';
+		} else {
+			$base          = $headers['base_uri'];
+			$bitbucket_org = false;
+		}
+
+		if ( ! $bitbucket_org ) {
+			$install['download_link'] = implode( '/', array(
+				$base,
+				'rest/archive/1.0/projects',
+				$headers['owner'],
+				'repos',
+				$headers['repo'],
+				'archive',
+			) );
+
+			$install['download_link'] = add_query_arg( array(
+				'prefix' => $headers['repo'] . '/',
+				'at'     => $install['github_updater_branch'],
+			), $install['download_link'] );
+
+			if ( isset( $install['is_private'] ) ) {
+				parent::$options[ $install['repo'] ] = 1;
+			}
+			if ( ! empty( $install['bitbucket_username'] ) ) {
+				parent::$options['bitbucket_server_username'] = $install['bitbucket_username'];
+			}
+			if ( ! empty( $install['bitbucket_password'] ) ) {
+				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
+			}
+
+			new Bitbucket_Server_API( new \stdClass() );
+		}
+
+		return $install;
+	}
+
 }

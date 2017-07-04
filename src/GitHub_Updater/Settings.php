@@ -59,6 +59,7 @@ class Settings extends Base {
 	public function __construct() {
 		$this->ensure_api_key_is_set();
 		$this->load_options();
+		$this->load_apis();
 		$this->load_hooks();
 	}
 
@@ -74,6 +75,23 @@ class Settings extends Base {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Load APIs in use into array for later use.
+	 */
+	protected function load_apis() {
+		parent::$loaded_apis['bitbucket_api'] = class_exists( 'Fragen\GitHub_Updater\Bitbucket_API' )
+			? new Bitbucket_API( new \stdClass() )
+			: false;
+
+		parent::$loaded_apis['bitbucket_server_api'] = class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' )
+			? new Bitbucket_Server_API( new \stdClass() )
+			: false;
+
+		parent::$loaded_apis['gitlab_api'] = class_exists( 'Fragen\GitHub_Updater\GitLab_API' )
+			? new GitLab_API( new \stdClass() )
+			: false;
 	}
 
 	/**
@@ -119,14 +137,22 @@ class Settings extends Base {
 
 		$git_subtab  = array();
 		$ghu_subtabs = array(
-			'github'    => esc_html__( 'GitHub', 'github-updater' ),
-			'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ),
-			'bbserver'  => esc_html__( 'Bitbucket Server', 'github-updater' ),
-			'gitlab'    => esc_html__( 'GitLab', 'github-updater' ),
+			'github' => esc_html__( 'GitHub', 'github-updater' ),
 		);
+		if ( parent::$loaded_apis['bitbucket_api'] ) {
+			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
+		}
+		if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
+		}
+		if ( parent::$loaded_apis['gitlab_api'] ) {
+			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
+		}
 
 		foreach ( $gits as $git ) {
-			$git_subtab[ $git ] = $ghu_subtabs[ $git ];
+			if ( array_key_exists( $git, $ghu_subtabs ) ) {
+				$git_subtab[ $git ] = $ghu_subtabs[ $git ];
+			}
 		}
 		$subtabs = array_merge( $subtabs, $git_subtab );
 
@@ -312,9 +338,9 @@ class Settings extends Base {
 		}
 
 		register_setting(
-			'github_updater',           // Option group
-			'github_updater',           // Option name
-			array( &$this, 'sanitize' )  // Sanitize
+			'github_updater',
+			'github_updater',
+			array( &$this, 'sanitize' )
 		);
 
 		$this->ghu_tokens();
@@ -380,131 +406,17 @@ class Settings extends Base {
 			);
 		}
 
-		/*
-		 * Add setting for GitLab.com, GitLab Community Edition.
-		 * or GitLab Enterprise Access Token.
-		 */
-		if ( parent::$auth_required['gitlab'] || parent::$auth_required['gitlab_enterprise'] ) {
-			add_settings_section(
-				'gitlab_settings',
-				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
-				array( &$this, 'print_section_gitlab_token' ),
-				'github_updater_gitlab_install_settings'
-			);
+		if ( parent::$loaded_apis['gitlab_api'] ) {
+			parent::$loaded_apis['gitlab_api']->add_settings();
 		}
 
-		if ( parent::$auth_required['gitlab_private'] ) {
-			add_settings_section(
-				'gitlab_id',
-				esc_html__( 'GitLab Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_gitlab_info' ),
-				'github_updater_gitlab_install_settings'
-			);
+		if ( parent::$loaded_apis['bitbucket_api'] ) {
+			parent::$loaded_apis['bitbucket_api']->add_settings();
 		}
 
-		if ( parent::$auth_required['gitlab'] ) {
-			add_settings_field(
-				'gitlab_access_token',
-				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_gitlab_install_settings',
-				'gitlab_settings',
-				array( 'id' => 'gitlab_access_token', 'token' => true )
-			);
+		if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+			parent::$loaded_apis['bitbucket_server_api']->add_settings();
 		}
-
-		if ( parent::$auth_required['gitlab_enterprise'] ) {
-			add_settings_field(
-				'gitlab_enterprise_token',
-				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_gitlab_install_settings',
-				'gitlab_settings',
-				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
-			);
-		}
-
-		/*
-		 * Add settings for Bitbucket Username and Password.
-		 */
-		add_settings_section(
-			'bitbucket_user',
-			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			array( &$this, 'print_section_bitbucket_username' ),
-			'github_updater_bitbucket_install_settings'
-		);
-
-		add_settings_field(
-			'bitbucket_username',
-			esc_html__( 'Bitbucket Username', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
-			array( 'id' => 'bitbucket_username' )
-		);
-
-		add_settings_field(
-			'bitbucket_password',
-			esc_html__( 'Bitbucket Password', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
-			array( 'id' => 'bitbucket_password', 'token' => true )
-		);
-
-		/*
-		 * Show section for private Bitbucket repositories.
-		 */
-		if ( parent::$auth_required['bitbucket_private'] ) {
-			add_settings_section(
-				'bitbucket_id',
-				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
-				array( &$this, 'print_section_bitbucket_info' ),
-				'github_updater_bitbucket_install_settings'
-			);
-		}
-
-		/*
-		 * Add settings for Bitbucket Server Username and Password.
-		 */
-
-		add_settings_section(
-			'bitbucket_server_user',
-			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
-			array( &$this, 'print_section_bitbucket_username' ),
-			'github_updater_bbserver_install_settings'
-		);
-
-		add_settings_field(
-			'bitbucket_server_username',
-			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
-			array( 'id' => 'bitbucket_server_username' )
-		);
-
-		add_settings_field(
-			'bitbucket_server_password',
-			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
-			array( 'id' => 'bitbucket_server_password', 'token' => true )
-		);
-
-		/*
-		 * Show section for private Bitbucket Server repositories.
-		 */
-		if ( parent::$auth_required['bitbucket_server'] ) {
-			add_settings_section(
-				'bitbucket_server_id',
-				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
-				array( &$this, 'print_section_bitbucket_info' ),
-				'github_updater_bbserver_install_settings'
-			);
-		}
-
 
 		$this->update_settings();
 	}
@@ -524,68 +436,9 @@ class Settings extends Base {
 			$ghu_options_keys[ $token->repo ] = null;
 
 			/*
-			 * Set boolean for Enterprise headers.
+			 * Check to see if it's a private repo or Enterprise and set variables.
 			 */
-			if ( $token->enterprise ) {
-				/*
-				 * Set boolean if GitHub Enterprise found.
-				 */
-				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! parent::$auth_required['github_enterprise']
-				) {
-					parent::$auth_required['github_enterprise'] = true;
-				}
-				/*
-				 * Set boolean if GitLab CE/Enterprise found.
-				 */
-				if ( false !== strpos( $token->type, 'gitlab' ) &&
-				     ! empty( $token->enterprise ) &&
-				     ! parent::$auth_required['gitlab_enterprise']
-				) {
-					parent::$auth_required['gitlab_enterprise'] = true;
-				}
-				/*
-				 * Set boolean if Bitbucket Server found.
-				 */
-				if ( false !== strpos( $token->type, 'bitbucket' ) &&
-				     ! empty( $token->enterprise ) &&
-				     ! parent::$auth_required['bitbucket_server']
-				) {
-					parent::$auth_required['bitbucket_server'] = true;
-				}
-
-			}
-
-			/*
-			 * Check to see if it's a private repo and set variables.
-			 */
-			if ( $this->is_private( $token ) ) {
-				if ( false !== strpos( $token->type, 'github' ) &&
-				     ! parent::$auth_required['github_private']
-				) {
-					parent::$auth_required['github_private'] = true;
-				}
-				if ( false !== strpos( $token->type, 'bitbucket' ) &&
-				     ! parent::$auth_required['bitbucket_private']
-				) {
-					parent::$auth_required['bitbucket_private'] = true;
-				}
-				if ( false !== strpos( $token->type, 'gitlab' ) &&
-				     ! parent::$auth_required['gitlab_private']
-				) {
-					parent::$auth_required['gitlab_private'] = true;
-				}
-			}
-
-			/*
-			 * Set boolean if GitLab header found.
-			 */
-			if ( false !== strpos( $token->type, 'gitlab' ) &&
-			     empty( $token->enterprise ) &&
-			     ! parent::$auth_required['gitlab']
-			) {
-				parent::$auth_required['gitlab'] = true;
-			}
+			$this->set_auth_required( $token );
 
 			/*
 			 * Next if not a private repo or token field not empty.
@@ -598,6 +451,7 @@ class Settings extends Base {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
+			$repo_setting_field     = array();
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
@@ -607,28 +461,27 @@ class Settings extends Base {
 					$setting_field['page']            = 'github_updater_github_install_settings';
 					$setting_field['section']         = 'github_id';
 					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
-					$setting_field['callback']        = $token->repo;
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						$setting_field['page']            = 'github_updater_bitbucket_install_settings';
-						$setting_field['section']         = 'bitbucket_id';
-						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
-						$setting_field['callback']        = $token->repo;
+						if ( parent::$loaded_apis['bitbucket_api'] ) {
+							$repo_setting_field = parent::$loaded_apis['bitbucket_api']->add_repo_setting_field();
+						}
 					} else {
-						$setting_field['page']            = 'github_updater_bbserver_install_settings';
-						$setting_field['section']         = 'bitbucket_server_id';
-						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
-						$setting_field['callback']        = $token->repo;
+						if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+							$repo_setting_field = parent::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
+						}
 					}
 					break;
 				case 'gitlab':
-					$setting_field['page']            = 'github_updater_gitlab_install_settings';
-					$setting_field['section']         = 'gitlab_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
-					$setting_field['callback']        = $token->repo;
+					if ( parent::$loaded_apis['gitlab_api'] ) {
+						$repo_setting_field = parent::$loaded_apis['gitlab_api']->add_repo_setting_field();
+					}
 					break;
 			}
+
+			$setting_field             = array_merge( $setting_field, $repo_setting_field );
+			$setting_field['callback'] = $token->repo;
 
 			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
 			add_settings_field(
@@ -641,9 +494,16 @@ class Settings extends Base {
 			);
 		}
 
-		/*
-		 * Unset options that are no longer present and update options.
-		 */
+		$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+	}
+
+	/**
+	 * Check current saved options and unset if repos not present.
+	 *
+	 * @param array $ghu_options_keys
+	 * @param array $ghu_tokens
+	 */
+	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
 		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
 		$always_unset   = array(
 			'db_version',
@@ -652,12 +512,9 @@ class Settings extends Base {
 			'github_enterprise_token',
 			'bitbucket_username',
 			'bitbucket_password',
+			'bitbucket_server_username',
+			'bitbucket_server_password',
 		);
-
-		$bbserver_auth = array_key_exists( 'bbserver', $this->settings_sub_tabs() )
-			? array( 'bitbucket_server_username', 'bitbucket_server_password' )
-			: array();
-		$always_unset  = array_merge( $always_unset, $bbserver_auth );
 
 		array_filter( $always_unset,
 			function( $e ) use ( &$ghu_unset_keys ) {
@@ -692,9 +549,70 @@ class Settings extends Base {
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( parent::$options [ $key ] );
+				if ( ! empty( $value ) ) {
+					unset( parent::$options [ $key ] );
+				}
 			}
 			update_site_option( 'github_updater', parent::$options );
+		}
+	}
+
+	/**
+	 * Check to see if it's a private repo and set variables.
+	 *
+	 * @param $token
+	 */
+	private function set_auth_required( $token ) {
+
+		// Set booleans for Enterprise headers.
+		if ( $token->enterprise ) {
+			if ( ! parent::$auth_required['github_enterprise'] &&
+			     false !== strpos( $token->type, 'github' )
+
+			) {
+				parent::$auth_required['github_enterprise'] = true;
+			}
+
+			if (
+				//! empty( $token->enterprise ) &&
+				! parent::$auth_required['gitlab_enterprise'] &&
+				false !== strpos( $token->type, 'gitlab' )
+			) {
+				parent::$auth_required['gitlab_enterprise'] = true;
+			}
+
+			if (
+				//! empty( $token->enterprise ) &&
+				! parent::$auth_required['bitbucket_server'] &&
+				false !== strpos( $token->type, 'bitbucket' )
+			) {
+				parent::$auth_required['bitbucket_server'] = true;
+			}
+		}
+
+		if ( $this->is_private( $token ) ) {
+			if ( ! parent::$auth_required['github_private'] &&
+			     false !== strpos( $token->type, 'github' )
+			) {
+				parent::$auth_required['github_private'] = true;
+			}
+			if ( ! parent::$auth_required['bitbucket_private'] &&
+			     false !== strpos( $token->type, 'bitbucket' )
+			) {
+				parent::$auth_required['bitbucket_private'] = true;
+			}
+			if ( ! parent::$auth_required['gitlab_private'] &&
+			     false !== strpos( $token->type, 'gitlab' )
+			) {
+				parent::$auth_required['gitlab_private'] = true;
+			}
+		}
+
+		if ( empty( $token->enterprise ) &&
+		     ! parent::$auth_required['gitlab'] &&
+		     false !== strpos( $token->type, 'gitlab' )
+		) {
+			parent::$auth_required['gitlab'] = true;
 		}
 	}
 
@@ -702,7 +620,6 @@ class Settings extends Base {
 	 * Settings for Remote Management.
 	 */
 	public function remote_management_page_init() {
-
 		register_setting(
 			'github_updater_remote_management',
 			'github_updater_remote_settings',
@@ -775,34 +692,6 @@ class Settings extends Base {
 	 */
 	public function print_section_github_access_token() {
 		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
-	}
-
-	/**
-	 * Print the Bitbucket repo text.
-	 */
-	public function print_section_bitbucket_info() {
-		esc_html_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
-	}
-
-	/**
-	 * Print the Bitbucket user/pass text.
-	 */
-	public function print_section_bitbucket_username() {
-		esc_html_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
-	}
-
-	/**
-	 * Print the GitLab text.
-	 */
-	public function print_section_gitlab_info() {
-		esc_html_e( 'Enter your GitLab Access Token.', 'github-updater' );
-	}
-
-	/**
-	 * Print the GitLab Access Token text.
-	 */
-	public function print_section_gitlab_token() {
-		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' );
 	}
 
 	/**
