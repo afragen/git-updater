@@ -35,7 +35,7 @@ class Additions {
 	 * @access private
 	 * @var    bool|Additions
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Holds array of plugin/theme headers to add to GitHub Updater.
@@ -52,7 +52,7 @@ class Additions {
 	 * @return Additions
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
