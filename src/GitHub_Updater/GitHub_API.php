@@ -439,6 +439,9 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Return the AWS download link for a GitHub release asset.
+	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 *
+	 * @TODO  Figure out how to run this on the fly only when needed.
 	 *
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
