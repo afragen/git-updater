@@ -53,7 +53,7 @@ class Plugin extends Base {
 		 */
 		$this->config = $this->get_plugin_meta();
 
-		if ( null === $this->config ) {
+		if ( empty( $this->config ) ) {
 			return;
 		}
 	}

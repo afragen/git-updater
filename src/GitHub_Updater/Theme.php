@@ -55,7 +55,7 @@ class Theme extends Base {
 		 */
 		$this->config = $this->get_theme_meta();
 
-		if ( null === $this->config ) {
+		if ( empty( $this->config ) ) {
 			return;
 		}
 	}
