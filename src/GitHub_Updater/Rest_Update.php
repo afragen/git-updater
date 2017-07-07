@@ -203,7 +203,7 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			http_response_code( 500 );
+			header("HTTP/1.1 500 Internal Server Error");
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
@@ -222,7 +222,7 @@ class Rest_Update extends Base {
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
-			http_response_code( 500 );
+			header("HTTP/1.1 500 Internal Server Error");
 		} else {
 			$response['success'] = true;
 		}
