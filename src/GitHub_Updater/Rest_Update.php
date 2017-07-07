@@ -203,8 +203,8 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			//http_response_code( 500 );
-			header("HTTP/1.1 500 Internal Server Error");
+			//http_response_code( 500 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 500 Internal Server Error' );
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
@@ -223,8 +223,8 @@ class Rest_Update extends Base {
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
-			//http_response_code( 500 );
-			header("HTTP/1.1 500 Internal Server Error");
+			//http_response_code( 500 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 500 Internal Server Error' );
 		} else {
 			$response['success'] = true;
 		}
@@ -233,10 +233,17 @@ class Rest_Update extends Base {
 		exit;
 	}
 
-	//for compatibility with older versions of php
-	private function get_server_variable_if_set($name) {
-		return isset($_SERVER[$name]) ? $_SERVER[$name]: "";
+	/**
+	 * For compatibility with PHP 5.3
+	 *
+	 * @param string $name $_SERVER index.
+	 *
+	 * @return bool
+	 */
+	private function get_server_variable_if_set( $name ) {
+		return isset( $_SERVER[ $name ] );
 	}
+
 	/**
 	 * Checks the headers of the request and sends webhook data to be parsed.
 	 * If the request did not come from a webhook, this function returns false.
@@ -247,20 +254,24 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents( 'php://input' );
 
 		// GitHub
-		if ( 'push' === $this->get_server_variable_if_set('HTTP_X_GITHUB_EVENT') ||
-		     'create' === $this->get_server_variable_if_set('HTTP_X_GITHUB_EVENT')
+		if ( $this->get_server_variable_if_set( 'HTTP_X_GITHUB_EVENT' ) &&
+		     ( 'push' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) ||
+		       'create' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) )
 		) {
 			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
-		if ( 'repo:push' === $this->get_server_variable_if_set('HTTP_X_EVENT_KEY') ) {
+		if ( $this->get_server_variable_if_set( 'HTTP_X_EVENT_KEY' ) &&
+		     'repo:push' === $_SERVER( 'HTTP_X_EVENT_KEY' )
+		) {
 			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( 'Push Hook' === $this->get_server_variable_if_set('HTTP_X_GITLAB_EVENT') ||
-		     'Tag Push Hook' === $this->get_server_variable_if_set('HTTP_X_GITLAB_EVENT')
+		if ( $this->get_server_variable_if_set( 'HTTP_X_GITLAB_EVENT' )
+		( 'Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) ||
+		  'Tag Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) )
 		) {
 			return $this->parse_gitlab_webhook( $request_body );
 		}
