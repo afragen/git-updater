@@ -240,7 +240,7 @@ class Rest_Update extends Base {
 	 *
 	 * @return bool
 	 */
-	private function get_server_variable_if_set( $name ) {
+	private function is_server_variable_set( $name ) {
 		return isset( $_SERVER[ $name ] );
 	}
 
@@ -254,7 +254,7 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents( 'php://input' );
 
 		// GitHub
-		if ( $this->get_server_variable_if_set( 'HTTP_X_GITHUB_EVENT' ) &&
+		if ( $this->is_server_variable_set( 'HTTP_X_GITHUB_EVENT' ) &&
 		     ( 'push' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) ||
 		       'create' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) )
 		) {
@@ -262,14 +262,14 @@ class Rest_Update extends Base {
 		}
 
 		// Bitbucket
-		if ( $this->get_server_variable_if_set( 'HTTP_X_EVENT_KEY' ) &&
+		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ) &&
 		     'repo:push' === $_SERVER( 'HTTP_X_EVENT_KEY' )
 		) {
 			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( $this->get_server_variable_if_set( 'HTTP_X_GITLAB_EVENT' )
+		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' )
 		( 'Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) ||
 		  'Tag Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) )
 		) {
