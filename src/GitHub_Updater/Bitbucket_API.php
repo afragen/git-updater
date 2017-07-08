@@ -343,7 +343,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param Bitbucket_API|API $git
 	 * @param string            $endpoint
 	 *
-	 * @return string $endpoint
+	 * @return string|void $endpoint
 	 */
 	public function add_endpoints( $git, $endpoint ) {
 	}

@@ -83,6 +83,8 @@ class Additions {
 		}
 
 		$this->add_headers( $config, $repos, $type );
+
+		return true;
 	}
 
 	/**

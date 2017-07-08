@@ -145,7 +145,7 @@ abstract class API extends Base {
 		if ( false !== strrpos( basename( $url ), '.php' ) ||
 		     false !== strrpos( basename( $url ), '.css' )
 		) {
-			$this->type->broken = 200 != $code;
+			$this->type->broken = (int) 200 !== $code;
 		}
 
 		if ( is_wp_error( $response ) ) {

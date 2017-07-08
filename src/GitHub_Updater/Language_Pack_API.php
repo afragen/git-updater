@@ -28,7 +28,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
@@ -65,6 +65,8 @@ class Language_Pack_API extends API {
 		}
 
 		$this->type->language_packs = $response;
+
+		return true;
 	}
 
 	/**

@@ -39,7 +39,7 @@ class Base {
 	/**
 	 * Class Object for API.
 	 *
-	 * @var \stdClass
+	 * @var GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API
 	 */
 	protected $repo_api;
 
@@ -712,8 +712,8 @@ class Base {
 	 * Set array with normal and extended repo names.
 	 * Fix name even if installed without renaming originally.
 	 *
-	 * @param string       $slug
-	 * @param Plugin|Theme $upgrader_object
+	 * @param string            $slug
+	 * @param Base|Plugin|Theme $upgrader_object
 	 *
 	 * @return array
 	 */
@@ -1219,7 +1219,7 @@ class Base {
 	 *
 	 * @param array $data Parameters for creating branch switching row.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	protected function make_branch_switch_row( $data ) {
 		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? array() : $this->config[ $data['slug'] ]->rollback;
@@ -1522,6 +1522,8 @@ class Base {
 		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
 			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
 		}
+
+		return false;
 	}
 
 }

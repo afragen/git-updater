@@ -200,7 +200,7 @@ class Basic_Auth_Loader {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 
 		if ( $slug && array_key_exists( $slug, self::$options ) &&
-		     1 == self::$options[ $slug ] &&
+		     1 === (int) self::$options[ $slug ] &&
 		     false !== stripos( $url, $slug )
 		) {
 			return true;
@@ -215,7 +215,7 @@ class Basic_Auth_Loader {
 
 		// Used for refreshing cache.
 		foreach ( array_keys( self::$options ) as $option ) {
-			if ( 1 == self::$options[ $option ] &&
+			if ( 1 === (int) self::$options[ $option ] &&
 			     false !== strpos( $url, $option )
 			) {
 				return true;
