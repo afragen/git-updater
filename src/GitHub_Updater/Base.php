@@ -806,7 +806,7 @@ class Base {
 
 		// Reduce array to only headers with data.
 		$all_headers = array_filter( $all_headers,
-			function( $e ) use ( &$all_headers ) {
+			function( $e ) {
 				return ! empty( $e );
 			} );
 
