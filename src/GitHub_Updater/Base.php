@@ -826,9 +826,9 @@ class Base {
 		$local_files = null;
 
 		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path, SCANDIR_SORT_NONE );
+			$local_files = scandir( $this->$type->local_path, 0 );
 		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
-			$local_files = scandir( $this->$type->local_path_extended, SCANDIR_SORT_NONE );
+			$local_files = scandir( $this->$type->local_path_extended, 0 );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
