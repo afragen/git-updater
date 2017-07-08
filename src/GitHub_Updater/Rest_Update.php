@@ -203,8 +203,8 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			//http_response_code( 500 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 500 Internal Server Error' );
+			//http_response_code( 417 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 417 Expectation Failed' );
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
@@ -223,8 +223,8 @@ class Rest_Update extends Base {
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
-			//http_response_code( 500 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 500 Internal Server Error' );
+			//http_response_code( 417 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 417 Expectation Failed' );
 		} else {
 			$response['success'] = true;
 		}
