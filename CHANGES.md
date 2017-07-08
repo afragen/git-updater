@@ -3,7 +3,7 @@
 * refactored Settings and Install to place API Settings data in individual API classes
 * refactored Settings to make smaller methods
 * simplfied `composer.json`, removed autoload section and no need to require `composer/installer`
-* more PHP linting fixes
+* many PHP Inspections fixes
 * fixed `class Rest_Update` for PHP 5.3 compatibility, thanks @epicfaace
 
 #### 6.3.5 / 2017-06-29
