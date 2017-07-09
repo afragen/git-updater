@@ -255,23 +255,23 @@ class Rest_Update extends Base {
 
 		// GitHub
 		if ( $this->is_server_variable_set( 'HTTP_X_GITHUB_EVENT' ) &&
-		     ( 'push' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) ||
-		       'create' === $_SERVER( 'HTTP_X_GITHUB_EVENT' ) )
+		     ( 'push' === $_SERVER[ 'HTTP_X_GITHUB_EVENT' ] ||
+		       'create' === $_SERVER[ 'HTTP_X_GITHUB_EVENT' ] )
 		) {
 			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
 		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ) &&
-		     'repo:push' === $_SERVER( 'HTTP_X_EVENT_KEY' )
+		     'repo:push' === $_SERVER[ 'HTTP_X_EVENT_KEY' ]
 		) {
 			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
 		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' )
-		( 'Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) ||
-		  'Tag Push Hook' === $_SERVER( 'HTTP_X_GITLAB_EVENT' ) )
+		( 'Push Hook' === $_SERVER[ 'HTTP_X_GITLAB_EVENT' ] ||
+		  'Tag Push Hook' === $_SERVER[ 'HTTP_X_GITLAB_EVENT' ] )
 		) {
 			return $this->parse_gitlab_webhook( $request_body );
 		}
