@@ -76,7 +76,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 

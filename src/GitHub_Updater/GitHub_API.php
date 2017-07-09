@@ -68,7 +68,7 @@ class GitHub_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 
