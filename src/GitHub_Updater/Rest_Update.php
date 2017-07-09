@@ -262,7 +262,7 @@ class Rest_Update extends Base {
 		}
 
 		// Bitbucket
-		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ] &&
+		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ) &&
 		     'repo:push' === $_SERVER[ 'HTTP_X_EVENT_KEY' ]
 		) {
 			return $this->parse_bitbucket_webhook( $request_body );
