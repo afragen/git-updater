@@ -1510,7 +1510,7 @@ class Base {
 	}
 
 	/**
-	 * Is this a private repo?
+	 * Is this a private repo with a token/checked or needing token/checked?
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
 	 *
