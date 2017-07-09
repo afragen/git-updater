@@ -269,7 +269,7 @@ class Rest_Update extends Base {
 		}
 
 		// GitLab
-		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' )
+		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' ) &&
 		( 'Push Hook' === $_SERVER[ 'HTTP_X_GITLAB_EVENT' ] ||
 		  'Tag Push Hook' === $_SERVER[ 'HTTP_X_GITLAB_EVENT' ] )
 		) {
