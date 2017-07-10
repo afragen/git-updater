@@ -480,10 +480,6 @@ class Settings extends Base {
 					break;
 			}
 
-			if ( empty( $repo_setting_field ) ) {
-				continue;
-			}
-
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
 			$setting_field['callback'] = $token->repo;
 
