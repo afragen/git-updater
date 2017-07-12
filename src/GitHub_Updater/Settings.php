@@ -257,15 +257,15 @@ class Settings extends Base {
 			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
-				<?php if ( ( isset( $_GET['updated'] ) && true === $_GET['updated'] ) && is_multisite() ): ?>
+				<?php if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ): ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
 					</div>
-				<?php elseif ( isset( $_GET['reset'] ) && true === $_GET['reset'] ): ?>
+				<?php elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ): ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
 					</div>
-				<?php elseif ( isset( $_GET['refresh_transients'] ) && true === $_GET['refresh_transients'] ) : ?>
+				<?php elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) : ?>
 					<div class="updated">
 						<p><?php esc_html_e( 'Cache refreshed.', 'github-updater' ); ?></p>
 					</div>
