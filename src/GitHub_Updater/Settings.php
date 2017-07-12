@@ -549,7 +549,9 @@ class Settings extends Base {
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( parent::$options [ $key ] );
+				if ( empty( $value ) ) {
+					unset( parent::$options [ $key ] );
+				}
 			}
 			update_site_option( 'github_updater', parent::$options );
 		}

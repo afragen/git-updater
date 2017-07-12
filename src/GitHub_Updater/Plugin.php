@@ -141,7 +141,11 @@ class Plugin extends Base {
 					}
 				}
 
-				$header = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$current_branch = 'current_branch_' . $header['repo'];
+				$branch         = isset( parent::$options[ $current_branch ] )
+					? parent::$options[ $current_branch ]
+					: false;
 
 				$git_plugin['type']                = $repo_parts['type'];
 				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
@@ -155,6 +159,7 @@ class Plugin extends Base {
 					$header['repo'],
 				) );
 				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
+				$git_plugin['branch']              = $branch ? $branch : $git_plugin['branch'];
 				$git_plugin['slug']                = $plugin;
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -252,16 +257,10 @@ class Plugin extends Base {
 			return false;
 		}
 
-		/*
-		 * Get current branch.
-		 */
-		foreach ( parent::$git_servers as $server ) {
-			$branch_key = $server . ' Branch';
-			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
-			if ( 'master' !== $branch ) {
-				break;
-			}
-		}
+		// Get current branch.
+		$branch_finder = new Branch_Finder();
+		$repo          = $this->config[ $plugin['repo'] ];
+		$branch        = $branch_finder->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];

@@ -73,6 +73,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
+				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
 		}
 
