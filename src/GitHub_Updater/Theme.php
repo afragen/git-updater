@@ -374,7 +374,7 @@ class Theme extends Base {
 
 		// Get current branch.
 		$branch_finder = new Branch_Finder();
-		$repo          = $this->config[ $theme['repo'] ];
+		$repo          = $this->config[ $theme_key ];
 		$branch        = $branch_finder->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
