@@ -540,9 +540,20 @@ class Settings extends Base {
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys, true );
-				if ( ( array_key_exists( $key, $ghu_unset_keys ) &&
-				       array_key_exists( $key, $ghu_tokens ) )
-				     || false !== strpos( $key, 'current_branch' )
+				if ( array_key_exists( $key, $ghu_unset_keys ) &&
+				     array_key_exists( $key, $ghu_tokens )
+				) {
+					unset( $ghu_unset_keys[ $key ] );
+				}
+			} );
+
+		// Unset if current_branch AND associated with repo.
+		array_filter( $ghu_unset_keys,
+			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
+				$key  = array_search( $e, $ghu_unset_keys, true );
+				$repo = str_replace( 'current_branch_', '', $key );
+				if ( array_key_exists( $repo, $ghu_tokens )
+				     && false !== strpos( $key, 'current_branch' )
 				) {
 					unset( $ghu_unset_keys[ $key ] );
 				}
