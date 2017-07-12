@@ -536,12 +536,13 @@ class Settings extends Base {
 				}
 			} );
 
-		// Unset if value set AND if associated with a repo
+		// Unset if value set AND if associated with a repo OR is current_branch.
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys, true );
-				if ( array_key_exists( $key, $ghu_unset_keys )
-				     && array_key_exists( $key, $ghu_tokens )
+				if ( ( array_key_exists( $key, $ghu_unset_keys ) &&
+				       array_key_exists( $key, $ghu_tokens ) )
+				     || false !== strpos( $key, 'current_branch' )
 				) {
 					unset( $ghu_unset_keys[ $key ] );
 				}
@@ -549,9 +550,7 @@ class Settings extends Base {
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				if ( empty( $value ) ) {
-					unset( parent::$options [ $key ] );
-				}
+				unset( parent::$options [ $key ] );
 			}
 			update_site_option( 'github_updater', parent::$options );
 		}
