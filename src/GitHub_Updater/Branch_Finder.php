@@ -37,7 +37,22 @@ class Branch_Finder extends API {
 	}
 
 	/**
-	 * Set new branch on branch switch.
+	 * Get the current repo branch.
+	 *
+	 * @param $repo
+	 *
+	 * @return mixed
+	 */
+	public function get_current_branch( $repo ) {
+		$current_branch = ! empty( $this->cache['current_branch'] )
+			? $this->cache['current_branch']
+			: $repo->branch;
+
+		return $current_branch;
+	}
+
+	/**
+	 * Set current branch on branch switch.
 	 *
 	 * @param $response
 	 * @param $type
@@ -65,18 +80,15 @@ class Branch_Finder extends API {
 	}
 
 	/**
-	 * Get the current repo branch.
+	 * Set current branch on install.
 	 *
-	 * @param $repo
-	 *
-	 * @return mixed
+	 * @param $install
 	 */
-	public function get_current_branch( $repo ) {
-		$current_branch = ! empty( $this->cache['current_branch'] )
-			? $this->cache['current_branch']
-			: $repo->branch;
+	public function set_branch_on_install( $install ) {
+		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
+		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
+		update_site_option( 'github_updater', self::$options );
 
-		return $current_branch;
 	}
 
 }
