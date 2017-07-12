@@ -233,6 +233,10 @@ class Install extends Base {
 			 * Perform the action and install the repo from the $source urldecode().
 			 */
 			$upgrader->install( $url );
+
+			// Save branch setting.
+			parent::$options[ 'current_branch_' . self::$install['repo'] ] = self::$install['github_updater_branch'];
+			update_site_option( 'github_updater', parent::$options );
 		}
 
 		if ( $wp_cli ) {
