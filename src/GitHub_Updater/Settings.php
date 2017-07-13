@@ -536,7 +536,7 @@ class Settings extends Base {
 				}
 			} );
 
-		// Unset if value set AND if associated with a repo OR is current_branch.
+		// Unset if value set AND if associated with a repo.
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys, true );
@@ -547,7 +547,7 @@ class Settings extends Base {
 				}
 			} );
 
-		// Unset if current_branch AND associated with repo.
+		// Unset if current_branch AND if associated with repo.
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key  = array_search( $e, $ghu_unset_keys, true );
