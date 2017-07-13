@@ -38,10 +38,10 @@ class Bitbucket_API extends API implements API_Interface {
 	public function __construct( $type ) {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
-		$branch_finder  = new Branch_Finder( $this->response );
+		$branch         = new Branch( $this->response );
 		if ( ! empty( $type->branch ) ) {
-			$this->type->branch = ! empty( $branch_finder->cache['current_branch'] )
-				? $branch_finder->cache['current_branch']
+			$this->type->branch = ! empty( $branch->cache['current_branch'] )
+				? $branch->cache['current_branch']
 				: $type->branch;
 		}
 

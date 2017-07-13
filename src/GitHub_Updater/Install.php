@@ -235,8 +235,8 @@ class Install extends Base {
 			$upgrader->install( $url );
 
 			// Save branch setting.
-			$branch_finder = new Branch_Finder();
-			$branch_finder->set_branch_on_install(self::$install);
+			$branch = new Branch();
+			$branch->set_branch_on_install( self::$install );
 			parent::$options[ 'current_branch_' . self::$install['repo'] ] = self::$install['github_updater_branch'];
 			update_site_option( 'github_updater', parent::$options );
 		}

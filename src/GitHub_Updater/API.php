@@ -284,15 +284,15 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param string $id       Data Identifier.
-	 * @param mixed  $response Data to be stored.
-	 * @param string|bool $repo Repo name or false.
+	 * @param string      $id       Data Identifier.
+	 * @param mixed       $response Data to be stored.
+	 * @param string|bool $repo     Repo name or false.
 	 *
 	 * @return bool
 	 */
 	protected function set_repo_cache( $id, $response, $repo = false ) {
 		if ( ! $repo ) {
-			$repo      = isset( $this->type->repo )  ? $this->type->repo : 'ghu';
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = '+' . self::$hours . ' hours';

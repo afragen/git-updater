@@ -12,11 +12,11 @@ namespace Fragen\GitHub_Updater;
 
 
 /**
- * Class Branch_Finder
+ * Class Branch
  *
  * @package Fragen\GitHub_Updater
  */
-class Branch_Finder extends API {
+class Branch extends API {
 
 	/**
 	 * Holds repo cache data.
@@ -26,7 +26,7 @@ class Branch_Finder extends API {
 	public $cache;
 
 	/**
-	 * Branch_Finder constructor.
+	 * Branch constructor.
 	 *
 	 * @param null $cache
 	 */
