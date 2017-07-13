@@ -5,6 +5,7 @@
 * simplfied `composer.json`, removed autoload section and no need to require `composer/installer`
 * many PHP Inspections fixes
 * fixed `class Rest_Update` for PHP 5.3 compatibility, thanks @epicfaace
+* created `class Branch` to automatically set correct branch during branch switch or install. No more need for Branch header
 
 #### 6.3.5 / 2017-06-29
 * hotfix to `composer.json` to remove classmap and files, I think I messed something up.

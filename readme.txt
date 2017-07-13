@@ -31,19 +31,16 @@ The following headers are available for use depending upon your hosting source.
 ### GitHub
 * GitHub Plugin URI
 * GitHub Theme URI
-* GitHub Branch
 * GitHub Languages
 
 ### Bitbucket
 * Bitbucket Plugin URI
 * Bitbucket Theme URI
-* Bitbucket Branch
 * Bitbucket Languages
 
 ### GitLab
 * GitLab Plugin URI
 * GitLab Theme URI
-* GitLab Branch
 * GitLab Languages
 * GitLab CI Job
 

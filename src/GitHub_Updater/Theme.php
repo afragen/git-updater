@@ -160,9 +160,7 @@ class Theme extends Base {
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
 				$git_theme['local_path_extended']     = null;
-				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
-				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
-				$git_theme['branch']                  = $branch ? $branch : $git_theme['branch'];
+				$git_theme['branch']                  = $branch ?: 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
 				$git_theme['release_asset']           = 'true' === $theme->get( 'Release Asset' );
@@ -358,7 +356,6 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;

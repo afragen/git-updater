@@ -98,11 +98,9 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
-	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
-		'branch'    => 'Branch',
 		'languages' => 'Languages',
 		'ci_job'    => 'CI Job',
 	);

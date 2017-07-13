@@ -158,8 +158,7 @@ class Plugin extends Base {
 					str_replace( '/', '-', $header['owner'] ),
 					$header['repo'],
 				) );
-				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
-				$git_plugin['branch']              = $branch ? $branch : $git_plugin['branch'];
+				$git_plugin['branch']              = $branch ?: 'master';
 				$git_plugin['slug']                = $plugin;
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -237,7 +236,6 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
