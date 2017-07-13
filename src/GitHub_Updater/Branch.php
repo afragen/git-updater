@@ -66,15 +66,15 @@ class Branch extends API {
 
 		if ( isset( $_GET['action'] ) &&
 		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] ) &&
-		     ( $repo === $this->cache['repo'] &&
-		       array_key_exists( $_GET['rollback'], $this->cache['branches'] )
-		     ) &&
+		     $repo === $this->cache['repo'] &&
 		     false !== strpos( $url, $this->cache['repo'] )
 		) {
-			$this->set_repo_cache( 'current_branch', $_GET['rollback'], $repo );
-			self::$options[ 'current_branch_' . $repo ] = $_GET['rollback'];
+			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
+				? $_GET['rollback']
+				: 'master';
+			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
+			self::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', self::$options );
-
 		}
 		remove_filter( 'http_api_debug', array( $this, 'set_branch_on_switch' ) );
 	}
