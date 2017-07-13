@@ -33,7 +33,7 @@ class Branch extends API {
 	public function __construct( $cache = null ) {
 		$this->cache = $cache;
 
-		add_filter( 'http_api_debug', array( $this, 'set_branch_on_switch' ), 10, 5 );
+		add_filter( 'http_response', array( $this, 'set_branch_on_switch' ), 10, 3 );
 	}
 
 	/**
@@ -55,12 +55,12 @@ class Branch extends API {
 	 * Set current branch on branch switch.
 	 *
 	 * @param $response
-	 * @param $type
-	 * @param $class
-	 * @param $args
+	 * @param $r
 	 * @param $url
+	 *
+	 * @return $response Just a pass through.
 	 */
-	public function set_branch_on_switch( $response, $type, $class, $args, $url ) {
+	public function set_branch_on_switch( $response, $r, $url ) {
 		$repo = isset( $_GET['plugin'] ) ? dirname( $_GET['plugin'] ) : null;
 		$repo = isset( $_GET['theme'] ) ? $_GET['theme'] : $repo;
 
@@ -76,7 +76,9 @@ class Branch extends API {
 			self::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', self::$options );
 		}
-		remove_filter( 'http_api_debug', array( $this, 'set_branch_on_switch' ) );
+		remove_filter( 'http_response', array( $this, 'set_branch_on_switch' ) );
+
+		return $response;
 	}
 
 	/**
