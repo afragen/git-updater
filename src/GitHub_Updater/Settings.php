@@ -971,7 +971,7 @@ class Settings extends Base {
 				'type'    => $e->type,
 				'repo'    => $e->repo,
 				'name'    => $e->name,
-				'private' => $e->is_private,
+				'private' => isset( $e->is_private ) ? $e->is_private : false,
 				'broken'  => $e->broken,
 				'dot_org' => $e->dot_org,
 			);
