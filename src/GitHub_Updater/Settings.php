@@ -536,12 +536,24 @@ class Settings extends Base {
 				}
 			} );
 
-		// Unset if value set AND if associated with a repo
+		// Unset if value set AND if associated with a repo.
 		array_filter( $ghu_unset_keys,
 			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 				$key = array_search( $e, $ghu_unset_keys, true );
-				if ( array_key_exists( $key, $ghu_unset_keys )
-				     && array_key_exists( $key, $ghu_tokens )
+				if ( array_key_exists( $key, $ghu_unset_keys ) &&
+				     array_key_exists( $key, $ghu_tokens )
+				) {
+					unset( $ghu_unset_keys[ $key ] );
+				}
+			} );
+
+		// Unset if current_branch AND if associated with repo.
+		array_filter( $ghu_unset_keys,
+			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
+				$key  = array_search( $e, $ghu_unset_keys, true );
+				$repo = str_replace( 'current_branch_', '', $key );
+				if ( array_key_exists( $repo, $ghu_tokens )
+				     && false !== strpos( $key, 'current_branch' )
 				) {
 					unset( $ghu_unset_keys[ $key ] );
 				}
@@ -935,7 +947,8 @@ class Settings extends Base {
 
 	/**
 	 * Write out listing of installed plugins and themes using GitHub Updater.
-	 * Places a lock dashicon before the repo name if it's a private repo.
+	 * Places a lock dashicon after the repo name if it's a private repo.
+	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *
 	 * @param $type
 	 */
@@ -959,21 +972,23 @@ class Settings extends Base {
 				'repo'    => $e->repo,
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
-				'broken'  => $e->broken ?: false,
+				'broken'  => $e->broken,
+				'dot_org' => $e->dot_org,
 			);
 		}, $type_repos );
 
-		$lock   = '&nbsp;<span class="dashicons dashicons-lock"></span>';
-		$broken = '&nbsp;<span style="color:#f00;" class="dashicons dashicons-warning"></span>';
+		$lock    = '&nbsp;<span class="dashicons dashicons-lock"></span>';
+		$broken  = '&nbsp;<span style="color:#f00;" class="dashicons dashicons-warning"></span>';
+		$dot_org = '&nbsp;<span class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon   = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+			$dashicon   = false !== strpos( $data['type'], 'theme' )
+				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
+				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private = $data['private'] ? $lock : null;
 			$is_broken  = $data['broken'] ? $broken : null;
-			if ( false !== strpos( $data['type'], 'theme' ) ) {
-				$dashicon = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
-			}
-			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_broken . '</p>' );
+			$is_dot_org = $data['dot_org'] ? $dot_org : null;
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_broken . $is_dot_org . '</p>' );
 		}
 	}
 

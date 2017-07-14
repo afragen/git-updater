@@ -141,7 +141,11 @@ class Plugin extends Base {
 					}
 				}
 
-				$header = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$current_branch = 'current_branch_' . $header['repo'];
+				$branch         = isset( parent::$options[ $current_branch ] )
+					? parent::$options[ $current_branch ]
+					: false;
 
 				$git_plugin['type']                = $repo_parts['type'];
 				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
@@ -154,7 +158,7 @@ class Plugin extends Base {
 					str_replace( '/', '-', $header['owner'] ),
 					$header['repo'],
 				) );
-				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
+				$git_plugin['branch']              = $branch ?: 'master';
 				$git_plugin['slug']                = $plugin;
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -232,7 +236,6 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -252,16 +255,10 @@ class Plugin extends Base {
 			return false;
 		}
 
-		/*
-		 * Get current branch.
-		 */
-		foreach ( parent::$git_servers as $server ) {
-			$branch_key = $server . ' Branch';
-			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
-			if ( 'master' !== $branch ) {
-				break;
-			}
-		}
+		// Get current branch.
+		$branch = new Branch();
+		$repo   = $this->config[ $plugin['repo'] ];
+		$branch = $branch->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];

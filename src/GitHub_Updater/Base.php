@@ -98,11 +98,9 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
-	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
-		'branch'    => 'Branch',
 		'languages' => 'Languages',
 		'ci_job'    => 'CI Job',
 	);
@@ -368,7 +366,6 @@ class Base {
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 *
-	 * @TODO Set `Requires WP: 4.6` and only use current filter and apply_filters_deprecated
 	 */
 	public function set_options_filter() {
 		// Single plugin/theme should not be using both hooks.

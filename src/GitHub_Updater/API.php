@@ -284,13 +284,16 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param string $id       Data Identifier.
-	 * @param mixed  $response Data to be stored.
+	 * @param string      $id       Data Identifier.
+	 * @param mixed       $response Data to be stored.
+	 * @param string|bool $repo     Repo name or false.
 	 *
 	 * @return bool
 	 */
-	protected function set_repo_cache( $id, $response ) {
-		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+	protected function set_repo_cache( $id, $response, $repo = false ) {
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = '+' . self::$hours . ' hours';
 
@@ -355,25 +358,31 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @return array|bool|mixed|string|\WP_Error
+	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
 		$slug     = $this->type->repo;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug . '.json' );
+			//@TODO shorten syntax for PHP 5.4
+			$type     = explode( '_', $this->type->type );
+			$type     = $type[1];
+			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
+			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
+			$response = wp_remote_get( $url );
+			$response = json_decode( $response['body'] );
+
 			if ( is_wp_error( $response ) ) {
-				return false;
+				return $response;
 			}
-			$wp_repo_body = json_decode( $response['body'] );
-			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
+
+			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
-		$response = 'in dot org' === $response;
 
-		return $response;
+		return 'in dot org' === $response;
 	}
 
 	/**

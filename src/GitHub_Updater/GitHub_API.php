@@ -42,6 +42,12 @@ class GitHub_API extends API implements API_Interface {
 	public function __construct( $type ) {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
+		$branch         = new Branch( $this->response );
+		if ( ! empty( $type->branch ) ) {
+			$this->type->branch = ! empty( $branch->cache['current_branch'] )
+				? $branch->cache['current_branch']
+				: $type->branch;
+		}
 	}
 
 	/**
@@ -65,6 +71,7 @@ class GitHub_API extends API implements API_Interface {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
+				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
 		}
 

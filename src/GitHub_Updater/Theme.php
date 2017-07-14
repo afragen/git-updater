@@ -140,7 +140,11 @@ class Theme extends Base {
 					}
 				}
 
-				$header = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+				$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+				$current_branch = 'current_branch_' . $header['repo'];
+				$branch         = isset( parent::$options[ $current_branch ] )
+					? parent::$options[ $current_branch ]
+					: false;
 
 				$git_theme['type']                    = $repo_parts['type'];
 				$git_theme['uri']                     = $header['base_uri'] . '/' . $header['owner_repo'];
@@ -156,8 +160,7 @@ class Theme extends Base {
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
 				$git_theme['local_path_extended']     = null;
-				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
-				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+				$git_theme['branch']                  = $branch ?: 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
 				$git_theme['release_asset']           = 'true' === $theme->get( 'Release Asset' );
@@ -353,7 +356,6 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		$branch  = 'master';
 		$options = get_site_option( 'github_updater' );
 		if ( empty( $options['branch_switch'] ) ) {
 			return false;
@@ -367,16 +369,10 @@ class Theme extends Base {
 			'upgrade-theme_' . $theme_key
 		);
 
-		/*
-		 * Get current branch.
-		 */
-		foreach ( parent::$git_servers as $server ) {
-			$branch_key = $server . ' Branch';
-			$branch     = $theme->get( $branch_key ) ?: 'master';
-			if ( 'master' !== $branch ) {
-				break;
-			}
-		}
+		// Get current branch.
+		$branch = new Branch();
+		$repo   = $this->config[ $theme_key ];
+		$branch = $branch->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $theme_key;
