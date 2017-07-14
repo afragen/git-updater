@@ -90,7 +90,6 @@ class Branch extends API {
 		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
 		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
 		update_site_option( 'github_updater', self::$options );
-
 	}
 
 }
