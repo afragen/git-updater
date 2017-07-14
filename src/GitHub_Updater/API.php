@@ -358,18 +358,26 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @return bool|int|mixed|string
+	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
 		$slug     = $this->type->repo;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
+			//@TODO shorten syntax for PHP 5.4
 			$type     = explode( '_', $this->type->type );
 			$type     = $type[1];
-			$url      = 'https://' . $type . 's.svn.wordpress.org/' . $slug . '/';
-			$response = wp_remote_retrieve_response_code( wp_remote_head( $url ) );
-			$response = 200 === $response ? 'in dot org' : 'not in dot org';
+			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
+			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
+			$response = wp_remote_get( $url );
+			$response = json_decode( $response['body'] );
+
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
