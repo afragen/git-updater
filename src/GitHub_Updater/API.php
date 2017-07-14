@@ -358,25 +358,23 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @return array|bool|mixed|string|\WP_Error
+	 * @return bool|int|mixed|string
 	 */
 	protected function get_dot_org_data() {
 		$slug     = $this->type->repo;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.0/' . $slug . '.json' );
-			if ( is_wp_error( $response ) ) {
-				return false;
-			}
-			$wp_repo_body = json_decode( $response['body'] );
-			$response     = is_object( $wp_repo_body ) ? 'in dot org' : 'not in dot org';
+			$type     = explode( '_', $this->type->type );
+			$type     = $type[1];
+			$url      = 'https://' . $type . 's.svn.wordpress.org/' . $slug;
+			$response = wp_remote_retrieve_response_code( wp_remote_get( $url ) );
+			$response = 200 === $response ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
-		$response = 'in dot org' === $response;
 
-		return $response;
+		return 'in dot org' === $response;
 	}
 
 	/**
