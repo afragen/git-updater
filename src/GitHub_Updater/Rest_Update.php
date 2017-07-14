@@ -299,6 +299,7 @@ class Rest_Update extends Base {
 		}
 
 		$request_data = json_decode( $request_body, true );
+		$request_ref  = explode( '/', $request_data['ref'] );
 
 		$response               = array();
 		$response['hash']       = isset( $request_data['ref_type'] )
@@ -306,7 +307,7 @@ class Rest_Update extends Base {
 			: $request_data['after'];
 		$response['branch']     = isset( $request_data['ref_type'] )
 			? 'master'
-			: array_pop( explode( '/', $request_data['ref'] ) );
+			: array_pop( $request_ref );
 		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;
@@ -325,10 +326,11 @@ class Rest_Update extends Base {
 	 */
 	private function parse_gitlab_webhook( $request_body ) {
 		$request_data = json_decode( $request_body, true );
+		$request_ref  = explode( '/', $request_data['ref'] );
 
 		$response               = array();
 		$response['hash']       = $request_data['after'];
-		$response['branch']     = array_pop( explode( '/', $request_data['ref'] ) );
+		$response['branch']     = array_pop( $request_ref );
 		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;

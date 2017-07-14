@@ -98,6 +98,7 @@ class Base {
 
 	/**
 	 * Holds extra repo header types.
+	 *
 	 * @var array
 	 */
 	protected static $extra_repo_headers = array(
@@ -1013,8 +1014,8 @@ class Base {
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 
-		$newest_tag     = null;
-		$newest_tag_key = key( array_slice( $tags, - 1, 1, true ) );
+		$newest_tag     = array_slice( $tags, - 1, 1, true );
+		$newest_tag_key = key( $newest_tag );
 		$newest_tag     = $tags[ $newest_tag_key ];
 
 		$this->type->newest_tag = $newest_tag;
