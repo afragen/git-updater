@@ -367,8 +367,8 @@ abstract class API extends Base {
 		if ( ! $response ) {
 			$type     = explode( '_', $this->type->type );
 			$type     = $type[1];
-			$url      = 'https://' . $type . 's.svn.wordpress.org/' . $slug;
-			$response = wp_remote_retrieve_response_code( wp_remote_get( $url ) );
+			$url      = 'https://' . $type . 's.svn.wordpress.org/' . $slug . '/';
+			$response = wp_remote_retrieve_response_code( wp_remote_head( $url ) );
 			$response = 200 === $response ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
