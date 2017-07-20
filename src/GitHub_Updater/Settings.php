@@ -81,15 +81,15 @@ class Settings extends Base {
 	 * Load APIs in use into array for later use.
 	 */
 	protected function load_apis() {
-		parent::$loaded_apis['bitbucket_api'] = class_exists( 'Fragen\GitHub_Updater\Bitbucket_API' )
+		parent::$loaded_apis['bitbucket_api'] = parent::$loaded_apis['bitbucket_api']
 			? new Bitbucket_API( new \stdClass() )
 			: false;
 
-		parent::$loaded_apis['bitbucket_server_api'] = class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' )
+		parent::$loaded_apis['bitbucket_server_api'] = parent::$loaded_apis['bitbucket_server_api']
 			? new Bitbucket_Server_API( new \stdClass() )
 			: false;
 
-		parent::$loaded_apis['gitlab_api'] = class_exists( 'Fragen\GitHub_Updater\GitLab_API' )
+		parent::$loaded_apis['gitlab_api'] = parent::$loaded_apis['gitlab_api']
 			? new GitLab_API( new \stdClass() )
 			: false;
 	}
