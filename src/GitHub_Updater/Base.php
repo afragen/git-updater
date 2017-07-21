@@ -107,11 +107,11 @@ class Base {
 	);
 
 	/**
-	 * Holds an array of loaded git APIs.
+	 * Holds an array of installed git APIs.
 	 *
 	 * @var array
 	 */
-	public static $loaded_apis = array(
+	protected static $installed_apis = array(
 		'github_api'           => true,
 		'bitbucket_api'        => false,
 		'bitbucket_server_api' => false,
@@ -151,7 +151,7 @@ class Base {
 			$this->delete_all_cached_data();
 		}
 
-		$this->set_loaded_apis();
+		$this->set_installed_apis();
 		$this->load_hooks();
 
 		if ( self::is_wp_cli() ) {
@@ -160,15 +160,18 @@ class Base {
 		}
 	}
 
-	private function set_loaded_apis() {
+	/**
+	 * Set boolean for installed API classes.
+	 */
+	private function set_installed_apis() {
 		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' ) ) {
-			self::$loaded_apis['bitbucket_server_api'] = true;
+			self::$installed_apis['bitbucket_server_api'] = true;
 		}
 		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_API' ) ) {
-			self::$loaded_apis['bitbucket_api'] = true;
+			self::$installed_apis['bitbucket_api'] = true;
 		}
 		if ( class_exists( 'Fragen\GitHub_Updater\GitLab_API' ) ) {
-			self::$loaded_apis['gitlab_api'] = true;
+			self::$installed_apis['gitlab_api'] = true;
 		}
 	}
 
@@ -486,16 +489,16 @@ class Base {
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				if ( $repo->enterprise_api ) {
-					if ( self::$loaded_apis['bitbucket_server_api'] ) {
+					if ( self::$installed_apis['bitbucket_server_api'] ) {
 						$this->repo_api = new Bitbucket_Server_API( $repo );
 					}
-				} elseif ( self::$loaded_apis['bitbucket_api'] ) {
+				} elseif ( self::$installed_apis['bitbucket_api'] ) {
 					$this->repo_api = new Bitbucket_API( $repo );
 				}
 				break;
 			case 'gitlab_plugin':
 			case 'gitlab_theme':
-				if ( self::$loaded_apis['gitlab_api'] ) {
+				if ( self::$installed_apis['gitlab_api'] ) {
 					$this->repo_api = new GitLab_API( $repo );
 				}
 				break;

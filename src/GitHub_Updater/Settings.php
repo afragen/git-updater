@@ -42,6 +42,13 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
+	 * Holds loaded API classes.
+	 *
+	 * @var
+	 */
+	private static $loaded_apis;
+
+	/**
 	 * Supported remote management services.
 	 *
 	 * @var array
@@ -80,16 +87,16 @@ class Settings extends Base {
 	/**
 	 * Load APIs in use into array for later use.
 	 */
-	protected function load_apis() {
-		parent::$loaded_apis['bitbucket_api'] = parent::$loaded_apis['bitbucket_api']
+	private function load_apis() {
+		self::$loaded_apis['bitbucket_api'] = parent::$installed_apis['bitbucket_api']
 			? new Bitbucket_API( new \stdClass() )
 			: false;
 
-		parent::$loaded_apis['bitbucket_server_api'] = parent::$loaded_apis['bitbucket_server_api']
+		self::$loaded_apis['bitbucket_server_api'] = parent::$installed_apis['bitbucket_server_api']
 			? new Bitbucket_Server_API( new \stdClass() )
 			: false;
 
-		parent::$loaded_apis['gitlab_api'] = parent::$loaded_apis['gitlab_api']
+		self::$loaded_apis['gitlab_api'] = parent::$installed_apis['gitlab_api']
 			? new GitLab_API( new \stdClass() )
 			: false;
 	}
@@ -139,13 +146,13 @@ class Settings extends Base {
 		$ghu_subtabs = array(
 			'github' => esc_html__( 'GitHub', 'github-updater' ),
 		);
-		if ( parent::$loaded_apis['bitbucket_api'] ) {
+		if ( parent::$installed_apis['bitbucket_api'] ) {
 			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
 		}
-		if ( parent::$loaded_apis['bitbucket_server_api'] ) {
+		if ( parent::$installed_apis['bitbucket_server_api'] ) {
 			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
 		}
-		if ( parent::$loaded_apis['gitlab_api'] ) {
+		if ( parent::$installed_apis['gitlab_api'] ) {
 			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
 		}
 
@@ -406,16 +413,16 @@ class Settings extends Base {
 			);
 		}
 
-		if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-			parent::$loaded_apis['gitlab_api']->add_settings();
+		if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
+			self::$loaded_apis['gitlab_api']->add_settings();
 		}
 
-		if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-			parent::$loaded_apis['bitbucket_api']->add_settings();
+		if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
+			self::$loaded_apis['bitbucket_api']->add_settings();
 		}
 
-		if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-			parent::$loaded_apis['bitbucket_server_api']->add_settings();
+		if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
+			self::$loaded_apis['bitbucket_server_api']->add_settings();
 		}
 
 		$this->update_settings();
@@ -464,18 +471,18 @@ class Settings extends Base {
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-							$repo_setting_field = parent::$loaded_apis['bitbucket_api']->add_repo_setting_field();
+						if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
+							$repo_setting_field = self::$loaded_apis['bitbucket_api']->add_repo_setting_field();
 						}
 					} else {
-						if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-							$repo_setting_field = parent::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
+						if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
+							$repo_setting_field = self::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
-					if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-						$repo_setting_field = parent::$loaded_apis['gitlab_api']->add_repo_setting_field();
+					if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
+						$repo_setting_field = self::$loaded_apis['gitlab_api']->add_repo_setting_field();
 					}
 					break;
 			}

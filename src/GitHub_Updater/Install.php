@@ -34,6 +34,13 @@ class Install extends Base {
 	protected static $install = array();
 
 	/**
+	 * Holds loaded API classes.
+	 *
+	 * @var
+	 */
+	private static $loaded_apis;
+
+	/**
 	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
 	 *
@@ -43,8 +50,26 @@ class Install extends Base {
 	public function __construct( $type, $wp_cli_config = array() ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		$this->install( $type, $wp_cli_config );
+		$this->load_apis();
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
+	}
+
+	/**
+	 * Load APIs in use into array for later use.
+	 */
+	private function load_apis() {
+		self::$loaded_apis['bitbucket_api'] = parent::$installed_apis['bitbucket_api']
+			? new Bitbucket_API( new \stdClass() )
+			: false;
+
+		self::$loaded_apis['bitbucket_server_api'] = parent::$installed_apis['bitbucket_server_api']
+			? new Bitbucket_Server_API( new \stdClass() )
+			: false;
+
+		self::$loaded_apis['gitlab_api'] = parent::$installed_apis['gitlab_api']
+			? new GitLab_API( new \stdClass() )
+			: false;
 	}
 
 	/**
@@ -161,12 +186,12 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-					self::$install = parent::$loaded_apis['bitbucket_api']->remote_install( $headers, self::$install );
+				if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
+					self::$install = self::$loaded_apis['bitbucket_api']->remote_install( $headers, self::$install );
 				}
 
-				if ( parent::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-					self::$install = parent::$loaded_apis['bitbucket_server_api']->remote_install( $headers, self::$install );
+				if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
+					self::$install = self::$loaded_apis['bitbucket_server_api']->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -175,8 +200,8 @@ class Install extends Base {
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-					self::$install = parent::$loaded_apis['gitlab_api']->remote_install( $headers, self::$install );
+				if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
+					self::$install = self::$loaded_apis['gitlab_api']->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -336,12 +361,12 @@ class Install extends Base {
 			$type
 		);
 
-		if ( parent::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-			parent::$loaded_apis['bitbucket_api']->add_install_settings_fields( $type );
+		if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
+			self::$loaded_apis['bitbucket_api']->add_install_settings_fields( $type );
 		}
 
-		if ( parent::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-			parent::$loaded_apis['gitlab_api']->add_install_settings_fields( $type );
+		if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
+			self::$loaded_apis['gitlab_api']->add_install_settings_fields( $type );
 		}
 	}
 
@@ -383,7 +408,7 @@ class Install extends Base {
 		<label for="github_updater_api">
 			<select name="github_updater_api">
 				<?php foreach ( parent::$git_servers as $key => $value ): ?>
-					<?php if ( parent::$loaded_apis[ $key . '_api' ] ): ?>
+					<?php if ( parent::$installed_apis[ $key . '_api' ] ): ?>
 						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>
