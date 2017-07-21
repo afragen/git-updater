@@ -516,10 +516,9 @@ class Settings extends Base {
 			'bitbucket_server_password',
 		);
 
-		array_filter( $always_unset,
-			function( $e ) use ( &$ghu_unset_keys ) {
-				unset( $ghu_unset_keys[ $e ] );
-			} );
+		array_map( function( $e ) use ( &$ghu_unset_keys ) {
+			unset( $ghu_unset_keys[ $e ] );
+		}, $always_unset );
 
 		$auth_required       = parent::$auth_required;
 		$auth_required_unset = array(
@@ -528,36 +527,26 @@ class Settings extends Base {
 			'gitlab_enterprise' => 'gitlab_enterprise_token',
 		);
 
-		array_filter( $auth_required_unset,
-			function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
-				$key = array_search( $e, $auth_required_unset, true );
-				if ( $auth_required[ $key ] ) {
-					unset( $ghu_unset_keys[ $e ] );
-				}
-			} );
+		array_map( function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
+			$key = array_search( $e, $auth_required_unset, true );
+			if ( $auth_required[ $key ] ) {
+				unset( $ghu_unset_keys[ $e ] );
+			}
+		}, $auth_required_unset );
 
 		// Unset if value set AND if associated with a repo.
-		array_filter( $ghu_unset_keys,
-			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
-				$key = array_search( $e, $ghu_unset_keys, true );
-				if ( array_key_exists( $key, $ghu_unset_keys ) &&
-				     array_key_exists( $key, $ghu_tokens )
-				) {
-					unset( $ghu_unset_keys[ $key ] );
-				}
-			} );
-
 		// Unset if current_branch AND if associated with repo.
-		array_filter( $ghu_unset_keys,
-			function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
-				$key  = array_search( $e, $ghu_unset_keys, true );
-				$repo = str_replace( 'current_branch_', '', $key );
-				if ( array_key_exists( $repo, $ghu_tokens )
-				     && false !== strpos( $key, 'current_branch' )
-				) {
-					unset( $ghu_unset_keys[ $key ] );
-				}
-			} );
+		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
+			$key  = array_search( $e, $ghu_unset_keys, true );
+			$repo = str_replace( 'current_branch_', '', $key );
+			if ( ( array_key_exists( $key, $ghu_unset_keys ) &&
+			       array_key_exists( $key, $ghu_tokens ) )
+			     || ( array_key_exists( $repo, $ghu_tokens )
+			          && false !== strpos( $key, 'current_branch' ) )
+			) {
+				unset( $ghu_unset_keys[ $key ] );
+			}
+		}, $ghu_unset_keys );
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
