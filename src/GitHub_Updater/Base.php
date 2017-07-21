@@ -177,6 +177,8 @@ class Base {
 
 	/**
 	 * Load APIs in use into array for later use.
+	 *
+	 * @return array $loaded_apis
 	 */
 	protected function load_apis() {
 		$loaded_apis                  = array();
