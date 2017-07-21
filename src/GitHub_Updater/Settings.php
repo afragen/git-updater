@@ -579,18 +579,14 @@ class Settings extends Base {
 				parent::$auth_required['github_enterprise'] = true;
 			}
 
-			if (
-				//! empty( $token->enterprise ) &&
-				! parent::$auth_required['gitlab_enterprise'] &&
-				false !== strpos( $token->type, 'gitlab' )
+			if ( ! parent::$auth_required['gitlab_enterprise'] &&
+			     false !== strpos( $token->type, 'gitlab' )
 			) {
 				parent::$auth_required['gitlab_enterprise'] = true;
 			}
 
-			if (
-				//! empty( $token->enterprise ) &&
-				! parent::$auth_required['bitbucket_server'] &&
-				false !== strpos( $token->type, 'bitbucket' )
+			if ( ! parent::$auth_required['bitbucket_server'] &&
+			     false !== strpos( $token->type, 'bitbucket' )
 			) {
 				parent::$auth_required['bitbucket_server'] = true;
 			}
