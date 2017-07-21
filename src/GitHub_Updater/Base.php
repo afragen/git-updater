@@ -176,6 +176,26 @@ class Base {
 	}
 
 	/**
+	 * Load APIs in use into array for later use.
+	 */
+	protected function load_apis() {
+		$loaded_apis                  = array();
+		$loaded_apis['bitbucket_api'] = self::$installed_apis['bitbucket_api']
+			? new Bitbucket_API( new \stdClass() )
+			: false;
+
+		$loaded_apis['bitbucket_server_api'] = self::$installed_apis['bitbucket_server_api']
+			? new Bitbucket_Server_API( new \stdClass() )
+			: false;
+
+		$loaded_apis['gitlab_api'] = self::$installed_apis['gitlab_api']
+			? new GitLab_API( new \stdClass() )
+			: false;
+
+		return $loaded_apis;
+	}
+
+	/**
 	 * Load site options.
 	 */
 	protected function load_options() {

@@ -49,27 +49,10 @@ class Install extends Base {
 	 */
 	public function __construct( $type, $wp_cli_config = array() ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		$this->load_apis();
+		self::$loaded_apis = $this->load_apis();
 		$this->install( $type, $wp_cli_config );
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
-	}
-
-	/**
-	 * Load APIs in use into array for later use.
-	 */
-	private function load_apis() {
-		self::$loaded_apis['bitbucket_api'] = parent::$installed_apis['bitbucket_api']
-			? new Bitbucket_API( new \stdClass() )
-			: false;
-
-		self::$loaded_apis['bitbucket_server_api'] = parent::$installed_apis['bitbucket_server_api']
-			? new Bitbucket_Server_API( new \stdClass() )
-			: false;
-
-		self::$loaded_apis['gitlab_api'] = parent::$installed_apis['gitlab_api']
-			? new GitLab_API( new \stdClass() )
-			: false;
 	}
 
 	/**

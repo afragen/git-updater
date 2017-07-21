@@ -66,7 +66,7 @@ class Settings extends Base {
 	public function __construct() {
 		$this->ensure_api_key_is_set();
 		$this->load_options();
-		$this->load_apis();
+		self::$loaded_apis = $this->load_apis();
 		$this->load_hooks();
 	}
 
@@ -82,23 +82,6 @@ class Settings extends Base {
 		}
 
 		return self::$instance;
-	}
-
-	/**
-	 * Load APIs in use into array for later use.
-	 */
-	private function load_apis() {
-		self::$loaded_apis['bitbucket_api'] = parent::$installed_apis['bitbucket_api']
-			? new Bitbucket_API( new \stdClass() )
-			: false;
-
-		self::$loaded_apis['bitbucket_server_api'] = parent::$installed_apis['bitbucket_server_api']
-			? new Bitbucket_Server_API( new \stdClass() )
-			: false;
-
-		self::$loaded_apis['gitlab_api'] = parent::$installed_apis['gitlab_api']
-			? new GitLab_API( new \stdClass() )
-			: false;
 	}
 
 	/**
