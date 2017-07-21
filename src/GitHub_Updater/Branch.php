@@ -64,7 +64,7 @@ class Branch extends API {
 		$repo = isset( $_GET['plugin'] ) ? dirname( $_GET['plugin'] ) : null;
 		$repo = isset( $_GET['theme'] ) ? $_GET['theme'] : $repo;
 
-		if ( isset( $_GET['action'] ) &&
+		if ( isset( $_GET['action'], $this->cache['repo'] ) &&
 		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] ) &&
 		     $repo === $this->cache['repo'] &&
 		     false !== strpos( $url, $this->cache['repo'] )
