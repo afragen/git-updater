@@ -245,8 +245,6 @@ class Install extends Base {
 			// Save branch setting.
 			$branch = new Branch();
 			$branch->set_branch_on_install( self::$install );
-			parent::$options[ 'current_branch_' . self::$install['repo'] ] = self::$install['github_updater_branch'];
-			update_site_option( 'github_updater', parent::$options );
 		}
 
 		if ( $wp_cli ) {
