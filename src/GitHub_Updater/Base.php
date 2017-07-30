@@ -439,7 +439,7 @@ class Base {
 		}
 
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers       = array_merge( (array) $extra_headers, (array) $ghu_extra_headers );
+		$extra_headers       = array_merge( (array) $extra_headers, $ghu_extra_headers );
 		ksort( self::$extra_headers );
 
 		return $extra_headers;
