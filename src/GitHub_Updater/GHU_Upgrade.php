@@ -29,7 +29,7 @@ class GHU_Upgrade extends Base {
 	 *
 	 * @var int
 	 */
-	private $db_version = 6400;
+	private $db_version = 7000;
 
 	/**
 	 * GHU_Upgrade constructor.

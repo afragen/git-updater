@@ -1,4 +1,6 @@
-#### 7.0.0 [unreleased]
+#### [unreleased]
+
+#### 7.0.0 / 2017-08-01
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
 * refactored Settings and Install to place API Settings data in individual API classes
 * refactored Settings to make smaller methods
