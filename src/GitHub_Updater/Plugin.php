@@ -32,9 +32,9 @@ class Plugin extends Base {
 	/**
 	 * Plugin object.
 	 *
-	 * @var bool|Plugin
+	 * @var Plugin
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Rollback variable
@@ -54,7 +54,7 @@ class Plugin extends Base {
 		$this->config = $this->get_plugin_meta();
 
 		if ( empty( $this->config ) ) {
-			return false;
+			return;
 		}
 	}
 
@@ -72,10 +72,10 @@ class Plugin extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return object $instance Plugin
+	 * @return Plugin $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -91,7 +91,7 @@ class Plugin extends Base {
 		/*
 		 * Ensure get_plugins() function is available.
 		 */
-		include_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
 		$git_plugins = array();
@@ -123,11 +123,11 @@ class Plugin extends Base {
 			foreach ( (array) self::$extra_headers as $value ) {
 				$header = null;
 
-				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ) ) ) {
+				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ), true ) ) {
 					continue;
 				}
 
-				if ( empty( $headers[ $value ] ) || false === stristr( $value, 'Plugin' ) ) {
+				if ( empty( $headers[ $value ] ) || false === stripos( $value, 'Plugin' ) ) {
 					continue;
 				}
 
@@ -141,7 +141,11 @@ class Plugin extends Base {
 					}
 				}
 
-				$header = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$current_branch = 'current_branch_' . $header['repo'];
+				$branch         = isset( parent::$options[ $current_branch ] )
+					? parent::$options[ $current_branch ]
+					: false;
 
 				$git_plugin['type']                = $repo_parts['type'];
 				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
@@ -151,10 +155,10 @@ class Plugin extends Base {
 				$git_plugin['repo']                = $header['repo'];
 				$git_plugin['extended_repo']       = implode( '-', array(
 					$repo_parts['git_server'],
-					$header['owner'],
+					str_replace( '/', '-', $header['owner'] ),
 					$header['repo'],
 				) );
-				$git_plugin['branch']              = ! empty( $headers[ $repo_parts['branch'] ] ) ? $headers[ $repo_parts['branch'] ] : 'master';
+				$git_plugin['branch']              = $branch ?: 'master';
 				$git_plugin['slug']                = $plugin;
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
@@ -166,8 +170,8 @@ class Plugin extends Base {
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_plugin['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_plugin['release_asset']           = true == $plugin_data['Release Asset'] ? true : false;
-				$git_plugin['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
+				$git_plugin['release_asset']           = 'true' === $plugin_data['Release Asset'];
+				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				$git_plugin['banners']['high'] =
 					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )
@@ -198,17 +202,18 @@ class Plugin extends Base {
 				continue;
 			}
 
-			// Update plugin transient with rollback (branch switching) data.
-			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
-
-			if ( ( ! is_multisite() || is_network_admin() ) && ! $plugin->release_asset &&
-			     'init' === current_filter() //added due to calling hook for shiny updates, don't show row twice
+			//current_filter() check due to calling hook for shiny updates, don't show row twice
+			if ( ! $plugin->release_asset && 'init' === current_filter() &&
+			     ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
 
-		if ( ! $this->is_wp_cli() ) {
+		// Update plugin transient with rollback (branch switching) data.
+		add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
+
+		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
 	}
@@ -250,16 +255,10 @@ class Plugin extends Base {
 			return false;
 		}
 
-		/*
-		 * Get current branch.
-		 */
-		foreach ( parent::$git_servers as $server ) {
-			$branch_key = $server . ' Branch';
-			$branch     = ! empty( $plugin_data[ $branch_key ] ) ? $plugin_data[ $branch_key ] : 'master';
-			if ( 'master' !== $branch ) {
-				break;
-			}
-		}
+		// Get current branch.
+		$branch = new Branch();
+		$repo   = $this->config[ $plugin['repo'] ];
+		$branch = $branch->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];
@@ -305,7 +304,7 @@ class Plugin extends Base {
 		 * Remove 'Visit plugin site' link in favor or 'View details' link.
 		 */
 		if ( array_key_exists( $repo, $this->config ) ) {
-			if ( ! is_null( $repo ) ) {
+			if ( null !== $repo ) {
 				unset( $links[2] );
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 					esc_url(
@@ -369,7 +368,7 @@ class Plugin extends Base {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
-		foreach ( $plugin->contributors as $contributor ) {
+		foreach ( (array) $plugin->contributors as $contributor ) {
 			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 		}
 		$response->contributors = $contributors;

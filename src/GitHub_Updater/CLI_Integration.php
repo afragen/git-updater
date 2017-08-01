@@ -119,6 +119,7 @@ class CLI_Integration extends WP_CLI_Command {
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
+		$this->process_branch( $cli_config, $slug );
 		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
 	}
 
@@ -176,6 +177,7 @@ class CLI_Integration extends WP_CLI_Command {
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
+		$this->process_branch( $cli_config, $slug );
 		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
 	}
 
@@ -212,6 +214,19 @@ class CLI_Integration extends WP_CLI_Command {
 		return $cli_config;
 	}
 
+	/**
+	 * Process branch setting for WP-CLI.
+	 *
+	 * @param array  $cli_config
+	 * @param string $slug
+	 */
+	private function process_branch( $cli_config, $slug ) {
+		$branch_data['github_updater_branch'] = $cli_config['branch'];
+		$branch_data['repo']                  = $slug;
+		$branch                               = new Branch();
+		$branch->set_branch_on_install( $branch_data );
+	}
+
 }
 
 /**
@@ -223,26 +238,38 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
 class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
-	public function header() {}
-	public function footer() {}
+	public function header() {
+	}
+
+	public function footer() {
+	}
+
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
-		};
+		}
 	}
-	public function feedback( $string ) {}
+
+	public function feedback( $string ) {
+	}
 }
 
 /**
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
 class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
-	public function header() {}
-	public function footer() {}
+	public function header() {
+	}
+
+	public function footer() {
+	}
+
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
-		};
+		}
 	}
-	public function feedback( $string ) {}
+
+	public function feedback( $string ) {
+	}
 }

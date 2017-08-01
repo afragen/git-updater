@@ -1,5 +1,14 @@
 #### [unreleased]
 
+#### 7.0.0 / 2017-08-01
+* added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
+* refactored Settings and Install to place API Settings data in individual API classes
+* refactored Settings to make smaller methods
+* simplified `composer.json`, removed autoload section and no need to require `composer/installer`
+* many PHP Inspections fixes
+* fixed `class Rest_Update` for PHP 5.3 compatibility, thanks @epicfaace
+* created `class Branch` to automatically set correct branch during branch switch or install. No more need for Branch header. This is a breaking change as `master` will become the default branch for all repositories. You will need to use _Branch Switch_ to reinstall the current branch for it to be correctly set.
+
 #### 6.3.5 / 2017-06-29
 * hotfix to `composer.json` to remove classmap and files, I think I messed something up.
 

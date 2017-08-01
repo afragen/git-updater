@@ -34,9 +34,9 @@ class Theme extends Base {
 	/**
 	 * Theme object.
 	 *
-	 * @var bool|Theme
+	 * @var Theme $instance
 	 */
-	private static $instance = false;
+	private static $instance;
 
 	/**
 	 * Rollback variable.
@@ -56,7 +56,7 @@ class Theme extends Base {
 		$this->config = $this->get_theme_meta();
 
 		if ( empty( $this->config ) ) {
-			return false;
+			return;
 		}
 	}
 
@@ -65,10 +65,10 @@ class Theme extends Base {
 	 * method - this prevents unnecessary work in rebuilding the object and
 	 * querying to construct a list of categories, etc.
 	 *
-	 * @return object $instance Theme
+	 * @return Theme $instance
 	 */
 	public static function instance() {
-		if ( false === self::$instance ) {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 
@@ -126,7 +126,7 @@ class Theme extends Base {
 					}
 				}
 
-				if ( empty( $repo_uri ) || false === stristr( $value, 'Theme' ) ) {
+				if ( empty( $repo_uri ) || false === stripos( $value, 'Theme' ) ) {
 					continue;
 				}
 
@@ -135,12 +135,16 @@ class Theme extends Base {
 
 				if ( $repo_parts['bool'] ) {
 					$header = $this->parse_header_uri( $repo_uri );
-					if ( $theme->stylesheet !== $header['repo'] || empty( $header ) ) {
+					if ( empty( $header ) || $theme->stylesheet !== $header['repo'] ) {
 						continue;
 					}
 				}
 
-				$header = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+				$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+				$current_branch = 'current_branch_' . $header['repo'];
+				$branch         = isset( parent::$options[ $current_branch ] )
+					? parent::$options[ $current_branch ]
+					: false;
 
 				$git_theme['type']                    = $repo_parts['type'];
 				$git_theme['uri']                     = $header['base_uri'] . '/' . $header['owner_repo'];
@@ -156,12 +160,11 @@ class Theme extends Base {
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
 				$git_theme['local_path_extended']     = null;
-				$git_theme['branch']                  = $theme->get( $repo_parts['branch'] );
-				$git_theme['branch']                  = ! empty( $git_theme['branch'] ) ? $git_theme['branch'] : 'master';
+				$git_theme['branch']                  = $branch ?: 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
-				$git_theme['release_asset']           = true == $theme->get( 'Release Asset' ) ? true : false;
-				$git_theme['broken']                  = empty( $header['owner'] ) || empty( $header['repo'] ) ? true : false;
+				$git_theme['release_asset']           = 'true' === $theme->get( 'Release Asset' );
+				$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				break;
 			}
@@ -190,9 +193,6 @@ class Theme extends Base {
 				continue;
 			}
 
-			// Update theme transient with rollback (branch switching) data.
-			add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
-
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
@@ -210,7 +210,10 @@ class Theme extends Base {
 			}
 		}
 
-		if ( ! $this->is_wp_cli() ) {
+		// Update theme transient with rollback (branch switching) data.
+		add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
+
+		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
 	}
@@ -287,8 +290,8 @@ class Theme extends Base {
 			'strong'  => array(),
 		);
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
-		$details_url        = esc_attr( add_query_arg(
+		//$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$details_url       = esc_attr( add_query_arg(
 			array(
 				'tab'       => 'theme-information',
 				'theme'     => $theme_key,
@@ -296,12 +299,12 @@ class Theme extends Base {
 				'width'     => 270,
 				'height'    => 400,
 			),
-			self_admin_url( "theme-install.php" ) ) );
-		$nonced_update_url  = wp_nonce_url(
+			self_admin_url( 'theme-install.php' ) ) );
+		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
 		);
-		$enclosure          = $this->update_row_enclosure( $theme_key, 'theme' );
+		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme' );
 
 		/*
 		 * Update transient if necessary.
@@ -366,16 +369,10 @@ class Theme extends Base {
 			'upgrade-theme_' . $theme_key
 		);
 
-		/*
-		 * Get current branch.
-		 */
-		foreach ( parent::$git_servers as $server ) {
-			$branch_key = $server . ' Branch';
-			$branch     = $theme->get( $branch_key ) ? $theme->get( $branch_key ) : 'master';
-			if ( 'master' !== $branch ) {
-				break;
-			}
-		}
+		// Get current branch.
+		$branch = new Branch();
+		$repo   = $this->config[ $theme_key ];
+		$branch = $branch->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $theme_key;
@@ -433,9 +430,9 @@ class Theme extends Base {
 				continue;
 			}
 
-			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row', 10 );
 			break;
 		}
+		remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
 	}
 
 	/**
@@ -474,7 +471,7 @@ class Theme extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $theme
+	 * @param \stdClass $theme
 	 *
 	 * @return string (content buffer)
 	 */
@@ -487,7 +484,7 @@ class Theme extends Base {
 				'width'     => 270,
 				'height'    => 400,
 			),
-			self_admin_url( "theme-install.php" ) ) );
+			self_admin_url( 'theme-install.php' ) ) );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo
@@ -533,7 +530,7 @@ class Theme extends Base {
 	 *
 	 * @access protected
 	 *
-	 * @param object $theme
+	 * @param \stdClass $theme
 	 *
 	 * @return string
 	 */
@@ -577,9 +574,7 @@ class Theme extends Base {
 								echo '<option>' . $tag . '</option>';
 							}
 						}
-						if ( empty( $options['branch_switch'] ) &&
-						     empty( $theme->rollback )
-						) {
+						if ( empty( $theme->rollback ) ) {
 							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
 							$show_button = false;
 						}
@@ -602,7 +597,7 @@ class Theme extends Base {
 	 *
 	 * @param array $transient
 	 *
-	 * @return array|object
+	 * @return array|\stdClass
 	 */
 	public function pre_set_site_transient_update_themes( $transient ) {
 

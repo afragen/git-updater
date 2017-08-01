@@ -32,16 +32,22 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @var null
 	 */
-	private static $method = null;
+	private static $method;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
+		$branch         = new Branch( $this->response );
+		if ( ! empty( $type->branch ) ) {
+			$this->type->branch = ! empty( $branch->cache['current_branch'] )
+				? $branch->cache['current_branch']
+				: $type->branch;
+		}
 	}
 
 	/**
@@ -65,10 +71,11 @@ class GitHub_API extends API implements API_Interface {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
+				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -163,7 +170,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -190,7 +197,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
+			$response = $parser->parse_data( $this );
 			$this->set_repo_cache( 'readme', $response );
 		}
 
@@ -301,7 +308,7 @@ class GitHub_API extends API implements API_Interface {
 			 * For users wanting to update against branch other than master
 			 * or if not using tags, else use newest_tag.
 			 */
-		} elseif ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
+		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
@@ -322,8 +329,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param GitHub_API|API $git
+	 * @param string         $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -338,6 +345,9 @@ class GitHub_API extends API implements API_Interface {
 			case 'changes':
 			case 'download_link':
 			case 'translation':
+				break;
+			case 'branches':
+				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
 				break;
 			default:
 				break;
@@ -375,9 +385,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param object|array $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return object|array $arr Array of tag numbers, object is error.
+	 * @return \stdClass|array $arr Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -397,7 +407,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -419,7 +429,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
@@ -436,11 +446,14 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Return the AWS download link for a GitHub release asset.
+	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 *
+	 * @TODO  Figure out how to run this on the fly only when needed.
 	 *
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
 	 *
-	 * @return array|bool|object|\stdClass
+	 * @return array|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
@@ -482,7 +495,6 @@ class GitHub_API extends API implements API_Interface {
 					return false;
 				}
 
-				$response = array();
 				$response = $download_link[0];
 				$this->set_repo_cache( 'release_asset_url', $response );
 			}

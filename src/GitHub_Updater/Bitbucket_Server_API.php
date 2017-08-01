@@ -27,25 +27,22 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
-class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
+class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
 	 * Holds loose class method name.
 	 *
 	 * @var null
 	 */
-	private static $method = null;
+	private static $method;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param object $type
+	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
-		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
-
-		Basic_Auth_Loader::instance( parent::$options )->load_authentication_hooks();
+		parent::__construct( $type );
 
 		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
 			self::$options['bitbucket_server_username'] = null;
@@ -76,10 +73,11 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
+				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
 		}
 
-		if ( $this->validate_response( $response ) || ! is_array( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -182,7 +180,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
 
@@ -219,7 +217,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 		if ( $response && isset( $response->data ) ) {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
+			$response = $parser->parse_data( $this );
 			$this->set_repo_cache( 'readme', $response );
 		}
 
@@ -274,9 +272,10 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
+			self::$method = 'branches';
+			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
 			if ( $response && isset( $response->values ) ) {
-				foreach ( $response->values as $value ) {
+				foreach ( (array) $response->values as $value ) {
 					$branch              = $value->displayId;
 					$branches[ $branch ] = $this->construct_download_link( false, $branch );
 				}
@@ -325,8 +324,8 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	/**
 	 * Create Bitbucket Server API endpoints.
 	 *
-	 * @param object $git
-	 * @param string $endpoint
+	 * @param Bitbucket_Server_API|API $git
+	 * @param string                   $endpoint
 	 *
 	 * @return string $endpoint
 	 */
@@ -335,6 +334,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 			case 'meta':
 			case 'tags':
 			case 'translation':
+			case 'branches':
 				break;
 			case 'file':
 			case 'readme':
@@ -389,16 +389,16 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	 * Combines separate text lines from API response into one string with \n line endings.
 	 * Code relying on raw text can now parse it.
 	 *
-	 * @param string $response
+	 * @param string|\stdClass|mixed $response
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
 	private function bbserver_recombine_response( $response ) {
 		$remote_info_file = '';
-		$json_decoded     = is_string( $response ) ? json_decode( $response ) : null;
+		$json_decoded     = is_string( $response ) ? json_decode( $response ) : '';
 		$response         = empty( $json_decoded ) ? $response : $json_decoded;
 		if ( isset( $response->lines ) ) {
-			foreach ( $response->lines as $line ) {
+			foreach ( (array) $response->lines as $line ) {
 				$remote_info_file .= $line->text . "\n";
 			}
 		}
@@ -409,7 +409,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param object $response Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -431,7 +431,7 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog.
 	 *
-	 * @param object $response Response from API call.
+	 * @param string $response Response from API call.
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
@@ -442,9 +442,9 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 	/**
 	 * Parse API response and return object with readme body.
 	 *
-	 * @param string $response
+	 * @param string|\stdClass $response
 	 *
-	 * @return object $response
+	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
 		$content        = $this->bbserver_recombine_response( $response );
@@ -453,4 +453,133 @@ class Bitbucket_Server_API extends Bitbucket_API implements API_Interface {
 
 		return $response;
 	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param \stdClass $response Response from API call.
+	 *
+	 * @return array|\stdClass Array of tag numbers, object is error.
+	 */
+	public function parse_tag_response( $response ) {
+		if ( isset( $response->message ) || ! isset( $response->values ) ) {
+			return $response;
+		}
+
+		$arr = array();
+		array_map( function( $e ) use ( &$arr ) {
+			$arr[] = $e->displayId;
+
+			return $arr;
+		}, (array) $response->values );
+
+		return $arr;
+	}
+
+	/**
+	 * Add settings for Bitbucket Server Username and Password.
+	 */
+	public function add_settings() {
+		add_settings_section(
+			'bitbucket_server_user',
+			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
+			array( &$this, 'print_section_bitbucket_username' ),
+			'github_updater_bbserver_install_settings'
+		);
+
+		add_settings_field(
+			'bitbucket_server_username',
+			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_username' )
+		);
+
+		add_settings_field(
+			'bitbucket_server_password',
+			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
+			array( Settings::instance(), 'token_callback_text' ),
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			array( 'id' => 'bitbucket_server_password', 'token' => true )
+		);
+
+		/*
+		 * Show section for private Bitbucket Server repositories.
+		 */
+		if ( parent::$auth_required['bitbucket_server'] ) {
+			add_settings_section(
+				'bitbucket_server_id',
+				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
+				array( &$this, 'print_section_bitbucket_info' ),
+				'github_updater_bbserver_install_settings'
+			);
+		}
+
+	}
+
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field() {
+		$setting_field['page']            = 'github_updater_bbserver_install_settings';
+		$setting_field['section']         = 'bitbucket_server_id';
+		$setting_field['callback_method'] = array( Settings::instance(), 'token_callback_checkbox' );
+
+		return $setting_field;
+	}
+
+	/**
+	 * Add remote install feature, create endpoint.
+	 *
+	 * @param array $headers
+	 * @param array $install
+	 *
+	 * @return array $install
+	 */
+	public function remote_install( $headers, $install ) {
+		$bitbucket_org = true;
+
+		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
+			$base            = 'https://bitbucket.org';
+			$headers['host'] = 'bitbucket.org';
+		} else {
+			$base          = $headers['base_uri'];
+			$bitbucket_org = false;
+		}
+
+		if ( ! $bitbucket_org ) {
+			$install['download_link'] = implode( '/', array(
+				$base,
+				'rest/archive/1.0/projects',
+				$headers['owner'],
+				'repos',
+				$headers['repo'],
+				'archive',
+			) );
+
+			$install['download_link'] = add_query_arg( array(
+				'prefix' => $headers['repo'] . '/',
+				'at'     => $install['github_updater_branch'],
+			), $install['download_link'] );
+
+			if ( isset( $install['is_private'] ) ) {
+				parent::$options[ $install['repo'] ] = 1;
+			}
+			if ( ! empty( $install['bitbucket_username'] ) ) {
+				parent::$options['bitbucket_server_username'] = $install['bitbucket_username'];
+			}
+			if ( ! empty( $install['bitbucket_password'] ) ) {
+				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
+			}
+
+			new Bitbucket_Server_API( new \stdClass() );
+		}
+
+		return $install;
+	}
+
 }

@@ -65,7 +65,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $plugin ) {
-			throw new \Exception( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
+			throw new \UnexpectedValueException( 'Plugin not found or not updatable with GitHub Updater: ' . $plugin_slug );
 		}
 
 		if ( is_plugin_active( $plugin->slug ) ) {
@@ -116,7 +116,7 @@ class Rest_Update extends Base {
 		}
 
 		if ( ! $theme ) {
-			throw new \Exception( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
+			throw new \UnexpectedValueException( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
 		$this->get_remote_repo_meta( $theme );
@@ -167,9 +167,9 @@ class Rest_Update extends Base {
 			$json_encode_flags = 128 | 64;
 
 			if ( ! isset( $_REQUEST['key'] ) ||
-			     $_REQUEST['key'] != get_site_option( 'github_updater_api_key' )
+			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
-				throw new \Exception( 'Bad api key.' );
+				throw new \UnexpectedValueException( 'Bad api key.' );
 			}
 
 			$tag = 'master';
@@ -191,7 +191,7 @@ class Rest_Update extends Base {
 				if ( $tag === $webhook_response['branch'] ) {
 					$tag = $webhook_response['hash'];
 				} else {
-					throw new \Exception( 'Request tag and webhook are not matching. ' . 'Response: ' . http_build_query( $webhook_response, null, ', ' ) );
+					throw new \UnexpectedValueException( 'Request tag and webhook are not matching. ' . 'Response: ' . http_build_query( $webhook_response, null, ', ' ) );
 				}
 			}
 
@@ -200,10 +200,11 @@ class Rest_Update extends Base {
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
 			} else {
-				throw new \Exception( 'No plugin or theme specified for update.' );
+				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			http_response_code( 500 );
+			//http_response_code( 417 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 417 Expectation Failed' );
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
@@ -217,18 +218,30 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'response' => $webhook_response ? $webhook_response : $_GET,
+			'response' => $webhook_response ?: $_GET,
 		);
 
 		if ( $this->is_error() ) {
 			$response['error'] = true;
-			http_response_code( 500 );
+			//http_response_code( 417 ); //@TODO PHP 5.4
+			header( 'HTTP/1.1 417 Expectation Failed' );
 		} else {
 			$response['success'] = true;
 		}
 
 		echo json_encode( $response, $json_encode_flags ) . "\n";
 		exit;
+	}
+
+	/**
+	 * For compatibility with PHP 5.3
+	 *
+	 * @param string $name $_SERVER index.
+	 *
+	 * @return bool
+	 */
+	private function is_server_variable_set( $name ) {
+		return isset( $_SERVER[ $name ] );
 	}
 
 	/**
@@ -241,20 +254,24 @@ class Rest_Update extends Base {
 		$request_body = file_get_contents( 'php://input' );
 
 		// GitHub
-		if ( 'push' == $_SERVER['HTTP_X_GITHUB_EVENT'] ||
-		     'create' == $_SERVER['HTTP_X_GITHUB_EVENT']
+		if ( $this->is_server_variable_set( 'HTTP_X_GITHUB_EVENT' ) &&
+		     ( 'push' === $_SERVER['HTTP_X_GITHUB_EVENT'] ||
+		       'create' === $_SERVER['HTTP_X_GITHUB_EVENT'] )
 		) {
 			return $this->parse_github_webhook( $request_body );
 		}
 
 		// Bitbucket
-		if ( 'repo:push' == $_SERVER['HTTP_X_EVENT_KEY'] ) {
+		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ) &&
+		     'repo:push' === $_SERVER['HTTP_X_EVENT_KEY']
+		) {
 			return $this->parse_bitbucket_webhook( $request_body );
 		}
 
 		// GitLab
-		if ( 'Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT'] ||
-		     'Tag Push Hook' == $_SERVER['HTTP_X_GITLAB_EVENT']
+		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' ) &&
+		     ( 'Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT'] ||
+		       'Tag Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT'] )
 		) {
 			return $this->parse_gitlab_webhook( $request_body );
 		}
@@ -267,21 +284,22 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
 	 *
-	 * @param array $request_body
+	 * @param string|bool $request_body
 	 *
 	 * @return array $response
 	 */
 	private function parse_github_webhook( $request_body ) {
 		$request_body = urldecode( $request_body );
-		if ( ( false !== $pos = strpos( $request_body, '{' ) ) ) {
+		if ( false !== $pos = strpos( $request_body, '{' ) ) {
 			$request_body = substr( $request_body, $pos );
 		}
 
-		if ( ( false !== $pos = strpos( $request_body, '}}' ) ) ) {
+		if ( false !== $pos = strpos( $request_body, '}}' ) ) {
 			$request_body = substr( $request_body, 0, $pos ) . '}}';
 		}
 
 		$request_data = json_decode( $request_body, true );
+		$request_ref  = explode( '/', $request_data['ref'] );
 
 		$response               = array();
 		$response['hash']       = isset( $request_data['ref_type'] )
@@ -289,7 +307,7 @@ class Rest_Update extends Base {
 			: $request_data['after'];
 		$response['branch']     = isset( $request_data['ref_type'] )
 			? 'master'
-			: array_pop( explode( '/', $request_data['ref'] ) );
+			: array_pop( $request_ref );
 		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;
@@ -302,16 +320,17 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
 	 *
-	 * @param array $request_body
+	 * @param string $request_body
 	 *
 	 * @return array $response
 	 */
 	private function parse_gitlab_webhook( $request_body ) {
 		$request_data = json_decode( $request_body, true );
+		$request_ref  = explode( '/', $request_data['ref'] );
 
 		$response               = array();
 		$response['hash']       = $request_data['after'];
-		$response['branch']     = array_pop( explode( '/', $request_data['ref'] ) );
+		$response['branch']     = array_pop( $request_ref );
 		$response['json_error'] = json_last_error_msg();
 
 		//$response['payload'] = $request_data;
@@ -327,7 +346,7 @@ class Rest_Update extends Base {
 	 *
 	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
 	 *
-	 * @param array $request_body
+	 * @param string $request_body
 	 *
 	 * @return bool|array $response
 	 */

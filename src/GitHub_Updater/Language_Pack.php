@@ -27,26 +27,19 @@ class Language_Pack extends Base {
 	/**
 	 * Variable containing the plugin/theme object.
 	 *
-	 * @var object
+	 * @var Plugin|Theme
 	 */
 	protected $repo;
 
 	/**
-	 * Variable containing the git host API object.
-	 *
-	 * @var
-	 */
-	protected $repo_api;
-
-	/**
 	 * Language_Pack constructor.
 	 *
-	 * @param object                                   $repo Plugin/Theme object.
-	 * @param \Fragen\GitHub_Updater\Language_Pack_API $api  Language_Pack_API object.
+	 * @param Plugin|Theme      $repo Plugin/Theme object
+	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {
 		if ( empty( $repo->languages ) ) {
-			return false;
+			return;
 		}
 
 		$this->repo     = $repo;

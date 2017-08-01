@@ -75,15 +75,18 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param $type
 	 */
-	protected function decrement_update_count( $type ) {}
+	protected function decrement_update_count( $type ) {
+	}
 
 	/**
 	 * Do nothing.
 	 */
-	public function header() {}
+	public function header() {
+	}
 
 	/**
 	 * Do nothing.
 	 */
-	public function footer() {}
+	public function footer() {
+	}
 }

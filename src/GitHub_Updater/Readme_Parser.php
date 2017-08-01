@@ -11,7 +11,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use WordPressdotorg\Plugin_Directory\Readme\Parser as Parser;
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use Parsedown;
 
 /*
@@ -36,7 +36,7 @@ class Readme_Parser extends Parser {
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
 
-		if ( is_null( $markdown ) ) {
+		if ( null === $markdown ) {
 			$markdown = new Parsedown();
 		}
 
@@ -44,11 +44,13 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
+	 * @param GitHub_API|Bitbucket_API|GitLab_API $api
+	 *
 	 * @return array
 	 */
-	public function parse_data() {
+	public function parse_data( $api ) {
 		$data = array();
-		foreach ( $this as $key => $value ) {
+		foreach ( (array) $api as $key => $value ) {
 			$data[ $key ] = $value;
 		}
 
@@ -107,7 +109,7 @@ class Readme_Parser extends Parser {
 			} else {
 				$pos = strrpos( $desc, '.' );
 			}
-			if ( '.' !== mb_substr( $desc, - 1 ) && $pos > ( 0.8 * $length ) ) {
+			if ( $pos > ( 0.8 * $length ) && '.' !== mb_substr( $desc, - 1 ) ) {
 				$desc = mb_substr( $desc, 0, $pos + 1 );
 			}
 		}

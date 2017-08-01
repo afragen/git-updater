@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fired when the plugin is uninstalled.
  *
@@ -29,13 +28,11 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-delete_site_option( 'github_updater' );
-delete_option( 'github_updater' );
-delete_site_option( 'github_updater_api_key' );
-delete_option( 'github_updater_api_key' );
-
-delete_site_option( 'github_updater_remote_management' );
-delete_option( 'github_updater_remote_management' );
+$options = array( 'github_updater', 'github_updater_api_key', 'github_updater_remote_management' );
+foreach ( $options as $option ) {
+	delete_option( $option );
+	delete_site_option( $option );
+}
 
 global $wpdb;
 $table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
