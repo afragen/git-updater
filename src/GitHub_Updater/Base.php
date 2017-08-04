@@ -663,8 +663,7 @@ class Base {
 	}
 
 	/**
-	 * Extended naming.
-	 * Only for plugins and not for 'master' === branch && .org hosted.
+	 * Extended naming only for plugins.
 	 *
 	 * @param string       $new_source
 	 * @param string       $remote_source
@@ -674,13 +673,7 @@ class Base {
 	 * @return string $new_source
 	 */
 	private function extended_naming( $new_source, $remote_source, $upgrader_object, $repo ) {
-		if ( $upgrader_object instanceof Plugin &&
-		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ( isset( $upgrader_object->config[ $repo['repo'] ] ) &&
-		         ! $upgrader_object->config[ $repo['repo'] ]->dot_org ) ||
-		       ( $upgrader_object->tag && 'master' !== $upgrader_object->tag ) ||
-		       isset( self::$options['github_updater_install_repo'] ) )
-		) {
+		if ( $upgrader_object instanceof Plugin && $this->is_extended_naming() ) {
 			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
 			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
 				'<strong>' . $repo['extended_repo'] . '</strong>'
@@ -1547,6 +1540,15 @@ class Base {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Is extended naming option active?
+	 *
+	 * @return bool
+	 */
+	protected function is_extended_naming() {
+		return ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
 
 }

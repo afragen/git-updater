@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix for extended naming updating
 
 #### 7.0.0 / 2017-08-01
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven

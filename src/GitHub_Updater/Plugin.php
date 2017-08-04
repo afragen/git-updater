@@ -402,27 +402,21 @@ class Plugin extends Base {
 					'branches'    => array_keys( $plugin->branches ),
 				);
 
-				/*
-				 * Skip on branch switching or rollback.
-				 */
+				// Skip on branch switching or rollback.
 				if ( $this->tag &&
 				     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
 				) {
 					continue;
 				}
 
-				/*
-				 * Skip on RESTful updating.
-				 */
+				// Skip on RESTful updating.
 				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
 				     $response['slug'] === $_GET['plugin']
 				) {
 					continue;
 				}
 
-				/*
-				 * If branch is 'master' and plugin is in wp.org repo then pull update from wp.org
-				 */
+				// If branch is 'master' and plugin is in wp.org repo then pull update from wp.org.
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
 					if ( isset( $transient->response[ $plugin->slug ] ) &&
@@ -431,6 +425,13 @@ class Plugin extends Base {
 						unset( $transient->response[ $plugin->slug ] );
 					}
 					continue;
+				}
+
+				// Unset if extended naming and same slug on dot org.
+				if ( isset( $transient->response[ $plugin->slug ]->id ) &&
+				     $this->is_extended_naming()
+				) {
+					unset( $transient->response[ $plugin->slug ] );
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;

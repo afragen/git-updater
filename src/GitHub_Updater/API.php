@@ -355,12 +355,17 @@ abstract class API extends Base {
 
 	/**
 	 * Query wp.org for plugin information.
+	 * Exit early and false for extended naming active.
 	 *
 	 * @access protected
 	 *
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
+		if ( $this->is_extended_naming() ) {
+			return false;
+		}
+
 		$slug     = $this->type->repo;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
