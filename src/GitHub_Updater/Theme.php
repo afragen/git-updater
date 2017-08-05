@@ -535,7 +535,6 @@ class Theme extends Base {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
-		$show_button       = true;
 		$options           = get_site_option( 'github_updater' );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
@@ -544,7 +543,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( ! empty( $options['branch_switch'] ) ) {
+		if ( '1' === $options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
@@ -576,13 +575,10 @@ class Theme extends Base {
 						}
 						if ( empty( $theme->rollback ) ) {
 							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
-							$show_button = false;
 						}
 						?>
 					</select></label>
-				<?php if ( $show_button ) : ?>
-					<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
-				<?php endif; ?>
+				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
 

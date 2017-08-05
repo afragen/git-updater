@@ -1,5 +1,6 @@
 #### [unreleased]
 * fix for extended naming updating
+* always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)
 
 #### 7.0.0 / 2017-08-01
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
