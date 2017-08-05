@@ -401,8 +401,7 @@ abstract class API extends Base {
 	 * @return bool
 	 */
 	protected function local_file_exists( $filename ) {
-		return ( file_exists( $this->type->local_path . $filename ) ||
-		         file_exists( $this->type->local_path_extended . $filename ) );
+		return file_exists( $this->type->local_path . $filename );
 	}
 
 	/**

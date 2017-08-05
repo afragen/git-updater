@@ -843,8 +843,6 @@ class Base {
 
 		if ( is_dir( $this->$type->local_path ) ) {
 			$local_files = scandir( $this->$type->local_path, 0 );
-		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
-			$local_files = scandir( $this->$type->local_path_extended, 0 );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
@@ -1159,14 +1157,10 @@ class Base {
 			return $response;
 		}
 
-		if ( is_dir( $repo->local_path ) ) {
-			if ( file_exists( $repo->local_path . $file ) ) {
-				$response = file_get_contents( $repo->local_path . $file );
-			}
-		} elseif ( is_dir( $repo->local_path_extended ) ) {
-			if ( file_exists( $repo->local_path_extended . $file ) ) {
-				$response = file_get_contents( $repo->local_path_extended . $file );
-			}
+		if ( is_dir( $repo->local_path ) &&
+		     file_exists( $repo->local_path . $file )
+		) {
+			$response = file_get_contents( $repo->local_path . $file );
 		}
 
 		switch ( $repo->type ) {

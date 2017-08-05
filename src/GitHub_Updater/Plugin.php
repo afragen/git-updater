@@ -161,7 +161,6 @@ class Plugin extends Base {
 				$git_plugin['branch']              = $branch ?: 'master';
 				$git_plugin['slug']                = $plugin;
 				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
-				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
