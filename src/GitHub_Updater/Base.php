@@ -706,6 +706,8 @@ class Base {
 	 * Set array with normal and extended repo names.
 	 * Fix name even if installed without renaming originally.
 	 *
+	 * @TODO remove extended naming stuff
+	 *
 	 * @param string            $slug
 	 * @param Base|Plugin|Theme $upgrader_object
 	 *
@@ -1288,7 +1290,7 @@ class Base {
 			$slug = dirname( $_GET['plugin'] );
 			$type = 'plugin';
 
-			// For extended naming
+			// For extended naming @TODO remove extended naming stuff
 			$repo = $this->get_repo_slugs( $slug );
 			$slug = $repo['repo'];
 		}

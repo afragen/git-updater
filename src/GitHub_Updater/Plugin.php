@@ -147,20 +147,22 @@ class Plugin extends Base {
 					? parent::$options[ $current_branch ]
 					: false;
 
-				$git_plugin['type']                = $repo_parts['type'];
-				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
-				$git_plugin['enterprise']          = $header['enterprise_uri'];
-				$git_plugin['enterprise_api']      = $header['enterprise_api'];
-				$git_plugin['owner']               = $header['owner'];
-				$git_plugin['repo']                = $header['repo'];
-				$git_plugin['extended_repo']       = implode( '-', array(
+				$git_plugin['type']           = $repo_parts['type'];
+				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['enterprise']     = $header['enterprise_uri'];
+				$git_plugin['enterprise_api'] = $header['enterprise_api'];
+				$git_plugin['owner']          = $header['owner'];
+				$git_plugin['repo']           = $header['repo'];
+				$git_plugin['branch']         = $branch ?: 'master';
+				$git_plugin['slug']           = $plugin;
+				$git_plugin['local_path']     = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+
+				// @TODO remove extended naming stuff
+				$git_plugin['extended_repo'] = implode( '-', array(
 					$repo_parts['git_server'],
 					str_replace( '/', '-', $header['owner'] ),
 					$header['repo'],
 				) );
-				$git_plugin['branch']              = $branch ?: 'master';
-				$git_plugin['slug']                = $plugin;
-				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
