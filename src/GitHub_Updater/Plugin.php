@@ -429,7 +429,7 @@ class Plugin extends Base {
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 
-			// Unset if extended naming and same slug on dot org.
+			// Unset if override dot org and same slug on dot org.
 			if ( isset( $transient->response[ $plugin->slug ]->id ) &&
 			     $this->is_override_dot_org()
 			) {

@@ -355,7 +355,7 @@ abstract class API extends Base {
 
 	/**
 	 * Query wp.org for plugin information.
-	 * Exit early and false for extended naming active.
+	 * Exit early and false for override dot org active.
 	 *
 	 * @access protected
 	 *
