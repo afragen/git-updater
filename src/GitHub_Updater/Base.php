@@ -616,7 +616,6 @@ class Base {
 		}
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
-		//$new_source = $this->extended_naming( $new_source, $remote_source, $upgrader_object, $repo );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		$wp_filesystem->move( $source, $new_source );
@@ -657,27 +656,6 @@ class Base {
 					}
 				}
 			}
-		}
-
-		return $new_source;
-	}
-
-	/**
-	 * Extended naming only for plugins.
-	 *
-	 * @param string       $new_source
-	 * @param string       $remote_source
-	 * @param Plugin|Theme $upgrader_object
-	 * @param array        $repo
-	 *
-	 * @return string $new_source
-	 */
-	private function extended_naming( $new_source, $remote_source, $upgrader_object, $repo ) {
-		if ( $upgrader_object instanceof Plugin && $this->is_extended_naming() ) {
-			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
-			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
-				'<strong>' . $repo['extended_repo'] . '</strong>'
-			);
 		}
 
 		return $new_source;
@@ -1530,15 +1508,6 @@ class Base {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Is extended naming option active?
-	 *
-	 * @return bool
-	 */
-	protected function is_extended_naming() {
-		return ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
 
 	/**

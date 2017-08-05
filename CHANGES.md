@@ -1,6 +1,6 @@
 #### [unreleased]
-* fix for extended naming updating
-* added constant for overriding dot org updates when plugins have identical slugs, `GITHUB_UPDATER_OVERRIDE_DOT_ORG`
+* no more extended naming
+* added constant for overriding dot org updates when plugins have identical slugs, `GITHUB_UPDATER_OVERRIDE_DOT_ORG` replacing `GITHUB_UPDATER_EXTENDED_NAMING` constant.
 
 #### 7.0.0 / 2017-08-01
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
