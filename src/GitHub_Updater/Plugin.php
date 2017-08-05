@@ -427,14 +427,14 @@ class Plugin extends Base {
 					continue;
 				}
 
-				// Unset if extended naming and same slug on dot org.
-				if ( isset( $transient->response[ $plugin->slug ]->id ) &&
-				     ( $this->is_extended_naming() || $this->is_override_dot_org() )
-				) {
-					unset( $transient->response[ $plugin->slug ] );
-				}
-
 				$transient->response[ $plugin->slug ] = (object) $response;
+			}
+
+			// Unset if extended naming and same slug on dot org.
+			if ( isset( $transient->response[ $plugin->slug ]->id ) &&
+			     $this->is_override_dot_org()
+			) {
+				unset( $transient->response[ $plugin->slug ] );
 			}
 		}
 
