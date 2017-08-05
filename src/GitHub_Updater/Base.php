@@ -1311,12 +1311,8 @@ class Base {
 			$type = 'plugin';
 
 			// For extended naming
-			foreach ( (array) $this->config as $repo ) {
-				if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
-					$slug = $repo->repo;
-					break;
-				}
-			}
+			$repo = $this->get_repo_slugs( $slug );
+			$slug = $repo['repo'];
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
