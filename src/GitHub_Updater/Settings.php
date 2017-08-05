@@ -652,12 +652,9 @@ class Settings extends Base {
 	 * Print the GitHub Updater text.
 	 */
 	public function print_section_ghu_settings() {
-		if ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) {
+		if ( $this->is_extended_naming() ) {
 			printf( esc_html__( 'Extended Naming is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
-		}
-		if ( ! defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) ||
-		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && ! GITHUB_UPDATER_EXTENDED_NAMING )
-		) {
+		} else {
 			printf( esc_html__( 'Extended Naming is %snot active%s.', 'github-updater' ), '<strong>', '</strong>' );
 		}
 		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater' ), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>' );
