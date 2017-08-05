@@ -287,8 +287,6 @@ class Plugin extends Base {
 	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname( $file );
-		$slugs         = $this->get_repo_slugs( $repo );
-		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
 		/*
 		 * Sanity check for some commercial plugins.
@@ -348,12 +346,7 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		/*
-		 * Fix for extended naming.
-		 */
-		$repos          = $this->get_repo_slugs( $plugin->repo );
-		$response->slug = ( $response->slug === $repos['extended_repo'] ) ? $repos['repo'] : $plugin->repo;
-
+		$response->slug          = $plugin->repo;
 		$response->plugin_name   = $plugin->name;
 		$response->name          = $plugin->name;
 		$response->author        = $plugin->author;

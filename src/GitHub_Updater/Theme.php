@@ -152,7 +152,6 @@ class Theme extends Base {
 				$git_theme['enterprise_api']          = $header['enterprise_api'];
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
-				$git_theme['extended_repo']           = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
