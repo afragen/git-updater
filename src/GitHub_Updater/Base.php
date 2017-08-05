@@ -616,7 +616,7 @@ class Base {
 		}
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
-		$new_source = $this->extended_naming( $new_source, $remote_source, $upgrader_object, $repo );
+		//$new_source = $this->extended_naming( $new_source, $remote_source, $upgrader_object, $repo );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		$wp_filesystem->move( $source, $new_source );
