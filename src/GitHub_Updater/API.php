@@ -362,7 +362,7 @@ abstract class API extends Base {
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		if ( $this->is_extended_naming() ) {
+		if ( $this->is_extended_naming() || $this->is_override_dot_org() ) {
 			return false;
 		}
 

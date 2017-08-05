@@ -659,6 +659,15 @@ class Settings extends Base {
 		}
 		printf( '<br>' . esc_html__( 'Extended Naming renames plugin directories %s to prevent possible conflicts with WP.org plugins.', 'github-updater' ), '<code>&lt;git&gt;-&lt;owner&gt;-&lt;repo&gt;</code>' );
 		printf( '<br>' . esc_html__( 'Activate Extended Naming by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_EXTENDED_NAMING\', true );</code>' );
+		echo '<br><br>';
+		if ( $this->is_override_dot_org() ) {
+			printf( esc_html__( 'Override Dot Org is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
+		} else {
+			printf( esc_html__( 'Override Dot Org is %snot active%s.', 'github-updater' ), '<strong>', '</strong>' );
+		}
+		print( '<br>' . esc_html__( 'Override Dot Org will skip any updates from Dot Org for plugins with identical slugs.', 'github-updater' ) );
+		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
+
 		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>' );
 	}
 

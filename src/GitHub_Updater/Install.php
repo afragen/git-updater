@@ -190,7 +190,7 @@ class Install extends Base {
 
 			parent::$options['github_updater_install_repo'] = self::$install['repo'];
 
-			if ( 'plugin' === $type && $this->is_extended_naming() ) {
+			if ( 'plugin' === $type && ( $this->is_extended_naming() || $this->is_override_dot_org() ) ) {
 				parent::$options['github_updater_install_repo'] = implode( '-', array(
 					self::$install['github_updater_api'],
 					$headers['owner'],

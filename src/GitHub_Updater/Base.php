@@ -1551,4 +1551,13 @@ class Base {
 		return ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
 
+	/**
+	 * Is override dot org option active?
+	 *
+	 * @return bool
+	 */
+	protected function is_override_dot_org() {
+		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG );
+	}
+
 }
