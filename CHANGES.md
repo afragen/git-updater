@@ -1,6 +1,8 @@
 #### [unreleased]
-* fix for extended naming updating
 * always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)
+* fixed override of dot org to correctly ignore dot org updates [#581](https://github.com/afragen/github-updater/issues/581)
+* no more extended naming
+* added constant for overriding dot org updates when plugins have identical slugs, `GITHUB_UPDATER_OVERRIDE_DOT_ORG` replacing the `GITHUB_UPDATER_EXTENDED_NAMING` constant.
 
 #### 7.0.0 / 2017-08-01
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven

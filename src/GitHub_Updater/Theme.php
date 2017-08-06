@@ -152,14 +152,12 @@ class Theme extends Base {
 				$git_theme['enterprise_api']          = $header['enterprise_api'];
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
-				$git_theme['extended_repo']           = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
-				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $branch ?: 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;

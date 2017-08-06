@@ -147,21 +147,22 @@ class Plugin extends Base {
 					? parent::$options[ $current_branch ]
 					: false;
 
-				$git_plugin['type']                = $repo_parts['type'];
-				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
-				$git_plugin['enterprise']          = $header['enterprise_uri'];
-				$git_plugin['enterprise_api']      = $header['enterprise_api'];
-				$git_plugin['owner']               = $header['owner'];
-				$git_plugin['repo']                = $header['repo'];
-				$git_plugin['extended_repo']       = implode( '-', array(
+				$git_plugin['type']           = $repo_parts['type'];
+				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['enterprise']     = $header['enterprise_uri'];
+				$git_plugin['enterprise_api'] = $header['enterprise_api'];
+				$git_plugin['owner']          = $header['owner'];
+				$git_plugin['repo']           = $header['repo'];
+				$git_plugin['branch']         = $branch ?: 'master';
+				$git_plugin['slug']           = $plugin;
+				$git_plugin['local_path']     = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+
+				// @TODO remove extended naming stuff
+				$git_plugin['extended_repo'] = implode( '-', array(
 					$repo_parts['git_server'],
 					str_replace( '/', '-', $header['owner'] ),
 					$header['repo'],
 				) );
-				$git_plugin['branch']              = $branch ?: 'master';
-				$git_plugin['slug']                = $plugin;
-				$git_plugin['local_path']          = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
-				$git_plugin['local_path_extended'] = WP_PLUGIN_DIR . '/' . $git_plugin['extended_repo'] . '/';
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
@@ -288,8 +289,6 @@ class Plugin extends Base {
 	public function plugin_row_meta( $links, $file ) {
 		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
 		$repo          = dirname( $file );
-		$slugs         = $this->get_repo_slugs( $repo );
-		$repo          = ! empty( $slugs ) ? $slugs['repo'] : null;
 
 		/*
 		 * Sanity check for some commercial plugins.
@@ -349,12 +348,7 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		/*
-		 * Fix for extended naming.
-		 */
-		$repos          = $this->get_repo_slugs( $plugin->repo );
-		$response->slug = ( $response->slug === $repos['extended_repo'] ) ? $repos['repo'] : $plugin->repo;
-
+		$response->slug          = $plugin->repo;
 		$response->plugin_name   = $plugin->name;
 		$response->name          = $plugin->name;
 		$response->author        = $plugin->author;
@@ -427,14 +421,14 @@ class Plugin extends Base {
 					continue;
 				}
 
-				// Unset if extended naming and same slug on dot org.
-				if ( isset( $transient->response[ $plugin->slug ]->id ) &&
-				     $this->is_extended_naming()
-				) {
-					unset( $transient->response[ $plugin->slug ] );
-				}
-
 				$transient->response[ $plugin->slug ] = (object) $response;
+			}
+
+			// Unset if override dot org and same slug on dot org.
+			if ( isset( $transient->response[ $plugin->slug ]->id ) &&
+			     $this->is_override_dot_org()
+			) {
+				unset( $transient->response[ $plugin->slug ] );
 			}
 		}
 

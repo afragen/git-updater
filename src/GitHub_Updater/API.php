@@ -355,14 +355,14 @@ abstract class API extends Base {
 
 	/**
 	 * Query wp.org for plugin information.
-	 * Exit early and false for extended naming active.
+	 * Exit early and false for override dot org active.
 	 *
 	 * @access protected
 	 *
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		if ( $this->is_extended_naming() ) {
+		if ( $this->is_override_dot_org() ) {
 			return false;
 		}
 
@@ -401,8 +401,7 @@ abstract class API extends Base {
 	 * @return bool
 	 */
 	protected function local_file_exists( $filename ) {
-		return ( file_exists( $this->type->local_path . $filename ) ||
-		         file_exists( $this->type->local_path_extended . $filename ) );
+		return file_exists( $this->type->local_path . $filename );
 	}
 
 	/**
