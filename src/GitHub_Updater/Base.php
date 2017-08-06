@@ -704,7 +704,7 @@ class Base {
 
 	/**
 	 * Set array with normal and extended repo names.
-	 * Fix name even if installed without renaming originally.
+	 * Fix name even if installed without renaming originally, eg <repo>-master
 	 *
 	 * @TODO remove extended naming stuff
 	 *
