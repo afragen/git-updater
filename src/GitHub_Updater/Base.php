@@ -725,7 +725,8 @@ class Base {
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( ( $slug === $repo->repo || $slug === $repo->extended_repo ) ||
+			if ( ( $slug === $repo->repo ||
+			       ( isset( $repo->extended_repo ) && $slug === $repo->extended_repo ) ) ||
 			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
 				$arr['repo']          = $repo->repo;
@@ -1292,7 +1293,7 @@ class Base {
 
 			// For extended naming @TODO remove extended naming stuff
 			$repo = $this->get_repo_slugs( $slug );
-			$slug = $repo['repo'];
+			$slug = ! empty( $repo ) ? $repo['repo'] : $slug;
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
