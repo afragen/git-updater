@@ -394,6 +394,7 @@ class Plugin extends Base {
 					'package'     => $plugin->download_link,
 					'branch'      => $plugin->branch,
 					'branches'    => array_keys( $plugin->branches ),
+					'type'        => $plugin->type,
 				);
 
 				// Skip on branch switching or rollback.
@@ -413,9 +414,7 @@ class Plugin extends Base {
 				// If branch is 'master' and plugin is in wp.org repo then pull update from wp.org.
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
-					if ( isset( $transient->response[ $plugin->slug ] ) &&
-					     ! isset( $transient->response[ $plugin->slug ]->id )
-					) {
+					if ( isset( $transient->response[ $plugin->slug ], $transient->response[ $plugin->slug ]->type ) ) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
 					continue;
@@ -425,7 +424,7 @@ class Plugin extends Base {
 			}
 
 			// Unset if override dot org and same slug on dot org.
-			if ( isset( $transient->response[ $plugin->slug ]->id ) &&
+			if ( ! isset( $transient->response[ $plugin->slug ]->type ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $plugin->slug ] );

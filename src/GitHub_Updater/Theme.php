@@ -605,6 +605,7 @@ class Theme extends Base {
 					'package'     => $theme->download_link,
 					'branch'      => $theme->branch,
 					'branches'    => array_keys( $theme->branches ),
+					'type'        => $theme->type,
 				);
 
 				/*
@@ -625,7 +626,23 @@ class Theme extends Base {
 					continue;
 				}
 
+				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
+				if ( $theme->dot_org && 'master' === $theme->branch ) {
+					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
+					if ( isset( $transient->response[ $theme->slug ], $transient->response[ $theme->slug ]->type ) ) {
+						unset( $transient->response[ $theme->slug ] );
+					}
+					continue;
+				}
+
 				$transient->response[ $theme->repo ] = $response;
+			}
+
+			// Unset if override dot org and same slug on dot org.
+			if ( ! isset( $transient->response[ $theme->slug ]->type ) &&
+			     $this->is_override_dot_org()
+			) {
+				unset( $transient->response[ $theme->slug ] );
 			}
 		}
 
