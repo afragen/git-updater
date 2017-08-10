@@ -152,14 +152,12 @@ class Theme extends Base {
 				$git_theme['enterprise_api']          = $header['enterprise_api'];
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
-				$git_theme['extended_repo']           = $header['repo'];
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
 				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['repo'] . '/';
-				$git_theme['local_path_extended']     = null;
 				$git_theme['branch']                  = $branch ?: 'master';
 				$git_theme['languages']               = ! empty( $header['languages'] ) ? $header['languages'] : null;
 				$git_theme['ci_job']                  = ! empty( $header['ci_job'] ) ? $header['ci_job'] : null;
@@ -535,7 +533,6 @@ class Theme extends Base {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
-		$show_button       = true;
 		$options           = get_site_option( 'github_updater' );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
@@ -544,7 +541,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( ! empty( $options['branch_switch'] ) ) {
+		if ( '1' === $options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
@@ -576,13 +573,10 @@ class Theme extends Base {
 						}
 						if ( empty( $theme->rollback ) ) {
 							echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
-							$show_button = false;
 						}
 						?>
 					</select></label>
-				<?php if ( $show_button ) : ?>
-					<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
-				<?php endif; ?>
+				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
 			</div>
 			<?php
 
@@ -611,6 +605,7 @@ class Theme extends Base {
 					'package'     => $theme->download_link,
 					'branch'      => $theme->branch,
 					'branches'    => array_keys( $theme->branches ),
+					'type'        => $theme->type,
 				);
 
 				/*
@@ -631,7 +626,23 @@ class Theme extends Base {
 					continue;
 				}
 
+				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
+				if ( $theme->dot_org && 'master' === $theme->branch ) {
+					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
+					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]->type ) ) {
+						unset( $transient->response[ $theme->repo ] );
+					}
+					continue;
+				}
+
 				$transient->response[ $theme->repo ] = $response;
+			}
+
+			// Unset if override dot org and same slug on dot org.
+			if ( ! isset( $transient->response[ $theme->repo ]->type ) &&
+			     $this->is_override_dot_org()
+			) {
+				unset( $transient->response[ $theme->repo ] );
 			}
 		}
 

@@ -482,7 +482,7 @@ class Base {
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
-		$this->$type->requires_wp_version  = '4.4';
+		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
 	}
@@ -611,12 +611,11 @@ class Base {
 		 * Remote install source.
 		 */
 		if ( empty( $repo ) && isset( self::$options['github_updater_install_repo'] ) ) {
-			$repo['repo'] = $repo['extended_repo'] = self::$options['github_updater_install_repo'];
+			$repo['repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
-		$new_source = $this->extended_naming( $new_source, $remote_source, $upgrader_object, $repo );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		$wp_filesystem->move( $source, $new_source );
@@ -657,34 +656,6 @@ class Base {
 					}
 				}
 			}
-		}
-
-		return $new_source;
-	}
-
-	/**
-	 * Extended naming.
-	 * Only for plugins and not for 'master' === branch && .org hosted.
-	 *
-	 * @param string       $new_source
-	 * @param string       $remote_source
-	 * @param Plugin|Theme $upgrader_object
-	 * @param array        $repo
-	 *
-	 * @return string $new_source
-	 */
-	private function extended_naming( $new_source, $remote_source, $upgrader_object, $repo ) {
-		if ( $upgrader_object instanceof Plugin &&
-		     ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING ) &&
-		     ( ( isset( $upgrader_object->config[ $repo['repo'] ] ) &&
-		         ! $upgrader_object->config[ $repo['repo'] ]->dot_org ) ||
-		       ( $upgrader_object->tag && 'master' !== $upgrader_object->tag ) ||
-		       isset( self::$options['github_updater_install_repo'] ) )
-		) {
-			$new_source = trailingslashit( $remote_source ) . $repo['extended_repo'];
-			printf( esc_html__( 'Rename successful using extended name to %1$s', 'github-updater' ) . '&#8230;<br>',
-				'<strong>' . $repo['extended_repo'] . '</strong>'
-			);
 		}
 
 		return $new_source;
@@ -733,7 +704,9 @@ class Base {
 
 	/**
 	 * Set array with normal and extended repo names.
-	 * Fix name even if installed without renaming originally.
+	 * Fix name even if installed without renaming originally, eg <repo>-master
+	 *
+	 * @TODO remove extended naming stuff
 	 *
 	 * @param string            $slug
 	 * @param Base|Plugin|Theme $upgrader_object
@@ -752,7 +725,8 @@ class Base {
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( ( $slug === $repo->repo || $slug === $repo->extended_repo ) ||
+			if ( ( $slug === $repo->repo ||
+			       ( isset( $repo->extended_repo ) && $slug === $repo->extended_repo ) ) ||
 			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
 				$arr['repo']          = $repo->repo;
@@ -850,8 +824,6 @@ class Base {
 
 		if ( is_dir( $this->$type->local_path ) ) {
 			$local_files = scandir( $this->$type->local_path, 0 );
-		} elseif ( is_dir( $this->$type->local_path_extended ) ) {
-			$local_files = scandir( $this->$type->local_path_extended, 0 );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
@@ -1166,14 +1138,10 @@ class Base {
 			return $response;
 		}
 
-		if ( is_dir( $repo->local_path ) ) {
-			if ( file_exists( $repo->local_path . $file ) ) {
-				$response = file_get_contents( $repo->local_path . $file );
-			}
-		} elseif ( is_dir( $repo->local_path_extended ) ) {
-			if ( file_exists( $repo->local_path_extended . $file ) ) {
-				$response = file_get_contents( $repo->local_path_extended . $file );
-			}
+		if ( is_dir( $repo->local_path ) &&
+		     file_exists( $repo->local_path . $file )
+		) {
+			$response = file_get_contents( $repo->local_path . $file );
 		}
 
 		switch ( $repo->type ) {
@@ -1323,13 +1291,9 @@ class Base {
 			$slug = dirname( $_GET['plugin'] );
 			$type = 'plugin';
 
-			// For extended naming
-			foreach ( (array) $this->config as $repo ) {
-				if ( $slug === $repo->repo || $slug === $repo->extended_repo ) {
-					$slug = $repo->repo;
-					break;
-				}
-			}
+			// For extended naming @TODO remove extended naming stuff
+			$repo = $this->get_repo_slugs( $slug );
+			$slug = ! empty( $repo ) ? $repo['repo'] : $slug;
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
@@ -1547,6 +1511,16 @@ class Base {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Is override dot org option active?
+	 *
+	 * @return bool
+	 */
+	protected function is_override_dot_org() {
+		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG )
+		       || ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
 
 }
