@@ -730,7 +730,7 @@ class Base {
 			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
 				$arr['repo']          = $repo->repo;
-				$arr['extended_repo'] = $repo->extended_repo;
+				$arr['extended_repo'] = isset( $repo->extended_repo ) ? $repo->extended_repo : null;
 				break;
 			}
 		}

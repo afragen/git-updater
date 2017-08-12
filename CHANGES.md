@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
 
 #### 7.1.0 / 2017-08-10
 * always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)
