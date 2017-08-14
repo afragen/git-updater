@@ -31,9 +31,7 @@ final class Class_Factory {
 
 		$class = __NAMESPACE__ . '\\' . $class;
 
-		$class_name = isset( $instance[ $class ] ) ? get_class( $instance[ $class ] ) : null;
-
-		if ( null === $instance || $class !== $class_name ) {
+		if ( null === $instance || ! isset( $instance[ $class ] ) ) {
 			$instance[ $class ] = new $class( $options );
 		}
 
