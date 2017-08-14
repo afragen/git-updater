@@ -38,7 +38,7 @@ final class Class_Factory {
 		// Stores calling class for use.
 		if ( is_array( $options ) ) {
 			$backtrace                  = debug_backtrace();
-			$instance[ $class ]->object = $backtrace[1]['object'];
+			$instance[ $class ]->caller = $backtrace[1]['object'];
 		}
 
 		return $instance[ $class ];

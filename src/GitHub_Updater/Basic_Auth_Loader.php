@@ -38,7 +38,7 @@ class Basic_Auth_Loader {
 	 * @access public
 	 * @var    \stdClass
 	 */
-	public $object;
+	public $caller;
 
 	/**
 	 * Basic_Auth_Loader constructor.
@@ -110,7 +110,7 @@ class Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = $this->object;
+		$type         = $this->caller;
 		$username_key = null;
 		$password_key = null;
 		$credentials  = array(
