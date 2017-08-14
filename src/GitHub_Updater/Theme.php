@@ -607,7 +607,7 @@ class Theme extends Base {
 				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
 				if ( $theme->dot_org && 'master' === $theme->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
-					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]->type ) ) {
+					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]['type'] ) ) {
 						unset( $transient->response[ $theme->repo ] );
 					}
 					continue;
@@ -617,7 +617,8 @@ class Theme extends Base {
 			}
 
 			// Unset if override dot org and same slug on dot org.
-			if ( ! isset( $transient->response[ $theme->repo ]->type ) &&
+			if ( isset( $transient->response[ $theme->repo ] ) &&
+			     ! isset( $transient->response[ $theme->repo ]['type'] ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $theme->repo ] );
