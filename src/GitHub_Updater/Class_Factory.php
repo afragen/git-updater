@@ -41,8 +41,8 @@ final class Class_Factory {
 			$instance[ $class ] = new $class( $options );
 		}
 
-		// Stores calling class for use.
-		if ( is_array( $options ) ) {
+		// Stores calling class for use in class Basic_Auth_Loader.
+		if ( $instance[ $class ] instanceof Basic_Auth_Loader ) {
 			$backtrace                  = debug_backtrace();
 			$instance[ $class ]->caller = $backtrace[1]['object'];
 		}
