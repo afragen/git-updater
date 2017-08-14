@@ -149,7 +149,7 @@ abstract class API extends Base {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			Messages::instance()->create_error_message( $response );
+			Class_Factory::get_instance( 'Messages' )->create_error_message( $response );
 
 			return false;
 		}
@@ -168,7 +168,7 @@ abstract class API extends Base {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Messages::instance()->create_error_message( $type['repo'] );
+			Class_Factory::get_instance( 'Messages' )->create_error_message( $type['repo'] );
 
 			return false;
 		}
@@ -210,8 +210,7 @@ abstract class API extends Base {
 						break;
 					}
 				}
-				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = Class_Factory::get_instance( 'GitHub_API', $type['type'] )->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -224,16 +223,14 @@ abstract class API extends Base {
 						break;
 					}
 				}
-				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = Class_Factory::get_instance( 'GitLab_API', $type['type'] )->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
 					}
-					$api      = new Bitbucket_Server_API( new \stdClass() );
-					$endpoint = $api->add_endpoints( $this, $endpoint );
+					$endpoint = Class_Factory::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}

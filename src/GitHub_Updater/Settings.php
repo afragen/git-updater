@@ -28,13 +28,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Settings extends Base {
 
 	/**
-	 * Settings object.
-	 *
-	 * @var Settings $instance
-	 */
-	private static $instance;
-
-	/**
 	 * Holds the plugin basename.
 	 *
 	 * @var string
@@ -68,20 +61,6 @@ class Settings extends Base {
 		$this->load_options();
 		self::$loaded_apis = $this->load_apis();
 		$this->load_hooks();
-	}
-
-	/**
-	 * The Settings object can be created/obtained via this
-	 * method - this prevents potential duplicate loading.
-	 *
-	 * @return Settings $instance
-	 */
-	public static function instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -156,8 +135,8 @@ class Settings extends Base {
 	 * @return array $gits
 	 */
 	private function installed_git_repos() {
-		$plugins = Plugin::instance()->get_plugin_configs();
-		$themes  = Theme::instance()->get_theme_configs();
+		$plugins = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes  = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
@@ -416,8 +395,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = Plugin::instance()->get_plugin_configs();
-		$ghu_themes       = Theme::instance()->get_theme_configs();
+		$ghu_plugins      = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
+		$ghu_themes       = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -772,8 +751,8 @@ class Settings extends Base {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$plugins          = Plugin::instance()->get_plugin_configs();
-		$themes           = Theme::instance()->get_theme_configs();
+		$plugins          = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes           = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
 		$repos            = array_merge( $plugins, $themes );
 		$options          = parent::$options;
 		$non_repo_options = array(
@@ -926,8 +905,8 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
-		$plugins  = Plugin::instance()->get_plugin_configs();
-		$themes   = Theme::instance()->get_theme_configs();
+		$plugins  = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes   = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
 		$bbserver = array( 'bitbucket', 'bbserver' );
 
