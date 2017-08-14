@@ -75,11 +75,11 @@ class Language_Pack extends Base {
 		}
 
 		if ( 'pre_set_site_transient_update_plugins' === current_filter() ) {
-			$repos        = Plugin::instance()->get_plugin_configs();
+			$repos        = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
 			$translations = wp_get_installed_translations( 'plugins' );
 		}
 		if ( 'pre_set_site_transient_update_themes' === current_filter() ) {
-			$repos        = Theme::instance()->get_theme_configs();
+			$repos        = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
 			$translations = wp_get_installed_translations( 'themes' );
 		}
 

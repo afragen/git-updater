@@ -48,7 +48,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_plugins() {
 		$this->base->forced_meta_update_plugins( true );
 		$current = get_site_transient( 'update_plugins' );
-		$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+		$current = Class_Factory::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
 	}
 
@@ -61,7 +61,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_themes() {
 		$this->base->forced_meta_update_themes( true );
 		$current = get_site_transient( 'update_themes' );
-		$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+		$current = Class_Factory::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
 	}
 

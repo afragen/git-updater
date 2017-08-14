@@ -32,13 +32,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Theme extends Base {
 
 	/**
-	 * Theme object.
-	 *
-	 * @var Theme $instance
-	 */
-	private static $instance;
-
-	/**
 	 * Rollback variable.
 	 *
 	 * @var number
@@ -58,21 +51,6 @@ class Theme extends Base {
 		if ( empty( $this->config ) ) {
 			return;
 		}
-	}
-
-	/**
-	 * The Theme object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Theme $instance
-	 */
-	public static function instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
