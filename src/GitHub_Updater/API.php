@@ -209,7 +209,8 @@ abstract class API extends Base {
 						break;
 					}
 				}
-				$endpoint = Class_Factory::get_instance( 'GitHub_API', $type['type'] )->add_endpoints( $this, $endpoint );
+				$api      = new GitHub_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -222,7 +223,8 @@ abstract class API extends Base {
 						break;
 					}
 				}
-				$endpoint = Class_Factory::get_instance( 'GitLab_API', $type['type'] )->add_endpoints( $this, $endpoint );
+				$api      = new GitLab_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
