@@ -34,7 +34,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * GitHub_Updater_CLI_Integration constructor.
 	 */
 	public function __construct() {
-		$this->base = new Base();
+		$this->base = Class_Factory::get_instance( 'Base' );
 		$this->init_plugins();
 		$this->init_themes();
 	}
@@ -223,8 +223,8 @@ class CLI_Integration extends WP_CLI_Command {
 	private function process_branch( $cli_config, $slug ) {
 		$branch_data['github_updater_branch'] = $cli_config['branch'];
 		$branch_data['repo']                  = $slug;
-		$branch                               = new Branch();
-		$branch->set_branch_on_install( $branch_data );
+
+		Class_Factory::get_instance( 'Branch' )->set_branch_on_install( $branch_data );
 	}
 
 }

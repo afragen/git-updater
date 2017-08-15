@@ -69,14 +69,13 @@ abstract class API extends Base {
 	 */
 	public static function wp_update_response( $response, $args, $url ) {
 		$parsed_url = parse_url( $url );
-		$base       = new Base();
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				$base->make_update_transient_current( 'update_plugins' );
+				Class_Factory::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				$base->make_update_transient_current( 'update_themes' );
+				Class_Factory::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
 			}
 		}
 

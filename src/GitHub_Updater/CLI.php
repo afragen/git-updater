@@ -32,7 +32,7 @@ class CLI extends WP_CLI_Command {
 	 * GitHub_Updater_CLI constructor.
 	 */
 	public function __construct() {
-		$this->base = new Base();
+		$this->base = Class_Factory::get_instance( 'Base' );
 	}
 
 	/**
