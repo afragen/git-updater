@@ -228,6 +228,24 @@ class Base {
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 
 		/*
+		 * The following clears any active theme cache, which may have be set by a mu-plugin
+		 * calling wp_get_theme()
+		 */
+		if ( empty( $stylesheet ) )
+			$stylesheet = get_stylesheet();
+		
+		if ( empty( $theme_root ) ) {
+			$theme_root = get_raw_theme_root( $stylesheet );
+			if ( false === $theme_root )
+				$theme_root = WP_CONTENT_DIR . '/themes';
+			elseif ( ! in_array( $theme_root, (array) $wp_theme_directories ) )
+				$theme_root = WP_CONTENT_DIR . $theme_root;
+		}
+		
+		$cache_hash = md5( $theme_root . '/' . $stylesheet );
+		wp_cache_delete( 'theme-' . $cache_hash, 'themes' );
+
+		/*
 		 * The following hook needed to ensure transient is reset correctly after
 		 * shiny updates.
 		 */
