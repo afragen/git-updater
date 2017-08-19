@@ -358,7 +358,7 @@ class Rest_Update extends Base {
 		$new = $request_data['push']['changes'][0]['new'];
 
 		$response               = array();
-		$response['hash']       = 'tag' === $new['type'] ? $new['name'] : $new['target']['hash'];
+		$response['hash']       = $new['target']['hash'];
 		$response['branch']     = 'tag' === $new['type'] ? 'master' : $new['name'];
 		$response['json_error'] = json_last_error_msg();
 
