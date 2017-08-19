@@ -217,7 +217,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( $response && isset( $response->data ) ) {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data( $this );
+			$response = $parser->parse_data( $parser );
 			$this->set_repo_cache( 'readme', $response );
 		}
 

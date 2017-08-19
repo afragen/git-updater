@@ -197,7 +197,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data( $this );
+			$response = $parser->parse_data( $parser );
 			$this->set_repo_cache( 'readme', $response );
 		}
 
