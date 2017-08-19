@@ -579,7 +579,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
 
-			Class_Factory::get_instance('Bitbucket_Server_API', new \stdClass() );
+			Class_Factory::get_instance( 'Bitbucket_Server_API', new \stdClass() );
 		}
 
 		return $install;

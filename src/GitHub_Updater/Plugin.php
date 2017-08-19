@@ -402,7 +402,7 @@ class Plugin extends Base {
 
 			// Unset if override dot org and same slug on dot org.
 			if ( isset( $transient->response[ $plugin->slug ] ) &&
-				! isset( $transient->response[ $plugin->slug ]->type ) &&
+			     ! isset( $transient->response[ $plugin->slug ]->type ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $plugin->slug ] );
