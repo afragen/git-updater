@@ -44,13 +44,13 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
-	 * @param Readme_Parser $parser
+	 * Return parsed readme.txt as array.
 	 *
 	 * @return array
 	 */
-	public function parse_data( $parser ) {
+	public function parse_data() {
 		$data = array();
-		foreach ( get_object_vars( $parser ) as $key => $value ) {
+		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = $value;
 		}
 
