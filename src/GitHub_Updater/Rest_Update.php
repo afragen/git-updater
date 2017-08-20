@@ -189,7 +189,7 @@ class Rest_Update extends Base {
 			$webhook_response = $this->get_webhook_data();
 			if ( $webhook_response ) {
 				if ( $tag === $webhook_response['branch'] ) {
-					$tag = $webhook_response['hash'];
+					$tag = $_GET['hash'] = $webhook_response['hash'];
 				} else {
 					throw new \UnexpectedValueException( 'Request tag and webhook are not matching. ' . 'Response: ' . http_build_query( $webhook_response, null, ', ' ) );
 				}
