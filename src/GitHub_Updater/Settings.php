@@ -135,8 +135,8 @@ class Settings extends Base {
 	 * @return array $gits
 	 */
 	private function installed_git_repos() {
-		$plugins = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes  = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme' )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
@@ -395,8 +395,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
-		$ghu_themes       = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
+		$ghu_plugins      = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$ghu_themes       = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -751,8 +751,8 @@ class Settings extends Base {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$plugins          = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes           = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
+		$plugins          = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes           = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos            = array_merge( $plugins, $themes );
 		$options          = parent::$options;
 		$non_repo_options = array(
@@ -905,8 +905,8 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
-		$plugins  = Class_Factory::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes   = Class_Factory::get_instance( 'Theme' )->get_theme_configs();
+		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
 		$bbserver = array( 'bitbucket', 'bbserver' );
 

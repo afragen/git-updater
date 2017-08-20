@@ -126,8 +126,8 @@ class Basic_Auth_Loader {
 		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$repos = null !== $_REQUEST
 			? array_merge(
-				Class_Factory::get_instance( 'Plugin' )->get_plugin_configs(),
-				Class_Factory::get_instance( 'Theme' )->get_theme_configs()
+				Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+				Singleton::get_instance( 'Theme' )->get_theme_configs()
 			)
 			: false;
 		$type  = $slug && $repos &&

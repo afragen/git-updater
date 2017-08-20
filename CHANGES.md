@@ -1,7 +1,7 @@
 #### [unreleased]
-* fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
-* created a Factory class to use instead of creating Singletons
+* added a static proxy class to use for creating Singletons
 * fixed Override Dot Org for themes
+* fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
 * fixed bug introduced in readme.txt parsing [#589](https://github.com/afragen/github-updater/issues/589)
 
 #### 7.1.0 / 2017-08-10

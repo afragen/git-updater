@@ -236,7 +236,7 @@ class Plugin extends Base {
 
 		// Get current branch.
 		$repo   = $this->config[ $plugin['repo'] ];
-		$branch = Class_Factory::get_instance( 'Branch' )->get_current_branch( $repo );
+		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];

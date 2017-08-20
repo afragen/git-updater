@@ -44,7 +44,7 @@ class Bitbucket_API extends API implements API_Interface {
 				: $type->branch;
 		}
 
-		Class_Factory::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
+		Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
 
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
@@ -427,7 +427,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'bitbucket_username',
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
-			array( Class_Factory::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_username' )
@@ -436,7 +436,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'bitbucket_password',
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
-			array( Class_Factory::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_password', 'token' => true )
@@ -465,7 +465,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
 		$setting_field['callback_method'] = array(
-			Class_Factory::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings' ),
 			'token_callback_checkbox',
 		);
 

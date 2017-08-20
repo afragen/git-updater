@@ -233,7 +233,7 @@ class Install extends Base {
 			$upgrader->install( $url );
 
 			// Save branch setting.
-			Class_Factory::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+			Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
 		}
 
 		if ( $wp_cli ) {

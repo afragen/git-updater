@@ -72,10 +72,10 @@ abstract class API extends Base {
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				Class_Factory::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
+				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				Class_Factory::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
+				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
 			}
 		}
 
@@ -148,7 +148,7 @@ abstract class API extends Base {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			Class_Factory::get_instance( 'Messages' )->create_error_message( $response );
+			Singleton::get_instance( 'Messages' )->create_error_message( $response );
 
 			return false;
 		}
@@ -167,7 +167,7 @@ abstract class API extends Base {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Class_Factory::get_instance( 'Messages' )->create_error_message( $type['repo'] );
+			Singleton::get_instance( 'Messages' )->create_error_message( $type['repo'] );
 
 			return false;
 		}
@@ -231,7 +231,7 @@ abstract class API extends Base {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Class_Factory::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}

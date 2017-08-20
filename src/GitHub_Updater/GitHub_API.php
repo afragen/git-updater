@@ -479,7 +479,7 @@ class GitHub_API extends API implements API_Interface {
 				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
 
 				if ( is_wp_error( $response_new ) ) {
-					Class_Factory::get_instance( 'Messages' )->create_error_message( $response_new );
+					Singleton::get_instance( 'Messages' )->create_error_message( $response_new );
 
 					return false;
 				}

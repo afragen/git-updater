@@ -18,13 +18,13 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Class_Factory
+ * Class Singleton
  *
- * Creates a static proxy for passed class names.
+ * A static proxy for creating Singletons from passed class names.
  *
  * @package Fragen\GitHub_Updater
  */
-final class Class_Factory {
+final class Singleton {
 
 	/**
 	 * @param  string              $class
