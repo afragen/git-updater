@@ -404,10 +404,9 @@ class Theme extends Base {
 			if ( empty( $repo_uri ) ) {
 				continue;
 			}
-
 			break;
 		}
-		remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
+		remove_action( "after_theme_row_$theme_key", array( $this, 'wp_theme_update_row' ) );
 	}
 
 	/**
