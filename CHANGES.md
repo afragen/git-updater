@@ -3,7 +3,7 @@
 * fixed Override Dot Org for themes
 * fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
 * fixed bug introduced in readme.txt parsing [#589](https://github.com/afragen/github-updater/issues/589)
-* fixed bug introduced with linter updates to properly display multisite theme updates in themes.php
+* fixed bug introduced in v7.0.0 with linter updates to properly display multisite theme updates in themes.php
 
 #### 7.1.0 / 2017-08-10
 * always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)
