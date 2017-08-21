@@ -35,13 +35,6 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Holds loaded API classes.
-	 *
-	 * @var
-	 */
-	private static $loaded_apis;
-
-	/**
 	 * Supported remote management services.
 	 *
 	 * @var array
@@ -59,7 +52,6 @@ class Settings extends Base {
 	public function __construct() {
 		$this->ensure_api_key_is_set();
 		$this->load_options();
-		self::$loaded_apis = $this->load_apis();
 		$this->load_hooks();
 	}
 
@@ -375,16 +367,16 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-			self::$loaded_apis['gitlab_api']->add_settings();
+		if ( parent::$installed_apis['gitlab_api'] ) {
+			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings();
 		}
 
-		if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-			self::$loaded_apis['bitbucket_api']->add_settings();
+		if ( parent::$installed_apis['bitbucket_api'] ) {
+			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings();
 		}
 
-		if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-			self::$loaded_apis['bitbucket_server_api']->add_settings();
+		if ( parent::$installed_apis['bitbucket_server_api'] ) {
+			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings();
 		}
 
 		$this->update_settings();
@@ -433,18 +425,18 @@ class Settings extends Base {
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-							$repo_setting_field = self::$loaded_apis['bitbucket_api']->add_repo_setting_field();
+						if ( parent::$installed_apis['bitbucket_api'] ) {
+							$repo_setting_field = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
-						if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-							$repo_setting_field = self::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
+						if ( parent::$installed_apis['bitbucket_server_api'] ) {
+							$repo_setting_field = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
-					if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-						$repo_setting_field = self::$loaded_apis['gitlab_api']->add_repo_setting_field();
+					if ( parent::$installed_apis['gitlab_api'] ) {
+						$repo_setting_field = Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_repo_setting_field();
 					}
 					break;
 			}
