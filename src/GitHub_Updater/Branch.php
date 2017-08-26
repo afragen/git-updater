@@ -70,9 +70,8 @@ class Branch extends API {
 	public function set_branch_on_switch( $repo ) {
 		$this->cache = $this->get_repo_cache( $repo );
 
-		if ( isset( $_GET['action'], $this->cache['repo'] ) &&
-		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] ) &&
-		     $repo === $this->cache['repo']
+		if ( isset( $_GET['action'] ) && $this->cache &&
+		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
 			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
 				? $_GET['rollback']
