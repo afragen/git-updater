@@ -4,6 +4,7 @@
 * fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
 * fixed bug introduced in readme.txt parsing [#589](https://github.com/afragen/github-updater/issues/589)
 * fixed bug introduced in v7.0.0 with linter updates to properly display multisite theme updates in themes.php
+* fixed branch setting bug [#592](https://github.com/afragen/github-updater/issues/592) by moving trigger from filter hook to direct call, thanks @rob and @idpaterson
 
 #### 7.1.0 / 2017-08-10
 * always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)

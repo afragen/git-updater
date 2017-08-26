@@ -592,6 +592,8 @@ class Base {
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
+		Singleton::get_instance( 'Branch' )->set_branch_on_switch( $slug );
+
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
