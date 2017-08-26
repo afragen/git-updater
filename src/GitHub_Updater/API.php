@@ -263,10 +263,14 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
+	 * @param string|bool $repo Repo name or false.
+	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	protected function get_repo_cache() {
-		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+	protected function get_repo_cache( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$cache     = get_site_option( $cache_key );
 
