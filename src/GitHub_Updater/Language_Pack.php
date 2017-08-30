@@ -38,8 +38,8 @@ class Language_Pack extends Base {
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {
-		if ( empty( $repo->languages ) ) {
 		parent::__construct();
+		if ( null === $repo->languages ) {
 			return;
 		}
 

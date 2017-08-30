@@ -49,7 +49,7 @@ class Theme extends Base {
 		 */
 		$this->config = $this->get_theme_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}
