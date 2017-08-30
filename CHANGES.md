@@ -1,4 +1,5 @@
 #### [unreleased]
+* removed non-constructor stuff from constructors
 
 #### 7.2.0 / 2017-08-30
 * added a static proxy class to use for creating Singletons

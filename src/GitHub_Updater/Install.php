@@ -43,7 +43,6 @@ class Install extends Base {
 	public function __construct( $type, $wp_cli_config = array() ) {
 		parent::__construct();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		$this->install( $type, $wp_cli_config );
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
 	}
@@ -56,7 +55,7 @@ class Install extends Base {
 	 *
 	 * @return bool
 	 */
-	public function install( $type, $wp_cli_config ) {
+	public function install( $type, $wp_cli_config = null ) {
 		$wp_cli = false;
 
 		if ( ! empty( $wp_cli_config['uri'] ) ) {

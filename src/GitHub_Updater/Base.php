@@ -44,13 +44,6 @@ class Base {
 	protected $repo_api;
 
 	/**
-	 * Class Object for Language Packs.
-	 *
-	 * @var \stdClass
-	 */
-	protected $languages;
-
-	/**
 	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
@@ -152,6 +145,12 @@ class Base {
 		}
 
 		$this->set_installed_apis();
+	}
+
+	/**
+	 * Let's get going.
+	 */
+	public function run() {
 		$this->load_hooks();
 
 		if ( self::is_wp_cli() ) {
@@ -304,7 +303,7 @@ class Base {
 		if ( self::$load_repo_meta && is_admin() &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
-			Singleton::get_instance( 'Settings' );
+			Singleton::get_instance( 'Settings' )->run();
 		}
 
 		return true;
@@ -526,7 +525,8 @@ class Base {
 			}
 			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
-			$this->languages     = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			$language_pack->run();
 		}
 
 		$this->remove_hooks();
