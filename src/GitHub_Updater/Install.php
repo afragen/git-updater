@@ -60,7 +60,7 @@ class Install extends Base {
 
 		if ( ! empty( $wp_cli_config['uri'] ) ) {
 			$wp_cli  = true;
-			$headers = Base::parse_header_uri( $wp_cli_config['uri'] );
+			$headers = $this->parse_header_uri( $wp_cli_config['uri'] );
 			$api     = false !== strpos( $headers['host'], '.com' )
 				? rtrim( $headers['host'], '.com' )
 				: rtrim( $headers['host'], '.org' );
@@ -106,7 +106,7 @@ class Install extends Base {
 			/*
 			 * Transform URI to owner/repo
 			 */
-			$headers                      = Base::parse_header_uri( $_POST['github_updater_repo'] );
+			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
 			self::$install         = Settings::sanitize( $_POST );
