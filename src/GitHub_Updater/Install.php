@@ -41,6 +41,7 @@ class Install extends Base {
 	 * @param array  $wp_cli_config
 	 */
 	public function __construct( $type, $wp_cli_config = array() ) {
+		parent::__construct();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		$this->install( $type, $wp_cli_config );
 

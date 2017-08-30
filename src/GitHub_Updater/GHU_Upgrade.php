@@ -35,6 +35,7 @@ class GHU_Upgrade extends Base {
 	 * GHU_Upgrade constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->load_options();
 	}
 

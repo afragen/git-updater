@@ -47,9 +47,10 @@ class Settings extends Base {
 	);
 
 	/**
-	 * Start up.
+	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->ensure_api_key_is_set();
 		$this->load_options();
 		$this->load_hooks();

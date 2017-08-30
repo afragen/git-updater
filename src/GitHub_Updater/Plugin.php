@@ -40,6 +40,7 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 
 		/*
 		 * Get details of installed git sourced plugins.

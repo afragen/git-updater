@@ -40,6 +40,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
+		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
