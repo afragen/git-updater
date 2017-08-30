@@ -40,13 +40,14 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 
 		/*
 		 * Get details of installed git sourced plugins.
 		 */
 		$this->config = $this->get_plugin_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}

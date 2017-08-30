@@ -35,6 +35,13 @@ class CLI_Integration extends WP_CLI_Command {
 	 */
 	public function __construct() {
 		$this->base = Singleton::get_instance( 'Base' );
+		$this->run();
+	}
+
+	/**
+	 * Off to the races.
+	 */
+	public function run() {
 		$this->init_plugins();
 		$this->init_themes();
 	}
@@ -115,7 +122,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_plugin( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		new Install( 'plugin', $cli_config );
+		Singleton::get_instance( 'Install' )->install( 'plugin', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
@@ -173,7 +180,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_theme( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		new Install( 'theme', $cli_config );
+		Singleton::get_instance( 'Install' )->install( 'theme', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );

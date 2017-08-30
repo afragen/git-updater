@@ -47,11 +47,18 @@ class Settings extends Base {
 	);
 
 	/**
-	 * Start up.
+	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->ensure_api_key_is_set();
 		$this->load_options();
+	}
+
+	/**
+	 * Let's get going.
+	 */
+	public function run() {
 		$this->load_hooks();
 	}
 
@@ -263,10 +270,10 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
-				new Install( 'plugin' );
+				Singleton::get_instance( 'Install' )->install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
-				new Install( 'theme' );
+				Singleton::get_instance( 'Install' )->install( 'theme' );
 			}
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>

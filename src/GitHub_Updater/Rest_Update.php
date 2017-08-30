@@ -42,6 +42,7 @@ class Rest_Update extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
 	}
 
