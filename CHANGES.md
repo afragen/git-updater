@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.2.0 / 2017-08-30
 * added a static proxy class to use for creating Singletons
 * fixed Override Dot Org for themes
 * fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
