@@ -217,7 +217,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( $response && isset( $response->data ) ) {
 			$file     = $response->data;
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data( $this );
+			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
 		}
 
@@ -490,7 +490,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_field(
 			'bitbucket_server_username',
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			array( Settings::instance(), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			array( 'id' => 'bitbucket_server_username' )
@@ -499,7 +499,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_field(
 			'bitbucket_server_password',
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			array( Settings::instance(), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			array( 'id' => 'bitbucket_server_password', 'token' => true )
@@ -527,7 +527,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bbserver_install_settings';
 		$setting_field['section']         = 'bitbucket_server_id';
-		$setting_field['callback_method'] = array( Settings::instance(), 'token_callback_checkbox' );
+		$setting_field['callback_method'] = array(
+			Singleton::get_instance( 'Settings' ),
+			'token_callback_checkbox',
+		);
 
 		return $setting_field;
 	}
@@ -576,7 +579,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
 
-			new Bitbucket_Server_API( new \stdClass() );
+			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() );
 		}
 
 		return $install;

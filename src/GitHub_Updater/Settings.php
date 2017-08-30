@@ -28,25 +28,11 @@ if ( ! defined( 'WPINC' ) ) {
 class Settings extends Base {
 
 	/**
-	 * Settings object.
-	 *
-	 * @var Settings $instance
-	 */
-	private static $instance;
-
-	/**
 	 * Holds the plugin basename.
 	 *
 	 * @var string
 	 */
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
-
-	/**
-	 * Holds loaded API classes.
-	 *
-	 * @var
-	 */
-	private static $loaded_apis;
 
 	/**
 	 * Supported remote management services.
@@ -66,22 +52,7 @@ class Settings extends Base {
 	public function __construct() {
 		$this->ensure_api_key_is_set();
 		$this->load_options();
-		self::$loaded_apis = $this->load_apis();
 		$this->load_hooks();
-	}
-
-	/**
-	 * The Settings object can be created/obtained via this
-	 * method - this prevents potential duplicate loading.
-	 *
-	 * @return Settings $instance
-	 */
-	public static function instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -156,8 +127,8 @@ class Settings extends Base {
 	 * @return array $gits
 	 */
 	private function installed_git_repos() {
-		$plugins = Plugin::instance()->get_plugin_configs();
-		$themes  = Theme::instance()->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme' )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
@@ -396,16 +367,16 @@ class Settings extends Base {
 			);
 		}
 
-		if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-			self::$loaded_apis['gitlab_api']->add_settings();
+		if ( parent::$installed_apis['gitlab_api'] ) {
+			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings();
 		}
 
-		if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-			self::$loaded_apis['bitbucket_api']->add_settings();
+		if ( parent::$installed_apis['bitbucket_api'] ) {
+			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings();
 		}
 
-		if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-			self::$loaded_apis['bitbucket_server_api']->add_settings();
+		if ( parent::$installed_apis['bitbucket_server_api'] ) {
+			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings();
 		}
 
 		$this->update_settings();
@@ -416,8 +387,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = Plugin::instance()->get_plugin_configs();
-		$ghu_themes       = Theme::instance()->get_theme_configs();
+		$ghu_plugins      = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$ghu_themes       = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -454,18 +425,18 @@ class Settings extends Base {
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						if ( self::$loaded_apis['bitbucket_api'] instanceof Bitbucket_API ) {
-							$repo_setting_field = self::$loaded_apis['bitbucket_api']->add_repo_setting_field();
+						if ( parent::$installed_apis['bitbucket_api'] ) {
+							$repo_setting_field = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
-						if ( self::$loaded_apis['bitbucket_server_api'] instanceof Bitbucket_Server_API ) {
-							$repo_setting_field = self::$loaded_apis['bitbucket_server_api']->add_repo_setting_field();
+						if ( parent::$installed_apis['bitbucket_server_api'] ) {
+							$repo_setting_field = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
-					if ( self::$loaded_apis['gitlab_api'] instanceof GitLab_API ) {
-						$repo_setting_field = self::$loaded_apis['gitlab_api']->add_repo_setting_field();
+					if ( parent::$installed_apis['gitlab_api'] ) {
+						$repo_setting_field = Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_repo_setting_field();
 					}
 					break;
 			}
@@ -772,8 +743,8 @@ class Settings extends Base {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$plugins          = Plugin::instance()->get_plugin_configs();
-		$themes           = Theme::instance()->get_theme_configs();
+		$plugins          = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes           = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos            = array_merge( $plugins, $themes );
 		$options          = parent::$options;
 		$non_repo_options = array(
@@ -926,8 +897,8 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
-		$plugins  = Plugin::instance()->get_plugin_configs();
-		$themes   = Theme::instance()->get_theme_configs();
+		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
 		$bbserver = array( 'bitbucket', 'bbserver' );
 

@@ -44,13 +44,13 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
-	 * @param GitHub_API|Bitbucket_API|GitLab_API $api
+	 * Return parsed readme.txt as array.
 	 *
 	 * @return array
 	 */
-	public function parse_data( $api ) {
+	public function parse_data() {
 		$data = array();
-		foreach ( (array) $api as $key => $value ) {
+		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = $value;
 		}
 

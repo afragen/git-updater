@@ -32,13 +32,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Theme extends Base {
 
 	/**
-	 * Theme object.
-	 *
-	 * @var Theme $instance
-	 */
-	private static $instance;
-
-	/**
 	 * Rollback variable.
 	 *
 	 * @var number
@@ -58,21 +51,6 @@ class Theme extends Base {
 		if ( empty( $this->config ) ) {
 			return;
 		}
-	}
-
-	/**
-	 * The Theme object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Theme $instance
-	 */
-	public static function instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -368,9 +346,8 @@ class Theme extends Base {
 		);
 
 		// Get current branch.
-		$branch = new Branch();
 		$repo   = $this->config[ $theme_key ];
-		$branch = $branch->get_current_branch( $repo );
+		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $theme_key;
@@ -427,10 +404,9 @@ class Theme extends Base {
 			if ( empty( $repo_uri ) ) {
 				continue;
 			}
-
 			break;
 		}
-		remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
+		remove_action( "after_theme_row_$theme_key", array( $this, 'wp_theme_update_row' ) );
 	}
 
 	/**
@@ -629,7 +605,7 @@ class Theme extends Base {
 				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
 				if ( $theme->dot_org && 'master' === $theme->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
-					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]->type ) ) {
+					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]['type'] ) ) {
 						unset( $transient->response[ $theme->repo ] );
 					}
 					continue;
@@ -639,7 +615,8 @@ class Theme extends Base {
 			}
 
 			// Unset if override dot org and same slug on dot org.
-			if ( ! isset( $transient->response[ $theme->repo ]->type ) &&
+			if ( isset( $transient->response[ $theme->repo ] ) &&
+			     ! isset( $transient->response[ $theme->repo ]['type'] ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $theme->repo ] );

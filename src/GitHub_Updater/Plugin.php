@@ -30,13 +30,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Plugin extends Base {
 
 	/**
-	 * Plugin object.
-	 *
-	 * @var Plugin
-	 */
-	private static $instance;
-
-	/**
 	 * Rollback variable
 	 *
 	 * @var string branch
@@ -65,21 +58,6 @@ class Plugin extends Base {
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
-	}
-
-	/**
-	 * The Plugin object can be created/obtained via this
-	 * method - this prevents unnecessary work in rebuilding the object and
-	 * querying to construct a list of categories, etc.
-	 *
-	 * @return Plugin $instance
-	 */
-	public static function instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -257,9 +235,8 @@ class Plugin extends Base {
 		}
 
 		// Get current branch.
-		$branch = new Branch();
 		$repo   = $this->config[ $plugin['repo'] ];
-		$branch = $branch->get_current_branch( $repo );
+		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];
@@ -424,7 +401,8 @@ class Plugin extends Base {
 			}
 
 			// Unset if override dot org and same slug on dot org.
-			if ( ! isset( $transient->response[ $plugin->slug ]->type ) &&
+			if ( isset( $transient->response[ $plugin->slug ] ) &&
+			     ! isset( $transient->response[ $plugin->slug ]->type ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $plugin->slug ] );

@@ -10,6 +10,12 @@
 
 namespace Fragen\GitHub_Updater;
 
+/*
+ * Exit if called directly.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * Class Branch
@@ -21,6 +27,7 @@ class Branch extends API {
 	/**
 	 * Holds repo cache data.
 	 *
+	 * @access public
 	 * @var null
 	 */
 	public $cache;
@@ -28,16 +35,18 @@ class Branch extends API {
 	/**
 	 * Branch constructor.
 	 *
+	 * @access public
+	 *
 	 * @param null $cache
 	 */
 	public function __construct( $cache = null ) {
 		$this->cache = $cache;
-
-		add_filter( 'http_response', array( $this, 'set_branch_on_switch' ), 10, 3 );
 	}
 
 	/**
 	 * Get the current repo branch.
+	 *
+	 * @access public
 	 *
 	 * @param $repo
 	 *
@@ -54,20 +63,15 @@ class Branch extends API {
 	/**
 	 * Set current branch on branch switch.
 	 *
-	 * @param $response
-	 * @param $r
-	 * @param $url
+	 * @access public
 	 *
-	 * @return $response Just a pass through.
+	 * @param string $repo Repository slug.
 	 */
-	public function set_branch_on_switch( $response, $r, $url ) {
-		$repo = isset( $_GET['plugin'] ) ? dirname( $_GET['plugin'] ) : null;
-		$repo = isset( $_GET['theme'] ) ? $_GET['theme'] : $repo;
+	public function set_branch_on_switch( $repo ) {
+		$this->cache = $this->get_repo_cache( $repo );
 
-		if ( isset( $_GET['action'], $this->cache['repo'] ) &&
-		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] ) &&
-		     $repo === $this->cache['repo'] &&
-		     false !== strpos( $url, $this->cache['repo'] )
+		if ( isset( $_GET['action'], $this->cache['branches'] ) &&
+		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
 			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
 				? $_GET['rollback']
@@ -76,15 +80,14 @@ class Branch extends API {
 			self::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', self::$options );
 		}
-		remove_filter( 'http_response', array( $this, 'set_branch_on_switch' ) );
-
-		return $response;
 	}
 
 	/**
 	 * Set current branch on install.
 	 *
-	 * @param $install
+	 * @access public
+	 *
+	 * @param array $install Array of install data.
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );

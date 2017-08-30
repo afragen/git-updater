@@ -35,18 +35,10 @@ class Basic_Auth_Loader {
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
-	 * @access private
+	 * @access public
 	 * @var    \stdClass
 	 */
-	private static $object;
-
-	/**
-	 * Basic_Auth_Loader object.
-	 *
-	 * @access private
-	 * @var    Basic_Auth_Loader $instance
-	 */
-	private static $instance;
+	public $caller;
 
 	/**
 	 * Basic_Auth_Loader constructor.
@@ -59,26 +51,6 @@ class Basic_Auth_Loader {
 		self::$options = empty( $options )
 			? get_site_option( 'github_updater', array() )
 			: $options;
-	}
-
-	/**
-	 * Gets an instance of the Basic_Auth_Loader class.
-	 *
-	 * The Basic_Auth_Loader object can be created/obtained via this
-	 * method - this prevents potential duplicate loading.
-	 *
-	 * @param array $options Additional options to pass to the instance.
-	 *
-	 * @return Basic_Auth_Loader
-	 */
-	public static function instance( $options ) {
-		if ( null === self::$instance ) {
-			self::$instance = new static( $options );
-			$backtrace      = debug_backtrace();
-			self::$object   = $backtrace[1]['object'];
-		}
-
-		return self::$instance;
 	}
 
 	/**
@@ -138,7 +110,7 @@ class Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = self::$object;
+		$type         = $this->caller;
 		$username_key = null;
 		$password_key = null;
 		$credentials  = array(
@@ -154,8 +126,8 @@ class Basic_Auth_Loader {
 		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$repos = null !== $_REQUEST
 			? array_merge(
-				Plugin::instance()->get_plugin_configs(),
-				Theme::instance()->get_theme_configs()
+				Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+				Singleton::get_instance( 'Theme' )->get_theme_configs()
 			)
 			: false;
 		$type  = $slug && $repos &&

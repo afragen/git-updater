@@ -59,7 +59,7 @@ class GitLab_API extends API implements API_Interface {
 			empty( self::$options['gitlab_access_token'] ) ||
 			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
 		) {
-			Messages::instance()->create_error_message( 'gitlab' );
+			Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
 		}
 		add_site_option( 'github_updater', self::$options );
 	}
@@ -217,7 +217,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data( $this );
+			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
 		}
 
@@ -530,7 +530,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
-				array( Settings::instance(), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_access_token', 'token' => true )
@@ -541,7 +541,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
-				array( Settings::instance(), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
@@ -557,7 +557,7 @@ class GitLab_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_gitlab_install_settings';
 		$setting_field['section']         = 'gitlab_id';
-		$setting_field['callback_method'] = array( Settings::instance(), 'token_callback_text' );
+		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_text' );
 
 		return $setting_field;
 	}

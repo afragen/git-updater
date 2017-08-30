@@ -176,28 +176,6 @@ class Base {
 	}
 
 	/**
-	 * Load APIs in use into array for later use.
-	 *
-	 * @return array $loaded_apis
-	 */
-	protected function load_apis() {
-		$loaded_apis                  = array();
-		$loaded_apis['bitbucket_api'] = self::$installed_apis['bitbucket_api']
-			? new Bitbucket_API( new \stdClass() )
-			: false;
-
-		$loaded_apis['bitbucket_server_api'] = self::$installed_apis['bitbucket_server_api']
-			? new Bitbucket_Server_API( new \stdClass() )
-			: false;
-
-		$loaded_apis['gitlab_api'] = self::$installed_apis['gitlab_api']
-			? new GitLab_API( new \stdClass() )
-			: false;
-
-		return $loaded_apis;
-	}
-
-	/**
 	 * Load site options.
 	 */
 	protected function load_options() {
@@ -220,7 +198,7 @@ class Base {
 		 * Load hook for shiny updates Basic Authentication headers.
 		 */
 		if ( self::is_doing_ajax() ) {
-			Basic_Auth_Loader::instance( self::$options )->load_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -244,7 +222,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
-			Basic_Auth_Loader::instance( self::$options )->remove_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->remove_authentication_hooks();
 		}
 	}
 
@@ -326,7 +304,7 @@ class Base {
 		if ( self::$load_repo_meta && is_admin() &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
-			Settings::instance();
+			Singleton::get_instance( 'Settings' );
 		}
 
 		return true;
@@ -337,8 +315,7 @@ class Base {
 	 */
 	public function ajax_update() {
 		$this->load_options();
-		$rest_update = new Rest_Update();
-		$rest_update->process_request();
+		Singleton::get_instance( 'Rest_Update' )->process_request();
 	}
 
 	/**
@@ -359,7 +336,7 @@ class Base {
 	public function forced_meta_update_plugins( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
-			Plugin::instance()->get_remote_plugin_meta();
+			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
 
@@ -371,7 +348,7 @@ class Base {
 	public function forced_meta_update_themes( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
-			Theme::instance()->get_remote_theme_meta();
+			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
 
@@ -580,7 +557,7 @@ class Base {
 		 * Rename plugins.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			$upgrader_object = Plugin::instance();
+			$upgrader_object = Singleton::get_instance( 'Plugin' );
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -591,7 +568,7 @@ class Base {
 		 * Rename themes.
 		 */
 		if ( $upgrader instanceof \Theme_Upgrader ) {
-			$upgrader_object = Theme::instance();
+			$upgrader_object = Singleton::get_instance( 'Theme' );
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -614,6 +591,8 @@ class Base {
 			$repo['repo'] = self::$options['github_updater_install_repo'];
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
+
+		Singleton::get_instance( 'Branch' )->set_branch_on_switch( $slug );
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
@@ -730,7 +709,7 @@ class Base {
 			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
 			) {
 				$arr['repo']          = $repo->repo;
-				$arr['extended_repo'] = $repo->extended_repo;
+				$arr['extended_repo'] = isset( $repo->extended_repo ) ? $repo->extended_repo : null;
 				break;
 			}
 		}
@@ -1392,17 +1371,17 @@ class Base {
 			switch ( $transient ) {
 				case 'update_plugins':
 					$this->forced_meta_update_plugins( true );
-					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
 					$this->forced_meta_update_themes( true );
-					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
 					$this->forced_meta_update_plugins( true );
-					$current = Plugin::instance()->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					$this->forced_meta_update_themes( true );
-					$current = Theme::instance()->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 			}
 			set_site_transient( $transient, $current );

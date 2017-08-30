@@ -69,14 +69,13 @@ abstract class API extends Base {
 	 */
 	public static function wp_update_response( $response, $args, $url ) {
 		$parsed_url = parse_url( $url );
-		$base       = new Base();
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				$base->make_update_transient_current( 'update_plugins' );
+				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				$base->make_update_transient_current( 'update_themes' );
+				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
 			}
 		}
 
@@ -149,7 +148,7 @@ abstract class API extends Base {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			Messages::instance()->create_error_message( $response );
+			Singleton::get_instance( 'Messages' )->create_error_message( $response );
 
 			return false;
 		}
@@ -168,7 +167,7 @@ abstract class API extends Base {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Messages::instance()->create_error_message( $type['repo'] );
+			Singleton::get_instance( 'Messages' )->create_error_message( $type['repo'] );
 
 			return false;
 		}
@@ -232,8 +231,7 @@ abstract class API extends Base {
 					if ( $download_link ) {
 						break;
 					}
-					$api      = new Bitbucket_Server_API( new \stdClass() );
-					$endpoint = $api->add_endpoints( $this, $endpoint );
+					$endpoint = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -265,10 +263,14 @@ abstract class API extends Base {
 	 *
 	 * @access protected
 	 *
+	 * @param string|bool $repo Repo name or false.
+	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	protected function get_repo_cache() {
-		$repo      = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+	protected function get_repo_cache( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$cache     = get_site_option( $cache_key );
 
