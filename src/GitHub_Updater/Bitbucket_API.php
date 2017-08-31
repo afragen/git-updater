@@ -45,7 +45,7 @@ class Bitbucket_API extends API implements API_Interface {
 				: $type->branch;
 		}
 
-		// Need to load authentication hooks in constructor.
+		// Need to load authentication hooks in constructor for update-core.php
 		Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
 
 		$set_credentials = false;
