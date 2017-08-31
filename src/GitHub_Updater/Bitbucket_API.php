@@ -47,13 +47,18 @@ class Bitbucket_API extends API implements API_Interface {
 
 		Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
 
+		$set_credentials = false;
 		if ( ! isset( self::$options['bitbucket_username'] ) ) {
 			self::$options['bitbucket_username'] = null;
+			$set_credentials                     = true;
 		}
 		if ( ! isset( self::$options['bitbucket_password'] ) ) {
 			self::$options['bitbucket_password'] = null;
+			$set_credentials                     = true;
 		}
-		add_site_option( 'github_updater', self::$options );
+		if ( $set_credentials ) {
+			add_site_option( 'github_updater', self::$options );
+		}
 	}
 
 	/**
