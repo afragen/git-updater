@@ -583,8 +583,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			if ( ! empty( $install['bitbucket_password'] ) ) {
 				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
-
-			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() );
 		}
 
 		return $install;
