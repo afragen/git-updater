@@ -227,6 +227,7 @@ abstract class API extends Base {
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
+				Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
