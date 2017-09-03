@@ -463,4 +463,44 @@ abstract class API extends Base {
 		return $endpoint;
 	}
 
+
+	/**
+	 * Loads authentication hooks when updating from update-core.php.
+	 *
+	 * @param bool                             $reply
+	 * @param string                           $package Update package URL, unused.
+	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object
+	 *
+	 * @return mixed
+	 */
+	public function upgrader_pre_download( $reply, $package, $class ) {
+		$basic_auth_loader = Singleton::get_instance( 'Basic_Auth_Loader', self::$options );
+		if ( $class instanceof \Plugin_Upgrader &&
+		     property_exists( $class->skin, 'plugin_info' )
+		) {
+			$headers = $class->skin->plugin_info;
+			foreach ( $basic_auth_loader::$basic_auth_required as $git_server ) {
+				$git_server .= ' Plugin URI';
+				if ( ! empty( $headers[ $git_server ] ) ) {
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+					break;
+				}
+			}
+		}
+		if ( $class instanceof \Theme_Upgrader &&
+		     property_exists( $class->skin, 'theme_info' )
+		) {
+			$theme = $class->skin->theme_info;
+			foreach ( $basic_auth_loader::$basic_auth_required as $git_server ) {
+				$git_server .= ' Theme URI';
+				if ( ! empty( $theme->get( $git_server ) ) ) {
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+					break;
+				}
+			}
+		}
+
+		return $reply;
+	}
+
 }

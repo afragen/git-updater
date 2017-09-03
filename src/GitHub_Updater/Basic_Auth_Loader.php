@@ -33,6 +33,13 @@ class Basic_Auth_Loader {
 	private static $options;
 
 	/**
+	 * Stores array of git servers requiring Basic Authentication.
+	 *
+	 * @var array
+	 */
+	public static $basic_auth_required = array( 'Bitbucket' );
+
+	/**
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
 	 * @access public
