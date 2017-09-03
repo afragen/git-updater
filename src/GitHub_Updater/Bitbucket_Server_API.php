@@ -43,19 +43,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function __construct( $type ) {
 		parent::__construct( $type );
-
-		$set_credentials = false;
-		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
-			self::$options['bitbucket_server_username'] = null;
-			$set_credentials                            = true;
-		}
-		if ( ! isset( self::$options['bitbucket_server_password'] ) ) {
-			self::$options['bitbucket_server_password'] = null;
-			$set_credentials                            = true;
-		}
-		if ( $set_credentials ) {
-			add_site_option( 'github_updater', self::$options );
-		}
 	}
 
 	/**
