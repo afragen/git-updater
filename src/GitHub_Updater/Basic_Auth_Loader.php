@@ -128,9 +128,35 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
-		$slug  = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
-		$slug  = isset( $_REQUEST['plugin'] ) && ! $slug ? $_REQUEST['plugin'] : $slug;
-		$slug  = isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
+		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
+		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
+		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
+
+		// Set for bulk upgrade.
+		if ( ! $slug ) {
+			$plugins     = isset( $_REQUEST['plugins'] )
+				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
+				: array();
+			$themes      = isset( $_REQUEST['themes'] )
+				? explode( ',', $_REQUEST['themes'] )
+				: array();
+			$bulk_update = array_merge( $plugins, $themes );
+			if ( ! empty( $bulk_update ) ) {
+				$slug = array_filter( $bulk_update, function( $e ) use ( $url ) {
+					if ( false !== strpos( $url, $e ) ) {
+						return $e;
+					}
+				} );
+				$slug = array_pop( $slug );
+			}
+		}
+
+		// Set for Remote Install.
+		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
+		        false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
+			? $_POST['github_updater_api'] . '_install'
+			: $type;
+
 		$repos = null !== $_REQUEST
 			? array_merge(
 				Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
@@ -145,6 +171,7 @@ class Basic_Auth_Loader {
 		switch ( $type ) {
 			case ( 'bitbucket_plugin' ):
 			case ( 'bitbucket_theme' ):
+			case ( 'bitbucket_install' ):
 			case ( $type instanceof Bitbucket_API ):
 			case ( $type instanceof Bitbucket_Server_API ):
 				$bitbucket_org = 'bitbucket.org' === $headers['host'];
