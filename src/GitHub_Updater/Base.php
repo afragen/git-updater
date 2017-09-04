@@ -204,7 +204,11 @@ class Base {
 
 		// Needed for updating from update-core.php.
 		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download', array( 'Fragen\\GitHub_Updater\\API', 'upgrader_pre_download', ), 10, 3 );
+			add_filter( 'upgrader_pre_download',
+				array(
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					'upgrader_pre_download',
+				), 10, 3 );
 		}
 
 		// The following hook needed to ensure transient is reset correctly after shiny updates.
