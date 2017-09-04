@@ -193,9 +193,7 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
-		/*
-		 * Load hook for shiny updates Basic Authentication headers.
-		 */
+		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
 			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
@@ -204,10 +202,16 @@ class Base {
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 
-		/*
-		 * The following hook needed to ensure transient is reset correctly after
-		 * shiny updates.
-		 */
+		// Needed for updating from update-core.php.
+		if ( ! self::is_doing_ajax() ) {
+			add_filter( 'upgrader_pre_download',
+				array(
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					'upgrader_pre_download',
+				), 10, 3 );
+		}
+
+		// The following hook needed to ensure transient is reset correctly after shiny updates.
 		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 

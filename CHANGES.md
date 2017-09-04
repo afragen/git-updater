@@ -1,5 +1,5 @@
 #### [unreleased]
-* removed non-constructor stuff from constructors
+* removed non-constructor stuff from all constructors
 * added `parent::__construct()` to all extended classes
 * fixed multisite theme rollback when current theme up-to-date
 
