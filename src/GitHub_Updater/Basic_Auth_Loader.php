@@ -37,7 +37,7 @@ class Basic_Auth_Loader {
 	 *
 	 * @var array
 	 */
-	public static $basic_auth_required = array( 'Bitbucket' );
+	private static $basic_auth_required = array( 'Bitbucket' );
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
