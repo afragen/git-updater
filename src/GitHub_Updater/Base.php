@@ -1325,6 +1325,7 @@ class Base {
 			'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
+			'type'        => $repo->type,
 		);
 
 		if ( 'plugin' === $type ) {
