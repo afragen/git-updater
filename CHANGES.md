@@ -1,6 +1,7 @@
 #### [unreleased]
 * removed non-constructor stuff from constructors
 * added `parent::__construct()` to all extended classes
+* fixed multisite theme rollback when current theme up-to-date
 
 #### 7.2.0 / 2017-08-30
 * added a static proxy class to use for creating Singletons
