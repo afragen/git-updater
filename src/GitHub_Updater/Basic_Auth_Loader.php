@@ -267,8 +267,8 @@ class Basic_Auth_Loader {
 		) {
 			$headers = $class->skin->plugin_info;
 			foreach ( self::$basic_auth_required as $git_server ) {
-				$git_server .= ' Plugin URI';
-				if ( ! empty( $headers[ $git_server ] ) ) {
+				$ghu_header = $git_server . ' Plugin URI';
+				if ( ! empty( $headers[ $ghu_header ] ) ) {
 					$this->load_authentication_hooks();
 					break;
 				}
@@ -279,15 +279,15 @@ class Basic_Auth_Loader {
 		) {
 			$theme = $class->skin->theme_info;
 			foreach ( self::$basic_auth_required as $git_server ) {
-				$git_server .= ' Theme URI';
-				if ( ! empty( $theme->get( $git_server ) ) ) {
+				$ghu_header = $git_server . ' Theme URI';
+				if ( ! empty( $theme->get( $ghu_header ) ) ) {
 					$this->load_authentication_hooks();
 					break;
 				}
 			}
 		}
 		add_filter( 'upgrader_process_complete', function() {
-			remove_filter( 'upgrader_pre_download', array( $this, 'upgrader_pre_download' ) );
+			remove_filter( 'upgrader_pre_download', array( &$this, 'upgrader_pre_download' ) );
 		} );
 
 		return $reply;
