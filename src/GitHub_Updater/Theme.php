@@ -615,8 +615,9 @@ class Theme extends Base {
 				$transient->response[ $theme->repo ] = $response;
 			}
 
-			// Unset if override dot org and same slug on dot org.
-			if ( isset( $transient->response[ $theme->repo ] ) &&
+			// Unset if override dot org AND same slug on dot org AND NOT a rollback.
+			if ( ! $this->tag &&
+			     isset( $transient->response[ $theme->repo ] ) &&
 			     ! isset( $transient->response[ $theme->repo ]['type'] ) &&
 			     $this->is_override_dot_org()
 			) {
