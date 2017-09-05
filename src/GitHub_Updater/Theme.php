@@ -64,6 +64,18 @@ class Theme extends Base {
 	}
 
 	/**
+	 * Delete cache of current theme.
+	 * This is needed in case `wp_get_theme()` is called in earlier or in a mu-plugin.
+	 * This action results in the extra headers not being added.
+	 *
+	 * @link https://github.com/afragen/github-updater/issues/586
+	 */
+	private function delete_current_theme_cache() {
+		$cache_hash = md5( get_stylesheet_directory() );
+		wp_cache_delete( 'theme-' . $cache_hash, 'themes' );
+	}
+
+	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array.
 	 *
@@ -71,7 +83,8 @@ class Theme extends Base {
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
-		$themes     = wp_get_themes( array( 'errors' => null ) );
+		$this->delete_current_theme_cache();
+		$themes = wp_get_themes( array( 'errors' => null ) );
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
