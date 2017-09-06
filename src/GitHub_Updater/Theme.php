@@ -389,11 +389,11 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
+		$themes = $this->get_theme_configs();
 
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
-			$themes      = $this->get_theme_configs();
 
 			/**
 			 * Filter to add themes not containing appropriate header line.
@@ -420,7 +420,9 @@ class Theme extends Base {
 			}
 			break;
 		}
-		remove_action( "after_theme_row_$theme_key", array( $this, 'wp_theme_update_row' ) );
+		if ( array_key_exists( $theme_key, $themes ) ) {
+			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
+		}
 	}
 
 	/**
