@@ -5,6 +5,7 @@
 * fixed [#568](https://github.com/afragen/github-updater/issues/586), thanks @bradmkjr
 * fixed multisite bug for theme update rows that I introduced in v7.0.0 :-(
 * fixed PHP notice [#591](https://github.com/afragen/github-updater/issues/591)
+* fixed bug with current branch data being deleted when saving settings
 
 #### 7.2.0 / 2017-08-30
 * added a static proxy class to use for creating Singletons

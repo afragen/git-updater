@@ -765,20 +765,26 @@ class Settings extends Base {
 			'branch_switch',
 			'db_version',
 		);
+		$current_branches = array();
 
 		$repos = array_map( function( $e ) {
 			return $e->repo = null;
 		}, $repos );
 
-		array_filter( $non_repo_options,
-			function( $e ) use ( &$options ) {
-				unset( $options[ $e ] );
+		array_map( function( $e ) use ( &$options ) {
+			unset( $options[ $e ] );
+		}, $non_repo_options );
+
+
+		foreach ( array_keys( $options ) as $key ) {
+			if ( false !== strpos( $key, 'current_branch' ) ) {
+				$current_branches[ $key ] = $options[ $key ];
 			}
-		);
+		}
 
 		$intersect  = array_intersect( $options, $repos );
 		$db_version = array( 'db_version' => parent::$options['db_version'] );
-		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version );
+		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version, $current_branches );
 
 		return $options;
 	}
