@@ -216,7 +216,7 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( null === self::$options['branch_switch'] ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 

@@ -346,7 +346,7 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		if ( null === self::$options['branch_switch'] ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 

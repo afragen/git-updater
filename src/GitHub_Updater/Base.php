@@ -523,7 +523,7 @@ class Base {
 					}
 					$this->repo_api->get_remote_readme();
 				}
-				if ( null !== self::$options['branch_switch'] ) {
+				if ( ! empty( self::$options['branch_switch'] ) ) {
 					$this->repo_api->get_remote_branches();
 				}
 			}
@@ -1098,7 +1098,7 @@ class Base {
 		}
 
 		if ( $branch ) {
-			return null === self::$options['branch_switch'];
+			return empty( self::$options['branch_switch'] );
 		}
 
 		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update( $this->type ) );
