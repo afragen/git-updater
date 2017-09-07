@@ -346,8 +346,7 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		$options = get_site_option( 'github_updater' );
-		if ( empty( $options['branch_switch'] ) ) {
+		if ( null === self::$options['branch_switch'] ) {
 			return false;
 		}
 
@@ -525,7 +524,6 @@ class Theme extends Base {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
-		$options           = get_site_option( 'github_updater' );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo
@@ -533,7 +531,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( '1' === $options['branch_switch'] ) {
+		if ( '1' === self::$options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
