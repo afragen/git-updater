@@ -744,47 +744,20 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Filter options so that sub-tab options are grouped in single $options variable.
+	 * Filter options to remove unchecked checkbox options.
 	 *
 	 * @access private
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$plugins          = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes           = Singleton::get_instance( 'Theme' )->get_theme_configs();
-		$repos            = array_merge( $plugins, $themes );
-		$options          = parent::$options;
-		$non_repo_options = array(
-			'github_access_token',
-			'bitbucket_username',
-			'bitbucket_password',
-			'bitbucket_server_username',
-			'bitbucket_server_password',
-			'gitlab_access_token',
-			'gitlab_enterprise_token',
-			'branch_switch',
-			'db_version',
-		);
-		$current_branches = array();
+		$options = parent::$options;
 
-		$repos = array_map( function( $e ) {
-			return $e->repo = null;
-		}, $repos );
+		// Remove checkbox options.
+		$options = array_filter( $options, function( $e ) use ( &$options ) {
+			return $e !== '1';
+		} );
 
-		array_map( function( $e ) use ( &$options ) {
-			unset( $options[ $e ] );
-		}, $non_repo_options );
-
-
-		foreach ( array_keys( $options ) as $key ) {
-			if ( false !== strpos( $key, 'current_branch' ) ) {
-				$current_branches[ $key ] = $options[ $key ];
-			}
-		}
-
-		$intersect  = array_intersect( $options, $repos );
-		$db_version = array( 'db_version' => parent::$options['db_version'] );
-		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version, $current_branches );
+		$options = array_merge( $options, $_POST['github_updater'] );
 
 		return $options;
 	}
