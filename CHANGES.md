@@ -1,6 +1,6 @@
 #### [unreleased]
 * removed non-constructor stuff from all constructors
-* added `parent::__construct()` to all extended classes
+* added `parent::__construct()` to all extended classes where needed
 * fixed multisite theme rollback when current theme up-to-date
 * fixed [#568](https://github.com/afragen/github-updater/issues/586), thanks @bradmkjr
 * fixed multisite bug for theme update rows that I introduced in v7.0.0 :-(
