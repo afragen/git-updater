@@ -137,13 +137,8 @@ class Base {
 
 	/**
 	 * Constructor.
-	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
-			$this->delete_all_cached_data();
-		}
-
 		$this->set_installed_apis();
 	}
 

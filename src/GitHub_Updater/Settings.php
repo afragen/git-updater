@@ -51,8 +51,18 @@ class Settings extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->refresh_caches();
 		$this->ensure_api_key_is_set();
 		$this->load_options();
+	}
+
+	/**
+	 * Check for cache refresh.
+	 */
+	protected function refresh_caches() {
+		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
+			$this->delete_all_cached_data();
+		}
 	}
 
 	/**
