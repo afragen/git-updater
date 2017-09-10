@@ -162,7 +162,7 @@ class Base {
 	/**
 	 * Set boolean for installed API classes.
 	 */
-	private function set_installed_apis() {
+	protected function set_installed_apis() {
 		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' ) ) {
 			self::$installed_apis['bitbucket_server_api'] = true;
 		}
