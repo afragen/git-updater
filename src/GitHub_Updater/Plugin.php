@@ -374,13 +374,6 @@ class Plugin extends Base {
 					'type'        => $plugin->type,
 				);
 
-				// Skip on branch switching or rollback.
-				if ( $this->tag &&
-				     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
-				) {
-					continue;
-				}
-
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
 				     $response['slug'] === $_GET['plugin']
@@ -398,6 +391,13 @@ class Plugin extends Base {
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
+			}
+
+			// Set transient on rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+			) {
+				$transient->response[ $plugin->slug ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}
 
 			// Unset if override dot org AND same slug on dot org.

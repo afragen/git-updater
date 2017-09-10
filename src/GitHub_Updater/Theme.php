@@ -598,18 +598,7 @@ class Theme extends Base {
 					'type'        => $theme->type,
 				);
 
-				/*
-				 * Skip on branch switching or rollback.
-				 */
-				if ( $this->tag &&
-				     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
-				) {
-					continue;
-				}
-
-				/*
-				 * Skip on RESTful updating.
-				 */
+				// Skip on RESTful updating.
 				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
 				     $response['theme'] === $_GET['theme']
 				) {
@@ -626,6 +615,13 @@ class Theme extends Base {
 				}
 
 				$transient->response[ $theme->repo ] = $response;
+			}
+
+			// Set transient for rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->repo === $_GET['theme'] )
+			) {
+				$transient->response[ $theme->repo ] = $this->set_rollback_transient( 'theme', $theme );
 			}
 
 			// Unset if override dot org AND same slug on dot org.

@@ -1279,7 +1279,7 @@ class Base {
 
 		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
 			$repo = $this->config[ $slug ];
-			$this->set_rollback_transient( $type, $repo );
+			$this->set_rollback_transient( $type, $repo, true );
 		}
 
 		return $update_data;
@@ -1288,10 +1288,13 @@ class Base {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string    $type plugin|theme
+	 * @param string    $type  plugin|theme
 	 * @param \stdClass $repo
+	 * @param bool      $false If true then set update transient.
+	 *
+	 * @return array $rollback Rollback transient.
 	 */
-	private function set_rollback_transient( $type, $repo ) {
+	protected function set_rollback_transient( $type, $repo, $false = false ) {
 		switch ( $repo->type ) {
 			case 'github_plugin':
 			case 'github_theme':
@@ -1326,13 +1329,16 @@ class Base {
 		);
 
 		if ( 'plugin' === $type ) {
-			$rollback['slug']                     = $repo->repo;
-			$updates_transient->response[ $slug ] = (object) $rollback;
+			$rollback['slug'] = $repo->repo;
+			$rollback         = (object) $rollback;
 		}
-		if ( 'theme' === $type ) {
-			$updates_transient->response[ $slug ] = (array) $rollback;
+		$updates_transient->response[ $slug ] = $rollback;
+
+		if ( $false ) {
+			set_site_transient( $transient, $updates_transient );
 		}
-		set_site_transient( $transient, $updates_transient );
+
+		return $rollback;
 	}
 
 	/**
