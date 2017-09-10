@@ -1288,13 +1288,13 @@ class Base {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string    $type  plugin|theme
+	 * @param string    $type          plugin|theme
 	 * @param \stdClass $repo
-	 * @param bool      $false If true then set update transient.
+	 * @param bool      $set_transient Default false, if true then set update transient.
 	 *
 	 * @return array $rollback Rollback transient.
 	 */
-	protected function set_rollback_transient( $type, $repo, $false = false ) {
+	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		switch ( $repo->type ) {
 			case 'github_plugin':
 			case 'github_theme':
@@ -1314,11 +1314,9 @@ class Base {
 				break;
 		}
 
-		$transient         = 'update_' . $type . 's';
-		$this->tag         = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
-		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
-		$updates_transient = get_site_transient( $transient );
-		$rollback          = array(
+		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
+		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
+		$rollback  = array(
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
@@ -1332,10 +1330,12 @@ class Base {
 			$rollback['slug'] = $repo->repo;
 			$rollback         = (object) $rollback;
 		}
-		$updates_transient->response[ $slug ] = $rollback;
 
-		if ( $false ) {
-			set_site_transient( $transient, $updates_transient );
+		if ( $set_transient ) {
+			$transient                  = 'update_' . $type . 's';
+			$current                    = get_site_transient( $transient );
+			$current->response[ $slug ] = $rollback;
+			set_site_transient( $transient, $current );
 		}
 
 		return $rollback;
