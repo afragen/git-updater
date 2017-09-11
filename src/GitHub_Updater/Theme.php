@@ -44,9 +44,7 @@ class Theme extends Base {
 	public function __construct() {
 		parent::__construct();
 
-		/*
-		 * Get details of installed git sourced themes.
-		 */
+		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();
 
 		if ( null === $this->config ) {
@@ -159,9 +157,7 @@ class Theme extends Base {
 				break;
 			}
 
-			/*
-			 * Exit if not git hosted theme.
-			 */
+			// Exit if not git hosted theme.
 			if ( empty( $git_theme ) ) {
 				continue;
 			}

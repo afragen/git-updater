@@ -42,9 +42,7 @@ class Plugin extends Base {
 	public function __construct() {
 		parent::__construct();
 
-		/*
-		 * Get details of installed git sourced plugins.
-		 */
+		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
 
 		if ( null === $this->config ) {
@@ -67,9 +65,7 @@ class Plugin extends Base {
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
-		/*
-		 * Ensure get_plugins() function is available.
-		 */
+		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
