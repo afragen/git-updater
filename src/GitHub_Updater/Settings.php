@@ -913,7 +913,7 @@ class Settings extends Base {
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
 				'broken'  => $e->broken,
-				'dot_org' => $e->dot_org,
+				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
 			);
 		}, $type_repos );
 
