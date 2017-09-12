@@ -378,22 +378,17 @@ class Plugin extends Base {
 				}
 
 				// If branch is 'master' and plugin is in wp.org repo then pull update from wp.org.
-				if ( ! $this->tag && $plugin->dot_org && 'master' === $plugin->branch ) {
+				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
 					if ( isset( $transient->response[ $plugin->slug ], $transient->response[ $plugin->slug ]->type ) ) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
-					continue;
+					if ( ! $this->tag ) {
+						continue;
+					}
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
-			}
-
-			// Set transient on rollback.
-			if ( $this->tag &&
-			     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
-			) {
-				$transient->response[ $plugin->slug ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}
 
 			// Unset if override dot org AND same slug on dot org.
@@ -402,6 +397,13 @@ class Plugin extends Base {
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $plugin->slug ] );
+			}
+
+			// Set transient on rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+			) {
+				$transient->response[ $plugin->slug ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 

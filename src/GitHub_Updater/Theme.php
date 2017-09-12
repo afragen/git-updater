@@ -602,22 +602,17 @@ class Theme extends Base {
 				}
 
 				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
-				if ( ! $this->tag && $theme->dot_org && 'master' === $theme->branch ) {
+				if ( $theme->dot_org && 'master' === $theme->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
 					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]['type'] ) ) {
 						unset( $transient->response[ $theme->repo ] );
 					}
-					continue;
+					if ( ! $this->tag ) {
+						continue;
+					}
 				}
 
 				$transient->response[ $theme->repo ] = $response;
-			}
-
-			// Set transient for rollback.
-			if ( $this->tag &&
-			     ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->repo === $_GET['theme'] )
-			) {
-				$transient->response[ $theme->repo ] = $this->set_rollback_transient( 'theme', $theme );
 			}
 
 			// Unset if override dot org AND same slug on dot org.
@@ -626,6 +621,13 @@ class Theme extends Base {
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $theme->repo ] );
+			}
+
+			// Set transient for rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->repo === $_GET['theme'] )
+			) {
+				$transient->response[ $theme->repo ] = $this->set_rollback_transient( 'theme', $theme );
 			}
 		}
 
