@@ -762,7 +762,7 @@ class Settings extends Base {
 		$options = parent::$options;
 
 		// Remove checkbox options.
-		$options = array_filter( $options, function( $e ) use ( &$options ) {
+		$options = array_filter( $options, function( $e ) {
 			return $e !== '1';
 		} );
 
