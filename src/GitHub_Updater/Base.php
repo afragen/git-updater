@@ -72,6 +72,13 @@ class Base {
 	protected static $options_remote;
 
 	/**
+	 * Holds the value for the Remote Management API key.
+	 *
+	 * @var
+	 */
+	protected static $api_key;
+
+	/**
 	 * Holds HTTP error code from API call.
 	 *
 	 * @var array ( $this->type-repo => $code )
@@ -175,6 +182,7 @@ class Base {
 	protected function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		self::$api_key        = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -228,8 +236,7 @@ class Base {
 	 * Ensure api key is set.
 	 */
 	public function ensure_api_key_is_set() {
-		$api_key = get_site_option( 'github_updater_api_key' );
-		if ( ! $api_key ) {
+		if ( ! self::$api_key ) {
 			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
 		}
 	}

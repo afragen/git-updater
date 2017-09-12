@@ -669,10 +669,9 @@ class Settings extends Base {
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
-		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',
-			'key'    => $api_key,
+			'key'    => self::$api_key,
 		), admin_url( 'admin-ajax.php' ) );
 
 		?>
