@@ -602,7 +602,7 @@ class Theme extends Base {
 				}
 
 				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
-				if ( $theme->dot_org && 'master' === $theme->branch ) {
+				if ( ! $this->tag && $theme->dot_org && 'master' === $theme->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
 					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]['type'] ) ) {
 						unset( $transient->response[ $theme->repo ] );

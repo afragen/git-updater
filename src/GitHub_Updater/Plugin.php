@@ -378,7 +378,7 @@ class Plugin extends Base {
 				}
 
 				// If branch is 'master' and plugin is in wp.org repo then pull update from wp.org.
-				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
+				if ( ! $this->tag && $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
 					if ( isset( $transient->response[ $plugin->slug ], $transient->response[ $plugin->slug ]->type ) ) {
 						unset( $transient->response[ $plugin->slug ] );
