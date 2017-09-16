@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.3.0 / 2017-09-15
 * removed non-constructor stuff from all constructors
 * added `parent::__construct()` to extended classes where needed
 * fixed [#568](https://github.com/afragen/github-updater/issues/586), thanks @bradmkjr
