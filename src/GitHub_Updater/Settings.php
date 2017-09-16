@@ -47,11 +47,28 @@ class Settings extends Base {
 	);
 
 	/**
-	 * Start up.
+	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
+		$this->refresh_caches();
 		$this->ensure_api_key_is_set();
 		$this->load_options();
+	}
+
+	/**
+	 * Check for cache refresh.
+	 */
+	protected function refresh_caches() {
+		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
+			$this->delete_all_cached_data();
+		}
+	}
+
+	/**
+	 * Let's get going.
+	 */
+	public function run() {
 		$this->load_hooks();
 	}
 
@@ -263,10 +280,10 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
-				new Install( 'plugin' );
+				Singleton::get_instance( 'Install' )->install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
-				new Install( 'theme' );
+				Singleton::get_instance( 'Install' )->install( 'theme' );
 			}
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
@@ -652,10 +669,9 @@ class Settings extends Base {
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
-		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',
-			'key'    => $api_key,
+			'key'    => self::$api_key,
 		), admin_url( 'admin-ajax.php' ) );
 
 		?>
@@ -737,41 +753,20 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Filter options so that sub-tab options are grouped in single $options variable.
+	 * Filter options to remove unchecked checkbox options.
 	 *
 	 * @access private
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$plugins          = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes           = Singleton::get_instance( 'Theme' )->get_theme_configs();
-		$repos            = array_merge( $plugins, $themes );
-		$options          = parent::$options;
-		$non_repo_options = array(
-			'github_access_token',
-			'bitbucket_username',
-			'bitbucket_password',
-			'bitbucket_server_username',
-			'bitbucket_server_password',
-			'gitlab_access_token',
-			'gitlab_enterprise_token',
-			'branch_switch',
-			'db_version',
-		);
+		$options = parent::$options;
 
-		$repos = array_map( function( $e ) {
-			return $e->repo = null;
-		}, $repos );
+		// Remove checkbox options.
+		$options = array_filter( $options, function( $e ) {
+			return $e !== '1';
+		} );
 
-		array_filter( $non_repo_options,
-			function( $e ) use ( &$options ) {
-				unset( $options[ $e ] );
-			}
-		);
-
-		$intersect  = array_intersect( $options, $repos );
-		$db_version = array( 'db_version' => parent::$options['db_version'] );
-		$options    = array_merge( $intersect, $_POST['github_updater'], $db_version );
+		$options = array_merge( $options, $_POST['github_updater'] );
 
 		return $options;
 	}
@@ -917,7 +912,7 @@ class Settings extends Base {
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
 				'broken'  => $e->broken,
-				'dot_org' => $e->dot_org,
+				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
 			);
 		}, $type_repos );
 

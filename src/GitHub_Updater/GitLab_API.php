@@ -48,20 +48,30 @@ class GitLab_API extends API implements API_Interface {
 				? $branch->cache['current_branch']
 				: $type->branch;
 		}
+		$this->set_default_credentials();
+	}
 
+	/**
+	 * Set default credentials if option not set.
+	 */
+	protected function set_default_credentials() {
+		$set_credentials = false;
 		if ( ! isset( self::$options['gitlab_access_token'] ) ) {
 			self::$options['gitlab_access_token'] = null;
+			$set_credentials                      = true;
 		}
 		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
 			self::$options['gitlab_enterprise_token'] = null;
+			$set_credentials                          = true;
 		}
-		if (
-			empty( self::$options['gitlab_access_token'] ) ||
-			( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $type->enterprise ) )
+		if ( empty( self::$options['gitlab_access_token'] ) ||
+		     ( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
 		) {
 			Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
 		}
-		add_site_option( 'github_updater', self::$options );
+		if ( $set_credentials ) {
+			add_site_option( 'github_updater', self::$options );
+		}
 	}
 
 	/**

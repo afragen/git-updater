@@ -38,19 +38,23 @@ class Language_Pack extends Base {
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {
-		if ( empty( $repo->languages ) ) {
+		parent::__construct();
+		if ( null === $repo->languages ) {
 			return;
 		}
 
 		$this->repo     = $repo;
 		$this->repo_api = $api;
-		$this->run();
 	}
 
 	/**
 	 * Do the Language Pack integration.
 	 */
-	protected function run() {
+	public function run() {
+		if ( null === $this->repo ) {
+			return false;
+		}
+
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 

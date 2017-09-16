@@ -44,7 +44,7 @@ final class Singleton {
 		// Stores calling class for use in class Basic_Auth_Loader.
 		if ( $instance[ $class ] instanceof Basic_Auth_Loader ) {
 			$backtrace                  = debug_backtrace();
-			$instance[ $class ]->caller = $backtrace[1]['object'];
+			$instance[ $class ]->caller = isset( $backtrace[1]['object'] ) ? $backtrace[1]['object'] : null;
 		}
 
 		return $instance[ $class ];

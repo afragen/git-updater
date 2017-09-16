@@ -43,14 +43,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function __construct( $type ) {
 		parent::__construct( $type );
-
-		if ( ! isset( self::$options['bitbucket_server_username'] ) ) {
-			self::$options['bitbucket_server_username'] = null;
-		}
-		if ( ! isset( self::$options['bitbucket_server_password'] ) ) {
-			self::$options['bitbucket_server_password'] = null;
-		}
-		add_site_option( 'github_updater', self::$options );
 	}
 
 	/**
@@ -578,8 +570,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			if ( ! empty( $install['bitbucket_password'] ) ) {
 				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
-
-			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() );
 		}
 
 		return $install;

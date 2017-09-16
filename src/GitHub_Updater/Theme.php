@@ -42,13 +42,12 @@ class Theme extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 
-		/*
-		 * Get details of installed git sourced themes.
-		 */
+		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}
@@ -63,6 +62,18 @@ class Theme extends Base {
 	}
 
 	/**
+	 * Delete cache of current theme.
+	 * This is needed in case `wp_get_theme()` is called in earlier or in a mu-plugin.
+	 * This action results in the extra headers not being added.
+	 *
+	 * @link https://github.com/afragen/github-updater/issues/586
+	 */
+	private function delete_current_theme_cache() {
+		$cache_hash = md5( get_stylesheet_directory() );
+		wp_cache_delete( 'theme-' . $cache_hash, 'themes' );
+	}
+
+	/**
 	 * Reads in WP_Theme class of each theme.
 	 * Populates variable array.
 	 *
@@ -70,7 +81,8 @@ class Theme extends Base {
 	 */
 	protected function get_theme_meta() {
 		$git_themes = array();
-		$themes     = wp_get_themes( array( 'errors' => null ) );
+		$this->delete_current_theme_cache();
+		$themes = wp_get_themes( array( 'errors' => null ) );
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
@@ -145,9 +157,7 @@ class Theme extends Base {
 				break;
 			}
 
-			/*
-			 * Exit if not git hosted theme.
-			 */
+			// Exit if not git hosted theme.
 			if ( empty( $git_theme ) ) {
 				continue;
 			}
@@ -332,8 +342,7 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		$options = get_site_option( 'github_updater' );
-		if ( empty( $options['branch_switch'] ) ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 
@@ -375,11 +384,11 @@ class Theme extends Base {
 	 * @param $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
+		$themes = $this->get_theme_configs();
 
 		foreach ( parent::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
-			$themes      = $this->get_theme_configs();
 
 			/**
 			 * Filter to add themes not containing appropriate header line.
@@ -406,7 +415,9 @@ class Theme extends Base {
 			}
 			break;
 		}
-		remove_action( "after_theme_row_$theme_key", array( $this, 'wp_theme_update_row' ) );
+		if ( array_key_exists( $theme_key, $themes ) ) {
+			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
+		}
 	}
 
 	/**
@@ -509,7 +520,6 @@ class Theme extends Base {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
-		$options           = get_site_option( 'github_updater' );
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme->repo ),
 			'upgrade-theme_' . $theme->repo
@@ -517,7 +527,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( '1' === $options['branch_switch'] ) {
+		if ( '1' === self::$options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
@@ -584,18 +594,7 @@ class Theme extends Base {
 					'type'        => $theme->type,
 				);
 
-				/*
-				 * Skip on branch switching or rollback.
-				 */
-				if ( $this->tag &&
-				     ( isset( $_GET['theme'] ) && $theme->repo === $_GET['theme'] )
-				) {
-					continue;
-				}
-
-				/*
-				 * Skip on RESTful updating.
-				 */
+				// Skip on RESTful updating.
 				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
 				     $response['theme'] === $_GET['theme']
 				) {
@@ -608,18 +607,27 @@ class Theme extends Base {
 					if ( isset( $transient->response[ $theme->repo ], $transient->response[ $theme->repo ]['type'] ) ) {
 						unset( $transient->response[ $theme->repo ] );
 					}
-					continue;
+					if ( ! $this->tag ) {
+						continue;
+					}
 				}
 
 				$transient->response[ $theme->repo ] = $response;
 			}
 
-			// Unset if override dot org and same slug on dot org.
+			// Unset if override dot org AND same slug on dot org.
 			if ( isset( $transient->response[ $theme->repo ] ) &&
 			     ! isset( $transient->response[ $theme->repo ]['type'] ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $theme->repo ] );
+			}
+
+			// Set transient for rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->repo === $_GET['theme'] )
+			) {
+				$transient->response[ $theme->repo ] = $this->set_rollback_transient( 'theme', $theme );
 			}
 		}
 

@@ -40,13 +40,12 @@ class Plugin extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 
-		/*
-		 * Get details of installed git sourced plugins.
-		 */
+		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
 
-		if ( empty( $this->config ) ) {
+		if ( null === $this->config ) {
 			return;
 		}
 	}
@@ -66,9 +65,7 @@ class Plugin extends Base {
 	 * @return array Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
-		/*
-		 * Ensure get_plugins() function is available.
-		 */
+		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
@@ -215,8 +212,7 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		$options = get_site_option( 'github_updater' );
-		if ( empty( $options['branch_switch'] ) ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 
@@ -374,13 +370,6 @@ class Plugin extends Base {
 					'type'        => $plugin->type,
 				);
 
-				// Skip on branch switching or rollback.
-				if ( $this->tag &&
-				     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
-				) {
-					continue;
-				}
-
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
 				     $response['slug'] === $_GET['plugin']
@@ -394,18 +383,27 @@ class Plugin extends Base {
 					if ( isset( $transient->response[ $plugin->slug ], $transient->response[ $plugin->slug ]->type ) ) {
 						unset( $transient->response[ $plugin->slug ] );
 					}
-					continue;
+					if ( ! $this->tag ) {
+						continue;
+					}
 				}
 
 				$transient->response[ $plugin->slug ] = (object) $response;
 			}
 
-			// Unset if override dot org and same slug on dot org.
+			// Unset if override dot org AND same slug on dot org.
 			if ( isset( $transient->response[ $plugin->slug ] ) &&
 			     ! isset( $transient->response[ $plugin->slug ]->type ) &&
 			     $this->is_override_dot_org()
 			) {
 				unset( $transient->response[ $plugin->slug ] );
+			}
+
+			// Set transient on rollback.
+			if ( $this->tag &&
+			     ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+			) {
+				$transient->response[ $plugin->slug ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 

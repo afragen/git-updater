@@ -44,13 +44,6 @@ class Base {
 	protected $repo_api;
 
 	/**
-	 * Class Object for Language Packs.
-	 *
-	 * @var \stdClass
-	 */
-	protected $languages;
-
-	/**
 	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
@@ -77,6 +70,13 @@ class Base {
 	 * @var mixed
 	 */
 	protected static $options_remote;
+
+	/**
+	 * Holds the value for the Remote Management API key.
+	 *
+	 * @var
+	 */
+	protected static $api_key;
 
 	/**
 	 * Holds HTTP error code from API call.
@@ -144,14 +144,15 @@ class Base {
 
 	/**
 	 * Constructor.
-	 * Loads options to private static variable.
 	 */
 	public function __construct() {
-		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
-			$this->delete_all_cached_data();
-		}
-
 		$this->set_installed_apis();
+	}
+
+	/**
+	 * Let's get going.
+	 */
+	public function run() {
 		$this->load_hooks();
 
 		if ( self::is_wp_cli() ) {
@@ -163,7 +164,7 @@ class Base {
 	/**
 	 * Set boolean for installed API classes.
 	 */
-	private function set_installed_apis() {
+	protected function set_installed_apis() {
 		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' ) ) {
 			self::$installed_apis['bitbucket_server_api'] = true;
 		}
@@ -181,6 +182,7 @@ class Base {
 	protected function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		self::$api_key        = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -194,9 +196,7 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
-		/*
-		 * Load hook for shiny updates Basic Authentication headers.
-		 */
+		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
 			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
@@ -205,10 +205,16 @@ class Base {
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
 
-		/*
-		 * The following hook needed to ensure transient is reset correctly after
-		 * shiny updates.
-		 */
+		// Needed for updating from update-core.php.
+		if ( ! self::is_doing_ajax() ) {
+			add_filter( 'upgrader_pre_download',
+				array(
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					'upgrader_pre_download',
+				), 10, 3 );
+		}
+
+		// The following hook needed to ensure transient is reset correctly after shiny updates.
 		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
@@ -230,8 +236,7 @@ class Base {
 	 * Ensure api key is set.
 	 */
 	public function ensure_api_key_is_set() {
-		$api_key = get_site_option( 'github_updater_api_key' );
-		if ( ! $api_key ) {
+		if ( ! self::$api_key ) {
 			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
 		}
 	}
@@ -304,7 +309,7 @@ class Base {
 		if ( self::$load_repo_meta && is_admin() &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
-			Singleton::get_instance( 'Settings' );
+			Singleton::get_instance( 'Settings' )->run();
 		}
 
 		return true;
@@ -526,7 +531,8 @@ class Base {
 			}
 			$this->repo_api->get_remote_tag();
 			$repo->download_link = $this->repo_api->construct_download_link();
-			$this->languages     = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			$language_pack->run();
 		}
 
 		$this->remove_hooks();
@@ -830,12 +836,6 @@ class Base {
 		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
 		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
 
-		if ( ( isset( $this->tag ) && $this->tag ) &&
-		     ( isset( $_GET['plugin'] ) && $type->slug === $_GET['plugin'] )
-		) {
-			$remote_is_newer = true;
-		}
-
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
 
@@ -1094,9 +1094,7 @@ class Base {
 		}
 
 		if ( $branch ) {
-			$options = get_site_option( 'github_updater' );
-
-			return empty( $options['branch_switch'] );
+			return empty( self::$options['branch_switch'] );
 		}
 
 		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update( $this->type ) );
@@ -1282,7 +1280,7 @@ class Base {
 
 		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
 			$repo = $this->config[ $slug ];
-			$this->set_rollback_transient( $type, $repo );
+			$this->set_rollback_transient( $type, $repo, true );
 		}
 
 		return $update_data;
@@ -1291,10 +1289,13 @@ class Base {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string    $type plugin|theme
+	 * @param string    $type          plugin|theme
 	 * @param \stdClass $repo
+	 * @param bool      $set_transient Default false, if true then set update transient.
+	 *
+	 * @return array $rollback Rollback transient.
 	 */
-	private function set_rollback_transient( $type, $repo ) {
+	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		switch ( $repo->type ) {
 			case 'github_plugin':
 			case 'github_theme':
@@ -1314,27 +1315,31 @@ class Base {
 				break;
 		}
 
-		$transient         = 'update_' . $type . 's';
-		$this->tag         = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
-		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
-		$updates_transient = get_site_transient( $transient );
-		$rollback          = array(
+		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
+		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
+		$rollback  = array(
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
 			'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
+			'type'        => $repo->type,
 		);
 
 		if ( 'plugin' === $type ) {
-			$rollback['slug']                     = $repo->repo;
-			$updates_transient->response[ $slug ] = (object) $rollback;
+			$rollback['slug'] = $repo->repo;
+			$rollback         = (object) $rollback;
 		}
-		if ( 'theme' === $type ) {
-			$updates_transient->response[ $slug ] = (array) $rollback;
+
+		if ( $set_transient ) {
+			$transient                  = 'update_' . $type . 's';
+			$current                    = get_site_transient( $transient );
+			$current->response[ $slug ] = $rollback;
+			set_site_transient( $transient, $current );
 		}
-		set_site_transient( $transient, $updates_transient );
+
+		return $rollback;
 	}
 
 	/**
