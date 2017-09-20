@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 7.3.1 / 2017-09-20
+* removed parent constructor from `Branch`, thanks @fwolfst
+
 #### 7.3.0 / 2017-09-15
 * removed non-constructor stuff from all constructors
 * added `parent::__construct()` to extended classes where needed
