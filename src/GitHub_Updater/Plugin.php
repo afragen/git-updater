@@ -195,7 +195,7 @@ class Plugin extends Base {
 		}
 
 		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
-			wp_schedule_single_event( time() + 5, 'ghu_get_remote_plugin', array( $plugins ) );
+			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.

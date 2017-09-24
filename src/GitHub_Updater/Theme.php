@@ -205,7 +205,7 @@ class Theme extends Base {
 		}
 
 		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
-			wp_schedule_single_event( time() + 5, 'ghu_get_remote_theme', array( $themes ) );
+			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 		}
 
 		// Update theme transient with rollback (branch switching) data.
