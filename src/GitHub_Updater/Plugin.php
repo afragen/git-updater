@@ -189,10 +189,8 @@ class Plugin extends Base {
 			}
 		}
 
-		//add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1  );
-		//add_action( 'ghu_get_remote_meta', $this->run_cron_batch() );
 		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
-			wp_schedule_single_event( time() + 30, 'ghu_get_remote_plugin', array( $plugins ) );
+			wp_schedule_single_event( time() + 5, 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
