@@ -181,6 +181,11 @@ class Plugin extends Base {
 
 			$plugins[ $plugin->repo ] = self::$batches[ $plugin->repo ] = $plugin;
 
+			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
+			if ( $cache ) {
+				$this->get_remote_repo_meta( $plugin );
+			}
+
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 			     ( ! is_multisite() || is_network_admin() )

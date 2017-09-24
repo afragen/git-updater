@@ -182,6 +182,11 @@ class Theme extends Base {
 
 			$themes[ $theme->repo ] = self::$batches[ $theme->repo ] = $theme;
 
+			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $theme->repo );
+			if ( $cache ) {
+				$this->get_remote_repo_meta( $theme );
+			}
+
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
