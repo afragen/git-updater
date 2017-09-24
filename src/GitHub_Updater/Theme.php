@@ -502,7 +502,7 @@ class Theme extends Base {
 						esc_attr( $theme->name )
 					);
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-						$theme->remote_version,
+						$theme->remote_version = isset( $theme->remote_version ) ? $theme->remote_version : null,
 						'</a>',
 						sprintf( '<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
 							$theme->name
@@ -552,8 +552,10 @@ class Theme extends Base {
 								   ">
 						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 						<?php
-						foreach ( array_keys( $theme->branches ) as $branch ) {
-							echo '<option>' . $branch . '</option>';
+						if ( isset( $theme->branches ) ) {
+							foreach ( array_keys( $theme->branches ) as $branch ) {
+								echo '<option>' . $branch . '</option>';
+							}
 						}
 						if ( ! empty( $theme->rollback ) ) {
 							$rollback = array_keys( $theme->rollback );

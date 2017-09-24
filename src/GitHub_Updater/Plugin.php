@@ -234,7 +234,9 @@ class Plugin extends Base {
 
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
-			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+			$branches = isset( $this->config[ $plugin['repo'] ]->branches )
+				? $this->config[ $plugin['repo'] ]->branches
+				: null;
 		} else {
 			return false;
 		}

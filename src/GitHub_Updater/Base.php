@@ -474,7 +474,6 @@ class Base {
 	}
 
 	public function run_cron_batch( array $batches ) {
-		//$chunks = array_chunk(self::$batches, 5, true );
 		$batches = empty( $batches ) ? self::$batches : $batches;
 
 		foreach ( $batches as $repo ) {
@@ -845,9 +844,13 @@ class Base {
 	public function can_update( $type ) {
 		global $wp_version;
 
-		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
-		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
-		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+		if ( isset( $type->remote_version, $type->requires_php_version,$type->requires_php_version )){
+			$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+			$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
+			$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+		} else {
+			return false;
+		}
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
@@ -1213,12 +1216,14 @@ class Base {
 
 		print( '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">' );
 
-		foreach ( array_keys( $data['branches'] ) as $branch ) {
-			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
-				$data['nonced_update_url'],
-				'&rollback=' . urlencode( $branch ),
-				esc_attr( $branch )
-			);
+		if ( null !== $data['branches'] ) {
+			foreach ( array_keys( $data['branches'] ) as $branch ) {
+				printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+					$data['nonced_update_url'],
+					'&rollback=' . urlencode( $branch ),
+					esc_attr( $branch )
+				);
+			}
 		}
 
 		if ( ! empty( $rollback ) ) {
