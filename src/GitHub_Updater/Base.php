@@ -142,6 +142,8 @@ class Base {
 	 */
 	protected static $load_repo_meta;
 
+	protected static $batches;
+
 	/**
 	 * Constructor.
 	 */
@@ -331,6 +333,8 @@ class Base {
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
 		add_action( 'update_option_auto_updater.lock', array( &$this, 'forced_meta_update_remote_management' ) );
+		add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
 	}
 
 	/**
@@ -467,6 +471,15 @@ class Base {
 		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
+	}
+
+	public function run_cron_batch( array $batches ) {
+		//$chunks = array_chunk(self::$batches, 5, true );
+		$batches = empty( $batches ) ? self::$batches : $batches;
+
+		foreach ( $batches as $repo ) {
+			$this->get_remote_repo_meta( $repo );
+		}
 	}
 
 	/**

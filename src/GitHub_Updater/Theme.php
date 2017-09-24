@@ -173,11 +173,14 @@ class Theme extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_theme_meta() {
+		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 
-			if ( ! $this->get_remote_repo_meta( $theme ) ) {
-				continue;
-			}
+			//if ( ! $this->get_remote_repo_meta( $theme ) ) {
+			//	continue;
+			//}
+
+			$themes[ $theme->repo ] = self::$batches[ $theme->repo ] = $theme;
 
 			/*
 			 * Add update row to theme row, only in multisite.
@@ -194,6 +197,11 @@ class Theme extends Base {
 					}
 				}
 			}
+		}
+
+		//add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ),10,1  );
+		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
+			wp_schedule_single_event( time() + 60, 'ghu_get_remote_theme', array( $themes ) );
 		}
 
 		// Update theme transient with rollback (branch switching) data.

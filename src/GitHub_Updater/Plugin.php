@@ -172,11 +172,14 @@ class Plugin extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
+		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
-				continue;
-			}
+			//if ( ! $this->get_remote_repo_meta( $plugin ) ) {
+			//	continue;
+			//}
+
+			$plugins[ $plugin->repo ] = self::$batches[ $plugin->repo ] = $plugin;
 
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
@@ -184,6 +187,12 @@ class Plugin extends Base {
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
+		}
+
+		//add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1  );
+		//add_action( 'ghu_get_remote_meta', $this->run_cron_batch() );
+		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
+			wp_schedule_single_event( time() + 30, 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
