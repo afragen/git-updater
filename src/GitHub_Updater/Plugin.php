@@ -175,11 +175,7 @@ class Plugin extends Base {
 		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			//if ( ! $this->get_remote_repo_meta( $plugin ) ) {
-			//	continue;
-			//}
-
-			$plugins[ $plugin->repo ] = self::$batches[ $plugin->repo ] = $plugin;
+			$plugins[ $plugin->repo ] = $plugin;
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
 			if ( $cache ) {

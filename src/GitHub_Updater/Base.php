@@ -142,8 +142,6 @@ class Base {
 	 */
 	protected static $load_repo_meta;
 
-	protected static $batches;
-
 	/**
 	 * Constructor.
 	 */
@@ -473,9 +471,12 @@ class Base {
 		$this->$type->release_asset        = false;
 	}
 
+	/**
+	 * Runs on wp-cron job to get remote repo meta in background.
+	 *
+	 * @param array $batches
+	 */
 	public function run_cron_batch( array $batches ) {
-		$batches = empty( $batches ) ? self::$batches : $batches;
-
 		foreach ( $batches as $repo ) {
 			$this->get_remote_repo_meta( $repo );
 		}

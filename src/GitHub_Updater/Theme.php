@@ -176,11 +176,7 @@ class Theme extends Base {
 		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 
-			//if ( ! $this->get_remote_repo_meta( $theme ) ) {
-			//	continue;
-			//}
-
-			$themes[ $theme->repo ] = self::$batches[ $theme->repo ] = $theme;
+			$themes[ $theme->repo ] = $theme;
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $theme->repo );
 			if ( $cache ) {
