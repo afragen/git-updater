@@ -356,7 +356,9 @@ class Theme extends Base {
 
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme', true );
 		$id                = $theme_key . '-id';
-		$branches          = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$branches          = isset( $this->config[ $theme_key ]->branches )
+			? $this->config[ $theme_key ]->branches
+			: null;
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
