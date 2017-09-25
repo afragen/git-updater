@@ -615,10 +615,10 @@ class Bitbucket_API extends API implements API_Interface {
 			if ( isset( $install['is_private'] ) ) {
 				parent::$options[ $install['repo'] ] = 1;
 			}
-			if ( isset( $install['bitbucket_username'] ) ) {
+			if ( ! empty( $install['bitbucket_username'] ) ) {
 				parent::$options['bitbucket_username'] = $install['bitbucket_username'];
 			}
-			if ( isset( $install['bitbucket_password'] ) ) {
+			if ( ! empty( $install['bitbucket_password'] ) ) {
 				parent::$options['bitbucket_password'] = $install['bitbucket_password'];
 			}
 		}
