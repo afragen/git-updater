@@ -173,10 +173,14 @@ class Theme extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_theme_meta() {
+		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 
-			if ( ! $this->get_remote_repo_meta( $theme ) ) {
-				continue;
+			$themes[ $theme->repo ] = $theme;
+
+			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $theme->repo );
+			if ( $cache ) {
+				$this->get_remote_repo_meta( $theme );
 			}
 
 			/*
@@ -194,6 +198,10 @@ class Theme extends Base {
 					}
 				}
 			}
+		}
+
+		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
+			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 		}
 
 		// Update theme transient with rollback (branch switching) data.
@@ -348,7 +356,9 @@ class Theme extends Base {
 
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme', true );
 		$id                = $theme_key . '-id';
-		$branches          = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$branches          = isset( $this->config[ $theme_key ]->branches )
+			? $this->config[ $theme_key ]->branches
+			: null;
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
@@ -494,7 +504,7 @@ class Theme extends Base {
 						esc_attr( $theme->name )
 					);
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-						$theme->remote_version,
+						$theme->remote_version = isset( $theme->remote_version ) ? $theme->remote_version : null,
 						'</a>',
 						sprintf( '<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
 							$theme->name
@@ -544,8 +554,10 @@ class Theme extends Base {
 								   ">
 						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 						<?php
-						foreach ( array_keys( $theme->branches ) as $branch ) {
-							echo '<option>' . $branch . '</option>';
+						if ( isset( $theme->branches ) ) {
+							foreach ( array_keys( $theme->branches ) as $branch ) {
+								echo '<option>' . $branch . '</option>';
+							}
 						}
 						if ( ! empty( $theme->rollback ) ) {
 							$rollback = array_keys( $theme->rollback );

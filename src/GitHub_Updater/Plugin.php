@@ -172,10 +172,14 @@ class Plugin extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
+		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
-				continue;
+			$plugins[ $plugin->repo ] = $plugin;
+
+			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
+			if ( $cache ) {
+				$this->get_remote_repo_meta( $plugin );
 			}
 
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
@@ -184,6 +188,10 @@ class Plugin extends Base {
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
+		}
+
+		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
+			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
@@ -225,7 +233,9 @@ class Plugin extends Base {
 
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
-			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+			$branches = isset( $this->config[ $plugin['repo'] ]->branches )
+				? $this->config[ $plugin['repo'] ]->branches
+				: null;
 		} else {
 			return false;
 		}

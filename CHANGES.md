@@ -1,4 +1,5 @@
 #### [unreleased]
+* remote repo data now obtained using wp-cron for background processing
 
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst

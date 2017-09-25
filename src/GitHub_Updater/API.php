@@ -268,7 +268,7 @@ abstract class API extends Base {
 	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	protected function get_repo_cache( $repo = false ) {
+	public function get_repo_cache( $repo = false ) {
 		if ( ! $repo ) {
 			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}

@@ -331,6 +331,8 @@ class Base {
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
 		add_action( 'update_option_auto_updater.lock', array( &$this, 'forced_meta_update_remote_management' ) );
+		add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
 	}
 
 	/**
@@ -467,6 +469,17 @@ class Base {
 		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
+	}
+
+	/**
+	 * Runs on wp-cron job to get remote repo meta in background.
+	 *
+	 * @param array $batches
+	 */
+	public function run_cron_batch( array $batches ) {
+		foreach ( $batches as $repo ) {
+			$this->get_remote_repo_meta( $repo );
+		}
 	}
 
 	/**
@@ -832,9 +845,13 @@ class Base {
 	public function can_update( $type ) {
 		global $wp_version;
 
-		$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
-		$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
-		$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+		if ( isset( $type->remote_version, $type->requires_php_version,$type->requires_php_version )){
+			$remote_is_newer = version_compare( $type->remote_version, $type->local_version, '>' );
+			$wp_version_ok   = version_compare( $wp_version, $type->requires_wp_version, '>=' );
+			$php_version_ok  = version_compare( PHP_VERSION, $type->requires_php_version, '>=' );
+		} else {
+			return false;
+		}
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
@@ -1200,12 +1217,14 @@ class Base {
 
 		print( '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">' );
 
-		foreach ( array_keys( $data['branches'] ) as $branch ) {
-			printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
-				$data['nonced_update_url'],
-				'&rollback=' . urlencode( $branch ),
-				esc_attr( $branch )
-			);
+		if ( null !== $data['branches'] ) {
+			foreach ( array_keys( $data['branches'] ) as $branch ) {
+				printf( '<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
+					$data['nonced_update_url'],
+					'&rollback=' . urlencode( $branch ),
+					esc_attr( $branch )
+				);
+			}
 		}
 
 		if ( ! empty( $rollback ) ) {
