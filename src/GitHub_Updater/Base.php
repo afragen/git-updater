@@ -1509,6 +1509,9 @@ class Base {
 	 * @return bool
 	 */
 	protected function is_private( $repo ) {
+		if ( ! isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
+			return true;
+		}
 		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
 			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
 		}
