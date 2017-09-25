@@ -162,7 +162,7 @@ class Install extends Base {
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
 				if ( parent::$installed_apis['bitbucket_api'] ) {
-					Singleton::get_instance( 'Basic_Auth_Loader' )->load_authentication_hooks();
+					Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
 					self::$install = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
