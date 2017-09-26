@@ -1,5 +1,5 @@
 #### [unreleased]
-* remote repo data now obtained using wp-cron for background processing
+* use wp-cron for background processing of `wp_remote_get()` calls for getting repo data
 
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst
