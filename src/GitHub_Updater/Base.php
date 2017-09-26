@@ -1240,7 +1240,8 @@ class Base {
 					esc_attr( $tag )
 				);
 			}
-		} else {
+		}
+		if ( empty( $rollback ) ) {
 			esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 		}
 
