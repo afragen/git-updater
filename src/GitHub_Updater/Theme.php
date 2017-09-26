@@ -180,6 +180,7 @@ class Theme extends Base {
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $theme->repo );
 			if ( $cache ) {
+				unset( $themes[ $theme->repo ] );
 				$this->get_remote_repo_meta( $theme );
 			}
 
@@ -200,7 +201,7 @@ class Theme extends Base {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
+		if ( ! empty( $themes ) && ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 		}
 

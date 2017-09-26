@@ -179,6 +179,7 @@ class Plugin extends Base {
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
 			if ( $cache ) {
+				unset( $plugins[ $plugin->repo ] );
 				$this->get_remote_repo_meta( $plugin );
 			}
 
@@ -190,7 +191,7 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
+		if ( ! empty( $plugins ) && ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
