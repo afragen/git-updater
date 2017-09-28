@@ -1,5 +1,6 @@
 #### [unreleased]
 * use wp-cron for background processing of `wp_remote_get()` calls for getting repo data
+* fixed [#603](https://github.com/afragen/github-updater/issues/603) by not creating generic global variables accidentally
 
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst
