@@ -491,7 +491,7 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		self::$hours    = 6 + mt_rand( 0, 12 );
+		self::$hours    = 12;
 		$this->repo_api = null;
 		$file           = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
