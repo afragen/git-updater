@@ -178,7 +178,7 @@ class Plugin extends Base {
 			$plugins[ $plugin->repo ] = $plugin;
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
-			if ( $cache ) {
+			if ( $cache || parent::is_wp_cli() ) {
 				unset( $plugins[ $plugin->repo ] );
 				$this->get_remote_repo_meta( $plugin );
 			}

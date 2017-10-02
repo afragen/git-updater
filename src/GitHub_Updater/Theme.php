@@ -179,7 +179,7 @@ class Theme extends Base {
 			$themes[ $theme->repo ] = $theme;
 
 			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $theme->repo );
-			if ( $cache ) {
+			if ( $cache || parent::is_wp_cli() ) {
 				unset( $themes[ $theme->repo ] );
 				$this->get_remote_repo_meta( $theme );
 			}
