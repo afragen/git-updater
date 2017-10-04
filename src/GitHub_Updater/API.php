@@ -137,14 +137,14 @@ abstract class API extends Base {
 
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
-		$code          = (integer) wp_remote_retrieve_response_code( $response );
+		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = array( 200, 404 );
 
 		// Set 'broken' if main file doesn't return 200.
 		if ( false !== strrpos( basename( $url ), '.php' ) ||
 		     false !== strrpos( basename( $url ), '.css' )
 		) {
-			$this->type->broken = (int) 200 !== $code;
+			$this->type->broken = 200 !== $code;
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -152,7 +152,7 @@ abstract class API extends Base {
 
 			return false;
 		}
-		if ( ! in_array( $code, $allowed_codes, false ) ) {
+		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			self::$error_code = array_merge(
 				self::$error_code,
 				array(
