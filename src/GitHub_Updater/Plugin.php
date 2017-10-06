@@ -159,6 +159,20 @@ class Plugin extends Base {
 						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
 						: null;
 
+				$git_plugin['icons'] = array();
+				$icons               = array(
+					'svg'    => 'icon.svg',
+					'1x_png' => 'icon-128x128.png',
+					'1x_jpg' => 'icon-128x128.jpg',
+					'2x_png' => 'icon-256x256.png',
+					'2x_jpg' => 'icon-256x256.jpg',
+				);
+				foreach ( $icons as $key => $filename ) {
+					$key  = preg_replace( '/_png|_jpg/', '', $key );
+					$icon = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
+						? $git_plugin['icons'][ $key ] = trailingslashit( WP_PLUGIN_URL ) . $git_plugin['repo'] . '/assets/' . $filename
+						: null;
+				}
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -346,6 +360,7 @@ class Plugin extends Base {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
+		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
 		foreach ( (array) $plugin->contributors as $contributor ) {
 			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 		}
@@ -376,6 +391,7 @@ class Plugin extends Base {
 					'new_version' => $plugin->remote_version,
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,
+					'icons'       => $plugin->icons,
 					'branch'      => $plugin->branch,
 					'branches'    => array_keys( $plugin->branches ),
 					'type'        => $plugin->type,
