@@ -514,15 +514,12 @@ class Settings extends Base {
 			}
 		}, $auth_required_unset );
 
-		// Unset if value set AND if associated with a repo.
 		// Unset if current_branch AND if associated with repo.
 		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
 			$key  = array_search( $e, $ghu_unset_keys, true );
 			$repo = str_replace( 'current_branch_', '', $key );
-			if ( ( array_key_exists( $key, $ghu_unset_keys ) &&
-			       array_key_exists( $key, $ghu_tokens ) )
-			     || ( array_key_exists( $repo, $ghu_tokens )
-			          && false !== strpos( $key, 'current_branch' ) )
+			if ( array_key_exists( $key, $ghu_unset_keys )
+			     && false !== strpos( $key, 'current_branch' )
 			) {
 				unset( $ghu_unset_keys[ $key ] );
 			}
