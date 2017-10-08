@@ -487,7 +487,7 @@ class Base {
 	 *
 	 * @param null $repo
 	 *
-	 * @return bool false when not waiting for wp-cron job to finish.
+	 * @return bool true when waiting for wp-cron job to finish.
 	 */
 	protected function waiting_for_wp_cron( $repo = null ) {
 		if ( null !== $repo ) {
