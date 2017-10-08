@@ -191,9 +191,7 @@ class Plugin extends Base {
 
 			$plugins[ $plugin->repo ] = $plugin;
 
-			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $plugin->repo );
-			if ( $cache || parent::is_wp_cli() ) {
-				unset( $plugins[ $plugin->repo ] );
+			if ( ! $this->waiting_for_wp_cron( $plugin ) || static::is_wp_cli() ) {
 				$this->get_remote_repo_meta( $plugin );
 			}
 
@@ -205,7 +203,7 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( ! empty( $plugins ) && ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
+		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
