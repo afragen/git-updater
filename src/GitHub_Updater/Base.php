@@ -483,6 +483,33 @@ class Base {
 	}
 
 	/**
+	 * Check to see if wp-cron updating has finished.
+	 *
+	 * @param null $repo
+	 *
+	 * @return bool false when not waiting for wp-cron job to finish.
+	 */
+	protected function waiting_for_wp_cron( $repo = null ) {
+		if ( null !== $repo ) {
+			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $repo->repo );
+
+			return empty( $cache );
+		}
+		$repos = array_merge(
+			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme' )->get_theme_configs()
+		);
+		foreach ( $repos as $repo ) {
+			$caches[ $repo->repo ] = Singleton::get_instance( 'Branch' )->get_repo_cache( $repo->repo );
+		}
+		$waiting = array_filter( $caches, function( $e ) {
+			return empty( $e );
+		} );
+
+		return ! empty( $waiting );
+	}
+
+	/**
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
 	 *
