@@ -742,7 +742,7 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) ) {
+		if ( isset( $_POST['option_page'] ) && ! $this->waiting_for_wp_cron() ) {
 			if ( 'github_updater' === $_POST['option_page'] ) {
 				$options = $this->filter_options();
 				update_site_option( 'github_updater', self::sanitize( $options ) );
