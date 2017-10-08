@@ -472,9 +472,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( ! $this->waiting_for_wp_cron() ) {
-			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
-		}
+		$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
 	}
 
 	/**
