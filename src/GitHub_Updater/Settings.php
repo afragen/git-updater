@@ -395,8 +395,6 @@ class Settings extends Base {
 		if ( parent::$installed_apis['bitbucket_server_api'] ) {
 			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings();
 		}
-
-		$this->update_settings();
 	}
 
 	/**
