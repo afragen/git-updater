@@ -481,10 +481,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
-		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
-			'token_callback_checkbox',
-		);
+		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_checkbox' );
 
 		return $setting_field;
 	}

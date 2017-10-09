@@ -118,41 +118,7 @@ class Install extends Base {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-
-				if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
-					$base            = 'https://api.github.com';
-					$headers['host'] = 'github.com';
-				} else {
-					$base = $headers['base_uri'] . '/api/v3';
-				}
-
-				self::$install['download_link'] = implode( '/', array(
-					$base,
-					'repos',
-					self::$install['github_updater_repo'],
-					'zipball',
-					self::$install['github_updater_branch'],
-				) );
-				/*
-				 * If asset is entered install it.
-				 */
-				if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
-					self::$install['download_link'] = $headers['uri'];
-				}
-
-				/*
-				 * Add access token if present.
-				 */
-				if ( ! empty( self::$install['github_access_token'] ) ) {
-					self::$install['download_link']            = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
-					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
-				} elseif ( ! empty( parent::$options['github_access_token'] ) &&
-				           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
-				) {
-					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
-				} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], self::$install['download_link'] );
-				}
+				Singleton::get_instance( 'GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
 			}
 
 			/*
@@ -173,6 +139,7 @@ class Install extends Base {
 
 			/*
 			 * Create GitLab endpoint.
+			 * Save Access Token if present.
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
@@ -316,13 +283,7 @@ class Install extends Base {
 			$type
 		);
 
-		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'github_access_token' ),
-			'github_updater_install_' . $type,
-			$type
-		);
+		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
 
 		if ( parent::$installed_apis['bitbucket_api'] ) {
 			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
@@ -378,21 +339,6 @@ class Install extends Base {
 					<?php endif ?>
 				<?php endforeach ?>
 			</select>
-		</label>
-		<?php
-	}
-
-	/**
-	 * GitHub Access Token for remote install.
-	 */
-	public function github_access_token() {
-		?>
-		<label for="github_access_token">
-			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
-			<br>
-			<span class="description">
-				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
-			</span>
 		</label>
 		<?php
 	}

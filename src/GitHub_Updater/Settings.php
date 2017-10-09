@@ -342,47 +342,7 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		/*
-		 * Add settings for GitHub Personal Access Token.
-		 */
-		add_settings_section(
-			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			array( &$this, 'print_section_github_access_token' ),
-			'github_updater_github_install_settings'
-		);
-
-		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_github_install_settings',
-			'github_access_token',
-			array( 'id' => 'github_access_token', 'token' => true )
-		);
-
-		if ( parent::$auth_required['github_enterprise'] ) {
-			add_settings_field(
-				'github_enterprise_token',
-				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_github_install_settings',
-				'github_access_token',
-				array( 'id' => 'github_enterprise_token', 'token' => true )
-			);
-		}
-
-		/*
-		 * Show section for private GitHub repositories.
-		 */
-		if ( parent::$auth_required['github_private'] || parent::$auth_required['github_enterprise'] ) {
-			add_settings_section(
-				'github_id',
-				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_github_info' ),
-				'github_updater_github_install_settings'
-			);
-		}
+		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings();
 
 		if ( parent::$installed_apis['gitlab_api'] ) {
 			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings();
@@ -434,9 +394,7 @@ class Settings extends Base {
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
-					$setting_field['page']            = 'github_updater_github_install_settings';
-					$setting_field['section']         = 'github_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
+					$repo_setting_field = Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_repo_setting_field();
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
@@ -634,7 +592,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub Updater text.
+	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
 		if ( $this->is_override_dot_org() ) {
@@ -646,20 +604,6 @@ class Settings extends Base {
 		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
 
 		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>' );
-	}
-
-	/**
-	 * Print the GitHub text.
-	 */
-	public function print_section_github_info() {
-		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
-	}
-
-	/**
-	 * Print the GitHub Personal Access Token text.
-	 */
-	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
 	}
 
 	/**
