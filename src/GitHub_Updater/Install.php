@@ -118,7 +118,7 @@ class Install extends Base {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-				Singleton::get_instance( 'GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
+				self::$install = Singleton::get_instance( 'GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
 			}
 
 			/*
