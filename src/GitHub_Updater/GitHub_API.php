@@ -523,4 +523,152 @@ class GitHub_API extends API implements API_Interface {
 		return $args;
 	}
 
+	/**
+	 * Add settings for GitHub Personal Access Token.
+	 */
+	public function add_settings() {
+		add_settings_section(
+			'github_access_token',
+			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
+			array( &$this, 'print_section_github_access_token' ),
+			'github_updater_github_install_settings'
+		);
+
+		add_settings_field(
+			'github_access_token',
+			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			'github_updater_github_install_settings',
+			'github_access_token',
+			array( 'id' => 'github_access_token', 'token' => true )
+		);
+
+		if ( parent::$auth_required['github_enterprise'] ) {
+			add_settings_field(
+				'github_enterprise_token',
+				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
+				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				'github_updater_github_install_settings',
+				'github_access_token',
+				array( 'id' => 'github_enterprise_token', 'token' => true )
+			);
+		}
+
+		/*
+		 * Show section for private GitHub repositories.
+		 */
+		if ( parent::$auth_required['github_private'] || parent::$auth_required['github_enterprise'] ) {
+			add_settings_section(
+				'github_id',
+				esc_html__( 'GitHub Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_github_info' ),
+				'github_updater_github_install_settings'
+			);
+		}
+	}
+
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field() {
+		$setting_field['page']            = 'github_updater_github_install_settings';
+		$setting_field['section']         = 'github_id';
+		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_text' );
+
+		return $setting_field;
+	}
+
+	/**
+	 * Print the GitHub text.
+	 */
+	public function print_section_github_info() {
+		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitHub Personal Access Token text.
+	 */
+	public function print_section_github_access_token() {
+		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
+	}
+
+	/**
+	 * Add remote install settings fields.
+	 *
+	 * @param $type
+	 */
+	public function add_install_settings_fields( $type ) {
+		add_settings_field(
+			'github_access_token',
+			esc_html__( 'GitHub Access Token', 'github-updater' ),
+			array( &$this, 'github_access_token' ),
+			'github_updater_install_' . $type,
+			$type
+		);
+	}
+
+	/**
+	 * GitHub Access Token for remote install.
+	 */
+	public function github_access_token() {
+		?>
+		<label for="github_access_token">
+			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
+			<br>
+			<span class="description">
+				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
+			</span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Add remote install feature, create endpoint.
+	 *
+	 * @param $headers
+	 * @param $install
+	 *
+	 * @return mixed
+	 */
+	public function remote_install( $headers, $install ) {
+		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
+			$base            = 'https://api.github.com';
+			$headers['host'] = 'github.com';
+		} else {
+			$base = $headers['base_uri'] . '/api/v3';
+		}
+
+		$install['download_link'] = implode( '/', array(
+			$base,
+			'repos',
+			$install['github_updater_repo'],
+			'zipball',
+			$install['github_updater_branch'],
+		) );
+		/*
+		 * If asset is entered install it.
+		 */
+		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
+			$install['download_link'] = $headers['uri'];
+		}
+
+		/*
+		 * Add access token if present.
+		 */
+		if ( ! empty( self::$install['github_access_token'] ) ) {
+			$install['download_link']            = add_query_arg( 'access_token', $install['github_access_token'], $install['download_link'] );
+			parent::$options[ $install['repo'] ] = $install['github_access_token'];
+		} elseif ( ! empty( parent::$options['github_access_token'] ) &&
+		           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
+		) {
+			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
+		} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
+			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $install['download_link'] );
+		}
+
+		return $install;
+	}
+
 }

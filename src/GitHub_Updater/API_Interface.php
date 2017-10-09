@@ -133,4 +133,35 @@ interface API_Interface {
 	 */
 	public function parse_changelog_response( $response );
 
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field();
+
+	/**
+	 * Add settings for each API.
+	 *
+	 * @return mixed
+	 */
+	public function add_settings();
+
+	/**
+	 * Add remote install settings fields.
+	 *
+	 * @param $type
+	 */
+	public function add_install_settings_fields( $type );
+
+	/**
+	 *  Add remote install feature, create endpoint.
+	 *
+	 * @param $headers
+	 * @param $install
+	 *
+	 * @return mixed $install
+	 */
+	public function remote_install( $headers, $install );
+
 }
