@@ -448,14 +448,17 @@ class GitHub_API extends API implements API_Interface {
 	 * Return the AWS download link for a GitHub release asset.
 	 * AWS download link sets a link expiration of ONLY 5 minutes.
 	 *
-	 * @TODO  Figure out how to run this on the fly only when needed.
-	 *
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
 	 *
 	 * @return array|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
+		// Unset release asset url if older than 5 min to account for AWS expiration.
+		if ( ( current_time( 'timestamp' ) - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['release_asset_url'] );
+		}
+
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
 		if ( $this->exit_no_update( $response ) ) {
