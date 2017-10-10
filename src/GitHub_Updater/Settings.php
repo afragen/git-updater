@@ -852,7 +852,7 @@ class Settings extends Base {
 				'repo'    => $e->repo,
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
-				'broken'  => ! isset( $e->remote_version ),
+				'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
 			);
 		}, $type_repos );
