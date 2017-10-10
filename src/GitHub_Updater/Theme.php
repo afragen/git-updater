@@ -178,7 +178,16 @@ class Theme extends Base {
 
 			$themes[ $theme->repo ] = $theme;
 
-			if ( ! $this->waiting_for_wp_cron( $theme ) || static::is_wp_cli() ) {
+			/**
+			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
+			 *
+			 * @since  7.4.0
+			 * @access public
+			 *
+			 * @param bool
+			 */
+			if ( ! $this->waiting_for_wp_cron( $theme ) || static::is_wp_cli()
+			     || apply_filters( 'github_updater_disable_wpcron', false ) ) {
 				$this->get_remote_repo_meta( $theme );
 			}
 
@@ -199,7 +208,9 @@ class Theme extends Base {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) ) {
+		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
+		     ! apply_filters( 'github_updater_disable_wpcron', false )
+		) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 		}
 

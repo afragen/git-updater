@@ -191,7 +191,17 @@ class Plugin extends Base {
 
 			$plugins[ $plugin->repo ] = $plugin;
 
-			if ( ! $this->waiting_for_wp_cron( $plugin ) || static::is_wp_cli() ) {
+			/**
+			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
+			 *
+			 * @since  7.4.0
+			 * @access public
+			 *
+			 * @param bool
+			 */
+			if ( ! $this->waiting_for_wp_cron( $plugin ) || static::is_wp_cli()
+			     || apply_filters( 'github_updater_disable_wpcron', false )
+			) {
 				$this->get_remote_repo_meta( $plugin );
 			}
 
@@ -203,7 +213,9 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) ) {
+		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
+		     ! apply_filters( 'github_updater_disable_wpcron', false )
+		) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 

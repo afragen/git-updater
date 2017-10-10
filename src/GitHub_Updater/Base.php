@@ -159,6 +159,11 @@ class Base {
 			include_once __DIR__ . '/CLI.php';
 			include_once __DIR__ . '/CLI_Integration.php';
 		}
+
+		// Just in case someone has disabled WP-Cron.
+		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+			add_filter( 'github_updater_disable_wpcron', '__return_true' );
+		}
 	}
 
 	/**
