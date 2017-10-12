@@ -660,13 +660,13 @@ class GitHub_API extends API implements API_Interface {
 		/*
 		 * Add access token if present.
 		 */
-		if ( ! empty( self::$install['github_access_token'] ) ) {
+		if ( ! empty( $install['github_access_token'] ) ) {
 			$install['download_link']            = add_query_arg( 'access_token', $install['github_access_token'], $install['download_link'] );
 			parent::$options[ $install['repo'] ] = $install['github_access_token'];
 		} elseif ( ! empty( parent::$options['github_access_token'] ) &&
 		           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
 		) {
-			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
+			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], $install['download_link'] );
 		} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
 			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $install['download_link'] );
 		}
