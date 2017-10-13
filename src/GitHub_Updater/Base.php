@@ -956,6 +956,8 @@ class Base {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
 
+		wp_cron();
+
 		return true;
 	}
 
