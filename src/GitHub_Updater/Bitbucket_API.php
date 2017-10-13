@@ -462,7 +462,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Show section for private Bitbucket repositories.
 		 */
-		if ( parent::$auth_required['bitbucket_private'] ) {
+		if ( static::$auth_required['bitbucket_private'] ) {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
@@ -506,11 +506,11 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param string $type
 	 */
 	public function add_install_settings_fields( $type ) {
-		if ( ( empty( parent::$options['bitbucket_username'] ) ||
-		       empty( parent::$options['bitbucket_password'] ) ) ||
+		if ( ( empty( static::$options['bitbucket_username'] ) ||
+		       empty( static::$options['bitbucket_password'] ) ) ||
 
-		     ( empty( parent::$options['bitbucket_server_username'] ) ||
-		       empty( parent::$options['bitbucket_server_password'] ) )
+		     ( empty( static::$options['bitbucket_server_username'] ) ||
+		       empty( static::$options['bitbucket_server_password'] ) )
 		) {
 			add_settings_field(
 				'bitbucket_username',
@@ -610,13 +610,13 @@ class Bitbucket_API extends API implements API_Interface {
 				$install['github_updater_branch'] . '.zip',
 			) );
 			if ( isset( $install['is_private'] ) ) {
-				parent::$options[ $install['repo'] ] = 1;
+				static::$options[ $install['repo'] ] = 1;
 			}
 			if ( ! empty( $install['bitbucket_username'] ) ) {
-				parent::$options['bitbucket_username'] = $install['bitbucket_username'];
+				static::$options['bitbucket_username'] = $install['bitbucket_username'];
 			}
 			if ( ! empty( $install['bitbucket_password'] ) ) {
-				parent::$options['bitbucket_password'] = $install['bitbucket_password'];
+				static::$options['bitbucket_password'] = $install['bitbucket_password'];
 			}
 		}
 

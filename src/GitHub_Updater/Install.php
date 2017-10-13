@@ -127,12 +127,12 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
-				if ( parent::$installed_apis['bitbucket_api'] ) {
+				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				if ( static::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
-				if ( parent::$installed_apis['bitbucket_server_api'] ) {
+				if ( static::$installed_apis['bitbucket_server_api'] ) {
 					self::$install = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
@@ -143,14 +143,14 @@ class Install extends Base {
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( parent::$installed_apis['gitlab_api'] ) {
+				if ( static::$installed_apis['gitlab_api'] ) {
 					self::$install = Singleton::get_instance( 'GitLab_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
-			parent::$options['github_updater_install_repo'] = self::$install['repo'];
+			static::$options['github_updater_install_repo'] = self::$install['repo'];
 
-			update_site_option( 'github_updater', Settings::sanitize( parent::$options ) );
+			update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
 			$url      = self::$install['download_link'];
 			$nonce    = wp_nonce_url( $url );
 			$upgrader = null;
@@ -285,11 +285,11 @@ class Install extends Base {
 
 		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
 
-		if ( parent::$installed_apis['bitbucket_api'] ) {
+		if ( static::$installed_apis['bitbucket_api'] ) {
 			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 
-		if ( parent::$installed_apis['gitlab_api'] ) {
+		if ( static::$installed_apis['gitlab_api'] ) {
 			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 	}
@@ -331,8 +331,8 @@ class Install extends Base {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
-				<?php foreach ( parent::$git_servers as $key => $value ): ?>
-					<?php if ( parent::$installed_apis[ $key . '_api' ] ): ?>
+				<?php foreach ( static::$git_servers as $key => $value ): ?>
+					<?php if ( static::$installed_apis[ $key . '_api' ] ): ?>
 						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>

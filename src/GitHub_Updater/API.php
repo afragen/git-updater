@@ -220,7 +220,7 @@ abstract class API extends Base {
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
+				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
@@ -412,7 +412,7 @@ abstract class API extends Base {
 	 */
 	protected function add_access_token_endpoint( $git, $endpoint ) {
 		// This will return if checking during shiny updates.
-		if ( null === parent::$options ) {
+		if ( null === static::$options ) {
 			return $endpoint;
 		}
 		$key              = null;
@@ -435,22 +435,22 @@ abstract class API extends Base {
 		}
 
 		// Add hosted access token.
-		if ( ! empty( parent::$options[ $token ] ) ) {
-			$endpoint = add_query_arg( $key, parent::$options[ $token ], $endpoint );
+		if ( ! empty( static::$options[ $token ] ) ) {
+			$endpoint = add_query_arg( $key, static::$options[ $token ], $endpoint );
 		}
 
 		// Add Enterprise access token.
 		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( parent::$options[ $token_enterprise ] )
+		     ! empty( static::$options[ $token_enterprise ] )
 		) {
 			$endpoint = remove_query_arg( $key, $endpoint );
-			$endpoint = add_query_arg( $key, parent::$options[ $token_enterprise ], $endpoint );
+			$endpoint = add_query_arg( $key, static::$options[ $token_enterprise ], $endpoint );
 		}
 
 		// Add repo access token.
-		if ( ! empty( parent::$options[ $git->type->repo ] ) ) {
+		if ( ! empty( static::$options[ $git->type->repo ] ) ) {
 			$endpoint = remove_query_arg( $key, $endpoint );
-			$endpoint = add_query_arg( $key, parent::$options[ $git->type->repo ], $endpoint );
+			$endpoint = add_query_arg( $key, static::$options[ $git->type->repo ], $endpoint );
 		}
 
 		return $endpoint;

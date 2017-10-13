@@ -118,8 +118,8 @@ class Plugin extends Base {
 
 				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
 				$current_branch = 'current_branch_' . $header['repo'];
-				$branch         = isset( parent::$options[ $current_branch ] )
-					? parent::$options[ $current_branch ]
+				$branch         = isset( static::$options[ $current_branch ] )
+					? static::$options[ $current_branch ]
 					: false;
 
 				$git_plugin['type']           = $repo_parts['type'];

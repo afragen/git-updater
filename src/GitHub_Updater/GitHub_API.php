@@ -375,7 +375,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
-			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array(
+			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], array(
 				'git'  => 'github',
 				'wait' => $wait,
 			) );
@@ -546,7 +546,7 @@ class GitHub_API extends API implements API_Interface {
 			array( 'id' => 'github_access_token', 'token' => true )
 		);
 
-		if ( parent::$auth_required['github_enterprise'] ) {
+		if ( static::$auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
@@ -560,7 +560,7 @@ class GitHub_API extends API implements API_Interface {
 		/*
 		 * Show section for private GitHub repositories.
 		 */
-		if ( parent::$auth_required['github_private'] || parent::$auth_required['github_enterprise'] ) {
+		if ( static::$auth_required['github_private'] || static::$auth_required['github_enterprise'] ) {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
@@ -662,13 +662,13 @@ class GitHub_API extends API implements API_Interface {
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
 			$install['download_link']            = add_query_arg( 'access_token', $install['github_access_token'], $install['download_link'] );
-			parent::$options[ $install['repo'] ] = $install['github_access_token'];
-		} elseif ( ! empty( parent::$options['github_access_token'] ) &&
+			static::$options[ $install['repo'] ] = $install['github_access_token'];
+		} elseif ( ! empty( static::$options['github_access_token'] ) &&
 		           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
 		) {
-			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], $install['download_link'] );
-		} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
-			$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], $install['download_link'] );
+			$install['download_link'] = add_query_arg( 'access_token', static::$options['github_access_token'], $install['download_link'] );
+		} elseif ( ! empty( static::$options['github_enterprise_token'] ) ) {
+			$install['download_link'] = add_query_arg( 'access_token', static::$options['github_enterprise_token'], $install['download_link'] );
 		}
 
 		return $install;

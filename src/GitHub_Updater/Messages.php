@@ -53,7 +53,7 @@ class Messages extends Base {
 			return false;
 		}
 
-		if ( is_admin() && ! parent::is_doing_ajax() ) {
+		if ( is_admin() && ! static::is_doing_ajax() ) {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
@@ -148,10 +148,10 @@ class Messages extends Base {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public function gitlab_error() {
-		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
-		       parent::$auth_required['gitlab_enterprise'] ) ||
-		     ( empty( parent::$options['gitlab_access_token'] ) &&
-		       parent::$auth_required['gitlab'] )
+		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+		       static::$auth_required['gitlab_enterprise'] ) ||
+		     ( empty( static::$options['gitlab_access_token'] ) &&
+		       static::$auth_required['gitlab'] )
 		) {
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;

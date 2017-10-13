@@ -132,8 +132,8 @@ class Theme extends Base {
 
 				$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
 				$current_branch = 'current_branch_' . $header['repo'];
-				$branch         = isset( parent::$options[ $current_branch ] )
-					? parent::$options[ $current_branch ]
+				$branch         = isset( static::$options[ $current_branch ] )
+					? static::$options[ $current_branch ]
 					: false;
 
 				$git_theme['type']                    = $repo_parts['type'];
@@ -406,7 +406,7 @@ class Theme extends Base {
 	public function remove_after_theme_row( $theme_key, $theme ) {
 		$themes = $this->get_theme_configs();
 
-		foreach ( parent::$git_servers as $server ) {
+		foreach ( static::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
 

@@ -518,7 +518,7 @@ class GitLab_API extends API implements API_Interface {
 	 * or GitLab Enterprise Access Token.
 	 */
 	public function add_settings() {
-		if ( parent::$auth_required['gitlab'] || parent::$auth_required['gitlab_enterprise'] ) {
+		if ( static::$auth_required['gitlab'] || static::$auth_required['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
@@ -527,7 +527,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( parent::$auth_required['gitlab_private'] ) {
+		if ( static::$auth_required['gitlab_private'] ) {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -536,7 +536,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( parent::$auth_required['gitlab'] ) {
+		if ( static::$auth_required['gitlab'] ) {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
@@ -547,7 +547,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( parent::$auth_required['gitlab_enterprise'] ) {
+		if ( static::$auth_required['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
@@ -644,17 +644,17 @@ class GitLab_API extends API implements API_Interface {
 		 */
 		if ( ! empty( $install['gitlab_access_token'] ) ) {
 			$install['download_link']            = add_query_arg( 'private_token', $install['gitlab_access_token'], $install['download_link'] );
-			parent::$options[ $install['repo'] ] = $install['gitlab_access_token'];
+			static::$options[ $install['repo'] ] = $install['gitlab_access_token'];
 			if ( 'gitlab.com' === $headers['host'] ) {
-				parent::$options['gitlab_access_token'] = empty( parent::$options['gitlab_access_token'] ) ? $install['gitlab_access_token'] : parent::$options['gitlab_access_token'];
+				static::$options['gitlab_access_token'] = empty( static::$options['gitlab_access_token'] ) ? $install['gitlab_access_token'] : static::$options['gitlab_access_token'];
 			} else {
-				parent::$options['gitlab_enterprise_token'] = empty( parent::$options['gitlab_enterprise_token'] ) ? $install['gitlab_access_token'] : parent::$options['gitlab_enterprise_token'];
+				static::$options['gitlab_enterprise_token'] = empty( static::$options['gitlab_enterprise_token'] ) ? $install['gitlab_access_token'] : static::$options['gitlab_enterprise_token'];
 			}
 		} else {
 			if ( 'gitlab.com' === $headers['host'] ) {
-				$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_access_token'], $install['download_link'] );
+				$install['download_link'] = add_query_arg( 'private_token', static::$options['gitlab_access_token'], $install['download_link'] );
 			} else {
-				$install['download_link'] = add_query_arg( 'private_token', parent::$options['gitlab_enterprise_token'], $install['download_link'] );
+				$install['download_link'] = add_query_arg( 'private_token', static::$options['gitlab_enterprise_token'], $install['download_link'] );
 			}
 		}
 

@@ -352,7 +352,7 @@ class Rest_Update extends Base {
 	 * @return bool|array $response
 	 */
 	private function parse_bitbucket_webhook( $request_body ) {
-		Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->load_authentication_hooks();
+		Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
 
 		$request_data = json_decode( $request_body, true );
 
@@ -365,7 +365,7 @@ class Rest_Update extends Base {
 
 		//$response['payload'] = $new;
 
-		Singleton::get_instance( 'Basic_Auth_Loader', parent::$options )->remove_authentication_hooks();
+		Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->remove_authentication_hooks();
 
 		return $response;
 	}
