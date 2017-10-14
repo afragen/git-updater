@@ -56,21 +56,21 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	protected function set_default_credentials() {
 		$set_credentials = false;
-		if ( ! isset( self::$options['gitlab_access_token'] ) ) {
-			self::$options['gitlab_access_token'] = null;
-			$set_credentials                      = true;
+		if ( ! isset( static::$options['gitlab_access_token'] ) ) {
+			static::$options['gitlab_access_token'] = null;
+			$set_credentials                        = true;
 		}
-		if ( ! isset( self::$options['gitlab_enterprise_token'] ) ) {
-			self::$options['gitlab_enterprise_token'] = null;
-			$set_credentials                          = true;
+		if ( ! isset( static::$options['gitlab_enterprise_token'] ) ) {
+			static::$options['gitlab_enterprise_token'] = null;
+			$set_credentials                            = true;
 		}
-		if ( empty( self::$options['gitlab_access_token'] ) ||
-		     ( empty( self::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
+		if ( empty( static::$options['gitlab_access_token'] ) ||
+		     ( empty( static::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
 		) {
 			Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
 		}
 		if ( $set_credentials ) {
-			add_site_option( 'github_updater', self::$options );
+			add_site_option( 'github_updater', static::$options );
 		}
 	}
 

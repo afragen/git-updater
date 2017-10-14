@@ -59,16 +59,16 @@ class Bitbucket_API extends API implements API_Interface {
 			$username = 'bitbucket_server_username';
 			$password = 'bitbucket_server_password';
 		}
-		if ( ! isset( self::$options[ $username ] ) ) {
-			self::$options[ $username ] = null;
-			$set_credentials            = true;
+		if ( ! isset( static::$options[ $username ] ) ) {
+			static::$options[ $username ] = null;
+			$set_credentials              = true;
 		}
-		if ( ! isset( self::$options[ $password ] ) ) {
-			self::$options[ $password ] = null;
-			$set_credentials            = true;
+		if ( ! isset( static::$options[ $password ] ) ) {
+			static::$options[ $password ] = null;
+			$set_credentials              = true;
 		}
 		if ( $set_credentials ) {
-			add_site_option( 'github_updater', self::$options );
+			add_site_option( 'github_updater', static::$options );
 		}
 	}
 

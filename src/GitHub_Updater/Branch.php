@@ -77,8 +77,8 @@ class Branch extends API {
 				? $_GET['rollback']
 				: 'master';
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
-			self::$options[ 'current_branch_' . $repo ] = $current_branch;
-			update_site_option( 'github_updater', self::$options );
+			static::$options[ 'current_branch_' . $repo ] = $current_branch;
+			update_site_option( 'github_updater', static::$options );
 		}
 	}
 
@@ -91,8 +91,8 @@ class Branch extends API {
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
-		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
-		update_site_option( 'github_updater', self::$options );
+		static::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
+		update_site_option( 'github_updater', static::$options );
 	}
 
 }

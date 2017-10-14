@@ -360,7 +360,7 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
+		if ( empty( static::$options['branch_switch'] ) ) {
 			return false;
 		}
 
@@ -547,7 +547,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( '1' === self::$options['branch_switch'] ) {
+		if ( '1' === static::$options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
