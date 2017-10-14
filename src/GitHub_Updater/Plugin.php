@@ -69,16 +69,16 @@ class Plugin extends Base {
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		// @TODO update for PHP 5.4
-		$plugins               = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
-		$plugins               = ! empty( $plugins['plugins'] ) ? $plugins['plugins'] : false;
-		static::$extra_headers = empty( static::$extra_headers ) && ! empty( $plugins['extra_headers'] )
-			? $plugins['extra_headers']
-			: static::$extra_headers;
+		$plugins = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		$plugins = ! empty( $plugins['plugins'] ) ? $plugins['plugins'] : false;
 		if ( ! $plugins ) {
 			$plugins                  = get_plugins();
 			$plugins['extra_headers'] = static::$extra_headers;
 			Singleton::get_instance( 'Branch' )->set_repo_cache( 'plugins', $plugins, 'repos', '+5 minutes' );
 		}
+		static::$extra_headers = empty( static::$extra_headers ) && ! empty( $plugins['extra_headers'] )
+			? $plugins['extra_headers']
+			: static::$extra_headers;
 		unset( $plugins['extra_headers'] );
 
 		$git_plugins = array();
