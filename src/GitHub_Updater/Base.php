@@ -956,9 +956,29 @@ class Base {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
 
-		wp_cron();
+		$this->force_run_cron_job();
 
 		return true;
+	}
+
+	/**
+	 * Force wp-cron.php to run.
+	 */
+	private function force_run_cron_job() {
+		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
+		set_transient( 'doing_cron', $doing_wp_cron );
+
+		$cron_request = apply_filters( 'cron_request', array(
+			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),
+			'key'  => $doing_wp_cron,
+			'args' => array(
+				'timeout'   => 0.01,
+				'blocking'  => false,
+				'sslverify' => apply_filters( 'https_local_ssl_verify', true ),
+			),
+		) );
+
+		wp_remote_post( $cron_request['url'], $cron_request['args'] );
 	}
 
 	/**
