@@ -965,6 +965,15 @@ class Base {
 	 * Force wp-cron.php to run.
 	 */
 	private function force_run_cron_job() {
+		// Cleanup crons.
+		$crons = _get_cron_array();
+		foreach ( $crons as $timestamp => $cronhooks ) {
+			if ( in_array( key( $cronhooks ), array( 'ghu_get_remote_plugin', 'ghu_get_remote_theme' ), true ) ) {
+				unset( $crons[ $timestamp ] );
+			}
+		}
+		_set_cron_array( $crons );
+
 		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
 		$cron_request  = array(
 			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),
