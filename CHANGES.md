@@ -4,6 +4,7 @@
 * fixed issue with remote install of private Bitbucket repos
 * added plugin icons to `update-core.php` page for WP 4.9
 * fixed stale AWS download link for GitHub release asset
+* cache `get_plugins()` for short period, fixes [#612](https://github.com/afragen/github-updater/issues/612)
 
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst

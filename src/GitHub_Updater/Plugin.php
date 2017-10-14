@@ -68,7 +68,14 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$plugins     = get_plugins();
+		// @TODO update for PHP 5.4
+		$plugins = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		$plugins = ! empty( $plugins ) ? $plugins['plugins'] : false;
+		if ( ! $plugins ) {
+			$plugins = get_plugins();
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'plugins', $plugins, 'repos', '+5 minutes' );
+		}
+
 		$git_plugins = array();
 
 		/**

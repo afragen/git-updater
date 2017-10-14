@@ -283,15 +283,17 @@ abstract class API extends Base {
 	 * @param string      $id       Data Identifier.
 	 * @param mixed       $response Data to be stored.
 	 * @param string|bool $repo     Repo name or false.
+	 * @param string|bool $timeout  Timeout for cache.
+	 *                              Default is static::$hours (12 hours).
 	 *
 	 * @return bool
 	 */
-	protected function set_repo_cache( $id, $response, $repo = false ) {
+	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
 		if ( ! $repo ) {
 			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
-		$timeout   = '+' . self::$hours . ' hours';
+		$timeout   = $timeout ? $timeout : '+' . static::$hours . ' hours';
 
 		$this->response['timeout'] = strtotime( $timeout, current_time( 'timestamp' ) );
 		$this->response[ $id ]     = $response;
