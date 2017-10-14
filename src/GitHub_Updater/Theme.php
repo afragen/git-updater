@@ -82,7 +82,20 @@ class Theme extends Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$this->delete_current_theme_cache();
-		$themes = wp_get_themes( array( 'errors' => null ) );
+
+		$extra_headers         = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
+			? $extra_headers['extra_headers']
+			: self::$extra_headers;
+
+		// @TODO update for PHP 5.4
+		$themes = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		$themes = ! empty( $themes['themes'] ) ? $themes['themes'] : false;
+		if ( ! $themes ) {
+			$themes = wp_get_themes( array( 'errors' => null ) );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'themes', $themes, 'repos', '+5 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', self::$extra_headers, 'repos', '+5 minutes' );
+		}
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
