@@ -612,7 +612,7 @@ class Settings extends Base {
 	public function print_section_remote_management() {
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',
-			'key'    => self::$api_key,
+			'key'    => static::$api_key,
 		), admin_url( 'admin-ajax.php' ) );
 
 		?>

@@ -71,7 +71,7 @@ class Plugin extends Base {
 		$extra_headers         = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
 			? $extra_headers['extra_headers']
-			: self::$extra_headers;
+			: static::$extra_headers;
 
 		// @TODO update for PHP 5.4
 		$plugins = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
@@ -259,7 +259,7 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
+		if ( empty( static::$options['branch_switch'] ) ) {
 			return false;
 		}
 

@@ -86,7 +86,7 @@ class Theme extends Base {
 		$extra_headers         = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
 			? $extra_headers['extra_headers']
-			: self::$extra_headers;
+			: static::$extra_headers;
 
 		// @TODO update for PHP 5.4
 		$themes = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
@@ -94,7 +94,7 @@ class Theme extends Base {
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
 			Singleton::get_instance( 'Branch' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', self::$extra_headers, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**
@@ -113,7 +113,7 @@ class Theme extends Base {
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = array();
 
-			foreach ( (array) self::$extra_headers as $value ) {
+			foreach ( (array) static::$extra_headers as $value ) {
 				$header   = null;
 				$repo_uri = $theme->get( $value );
 
