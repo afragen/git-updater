@@ -78,8 +78,8 @@ class Plugin extends Base {
 		$plugins = ! empty( $plugins['plugins'] ) ? $plugins['plugins'] : false;
 		if ( ! $plugins ) {
 			$plugins = get_plugins();
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'plugins', $plugins, 'repos', '+5 minutes' );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+5 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		$git_plugins = array();

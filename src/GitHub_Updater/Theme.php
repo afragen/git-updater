@@ -93,8 +93,8 @@ class Theme extends Base {
 		$themes = ! empty( $themes['themes'] ) ? $themes['themes'] : false;
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'themes', $themes, 'repos', '+5 minutes' );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', self::$extra_headers, 'repos', '+5 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', self::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**
