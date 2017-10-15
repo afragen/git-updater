@@ -222,6 +222,7 @@ class Theme extends Base {
 		}
 
 		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
+		     ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
 		     ! apply_filters( 'github_updater_disable_wpcron', false )
 		) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );

@@ -510,6 +510,23 @@ class Base {
 	}
 
 	/**
+	 * Checks if dupicate wp-cron event exists.
+	 *
+	 * @param string $event Name of wp-cron event.
+	 *
+	 * @return bool
+	 */
+	protected function is_duplicate_wp_cron_event( $event ) {
+		foreach ( _get_cron_array() as $cronhooks ) {
+			if ( $event === key( $cronhooks ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
 	 *
@@ -965,15 +982,6 @@ class Base {
 	 * Force wp-cron.php to run.
 	 */
 	private function force_run_cron_job() {
-		// Cleanup crons.
-		$crons = _get_cron_array();
-		foreach ( $crons as $timestamp => $cronhooks ) {
-			if ( in_array( key( $cronhooks ), array( 'ghu_get_remote_plugin', 'ghu_get_remote_theme' ), true ) ) {
-				unset( $crons[ $timestamp ] );
-			}
-		}
-		_set_cron_array( $crons );
-
 		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
 		$cron_request  = array(
 			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),

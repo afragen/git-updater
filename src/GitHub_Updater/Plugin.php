@@ -227,6 +227,7 @@ class Plugin extends Base {
 		}
 
 		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
+		     ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
 		     ! apply_filters( 'github_updater_disable_wpcron', false )
 		) {
 			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
