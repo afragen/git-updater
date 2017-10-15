@@ -194,6 +194,9 @@ class Install extends Base {
 
 			// Save branch setting.
 			Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+
+			// Delete get_plugins() and wp_get_themes() cache.
+			delete_site_option( 'ghu-' . md5( 'repos' ) );
 		}
 
 		if ( $wp_cli ) {
