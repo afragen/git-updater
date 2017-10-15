@@ -51,6 +51,11 @@ if ( ! class_exists( 'PAnD' ) ) {
 		 * Enqueue javascript and variables.
 		 */
 		public static function load_script() {
+
+			if ( is_customize_preview() ) {
+				return;
+			}
+
 			wp_enqueue_script(
 				'dismissible-notices',
 				plugins_url( 'dismiss-notice.js', __FILE__ ),
