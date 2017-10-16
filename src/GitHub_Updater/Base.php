@@ -477,7 +477,7 @@ class Base {
 	 */
 	protected function waiting_for_wp_cron( $repo = null ) {
 		if ( null !== $repo ) {
-			$cache = Singleton::get_instance( 'Branch' )->get_repo_cache( $repo->repo );
+			$cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
 
 			return empty( $cache );
 		}
@@ -486,7 +486,7 @@ class Base {
 			Singleton::get_instance( 'Theme' )->get_theme_configs()
 		);
 		foreach ( $repos as $repo ) {
-			$caches[ $repo->repo ] = Singleton::get_instance( 'Branch' )->get_repo_cache( $repo->repo );
+			$caches[ $repo->repo ] = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
 		}
 		$waiting = array_filter( $caches, function( $e ) {
 			return empty( $e );

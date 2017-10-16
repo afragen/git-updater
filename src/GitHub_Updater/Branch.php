@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Branch extends API {
+class Branch {
 
 	/**
 	 * Holds repo cache data.
@@ -33,6 +33,13 @@ class Branch extends API {
 	public $cache;
 
 	/**
+	 * Holds site options.
+	 *
+	 * @var array $options
+	 */
+	protected static $options;
+
+	/**
 	 * Branch constructor.
 	 *
 	 * @access public
@@ -40,7 +47,9 @@ class Branch extends API {
 	 * @param null $cache
 	 */
 	public function __construct( $cache = null ) {
-		$this->cache = $cache;
+		$this->cache     = $cache;
+		$this->base      = $base = Singleton::get_instance( 'Base' );
+		static::$options = $base::$options;
 	}
 
 	/**
@@ -68,7 +77,7 @@ class Branch extends API {
 	 * @param string $repo Repository slug.
 	 */
 	public function set_branch_on_switch( $repo ) {
-		$this->cache = $this->get_repo_cache( $repo );
+		$this->cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo );
 
 		if ( isset( $_GET['action'], $this->cache['branches'] ) &&
 		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
@@ -76,7 +85,7 @@ class Branch extends API {
 			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
 				? $_GET['rollback']
 				: 'master';
-			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'current_branch', $current_branch, $repo );
 			static::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', static::$options );
 		}
@@ -90,7 +99,7 @@ class Branch extends API {
 	 * @param array $install Array of install data.
 	 */
 	public function set_branch_on_install( $install ) {
-		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
+		Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
 		static::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
 		update_site_option( 'github_updater', static::$options );
 	}

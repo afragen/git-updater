@@ -34,6 +34,13 @@ class API {
 	protected static $hours = 12;
 
 	/**
+	 * Holds HTTP error code from API call.
+	 *
+	 * @var array ( $this->type-repo => $code )
+	 */
+	protected static $error_code = array();
+
+	/**
 	 * Variable to hold all repository remote info.
 	 *
 	 * @access protected
@@ -430,6 +437,15 @@ class API {
 	 */
 	protected function local_file_exists( $filename ) {
 		return file_exists( $this->type->local_path . $filename );
+	}
+
+	/**
+	 * Returns static class variable $error_code.
+	 *
+	 * @return array self::$error_code
+	 */
+	public function get_error_codes() {
+		return self::$error_code;
 	}
 
 	/**

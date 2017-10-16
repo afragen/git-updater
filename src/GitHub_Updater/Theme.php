@@ -83,18 +83,18 @@ class Theme extends Base {
 		$git_themes = array();
 		$this->delete_current_theme_cache();
 
-		$extra_headers         = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		$extra_headers         = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
 			? $extra_headers['extra_headers']
 			: static::$extra_headers;
 
 		// @TODO update for PHP 5.4
-		$themes = Singleton::get_instance( 'Branch' )->get_repo_cache( 'repos' );
+		$themes = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
 		$themes = ! empty( $themes['themes'] ) ? $themes['themes'] : false;
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'Branch' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**

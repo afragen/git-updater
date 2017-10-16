@@ -83,8 +83,9 @@ class Messages extends Base {
 	 * Usually 403 as API rate limit max out.
 	 */
 	public function show_403_error_message() {
-		$_403 = false;
-		foreach ( self::$error_code as $repo ) {
+		$_403       = false;
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
 				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
@@ -121,8 +122,9 @@ class Messages extends Base {
 	 * Usually 401 as private repo with no token set or incorrect user/pass.
 	 */
 	public function show_401_error_message() {
-		$_401 = false;
-		foreach ( self::$error_code as $repo ) {
+		$_401       = false;
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_401 && 401 === $repo['code'] ) {
 				$_401 = true;
 				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
