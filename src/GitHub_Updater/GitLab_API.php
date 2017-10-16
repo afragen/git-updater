@@ -40,6 +40,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
+		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
@@ -96,7 +97,7 @@ class GitLab_API extends API implements API_Interface {
 
 			if ( $response && isset( $response->content ) ) {
 				$contents = base64_decode( $response->content );
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -159,7 +160,7 @@ class GitLab_API extends API implements API_Interface {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -208,7 +209,7 @@ class GitLab_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {

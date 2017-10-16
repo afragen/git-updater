@@ -44,13 +44,6 @@ class Base {
 	protected $repo_api;
 
 	/**
-	 * Variable for setting update transient hours.
-	 *
-	 * @var integer
-	 */
-	protected static $hours;
-
-	/**
 	 * Variable for holding extra theme and plugin headers.
 	 *
 	 * @var array
@@ -62,7 +55,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	protected static $options;
+	public static $options;
 
 	/**
 	 * Holds the values for remote management settings.
@@ -77,13 +70,6 @@ class Base {
 	 * @var
 	 */
 	protected static $api_key;
-
-	/**
-	 * Holds HTTP error code from API call.
-	 *
-	 * @var array ( $this->type-repo => $code )
-	 */
-	protected static $error_code = array();
 
 	/**
 	 * Holds git server types.
@@ -535,7 +521,6 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		self::$hours    = 12;
 		$this->repo_api = null;
 		$file           = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
@@ -878,7 +863,6 @@ class Base {
 		return false;
 	}
 
-
 	/**
 	 * Function to check if plugin or theme object is able to be updated.
 	 *
@@ -993,229 +977,6 @@ class Base {
 		);
 
 		wp_remote_post( $cron_request['url'], $cron_request['args'] );
-	}
-
-	/**
-	 * Set repo object file info.
-	 *
-	 * @param $response
-	 */
-	protected function set_file_info( $response ) {
-		$this->type->transient            = $response;
-		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
-		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->release_asset        = ( ! empty( $response['Release Asset'] ) && 'true' === $response['Release Asset'] );
-		$this->type->dot_org              = $response['dot_org'];
-	}
-
-	/**
-	 * Parse tags and set object data.
-	 *
-	 * @param $response
-	 * @param $repo_type
-	 *
-	 * @return bool
-	 */
-	protected function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
-		if ( false !== $response ) {
-			switch ( $repo_type['repo'] ) {
-				case 'github':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_uri'],
-							'repos',
-							$this->type->owner,
-							$this->type->repo,
-							'zipball/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag;
-					}
-					break;
-				case 'bitbucket':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'get/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag . '.zip';
-					}
-					break;
-				case 'gitlab':
-					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'repository/archive.zip',
-						) );
-						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link;
-					}
-					break;
-			}
-
-		}
-		if ( empty( $tags ) ) {
-			return false;
-		}
-
-		usort( $tags, 'version_compare' );
-		krsort( $rollback );
-
-		$newest_tag     = array_slice( $tags, - 1, 1, true );
-		$newest_tag_key = key( $newest_tag );
-		$newest_tag     = $tags[ $newest_tag_key ];
-
-		$this->type->newest_tag = $newest_tag;
-		$this->type->tags       = $tags;
-		$this->type->rollback   = $rollback;
-
-		return true;
-	}
-
-	/**
-	 * Set data from readme.txt.
-	 * Prefer changelog from CHANGES.md.
-	 *
-	 * @param $response
-	 *
-	 * @return bool
-	 */
-	protected function set_readme_info( $response ) {
-		$readme = array();
-		foreach ( (array) $this->type->sections as $section => $value ) {
-			if ( 'description' === $section ) {
-				continue;
-			}
-			$readme[ $section ] = $value;
-		}
-		foreach ( $readme as $key => $value ) {
-			if ( ! empty( $value ) ) {
-				unset( $response['sections'][ $key ] );
-			}
-		}
-
-		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
-		if ( empty( $response['sections']['other_notes'] ) ) {
-			unset( $response['sections']['other_notes'] );
-		} else {
-			$response['sections']['other_notes'] .= $response['remaining_content'];
-		}
-		unset( $response['sections']['screenshots'], $response['sections']['installation'] );
-		$response['sections']     = ! empty( $response['sections'] ) ? $response['sections'] : array();
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
-		$this->type->requires     = isset( $response['requires'] ) ? $response['requires'] : null;
-		$this->type->donate_link  = isset( $response['donate_link'] ) ? $response['donate_link'] : null;
-		$this->type->contributors = isset( $response['contributors'] ) ? $response['contributors'] : null;
-
-		return true;
-	}
-
-	/**
-	 * Add remote data to type object.
-	 *
-	 * @access protected
-	 */
-	protected function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
-		$this->type->last_updated = $this->type->repo_meta['last_updated'];
-		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
-		$this->type->is_private   = $this->type->repo_meta['private'];
-	}
-
-	/**
-	 * Create some sort of rating from 0 to 100 for use in star ratings.
-	 * I'm really just making this up, more based upon popularity.
-	 *
-	 * @param $repo_meta
-	 *
-	 * @return integer
-	 */
-	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
-		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
-		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
-
-		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
-
-		if ( 100 < $rating ) {
-			return 100;
-		}
-
-		return (integer) $rating;
-	}
-
-	/**
-	 * Test to exit early if no update available, saves API calls.
-	 *
-	 * @param $response array|bool
-	 * @param $branch   bool
-	 *
-	 * @return bool
-	 */
-	protected function exit_no_update( $response, $branch = false ) {
-		/**
-		 * Filters the return value of exit_no_update.
-		 *
-		 * @since 6.0.0
-		 * @return bool `true` will exit this function early, default will not.
-		 */
-		if ( apply_filters( 'ghu_always_fetch_update', false ) ) {
-			return false;
-		}
-
-		if ( $branch ) {
-			return empty( self::$options['branch_switch'] );
-		}
-
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update( $this->type ) );
-	}
-
-	/**
-	 * Get local file info if no update available. Save API calls.
-	 *
-	 * @param $repo
-	 * @param $file
-	 *
-	 * @return null|string
-	 */
-	protected function get_local_info( $repo, $file ) {
-		$response = false;
-
-		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
-			return $response;
-		}
-
-		if ( is_dir( $repo->local_path ) &&
-		     file_exists( $repo->local_path . $file )
-		) {
-			$response = file_get_contents( $repo->local_path . $file );
-		}
-
-		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$response = base64_encode( $response );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				$response = base64_encode( $response );
-				break;
-		}
-
-		return $response;
 	}
 
 	/**

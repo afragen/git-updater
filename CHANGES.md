@@ -5,6 +5,7 @@
 * added plugin icons to `update-core.php` page for WP 4.9
 * fixed stale AWS download link for GitHub release asset
 * cache `get_plugins()` and `wp_get_themes()` for short period giving better performance to some admin pages, fixes [#612](https://github.com/afragen/github-updater/issues/612)
+* refactor of methods from `class Base` to `class API`
 
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst
