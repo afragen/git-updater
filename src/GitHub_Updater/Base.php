@@ -165,7 +165,7 @@ class Base {
 	/**
 	 * Load site options.
 	 */
-	protected function load_options() {
+	public function load_options() {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 		self::$api_key        = get_site_option( 'github_updater_api_key' );
@@ -773,7 +773,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function get_file_headers( $contents, $type ) {
+	public function get_file_headers( $contents, $type ) {
 		$all_headers            = array();
 		$default_plugin_headers = array(
 			'Name'        => 'Plugin Name',
@@ -1349,7 +1349,7 @@ class Base {
 	 *
 	 * @return bool
 	 */
-	protected function is_override_dot_org() {
+	public function is_override_dot_org() {
 		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG )
 		       || ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
