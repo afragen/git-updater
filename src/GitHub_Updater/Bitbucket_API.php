@@ -615,13 +615,13 @@ class Bitbucket_API extends API implements API_Interface {
 				$install['github_updater_branch'] . '.zip',
 			) );
 			if ( isset( $install['is_private'] ) ) {
-				static::$options[ $install['repo'] ] = 1;
+				$install['options'][ $install['repo'] ] = 1;
 			}
 			if ( ! empty( $install['bitbucket_username'] ) ) {
-				static::$options['bitbucket_username'] = $install['bitbucket_username'];
+				$install['options']['bitbucket_username'] = $install['bitbucket_username'];
 			}
 			if ( ! empty( $install['bitbucket_password'] ) ) {
-				static::$options['bitbucket_password'] = $install['bitbucket_password'];
+				$install['options']['bitbucket_password'] = $install['bitbucket_password'];
 			}
 		}
 

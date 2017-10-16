@@ -663,17 +663,33 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		/*
-		 * Add access token if present.
+		 * Add/Save access token if present.
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
-			$install['download_link']            = add_query_arg( 'access_token', $install['github_access_token'], $install['download_link'] );
-			static::$options[ $install['repo'] ] = $install['github_access_token'];
-		} elseif ( ! empty( static::$options['github_access_token'] ) &&
-		           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
-		) {
-			$install['download_link'] = add_query_arg( 'access_token', static::$options['github_access_token'], $install['download_link'] );
-		} elseif ( ! empty( static::$options['github_enterprise_token'] ) ) {
-			$install['download_link'] = add_query_arg( 'access_token', static::$options['github_enterprise_token'], $install['download_link'] );
+			$install['options'][ $install['repo'] ] = $install['github_access_token'];
+			if ( 'github.com' === $headers['host'] ) {
+				$install['options']['github_access_token'] = $install['github_access_token'];
+			} else {
+				$install['options']['github_enterprise_token'] = $install['github_access_token'];
+			}
+		}
+		if ( 'github.com' === $headers['host'] ) {
+			$token = ! empty( $install['options']['github_access_token'] )
+				? $install['options']['github_access_token']
+				: static::$options['github_access_token'];
+		} else {
+			$token = ! empty( $install['options']['github_enterprise_token'] )
+				? $install['options']['github_enterprise_token']
+				: static::$options['github_enterprise_token'];
+		}
+
+		$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+
+		if ( ! empty( static::$options['github_access_token'] ) ) {
+			unset( $install['options']['github_access_token'] );
+		}
+		if ( ! empty( static::$options['github_enterprise_token'] ) ) {
+			unset( $install['options']['github_enterprise_token'] );
 		}
 
 		return $install;

@@ -645,22 +645,33 @@ class GitLab_API extends API implements API_Interface {
 		$install['download_link'] = add_query_arg( 'ref', $install['github_updater_branch'], $install['download_link'] );
 
 		/*
-		 * Add access token if present.
+		 * Add/Save access token if present.
 		 */
 		if ( ! empty( $install['gitlab_access_token'] ) ) {
-			$install['download_link']            = add_query_arg( 'private_token', $install['gitlab_access_token'], $install['download_link'] );
-			static::$options[ $install['repo'] ] = $install['gitlab_access_token'];
+			$install['options'][ $install['repo'] ] = $install['gitlab_access_token'];
 			if ( 'gitlab.com' === $headers['host'] ) {
-				static::$options['gitlab_access_token'] = empty( static::$options['gitlab_access_token'] ) ? $install['gitlab_access_token'] : static::$options['gitlab_access_token'];
+				$install['options']['gitlab_access_token'] = $install['gitlab_access_token'];
 			} else {
-				static::$options['gitlab_enterprise_token'] = empty( static::$options['gitlab_enterprise_token'] ) ? $install['gitlab_access_token'] : static::$options['gitlab_enterprise_token'];
+				$install['options']['gitlab_enterprise_token'] = $install['gitlab_access_token'];
 			}
+		}
+		if ( 'gitlab.com' === $headers['host'] ) {
+			$token = ! empty( $install['options']['gitlab_access_token'] )
+				? $install['options']['gitlab_access_token']
+				: static::$options['gitlab_access_token'];
 		} else {
-			if ( 'gitlab.com' === $headers['host'] ) {
-				$install['download_link'] = add_query_arg( 'private_token', static::$options['gitlab_access_token'], $install['download_link'] );
-			} else {
-				$install['download_link'] = add_query_arg( 'private_token', static::$options['gitlab_enterprise_token'], $install['download_link'] );
-			}
+			$token = ! empty( $install['options']['gitlab_enterprise_token'] )
+				? $install['options']['gitlab_enterprise_token']
+				: static::$options['gitlab_enterprise_token'];
+		}
+
+		$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+
+		if ( ! empty( static::$options['gitlab_access_token'] ) ) {
+			unset( $install['options']['gitlab_access_token'] );
+		}
+		if ( ! empty( static::$options['gitlab_enterprise_token'] ) ) {
+			unset( $install['options']['gitlab_enterprise_token'] );
 		}
 
 		return $install;
