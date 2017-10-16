@@ -89,12 +89,13 @@ class Theme extends Base {
 			: static::$extra_headers;
 
 		// @TODO update for PHP 5.4
+		// @TODO why cache themes when there are no hooks?
 		$themes = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
 		$themes = ! empty( $themes['themes'] ) ? $themes['themes'] : false;
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			//Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			//Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**
