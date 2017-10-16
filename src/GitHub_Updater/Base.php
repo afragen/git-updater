@@ -182,6 +182,12 @@ class Base {
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
 
+		// Delete get_plugins() and wp_get_themes() cache.
+		add_action( 'deleted_plugin', function() {
+			wp_cache_delete( 'plugins', 'plugins' );
+			delete_site_option( 'ghu-' . md5( 'repos' ) );
+		} );
+
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
 			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
