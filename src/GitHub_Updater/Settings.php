@@ -471,7 +471,7 @@ class Settings extends Base {
 		}, $auth_required_unset );
 
 		// Unset if current_branch AND if associated with repo.
-		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
+		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens, &$reset_keys ) {
 			$key  = array_search( $e, $ghu_unset_keys, true );
 			$repo = str_replace( 'current_branch_', '', $key );
 			if ( array_key_exists( $key, $ghu_unset_keys )
@@ -479,7 +479,11 @@ class Settings extends Base {
 			) {
 				unset( $ghu_unset_keys[ $key ] );
 			}
+			if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
+				$reset_keys[ $key ] = $e;
+			}
 		}, $ghu_unset_keys );
+		$ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
