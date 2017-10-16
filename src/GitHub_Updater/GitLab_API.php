@@ -517,9 +517,13 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Add settings for GitLab.com, GitLab Community Edition.
 	 * or GitLab Enterprise Access Token.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
-		if ( static::$auth_required['gitlab'] || static::$auth_required['gitlab_enterprise'] ) {
+	public function add_settings( $auth_required ) {
+		if ( $auth_required['gitlab'] || $auth_required['gitlab_enterprise'] ) {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
@@ -528,7 +532,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( static::$auth_required['gitlab_private'] ) {
+		if ( $auth_required['gitlab_private'] ) {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
@@ -537,7 +541,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( static::$auth_required['gitlab'] ) {
+		if ( $auth_required['gitlab'] ) {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
@@ -548,7 +552,7 @@ class GitLab_API extends API implements API_Interface {
 			);
 		}
 
-		if ( static::$auth_required['gitlab_enterprise'] ) {
+		if ( $auth_required['gitlab_enterprise'] ) {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),

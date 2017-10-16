@@ -143,9 +143,11 @@ interface API_Interface {
 	/**
 	 * Add settings for each API.
 	 *
+	 * @param array $auth_required
+	 *
 	 * @return mixed
 	 */
-	public function add_settings();
+	public function add_settings( $auth_required );
 
 	/**
 	 * Add remote install settings fields.

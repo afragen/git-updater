@@ -110,7 +110,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	protected static $auth_required = array(
+	public static $auth_required = array(
 		'github_private'    => false,
 		'github_enterprise' => false,
 		'bitbucket_private' => false,

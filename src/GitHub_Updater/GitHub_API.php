@@ -529,8 +529,12 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Add settings for GitHub Personal Access Token.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
+	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
@@ -547,7 +551,7 @@ class GitHub_API extends API implements API_Interface {
 			array( 'id' => 'github_access_token', 'token' => true )
 		);
 
-		if ( static::$auth_required['github_enterprise'] ) {
+		if ( $auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
@@ -561,7 +565,7 @@ class GitHub_API extends API implements API_Interface {
 		/*
 		 * Show section for private GitHub repositories.
 		 */
-		if ( static::$auth_required['github_private'] || static::$auth_required['github_enterprise'] ) {
+		if ( $auth_required['github_private'] || $auth_required['github_enterprise'] ) {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),

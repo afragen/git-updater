@@ -470,8 +470,12 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
 	 * Add settings for Bitbucket Server Username and Password.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
+	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'bitbucket_server_user',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
@@ -500,7 +504,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Show section for private Bitbucket Server repositories.
 		 */
-		if ( static::$auth_required['bitbucket_server'] ) {
+		if ( $auth_required['bitbucket_server'] ) {
 			add_settings_section(
 				'bitbucket_server_id',
 				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),

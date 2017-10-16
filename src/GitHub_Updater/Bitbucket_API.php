@@ -433,8 +433,12 @@ class Bitbucket_API extends API implements API_Interface {
 
 	/**
 	 * Add settings for Bitbucket Username and Password.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
+	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
@@ -463,7 +467,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Show section for private Bitbucket repositories.
 		 */
-		if ( static::$auth_required['bitbucket_private'] ) {
+		if ( $auth_required['bitbucket_private'] ) {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),

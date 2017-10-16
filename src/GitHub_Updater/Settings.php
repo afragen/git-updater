@@ -342,18 +342,18 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings();
+		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings();
+			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings();
+			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings();
+			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 	}
 
