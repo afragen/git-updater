@@ -641,11 +641,15 @@ class GitHub_API extends API implements API_Interface {
 	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
+		$github_com         = true;
+		$install['options'] = array();
+
 		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://api.github.com';
 			$headers['host'] = 'github.com';
 		} else {
-			$base = $headers['base_uri'] . '/api/v3';
+			$base       = $headers['base_uri'] . '/api/v3';
+			$github_com = false;
 		}
 
 		$install['download_link'] = implode( '/', array(
@@ -655,9 +659,8 @@ class GitHub_API extends API implements API_Interface {
 			'zipball',
 			$install['github_updater_branch'],
 		) );
-		/*
-		 * If asset is entered install it.
-		 */
+
+		// If asset is entered install it.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
 			$install['download_link'] = $headers['uri'];
 		}
@@ -667,13 +670,13 @@ class GitHub_API extends API implements API_Interface {
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
 			$install['options'][ $install['repo'] ] = $install['github_access_token'];
-			if ( 'github.com' === $headers['host'] ) {
+			if ( $github_com ) {
 				$install['options']['github_access_token'] = $install['github_access_token'];
 			} else {
 				$install['options']['github_enterprise_token'] = $install['github_access_token'];
 			}
 		}
-		if ( 'github.com' === $headers['host'] ) {
+		if ( $github_com ) {
 			$token = ! empty( $install['options']['github_access_token'] )
 				? $install['options']['github_access_token']
 				: static::$options['github_access_token'];

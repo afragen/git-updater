@@ -630,11 +630,15 @@ class GitLab_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
+		$gitlab_com         = true;
+		$install['options'] = array();
+
 		if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://gitlab.com';
 			$headers['host'] = 'gitlab.com';
 		} else {
-			$base = $headers['base_uri'];
+			$base       = $headers['base_uri'];
+			$gitlab_com = false;
 		}
 
 		$install['download_link'] = implode( '/', array(
@@ -649,13 +653,13 @@ class GitLab_API extends API implements API_Interface {
 		 */
 		if ( ! empty( $install['gitlab_access_token'] ) ) {
 			$install['options'][ $install['repo'] ] = $install['gitlab_access_token'];
-			if ( 'gitlab.com' === $headers['host'] ) {
+			if ( $gitlab_com ) {
 				$install['options']['gitlab_access_token'] = $install['gitlab_access_token'];
 			} else {
 				$install['options']['gitlab_enterprise_token'] = $install['gitlab_access_token'];
 			}
 		}
-		if ( 'gitlab.com' === $headers['host'] ) {
+		if ( $gitlab_com ) {
 			$token = ! empty( $install['options']['gitlab_access_token'] )
 				? $install['options']['gitlab_access_token']
 				: static::$options['gitlab_access_token'];
