@@ -641,8 +641,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
-		$github_com         = true;
-		$install['options'] = array();
+		$github_com = true;
 
 		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://api.github.com';

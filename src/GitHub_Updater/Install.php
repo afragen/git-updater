@@ -148,7 +148,9 @@ class Install extends Base {
 				}
 			}
 
-			static::$options = array_merge( static::$options, self::$install['options'] );
+			static::$options = isset( self::$install['options'] )
+				? array_merge( static::$options, self::$install['options'] )
+				: static::$options;
 
 			static::$options['github_updater_install_repo'] = self::$install['repo'];
 

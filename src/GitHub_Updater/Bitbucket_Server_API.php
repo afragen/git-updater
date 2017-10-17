@@ -540,8 +540,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$bitbucket_org      = true;
-		$install['options'] = array();
+		$bitbucket_org = true;
 
 		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://bitbucket.org';

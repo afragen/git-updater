@@ -630,8 +630,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$gitlab_com         = true;
-		$install['options'] = array();
+		$gitlab_com = true;
 
 		if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://gitlab.com';
