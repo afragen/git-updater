@@ -94,8 +94,8 @@ class Theme extends Base {
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
 			// @TODO why cache themes when there are no hooks to reset?
-			//Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			//Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**
@@ -174,6 +174,11 @@ class Theme extends Base {
 			// Exit if not git hosted theme.
 			if ( empty( $git_theme ) ) {
 				continue;
+			}
+
+			if ( ! is_dir( $git_theme['local_path'])){
+				// Delete get_plugins() and wp_get_themes() cache.
+				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
 
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
