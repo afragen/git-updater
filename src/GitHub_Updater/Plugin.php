@@ -188,6 +188,11 @@ class Plugin extends Base {
 				}
 			}
 
+			if ( ! is_dir( $git_plugin['local_path'])){
+				// Delete get_plugins() and wp_get_themes() cache.
+				delete_site_option( 'ghu-' . md5( 'repos' ) );
+			}
+
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
 		}
 
