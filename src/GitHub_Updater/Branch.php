@@ -48,7 +48,7 @@ class Branch {
 	 */
 	public function __construct( $cache = null ) {
 		$this->cache     = $cache;
-		$this->base      = $base = Singleton::get_instance( 'Base' );
+		$base            = Singleton::get_instance( 'Base' );
 		static::$options = $base::$options;
 	}
 

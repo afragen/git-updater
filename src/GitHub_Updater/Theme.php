@@ -174,7 +174,7 @@ class Theme extends Base {
 				continue;
 			}
 
-			if ( ! is_dir( $git_theme['local_path'])){
+			if ( ! is_dir( $git_theme['local_path'] ) ) {
 				// Delete get_plugins() and wp_get_themes() cache.
 				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
