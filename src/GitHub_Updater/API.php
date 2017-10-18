@@ -305,7 +305,7 @@ class API {
 		$cache_key = 'ghu-' . md5( $repo );
 		$cache     = get_site_option( $cache_key );
 
-		if ( empty( $cache['timeout'] ) || current_time( 'timestamp' ) > $cache['timeout'] ) {
+		if ( empty( $cache['timeout'] ) || time() > $cache['timeout'] ) {
 			return false;
 		}
 
@@ -332,7 +332,7 @@ class API {
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = $timeout ? $timeout : '+' . static::$hours . ' hours';
 
-		$this->response['timeout'] = strtotime( $timeout, current_time( 'timestamp' ) );
+		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
 		update_site_option( $cache_key, $this->response );

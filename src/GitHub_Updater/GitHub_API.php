@@ -456,7 +456,7 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	private function get_github_release_asset_url() {
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( ( current_time( 'timestamp' ) - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
 			unset( $this->response['release_asset_url'] );
 		}
 
