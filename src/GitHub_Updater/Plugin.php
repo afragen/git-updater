@@ -68,14 +68,12 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$extra_headers         = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
-		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
-			? $extra_headers['extra_headers']
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
+			? $repo_cache['extra_headers']
 			: static::$extra_headers;
 
-		// @TODO update for PHP 5.4
-		$plugins = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
-		$plugins = ! empty( $plugins['plugins'] ) ? $plugins['plugins'] : false;
+		$plugins = ! empty( $repo_cache['plugins'] ) ? $repo_cache['plugins'] : false;
 		if ( ! $plugins ) {
 			$plugins = get_plugins();
 			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );

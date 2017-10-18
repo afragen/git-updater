@@ -83,14 +83,12 @@ class Theme extends Base {
 		$git_themes = array();
 		$this->delete_current_theme_cache();
 
-		$extra_headers         = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
-		static::$extra_headers = ! empty( $extra_headers['extra_headers'] )
-			? $extra_headers['extra_headers']
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
+			? $repo_cache['extra_headers']
 			: static::$extra_headers;
 
-		// @TODO update for PHP 5.4
-		$themes = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
-		$themes = ! empty( $themes['themes'] ) ? $themes['themes'] : false;
+		$themes = ! empty( $repo_cache['themes'] ) ? $repo_cache['themes'] : false;
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
 			// @TODO why cache themes when there are no hooks to reset?
