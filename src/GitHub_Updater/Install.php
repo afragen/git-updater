@@ -118,41 +118,7 @@ class Install extends Base {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-
-				if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
-					$base            = 'https://api.github.com';
-					$headers['host'] = 'github.com';
-				} else {
-					$base = $headers['base_uri'] . '/api/v3';
-				}
-
-				self::$install['download_link'] = implode( '/', array(
-					$base,
-					'repos',
-					self::$install['github_updater_repo'],
-					'zipball',
-					self::$install['github_updater_branch'],
-				) );
-				/*
-				 * If asset is entered install it.
-				 */
-				if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
-					self::$install['download_link'] = $headers['uri'];
-				}
-
-				/*
-				 * Add access token if present.
-				 */
-				if ( ! empty( self::$install['github_access_token'] ) ) {
-					self::$install['download_link']            = add_query_arg( 'access_token', self::$install['github_access_token'], self::$install['download_link'] );
-					parent::$options[ self::$install['repo'] ] = self::$install['github_access_token'];
-				} elseif ( ! empty( parent::$options['github_access_token'] ) &&
-				           ( 'github.com' === $headers['host'] || empty( $headers['host'] ) )
-				) {
-					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_access_token'], self::$install['download_link'] );
-				} elseif ( ! empty( parent::$options['github_enterprise_token'] ) ) {
-					self::$install['download_link'] = add_query_arg( 'access_token', parent::$options['github_enterprise_token'], self::$install['download_link'] );
-				}
+				self::$install = Singleton::get_instance( 'GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
 			}
 
 			/*
@@ -161,28 +127,33 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				if ( parent::$installed_apis['bitbucket_api'] ) {
+				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				if ( static::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
-				if ( parent::$installed_apis['bitbucket_server_api'] ) {
+				if ( static::$installed_apis['bitbucket_server_api'] ) {
 					self::$install = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
 			/*
 			 * Create GitLab endpoint.
+			 * Save Access Token if present.
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( parent::$installed_apis['gitlab_api'] ) {
+				if ( static::$installed_apis['gitlab_api'] ) {
 					self::$install = Singleton::get_instance( 'GitLab_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
-			parent::$options['github_updater_install_repo'] = self::$install['repo'];
+			static::$options = isset( self::$install['options'] )
+				? array_merge( static::$options, self::$install['options'] )
+				: static::$options;
 
-			update_site_option( 'github_updater', Settings::sanitize( parent::$options ) );
+			static::$options['github_updater_install_repo'] = self::$install['repo'];
+
 			$url      = self::$install['download_link'];
 			$nonce    = wp_nonce_url( $url );
 			$upgrader = null;
@@ -219,13 +190,17 @@ class Install extends Base {
 				), 10, 3 );
 			}
 
-			/*
-			 * Perform the action and install the repo from the $source urldecode().
-			 */
-			$upgrader->install( $url );
+			// Perform the action and install the repo from the $source urldecode().
+			if ( $upgrader->install( $url ) ) {
+				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
 
-			// Save branch setting.
-			Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+				// Save branch setting.
+				Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+
+				// Delete get_plugins() and wp_get_themes() cache.
+				delete_site_option( 'ghu-' . md5( 'repos' ) );
+			}
+
 		}
 
 		if ( $wp_cli ) {
@@ -315,19 +290,13 @@ class Install extends Base {
 			$type
 		);
 
-		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'github_access_token' ),
-			'github_updater_install_' . $type,
-			$type
-		);
+		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
 
-		if ( parent::$installed_apis['bitbucket_api'] ) {
+		if ( static::$installed_apis['bitbucket_api'] ) {
 			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 
-		if ( parent::$installed_apis['gitlab_api'] ) {
+		if ( static::$installed_apis['gitlab_api'] ) {
 			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 	}
@@ -369,29 +338,14 @@ class Install extends Base {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
-				<?php foreach ( parent::$git_servers as $key => $value ): ?>
-					<?php if ( parent::$installed_apis[ $key . '_api' ] ): ?>
+				<?php foreach ( static::$git_servers as $key => $value ): ?>
+					<?php if ( static::$installed_apis[ $key . '_api' ] ): ?>
 						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>
 					<?php endif ?>
 				<?php endforeach ?>
 			</select>
-		</label>
-		<?php
-	}
-
-	/**
-	 * GitHub Access Token for remote install.
-	 */
-	public function github_access_token() {
-		?>
-		<label for="github_access_token">
-			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
-			<br>
-			<span class="description">
-				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
-			</span>
 		</label>
 		<?php
 	}

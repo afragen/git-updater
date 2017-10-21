@@ -82,7 +82,19 @@ class Theme extends Base {
 	protected function get_theme_meta() {
 		$git_themes = array();
 		$this->delete_current_theme_cache();
-		$themes = wp_get_themes( array( 'errors' => null ) );
+
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
+			? $repo_cache['extra_headers']
+			: static::$extra_headers;
+
+		$themes = ! empty( $repo_cache['themes'] ) ? $repo_cache['themes'] : false;
+		if ( ! $themes ) {
+			$themes = wp_get_themes( array( 'errors' => null ) );
+			// @TODO why cache themes when there are no hooks to reset?
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+		}
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
@@ -100,7 +112,7 @@ class Theme extends Base {
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = array();
 
-			foreach ( (array) self::$extra_headers as $value ) {
+			foreach ( (array) static::$extra_headers as $value ) {
 				$header   = null;
 				$repo_uri = $theme->get( $value );
 
@@ -132,8 +144,8 @@ class Theme extends Base {
 
 				$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
 				$current_branch = 'current_branch_' . $header['repo'];
-				$branch         = isset( parent::$options[ $current_branch ] )
-					? parent::$options[ $current_branch ]
+				$branch         = isset( static::$options[ $current_branch ] )
+					? static::$options[ $current_branch ]
 					: false;
 
 				$git_theme['type']                    = $repo_parts['type'];
@@ -162,6 +174,11 @@ class Theme extends Base {
 				continue;
 			}
 
+			if ( ! is_dir( $git_theme['local_path'] ) ) {
+				// Delete get_plugins() and wp_get_themes() cache.
+				delete_site_option( 'ghu-' . md5( 'repos' ) );
+			}
+
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
 		}
 
@@ -173,10 +190,22 @@ class Theme extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_theme_meta() {
+		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 
-			if ( ! $this->get_remote_repo_meta( $theme ) ) {
-				continue;
+			$themes[ $theme->repo ] = $theme;
+
+			/**
+			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
+			 *
+			 * @since  7.4.0
+			 * @access public
+			 *
+			 * @param bool
+			 */
+			if ( ! $this->waiting_for_wp_cron( $theme ) || static::is_wp_cli()
+			     || apply_filters( 'github_updater_disable_wpcron', false ) ) {
+				$this->get_remote_repo_meta( $theme );
 			}
 
 			/*
@@ -194,6 +223,13 @@ class Theme extends Base {
 					}
 				}
 			}
+		}
+
+		if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
+		     ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
+		     ! apply_filters( 'github_updater_disable_wpcron', false )
+		) {
+			wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 		}
 
 		// Update theme transient with rollback (branch switching) data.
@@ -342,13 +378,15 @@ class Theme extends Base {
 	 * @return bool
 	 */
 	public function multisite_branch_switcher( $theme_key, $theme ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
+		if ( empty( static::$options['branch_switch'] ) ) {
 			return false;
 		}
 
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme', true );
 		$id                = $theme_key . '-id';
-		$branches          = isset( $this->config[ $theme_key ] ) ? $this->config[ $theme_key ]->branches : null;
+		$branches          = isset( $this->config[ $theme_key ]->branches )
+			? $this->config[ $theme_key ]->branches
+			: null;
 		$nonced_update_url = wp_nonce_url(
 			$this->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
 			'upgrade-theme_' . $theme_key
@@ -386,7 +424,7 @@ class Theme extends Base {
 	public function remove_after_theme_row( $theme_key, $theme ) {
 		$themes = $this->get_theme_configs();
 
-		foreach ( parent::$git_servers as $server ) {
+		foreach ( static::$git_servers as $server ) {
 			$repo_header = $server . ' Theme URI';
 			$repo_uri    = $theme->get( $repo_header );
 
@@ -494,7 +532,7 @@ class Theme extends Base {
 						esc_attr( $theme->name )
 					);
 					printf( esc_html__( 'View version %1$s details%2$s or %3$supdate now%4$s.', 'github-updater' ),
-						$theme->remote_version,
+						$theme->remote_version = isset( $theme->remote_version ) ? $theme->remote_version : null,
 						'</a>',
 						sprintf( '<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . $theme->repo . '" href="' . $nonced_update_url . '">',
 							$theme->name
@@ -527,7 +565,7 @@ class Theme extends Base {
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
 		ob_start();
-		if ( '1' === self::$options['branch_switch'] ) {
+		if ( '1' === static::$options['branch_switch'] ) {
 			printf( '<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 				$theme->branch,
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
@@ -544,8 +582,10 @@ class Theme extends Base {
 								   ">
 						<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 						<?php
-						foreach ( array_keys( $theme->branches ) as $branch ) {
-							echo '<option>' . $branch . '</option>';
+						if ( isset( $theme->branches ) ) {
+							foreach ( array_keys( $theme->branches ) as $branch ) {
+								echo '<option>' . $branch . '</option>';
+							}
 						}
 						if ( ! empty( $theme->rollback ) ) {
 							$rollback = array_keys( $theme->rollback );

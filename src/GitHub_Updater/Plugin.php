@@ -68,7 +68,18 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$plugins     = get_plugins();
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
+			? $repo_cache['extra_headers']
+			: static::$extra_headers;
+
+		$plugins = ! empty( $repo_cache['plugins'] ) ? $repo_cache['plugins'] : false;
+		if ( ! $plugins ) {
+			$plugins = get_plugins();
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+		}
+
 		$git_plugins = array();
 
 		/**
@@ -95,7 +106,7 @@ class Plugin extends Base {
 				continue;
 			}
 
-			foreach ( (array) self::$extra_headers as $value ) {
+			foreach ( (array) static::$extra_headers as $value ) {
 				$header = null;
 
 				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ), true ) ) {
@@ -118,8 +129,8 @@ class Plugin extends Base {
 
 				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
 				$current_branch = 'current_branch_' . $header['repo'];
-				$branch         = isset( parent::$options[ $current_branch ] )
-					? parent::$options[ $current_branch ]
+				$branch         = isset( static::$options[ $current_branch ] )
+					? static::$options[ $current_branch ]
 					: false;
 
 				$git_plugin['type']           = $repo_parts['type'];
@@ -159,6 +170,25 @@ class Plugin extends Base {
 						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
 						: null;
 
+				$git_plugin['icons'] = array();
+				$icons               = array(
+					'svg'    => 'icon.svg',
+					'1x_png' => 'icon-128x128.png',
+					'1x_jpg' => 'icon-128x128.jpg',
+					'2x_png' => 'icon-256x256.png',
+					'2x_jpg' => 'icon-256x256.jpg',
+				);
+				foreach ( $icons as $key => $filename ) {
+					$key  = preg_replace( '/_png|_jpg/', '', $key );
+					$icon = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
+						? $git_plugin['icons'][ $key ] = trailingslashit( WP_PLUGIN_URL ) . $git_plugin['repo'] . '/assets/' . $filename
+						: null;
+				}
+			}
+
+			if ( ! is_dir( $git_plugin['local_path'] ) ) {
+				// Delete get_plugins() and wp_get_themes() cache.
+				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
@@ -172,10 +202,23 @@ class Plugin extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
+		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( ! $this->get_remote_repo_meta( $plugin ) ) {
-				continue;
+			$plugins[ $plugin->repo ] = $plugin;
+
+			/**
+			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
+			 *
+			 * @since  7.4.0
+			 * @access public
+			 *
+			 * @param bool
+			 */
+			if ( ! $this->waiting_for_wp_cron( $plugin ) || static::is_wp_cli()
+			     || apply_filters( 'github_updater_disable_wpcron', false )
+			) {
+				$this->get_remote_repo_meta( $plugin );
 			}
 
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
@@ -184,6 +227,13 @@ class Plugin extends Base {
 			) {
 				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
 			}
+		}
+
+		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
+		     ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
+		     ! apply_filters( 'github_updater_disable_wpcron', false )
+		) {
+			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
@@ -212,7 +262,7 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
+		if ( empty( static::$options['branch_switch'] ) ) {
 			return false;
 		}
 
@@ -225,7 +275,9 @@ class Plugin extends Base {
 
 		if ( ! empty( $plugin ) ) {
 			$id       = $plugin['repo'] . '-id';
-			$branches = isset( $this->config[ $plugin['repo'] ] ) ? $this->config[ $plugin['repo'] ]->branches : null;
+			$branches = isset( $this->config[ $plugin['repo'] ]->branches )
+				? $this->config[ $plugin['repo'] ]->branches
+				: null;
 		} else {
 			return false;
 		}
@@ -335,6 +387,7 @@ class Plugin extends Base {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
+		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
 		foreach ( (array) $plugin->contributors as $contributor ) {
 			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 		}
@@ -365,6 +418,7 @@ class Plugin extends Base {
 					'new_version' => $plugin->remote_version,
 					'url'         => $plugin->uri,
 					'package'     => $plugin->download_link,
+					'icons'       => $plugin->icons,
 					'branch'      => $plugin->branch,
 					'branches'    => array_keys( $plugin->branches ),
 					'type'        => $plugin->type,

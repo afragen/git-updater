@@ -55,7 +55,7 @@ class Basic_Auth_Loader {
 	 * @param array $options Options to pass to the updater.
 	 */
 	public function __construct( $options ) {
-		self::$options = empty( $options )
+		static::$options = empty( $options )
 			? get_site_option( 'github_updater', array() )
 			: $options;
 	}
@@ -178,9 +178,9 @@ class Basic_Auth_Loader {
 				break;
 		}
 
-		if ( isset( self::$options[ $username_key ], self::$options[ $password_key ] ) ) {
-			$credentials['username'] = self::$options[ $username_key ];
-			$credentials['password'] = self::$options[ $password_key ];
+		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
+			$credentials['username'] = static::$options[ $username_key ];
+			$credentials['password'] = static::$options[ $password_key ];
 			$credentials['isset']    = true;
 			$credentials['private']  = $this->is_repo_private( $url );
 		}
@@ -203,8 +203,8 @@ class Basic_Auth_Loader {
 		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 
-		if ( $slug && array_key_exists( $slug, self::$options ) &&
-		     1 === (int) self::$options[ $slug ] &&
+		if ( $slug && array_key_exists( $slug, static::$options ) &&
+		     1 === (int) static::$options[ $slug ] &&
 		     false !== stripos( $url, $slug )
 		) {
 			return true;
@@ -218,8 +218,8 @@ class Basic_Auth_Loader {
 		}
 
 		// Used for refreshing cache.
-		foreach ( array_keys( self::$options ) as $option ) {
-			if ( 1 === (int) self::$options[ $option ] &&
+		foreach ( array_keys( static::$options ) as $option ) {
+			if ( 1 === (int) static::$options[ $option ] &&
 			     false !== strpos( $url, $option )
 			) {
 				return true;

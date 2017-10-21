@@ -29,7 +29,7 @@ class GHU_Upgrade extends Base {
 	 *
 	 * @var int
 	 */
-	private $db_version = 7000;
+	private $db_version = 7400;
 
 	/**
 	 * GHU_Upgrade constructor.
@@ -43,7 +43,7 @@ class GHU_Upgrade extends Base {
 	 * Run update check against db_version.
 	 */
 	public function run() {
-		$db_version = isset( self::$options['db_version'] ) ? self::$options['db_version'] : 6000;
+		$db_version = isset( static::$options['db_version'] ) ? static::$options['db_version'] : 6000;
 
 		if ( $db_version === $this->db_version ) {
 			return;
@@ -57,7 +57,7 @@ class GHU_Upgrade extends Base {
 				break;
 		}
 
-		$options = array_merge( (array) self::$options, array( 'db_version' => (int) $this->db_version ) );
+		$options = array_merge( (array) static::$options, array( 'db_version' => (int) $this->db_version ) );
 		update_site_option( 'github_updater', $options );
 	}
 

@@ -1,5 +1,16 @@
 #### [unreleased]
 
+#### 7.4.0 / 2017-10-21
+* use wp-cron for background processing of `wp_remote_get()` calls for getting repo data 🚀
+* fixed [#603](https://github.com/afragen/github-updater/issues/603) by not creating generic global variables accidentally
+* fixed issue with remote install of private Bitbucket repos
+* added plugin icons to `update-core.php` page for WP 4.9
+* fixed stale AWS download link for GitHub release asset
+* cache `get_plugins()` and `wp_get_themes()` for short period giving better performance to some admin pages, fixes [#612](https://github.com/afragen/github-updater/issues/612)
+* refactor of methods from `class Base` to `class API`
+* created `class API_PseudoTrait` to share methods of `class API`, workaround for OOP traits
+* fixed removal of stale options
+
 #### 7.3.1 / 2017-09-20
 * removed parent constructor from `Branch`, thanks @fwolfst
 

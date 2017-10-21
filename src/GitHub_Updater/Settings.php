@@ -117,13 +117,13 @@ class Settings extends Base {
 		$ghu_subtabs = array(
 			'github' => esc_html__( 'GitHub', 'github-updater' ),
 		);
-		if ( parent::$installed_apis['bitbucket_api'] ) {
+		if ( static::$installed_apis['bitbucket_api'] ) {
 			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
 		}
-		if ( parent::$installed_apis['bitbucket_server_api'] ) {
+		if ( static::$installed_apis['bitbucket_server_api'] ) {
 			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
 		}
-		if ( parent::$installed_apis['gitlab_api'] ) {
+		if ( static::$installed_apis['gitlab_api'] ) {
 			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
 		}
 
@@ -342,61 +342,19 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		/*
-		 * Add settings for GitHub Personal Access Token.
-		 */
-		add_settings_section(
-			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			array( &$this, 'print_section_github_access_token' ),
-			'github_updater_github_install_settings'
-		);
+		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
 
-		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( &$this, 'token_callback_text' ),
-			'github_updater_github_install_settings',
-			'github_access_token',
-			array( 'id' => 'github_access_token', 'token' => true )
-		);
-
-		if ( parent::$auth_required['github_enterprise'] ) {
-			add_settings_field(
-				'github_enterprise_token',
-				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_github_install_settings',
-				'github_access_token',
-				array( 'id' => 'github_enterprise_token', 'token' => true )
-			);
+		if ( static::$installed_apis['gitlab_api'] ) {
+			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
-		/*
-		 * Show section for private GitHub repositories.
-		 */
-		if ( parent::$auth_required['github_private'] || parent::$auth_required['github_enterprise'] ) {
-			add_settings_section(
-				'github_id',
-				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_github_info' ),
-				'github_updater_github_install_settings'
-			);
+		if ( static::$installed_apis['bitbucket_api'] ) {
+			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
-		if ( parent::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings();
+		if ( static::$installed_apis['bitbucket_server_api'] ) {
+			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
-
-		if ( parent::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings();
-		}
-
-		if ( parent::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings();
-		}
-
-		$this->update_settings();
 	}
 
 	/**
@@ -436,23 +394,21 @@ class Settings extends Base {
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
-					$setting_field['page']            = 'github_updater_github_install_settings';
-					$setting_field['section']         = 'github_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_text' );
+					$repo_setting_field = Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_repo_setting_field();
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
-						if ( parent::$installed_apis['bitbucket_api'] ) {
+						if ( static::$installed_apis['bitbucket_api'] ) {
 							$repo_setting_field = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
-						if ( parent::$installed_apis['bitbucket_server_api'] ) {
+						if ( static::$installed_apis['bitbucket_server_api'] ) {
 							$repo_setting_field = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
-					if ( parent::$installed_apis['gitlab_api'] ) {
+					if ( static::$installed_apis['gitlab_api'] ) {
 						$repo_setting_field = Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_repo_setting_field();
 					}
 					break;
@@ -472,7 +428,9 @@ class Settings extends Base {
 			);
 		}
 
-		$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+		if ( ! $this->waiting_for_wp_cron() ) {
+			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+		}
 	}
 
 	/**
@@ -482,7 +440,7 @@ class Settings extends Base {
 	 * @param array $ghu_tokens
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
-		$ghu_unset_keys = array_diff_key( parent::$options, $ghu_options_keys );
+		$ghu_unset_keys = array_diff_key( static::$options, $ghu_options_keys );
 		$always_unset   = array(
 			'db_version',
 			'branch_switch',
@@ -498,7 +456,7 @@ class Settings extends Base {
 			unset( $ghu_unset_keys[ $e ] );
 		}, $always_unset );
 
-		$auth_required       = parent::$auth_required;
+		$auth_required       = static::$auth_required;
 		$auth_required_unset = array(
 			'github_enterprise' => 'github_enterprise_token',
 			'gitlab'            => 'gitlab_access_token',
@@ -512,25 +470,26 @@ class Settings extends Base {
 			}
 		}, $auth_required_unset );
 
-		// Unset if value set AND if associated with a repo.
 		// Unset if current_branch AND if associated with repo.
-		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens ) {
+		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens, &$reset_keys ) {
 			$key  = array_search( $e, $ghu_unset_keys, true );
 			$repo = str_replace( 'current_branch_', '', $key );
-			if ( ( array_key_exists( $key, $ghu_unset_keys ) &&
-			       array_key_exists( $key, $ghu_tokens ) )
-			     || ( array_key_exists( $repo, $ghu_tokens )
-			          && false !== strpos( $key, 'current_branch' ) )
+			if ( array_key_exists( $key, $ghu_unset_keys )
+			     && false !== strpos( $key, 'current_branch' )
 			) {
 				unset( $ghu_unset_keys[ $key ] );
 			}
+			if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
+				$reset_keys[ $key ] = $e;
+			}
 		}, $ghu_unset_keys );
+		$ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( parent::$options [ $key ] );
+				unset( static::$options [ $key ] );
 			}
-			update_site_option( 'github_updater', parent::$options );
+			update_site_option( 'github_updater', static::$options );
 		}
 	}
 
@@ -543,49 +502,49 @@ class Settings extends Base {
 
 		// Set booleans for Enterprise headers.
 		if ( $token->enterprise ) {
-			if ( ! parent::$auth_required['github_enterprise'] &&
+			if ( ! static::$auth_required['github_enterprise'] &&
 			     false !== strpos( $token->type, 'github' )
 
 			) {
-				parent::$auth_required['github_enterprise'] = true;
+				static::$auth_required['github_enterprise'] = true;
 			}
 
-			if ( ! parent::$auth_required['gitlab_enterprise'] &&
+			if ( ! static::$auth_required['gitlab_enterprise'] &&
 			     false !== strpos( $token->type, 'gitlab' )
 			) {
-				parent::$auth_required['gitlab_enterprise'] = true;
+				static::$auth_required['gitlab_enterprise'] = true;
 			}
 
-			if ( ! parent::$auth_required['bitbucket_server'] &&
+			if ( ! static::$auth_required['bitbucket_server'] &&
 			     false !== strpos( $token->type, 'bitbucket' )
 			) {
-				parent::$auth_required['bitbucket_server'] = true;
+				static::$auth_required['bitbucket_server'] = true;
 			}
 		}
 
 		if ( $this->is_private( $token ) ) {
-			if ( ! parent::$auth_required['github_private'] &&
+			if ( ! static::$auth_required['github_private'] &&
 			     false !== strpos( $token->type, 'github' )
 			) {
-				parent::$auth_required['github_private'] = true;
+				static::$auth_required['github_private'] = true;
 			}
-			if ( ! parent::$auth_required['bitbucket_private'] &&
+			if ( ! static::$auth_required['bitbucket_private'] &&
 			     false !== strpos( $token->type, 'bitbucket' )
 			) {
-				parent::$auth_required['bitbucket_private'] = true;
+				static::$auth_required['bitbucket_private'] = true;
 			}
-			if ( ! parent::$auth_required['gitlab_private'] &&
+			if ( ! static::$auth_required['gitlab_private'] &&
 			     false !== strpos( $token->type, 'gitlab' )
 			) {
-				parent::$auth_required['gitlab_private'] = true;
+				static::$auth_required['gitlab_private'] = true;
 			}
 		}
 
 		if ( empty( $token->enterprise ) &&
-		     ! parent::$auth_required['gitlab'] &&
+		     ! static::$auth_required['gitlab'] &&
 		     false !== strpos( $token->type, 'gitlab' )
 		) {
-			parent::$auth_required['gitlab'] = true;
+			static::$auth_required['gitlab'] = true;
 		}
 	}
 
@@ -637,7 +596,7 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub Updater text.
+	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
 		if ( $this->is_override_dot_org() ) {
@@ -652,26 +611,12 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the GitHub text.
-	 */
-	public function print_section_github_info() {
-		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
-	}
-
-	/**
-	 * Print the GitHub Personal Access Token text.
-	 */
-	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
-	}
-
-	/**
 	 * Print the Remote Management text.
 	 */
 	public function print_section_remote_management() {
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',
-			'key'    => self::$api_key,
+			'key'    => static::$api_key,
 		), admin_url( 'admin-ajax.php' ) );
 
 		?>
@@ -691,7 +636,7 @@ class Settings extends Base {
 	 * @param $args
 	 */
 	public function token_callback_text( $args ) {
-		$name = isset( parent::$options[ $args['id'] ] ) ? esc_attr( parent::$options[ $args['id'] ] ) : '';
+		$name = isset( static::$options[ $args['id'] ] ) ? esc_attr( static::$options[ $args['id'] ] ) : '';
 		$type = isset( $args['token'] ) ? 'password' : 'text';
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
@@ -706,7 +651,7 @@ class Settings extends Base {
 	 * @param $args
 	 */
 	public function token_callback_checkbox( $args ) {
-		$checked = isset( parent::$options[ $args['id'] ] ) ? parent::$options[ $args['id'] ] : null;
+		$checked = isset( static::$options[ $args['id'] ] ) ? static::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
@@ -724,7 +669,7 @@ class Settings extends Base {
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
-		$checked = isset( parent::$options_remote[ $args['id'] ] ) ? parent::$options_remote[ $args['id'] ] : null;
+		$checked = isset( static::$options_remote[ $args['id'] ] ) ? static::$options_remote[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
@@ -759,7 +704,7 @@ class Settings extends Base {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		$options = parent::$options;
+		$options = static::$options;
 
 		// Remove checkbox options.
 		$options = array_filter( $options, function( $e ) {
@@ -911,7 +856,7 @@ class Settings extends Base {
 				'repo'    => $e->repo,
 				'name'    => $e->name,
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
-				'broken'  => $e->broken,
+				'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
 			);
 		}, $type_repos );

@@ -63,7 +63,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 			if ( $response ) {
 				$contents = $this->bbserver_recombine_response( $response );
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -127,7 +127,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -181,7 +181,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -470,8 +470,12 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
 	 * Add settings for Bitbucket Server Username and Password.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
+	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'bitbucket_server_user',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
@@ -500,7 +504,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Show section for private Bitbucket Server repositories.
 		 */
-		if ( parent::$auth_required['bitbucket_server'] ) {
+		if ( $auth_required['bitbucket_server'] ) {
 			add_settings_section(
 				'bitbucket_server_id',
 				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
@@ -562,13 +566,13 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			), $install['download_link'] );
 
 			if ( isset( $install['is_private'] ) ) {
-				parent::$options[ $install['repo'] ] = 1;
+				$install['options'][ $install['repo'] ] = 1;
 			}
 			if ( ! empty( $install['bitbucket_username'] ) ) {
-				parent::$options['bitbucket_server_username'] = $install['bitbucket_username'];
+				$install['options']['bitbucket_server_username'] = $install['bitbucket_username'];
 			}
 			if ( ! empty( $install['bitbucket_password'] ) ) {
-				parent::$options['bitbucket_server_password'] = $install['bitbucket_password'];
+				$install['options']['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
 		}
 

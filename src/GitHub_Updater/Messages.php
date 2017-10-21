@@ -53,7 +53,7 @@ class Messages extends Base {
 			return false;
 		}
 
-		if ( is_admin() && ! parent::is_doing_ajax() ) {
+		if ( is_admin() && ! static::is_doing_ajax() ) {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
@@ -83,8 +83,9 @@ class Messages extends Base {
 	 * Usually 403 as API rate limit max out.
 	 */
 	public function show_403_error_message() {
-		$_403 = false;
-		foreach ( self::$error_code as $repo ) {
+		$_403       = false;
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
 				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
@@ -121,8 +122,9 @@ class Messages extends Base {
 	 * Usually 401 as private repo with no token set or incorrect user/pass.
 	 */
 	public function show_401_error_message() {
-		$_401 = false;
-		foreach ( self::$error_code as $repo ) {
+		$_401       = false;
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_401 && 401 === $repo['code'] ) {
 				$_401 = true;
 				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
@@ -148,10 +150,10 @@ class Messages extends Base {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public function gitlab_error() {
-		if ( ( empty( parent::$options['gitlab_enterprise_token'] ) &&
-		       parent::$auth_required['gitlab_enterprise'] ) ||
-		     ( empty( parent::$options['gitlab_access_token'] ) &&
-		       parent::$auth_required['gitlab'] )
+		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+		       static::$auth_required['gitlab_enterprise'] ) ||
+		     ( empty( static::$options['gitlab_access_token'] ) &&
+		       static::$auth_required['gitlab'] )
 		) {
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;

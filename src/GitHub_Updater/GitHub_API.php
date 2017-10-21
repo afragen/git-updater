@@ -40,6 +40,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
+		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
@@ -69,7 +70,7 @@ class GitHub_API extends API implements API_Interface {
 
 			if ( $response ) {
 				$contents = base64_decode( $response->content );
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -131,7 +132,7 @@ class GitHub_API extends API implements API_Interface {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -179,7 +180,7 @@ class GitHub_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -375,7 +376,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
-			parent::$error_code[ $repo ] = array_merge( parent::$error_code[ $repo ], array(
+			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], array(
 				'git'  => 'github',
 				'wait' => $wait,
 			) );
@@ -448,14 +449,17 @@ class GitHub_API extends API implements API_Interface {
 	 * Return the AWS download link for a GitHub release asset.
 	 * AWS download link sets a link expiration of ONLY 5 minutes.
 	 *
-	 * @TODO  Figure out how to run this on the fly only when needed.
-	 *
 	 * @since 6.1.0
 	 * @uses  Requests, requires WP 4.6
 	 *
 	 * @return array|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
+		// Unset release asset url if older than 5 min to account for AWS expiration.
+		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['release_asset_url'] );
+		}
+
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
 		if ( $this->exit_no_update( $response ) ) {
@@ -521,6 +525,176 @@ class GitHub_API extends API implements API_Interface {
 		$args['headers']['accept'] = 'application/octet-stream';
 
 		return $args;
+	}
+
+	/**
+	 * Add settings for GitHub Personal Access Token.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
+	 */
+	public function add_settings( $auth_required ) {
+		add_settings_section(
+			'github_access_token',
+			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
+			array( &$this, 'print_section_github_access_token' ),
+			'github_updater_github_install_settings'
+		);
+
+		add_settings_field(
+			'github_access_token',
+			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			'github_updater_github_install_settings',
+			'github_access_token',
+			array( 'id' => 'github_access_token', 'token' => true )
+		);
+
+		if ( $auth_required['github_enterprise'] ) {
+			add_settings_field(
+				'github_enterprise_token',
+				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
+				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				'github_updater_github_install_settings',
+				'github_access_token',
+				array( 'id' => 'github_enterprise_token', 'token' => true )
+			);
+		}
+
+		/*
+		 * Show section for private GitHub repositories.
+		 */
+		if ( $auth_required['github_private'] || $auth_required['github_enterprise'] ) {
+			add_settings_section(
+				'github_id',
+				esc_html__( 'GitHub Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_github_info' ),
+				'github_updater_github_install_settings'
+			);
+		}
+	}
+
+	/**
+	 * Add values for individual repo add_setting_field().
+	 *
+	 * @return mixed
+	 */
+	public function add_repo_setting_field() {
+		$setting_field['page']            = 'github_updater_github_install_settings';
+		$setting_field['section']         = 'github_id';
+		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_text' );
+
+		return $setting_field;
+	}
+
+	/**
+	 * Print the GitHub text.
+	 */
+	public function print_section_github_info() {
+		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+	}
+
+	/**
+	 * Print the GitHub Personal Access Token text.
+	 */
+	public function print_section_github_access_token() {
+		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
+	}
+
+	/**
+	 * Add remote install settings fields.
+	 *
+	 * @param $type
+	 */
+	public function add_install_settings_fields( $type ) {
+		add_settings_field(
+			'github_access_token',
+			esc_html__( 'GitHub Access Token', 'github-updater' ),
+			array( &$this, 'github_access_token' ),
+			'github_updater_install_' . $type,
+			$type
+		);
+	}
+
+	/**
+	 * GitHub Access Token for remote install.
+	 */
+	public function github_access_token() {
+		?>
+		<label for="github_access_token">
+			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
+			<br>
+			<span class="description">
+				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
+			</span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Add remote install feature, create endpoint.
+	 *
+	 * @param $headers
+	 * @param $install
+	 *
+	 * @return mixed
+	 */
+	public function remote_install( $headers, $install ) {
+		$github_com = true;
+
+		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
+			$base            = 'https://api.github.com';
+			$headers['host'] = 'github.com';
+		} else {
+			$base       = $headers['base_uri'] . '/api/v3';
+			$github_com = false;
+		}
+
+		$install['download_link'] = implode( '/', array(
+			$base,
+			'repos',
+			$install['github_updater_repo'],
+			'zipball',
+			$install['github_updater_branch'],
+		) );
+
+		// If asset is entered install it.
+		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
+			$install['download_link'] = $headers['uri'];
+		}
+
+		/*
+		 * Add/Save access token if present.
+		 */
+		if ( ! empty( $install['github_access_token'] ) ) {
+			$install['options'][ $install['repo'] ] = $install['github_access_token'];
+			if ( $github_com ) {
+				$install['options']['github_access_token'] = $install['github_access_token'];
+			} else {
+				$install['options']['github_enterprise_token'] = $install['github_access_token'];
+			}
+		}
+		if ( $github_com ) {
+			$token = ! empty( $install['options']['github_access_token'] )
+				? $install['options']['github_access_token']
+				: static::$options['github_access_token'];
+		} else {
+			$token = ! empty( $install['options']['github_enterprise_token'] )
+				? $install['options']['github_enterprise_token']
+				: static::$options['github_enterprise_token'];
+		}
+
+		$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+
+		if ( ! empty( static::$options['github_access_token'] ) ) {
+			unset( $install['options']['github_access_token'] );
+		}
+		if ( ! empty( static::$options['github_enterprise_token'] ) ) {
+			unset( $install['options']['github_enterprise_token'] );
+		}
+
+		return $install;
 	}
 
 }

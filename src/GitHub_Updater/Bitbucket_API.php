@@ -35,6 +35,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param \stdClass $type The repo type.
 	 */
 	public function __construct( $type ) {
+		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
@@ -59,16 +60,16 @@ class Bitbucket_API extends API implements API_Interface {
 			$username = 'bitbucket_server_username';
 			$password = 'bitbucket_server_password';
 		}
-		if ( ! isset( self::$options[ $username ] ) ) {
-			self::$options[ $username ] = null;
-			$set_credentials            = true;
+		if ( ! isset( static::$options[ $username ] ) ) {
+			static::$options[ $username ] = null;
+			$set_credentials              = true;
 		}
-		if ( ! isset( self::$options[ $password ] ) ) {
-			self::$options[ $password ] = null;
-			$set_credentials            = true;
+		if ( ! isset( static::$options[ $password ] ) ) {
+			static::$options[ $password ] = null;
+			$set_credentials              = true;
 		}
 		if ( $set_credentials ) {
-			add_site_option( 'github_updater', self::$options );
+			add_site_option( 'github_updater', static::$options );
 		}
 	}
 
@@ -89,7 +90,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 			if ( $response && isset( $response->data ) ) {
 				$contents = $response->data;
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -155,7 +156,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -207,7 +208,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -432,8 +433,12 @@ class Bitbucket_API extends API implements API_Interface {
 
 	/**
 	 * Add settings for Bitbucket Username and Password.
+	 *
+	 * @param array $auth_required
+	 *
+	 * @return void
 	 */
-	public function add_settings() {
+	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
@@ -462,7 +467,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Show section for private Bitbucket repositories.
 		 */
-		if ( parent::$auth_required['bitbucket_private'] ) {
+		if ( $auth_required['bitbucket_private'] ) {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
@@ -481,10 +486,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
-		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
-			'token_callback_checkbox',
-		);
+		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_checkbox' );
 
 		return $setting_field;
 	}
@@ -509,11 +511,11 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param string $type
 	 */
 	public function add_install_settings_fields( $type ) {
-		if ( ( empty( parent::$options['bitbucket_username'] ) ||
-		       empty( parent::$options['bitbucket_password'] ) ) ||
+		if ( ( empty( static::$options['bitbucket_username'] ) ||
+		       empty( static::$options['bitbucket_password'] ) ) ||
 
-		     ( empty( parent::$options['bitbucket_server_username'] ) ||
-		       empty( parent::$options['bitbucket_server_password'] ) )
+		     ( empty( static::$options['bitbucket_server_username'] ) ||
+		       empty( static::$options['bitbucket_server_password'] ) )
 		) {
 			add_settings_field(
 				'bitbucket_username',
@@ -613,13 +615,13 @@ class Bitbucket_API extends API implements API_Interface {
 				$install['github_updater_branch'] . '.zip',
 			) );
 			if ( isset( $install['is_private'] ) ) {
-				parent::$options[ $install['repo'] ] = 1;
+				$install['options'][ $install['repo'] ] = 1;
 			}
-			if ( isset( $install['bitbucket_username'] ) ) {
-				parent::$options['bitbucket_username'] = $install['bitbucket_username'];
+			if ( ! empty( $install['bitbucket_username'] ) ) {
+				$install['options']['bitbucket_username'] = $install['bitbucket_username'];
 			}
-			if ( isset( $install['bitbucket_password'] ) ) {
-				parent::$options['bitbucket_password'] = $install['bitbucket_password'];
+			if ( ! empty( $install['bitbucket_password'] ) ) {
+				$install['options']['bitbucket_password'] = $install['bitbucket_password'];
 			}
 		}
 
