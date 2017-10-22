@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 7.4.1 / 2017-10-22
+* oops, during refactor of `Install` I copied the incorrect query for GitHub's remote install
+
 #### 7.4.0 / 2017-10-21
 * use wp-cron for background processing of `wp_remote_get()` calls for getting repo data 🚀
 * fixed [#603](https://github.com/afragen/github-updater/issues/603) by not creating generic global variables accidentally
