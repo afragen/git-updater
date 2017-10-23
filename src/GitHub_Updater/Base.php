@@ -335,6 +335,9 @@ class Base {
 	public function forced_meta_update_plugins( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
+			if ( ! empty( self::$options['cron_overdue'] ) ) {
+				add_filter( 'github_updater_disable_wpcron', '__return_true' );
+			}
 			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
@@ -347,6 +350,9 @@ class Base {
 	public function forced_meta_update_themes( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
+			if ( ! empty( self::$options['cron_overdue'] ) ) {
+				add_filter( 'github_updater_disable_wpcron', '__return_true' );
+			}
 			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
@@ -509,13 +515,37 @@ class Base {
 	 * @return bool
 	 */
 	protected function is_duplicate_wp_cron_event( $event ) {
-		foreach ( _get_cron_array() as $cronhooks ) {
+		$cron = _get_cron_array();
+		foreach ( $cron as $timestamp => $cronhooks ) {
 			if ( $event === key( $cronhooks ) ) {
+				$this->is_cron_overdue( $cron, $timestamp );
+
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check to see if wp-cron event is overdue by 12 hours and set option if true.
+	 *
+	 * @param $cron
+	 * @param $timestamp
+	 *
+	 * @return bool
+	 */
+	private function is_cron_overdue( $cron, $timestamp ) {
+		unset( self::$options['cron_overdue'] );
+		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 12;
+		if ( $overdue ) {
+			self::$options['cron_update'] = true;
+			unset( $cron[ $timestamp ] );
+			_set_cron_array( $cron );
+		} else {
+			unset( self::$options['cron_overdue'] );
+		}
+		update_site_option( 'github_updater', self::$options );
 	}
 
 	/**
