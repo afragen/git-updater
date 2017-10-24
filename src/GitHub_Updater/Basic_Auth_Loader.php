@@ -161,6 +161,17 @@ class Basic_Auth_Loader {
 				Singleton::get_instance( 'Theme' )->get_theme_configs()
 			)
 			: false;
+		
+		if ( ! $slug ) {
+			if (isset($repos) && is_array($repos)) {
+				foreach ($repos as $repo) {
+					if ($repo->download_link == $url) {
+						$slug = dirname($repo->slug);
+					}
+				}
+			}
+		}
+		
 		$type  = $slug && $repos &&
 		         isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
 			? $repos[ $slug ]->type
