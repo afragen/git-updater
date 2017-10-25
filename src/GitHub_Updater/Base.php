@@ -533,7 +533,7 @@ class Base {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			/* translators: 'git API check event' refers to the repository check against GitHub's (Bitbucket, GitLab) API */
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. The git API check event is overdue.', 'github-updater' );
+			$error_msg = esc_html__( 'There may be a problem with WP-Cron. The git server API check event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Messages' )->create_error_message( $error );
 		}
