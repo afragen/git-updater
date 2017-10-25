@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.4.2 / 2017-10-25
 * added check to see if wp-cron is updating and if not send and error message
 * fix for WP-CLI updating for private Bitbucket repos, thanks @v8-ict
 
