@@ -335,9 +335,6 @@ class Base {
 	public function forced_meta_update_plugins( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
-			if ( ! empty( self::$options['cron_overdue'] ) ) {
-				add_filter( 'github_updater_disable_wpcron', '__return_true' );
-			}
 			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
@@ -350,9 +347,6 @@ class Base {
 	public function forced_meta_update_themes( $true = false ) {
 		if ( self::$load_repo_meta || $true ) {
 			$this->load_options();
-			if ( ! empty( self::$options['cron_overdue'] ) ) {
-				add_filter( 'github_updater_disable_wpcron', '__return_true' );
-			}
 			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
@@ -528,24 +522,20 @@ class Base {
 	}
 
 	/**
-	 * Check to see if wp-cron event is overdue by 12 hours and set option if true.
+	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
 	 * @param $cron
 	 * @param $timestamp
 	 *
-	 * @return bool
+	 * @return \WP_Error
 	 */
 	private function is_cron_overdue( $cron, $timestamp ) {
-		unset( self::$options['cron_overdue'] );
-		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 12;
+		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
-			self::$options['cron_update'] = true;
-			unset( $cron[ $timestamp ] );
-			_set_cron_array( $cron );
-		} else {
-			unset( self::$options['cron_overdue'] );
+			$error_msg = esc_html__( 'There may be a problem with WP-Cron. The API query event is overdue.', 'github-updater' );
+			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
+			Singleton::get_instance( 'Messages' )->create_error_message( $error );
 		}
-		update_site_option( 'github_updater', self::$options );
 	}
 
 	/**

@@ -1,5 +1,5 @@
 #### [unreleased]
-* added check to see if wp-cron is updating and if not revert to previous updating. The real solution is to find out why your wp-cron.php isn't running properly. It could be a timeout or htaccess issue. Changing to a real crontab and running `wp --path=./public_html/mysite cron event run --due-now` works for me. Obviously WP-CLI must be installed on your server.
+* added check to see if wp-cron is updating and if not send and error message
 
 #### 7.4.1 / 2017-10-22
 * oops, during refactor of `Install` I copied the incorrect query for GitHub's remote install
