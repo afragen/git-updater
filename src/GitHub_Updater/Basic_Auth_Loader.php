@@ -128,6 +128,11 @@ class Basic_Auth_Loader {
 			'private'       => false,
 		);
 
+		$repos = array_merge(
+			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme' )->get_theme_configs()
+		);
+
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
 		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
@@ -149,21 +154,25 @@ class Basic_Auth_Loader {
 			}
 		}
 
+		$type = $slug &&
+		        isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
+			? $repos[ $slug ]->type
+			: $type;
+
+		// Set for WP-CLI.
+		if ( ! $slug ) {
+			foreach ( $repos as $repo ) {
+				if ( property_exists( $repo, 'download_link' ) && $url === $repo->download_link ) {
+					$type = $repo->type;
+					break;
+				}
+			}
+		}
+
 		// Set for Remote Install.
 		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
 		        false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
 			? $_POST['github_updater_api'] . '_install'
-			: $type;
-
-		$repos = null !== $_REQUEST
-			? array_merge(
-				Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
-				Singleton::get_instance( 'Theme' )->get_theme_configs()
-			)
-			: false;
-		$type  = $slug && $repos &&
-		         isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
-			? $repos[ $slug ]->type
 			: $type;
 
 		switch ( $type ) {

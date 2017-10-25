@@ -509,13 +509,34 @@ class Base {
 	 * @return bool
 	 */
 	protected function is_duplicate_wp_cron_event( $event ) {
-		foreach ( _get_cron_array() as $cronhooks ) {
+		$cron = _get_cron_array();
+		foreach ( $cron as $timestamp => $cronhooks ) {
 			if ( $event === key( $cronhooks ) ) {
+				$this->is_cron_overdue( $cron, $timestamp );
+
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
+	 *
+	 * @param $cron
+	 * @param $timestamp
+	 *
+	 * @return \WP_Error
+	 */
+	private function is_cron_overdue( $cron, $timestamp ) {
+		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
+		if ( $overdue ) {
+			/* translators: 'git API check event' refers to the repository check against GitHub's (Bitbucket, GitLab) API */
+			$error_msg = esc_html__( 'There may be a problem with WP-Cron. The git server API check event is overdue.', 'github-updater' );
+			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
+			Singleton::get_instance( 'Messages' )->create_error_message( $error );
+		}
 	}
 
 	/**
