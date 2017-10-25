@@ -1,5 +1,6 @@
 #### [unreleased]
 * added check to see if wp-cron is updating and if not send and error message
+* fix for WP-CLI updating for private Bitbucket repos, thanks @v8-ict
 
 #### 7.4.1 / 2017-10-22
 * oops, during refactor of `Install` I copied the incorrect query for GitHub's remote install
