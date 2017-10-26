@@ -461,6 +461,7 @@ class Base {
 		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
+		$this->$type->ci_job               = false;
 	}
 
 	/**
@@ -1268,7 +1269,7 @@ class Base {
 	}
 
 	/**
-	 * Parse Enterprise, Languages, and CI Job headers for plugins and themes.
+	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
 	 * @param array           $header
 	 * @param array|\WP_Theme $headers
@@ -1285,6 +1286,7 @@ class Base {
 		$header['enterprise_api'] = null;
 		$header['languages']      = null;
 		$header['ci_job']         = false;
+		$header['release_asset']  = false;
 
 		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
@@ -1301,11 +1303,13 @@ class Base {
 		}
 
 		if ( $headers instanceof \WP_Theme ) {
-			$theme   = $headers;
-			$headers = array();
+			$theme                    = $headers;
+			$headers                  = array();
+			$headers['Release Asset'] = '';
+			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
 		}
 
-		$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+		$self_hosted_parts = array_keys( self::$extra_repo_headers );
 		foreach ( $self_hosted_parts as $part ) {
 			if ( $theme instanceof \WP_Theme ) {
 				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
@@ -1323,6 +1327,7 @@ class Base {
 				}
 			}
 		}
+		$header['release_asset'] = ! $header['release_asset'] ? 'true' === $headers['Release Asset'] : $header['release_asset'];
 
 		return $header;
 	}
