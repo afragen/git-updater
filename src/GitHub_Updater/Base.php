@@ -48,7 +48,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	protected static $extra_headers = array();
+	public static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
@@ -393,22 +393,18 @@ class Base {
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
-		$uri_type          = '';
 		$ghu_extra_headers = array(
 			'Requires WP'   => 'Requires WP',
 			'Requires PHP'  => 'Requires PHP',
 			'Release Asset' => 'Release Asset',
 		);
 
-		$current_filter = current_filter();
-		if ( 'extra_plugin_headers' === $current_filter ) {
-			$uri_type = ' Plugin URI';
-		} elseif ( 'extra_theme_headers' === $current_filter ) {
-			$uri_type = ' Theme URI';
-		}
+		$uri_types = array( 'plugin' => ' Plugin URI', 'theme' => ' Theme URI' );
 
 		foreach ( self::$git_servers as $server ) {
-			$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			foreach ( $uri_types as $uri_type ) {
+				$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			}
 			foreach ( self::$extra_repo_headers as $header ) {
 				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
 			}

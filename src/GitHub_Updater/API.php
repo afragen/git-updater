@@ -63,12 +63,20 @@ class API {
 	protected static $options;
 
 	/**
+	 * Holds extra headers.
+	 *
+	 * @var
+	 */
+	protected static $extra_headers;
+
+	/**
 	 * API constructor.
 	 *
 	 */
 	public function __construct() {
-		$this->base      = $base = Singleton::get_instance( 'Base' );
-		static::$options = $base::$options;
+		$this->base            = $base = Singleton::get_instance( 'Base' );
+		static::$options       = $base::$options;
+		static::$extra_headers = $this->base->add_headers( array() );
 	}
 
 	/**
