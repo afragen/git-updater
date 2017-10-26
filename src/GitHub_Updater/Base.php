@@ -460,8 +460,6 @@ class Base {
 		$this->$type->open_issues          = 0;
 		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
-		$this->$type->release_asset        = false;
-		$this->$type->ci_job               = false;
 	}
 
 	/**
