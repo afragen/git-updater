@@ -31,6 +31,7 @@ class Language_Pack_API extends API {
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
+		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 	}
