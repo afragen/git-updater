@@ -474,6 +474,12 @@ class GitHub_API extends API implements API_Interface {
 				$response->message = 'No release asset found';
 			}
 
+			if ( is_wp_error( $response ) ) {
+				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+
+				return false;
+			}
+
 			if ( $response ) {
 				add_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
 
