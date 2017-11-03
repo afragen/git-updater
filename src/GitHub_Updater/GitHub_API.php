@@ -497,17 +497,11 @@ class GitHub_API extends API implements API_Interface {
 				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
 					$response_object = $response_new['http_response']->get_response_object();
 					if ( ! $response_object->success ) {
-						$error = new \WP_Error( 'ghu_release_asset', esc_html__( '$response_object not successful.', 'github-updater' ) );
-						Singleton::get_instance( 'Messages' )->create_error_message( $error );
-
 						return false;
 					}
 					$response_headers = $response_object->history[0]->headers;
 					$download_link    = $response_headers->getValues( 'location' );
 				} else {
-					$error = new \WP_Error( 'ghu_release_asset', esc_html__( 'Not instance of WP_HTTP_Requests_Response', 'github-updater' ) );
-					Singleton::get_instance( 'Messages' )->create_error_message( $error );
-
 					return false;
 				}
 
