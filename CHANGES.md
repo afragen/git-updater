@@ -1,5 +1,6 @@
 #### [unreleased]
 * set all extra header values in `Base::parse_extra_headers()`
+* added more error messaging for `class WP_Error`
 
 #### 7.4.2 / 2017-10-25
 * added check to see if wp-cron is updating and if not send and error message

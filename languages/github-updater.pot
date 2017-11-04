@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2017-10-25 14:52-0700\n"
+"POT-Creation-Date: 2017-11-04 16:17-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -29,27 +29,26 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#. translators: 'git API check event' refers to the repository check against GitHub's (Bitbucket, GitLab) API
-#: src/GitHub_Updater/Base.php:536
+#: src/GitHub_Updater/Base.php:530
 msgid ""
-"There may be a problem with WP-Cron. The git server API check event is "
+"There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is "
 "overdue."
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1066 src/GitHub_Updater/Theme.php:569
+#: src/GitHub_Updater/Base.php:1060 src/GitHub_Updater/Theme.php:569
 #, php-format
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1076
+#: src/GitHub_Updater/Base.php:1070
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1091
+#: src/GitHub_Updater/Base.php:1085
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:1099 src/GitHub_Updater/Theme.php:601
+#: src/GitHub_Updater/Base.php:1093 src/GitHub_Updater/Theme.php:601
 msgid "No previous tags to rollback to."
 msgstr ""
 
@@ -140,37 +139,37 @@ msgstr ""
 msgid "Theme %s installed."
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:540
+#: src/GitHub_Updater/GitHub_API.php:546
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:547
+#: src/GitHub_Updater/GitHub_API.php:553
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:557
+#: src/GitHub_Updater/GitHub_API.php:563
 msgid "GitHub Enterprise Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:571
+#: src/GitHub_Updater/GitHub_API.php:577
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:595
+#: src/GitHub_Updater/GitHub_API.php:601
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:602
+#: src/GitHub_Updater/GitHub_API.php:608
 msgid ""
 "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid "
 "API access limits."
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:613
+#: src/GitHub_Updater/GitHub_API.php:619
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/GitHub_API.php:629
+#: src/GitHub_Updater/GitHub_API.php:635
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -261,30 +260,30 @@ msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:98 src/GitHub_Updater/Messages.php:137
-#: src/GitHub_Updater/Messages.php:182
+#: src/GitHub_Updater/Messages.php:95 src/GitHub_Updater/Messages.php:134
+#: src/GitHub_Updater/Messages.php:179
 msgid "GitHub Updater Error Code:"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:103
+#: src/GitHub_Updater/Messages.php:100
 #, php-format
 msgid "GitHub API's rate limit will reset in %s minutes."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:108
+#: src/GitHub_Updater/Messages.php:105
 #, php-format
 msgid ""
 "It looks like you are running into GitHub API rate limits. Be sure and "
 "configure a %sPersonal Access Token%s to avoid this issue."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:141
+#: src/GitHub_Updater/Messages.php:138
 msgid ""
 "There is probably an access token or password error on the GitHub Updater "
 "Settings page."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:164
+#: src/GitHub_Updater/Messages.php:161
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
