@@ -419,12 +419,14 @@ class API {
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
 			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
 			$response = wp_remote_get( $url );
-			$response = json_decode( $response['body'] );
 
 			if ( is_wp_error( $response ) ) {
-				return $response;
+				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+
+				return false;
 			}
 
+			$response = json_decode( $response['body'] );
 			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
