@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.4.3 / 2017-11-07
 * set all extra header values in `Base::parse_extra_headers()`
 * added more error messaging for `class WP_Error`
 * fixed some issues with GitHub Release Assets
