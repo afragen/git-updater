@@ -57,9 +57,6 @@ class Messages extends Base {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					if ( false !== strpos( self::$error_message, 'timed out' ) ) {
-						break;
-					}
 					add_action( 'admin_notices', array( &$this, 'show_wp_error' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_wp_error' ) );
 					break;

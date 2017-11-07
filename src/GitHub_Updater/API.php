@@ -63,12 +63,20 @@ class API {
 	protected static $options;
 
 	/**
+	 * Holds extra headers.
+	 *
+	 * @var
+	 */
+	protected static $extra_headers;
+
+	/**
 	 * API constructor.
 	 *
 	 */
 	public function __construct() {
-		$this->base      = $base = Singleton::get_instance( 'Base' );
-		static::$options = $base::$options;
+		$this->base            = $base = Singleton::get_instance( 'Base' );
+		static::$options       = $base::$options;
+		static::$extra_headers = $this->base->add_headers( array() );
 	}
 
 	/**
@@ -411,12 +419,14 @@ class API {
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
 			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
 			$response = wp_remote_get( $url );
-			$response = json_decode( $response['body'] );
 
 			if ( is_wp_error( $response ) ) {
-				return $response;
+				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+
+				return false;
 			}
 
+			$response = json_decode( $response['body'] );
 			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
@@ -650,7 +660,6 @@ class API {
 		$this->type->remote_version       = strtolower( $response['Version'] );
 		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
 		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->release_asset        = ( ! empty( $response['Release Asset'] ) && 'true' === $response['Release Asset'] );
 		$this->type->dot_org              = $response['dot_org'];
 	}
 

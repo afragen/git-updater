@@ -48,7 +48,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	protected static $extra_headers = array();
+	public static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
@@ -393,22 +393,18 @@ class Base {
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
-		$uri_type          = '';
 		$ghu_extra_headers = array(
 			'Requires WP'   => 'Requires WP',
 			'Requires PHP'  => 'Requires PHP',
 			'Release Asset' => 'Release Asset',
 		);
 
-		$current_filter = current_filter();
-		if ( 'extra_plugin_headers' === $current_filter ) {
-			$uri_type = ' Plugin URI';
-		} elseif ( 'extra_theme_headers' === $current_filter ) {
-			$uri_type = ' Theme URI';
-		}
+		$uri_types = array( 'plugin' => ' Plugin URI', 'theme' => ' Theme URI' );
 
 		foreach ( self::$git_servers as $server ) {
-			$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			foreach ( $uri_types as $uri_type ) {
+				$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			}
 			foreach ( self::$extra_repo_headers as $header ) {
 				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
 			}
@@ -460,7 +456,6 @@ class Base {
 		$this->$type->open_issues          = 0;
 		$this->$type->requires_wp_version  = '4.6';
 		$this->$type->requires_php_version = '5.3';
-		$this->$type->release_asset        = false;
 	}
 
 	/**
@@ -532,8 +527,7 @@ class Base {
 	private function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
-			/* translators: 'git API check event' refers to the repository check against GitHub's (Bitbucket, GitLab) API */
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. The git server API check event is overdue.', 'github-updater' );
+			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Messages' )->create_error_message( $error );
 		}
@@ -1268,7 +1262,7 @@ class Base {
 	}
 
 	/**
-	 * Parse Enterprise, Languages, and CI Job headers for plugins and themes.
+	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
 	 * @param array           $header
 	 * @param array|\WP_Theme $headers
@@ -1285,6 +1279,7 @@ class Base {
 		$header['enterprise_api'] = null;
 		$header['languages']      = null;
 		$header['ci_job']         = false;
+		$header['release_asset']  = false;
 
 		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
@@ -1301,11 +1296,13 @@ class Base {
 		}
 
 		if ( $headers instanceof \WP_Theme ) {
-			$theme   = $headers;
-			$headers = array();
+			$theme                    = $headers;
+			$headers                  = array();
+			$headers['Release Asset'] = '';
+			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
 		}
 
-		$self_hosted_parts = array_diff( array_keys( self::$extra_repo_headers ), array( 'branch' ) );
+		$self_hosted_parts = array_keys( self::$extra_repo_headers );
 		foreach ( $self_hosted_parts as $part ) {
 			if ( $theme instanceof \WP_Theme ) {
 				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
@@ -1323,6 +1320,7 @@ class Base {
 				}
 			}
 		}
+		$header['release_asset'] = ! $header['release_asset'] ? 'true' === $headers['Release Asset'] : $header['release_asset'];
 
 		return $header;
 	}

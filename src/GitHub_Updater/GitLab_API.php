@@ -668,7 +668,9 @@ class GitLab_API extends API implements API_Interface {
 				: static::$options['gitlab_enterprise_token'];
 		}
 
-		$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+		if ( ! empty( $token ) ) {
+			$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+		}
 
 		if ( ! empty( static::$options['gitlab_access_token'] ) ) {
 			unset( $install['options']['gitlab_access_token'] );
