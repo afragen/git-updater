@@ -37,7 +37,7 @@ if ( version_compare( '5.3.0', PHP_VERSION, '>=' ) ) {
 	?>
 	<div class="error notice is-dismissible">
 		<p>
-			<?php esc_html_e( 'GitHub Updater cannot run on PHP versions older than 5.3.0. Please contact your hosting provider to update your site.', 'github-updater' ); ?>
+			<?php printf( esc_html__( 'GitHub Updater cannot run on PHP versions older than %s. Please contact your hosting provider to update your site.', 'github-updater' ), '5.3.0' ); ?>
 		</p>
 	</div>
 	<?php
