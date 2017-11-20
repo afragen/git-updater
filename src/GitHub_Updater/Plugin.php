@@ -215,7 +215,7 @@ class Plugin extends Base {
 			 *
 			 * @param bool
 			 */
-			if ( ! $this->waiting_for_wp_cron( $plugin ) || static::is_wp_cli()
+			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
 			     || apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $plugin );

@@ -470,13 +470,13 @@ class Base {
 	}
 
 	/**
-	 * Check to see if wp-cron updating has finished.
+	 * Check to see if wp-cron/background updating has finished.
 	 *
 	 * @param null $repo
 	 *
-	 * @return bool true when waiting for wp-cron job to finish.
+	 * @return bool true when waiting for background job to finish.
 	 */
-	protected function waiting_for_wp_cron( $repo = null ) {
+	protected function waiting_for_background_update( $repo = null ) {
 		if ( null !== $repo ) {
 			$cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
 
