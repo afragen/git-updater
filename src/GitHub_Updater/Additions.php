@@ -65,17 +65,17 @@ class Additions {
 	 * @access public
 	 * @uses   \Fragen\GitHub_Updater\Additions::add_headers()
 	 *
-	 * @param string $config The repo config, in JSON.
-	 * @param array  $repos  The repos to pull from.
-	 * @param string $type   The plugin type ('plugin' or 'theme').
+	 * @param string $json_config The repo config, in JSON.
+	 * @param array  $repos       The repos to pull from.
+	 * @param string $type        The plugin type ('plugin' or 'theme').
 	 *
 	 * @return bool
 	 */
-	public function register( $config, $repos, $type ) {
-		if ( empty( $config ) ) {
+	public function register( $json_config, $repos, $type ) {
+		if ( empty( $json_config ) ) {
 			return false;
 		}
-		if ( null === ( $config = json_decode( $config, true ) ) ) {
+		if ( null === ( $config = json_decode( $json_config, true ) ) ) {
 			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
 			Singleton::get_instance( 'Messages' )->create_error_message( $error );
 
