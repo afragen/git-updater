@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.4.4 / 2017-11-29
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)
 
 #### 7.4.3 / 2017-11-07
