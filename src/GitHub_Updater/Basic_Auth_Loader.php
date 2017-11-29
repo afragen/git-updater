@@ -187,6 +187,10 @@ class Basic_Auth_Loader {
 				break;
 		}
 
+		// @TODO can use `( $this->caller )::$options` in PHP7
+		$caller          = $this->caller;
+		static::$options = $this->caller instanceof Install ? $caller::$options : static::$options;
+
 		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
 			$credentials['password'] = static::$options[ $password_key ];

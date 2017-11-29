@@ -428,7 +428,7 @@ class Settings extends Base {
 			);
 		}
 
-		if ( ! $this->waiting_for_wp_cron() ) {
+		if ( ! $this->waiting_for_background_update() ) {
 			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
 		}
 	}

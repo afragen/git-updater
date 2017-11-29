@@ -470,13 +470,14 @@ class Base {
 	}
 
 	/**
-	 * Check to see if wp-cron updating has finished.
+	 * Check to see if wp-cron/background updating has finished.
 	 *
 	 * @param null $repo
 	 *
-	 * @return bool true when waiting for wp-cron job to finish.
+	 * @return bool true when waiting for background job to finish.
 	 */
-	protected function waiting_for_wp_cron( $repo = null ) {
+	protected function waiting_for_background_update( $repo = null ) {
+		$caches = array();
 		if ( null !== $repo ) {
 			$cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
 
@@ -486,8 +487,8 @@ class Base {
 			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
 			Singleton::get_instance( 'Theme' )->get_theme_configs()
 		);
-		foreach ( $repos as $repo ) {
-			$caches[ $repo->repo ] = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
+		foreach ( $repos as $git_repo ) {
+			$caches[ $git_repo->repo ] = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $git_repo->repo );
 		}
 		$waiting = array_filter( $caches, function( $e ) {
 			return empty( $e );
