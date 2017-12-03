@@ -522,8 +522,6 @@ class Base {
 	 *
 	 * @param $cron
 	 * @param $timestamp
-	 *
-	 * @return \WP_Error
 	 */
 	private function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
