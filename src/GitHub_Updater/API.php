@@ -688,13 +688,13 @@ class API {
 		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
 		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
 
-		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
+		$rating = abs( (int) round( $watchers + ( $forks * 1.5 ) - ( $open_issues * 0.1 ) ) );
 
 		if ( 100 < $rating ) {
 			return 100;
 		}
 
-		return (integer) $rating;
+		return $rating;
 	}
 
 	/**
