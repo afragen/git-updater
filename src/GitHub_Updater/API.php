@@ -701,37 +701,31 @@ class API {
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param $response
+	 * @param array $readme Array of parsed readme.txt data
 	 *
 	 * @return bool
 	 */
-	protected function set_readme_info( $response ) {
-		$readme = array();
+	protected function set_readme_info( $readme ) {
 		foreach ( (array) $this->type->sections as $section => $value ) {
 			if ( 'description' === $section ) {
 				continue;
 			}
-			$readme[ $section ] = $value;
-		}
-		foreach ( $readme as $key => $value ) {
-			if ( ! empty( $value ) ) {
-				unset( $response['sections'][ $key ] );
-			}
+			$readme['sections'][ $section ] = $value;
 		}
 
-		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
-		if ( empty( $response['sections']['other_notes'] ) ) {
-			unset( $response['sections']['other_notes'] );
+		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;
+		if ( empty( $readme['sections']['other_notes'] ) ) {
+			unset( $readme['sections']['other_notes'] );
 		} else {
-			$response['sections']['other_notes'] .= $response['remaining_content'];
+			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
-		unset( $response['sections']['screenshots'], $response['sections']['installation'] );
-		$response['sections']     = ! empty( $response['sections'] ) ? $response['sections'] : array();
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
-		$this->type->requires     = isset( $response['requires'] ) ? $response['requires'] : null;
-		$this->type->donate_link  = isset( $response['donate_link'] ) ? $response['donate_link'] : null;
-		$this->type->contributors = isset( $response['contributors'] ) ? $response['contributors'] : null;
+		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
+		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : array();
+		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
+		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
+		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : null;
+		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : null;
 
 		return true;
 	}
