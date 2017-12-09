@@ -837,6 +837,10 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
+		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
+		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
+		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
+
 		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
 		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
@@ -861,9 +865,9 @@ class Settings extends Base {
 			);
 		}, $type_repos );
 
-		$lock    = '&nbsp;<span class="dashicons dashicons-lock"></span>';
-		$broken  = '&nbsp;<span style="color:#f00;" class="dashicons dashicons-warning"></span>';
-		$dot_org = '&nbsp;<span class="dashicons dashicons-wordpress"></span></span>';
+		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
+		$broken  = '&nbsp;<span title="' . $broken_title . '"style="color:#f00;" class="dashicons dashicons-warning"></span>';
+		$dot_org = '&nbsp;<span title="' . $dot_org_title . '"class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$dashicon   = false !== strpos( $data['type'], 'theme' )

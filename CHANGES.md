@@ -1,6 +1,7 @@
 #### [unreleased]
 * fixed _View detail_ ratings for large projects with lots of issues
 * fixed `API::set_readme_info()` to see passed parameter as readme data
+* added title attribute to icons on Settings subtabs, thanks @petemolinero
 
 #### 7.4.4 / 2017-11-29
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)
