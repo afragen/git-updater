@@ -121,12 +121,11 @@ class Base {
 	);
 
 	/**
-	 * Variable to hold boolean to load remote meta.
-	 * Checks user privileges and when to load.
+	 * Variable to hold boolean to check user privileges.
 	 *
 	 * @var bool
 	 */
-	protected static $load_repo_meta;
+	protected static $can_user_update;
 
 	/**
 	 * Constructor.
@@ -241,14 +240,12 @@ class Base {
 	public function init() {
 		global $pagenow;
 
-		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) );
-		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		self::$load_repo_meta = $load_multisite || $load_single_site;
+		$load_multisite        = ( is_network_admin() && current_user_can( 'manage_network' ) );
+		$load_single_site      = ( ! is_multisite() && current_user_can( 'manage_options' ) );
+		self::$can_user_update = $load_multisite || $load_single_site;
 		$this->load_options();
 
-		// Set $force_meta_update = true on appropriate admin pages.
-		$force_meta_update = false;
-		$admin_pages       = array(
+		$admin_pages = array(
 			'plugins.php',
 			'plugin-install.php',
 			'themes.php',
@@ -267,8 +264,6 @@ class Base {
 		}
 
 		if ( in_array( $pagenow, array_unique( $admin_pages ), true ) ) {
-			$force_meta_update = true;
-
 			// Load plugin stylesheet.
 			add_action( 'admin_enqueue_scripts', function() {
 				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
@@ -292,13 +287,11 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		if ( $force_meta_update ) {
+		if ( self::$can_user_update ) {
 			$this->forced_meta_update_plugins();
-		}
-		if ( $force_meta_update ) {
 			$this->forced_meta_update_themes();
 		}
-		if ( self::$load_repo_meta && is_admin() &&
+		if ( self::$can_user_update && is_admin() &&
 		     ! apply_filters( 'github_updater_hide_settings', false )
 		) {
 			Singleton::get_instance( 'Settings' )->run();
@@ -333,7 +326,7 @@ class Base {
 	 * @param bool $true Only used from API::wp_update_response()
 	 */
 	public function forced_meta_update_plugins( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
+		if ( self::$can_user_update || $true ) {
 			$this->load_options();
 			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
@@ -345,7 +338,7 @@ class Base {
 	 * @param bool $true Only used from API::wp_update_response()
 	 */
 	public function forced_meta_update_themes( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
+		if ( self::$can_user_update || $true ) {
 			$this->load_options();
 			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
