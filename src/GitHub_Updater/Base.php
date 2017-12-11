@@ -220,9 +220,6 @@ class Base {
 		if ( self::$can_user_update ) {
 			$this->forced_meta_update_plugins();
 			$this->forced_meta_update_themes();
-			if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-				Singleton::get_instance( 'Settings' )->run();
-			}
 		}
 
 		return true;

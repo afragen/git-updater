@@ -96,6 +96,10 @@ class Init extends Base {
 			'settings.php',
 		);
 
+		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
+			Singleton::get_instance( 'Settings' )->run();
+		}
+
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
 			if ( ! empty( self::$options_remote[ $key ] ) && is_admin() ) {
