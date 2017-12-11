@@ -96,8 +96,10 @@ class Init extends Base {
 			'settings.php',
 		);
 
-		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-			Singleton::get_instance( 'Settings' )->run();
+		// Add Settings menu.
+		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
+			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
+				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
