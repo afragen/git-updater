@@ -537,7 +537,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update( $this->type ) );
+		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update_repo( $this->type ) );
 	}
 
 	/**

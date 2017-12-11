@@ -814,7 +814,7 @@ class Base {
 	 *
 	 * @return bool
 	 */
-	public function can_update( $type ) {
+	public function can_update_repo( $type ) {
 		global $wp_version;
 
 		if ( isset( $type->remote_version, $type->requires_php_version, $type->requires_php_version ) ) {
