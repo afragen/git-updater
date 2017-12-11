@@ -65,9 +65,9 @@ $ghu['loader'] = 'Fragen\\Autoloader';
 new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
 
 // Instantiate class GitHub_Updater.
-$ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Base';
-$ghu['base']        = new $ghu['instantiate'];
-$ghu['base']->run();
+$ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
+$ghu['init']        = new $ghu['instantiate'];
+$ghu['init']->run();
 
 /**
  * Initialize Persist Admin notices Dismissal.

@@ -135,18 +135,6 @@ class Base {
 	}
 
 	/**
-	 * Let's get going.
-	 */
-	public function run() {
-		$this->load_hooks();
-
-		if ( self::is_wp_cli() ) {
-			include_once __DIR__ . '/CLI.php';
-			include_once __DIR__ . '/CLI_Integration.php';
-		}
-	}
-
-	/**
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
@@ -168,45 +156,6 @@ class Base {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 		self::$api_key        = get_site_option( 'github_updater_api_key' );
-	}
-
-	/**
-	 * Load relevant action/filter hooks.
-	 * Use 'init' hook for user capabilities.
-	 */
-	protected function load_hooks() {
-		add_action( 'init', array( &$this, 'init' ) );
-		add_action( 'init', array( &$this, 'background_update' ) );
-		add_action( 'init', array( &$this, 'set_options_filter' ) );
-		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
-		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
-
-		// Delete get_plugins() and wp_get_themes() cache.
-		add_action( 'deleted_plugin', function() {
-			wp_cache_delete( 'plugins', 'plugins' );
-			delete_site_option( 'ghu-' . md5( 'repos' ) );
-		} );
-
-		// Load hook for shiny updates Basic Authentication headers.
-		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
-		}
-
-		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
-
-		// Needed for updating from update-core.php.
-		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download',
-				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
-					'upgrader_pre_download',
-				), 10, 3 );
-		}
-
-		// The following hook needed to ensure transient is reset correctly after shiny updates.
-		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
 	/**
@@ -233,50 +182,31 @@ class Base {
 	}
 
 	/**
-	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
+	 * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
 	 *
 	 * @return bool
 	 */
-	public function init() {
-		global $pagenow;
-
-		$load_multisite        = ( is_network_admin() && current_user_can( 'manage_network' ) );
-		$load_single_site      = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		self::$can_user_update = $load_multisite || $load_single_site;
-		$this->load_options();
-
-		$admin_pages = array(
-			'plugins.php',
-			'plugin-install.php',
-			'themes.php',
-			'theme-install.php',
-			'update-core.php',
-			'update.php',
-			'options-general.php',
-			'settings.php',
-		);
-
-		foreach ( array_keys( Settings::$remote_management ) as $key ) {
-			// Remote management only needs to be active for admin pages.
-			if ( ! empty( self::$options_remote[ $key ] ) && is_admin() ) {
-				$admin_pages = array_merge( $admin_pages, array( 'index.php', 'admin-ajax.php' ) );
-			}
+	public function load() {
+		if ( ! Singleton::get_instance('Init')->can_update() ) {
+			return false;
 		}
 
-		if ( in_array( $pagenow, array_unique( $admin_pages ), true ) ) {
-			// Load plugin stylesheet.
-			add_action( 'admin_enqueue_scripts', function() {
-				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
-				wp_enqueue_style( 'github-updater' );
-			} );
+		// Run GitHub Updater upgrade functions.
+		$upgrade = new GHU_Upgrade();
+		$upgrade->run();
 
-			// Run GitHub Updater upgrade functions.
-			$upgrade = new GHU_Upgrade();
-			$upgrade->run();
+		// Load plugin stylesheet.
+		add_action( 'admin_enqueue_scripts', function() {
+			wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+			wp_enqueue_style( 'github-updater' );
+		} );
 
-			// Ensure transient updated on plugins.php and themes.php pages.
-			add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
-		}
+		// Run GitHub Updater upgrade functions.
+		$upgrade = new GHU_Upgrade();
+		$upgrade->run();
+
+		// Ensure transient updated on plugins.php and themes.php pages.
+		add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
@@ -290,11 +220,9 @@ class Base {
 		if ( self::$can_user_update ) {
 			$this->forced_meta_update_plugins();
 			$this->forced_meta_update_themes();
-		}
-		if ( self::$can_user_update && is_admin() &&
-		     ! apply_filters( 'github_updater_hide_settings', false )
-		) {
-			Singleton::get_instance( 'Settings' )->run();
+			if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
+				Singleton::get_instance( 'Settings' )->run();
+			}
 		}
 
 		return true;
