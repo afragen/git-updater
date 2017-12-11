@@ -411,7 +411,7 @@ class Plugin extends Base {
 
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( $this->can_update( $plugin ) ) {
+			if ( $this->can_update_repo( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'plugin'      => $plugin->slug,

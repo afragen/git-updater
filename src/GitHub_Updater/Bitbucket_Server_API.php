@@ -127,7 +127,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -181,7 +181,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {

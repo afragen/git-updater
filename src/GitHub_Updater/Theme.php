@@ -623,7 +623,7 @@ class Theme extends Base {
 
 		foreach ( (array) $this->config as $theme ) {
 
-			if ( $this->can_update( $theme ) ) {
+			if ( $this->can_update_repo( $theme ) ) {
 				$response = array(
 					'theme'       => $theme->repo,
 					'new_version' => $theme->remote_version,

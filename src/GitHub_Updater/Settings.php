@@ -691,7 +691,8 @@ class Settings extends Base {
 				update_site_option( 'github_updater', self::sanitize( $options ) );
 			}
 			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+				$options = $this->filter_options( true );
+				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $options ) );
 			}
 		}
 		$this->redirect_on_save();
@@ -701,9 +702,21 @@ class Settings extends Base {
 	 * Filter options to remove unchecked checkbox options.
 	 *
 	 * @access private
+	 *
+	 * @param bool $remote True if setting remote management options.
+	 *                     Default is false.
+	 *
 	 * @return array|mixed
 	 */
-	private function filter_options() {
+	private function filter_options( $remote = false ) {
+		if ( $remote ) {
+			$options = isset( $_POST['github_updater_remote_management'] )
+				? $_POST['github_updater_remote_management']
+				: array();
+
+			return $options;
+		}
+
 		$options = static::$options;
 
 		// Remove checkbox options.
