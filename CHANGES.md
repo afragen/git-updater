@@ -3,6 +3,8 @@
 * fixed `API::set_readme_info()` to see passed parameter as readme data
 * added title attribute to icons on Settings subtabs, thanks @petemolinero
 * created new `class Init` to help unclutter `class Base`
+* fixed PHP Warning if saving empty Remote Management Settings
+* changed some variable and function names to be more descriptive
 
 #### 7.4.4 / 2017-11-29
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)
