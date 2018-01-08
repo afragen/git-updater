@@ -121,13 +121,6 @@ class Base {
 	);
 
 	/**
-	 * Variable to hold boolean to check user privileges.
-	 *
-	 * @var bool
-	 */
-	protected static $can_user_update;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -240,10 +233,6 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		if ( ! \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
-			return false;
-		}
-
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
@@ -254,24 +243,18 @@ class Base {
 
 	/**
 	 * Performs actual plugin metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_plugins( $true = false ) {
-		if ( self::$can_user_update || $true ) {
-			$this->load_options();
+	public function forced_meta_update_plugins() {
+		if ( static::$can_user_update ) {
 			\Fragen\Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_themes( $true = false ) {
-		if ( self::$can_user_update || $true ) {
-			$this->load_options();
+	public function forced_meta_update_themes() {
+		if ( static::$can_user_update ) {
 			\Fragen\Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
@@ -281,8 +264,8 @@ class Base {
 	 * for remote management services.
 	 */
 	public function forced_meta_update_remote_management() {
-		$this->forced_meta_update_plugins( true );
-		$this->forced_meta_update_themes( true );
+		$this->forced_meta_update_plugins();
+		$this->forced_meta_update_themes();
 	}
 
 	/**
@@ -1167,17 +1150,17 @@ class Base {
 			$current = get_site_transient( $transient );
 			switch ( $transient ) {
 				case 'update_plugins':
-					$this->forced_meta_update_plugins( true );
+					$this->forced_meta_update_plugins();
 					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
-					$this->forced_meta_update_themes( true );
+					$this->forced_meta_update_themes();
 					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
-					$this->forced_meta_update_plugins( true );
-					$this->forced_meta_update_themes( true );
+					$this->forced_meta_update_plugins();
 					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+					$this->forced_meta_update_themes();
 					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 			}

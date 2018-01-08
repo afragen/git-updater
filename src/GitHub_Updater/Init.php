@@ -21,6 +21,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Init extends Base {
 
 	/**
+	 * Variable to hold boolean to check user privileges.
+	 *
+	 * @var bool
+	 */
+	protected static $can_user_update;
+
+	/**
 	 * Let's get going.
 	 */
 	public function run() {
