@@ -194,10 +194,6 @@ class Base {
 			wp_enqueue_style( 'github-updater' );
 		} );
 
-		// Run GitHub Updater upgrade functions.
-		$upgrade = new GHU_Upgrade();
-		$upgrade->run();
-
 		// Ensure transient updated on plugins.php and themes.php pages.
 		add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 
