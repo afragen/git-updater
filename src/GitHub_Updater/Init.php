@@ -86,7 +86,7 @@ class Init extends Base {
 	public function can_update() {
 		global $pagenow;
 
-		$load_multisite        = ( is_network_admin() && current_user_can( 'manage_network' ) );
+		$load_multisite        = ( is_multisite() && current_user_can( 'manage_network' ) );
 		$load_single_site      = ( ! is_multisite() && current_user_can( 'manage_options' ) );
 		self::$can_user_update = $load_multisite || $load_single_site;
 		$this->load_options();
@@ -102,6 +102,7 @@ class Init extends Base {
 			'options.php',
 			'settings.php',
 			'edit.php',
+			'admin-ajax.php',
 		);
 
 		// Add Settings menu.
