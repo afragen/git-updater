@@ -42,6 +42,7 @@ class Install extends Base {
 	 */
 	public function __construct( $type, $wp_cli_config = array() ) {
 		parent::__construct();
+		$this->load_options();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
@@ -83,8 +84,6 @@ class Install extends Base {
 					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
 					break;
 			}
-
-			$this->load_options();
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {

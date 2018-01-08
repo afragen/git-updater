@@ -43,6 +43,7 @@ class Theme extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 
 		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();

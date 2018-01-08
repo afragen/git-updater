@@ -225,7 +225,6 @@ class Base {
 	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
-		$this->load_options();
 		\Fragen\Singleton::get_instance( 'Rest_Update' )->process_request();
 	}
 

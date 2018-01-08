@@ -41,6 +41,7 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 
 		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
