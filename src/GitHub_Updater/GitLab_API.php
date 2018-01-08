@@ -68,7 +68,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( empty( static::$options['gitlab_access_token'] ) ||
 		     ( empty( static::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
 		) {
-			Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
+			\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
@@ -545,7 +545,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( \Fragen\Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_access_token', 'token' => true )
@@ -556,7 +556,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( \Fragen\Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
@@ -572,7 +572,7 @@ class GitLab_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_gitlab_install_settings';
 		$setting_field['section']         = 'gitlab_id';
-		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_text' );
+		$setting_field['callback_method'] = array( \Fragen\Singleton::get_instance( 'Settings' ), 'token_callback_text' );
 
 		return $setting_field;
 	}

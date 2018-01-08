@@ -77,7 +77,7 @@ class Additions {
 		}
 		if ( null === ( $config = json_decode( $json_config, true ) ) ) {
 			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
-			Singleton::get_instance( 'Messages' )->create_error_message( $error );
+			\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( $error );
 
 			return false;
 		}

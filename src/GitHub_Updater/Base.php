@@ -168,7 +168,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->remove_authentication_hooks();
+			\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->remove_authentication_hooks();
 		}
 	}
 
@@ -187,7 +187,7 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! Singleton::get_instance('Init')->can_update() ) {
+		if ( ! \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
 			return false;
 		}
 
@@ -217,11 +217,11 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		if ( self::$can_user_update ) {
+		if ( static::$can_user_update ) {
 			$this->forced_meta_update_plugins();
 			$this->forced_meta_update_themes();
 			if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-				Singleton::get_instance( 'Settings' )->run();
+				\Fragen\Singleton::get_instance( 'Settings' )->run();
 			}
 		}
 
@@ -233,13 +233,17 @@ class Base {
 	 */
 	public function ajax_update() {
 		$this->load_options();
-		Singleton::get_instance( 'Rest_Update' )->process_request();
+		\Fragen\Singleton::get_instance( 'Rest_Update' )->process_request();
 	}
 
 	/**
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
+		if ( ! \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
+			return false;
+		}
+
 		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
 		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
@@ -256,7 +260,7 @@ class Base {
 	public function forced_meta_update_plugins( $true = false ) {
 		if ( self::$can_user_update || $true ) {
 			$this->load_options();
-			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
+			\Fragen\Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
 
@@ -268,7 +272,7 @@ class Base {
 	public function forced_meta_update_themes( $true = false ) {
 		if ( self::$can_user_update || $true ) {
 			$this->load_options();
-			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
+			\Fragen\Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
 
@@ -400,16 +404,16 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = array();
 		if ( null !== $repo ) {
-			$cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
+			$cache = \Fragen\Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
 
 			return empty( $cache );
 		}
 		$repos = array_merge(
-			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
-			Singleton::get_instance( 'Theme' )->get_theme_configs()
+			\Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+			\Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->repo ] = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $git_repo->repo );
+			$caches[ $git_repo->repo ] = \Fragen\Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $git_repo->repo );
 		}
 		$waiting = array_filter( $caches, function( $e ) {
 			return empty( $e );
@@ -449,7 +453,7 @@ class Base {
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Messages' )->create_error_message( $error );
+			\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( $error );
 		}
 	}
 
@@ -546,7 +550,7 @@ class Base {
 		 * Rename plugins.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			$upgrader_object = Singleton::get_instance( 'Plugin' );
+			$upgrader_object = \Fragen\Singleton::get_instance( 'Plugin' );
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -557,7 +561,7 @@ class Base {
 		 * Rename themes.
 		 */
 		if ( $upgrader instanceof \Theme_Upgrader ) {
-			$upgrader_object = Singleton::get_instance( 'Theme' );
+			$upgrader_object = \Fragen\Singleton::get_instance( 'Theme' );
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -581,7 +585,7 @@ class Base {
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
-		Singleton::get_instance( 'Branch' )->set_branch_on_switch( $slug );
+		\Fragen\Singleton::get_instance( 'Branch' )->set_branch_on_switch( $slug );
 
 		// Delete get_plugins() and wp_get_themes() cache.
 		delete_site_option( 'ghu-' . md5( 'repos' ) );
@@ -1164,17 +1168,17 @@ class Base {
 			switch ( $transient ) {
 				case 'update_plugins':
 					$this->forced_meta_update_plugins( true );
-					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
 					$this->forced_meta_update_themes( true );
-					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
 					$this->forced_meta_update_plugins( true );
-					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					$this->forced_meta_update_themes( true );
-					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 			}
 			set_site_transient( $transient, $current );

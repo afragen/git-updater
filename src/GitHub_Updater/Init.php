@@ -51,7 +51,7 @@ class Init extends Base {
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+			\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -62,7 +62,7 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download',
 				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
 					'upgrader_pre_download',
 				), 10, 3 );
 		}
@@ -99,7 +99,7 @@ class Init extends Base {
 		// Add Settings menu.
 		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
+				array( \Fragen\Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {

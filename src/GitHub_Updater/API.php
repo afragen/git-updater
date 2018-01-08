@@ -74,7 +74,7 @@ class API {
 	 *
 	 */
 	public function __construct() {
-		$this->base            = $base = Singleton::get_instance( 'Base' );
+		$this->base            = $base = \Fragen\Singleton::get_instance( 'Base' );
 		static::$options       = $base::$options;
 		static::$extra_headers = $this->base->add_headers( array() );
 	}
@@ -117,10 +117,10 @@ class API {
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
+				\Fragen\Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
+				\Fragen\Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
 			}
 		}
 
@@ -186,7 +186,7 @@ class API {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
-			Singleton::get_instance( 'Messages' )->create_error_message( $response );
+			\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( $response );
 
 			return false;
 		}
@@ -205,7 +205,7 @@ class API {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Singleton::get_instance( 'Messages' )->create_error_message( $type['repo'] );
+			\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( $type['repo'] );
 
 			return false;
 		}
@@ -265,12 +265,12 @@ class API {
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = \Fragen\Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -421,7 +421,7 @@ class API {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+				\Fragen\Singleton::get_instance( 'Messages' )->create_error_message( $response );
 
 				return false;
 			}
