@@ -101,6 +101,7 @@ class Init extends Base {
 			'options-general.php',
 			'options.php',
 			'settings.php',
+			'edit.php',
 		);
 
 		// Add Settings menu.
