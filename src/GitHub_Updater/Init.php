@@ -21,13 +21,6 @@ if ( ! defined( 'WPINC' ) ) {
 class Init extends Base {
 
 	/**
-	 * Variable to hold boolean to check user privileges.
-	 *
-	 * @var bool
-	 */
-	protected static $can_user_update;
-
-	/**
 	 * Let's get going.
 	 */
 	public function run() {
@@ -86,9 +79,9 @@ class Init extends Base {
 	public function can_update() {
 		global $pagenow;
 
-		$load_multisite        = ( is_multisite() && current_user_can( 'manage_network' ) );
-		$load_single_site      = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		self::$can_user_update = $load_multisite || $load_single_site;
+		$load_multisite   = ( is_multisite() && current_user_can( 'manage_network' ) );
+		$load_single_site = ( ! is_multisite() && current_user_can( 'manage_options' ) );
+		$can_user_update  = $load_multisite || $load_single_site;
 		$this->load_options();
 
 		$admin_pages = array(
@@ -118,7 +111,7 @@ class Init extends Base {
 			}
 		}
 
-		return self::$can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
+		return $can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
 	}
 
 }

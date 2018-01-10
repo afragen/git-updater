@@ -206,12 +206,10 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		if ( static::$can_user_update ) {
-			$this->forced_meta_update_plugins();
-			$this->forced_meta_update_themes();
-			if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-				\Fragen\Singleton::get_instance( 'Settings' )->run();
-			}
+		$this->forced_meta_update_plugins();
+		$this->forced_meta_update_themes();
+		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
+			\Fragen\Singleton::get_instance( 'Settings' )->run();
 		}
 
 		return true;
@@ -240,7 +238,7 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function forced_meta_update_plugins() {
-		if ( static::$can_user_update ) {
+		if ( \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
 			\Fragen\Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
@@ -249,7 +247,7 @@ class Base {
 	 * Performs actual theme metadata fetching.
 	 */
 	public function forced_meta_update_themes() {
-		if ( static::$can_user_update ) {
+		if ( \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
 			\Fragen\Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
