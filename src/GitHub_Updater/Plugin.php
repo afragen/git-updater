@@ -41,6 +41,7 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 
 		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
@@ -68,7 +69,7 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		$repo_cache            = \Fragen\Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
 			? $repo_cache['extra_headers']
 			: static::$extra_headers;
@@ -76,8 +77,8 @@ class Plugin extends Base {
 		$plugins = ! empty( $repo_cache['plugins'] ) ? $repo_cache['plugins'] : false;
 		if ( ! $plugins ) {
 			$plugins = get_plugins();
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			\Fragen\Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
+			\Fragen\Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		$git_plugins = array();
@@ -284,7 +285,7 @@ class Plugin extends Base {
 
 		// Get current branch.
 		$repo   = $this->config[ $plugin['repo'] ];
-		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
+		$branch = \Fragen\Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];

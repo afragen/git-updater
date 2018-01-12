@@ -51,7 +51,7 @@ class Init extends Base {
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+			\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -62,7 +62,7 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download',
 				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
 					'upgrader_pre_download',
 				), 10, 3 );
 		}
@@ -79,9 +79,9 @@ class Init extends Base {
 	public function can_update() {
 		global $pagenow;
 
-		$load_multisite        = ( is_network_admin() && current_user_can( 'manage_network' ) );
-		$load_single_site      = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		self::$can_user_update = $load_multisite || $load_single_site;
+		$load_multisite   = ( is_multisite() && current_user_can( 'manage_network' ) );
+		$load_single_site = ( ! is_multisite() && current_user_can( 'manage_options' ) );
+		$can_user_update  = $load_multisite || $load_single_site;
 		$this->load_options();
 
 		$admin_pages = array(
@@ -94,12 +94,14 @@ class Init extends Base {
 			'options-general.php',
 			'options.php',
 			'settings.php',
+			'edit.php',
+			'admin-ajax.php',
 		);
 
 		// Add Settings menu.
 		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
+				array( \Fragen\Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
@@ -109,7 +111,7 @@ class Init extends Base {
 			}
 		}
 
-		return self::$can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
+		return $can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
 	}
 
 }

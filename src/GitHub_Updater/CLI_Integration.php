@@ -34,7 +34,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * GitHub_Updater_CLI_Integration constructor.
 	 */
 	public function __construct() {
-		$this->base = Singleton::get_instance( 'Base' );
+		$this->base = \Fragen\Singleton::get_instance( 'Base' );
 		$this->run();
 	}
 
@@ -55,7 +55,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_plugins() {
 		$this->base->forced_meta_update_plugins( true );
 		$current = get_site_transient( 'update_plugins' );
-		$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+		$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
 	}
 
@@ -68,7 +68,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_themes() {
 		$this->base->forced_meta_update_themes( true );
 		$current = get_site_transient( 'update_themes' );
-		$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+		$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
 	}
 
@@ -122,7 +122,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_plugin( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install' )->install( 'plugin', $cli_config );
+		\Fragen\Singleton::get_instance( 'Install' )->install( 'plugin', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
@@ -180,7 +180,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_theme( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install' )->install( 'theme', $cli_config );
+		\Fragen\Singleton::get_instance( 'Install' )->install( 'theme', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
@@ -231,7 +231,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$branch_data['github_updater_branch'] = $cli_config['branch'];
 		$branch_data['repo']                  = $slug;
 
-		Singleton::get_instance( 'Branch' )->set_branch_on_install( $branch_data );
+		\Fragen\Singleton::get_instance( 'Branch' )->set_branch_on_install( $branch_data );
 	}
 
 }

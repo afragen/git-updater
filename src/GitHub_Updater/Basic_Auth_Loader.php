@@ -129,8 +129,8 @@ class Basic_Auth_Loader {
 		);
 
 		$repos = array_merge(
-			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
-			Singleton::get_instance( 'Theme' )->get_theme_configs()
+			\Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+			\Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs()
 		);
 
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
