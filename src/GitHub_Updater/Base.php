@@ -206,8 +206,8 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		$this->forced_meta_update_plugins();
-		$this->forced_meta_update_themes();
+		$this->get_meta_plugins();
+		$this->get_meta_themes();
 		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			\Fragen\Singleton::get_instance( 'Settings' )->run();
 		}
@@ -226,10 +226,10 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
-		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
-		add_action( 'update_option_auto_updater.lock', array( &$this, 'forced_meta_update_remote_management' ) );
+		add_action( 'wp_update_plugins', array( &$this, 'get_meta_plugins' ) );
+		add_action( 'wp_update_themes', array( &$this, 'get_meta_themes' ) );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'get_meta_remote_management' ) );
+		add_action( 'update_option_auto_updater.lock', array( &$this, 'get_meta_remote_management' ) );
 		add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1 );
 		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
 	}
@@ -237,7 +237,7 @@ class Base {
 	/**
 	 * Performs actual plugin metadata fetching.
 	 */
-	public function forced_meta_update_plugins() {
+	public function get_meta_plugins() {
 		if ( \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
 			\Fragen\Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
@@ -246,19 +246,19 @@ class Base {
 	/**
 	 * Performs actual theme metadata fetching.
 	 */
-	public function forced_meta_update_themes() {
+	public function get_meta_themes() {
 		if ( \Fragen\Singleton::get_instance( 'Init' )->can_update() ) {
 			\Fragen\Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
 
 	/**
-	 * Calls $this->forced_meta_update_plugins() and $this->forced_meta_update_themes()
+	 * Calls $this->get_meta_plugins() and $this->get_meta_themes()
 	 * for remote management services.
 	 */
-	public function forced_meta_update_remote_management() {
-		$this->forced_meta_update_plugins();
-		$this->forced_meta_update_themes();
+	public function get_meta_remote_management() {
+		$this->get_meta_plugins();
+		$this->get_meta_themes();
 	}
 
 	/**
@@ -1143,17 +1143,17 @@ class Base {
 			$current = get_site_transient( $transient );
 			switch ( $transient ) {
 				case 'update_plugins':
-					$this->forced_meta_update_plugins();
+					$this->get_meta_plugins();
 					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
-					$this->forced_meta_update_themes();
+					$this->get_meta_themes();
 					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
-					$this->forced_meta_update_plugins();
+					$this->get_meta_plugins();
 					$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
-					$this->forced_meta_update_themes();
+					$this->get_meta_themes();
 					$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 			}

@@ -53,7 +53,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp plugin` commands with GitHub Updater repositories.
 	 */
 	public function init_plugins() {
-		$this->base->forced_meta_update_plugins( true );
+		$this->base->get_meta_plugins();
 		$current = get_site_transient( 'update_plugins' );
 		$current = \Fragen\Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
@@ -66,7 +66,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp theme` commands with GitHub Updater repositories.
 	 */
 	public function init_themes() {
-		$this->base->forced_meta_update_themes( true );
+		$this->base->get_meta_themes();
 		$current = get_site_transient( 'update_themes' );
 		$current = \Fragen\Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
