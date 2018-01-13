@@ -79,9 +79,9 @@ class Init extends Base {
 	public function can_update() {
 		global $pagenow;
 
-		$load_multisite   = ( is_multisite() && current_user_can( 'manage_network' ) );
-		$load_single_site = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		$can_user_update  = $load_multisite || $load_single_site;
+		$can_user_update = is_multisite()
+			? current_user_can( 'manage_network' )
+			: current_user_can( 'manage_options' );
 		$this->load_options();
 
 		$admin_pages = array(
