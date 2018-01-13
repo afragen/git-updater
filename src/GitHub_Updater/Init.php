@@ -79,6 +79,11 @@ class Init extends Base {
 	public function can_update() {
 		global $pagenow;
 
+		// WP-CLI access has full capabilities.
+		if ( static::is_wp_cli() ) {
+			return true;
+		}
+
 		$can_user_update = is_multisite()
 			? current_user_can( 'manage_network' )
 			: current_user_can( 'manage_options' );
