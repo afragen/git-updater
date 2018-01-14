@@ -26,7 +26,7 @@ class Init extends Base {
 	public function run() {
 		$this->load_hooks();
 
-		if ( self::is_wp_cli() ) {
+		if ( static::is_wp_cli() ) {
 			include_once __DIR__ . '/CLI.php';
 			include_once __DIR__ . '/CLI_Integration.php';
 		}
