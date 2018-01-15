@@ -10,6 +10,8 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
 /*
  * Exit if called directly.
  */
@@ -117,7 +119,7 @@ class Install extends Base {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-				self::$install = \Fragen\Singleton::get_instance( 'GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
+				self::$install = Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
 			}
 
 			/*
@@ -126,13 +128,13 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
 				if ( static::$installed_apis['bitbucket_api'] ) {
-					self::$install = \Fragen\Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
 				if ( static::$installed_apis['bitbucket_server_api'] ) {
-					self::$install = \Fragen\Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -143,7 +145,7 @@ class Install extends Base {
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
 				if ( static::$installed_apis['gitlab_api'] ) {
-					self::$install = \Fragen\Singleton::get_instance( 'GitLab_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -194,7 +196,7 @@ class Install extends Base {
 				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
 
 				// Save branch setting.
-				\Fragen\Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+				Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
 
 				// Delete get_plugins() and wp_get_themes() cache.
 				delete_site_option( 'ghu-' . md5( 'repos' ) );
@@ -289,14 +291,14 @@ class Install extends Base {
 			$type
 		);
 
-		\Fragen\Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
+		Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			\Fragen\Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
+			Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			\Fragen\Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_install_settings_fields( $type );
+			Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_install_settings_fields( $type );
 		}
 	}
 

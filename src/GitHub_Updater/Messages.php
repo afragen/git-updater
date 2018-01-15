@@ -10,6 +10,8 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
 /*
  * Exit if called directly.
  */
@@ -81,7 +83,7 @@ class Messages extends Base {
 	 */
 	public function show_403_error_message() {
 		$_403       = false;
-		$error_code = \Fragen\Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
@@ -120,7 +122,7 @@ class Messages extends Base {
 	 */
 	public function show_401_error_message() {
 		$_401       = false;
-		$error_code = \Fragen\Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_401 && 401 === $repo['code'] ) {
 				$_401 = true;

@@ -8,8 +8,9 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\API;
 
+use Fragen\GitHub_Updater\API;
 
 /**
  * Class Language_Pack_API

@@ -11,6 +11,8 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
 /*
  * Exit if called directly.
  */
@@ -59,7 +61,7 @@ class Rest_Update extends Base {
 		$plugin           = null;
 		$is_plugin_active = false;
 
-		foreach ( (array) \Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs() as $config_entry ) {
+		foreach ( (array) Singleton::get_instance( 'Plugin' )->get_plugin_configs() as $config_entry ) {
 			if ( $config_entry->repo === $plugin_slug ) {
 				$plugin = $config_entry;
 				break;
@@ -110,7 +112,7 @@ class Rest_Update extends Base {
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
 
-		foreach ( (array) \Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs() as $config_entry ) {
+		foreach ( (array) Singleton::get_instance( 'Theme' )->get_theme_configs() as $config_entry ) {
 			if ( $config_entry->repo === $theme_slug ) {
 				$theme = $config_entry;
 				break;
@@ -353,7 +355,7 @@ class Rest_Update extends Base {
 	 * @return bool|array $response
 	 */
 	private function parse_bitbucket_webhook( $request_body ) {
-		\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+		Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
 
 		$request_data = json_decode( $request_body, true );
 
@@ -366,7 +368,7 @@ class Rest_Update extends Base {
 
 		//$response['payload'] = $new;
 
-		\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->remove_authentication_hooks();
+		Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->remove_authentication_hooks();
 
 		return $response;
 	}
