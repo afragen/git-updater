@@ -97,10 +97,8 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 				if ( 1 >= count( $path_parts ) ) {
 					$path_parts = explode( DIRECTORY_SEPARATOR, $path );
 					$path       = array_pop( $path_parts );
-					$subdir     = null;
-				} else {
-					$subdir = array_pop( $path_parts ) . DIRECTORY_SEPARATOR;
 				}
+				$subdir  = ! empty( $path_parts ) ? array_pop( $path_parts ) . DIRECTORY_SEPARATOR : null;
 				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $path . '.php';
 				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $subdir . $path . '.php';
 
