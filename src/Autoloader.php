@@ -91,11 +91,25 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 				// Determine the possible path to the class.
 				$path = substr( $class, strlen( $namespace ) + 1 );
 				$path = str_replace( '\\', DIRECTORY_SEPARATOR, $path );
-				$path = $root_dir . DIRECTORY_SEPARATOR . $path . '.php';
+
+				// Use last part of $class as possible sub-directory. Only one sub-directory deep.
+				$path_parts = explode( '_', $path );
+				if ( 1 >= count( $path_parts ) ) {
+					$path_parts = explode( DIRECTORY_SEPARATOR, $path );
+					$path       = array_pop( $path_parts );
+					$subdir     = null;
+				} else {
+					$subdir = array_pop( $path_parts ) . DIRECTORY_SEPARATOR;
+				}
+				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $path . '.php';
+				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $subdir . $path . '.php';
 
 				// Test for its existence and load if present.
-				if ( file_exists( $path ) ) {
-					include_once $path;
+				foreach ( $paths as $path ) {
+					if ( file_exists( $path ) ) {
+						include_once $path;
+						break;
+					}
 				}
 			}
 		}
