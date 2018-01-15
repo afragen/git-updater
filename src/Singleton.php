@@ -71,7 +71,5 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 
 			return $class;
 		}
-
 	}
-
 }

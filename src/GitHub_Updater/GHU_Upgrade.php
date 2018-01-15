@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
+
 /**
  * Exit if called directly.
  */

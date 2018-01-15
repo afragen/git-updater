@@ -14,6 +14,7 @@ namespace Fragen\GitHub_Updater;
 use WordPressdotorg\Plugin_Directory\Readme\Parser,
 	Parsedown;
 
+
 /*
  * Exit if called directly.
  */

@@ -14,6 +14,7 @@ use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\GitHub_API,
 	Fragen\GitHub_Updater\API\GitLab_API;
 
+
 /*
  * Exit if called directly.
  */

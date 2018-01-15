@@ -14,6 +14,7 @@ use WP_CLI,
 	WP_CLI_Command,
 	Fragen\Singleton;
 
+
 // Add WP-CLI commands.
 $class = new CLI_Integration();
 WP_CLI::add_command( 'plugin install-git', array( $class, 'install_plugin' ) );

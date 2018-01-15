@@ -14,6 +14,7 @@ use WP_CLI,
 	WP_CLI_Command,
 	Fragen\Singleton;
 
+
 // Add WP-CLI commands.
 WP_CLI::add_command( 'github-updater', '\\Fragen\\GitHub_Updater\\CLI' );
 

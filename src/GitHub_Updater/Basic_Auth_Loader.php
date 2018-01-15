@@ -14,6 +14,7 @@ use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 
+
 /*
  * Exit if called directly.
  */
