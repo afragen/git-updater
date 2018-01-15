@@ -16,6 +16,7 @@ use Fragen\Singleton,
 	Fragen\GitHub_Updater\Branch,
 	Fragen\GitHub_Updater\Readme_Parser;
 
+
 /*
  * Exit if called directly.
  */

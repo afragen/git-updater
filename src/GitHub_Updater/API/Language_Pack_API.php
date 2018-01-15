@@ -12,6 +12,7 @@ namespace Fragen\GitHub_Updater\API;
 
 use Fragen\GitHub_Updater\API;
 
+
 /**
  * Class Language_Pack_API
  *
