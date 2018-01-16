@@ -29,7 +29,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 	 * @author    Barry Hughes <barry@codingkillsme.com>
 	 * @link      http://github.com/afragen/autoloader
 	 * @copyright 2015 Andy Fragen
-	 * @version   2.0.0
+	 * @version   2.1.0
 	 */
 	class Autoloader {
 		/**
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 
 
 		/**
-		 * Constructor
+		 * Constructor.
 		 *
 		 * @access public
 		 *
@@ -65,7 +65,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		}
 
 		/**
-		 * Load classes
+		 * Load classes.
 		 *
 		 * @access protected
 		 *
@@ -88,19 +88,16 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 					continue;
 				}
 
-				// Determine the possible path to the class.
+				// Determine the possible path to the class, include all subdirectories.
+				$dirs = glob( $root_dir . '/*', GLOB_ONLYDIR );
+				array_unshift( $dirs, $root_dir );
+
 				$path = substr( $class, strlen( $namespace ) + 1 );
 				$path = str_replace( '\\', DIRECTORY_SEPARATOR, $path );
 
-				// Use last part of $class as possible sub-directory. Only one sub-directory deep.
-				$path_parts = explode( '_', $path );
-				if ( 1 >= count( $path_parts ) ) {
-					$path_parts = explode( DIRECTORY_SEPARATOR, $path );
-					$path       = array_pop( $path_parts );
-				}
-				$subdir  = ! empty( $path_parts ) ? array_pop( $path_parts ) . DIRECTORY_SEPARATOR : null;
-				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $path . '.php';
-				$paths[] = $root_dir . DIRECTORY_SEPARATOR . $subdir . $path . '.php';
+				$paths = array_map( function( $dir ) use ( $path ) {
+					return $dir . DIRECTORY_SEPARATOR . $path . '.php';
+				}, $dirs );
 
 				// Test for its existence and load if present.
 				foreach ( $paths as $path ) {
