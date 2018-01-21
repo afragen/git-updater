@@ -48,13 +48,6 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		protected $map = array();
 
 		/**
-		 * Array of class file names that don't correspond to class names.
-		 *
-		 * @var array
-		 */
-		protected $misnamed = array();
-
-		/**
 		 * Constructor.
 		 *
 		 * @access public
@@ -65,13 +58,10 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		 * @param array|null $misnamed_classes Array of classes whose file names deviate from convention.
 		 *                                     Defaults to null.
 		 */
-		public function __construct( array $roots, array $static_map = null, array $misnamed_classes = null ) {
+		public function __construct( array $roots, array $static_map = null ) {
 			$this->roots = $roots;
 			if ( null !== $static_map ) {
 				$this->map = $static_map;
-			}
-			if ( null !== $misnamed_classes ) {
-				$this->misnamed = $misnamed_classes;
 			}
 			spl_autoload_register( array( $this, 'autoload' ) );
 		}
@@ -112,10 +102,7 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 				}
 				$directories = array_unique( $directories );
 
-				$fnames = array();
-				$fnames = array_merge( array( $psr4_fname ), $fnames, $this->misnamed );
-
-				$paths = $this->get_paths( $directories, $fnames );
+				$paths = $this->get_paths( $directories, array( $psr4_fname ) );
 
 				// Test for its existence and load if present.
 				foreach ( $paths as $path ) {
