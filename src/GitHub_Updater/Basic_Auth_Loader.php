@@ -10,6 +10,11 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API\Bitbucket_API,
+	Fragen\GitHub_Updater\API\Bitbucket_Server_API;
+
+
 /*
  * Exit if called directly.
  */
@@ -129,8 +134,8 @@ class Basic_Auth_Loader {
 		);
 
 		$repos = array_merge(
-			\Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
-			\Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs()
+			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme' )->get_theme_configs()
 		);
 
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;

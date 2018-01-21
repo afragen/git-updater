@@ -10,6 +10,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -144,8 +147,8 @@ class Settings extends Base {
 	 * @return array $gits
 	 */
 	private function installed_git_repos() {
-		$plugins = \Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes  = \Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme' )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
@@ -280,10 +283,10 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
-				\Fragen\Singleton::get_instance( 'Install' )->install( 'plugin' );
+				Singleton::get_instance( 'Install' )->install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
-				\Fragen\Singleton::get_instance( 'Install' )->install( 'theme' );
+				Singleton::get_instance( 'Install' )->install( 'theme' );
 			}
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
@@ -342,18 +345,18 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		\Fragen\Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
+		Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			\Fragen\Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			\Fragen\Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			\Fragen\Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 	}
 
@@ -362,8 +365,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = \Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$ghu_themes       = \Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$ghu_plugins      = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$ghu_themes       = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -394,22 +397,22 @@ class Settings extends Base {
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
-					$repo_setting_field = \Fragen\Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_repo_setting_field();
+					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_repo_setting_field();
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
 						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = \Fragen\Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
 						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = \Fragen\Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
 					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = \Fragen\Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_repo_setting_field();
+						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_repo_setting_field();
 					}
 					break;
 			}
@@ -854,8 +857,8 @@ class Settings extends Base {
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
 
-		$plugins  = \Fragen\Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes   = \Fragen\Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
+		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
 		$bbserver = array( 'bitbucket', 'bbserver' );
 

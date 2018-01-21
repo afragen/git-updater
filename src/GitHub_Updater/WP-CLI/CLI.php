@@ -11,7 +11,9 @@
 namespace Fragen\GitHub_Updater;
 
 use WP_CLI,
-	WP_CLI_Command;
+	WP_CLI_Command,
+	Fragen\Singleton;
+
 
 // Add WP-CLI commands.
 WP_CLI::add_command( 'github-updater', '\\Fragen\\GitHub_Updater\\CLI' );
@@ -32,7 +34,7 @@ class CLI extends WP_CLI_Command {
 	 * GitHub_Updater_CLI constructor.
 	 */
 	public function __construct() {
-		$this->base = \Fragen\Singleton::get_instance( 'Base' );
+		$this->base = Singleton::get_instance( 'Base' );
 	}
 
 	/**

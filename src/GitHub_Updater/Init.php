@@ -11,6 +11,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -27,8 +30,8 @@ class Init extends Base {
 		$this->load_hooks();
 
 		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/CLI.php';
-			include_once __DIR__ . '/CLI_Integration.php';
+			include_once __DIR__ . '/WP-CLI/CLI.php';
+			include_once __DIR__ . '/WP-CLI/CLI_Integration.php';
 		}
 	}
 
@@ -51,7 +54,7 @@ class Init extends Base {
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -62,7 +65,7 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download',
 				array(
-					\Fragen\Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
 					'upgrader_pre_download',
 				), 10, 3 );
 		}
@@ -106,7 +109,7 @@ class Init extends Base {
 		// Add Settings menu.
 		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( \Fragen\Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
+				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {

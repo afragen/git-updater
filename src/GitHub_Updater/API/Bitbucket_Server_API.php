@@ -8,7 +8,12 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\API;
+
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API,
+	Fragen\GitHub_Updater\Readme_Parser;
+
 
 /*
  * Exit if called directly.
@@ -486,7 +491,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_field(
 			'bitbucket_server_username',
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			array( \Fragen\Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			array( 'id' => 'bitbucket_server_username' )
@@ -495,7 +500,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_field(
 			'bitbucket_server_password',
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			array( \Fragen\Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			array( 'id' => 'bitbucket_server_password', 'token' => true )
@@ -524,7 +529,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$setting_field['page']            = 'github_updater_bbserver_install_settings';
 		$setting_field['section']         = 'bitbucket_server_id';
 		$setting_field['callback_method'] = array(
-			\Fragen\Singleton::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings' ),
 			'token_callback_checkbox',
 		);
 

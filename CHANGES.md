@@ -7,6 +7,9 @@
 * changed some variable and function names to be more descriptive
 * move Singleton Factory out of namespace
 * move capabilities check into `class Init`
+* move API classes to subdirectory
+* move WP-CLI classes to subdirectory
+* refactor autoloader to grab all subdirectories
 
 #### 7.4.4 / 2017-11-29
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)
