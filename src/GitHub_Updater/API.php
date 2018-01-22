@@ -279,6 +279,13 @@ class API {
 					return $this->type->enterprise_api . $endpoint;
 				}
 				break;
+			case 'gitea':
+				if ( $download_link ) {
+					break;
+				}
+				$api      = new Gitea_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
+				break;
 			default:
 				break;
 		}
