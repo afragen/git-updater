@@ -22,13 +22,13 @@
  * @author  Agbonghama Collins
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.3
+ * @version 1.3.2
  */
 
 /**
  * Exit if called directly.
  */
-if ( ! defined( 'WPINC' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
@@ -52,9 +52,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 		 */
 		public static function load_script() {
 
-			if ( is_customize_preview() ) {
-				return;
-			}
+		    if(is_customize_preview()) return;
 
 			wp_enqueue_script(
 				'dismissible-notices',
@@ -68,7 +66,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 				'dismissible-notices',
 				'dismissible_notice',
 				array(
-					'nonce' => wp_create_nonce( 'PAnD-dismissible-notice' ),
+					'nonce' => wp_create_nonce( 'dismissible-notice' ),
 				)
 			);
 		}
@@ -83,12 +81,13 @@ if ( ! class_exists( 'PAnD' ) ) {
 			$transient          = 0;
 
 			if ( 'forever' != $dismissible_length ) {
+				// If $dismissible_length is not an integer default to 1
 				$dismissible_length = ( 0 == absint( $dismissible_length ) ) ? 1 : $dismissible_length;
 				$transient          = absint( $dismissible_length ) * DAY_IN_SECONDS;
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
-			check_ajax_referer( 'PAnD-dismissible-notice', 'nonce' );
+			check_ajax_referer( 'dismissible-notice', 'nonce' );
 			set_site_transient( $option_name, $dismissible_length, $transient );
 			wp_die();
 		}
