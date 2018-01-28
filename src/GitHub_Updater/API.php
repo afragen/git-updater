@@ -10,6 +10,10 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API\GitHub_API,
+	Fragen\GitHub_Updater\API\GitLab_API;
+
 
 /*
  * Exit if called directly.
@@ -270,7 +274,7 @@ class API {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -427,7 +431,7 @@ class API {
 			}
 
 			$response = json_decode( $response['body'] );
-			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
+			$response = ! empty( $response ) && ! isset( $response->error ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
@@ -537,7 +541,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update( $this->type ) );
+		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update_repo( $this->type ) );
 	}
 
 	/**
@@ -688,50 +692,44 @@ class API {
 		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
 		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
 
-		$rating = round( $watchers + ( $forks * 1.5 ) - $open_issues );
+		$rating = abs( (int) round( $watchers + ( $forks * 1.5 ) - ( $open_issues * 0.1 ) ) );
 
 		if ( 100 < $rating ) {
 			return 100;
 		}
 
-		return (integer) $rating;
+		return $rating;
 	}
 
 	/**
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param $response
+	 * @param array $readme Array of parsed readme.txt data
 	 *
 	 * @return bool
 	 */
-	protected function set_readme_info( $response ) {
-		$readme = array();
+	protected function set_readme_info( $readme ) {
 		foreach ( (array) $this->type->sections as $section => $value ) {
 			if ( 'description' === $section ) {
 				continue;
 			}
-			$readme[ $section ] = $value;
-		}
-		foreach ( $readme as $key => $value ) {
-			if ( ! empty( $value ) ) {
-				unset( $response['sections'][ $key ] );
-			}
+			$readme['sections'][ $section ] = $value;
 		}
 
-		$response['remaining_content'] = ! empty( $response['remaining_content'] ) ? $response['remaining_content'] : null;
-		if ( empty( $response['sections']['other_notes'] ) ) {
-			unset( $response['sections']['other_notes'] );
+		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;
+		if ( empty( $readme['sections']['other_notes'] ) ) {
+			unset( $readme['sections']['other_notes'] );
 		} else {
-			$response['sections']['other_notes'] .= $response['remaining_content'];
+			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
-		unset( $response['sections']['screenshots'], $response['sections']['installation'] );
-		$response['sections']     = ! empty( $response['sections'] ) ? $response['sections'] : array();
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $response['sections'] );
-		$this->type->tested       = isset( $response['tested'] ) ? $response['tested'] : null;
-		$this->type->requires     = isset( $response['requires'] ) ? $response['requires'] : null;
-		$this->type->donate_link  = isset( $response['donate_link'] ) ? $response['donate_link'] : null;
-		$this->type->contributors = isset( $response['contributors'] ) ? $response['contributors'] : null;
+		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
+		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : array();
+		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
+		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
+		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : null;
+		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : null;
 
 		return true;
 	}

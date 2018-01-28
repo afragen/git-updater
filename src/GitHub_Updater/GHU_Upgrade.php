@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
+
 /**
  * Exit if called directly.
  */
@@ -43,7 +44,7 @@ class GHU_Upgrade extends Base {
 	 * Run update check against db_version.
 	 */
 	public function run() {
-		$db_version = isset( static::$options['db_version'] ) ? static::$options['db_version'] : 6000;
+		$db_version = isset( static::$options['db_version'] ) ? (int) static::$options['db_version'] : 6000;
 
 		if ( $db_version === $this->db_version ) {
 			return;

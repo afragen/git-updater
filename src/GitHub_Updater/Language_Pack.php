@@ -10,6 +10,10 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API\Language_Pack_API;
+
+
 /**
  * Exit if called directly.
  */

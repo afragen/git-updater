@@ -10,6 +10,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -41,6 +44,7 @@ class Plugin extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 
 		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
@@ -411,7 +415,7 @@ class Plugin extends Base {
 
 		foreach ( (array) $this->config as $plugin ) {
 
-			if ( $this->can_update( $plugin ) ) {
+			if ( $this->can_update_repo( $plugin ) ) {
 				$response = array(
 					'slug'        => dirname( $plugin->slug ),
 					'plugin'      => $plugin->slug,

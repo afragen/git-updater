@@ -11,6 +11,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -43,6 +46,7 @@ class Rest_Update extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
 	}
 

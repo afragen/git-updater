@@ -8,7 +8,12 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\API;
+
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API,
+	Fragen\GitHub_Updater\Branch,
+	Fragen\GitHub_Updater\Readme_Parser;
 
 /*
  * Exit if called directly.
@@ -156,7 +161,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -208,7 +213,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update( $this->type ) ) {
+		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -486,7 +491,10 @@ class Bitbucket_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
-		$setting_field['callback_method'] = array( Singleton::get_instance( 'Settings' ), 'token_callback_checkbox' );
+		$setting_field['callback_method'] = array(
+			Singleton::get_instance( 'Settings' ),
+			'token_callback_checkbox',
+		);
 
 		return $setting_field;
 	}

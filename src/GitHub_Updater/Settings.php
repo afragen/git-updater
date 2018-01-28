@@ -10,6 +10,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -342,18 +345,18 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
+		Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
 		}
 	}
 
@@ -394,22 +397,22 @@ class Settings extends Base {
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
-					$repo_setting_field = Singleton::get_instance( 'GitHub_API', new \stdClass() )->add_repo_setting_field();
+					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_repo_setting_field();
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
 						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'Bitbucket_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
 						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
 					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'GitLab_API', new \stdClass() )->add_repo_setting_field();
+						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_repo_setting_field();
 					}
 					break;
 			}
@@ -691,7 +694,8 @@ class Settings extends Base {
 				update_site_option( 'github_updater', self::sanitize( $options ) );
 			}
 			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $_POST['github_updater_remote_management'] ) );
+				$options = $this->filter_options( true );
+				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $options ) );
 			}
 		}
 		$this->redirect_on_save();
@@ -701,9 +705,21 @@ class Settings extends Base {
 	 * Filter options to remove unchecked checkbox options.
 	 *
 	 * @access private
+	 *
+	 * @param bool $remote True if setting remote management options.
+	 *                     Default is false.
+	 *
 	 * @return array|mixed
 	 */
-	private function filter_options() {
+	private function filter_options( $remote = false ) {
+		if ( $remote ) {
+			$options = isset( $_POST['github_updater_remote_management'] )
+				? $_POST['github_updater_remote_management']
+				: array();
+
+			return $options;
+		}
+
 		$options = static::$options;
 
 		// Remove checkbox options.
@@ -837,6 +853,10 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
+		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
+		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
+		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
+
 		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
 		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
@@ -861,9 +881,9 @@ class Settings extends Base {
 			);
 		}, $type_repos );
 
-		$lock    = '&nbsp;<span class="dashicons dashicons-lock"></span>';
-		$broken  = '&nbsp;<span style="color:#f00;" class="dashicons dashicons-warning"></span>';
-		$dot_org = '&nbsp;<span class="dashicons dashicons-wordpress"></span></span>';
+		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
+		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
+		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
 			$dashicon   = false !== strpos( $data['type'], 'theme' )

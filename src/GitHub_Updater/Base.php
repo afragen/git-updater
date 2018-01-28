@@ -11,6 +11,14 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API\GitHub_API,
+	Fragen\GitHub_Updater\API\Bitbucket_API,
+	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
+	Fragen\GitHub_Updater\API\GitLab_API,
+	Fragen\GitHub_Updater\API\Language_Pack_API;
+
+
 /*
  * Exit if called directly.
  */
@@ -121,14 +129,6 @@ class Base {
 	);
 
 	/**
-	 * Variable to hold boolean to load remote meta.
-	 * Checks user privileges and when to load.
-	 *
-	 * @var bool
-	 */
-	protected static $load_repo_meta;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -136,28 +136,16 @@ class Base {
 	}
 
 	/**
-	 * Let's get going.
-	 */
-	public function run() {
-		$this->load_hooks();
-
-		if ( self::is_wp_cli() ) {
-			include_once __DIR__ . '/CLI.php';
-			include_once __DIR__ . '/CLI_Integration.php';
-		}
-	}
-
-	/**
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
-		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_Server_API' ) ) {
+		if ( class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_Server_API' ) ) {
 			self::$installed_apis['bitbucket_server_api'] = true;
 		}
-		if ( class_exists( 'Fragen\GitHub_Updater\Bitbucket_API' ) ) {
+		if ( class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_API' ) ) {
 			self::$installed_apis['bitbucket_api'] = true;
 		}
-		if ( class_exists( 'Fragen\GitHub_Updater\GitLab_API' ) ) {
+		if ( class_exists( 'Fragen\GitHub_Updater\API\GitLab_API' ) ) {
 			self::$installed_apis['gitlab_api'] = true;
 		}
 	}
@@ -169,45 +157,6 @@ class Base {
 		self::$options        = get_site_option( 'github_updater', array() );
 		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 		self::$api_key        = get_site_option( 'github_updater_api_key' );
-	}
-
-	/**
-	 * Load relevant action/filter hooks.
-	 * Use 'init' hook for user capabilities.
-	 */
-	protected function load_hooks() {
-		add_action( 'init', array( &$this, 'init' ) );
-		add_action( 'init', array( &$this, 'background_update' ) );
-		add_action( 'init', array( &$this, 'set_options_filter' ) );
-		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
-		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
-
-		// Delete get_plugins() and wp_get_themes() cache.
-		add_action( 'deleted_plugin', function() {
-			wp_cache_delete( 'plugins', 'plugins' );
-			delete_site_option( 'ghu-' . md5( 'repos' ) );
-		} );
-
-		// Load hook for shiny updates Basic Authentication headers.
-		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
-		}
-
-		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
-
-		// Needed for updating from update-core.php.
-		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download',
-				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
-					'upgrader_pre_download',
-				), 10, 3 );
-		}
-
-		// The following hook needed to ensure transient is reset correctly after shiny updates.
-		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
 	}
 
 	/**
@@ -234,54 +183,27 @@ class Base {
 	}
 
 	/**
-	 * Instantiate Plugin, Theme, and Settings for proper user capabilities.
+	 * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
 	 *
 	 * @return bool
 	 */
-	public function init() {
-		global $pagenow;
-
-		$load_multisite       = ( is_network_admin() && current_user_can( 'manage_network' ) );
-		$load_single_site     = ( ! is_multisite() && current_user_can( 'manage_options' ) );
-		self::$load_repo_meta = $load_multisite || $load_single_site;
-		$this->load_options();
-
-		// Set $force_meta_update = true on appropriate admin pages.
-		$force_meta_update = false;
-		$admin_pages       = array(
-			'plugins.php',
-			'plugin-install.php',
-			'themes.php',
-			'theme-install.php',
-			'update-core.php',
-			'update.php',
-			'options-general.php',
-			'settings.php',
-		);
-
-		foreach ( array_keys( Settings::$remote_management ) as $key ) {
-			// Remote management only needs to be active for admin pages.
-			if ( ! empty( self::$options_remote[ $key ] ) && is_admin() ) {
-				$admin_pages = array_merge( $admin_pages, array( 'index.php', 'admin-ajax.php' ) );
-			}
+	public function load() {
+		if ( ! Singleton::get_instance( 'Init' )->can_update() ) {
+			return false;
 		}
 
-		if ( in_array( $pagenow, array_unique( $admin_pages ), true ) ) {
-			$force_meta_update = true;
+		// Run GitHub Updater upgrade functions.
+		$upgrade = new GHU_Upgrade();
+		$upgrade->run();
 
-			// Load plugin stylesheet.
-			add_action( 'admin_enqueue_scripts', function() {
-				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
-				wp_enqueue_style( 'github-updater' );
-			} );
+		// Load plugin stylesheet.
+		add_action( 'admin_enqueue_scripts', function() {
+			wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
+			wp_enqueue_style( 'github-updater' );
+		} );
 
-			// Run GitHub Updater upgrade functions.
-			$upgrade = new GHU_Upgrade();
-			$upgrade->run();
-
-			// Ensure transient updated on plugins.php and themes.php pages.
-			add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
-		}
+		// Ensure transient updated on plugins.php and themes.php pages.
+		add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
@@ -292,15 +214,9 @@ class Base {
 			do_action( 'ghu_refresh_transients' );
 		}
 
-		if ( $force_meta_update ) {
-			$this->forced_meta_update_plugins();
-		}
-		if ( $force_meta_update ) {
-			$this->forced_meta_update_themes();
-		}
-		if ( self::$load_repo_meta && is_admin() &&
-		     ! apply_filters( 'github_updater_hide_settings', false )
-		) {
+		$this->get_meta_plugins();
+		$this->get_meta_themes();
+		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			Singleton::get_instance( 'Settings' )->run();
 		}
 
@@ -311,7 +227,6 @@ class Base {
 	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
-		$this->load_options();
 		Singleton::get_instance( 'Rest_Update' )->process_request();
 	}
 
@@ -319,45 +234,39 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'forced_meta_update_plugins' ) );
-		add_action( 'wp_update_themes', array( &$this, 'forced_meta_update_themes' ) );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'forced_meta_update_remote_management' ) );
-		add_action( 'update_option_auto_updater.lock', array( &$this, 'forced_meta_update_remote_management' ) );
+		add_action( 'wp_update_plugins', array( &$this, 'get_meta_plugins' ) );
+		add_action( 'wp_update_themes', array( &$this, 'get_meta_themes' ) );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'get_meta_remote_management' ) );
+		add_action( 'update_option_auto_updater.lock', array( &$this, 'get_meta_remote_management' ) );
 		add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1 );
 		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
 	}
 
 	/**
 	 * Performs actual plugin metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_plugins( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
-			$this->load_options();
+	public function get_meta_plugins() {
+		if ( Singleton::get_instance( 'Init' )->can_update() ) {
 			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
 		}
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
-	 *
-	 * @param bool $true Only used from API::wp_update_response()
 	 */
-	public function forced_meta_update_themes( $true = false ) {
-		if ( self::$load_repo_meta || $true ) {
-			$this->load_options();
+	public function get_meta_themes() {
+		if ( Singleton::get_instance( 'Init' )->can_update() ) {
 			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
 		}
 	}
 
 	/**
-	 * Calls $this->forced_meta_update_plugins() and $this->forced_meta_update_themes()
+	 * Calls $this->get_meta_plugins() and $this->get_meta_themes()
 	 * for remote management services.
 	 */
-	public function forced_meta_update_remote_management() {
-		$this->forced_meta_update_plugins( true );
-		$this->forced_meta_update_themes( true );
+	public function get_meta_remote_management() {
+		$this->get_meta_plugins();
+		$this->get_meta_themes();
 	}
 
 	/**
@@ -522,8 +431,6 @@ class Base {
 	 *
 	 * @param $cron
 	 * @param $timestamp
-	 *
-	 * @return \WP_Error
 	 */
 	private function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
@@ -895,7 +802,7 @@ class Base {
 	 *
 	 * @return bool
 	 */
-	public function can_update( $type ) {
+	public function can_update_repo( $type ) {
 		global $wp_version;
 
 		if ( isset( $type->remote_version, $type->requires_php_version, $type->requires_php_version ) ) {
@@ -1244,17 +1151,17 @@ class Base {
 			$current = get_site_transient( $transient );
 			switch ( $transient ) {
 				case 'update_plugins':
-					$this->forced_meta_update_plugins( true );
+					$this->get_meta_plugins();
 					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
-					$this->forced_meta_update_themes( true );
+					$this->get_meta_themes();
 					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
-					$this->forced_meta_update_plugins( true );
+					$this->get_meta_plugins();
 					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
-					$this->forced_meta_update_themes( true );
+					$this->get_meta_themes();
 					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
 					break;
 			}

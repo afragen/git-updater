@@ -10,6 +10,9 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
+
+
 /*
  * Exit if called directly.
  */
@@ -43,6 +46,7 @@ class Theme extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		$this->load_options();
 
 		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();
@@ -623,7 +627,7 @@ class Theme extends Base {
 
 		foreach ( (array) $this->config as $theme ) {
 
-			if ( $this->can_update( $theme ) ) {
+			if ( $this->can_update_repo( $theme ) ) {
 				$response = array(
 					'theme'       => $theme->repo,
 					'new_version' => $theme->remote_version,

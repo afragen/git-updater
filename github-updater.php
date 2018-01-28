@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, or GitLab hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           7.4.4
+ * Version:           7.5.0
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -55,8 +55,9 @@ $ghu['root'] = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater
 $ghu['extra_classes'] = array(
 	'WordPressdotorg\Plugin_Directory\Readme\Parser' => __DIR__ . '/vendor/class-parser.php',
 
-	'Parsedown' => __DIR__ . '/vendor/parsedown/Parsedown.php',
-	'PAnD'      => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
+	'Fragen\Singleton' => __DIR__ . '/src/Singleton.php',
+	'Parsedown'        => __DIR__ . '/vendor/parsedown/Parsedown.php',
+	'PAnD'             => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
 );
 
 // Load Autoloader.
@@ -65,9 +66,9 @@ $ghu['loader'] = 'Fragen\\Autoloader';
 new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
 
 // Instantiate class GitHub_Updater.
-$ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Base';
-$ghu['base']        = new $ghu['instantiate'];
-$ghu['base']->run();
+$ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
+$ghu['init']        = new $ghu['instantiate'];
+$ghu['init']->run();
 
 /**
  * Initialize Persist Admin notices Dismissal.

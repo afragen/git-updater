@@ -8,7 +8,7 @@
     "updater",
     "install"
   ],
-  "license": "GPLv2",
+  "license": "GPL-2.0-or-later",
   "repositories": [
     {
       "type": "vcs",
