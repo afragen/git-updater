@@ -1,15 +1,20 @@
 #### [unreleased]
+
+#### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
 * fixed `API::set_readme_info()` to see passed parameter as readme data
 * added title attribute to icons on Settings subtabs, thanks @petemolinero
 * created new `class Init` to help unclutter `class Base`
 * fixed PHP Warning if saving empty Remote Management Settings
 * changed some variable and function names to be more descriptive
-* move Singleton Factory out of namespace
-* move capabilities check into `class Init`
-* move API classes to subdirectory
-* move WP-CLI classes to subdirectory
-* refactor autoloader to grab all subdirectories
+* moved Singleton Factory out of namespace
+* moved capabilities check into `class Init`
+* moved API classes to subdirectory
+* moved WP-CLI classes to subdirectory
+* refactored autoloader to grab all subdirectories
+* fixed for new WP.org Plugin API response
+* updated `vendor/class-parser.php` and `vendor/persist-admin-notices-dismissal`
+* fixed `composer.json` for new license format
 
 #### 7.4.4 / 2017-11-29
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)

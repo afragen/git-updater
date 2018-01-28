@@ -11,7 +11,7 @@ Run `composer require collizo4sky/persist-admin-notices-dismissal`
 Alternatively, clone or download this repo into the `vendor/` folder in your plugin, and include/require the `persist-admin-notices-dismissal.php` file like so
 
 ```php
-require  __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php'
+require  __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php';
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
 ```
 

@@ -431,7 +431,7 @@ class API {
 			}
 
 			$response = json_decode( $response['body'] );
-			$response = ! empty( $response ) ? 'in dot org' : 'not in dot org';
+			$response = ! empty( $response ) && ! isset( $response->error ) ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
