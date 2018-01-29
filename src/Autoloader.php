@@ -55,8 +55,6 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		 * @param array      $roots            Roots to scan when autoloading.
 		 * @param array|null $static_map       Array of classes that deviate from convention.
 		 *                                     Defaults to null.
-		 * @param array|null $misnamed_classes Array of classes whose file names deviate from convention.
-		 *                                     Defaults to null.
 		 */
 		public function __construct( array $roots, array $static_map = null ) {
 			$this->roots = $roots;
