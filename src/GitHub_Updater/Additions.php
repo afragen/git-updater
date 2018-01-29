@@ -133,6 +133,11 @@ class Additions {
 					$addition['slug']                                  = $repo['slug'];
 					$addition[ 'GitLab ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
+				case 'gitea_plugin':
+				case 'gitea_theme':
+					$addition['slug']                                  = $repo['slug'];
+					$addition[ 'Gitea ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
+					break;
 			}
 
 			$this->add_to_github_updater[ $repo['slug'] ] = array_merge( $additions[ $repo['slug'] ], $addition );
