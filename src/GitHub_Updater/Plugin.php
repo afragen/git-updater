@@ -221,7 +221,9 @@ class Plugin extends Base {
 			     || apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $plugin );
+				$plugin->waiting = false;
 			} else {
+				$plugin->waiting          = true;
 				$plugins[ $plugin->repo ] = $plugin;
 			}
 

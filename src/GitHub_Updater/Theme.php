@@ -209,7 +209,9 @@ class Theme extends Base {
 			     || apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $theme );
+				$theme->waiting = false;
 			} else {
+				$theme->waiting         = true;
 				$themes[ $theme->repo ] = $theme;
 			}
 
