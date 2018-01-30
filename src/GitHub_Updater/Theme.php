@@ -197,8 +197,6 @@ class Theme extends Base {
 		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 
-			$themes[ $theme->repo ] = $theme;
-
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *
@@ -208,8 +206,11 @@ class Theme extends Base {
 			 * @param bool
 			 */
 			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli()
-			     || apply_filters( 'github_updater_disable_wpcron', false ) ) {
+			     || apply_filters( 'github_updater_disable_wpcron', false )
+			) {
 				$this->get_remote_repo_meta( $theme );
+			} else {
+				$themes[ $theme->repo ] = $theme;
 			}
 
 			/*

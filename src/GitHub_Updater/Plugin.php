@@ -209,8 +209,6 @@ class Plugin extends Base {
 		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			$plugins[ $plugin->repo ] = $plugin;
-
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *
@@ -223,6 +221,8 @@ class Plugin extends Base {
 			     || apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $plugin );
+			} else {
+				$plugins[ $plugin->repo ] = $plugin;
 			}
 
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
