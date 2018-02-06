@@ -885,7 +885,7 @@ class Settings extends Base {
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
-		$waiting = '&nbsp;<span title="' . $waiting_title . '" style="color:#fad201;" class="dashicons dashicons-warning"></span>';
+		$waiting = '&nbsp;<span title="' . $waiting_title . '" style="color:#ff7900;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
