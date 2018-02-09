@@ -1,5 +1,6 @@
 #### [unreleased]
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
+* changed all password fields to use `type="password"`
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

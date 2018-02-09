@@ -638,7 +638,7 @@ class GitHub_API extends API implements API_Interface {
 	public function github_access_token() {
 		?>
 		<label for="github_access_token">
-			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
+			<input class="github_setting" type="password" style="width:50%;" name="github_access_token" value="">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
