@@ -76,6 +76,7 @@ class Readme_Parser extends Parser {
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
+		$contributors = array();
 		foreach ( (array) $users as $contributor ) {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
