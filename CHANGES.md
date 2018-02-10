@@ -1,6 +1,7 @@
 #### [unreleased]
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
 * changed all password fields to use `type="password"`
+* refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

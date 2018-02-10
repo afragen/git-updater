@@ -367,7 +367,6 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		$contributors = array();
 		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
 		}
@@ -394,10 +393,7 @@ class Plugin extends Base {
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
 		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
-		foreach ( (array) $plugin->contributors as $contributor ) {
-			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
-		}
-		$response->contributors = $contributors;
+		$response->contributors  = $plugin->contributors;
 		if ( ! $this->is_private( $plugin ) ) {
 			$response->num_ratings = $plugin->num_ratings;
 			$response->rating      = $plugin->rating;
