@@ -6,27 +6,60 @@
  * @since  4.6.0
  * @access public
  */
-jQuery( document ).ready( function( $ ) {
-	// Hide non-default (Bitbucket & GitLab) settings on page load
-	$.each( [ 'bitbucket', 'gitlab' ], function() {
-		$( 'input.'.concat( this, '_setting') ).parents( 'tr').hide();
+(function () {
+
+	// Hide non-default (Bitbucket & GitLab) settings on page load.
+	var nonDefault = ['bitbucket', 'gitlab'];
+
+	nonDefault.forEach(function (item) {
+		var parents = getParents(item, 'tr');
+		parents[0].style.display = 'none';
 	});
 
-	// When the api selector changes
-	$( 'select[ name="github_updater_api" ]' ).on( 'change', function() {
+	// When the api selector changes.
+	var selects = document.querySelector('select[ name="github_updater_api" ]');
 
-		// create difference array
-		var hideMe = $( [ 'github', 'bitbucket', 'gitlab' ] ).not( [ this.value ] ).get();
+	selects.addEventListener('change', function () {
+		var defaults = ['github', 'bitbucket', 'gitlab'];
 
-		/*
-		 * Show/hide all settings that have the selected api's class.
-		 * this.value equals either 'github', 'bitbucket', or 'gitlab'.
-		 */
-		$.each( hideMe, function() {
-			$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+		// Create difference array.
+		var hideMe = remove(defaults, this.value);
+
+		// Hide items with unselected api's classes.
+		hideMe.forEach(function (item) {
+			var parents = getParents(item, 'tr');
+			parents[0].style.display = 'none';
 		});
 
-		$( 'input.'.concat( this.value, '_setting' ) ).parents( 'tr' ).show();
-
+		// Show selected setting.
+		[this.value].forEach(function (item) {
+			var parents = getParents(item, 'tr');
+			parents[0].style.display = '';
+		});
 	});
-});
+
+	// Remove selected element from array and return array.
+	function remove(array, element) {
+		const index = array.indexOf(element);
+		if (index !== -1) {
+			array.splice(index, 1);
+		}
+
+		return array;
+	}
+
+	// Return $(query).parents.(selector)
+	function getParents(item, selector) {
+		return vanillaParents(document.querySelector('input.'.concat(item, '_setting')), selector);
+	}
+
+	// Vanilla JS version of jQuery .parents(selector)
+	function vanillaParents(element, selector) {
+		var parents = [];
+		while (element = element.parentElement.closest(selector))
+			parents.push(element);
+
+		return parents;
+	}
+
+})();
