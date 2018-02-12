@@ -48,7 +48,7 @@ class Install extends Base {
 		$this->load_options();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
+		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
 	}
 
 	/**
