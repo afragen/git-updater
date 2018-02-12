@@ -48,12 +48,12 @@
 		return array;
 	}
 
-	// Return $(query).parents.(selector)
+	// Return query and selector for `$(query).parents.(selector)`
 	function getParents(item, selector) {
 		return vanillaParents(document.querySelector('input.'.concat(item, '_setting')), selector);
 	}
 
-	// Vanilla JS version of jQuery .parents(selector)
+	// Vanilla JS version of jQuery `$(query).parents(selector)`
 	function vanillaParents(element, selector) {
 		var parents = [];
 		while (element = element.parentElement.closest(selector))
