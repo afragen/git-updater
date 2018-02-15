@@ -3,6 +3,7 @@
 * changed all password fields to use `type="password"`
 * refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
 * refactored `ghu-install.js` to vanilla JavaScript
+* moved GitLab specific admin notices to `GitLab_API`
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
