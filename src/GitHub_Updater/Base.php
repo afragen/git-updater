@@ -85,9 +85,7 @@ class Base {
 	 * @var array
 	 */
 	protected static $git_servers = array(
-		'github'    => 'GitHub',
-		'bitbucket' => 'Bitbucket',
-		'gitlab'    => 'GitLab',
+		'github' => 'GitHub',
 	);
 
 	/**
@@ -106,10 +104,7 @@ class Base {
 	 * @var array
 	 */
 	protected static $installed_apis = array(
-		'github_api'           => true,
-		'bitbucket_api'        => false,
-		'bitbucket_server_api' => false,
-		'gitlab_api'           => false,
+		'github_api' => true,
 	);
 
 	/**
@@ -139,14 +134,20 @@ class Base {
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
-		if ( class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_Server_API' ) ) {
-			self::$installed_apis['bitbucket_server_api'] = true;
-		}
 		if ( class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_API' ) ) {
 			self::$installed_apis['bitbucket_api'] = true;
+			self::$git_servers['bitbucket']        = 'Bitbucket';
+		} else {
+			self::$installed_apis['bitbucket_api'] = false;
 		}
+
+		self::$installed_apis['bitbucket_server_api'] = class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_Server_API' );
+
 		if ( class_exists( 'Fragen\GitHub_Updater\API\GitLab_API' ) ) {
 			self::$installed_apis['gitlab_api'] = true;
+			self::$git_servers['gitlab']        = 'GitLab';
+		} else {
+			self::$installed_apis['gitlab_api'] = false;
 		}
 	}
 
