@@ -103,13 +103,6 @@ class Plugin extends Base {
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
 
-			if ( empty( $headers['GitHub Plugin URI'] ) &&
-			     empty( $headers['Bitbucket Plugin URI'] ) &&
-			     empty( $headers['GitLab Plugin URI'] )
-			) {
-				continue;
-			}
-
 			foreach ( (array) static::$extra_headers as $value ) {
 				$header = null;
 
@@ -188,6 +181,11 @@ class Plugin extends Base {
 						? $git_plugin['icons'][ $key ] = trailingslashit( WP_PLUGIN_URL ) . $git_plugin['repo'] . '/assets/' . $filename
 						: null;
 				}
+			}
+
+			// Exit if not git hosted plugin.
+			if ( empty( $git_plugin ) ) {
+				continue;
 			}
 
 			if ( ! is_dir( $git_plugin['local_path'] ) ) {
