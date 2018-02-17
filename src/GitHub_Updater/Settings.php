@@ -417,12 +417,13 @@ class Settings extends Base {
 					break;
 			}
 
+			if ( empty( $repo_setting_field ) ) {
+				continue;
+			}
+
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
 			$setting_field['callback'] = $token->repo;
 
-			if ( empty( $setting_field['callback_method'] ) ) {
-				continue;
-			}
 
 			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
 			add_settings_field(
