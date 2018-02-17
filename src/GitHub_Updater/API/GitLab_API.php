@@ -642,10 +642,12 @@ class GitLab_API extends API implements API_Interface {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public function gitlab_error() {
+		$base = Singleton::get_instance( 'Base' );
+		
 		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		       $this->base::$auth_required['gitlab_enterprise'] ) ||
+		       $base::$auth_required['gitlab_enterprise'] ) ||
 		     ( empty( static::$options['gitlab_access_token'] ) &&
-		       $this->base::$auth_required['gitlab'] )
+		       $base::$auth_required['gitlab'] )
 		) {
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;
