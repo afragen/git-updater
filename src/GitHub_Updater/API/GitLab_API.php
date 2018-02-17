@@ -643,7 +643,7 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	public function gitlab_error() {
 		$base = Singleton::get_instance( 'Base' );
-		
+
 		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
 		       $base::$auth_required['gitlab_enterprise'] ) ||
 		     ( empty( static::$options['gitlab_access_token'] ) &&
