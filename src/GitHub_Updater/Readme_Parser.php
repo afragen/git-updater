@@ -78,8 +78,9 @@ class Readme_Parser extends Parser {
 		global $wp_version;
 		$contributors = array();
 		foreach ( (array) $users as $contributor ) {
-			$contributors[ $contributor ]['profile'] = '//profiles.wordpress.org/' . $contributor;
-			$contributors[ $contributor ]['avatar']  = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
+			$contributors[ $contributor ]['display_name'] = $contributor;
+			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
+			$contributors[ $contributor ]['avatar']       = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
 			if ( $wp_version < '5.0-alpha-42631' ) {
 				$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 			}
