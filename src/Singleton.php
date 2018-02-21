@@ -36,11 +36,13 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 */
 		public static function get_instance( $class_name, $options = null ) {
 			static $instance = null;
+
 			// TODO shorten syntax for PHP 5.4
-			$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS );
+			$backtrace = debug_backtrace();
 			$backtrace = $backtrace[1];
 			$class     = isset( $backtrace['class'] ) ? $backtrace['class'] : null;
 			$class     = self::get_class( $class_name, $class );
+
 			if ( null === $instance || ! isset( $instance[ $class ] ) ) {
 				$instance[ $class ] = new $class( $options );
 			}
