@@ -54,7 +54,7 @@ class Init extends Base {
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
