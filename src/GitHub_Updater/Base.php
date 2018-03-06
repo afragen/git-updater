@@ -170,7 +170,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->remove_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->remove_authentication_hooks();
 		}
 	}
 
@@ -189,7 +189,7 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! Singleton::get_instance( 'Init' )->can_update() ) {
+		if ( ! Singleton::get_instance( 'Init', $this )->can_update() ) {
 			return false;
 		}
 
@@ -218,7 +218,7 @@ class Base {
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
 		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-			Singleton::get_instance( 'Settings' )->run();
+			Singleton::get_instance( 'Settings', $this )->run();
 		}
 
 		return true;
@@ -228,7 +228,7 @@ class Base {
 	 * AJAX endpoint for REST updates.
 	 */
 	public function ajax_update() {
-		Singleton::get_instance( 'Rest_Update' )->process_request();
+		Singleton::get_instance( 'Rest_Update', $this )->process_request();
 	}
 
 	/**
@@ -247,8 +247,8 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function get_meta_plugins() {
-		if ( Singleton::get_instance( 'Init' )->can_update() ) {
-			Singleton::get_instance( 'Plugin' )->get_remote_plugin_meta();
+		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
+			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
 		}
 	}
 
@@ -256,8 +256,8 @@ class Base {
 	 * Performs actual theme metadata fetching.
 	 */
 	public function get_meta_themes() {
-		if ( Singleton::get_instance( 'Init' )->can_update() ) {
-			Singleton::get_instance( 'Theme' )->get_remote_theme_meta();
+		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
+			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
 		}
 	}
 
@@ -389,16 +389,16 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = array();
 		if ( null !== $repo ) {
-			$cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo->repo );
+			$cache = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( $repo->repo );
 
 			return empty( $cache );
 		}
 		$repos = array_merge(
-			Singleton::get_instance( 'Plugin' )->get_plugin_configs(),
-			Singleton::get_instance( 'Theme' )->get_theme_configs()
+			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
+			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->repo ] = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $git_repo->repo );
+			$caches[ $git_repo->repo ] = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( $git_repo->repo );
 		}
 		$waiting = array_filter( $caches, function( $e ) {
 			return empty( $e );
@@ -438,7 +438,7 @@ class Base {
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Messages' )->create_error_message( $error );
+			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
 		}
 	}
 
@@ -535,7 +535,7 @@ class Base {
 		 * Rename plugins.
 		 */
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			$upgrader_object = Singleton::get_instance( 'Plugin' );
+			$upgrader_object = Singleton::get_instance( 'Plugin', $this );
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -546,7 +546,7 @@ class Base {
 		 * Rename themes.
 		 */
 		if ( $upgrader instanceof \Theme_Upgrader ) {
-			$upgrader_object = Singleton::get_instance( 'Theme' );
+			$upgrader_object = Singleton::get_instance( 'Theme', $this );
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
@@ -570,7 +570,7 @@ class Base {
 			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
 		}
 
-		Singleton::get_instance( 'Branch' )->set_branch_on_switch( $slug );
+		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
 
 		// Delete get_plugins() and wp_get_themes() cache.
 		delete_site_option( 'ghu-' . md5( 'repos' ) );
@@ -1153,17 +1153,17 @@ class Base {
 			switch ( $transient ) {
 				case 'update_plugins':
 					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
 					break;
 				case 'update_themes':
 					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
 					break;
 				case 'update_core':
 					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
 					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
 					break;
 			}
 			set_site_transient( $transient, $current );

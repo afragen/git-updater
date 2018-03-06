@@ -65,7 +65,7 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download',
 				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options ),
 					'upgrader_pre_download',
 				), 10, 3 );
 		}
@@ -109,7 +109,7 @@ class Init extends Base {
 		// Add Settings menu.
 		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
+				array( Singleton::get_instance( 'Settings', $this ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {
