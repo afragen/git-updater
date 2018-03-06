@@ -424,7 +424,6 @@ class Settings extends Base {
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
 			$setting_field['callback'] = $token->repo;
 
-
 			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
 			add_settings_field(
 				$setting_field['id'],
