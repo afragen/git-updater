@@ -74,7 +74,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( empty( static::$options['gitlab_access_token'] ) ||
 		     ( empty( static::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
 		) {
-			Singleton::get_instance( 'Messages', $this )->create_error_message( 'gitlab' );
+			$this->gitlab_error_notices();
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
