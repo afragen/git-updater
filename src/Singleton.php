@@ -65,9 +65,20 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			$reflection      = self::get_reflection( $class );
 			$namespace       = $reflection->getNamespaceName();
 			$namespace_parts = explode( '\\', $namespace );
-			$namespace_root  = $namespace_parts[0] . '\\' . $namespace_parts[1];
+			$count           = count( $namespace_parts );
+			$classes[ - 1 ]  = null;
 
-			return $namespace_root . '\\' . $class_name;
+			for ( $i = 0; $i < $count; $i ++ ) {
+				$classes[ $i ] = ltrim( $classes[ $i - 1 ] . '\\' . $namespace_parts[ $i ], '\\' );
+			}
+
+			$classes = array_reverse( $classes );
+			foreach ( $classes as $namespace ) {
+				$namespaced_class = $namespace . '\\' . $class_name;
+				if ( class_exists( $namespaced_class ) ) {
+					return $namespaced_class;
+				}
+			}
 		}
 
 		/**

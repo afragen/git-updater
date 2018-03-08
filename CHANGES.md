@@ -5,6 +5,7 @@
 * refactored `ghu-install.js` to vanilla JavaScript
 * moved GitLab specific admin notices to `GitLab_API`
 * pass `$this` in `Singleton::get_instance()` instead of using `debug_backtrace()`
+* refactor `Singleton` to automatically find namespaced class
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
