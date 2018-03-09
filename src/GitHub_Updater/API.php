@@ -118,14 +118,13 @@ class API {
 	 */
 	public static function wp_update_response( $response, $args, $url ) {
 		$parsed_url = parse_url( $url );
-		$api        = new self();
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				Singleton::get_instance( 'Base', $api )->make_update_transient_current( 'update_plugins' );
+				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				Singleton::get_instance( 'Base', $api )->make_update_transient_current( 'update_themes' );
+				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_themes' );
 			}
 		}
 
