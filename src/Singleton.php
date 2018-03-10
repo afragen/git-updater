@@ -32,7 +32,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 * Get instance of class.
 		 *
 		 * @param string               $class_name
-		 * @param object               $caller
+		 * @param object               $caller Originating object.
 		 * @param null|array|\stdClass $options
 		 *
 		 * @return array $instance
