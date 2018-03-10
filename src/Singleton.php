@@ -117,9 +117,13 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			array_shift( $trace );
 			$message = $Exception->getMessage();
 			foreach ( $trace as $err ) {
-				$message .= '<tr><td>&nbsp;&nbsp;Called from <strong>' . $err['file'] . '</strong> on line ' . $err['line'] . '</td></tr>';
+				$message .= '<tr><td>&nbsp;&nbsp;';
+				$message .= sprintf( '%1$s called from %2$s on line %3$s',
+					'<strong>' . $err['class'] . $err['type'] . $err['function'] . '</strong>',
+					'<strong>' . $err['file'] . '</strong>',
+					$err['line'] . '</td></tr>'
+				);
 			}
-
 			die( '<table>' . $message . '</table>' );
 		}
 	}
