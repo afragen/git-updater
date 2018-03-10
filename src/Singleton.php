@@ -111,17 +111,20 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 * @param string $class_name
 		 */
 		private static function get_error( $class_name ) {
-			$error     = '<tr><td><strong>ERROR:</strong> Class "' . $class_name . '" does not exist.</td></tr>';
+			$error     = '<tr><td><pre><strong>PHP Fatal:</strong> Undefined class "' . $class_name . '"</pre></td></tr>';
 			$Exception = new \Exception( $error );
 			$trace     = $Exception->getTrace();
-			array_shift( $trace );
-			$message = $Exception->getMessage();
+			$trace     = array_reverse( $trace );
+			$message   = $Exception->getMessage();
+			$message   .= '<tr><td><pre>PHP Stack Trace:</pre></td></tr>';
+			$i         = 0;
 			foreach ( $trace as $err ) {
-				$message .= '<tr><td>&nbsp;&nbsp;';
-				$message .= sprintf( '%1$s called from %2$s on line %3$s',
-					'<strong>' . $err['class'] . $err['type'] . $err['function'] . '</strong>',
+				$i ++;
+				$message .= '<tr><td><pre>';
+				$message .= sprintf( $i . '. %1$s called from %2$s:%3$s',
+					'<strong>' . $err['class'] . $err['type'] . $err['function'] . '()</strong>',
 					'<strong>' . $err['file'] . '</strong>',
-					$err['line'] . '</td></tr>'
+					$err['line'] . '</pre></td></tr>'
 				);
 			}
 			die( '<table>' . $message . '</table>' );
