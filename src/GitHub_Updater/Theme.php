@@ -87,7 +87,7 @@ class Theme extends Base {
 		$git_themes = array();
 		$this->delete_current_theme_cache();
 
-		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
 			? $repo_cache['extra_headers']
 			: static::$extra_headers;
@@ -96,8 +96,8 @@ class Theme extends Base {
 		if ( ! $themes ) {
 			$themes = wp_get_themes( array( 'errors' => null ) );
 			// @TODO why cache themes when there are no hooks to reset?
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		/**
@@ -401,7 +401,7 @@ class Theme extends Base {
 
 		// Get current branch.
 		$repo   = $this->config[ $theme_key ];
-		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
+		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $theme_key;
