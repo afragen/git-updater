@@ -121,7 +121,7 @@ class Base {
 		'gitlab'            => false,
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
-		'gitea' 			=> false,
+		'gitea'             => false,
 	);
 
 	/**
@@ -152,7 +152,7 @@ class Base {
 		}
 		if ( class_exists( 'Fragen\GitHub_Updater\API\Gitea_API' ) ) {
 			self::$installed_apis['gitea_api'] = true;
-			self::$git_servers['gitea'] = 'Gitea';
+			self::$git_servers['gitea']        = 'Gitea';
 		} else {
 			self::$installed_apis['gitea_api'] = false;
 		}
@@ -869,13 +869,13 @@ class Base {
 			'GitHub'    => 'github_' . $type,
 			'Bitbucket' => 'bitbucket_' . $type,
 			'GitLab'    => 'gitlab_' . $type,
-			'Gitea'    	=> 'gitea_' . $type,
+			'Gitea'     => 'gitea_' . $type,
 		);
 		$repo_base_uris = array(
 			'GitHub'    => 'https://github.com/',
 			'Bitbucket' => 'https://bitbucket.org/',
 			'GitLab'    => 'https://gitlab.com/',
-			'Gitea'   	=> '',
+			'Gitea'     => '',
 		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {

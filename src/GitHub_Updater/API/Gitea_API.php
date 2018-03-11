@@ -65,7 +65,7 @@ class Gitea_API extends API implements API_Interface {
 		$set_credentials = false;
 		if ( ! isset( static::$options['gitea_access_token'] ) ) {
 			static::$options['gitea_access_token'] = null;
-			$set_credentials                        = true;
+			$set_credentials                       = true;
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
@@ -373,7 +373,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Create Gitea API endpoints.
 	 *
 	 * @param Gitea_API|API $git
-	 * @param string         $endpoint
+	 * @param string        $endpoint
 	 *
 	 * @return string $endpoint
 	 */

@@ -135,7 +135,7 @@ class Additions {
 					break;
 				case 'gitea_plugin':
 				case 'gitea_theme':
-					$addition['slug']                                  = $repo['slug'];
+					$addition['slug']                                 = $repo['slug'];
 					$addition[ 'Gitea ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 			}
