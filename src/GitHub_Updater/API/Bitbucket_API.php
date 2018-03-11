@@ -73,6 +73,10 @@ class Bitbucket_API extends API implements API_Interface {
 			static::$options[ $password ] = null;
 			$set_credentials              = true;
 		}
+		if ( empty( static::$options[ $username ] ) || empty( static::$options[ $password ] ) ) {
+			Singleton::get_instance( 'Messages', $this )->create_error_message( 'bitbucket' );
+			static::$error_code['bitbucket'] = array( 'code' => 401 );
+		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
 		}
