@@ -68,6 +68,10 @@ class Gitea_API extends API implements API_Interface {
 			static::$options['gitea_access_token'] = null;
 			$set_credentials                       = true;
 		}
+		if ( empty( static::$options['gitea_access_token'] ) ) {
+			$this->gitea_error_notices();
+		}
+
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
 		}
@@ -593,6 +597,40 @@ class Gitea_API extends API implements API_Interface {
 		</label>
 		<?php
 	}
+
+	/**
+	 * Display Gitea error admin notices.
+	 */
+	public function gitea_error_notices() {
+		add_action( 'admin_notices', array( &$this, 'gitea_error' ) );
+		add_action( 'network_admin_notices', array( &$this, 'gitea_error', ) );
+	}
+
+	/**
+	 * Generate error message for missing Gitea Access Token.
+	 */
+	public function gitea_error() {
+		$base       = Singleton::get_instance( 'Base', $this );
+		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+
+		if ( ! isset( $error_code['gitea'] ) &&
+		     empty( static::$options['gitea_access_token'] ) &&
+		     $base::$auth_required['gitea']
+		) {
+			self::$error_code['gitea'] = array( 'code' => 401 );
+			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
+				return;
+			}
+			?>
+			<div data-dismissible="gitea-error-1" class="error notice is-dismissible">
+				<p>
+					<?php esc_html_e( 'You must set a Gitea Access Token.', 'github-updater' ); ?>
+				</p>
+			</div>
+			<?php
+		}
+	}
+
 
 	/**
 	 * Add remote install feature, create endpoint.
