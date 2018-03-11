@@ -619,6 +619,10 @@ class Gitea_API extends API implements API_Interface {
 			$install['options'][ $install['repo'] ] = $install['gitea_access_token'];
 		}
 
+		$token = ! empty( $install['options']['gitea_access_token'] )
+			? $install['options']['gitea_access_token']
+			: static::$options['gitea_access_token'];
+
 		if ( ! empty( $token ) ) {
 			$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
 		}
