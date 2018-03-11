@@ -481,7 +481,7 @@ class GitHub_API extends API implements API_Interface {
 			}
 
 			if ( is_wp_error( $response ) ) {
-				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
 				return false;
 			}
@@ -495,7 +495,7 @@ class GitHub_API extends API implements API_Interface {
 				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
 
 				if ( is_wp_error( $response_new ) ) {
-					Singleton::get_instance( 'Messages' )->create_error_message( $response_new );
+					Singleton::get_instance( 'Messages', $this )->create_error_message( $response_new );
 
 					return false;
 				}
@@ -557,7 +557,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_github_install_settings',
 			'github_access_token',
 			array( 'id' => 'github_access_token', 'token' => true )
@@ -567,7 +567,7 @@ class GitHub_API extends API implements API_Interface {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_github_install_settings',
 				'github_access_token',
 				array( 'id' => 'github_enterprise_token', 'token' => true )
@@ -596,7 +596,7 @@ class GitHub_API extends API implements API_Interface {
 		$setting_field['page']            = 'github_updater_github_install_settings';
 		$setting_field['section']         = 'github_id';
 		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
 		);
 
@@ -638,7 +638,7 @@ class GitHub_API extends API implements API_Interface {
 	public function github_access_token() {
 		?>
 		<label for="github_access_token">
-			<input class="github_setting" type="text" style="width:50%;" name="github_access_token" value="">
+			<input class="github_setting" type="password" style="width:50%;" name="github_access_token" value="">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>

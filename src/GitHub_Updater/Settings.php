@@ -147,8 +147,8 @@ class Settings extends Base {
 	 * @return array $gits
 	 */
 	private function installed_git_repos() {
-		$plugins = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes  = Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
@@ -283,10 +283,10 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
-				Singleton::get_instance( 'Install' )->install( 'plugin' );
+				Singleton::get_instance( 'Install', $this )->install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
-				Singleton::get_instance( 'Install' )->install( 'theme' );
+				Singleton::get_instance( 'Install', $this )->install( 'theme' );
 			}
 			?>
 			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
@@ -345,18 +345,18 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_settings( static::$auth_required );
+		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 		}
 
 		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 		}
 	}
 
@@ -365,8 +365,8 @@ class Settings extends Base {
 	 */
 	public function ghu_tokens() {
 		$ghu_options_keys = array();
-		$ghu_plugins      = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$ghu_themes       = Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$ghu_plugins      = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$ghu_themes       = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
@@ -397,24 +397,28 @@ class Settings extends Base {
 			$token_type = explode( '_', $token->type );
 			switch ( $token_type[0] ) {
 				case 'github':
-					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_repo_setting_field();
+					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_repo_setting_field();
 					break;
 				case 'bitbucket':
 					if ( empty( $token->enterprise ) ) {
 						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_repo_setting_field();
 						}
 					} else {
 						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_repo_setting_field();
+							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_repo_setting_field();
 						}
 					}
 					break;
 				case 'gitlab':
 					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_repo_setting_field();
+						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_repo_setting_field();
 					}
 					break;
+			}
+
+			if ( empty( $repo_setting_field ) ) {
+				continue;
 			}
 
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
@@ -856,9 +860,10 @@ class Settings extends Base {
 		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
+		$waiting_title = esc_html__( 'Waiting for WP-Cron to finish.', 'github-updater' );
 
-		$plugins  = Singleton::get_instance( 'Plugin' )->get_plugin_configs();
-		$themes   = Singleton::get_instance( 'Theme' )->get_theme_configs();
+		$plugins  = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes   = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
 		$bbserver = array( 'bitbucket', 'bbserver' );
 
@@ -878,21 +883,24 @@ class Settings extends Base {
 				'private' => isset( $e->is_private ) ? $e->is_private : false,
 				'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
+				'waiting' => $e->waiting,
 			);
 		}, $type_repos );
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
+		$waiting = '&nbsp;<span title="' . $waiting_title . '" style="color:#ff7900;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon   = false !== strpos( $data['type'], 'theme' )
+			$dashicon          = false !== strpos( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private = $data['private'] ? $lock : null;
-			$is_broken  = $data['broken'] ? $broken : null;
-			$is_dot_org = $data['dot_org'] ? $dot_org : null;
-			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_broken . $is_dot_org . '</p>' );
+			$is_private        = $data['private'] ? $lock : null;
+			$is_broken         = $data['broken'] ? $broken : null;
+			$is_dot_org        = $data['dot_org'] ? $dot_org : null;
+			$waiting_or_broken = $data['waiting'] ? $waiting : $is_broken;
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . $waiting_or_broken . $is_dot_org . '</p>' );
 		}
 	}
 

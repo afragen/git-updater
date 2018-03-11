@@ -454,7 +454,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'bitbucket_username',
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_username' )
@@ -463,7 +463,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'bitbucket_password',
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
 			array( 'id' => 'bitbucket_password', 'token' => true )
@@ -492,7 +492,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
 		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_checkbox',
 		);
 
@@ -587,7 +587,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function bitbucket_password() {
 		?>
 		<label for="bitbucket_password">
-			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_password" value="">
+			<input class="bitbucket_setting" type="password" style="width:50%;" name="bitbucket_password" value="">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ) ?>

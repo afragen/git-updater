@@ -74,7 +74,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( empty( static::$options['gitlab_access_token'] ) ||
 		     ( empty( static::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
 		) {
-			Singleton::get_instance( 'Messages' )->create_error_message( 'gitlab' );
+			$this->gitlab_error_notices();
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
@@ -551,7 +551,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_access_token', 'token' => true )
@@ -562,7 +562,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
 				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
@@ -579,7 +579,7 @@ class GitLab_API extends API implements API_Interface {
 		$setting_field['page']            = 'github_updater_gitlab_install_settings';
 		$setting_field['section']         = 'gitlab_id';
 		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
 		);
 
@@ -621,13 +621,45 @@ class GitLab_API extends API implements API_Interface {
 	public function gitlab_access_token() {
 		?>
 		<label for="gitlab_access_token">
-			<input class="gitlab_setting" type="text" style="width:50%;" name="gitlab_access_token" value="">
+			<input class="gitlab_setting" type="password" style="width:50%;" name="gitlab_access_token" value="">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ) ?>
 			</span>
 		</label>
 		<?php
+	}
+
+	/**
+	 * Display GitLab error admin notices.
+	 */
+	public function gitlab_error_notices() {
+		add_action( 'admin_notices', array( &$this, 'gitlab_error' ) );
+		add_action( 'network_admin_notices', array( &$this, 'gitlab_error', ) );
+	}
+
+	/**
+	 * Generate error message for missing GitLab Private Token.
+	 */
+	public function gitlab_error() {
+		$base = Singleton::get_instance( 'Base', $this );
+
+		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+		       $base::$auth_required['gitlab_enterprise'] ) ||
+		     ( empty( static::$options['gitlab_access_token'] ) &&
+		       $base::$auth_required['gitlab'] )
+		) {
+			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
+				return;
+			}
+			?>
+			<div data-dismissible="gitlab-error-1" class="error notice is-dismissible">
+				<p>
+					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' ); ?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 
 	/**

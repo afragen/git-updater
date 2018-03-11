@@ -64,8 +64,7 @@ class Messages extends Base {
 					add_action( 'network_admin_notices', array( &$this, 'show_wp_error' ) );
 					break;
 				case 'gitlab':
-					add_action( 'admin_notices', array( &$this, 'gitlab_error' ) );
-					add_action( 'network_admin_notices', array( &$this, 'gitlab_error' ) );
+					Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->gitlab_error_notices();
 				case 'git':
 				default:
 					add_action( 'admin_notices', array( &$this, 'show_403_error_message' ) );
@@ -84,7 +83,7 @@ class Messages extends Base {
 	 */
 	public function show_403_error_message() {
 		$_403       = false;
-		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
@@ -123,7 +122,7 @@ class Messages extends Base {
 	 */
 	public function show_401_error_message() {
 		$_401       = false;
-		$error_code = Singleton::get_instance( 'API_PseudoTrait' )->get_error_codes();
+		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ! $_401 && 401 === $repo['code'] ) {
 				$_401 = true;
@@ -143,28 +142,6 @@ class Messages extends Base {
 				</div>
 				<?php
 			}
-		}
-	}
-
-	/**
-	 * Generate error message for missing GitLab Private Token.
-	 */
-	public function gitlab_error() {
-		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		       static::$auth_required['gitlab_enterprise'] ) ||
-		     ( empty( static::$options['gitlab_access_token'] ) &&
-		       static::$auth_required['gitlab'] )
-		) {
-			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
-				return;
-			}
-			?>
-			<div data-dismissible="gitlab-error-1" class="error notice is-dismissible">
-				<p>
-					<?php esc_html_e( 'You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' ); ?>
-				</p>
-			</div>
-			<?php
 		}
 	}
 

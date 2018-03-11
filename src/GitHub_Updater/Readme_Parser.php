@@ -47,12 +47,12 @@ class Readme_Parser extends Parser {
 	/**
 	 * Return parsed readme.txt as array.
 	 *
-	 * @return array
+	 * @return array $data
 	 */
 	public function parse_data() {
 		$data = array();
 		foreach ( get_object_vars( $this ) as $key => $value ) {
-			$data[ $key ] = $value;
+			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
 
 		return $data;
@@ -65,6 +65,28 @@ class Readme_Parser extends Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		return $users;
+	}
+
+	/**
+	 * Create contributor data.
+	 *
+	 * @param array $users
+	 *
+	 * @return array $contributors
+	 */
+	private function create_contributors( $users ) {
+		global $wp_version;
+		$contributors = array();
+		foreach ( (array) $users as $contributor ) {
+			$contributors[ $contributor ]['display_name'] = $contributor;
+			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
+			$contributors[ $contributor ]['avatar']       = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
+			if ( $wp_version < '5.0-alpha-42631' ) {
+				$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
+			}
+		}
+
+		return $contributors;
 	}
 
 	/**

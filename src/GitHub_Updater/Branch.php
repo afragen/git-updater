@@ -51,7 +51,7 @@ class Branch {
 	 */
 	public function __construct( $cache = null ) {
 		$this->cache     = $cache;
-		$base            = Singleton::get_instance( 'Base' );
+		$base            = Singleton::get_instance( 'Base', $this );
 		static::$options = $base::$options;
 	}
 
@@ -80,7 +80,7 @@ class Branch {
 	 * @param string $repo Repository slug.
 	 */
 	public function set_branch_on_switch( $repo ) {
-		$this->cache = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( $repo );
+		$this->cache = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( $repo );
 
 		if ( isset( $_GET['action'], $_GET['rollback'], $this->cache['branches'] ) &&
 		     ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
@@ -88,7 +88,7 @@ class Branch {
 			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
 				? $_GET['rollback']
 				: 'master';
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'current_branch', $current_branch, $repo );
+			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'current_branch', $current_branch, $repo );
 			static::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', static::$options );
 		}
@@ -102,7 +102,7 @@ class Branch {
 	 * @param array $install Array of install data.
 	 */
 	public function set_branch_on_install( $install ) {
-		Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
+		Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
 		static::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
 		update_site_option( 'github_updater', static::$options );
 	}

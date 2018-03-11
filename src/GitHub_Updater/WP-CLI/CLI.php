@@ -34,7 +34,7 @@ class CLI extends WP_CLI_Command {
 	 * GitHub_Updater_CLI constructor.
 	 */
 	public function __construct() {
-		$this->base = Singleton::get_instance( 'Base' );
+		$this->base = Singleton::get_instance( 'Base', $this );
 	}
 
 	/**

@@ -72,7 +72,7 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait' )->get_repo_cache( 'repos' );
+		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( 'repos' );
 		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
 			? $repo_cache['extra_headers']
 			: static::$extra_headers;
@@ -80,8 +80,8 @@ class Plugin extends Base {
 		$plugins = ! empty( $repo_cache['plugins'] ) ? $repo_cache['plugins'] : false;
 		if ( ! $plugins ) {
 			$plugins = get_plugins();
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait' )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
+			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
 		}
 
 		$git_plugins = array();
@@ -102,13 +102,6 @@ class Plugin extends Base {
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = array();
-
-			if ( empty( $headers['GitHub Plugin URI'] ) &&
-			     empty( $headers['Bitbucket Plugin URI'] ) &&
-			     empty( $headers['GitLab Plugin URI'] )
-			) {
-				continue;
-			}
 
 			foreach ( (array) static::$extra_headers as $value ) {
 				$header = null;
@@ -190,6 +183,11 @@ class Plugin extends Base {
 				}
 			}
 
+			// Exit if not git hosted plugin.
+			if ( empty( $git_plugin ) ) {
+				continue;
+			}
+
 			if ( ! is_dir( $git_plugin['local_path'] ) ) {
 				// Delete get_plugins() and wp_get_themes() cache.
 				delete_site_option( 'ghu-' . md5( 'repos' ) );
@@ -209,8 +207,6 @@ class Plugin extends Base {
 		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 
-			$plugins[ $plugin->repo ] = $plugin;
-
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *
@@ -223,6 +219,10 @@ class Plugin extends Base {
 			     || apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $plugin );
+				$plugin->waiting = false;
+			} else {
+				$plugin->waiting          = true;
+				$plugins[ $plugin->repo ] = $plugin;
 			}
 
 			//current_filter() check due to calling hook for shiny updates, don't show row twice
@@ -288,7 +288,7 @@ class Plugin extends Base {
 
 		// Get current branch.
 		$repo   = $this->config[ $plugin['repo'] ];
-		$branch = Singleton::get_instance( 'Branch' )->get_current_branch( $repo );
+		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
 		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['repo'];
@@ -365,7 +365,6 @@ class Plugin extends Base {
 	 * @return mixed
 	 */
 	public function plugins_api( $false, $action, $response ) {
-		$contributors = array();
 		if ( ! ( 'plugin_information' === $action ) ) {
 			return $false;
 		}
@@ -392,10 +391,7 @@ class Plugin extends Base {
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
 		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
-		foreach ( (array) $plugin->contributors as $contributor ) {
-			$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
-		}
-		$response->contributors = $contributors;
+		$response->contributors  = $plugin->contributors;
 		if ( ! $this->is_private( $plugin ) ) {
 			$response->num_ratings = $plugin->num_ratings;
 			$response->rating      = $plugin->rating;

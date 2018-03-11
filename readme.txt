@@ -1,5 +1,5 @@
 # GitHub Updater
-Contributors: afragen, garyj, scarstens, limikael
+Contributors: afragen, garyj, sethcarstens, limikael
 Donate link: http://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
 Requires at least: 4.6
