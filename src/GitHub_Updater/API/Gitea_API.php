@@ -30,6 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
+ * @author  Marco Betschart
  */
 class Gitea_API extends API implements API_Interface {
 
