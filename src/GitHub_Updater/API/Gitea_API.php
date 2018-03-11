@@ -506,7 +506,7 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Add settings for Gitea Access Token
+	 * Add settings for Gitea Access Token.
 	 *
 	 * @param array $auth_required
 	 *
@@ -526,7 +526,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_field(
 				'gitea_access_token',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings' ), 'token_callback_text' ),
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_gitea_install_settings',
 				'gitea_settings',
 				array( 'id' => 'gitea_access_token', 'token' => true )
@@ -543,7 +543,7 @@ class Gitea_API extends API implements API_Interface {
 		$setting_field['page']            = 'github_updater_gitea_install_settings';
 		$setting_field['section']         = 'gitea_id';
 		$setting_field['callback_method'] = array(
-			Singleton::get_instance( 'Settings' ),
+			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
 		);
 

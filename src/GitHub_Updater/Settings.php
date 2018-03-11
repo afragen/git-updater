@@ -364,7 +364,7 @@ class Settings extends Base {
 		}
 
 		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', new \stdClass() )->add_settings( static::$auth_required );
+			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 		}
 	}
 
@@ -481,7 +481,7 @@ class Settings extends Base {
 			'github_enterprise' => 'github_enterprise_token',
 			'gitlab'            => 'gitlab_access_token',
 			'gitlab_enterprise' => 'gitlab_enterprise_token',
-			'gitea'           	=> 'gitea_access_token',
+			'gitea'             => 'gitea_access_token',
 		);
 
 		array_map( function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
