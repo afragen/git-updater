@@ -86,6 +86,9 @@ class Install extends Base {
 				case 'gitlab':
 					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
 					break;
+				case 'gitea':
+					$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
+					break;
 			}
 		}
 
@@ -147,6 +150,16 @@ class Install extends Base {
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
 				if ( static::$installed_apis['gitlab_api'] ) {
 					self::$install = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
+				}
+			}
+
+			/*
+			 * Create Gitea endpoint.
+			 * Save Access Token if present.
+			 */
+			if ( 'gitea' === self::$install['github_updater_api'] ) {
+				if ( static::$installed_apis['gitea_api'] ) {
+					self::$install = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -300,6 +313,10 @@ class Install extends Base {
 
 		if ( static::$installed_apis['gitlab_api'] ) {
 			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_install_settings_fields( $type );
+		}
+
+		if ( static::$installed_apis['gitea_api'] ) {
+			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_install_settings_fields( $type );
 		}
 	}
 

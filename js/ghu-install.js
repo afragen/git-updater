@@ -9,7 +9,7 @@
 (function () {
 
 	// Hide non-default (Bitbucket & GitLab) settings on page load.
-	var nonDefault = ['bitbucket', 'gitlab'];
+	var nonDefault = ['bitbucket', 'gitlab', 'gitea'];
 
 	nonDefault.forEach(function (item) {
 		var parents = getParents(item, 'tr');
@@ -20,7 +20,7 @@
 	var selects = document.querySelector('select[ name="github_updater_api" ]');
 
 	selects.addEventListener('change', function () {
-		var defaults = ['github', 'bitbucket', 'gitlab'];
+		var defaults = ['github', 'bitbucket', 'gitlab', 'gitea'];
 
 		// Create difference array.
 		var hideMe = remove(defaults, this.value);
