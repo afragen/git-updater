@@ -617,7 +617,7 @@ class Gitea_API extends API implements API_Interface {
 		     empty( static::$options['gitea_access_token'] ) &&
 		     $base::$auth_required['gitea']
 		) {
-			self::$error_code['gitea'] = array( 'code' => 401 );
+			self::$error_code['gitea'] = array( 'error' => true );
 			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
 				return;
 			}
