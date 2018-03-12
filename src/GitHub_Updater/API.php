@@ -166,6 +166,11 @@ class API {
 				$arr['base_uri']      = 'https://gitlab.com/api/v3';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
+			case 'gitea':
+				// @TODO fix for URIs
+				$arr['repo']          = 'gitea';
+				$arr['base_uri']      = $this->type->enterprise;
+				$arr['base_download'] = $this->type->enterprise;
 		}
 
 		return $arr;

@@ -7,6 +7,8 @@
 * pass `$this` in `Singleton::get_instance()` instead of using `debug_backtrace()`
 * refactor `Singleton` to automatically find namespaced class
 * added some error handling to `Singleton`
+* fixed error messaging
+* added support for [Gitea](http://gitea.io/) thanks to [Marco Betschart](https://github.com/marbetschar)
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
