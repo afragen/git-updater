@@ -425,7 +425,7 @@ class Settings extends Base {
 					break;
 				case 'gitea':
 					if ( static::$installed_apis['gitea_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', new \stdClass() )->add_repo_setting_field();
+						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_repo_setting_field();
 					}
 					break;
 			}

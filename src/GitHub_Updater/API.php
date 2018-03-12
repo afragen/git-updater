@@ -12,7 +12,8 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\GitHub_API,
-	Fragen\GitHub_Updater\API\GitLab_API;
+	Fragen\GitHub_Updater\API\GitLab_API,
+	Fragen\GitHub_Updater\API\Gitea_API;
 
 
 /*

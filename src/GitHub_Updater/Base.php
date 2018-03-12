@@ -16,6 +16,7 @@ use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
 	Fragen\GitHub_Updater\API\GitLab_API,
+	Fragen\GitHub_Updater\API\Gitea_API,
 	Fragen\GitHub_Updater\API\Language_Pack_API;
 
 
