@@ -375,54 +375,6 @@ class API {
 	}
 
 	/**
-	 * Create release asset download link.
-	 * Filename must be `{$slug}-{$newest_tag}.zip`
-	 *
-	 * @access protected
-	 *
-	 * @return string $download_link
-	 */
-	protected function make_release_asset_download_link() {
-		$download_link = '';
-		switch ( $this->type->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$download_link = implode( '/', array(
-					'https://github.com',
-					$this->type->owner,
-					$this->type->repo,
-					'releases/download',
-					$this->type->newest_tag,
-					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
-				) );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				$download_link = implode( '/', array(
-					'https://bitbucket.org',
-					$this->type->owner,
-					$this->type->repo,
-					'downloads',
-					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
-				) );
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				$download_link = implode( '/', array(
-					'https://gitlab.com/api/v3/projects',
-					urlencode( $this->type->owner . '/' . $this->type->repo ),
-					'builds/artifacts',
-					$this->type->newest_tag,
-					'download',
-				) );
-				$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
-				break;
-		}
-
-		return $download_link;
-	}
-
-	/**
 	 * Query wp.org for plugin/theme information.
 	 * Exit early and false for override dot org active.
 	 *
@@ -584,7 +536,7 @@ class API {
 			return false;
 		}
 
-		list( $tags, $rollback) =  $parsed_tags;
+		list( $tags, $rollback ) = $parsed_tags;
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 

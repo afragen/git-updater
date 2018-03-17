@@ -380,6 +380,28 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @access private
+	 *
+	 * @return string $download_link
+	 */
+	private function make_release_asset_download_link() {
+		$download_link = '';
+		$download_link = implode( '/', array(
+			'https://gitlab.com/api/v3/projects',
+			urlencode( $this->type->owner . '/' . $this->type->repo ),
+			'builds/artifacts',
+			$this->type->newest_tag,
+			'download',
+		) );
+		$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
+
+		return $download_link;
+	}
+
+	/**
 	 * Create GitLab API endpoints.
 	 *
 	 * @param GitLab_API|API $git

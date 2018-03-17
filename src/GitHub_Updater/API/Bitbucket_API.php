@@ -371,6 +371,27 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @access private
+	 *
+	 * @return string $download_link
+	 */
+	private function make_release_asset_download_link() {
+		$download_link = '';
+		$download_link = implode( '/', array(
+			'https://bitbucket.org',
+			$this->type->owner,
+			$this->type->repo,
+			'downloads',
+			$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+		) );
+
+		return $download_link;
+	}
+
+	/**
 	 * Added due to interface contract, not used for Bitbucket.
 	 *
 	 * @param Bitbucket_API|API $git
