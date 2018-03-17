@@ -220,6 +220,14 @@ class API {
 			return false;
 		}
 
+		// Gitea doesn't return json encoded raw file.
+		if ( $this instanceof Gitea_API ) {
+			$body = wp_remote_retrieve_body( $response );
+			if ( null === json_decode( $body ) ) {
+				return $body;
+			}
+		}
+
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
 
@@ -287,9 +295,9 @@ class API {
 				break;
 			case 'gitea':
 				if ( $download_link ) {
+					$type['base_download'] = $type['base_uri'];
 					break;
 				}
-				$download_link = true;
 				$api      = new Gitea_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
@@ -510,8 +518,8 @@ class API {
 				break;
 			case 'gitea_plugin':
 			case 'gitea_theme':
-				$key = 'access_token';
-				$token = 'gitea_access_token';
+				$key              = 'access_token';
+				$token            = 'gitea_access_token';
 				$token_enterprise = 'gitea_access_token';
 				break;
 		}
@@ -613,6 +621,19 @@ class API {
 						$download_link    = add_query_arg( 'ref', $tag, $download_link );
 						$tags[]           = $tag;
 						$rollback[ $tag ] = $download_link;
+					}
+					break;
+				case 'gitea':
+					foreach ( (array) $response as $tag ) {
+						$download_link    = implode( '/', array(
+							$repo_type['base_uri'],
+							'repos',
+							$this->type->owner,
+							$this->type->repo,
+							'archive/',
+						) );
+						$tags[]           = $tag;
+						$rollback[ $tag ] = $download_link . $tag . '.zip';
 					}
 					break;
 			}

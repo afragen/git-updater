@@ -89,13 +89,10 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response     = $this->api( '/:owner/:repo/raw/branch/:branch/' . $file );
-			if ( ! isset( $response->content ) ) {
-				return false;
-			}
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
 
 			if ( $response ) {
-				$contents = base64_decode( $response->content );
+				$contents = $response;
 				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
@@ -108,7 +105,7 @@ class Gitea_API extends API implements API_Interface {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-		
+
 		return true;
 	}
 
@@ -171,7 +168,7 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->api( '/:owner/:repo/raw/branch/:branch' . $changes );
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -218,7 +215,7 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response     = $this->api( '/:owner/:repo/raw/branch/:branch/readme.txt' );
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
 
 		}
 		if ( $response && isset( $response->content ) ) {
@@ -247,19 +244,11 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'meta';
-			$project      = isset( $this->response['project'] ) ? $this->response['project'] : false;
-
-			// exit if transient is empty
-			if ( ! $project ) {
-				return false;
-			}
-
-			$response = ( $this->type->repo === $project->path ) ? $project : false;
+			$response     = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
 				$this->set_repo_cache( 'meta', $response );
-				$this->set_repo_cache( 'project', null );
 			}
 		}
 
@@ -319,7 +308,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/archive/', true );
 		$endpoint           = '';
 
 		/*
@@ -329,23 +318,23 @@ class Gitea_API extends API implements API_Interface {
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
 		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint .= $rollback;
+			$endpoint .= $rollback . '.zip';
 
 			/*
 			 * For users wanting to update against branch other than master
 			 * or if not using tags, else use newest_tag.
 			 */
 		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch;
+			$endpoint .= $this->type->branch . '.zip';
 		} else {
-			$endpoint .= $this->type->newest_tag;
+			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
 		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
-			$endpoint = $branch_switch;
+			$endpoint = $branch_switch . '.zip';
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
@@ -369,7 +358,6 @@ class Gitea_API extends API implements API_Interface {
 			case 'meta':
 			case 'tags':
 			case 'changes':
-			case 'download_link':
 			case 'translation':
 				break;
 			case 'branches':
@@ -398,7 +386,7 @@ class Gitea_API extends API implements API_Interface {
 
 		$arr = array();
 		array_map( function( $e ) use ( &$arr ) {
-			$arr[] = $e->name;
+			$arr[] = $e->tag_name;
 
 			return $arr;
 		}, (array) $response );
@@ -418,9 +406,9 @@ class Gitea_API extends API implements API_Interface {
 		$response = array( $response );
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['private']      = ! $e->public;
-			$arr['last_updated'] = $e->last_activity_at;
-			$arr['watchers']     = 0;
+			$arr['private']      = $e->private;
+			$arr['last_updated'] = $e->updated_at;
+			$arr['watchers']     = $e->watchers_count;
 			$arr['forks']        = $e->forks_count;
 			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
 		} );
@@ -444,7 +432,7 @@ class Gitea_API extends API implements API_Interface {
 		$response = array( $response );
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['changes'] = $e->content;
+			$arr['changes'] = base64_encode( $e );
 		} );
 
 		return $arr;
@@ -470,7 +458,8 @@ class Gitea_API extends API implements API_Interface {
 				esc_html__( 'Gitea Private Settings', 'github-updater' ),
 				array( &$this, 'print_section_gitea_info' ),
 				'github_updater_gitea_install_settings'
-			);}
+			);
+		}
 
 		if ( $auth_required['gitea'] ) {
 			add_settings_field(
