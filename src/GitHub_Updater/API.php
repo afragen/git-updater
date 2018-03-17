@@ -573,76 +573,18 @@ class API {
 	}
 
 	/**
-	 * Parse tags and set object data.
+	 * Sort tags and set object data.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param array $parsed_tags
 	 *
 	 * @return bool
 	 */
-	protected function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
-		if ( false !== $response ) {
-			switch ( $repo_type['repo'] ) {
-				case 'github':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_uri'],
-							'repos',
-							$this->type->owner,
-							$this->type->repo,
-							'zipball/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag;
-					}
-					break;
-				case 'bitbucket':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'get/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag . '.zip';
-					}
-					break;
-				case 'gitlab':
-					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'repository/archive.zip',
-						) );
-						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link;
-					}
-					break;
-				case 'gitea':
-					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
-							$repo_type['base_uri'],
-							'repos',
-							$this->type->owner,
-							$this->type->repo,
-							'archive/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link . $tag . '.zip';
-					}
-					break;
-			}
-
-		}
-		if ( empty( $tags ) ) {
+	protected function sort_tags( $parsed_tags ) {
+		if ( empty( $parsed_tags ) ) {
 			return false;
 		}
 
+		list( $tags, $rollback) =  $parsed_tags;
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 

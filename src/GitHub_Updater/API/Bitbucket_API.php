@@ -145,7 +145,8 @@ class Bitbucket_API extends API implements API_Interface {
 			return false;
 		}
 
-		$this->parse_tags( $response, $repo_type );
+		$tags = $this->parse_tags( $response, $repo_type );
+		$this->sort_tags( $tags );
 
 		return true;
 	}
@@ -437,6 +438,32 @@ class Bitbucket_API extends API implements API_Interface {
 		} );
 
 		return $arr;
+	}
+
+	/**
+	 * Parse tags and create download links.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return array
+	 */
+	protected function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+
+		foreach ( (array) $response as $tag ) {
+			$download_base    = implode( '/', array(
+				$repo_type['base_download'],
+				$this->type->owner,
+				$this->type->repo,
+				'get/',
+			) );
+			$tags[]           = $tag;
+			$rollback[ $tag ] = $download_base . $tag . '.zip';
+		}
+
+		return array( $tags, $rollback );
 	}
 
 	/**

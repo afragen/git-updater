@@ -137,7 +137,8 @@ class Gitea_API extends API implements API_Interface {
 			return false;
 		}
 
-		$this->parse_tags( $response, $repo_type );
+		$tags = $this->parse_tags( $response, $repo_type );
+		$this->sort_tags( $tags );
 
 		return true;
 	}
@@ -436,6 +437,33 @@ class Gitea_API extends API implements API_Interface {
 		} );
 
 		return $arr;
+	}
+
+	/**
+	 * Parse tags and create download links.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return array
+	 */
+	private function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+
+		foreach ( (array) $response as $tag ) {
+			$download_link    = implode( '/', array(
+				$repo_type['base_uri'],
+				'repos',
+				$this->type->owner,
+				$this->type->repo,
+				'archive/',
+			) );
+			$tags[]           = $tag;
+			$rollback[ $tag ] = $download_link . $tag . '.zip';
+		}
+
+		return array( $tags, $rollback );
 	}
 
 	/**
