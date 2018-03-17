@@ -532,6 +532,7 @@ class GitLab_API extends API implements API_Interface {
 	private function parse_tags( $response, $repo_type ) {
 		$tags     = array();
 		$rollback = array();
+
 		foreach ( (array) $response as $tag ) {
 			$download_link    = implode( '/', array(
 				$repo_type['base_download'],
