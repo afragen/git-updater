@@ -88,16 +88,13 @@ class Gitea_API extends API implements API_Interface {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			$id           = $this->get_gitea_id();
 			self::$method = 'file';
-
-			$response = $this->api( '/repos/' . $id . '/{repo}/raw/' . $file );
-
-			if ( empty( $response ) || ! isset( $response->content ) ) {
+			$response     = $this->api( '/:owner/:repo/raw/branch/:branch/' . $file );
+			if ( ! isset( $response->content ) ) {
 				return false;
 			}
 
-			if ( $response && isset( $response->content ) ) {
+			if ( $response ) {
 				$contents = base64_decode( $response->content );
 				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
@@ -111,7 +108,7 @@ class Gitea_API extends API implements API_Interface {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-
+		
 		return true;
 	}
 
@@ -125,9 +122,8 @@ class Gitea_API extends API implements API_Interface {
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
-			$id           = $this->get_gitea_id();
 			self::$method = 'tags';
-			$response     = $this->api( '/repos/' . $id . '/{repo}/releases' );
+			$response     = $this->api( '/repos/:owner/:repo/releases' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -174,9 +170,8 @@ class Gitea_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$id           = $this->get_gitea_id();
 			self::$method = 'changes';
-			$response     = $this->api( '/repos/' . $id . '/{repo}/raw/' . $changes );
+			$response     = $this->api( '/:owner/:repo/raw/branch/:branch' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -222,9 +217,8 @@ class Gitea_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$id           = $this->get_gitea_id();
 			self::$method = 'readme';
-			$response     = $this->api( '/repos/' . $id . '/{repo}/raw/readme.txt' );
+			$response     = $this->api( '/:owner/:repo/raw/branch/:branch/readme.txt' );
 
 		}
 		if ( $response && isset( $response->content ) ) {
@@ -293,9 +287,8 @@ class Gitea_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$id           = $this->get_gitea_id();
 			self::$method = 'branches';
-			$response     = $this->api( '/repos/' . $id . '/{repo}/branches' );
+			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -330,43 +323,29 @@ class Gitea_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		/*
-		 * If release asset.
-		 */
-		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$download_link_base = $this->make_release_asset_download_link();
-
-			return $this->add_access_token_endpoint( $this, $download_link_base );
-		}
-
-		/*
-		 * If a branch has been given, only check that for the remote info.
-		 * If branch is master (default) and tags are used, use newest tag.
-		 */
-		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
-		} elseif ( ! empty( $this->type->branch ) ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-
-		/*
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
 		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
+			$endpoint .= $rollback;
+
+			/*
+			 * For users wanting to update against branch other than master
+			 * or if not using tags, else use newest_tag.
+			 */
+		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+			$endpoint .= $this->type->branch;
+		} else {
+			$endpoint .= $this->type->newest_tag;
 		}
 
 		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
+			$endpoint = $branch_switch;
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
@@ -385,20 +364,16 @@ class Gitea_API extends API implements API_Interface {
 	public function add_endpoints( $git, $endpoint ) {
 
 		switch ( $git::$method ) {
-			case 'projects':
-				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
-				break;
+			case 'file':
+			case 'readme':
 			case 'meta':
 			case 'tags':
-			case 'branches':
-				break;
-			case 'file':
 			case 'changes':
-			case 'readme':
-				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
-				break;
+			case 'download_link':
 			case 'translation':
-				$endpoint = add_query_arg( 'ref', 'master', $endpoint );
+				break;
+			case 'branches':
+				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
 				break;
 			default:
 				break;
@@ -407,40 +382,6 @@ class Gitea_API extends API implements API_Interface {
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		return $endpoint;
-	}
-
-	/**
-	 * Get Gitea project ID and project meta.
-	 *
-	 * @return string|int
-	 */
-	public function get_gitea_id() {
-		$id       = null;
-		$response = isset( $this->response['project_id'] ) ? $this->response['project_id'] : false;
-
-		if ( ! $response ) {
-			self::$method = 'repos';
-			$response     = $this->api( '/repos/search' );
-
-			if ( empty( $response ) ) {
-				$id = implode( '/', array( $this->type->owner, $this->type->repo ) );
-				$id = urlencode( $id );
-
-				return $id;
-			}
-
-			foreach ( (array) $response as $project ) {
-				if ( $this->type->repo === $project->path ) {
-					$id = $project->id;
-					$this->set_repo_cache( 'project_id', $id );
-					$this->set_repo_cache( 'project', $project );
-
-					return $id;
-				}
-			}
-		}
-
-		return $response;
 	}
 
 	/**
@@ -524,7 +465,12 @@ class Gitea_API extends API implements API_Interface {
 				array( &$this, 'print_section_gitea_token' ),
 				'github_updater_gitea_install_settings'
 			);
-		}
+			add_settings_section(
+				'gitea_id',
+				esc_html__( 'Gitea Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_gitea_info' ),
+				'github_updater_gitea_install_settings'
+			);}
 
 		if ( $auth_required['gitea'] ) {
 			add_settings_field(
@@ -536,6 +482,7 @@ class Gitea_API extends API implements API_Interface {
 				array( 'id' => 'gitea_access_token', 'token' => true )
 			);
 		}
+
 	}
 
 	/**
@@ -641,20 +588,22 @@ class Gitea_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$base = $headers['base_uri'];
+		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = implode( '/', array(
 			$base,
+			'repos',
 			$install['github_updater_repo'],
-			'repository/archive.zip',
+			'archive',
+			$install['github_updater_branch'] . '.zip',
 		) );
-		$install['download_link'] = add_query_arg( 'ref', $install['github_updater_branch'], $install['download_link'] );
 
 		/*
 		 * Add/Save access token if present.
 		 */
 		if ( ! empty( $install['gitea_access_token'] ) ) {
-			$install['options'][ $install['repo'] ] = $install['gitea_access_token'];
+			$install['options'][ $install['repo'] ]   = $install['gitea_access_token'];
+			$install['options']['gitea_access_token'] = $install['gitea_access_token'];
 		}
 
 		$token = ! empty( $install['options']['gitea_access_token'] )
@@ -662,7 +611,7 @@ class Gitea_API extends API implements API_Interface {
 			: static::$options['gitea_access_token'];
 
 		if ( ! empty( $token ) ) {
-			$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
+			$install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );
 		}
 
 		if ( ! empty( static::$options['gitea_access_token'] ) ) {

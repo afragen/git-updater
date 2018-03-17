@@ -169,7 +169,7 @@ class API {
 			case 'gitea':
 				// @TODO fix for URIs
 				$arr['repo']          = 'gitea';
-				$arr['base_uri']      = $this->type->enterprise;
+				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
 				$arr['base_download'] = $this->type->enterprise;
 		}
 
@@ -289,6 +289,7 @@ class API {
 				if ( $download_link ) {
 					break;
 				}
+				$download_link = true;
 				$api      = new Gitea_API( $type['type'] );
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
@@ -506,6 +507,12 @@ class API {
 				$key              = 'private_token';
 				$token            = 'gitlab_access_token';
 				$token_enterprise = 'gitlab_enterprise_token';
+				break;
+			case 'gitea_plugin':
+			case 'gitea_theme':
+				$key = 'access_token';
+				$token = 'gitea_access_token';
+				$token_enterprise = 'gitea_access_token';
 				break;
 		}
 
