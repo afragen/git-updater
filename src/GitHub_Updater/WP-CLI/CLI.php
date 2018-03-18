@@ -38,7 +38,7 @@ class CLI extends WP_CLI_Command {
 	}
 
 	/**
-	 * Clear GitHub Updater transients.
+	 * Clear GitHub Updater cache.
 	 *
 	 * ## OPTIONS
 	 *
@@ -57,9 +57,9 @@ class CLI extends WP_CLI_Command {
 		list( $action ) = $args;
 		if ( 'delete' === $action ) {
 			$this->base->delete_all_cached_data();
-			WP_CLI::success( sprintf( esc_html__( 'GitHub Updater cache has been cleared.', 'github-updater' ) ) );
+			WP_CLI::success( 'GitHub Updater cache has been cleared.' );
 		} else {
-			WP_CLI::error( sprintf( esc_html__( 'Incorrect command syntax, see %s for proper syntax.', 'github-updater' ), '`wp help github-updater cache`' ) );
+			WP_CLI::error( sprintf( 'Incorrect command syntax, see %s for proper syntax.', '`wp help github-updater cache`' ) );
 		}
 	}
 
@@ -81,8 +81,8 @@ class CLI extends WP_CLI_Command {
 			'key'    => $api_key,
 		), admin_url( 'admin-ajax.php' ) );
 
-		WP_CLI::success( sprintf( esc_html__( 'GitHub Updater REST API key has been reset.', 'github-updater' ) ) );
-		WP_CLI::success( sprintf( esc_html__( 'The current RESTful endpoint is `%s`', 'github-updater' ), $api_url ) );
+		WP_CLI::success( 'GitHub Updater REST API key has been reset.' );
+		WP_CLI::success( sprintf( 'The current RESTful endpoint is `%s`', $api_url ) );
 	}
 
 }

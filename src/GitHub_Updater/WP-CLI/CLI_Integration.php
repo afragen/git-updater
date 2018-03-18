@@ -129,7 +129,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Plugin %s installed.', "'$slug'" ) );
 	}
 
 	/**
@@ -187,7 +187,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Theme %s installed.', "'$slug'" ) );
 	}
 
 	/**
