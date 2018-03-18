@@ -590,7 +590,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Print the GitLab Settings text.
 	 */
 	public function print_section_gitlab_info() {
-		esc_html_e( 'Enter your GitLab Access Token.', 'github-updater' );
+		esc_html_e( 'Enter your repository specific GitLab Access Token.', 'github-updater' );
 	}
 
 	/**
