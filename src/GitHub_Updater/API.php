@@ -573,15 +573,10 @@ class API {
 		}
 
 		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$response = base64_encode( $response );
-				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
+			default:
 				$response = base64_encode( $response );
 				break;
 		}
