@@ -48,7 +48,6 @@ The following headers are available for use depending upon your hosting source.
 ### Gitea
 * Gitea Plugin URI
 * Gitea Theme URI
-* Gitea Languages
 
 [Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
 
