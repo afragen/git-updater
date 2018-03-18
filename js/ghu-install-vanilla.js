@@ -5,26 +5,14 @@
  * @class  Fragen\GitHub_Updater\Install
  * @since  4.6.0
  * @access public
+ *
+ * Was working, then stopped working.
+ * Seems not to get all 3 bitbucket_setting elements.
  */
 (function () {
 
 	// Hide non-default (Bitbucket & GitLab) settings on page load.
 	var nonDefault = ['bitbucket', 'gitlab', 'gitea'];
-
-	//testing
-	nonDefault.forEach(function(item){
-		var rows = document.querySelectorAll('input.'.concat(item, '_setting'));
-		rows = document.parentElement(rows);
-		var parents = getParents(item, 'tr');
-		//rows = Array.from( rows );
-		//var children = getDirectChildren(rows, 'tr');
-		console.log( rows, parents);
-		rows.forEach(function(item){
-			console.log(item);
-			//item.style.display = 'none';
-		})
-		//rows[0].style.display = 'none';
-	});
 
 	nonDefault.forEach(function (item) {
 		var parents = getParents(item, 'tr');
@@ -65,8 +53,7 @@
 
 	// Return query and selector for `$(query).parents.(selector)`
 	function getParents(item, selector) {
-		var settings = document.querySelector('input.'.concat(item, '_setting'));
-		return vanillaParents( settings, selector);
+		return vanillaParents(document.querySelector('input.'.concat(item, '_setting')), selector);
 	}
 
 	// Vanilla JS version of jQuery `$(query).parents(selector)`
