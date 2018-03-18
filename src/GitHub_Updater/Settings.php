@@ -144,37 +144,6 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Return an array of the installed repository types.
-	 *
-	 * @access private
-	 * @return array $gits
-	 */
-	private function installed_git_repos() {
-		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-
-		$repos = array_merge( $plugins, $themes );
-		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
-				return 'bbserver';
-			}
-
-			return $e->type;
-		}, $repos );
-
-		$gits = array_unique( array_values( $gits ) );
-
-		$gits = array_map( function( $e ) {
-			$e = explode( '_', $e );
-
-			return $e[0];
-		}, $gits );
-
-
-		return array_unique( $gits );
-	}
-
-	/**
 	 * Add options page.
 	 */
 	public function add_plugin_page() {
