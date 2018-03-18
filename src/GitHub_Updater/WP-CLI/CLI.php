@@ -61,6 +61,8 @@ class CLI extends WP_CLI_Command {
 		} else {
 			WP_CLI::error( sprintf( 'Incorrect command syntax, see %s for proper syntax.', '`wp help github-updater cache`' ) );
 		}
+		WP_CLI::success( 'WP-Cron is now running.' );
+		WP_CLI::runcommand( 'cron event run --due-now' );
 	}
 
 	/**
