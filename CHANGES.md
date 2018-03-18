@@ -9,6 +9,7 @@
 * added some error handling to `Singleton`
 * fixed error messaging
 * added support for [Gitea](http://gitea.io/) thanks to [Marco Betschart](https://github.com/marbetschar)
+* refactored code out of `class API` into specific API classes
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

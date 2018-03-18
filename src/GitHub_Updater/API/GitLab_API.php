@@ -388,7 +388,6 @@ class GitLab_API extends API implements API_Interface {
 	 * @return string $download_link
 	 */
 	private function make_release_asset_download_link() {
-		$download_link = '';
 		$download_link = implode( '/', array(
 			'https://gitlab.com/api/v3/projects',
 			urlencode( $this->type->owner . '/' . $this->type->repo ),
