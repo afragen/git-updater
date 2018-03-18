@@ -84,17 +84,22 @@ class Language_Pack_API extends API {
 	private function get_language_pack_json( $type, $headers, $response ) {
 		switch ( $type ) {
 			case 'github':
-				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+				$response = $this->api( '/repos/:owner/:repo/contents/language-pack.json' );
 				$contents = base64_decode( $response->content );
 				$response = json_decode( $contents );
 				break;
 			case 'bitbucket':
-				$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
+				$response = $this->api( '/1.0/repositories/:owner/:repo/src/master/language-pack.json' );
 				$response = json_decode( $response->data );
 				break;
 			case 'gitlab':
 				$id       = urlencode( $headers['owner'] . '/' . $headers['repo'] );
 				$response = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
+				break;
+			case 'gitea':
+				$response = $this->api( '/repos/:owner/:repo/raw/master/language-pack.json' );
 				$contents = base64_decode( $response->content );
 				$response = json_decode( $contents );
 				break;
