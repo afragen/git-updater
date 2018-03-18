@@ -541,13 +541,6 @@ class Settings extends Base {
 			) {
 				static::$auth_required['bitbucket_server'] = true;
 			}
-
-			// @TODO Does Gitea have an Enterprise version?
-			//if ( ! static::$auth_required['gitea'] &&
-			//     false !== strpos( $token->type, 'gitea' )
-			//) {
-			//	static::$auth_required['gitea'] = true;
-			//}
 		}
 
 		if ( $this->is_private( $token ) ) {
@@ -566,19 +559,16 @@ class Settings extends Base {
 			) {
 				static::$auth_required['gitlab_private'] = true;
 			}
-			if ( ! static::$auth_required['gitea'] &&
+			if ( ! static::$auth_required['gitea_private'] &&
 			     false !== strpos( $token->type, 'gitea' )
 			) {
-				static::$auth_required['gitea'] = true;
+				static::$auth_required['gitea_private'] = true;
 			}
 		}
 
-		if ( empty( $token->enterprise ) &&
-		     ! static::$auth_required['gitlab'] &&
-		     false !== strpos( $token->type, 'gitlab' )
-		) {
-			static::$auth_required['gitlab'] = true;
-		}
+		// Always set to true.
+		static::$auth_required['gitlab'] = true;
+		static::$auth_required['gitea']  = true;
 	}
 
 	/**

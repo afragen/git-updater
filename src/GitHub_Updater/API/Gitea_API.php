@@ -481,6 +481,9 @@ class Gitea_API extends API implements API_Interface {
 				array( &$this, 'print_section_gitea_token' ),
 				'github_updater_gitea_install_settings'
 			);
+		}
+
+		if ( $auth_required['gitea_private'] ) {
 			add_settings_section(
 				'gitea_id',
 				esc_html__( 'Gitea Private Settings', 'github-updater' ),

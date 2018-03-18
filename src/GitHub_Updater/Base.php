@@ -123,6 +123,7 @@ class Base {
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
 		'gitea'             => false,
+		'gitea_private'     => false,
 	);
 
 	/**
