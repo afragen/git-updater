@@ -89,7 +89,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--token=<access_token>]
-	 * : GitHub or GitLab access token if not already saved
+	 * : GitHub, GitLab, or Gitea access token if not already saved
 	 *
 	 * [--bitbucket-private]
 	 * : Indicates a private Bitbucket repository
@@ -105,6 +105,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitlab]
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
+	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
 	 *
 	 * ## EXAMPLES
 	 *
@@ -133,7 +137,7 @@ class CLI_Integration extends WP_CLI_Command {
 	}
 
 	/**
-	 * Install theme from GitHub, Bitbucket, or GitLab using GitHub Updater.
+	 * Install theme from GitHub, Bitbucket, GitLab, or Gitea using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
@@ -163,6 +167,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitlab]
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
+	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
 	 *
 	 * ## EXAMPLES
 	 *
@@ -217,6 +225,9 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 			case isset( $assoc_args['gitlab'] ):
 				$cli_config['git'] = 'gitlab';
+				break;
+			case isset( $assoc_args['gitea'] ):
+				$cli_config['git'] = 'gitea';
 				break;
 		}
 
