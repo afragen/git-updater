@@ -528,7 +528,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Print the Gitea Settings text.
 	 */
 	public function print_section_gitea_info() {
-		esc_html_e( 'Enter your Gitea Access Token.', 'github-updater' );
+		esc_html_e( 'Enter your repository specific Gitea Access Token.', 'github-updater' );
 	}
 
 	/**
