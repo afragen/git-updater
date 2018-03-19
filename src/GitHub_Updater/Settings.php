@@ -429,17 +429,23 @@ class Settings extends Base {
 	 * @param array $ghu_tokens
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
-		$ghu_unset_keys = array_diff_key( static::$options, $ghu_options_keys );
-		$always_unset   = array(
+		$running_servers = $this->get_running_git_servers();
+		$ghu_unset_keys  = array_diff_key( static::$options, $ghu_options_keys );
+		$always_unset    = array(
 			'db_version',
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'bitbucket_server_username',
-			'bitbucket_server_password',
 		);
+
+		if ( in_array( 'bbserver', $running_servers ) ) {
+			$always_unset = array_merge( $always_unset, array(
+				'bitbucket_server_username',
+				'bitbucket_server_password',
+			) );
+		}
 
 		array_map( function( $e ) use ( &$ghu_unset_keys ) {
 			unset( $ghu_unset_keys[ $e ] );
