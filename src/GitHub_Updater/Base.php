@@ -1256,7 +1256,7 @@ class Base {
 	}
 
 	/**
-	 * Return an array of the installed repository types.
+	 * Return an array of the running git servers.
 	 *
 	 * @access public
 	 * @return array $gits
