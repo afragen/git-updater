@@ -63,14 +63,14 @@ class Gitea_API extends API implements API_Interface {
 	 * Set default credentials if option not set.
 	 */
 	protected function set_default_credentials() {
-		$installed_repos = Singleton::get_instance( 'Base', $this )->get_installed_git_repos();
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
 		$set_credentials = false;
 		if ( ! isset( static::$options['gitea_access_token'] ) ) {
 			static::$options['gitea_access_token'] = null;
 			$set_credentials                       = true;
 		}
 		if ( empty( static::$options['gitea_access_token'] ) &&
-		     in_array( 'gitea', $installed_repos, true )
+		     in_array( 'gitea', $running_servers, true )
 		) {
 			$this->gitea_error_notices();
 		}

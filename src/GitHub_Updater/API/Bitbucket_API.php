@@ -56,7 +56,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Set default credentials if option not set.
 	 */
 	protected function set_default_credentials() {
-		$installed_repos = Singleton::get_instance( 'Base', $this )->get_installed_git_repos();
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
 		$set_credentials = false;
 		if ( $this instanceof Bitbucket_API ) {
 			$username = 'bitbucket_username';
@@ -76,9 +76,9 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 		if ( ( empty( static::$options[ $username ] ) || empty( static::$options[ $password ] ) ) &&
 		     ( ( 'bitbucket_username' === $username &&
-		         in_array( 'bitbucket', $installed_repos, true ) ) ||
+		         in_array( 'bitbucket', $running_servers, true ) ) ||
 		       ( 'bitbucket_server_username' === $username &&
-		         in_array( 'bbserver', $installed_repos, true ) ) )
+		         in_array( 'bbserver', $running_servers, true ) ) )
 		) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( 'bitbucket' );
 			static::$error_code['bitbucket'] = array( 'code' => 401 );

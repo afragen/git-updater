@@ -114,7 +114,7 @@ class Settings extends Base {
 	 */
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
-		$gits    = $this->get_installed_git_repos();
+		$gits    = $this->get_running_git_servers();
 
 		$git_subtab  = array();
 		$ghu_subtabs = array(

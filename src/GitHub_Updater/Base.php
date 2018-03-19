@@ -1261,7 +1261,7 @@ class Base {
 	 * @access public
 	 * @return array $gits
 	 */
-	public function get_installed_git_repos() {
+	public function get_running_git_servers() {
 		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 

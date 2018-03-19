@@ -62,7 +62,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Set default credentials if option not set.
 	 */
 	protected function set_default_credentials() {
-		$installed_repos = Singleton::get_instance( 'Base', $this )->get_installed_git_repos();
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
 		$set_credentials = false;
 		if ( ! isset( static::$options['gitlab_access_token'] ) ) {
 			static::$options['gitlab_access_token'] = null;
@@ -75,7 +75,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
 		       ! empty( $this->type->enterprise ) ) ||
 		     ( empty( static::$options['gitlab_access_token'] ) &&
-		       in_array( 'gitlab', $installed_repos, true ) )
+		       in_array( 'gitlab', $running_servers, true ) )
 		) {
 			$this->gitlab_error_notices();
 		}
