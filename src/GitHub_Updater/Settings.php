@@ -114,7 +114,7 @@ class Settings extends Base {
 	 */
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
-		$gits    = $this->installed_git_repos();
+		$gits    = $this->get_running_git_servers();
 
 		$git_subtab  = array();
 		$ghu_subtabs = array(
@@ -129,6 +129,9 @@ class Settings extends Base {
 		if ( static::$installed_apis['gitlab_api'] ) {
 			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
 		}
+		if ( static::$installed_apis['gitea_api'] ) {
+			$ghu_subtabs['gitea'] = esc_html__( 'Gitea', 'github-updater' );
+		}
 
 		foreach ( $gits as $git ) {
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
@@ -138,37 +141,6 @@ class Settings extends Base {
 		$subtabs = array_merge( $subtabs, $git_subtab );
 
 		return $subtabs;
-	}
-
-	/**
-	 * Return an array of the installed repository types.
-	 *
-	 * @access private
-	 * @return array $gits
-	 */
-	private function installed_git_repos() {
-		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-
-		$repos = array_merge( $plugins, $themes );
-		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
-				return 'bbserver';
-			}
-
-			return $e->type;
-		}, $repos );
-
-		$gits = array_unique( array_values( $gits ) );
-
-		$gits = array_map( function( $e ) {
-			$e = explode( '_', $e );
-
-			return $e[0];
-		}, $gits );
-
-
-		return array_unique( $gits );
 	}
 
 	/**
@@ -262,6 +234,7 @@ class Settings extends Base {
 							case 'bitbucket':
 							case 'bbserver':
 							case 'gitlab':
+							case 'gitea':
 								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
 								$this->display_ghu_repos( $subtab );
 								$this->add_hidden_settings_sections( $subtab );
@@ -358,6 +331,10 @@ class Settings extends Base {
 		if ( static::$installed_apis['bitbucket_server_api'] ) {
 			Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_settings( static::$auth_required );
 		}
+
+		if ( static::$installed_apis['gitea_api'] ) {
+			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_settings( static::$auth_required );
+		}
 	}
 
 	/**
@@ -415,6 +392,11 @@ class Settings extends Base {
 						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_repo_setting_field();
 					}
 					break;
+				case 'gitea':
+					if ( static::$installed_apis['gitea_api'] ) {
+						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_repo_setting_field();
+					}
+					break;
 			}
 
 			if ( empty( $repo_setting_field ) ) {
@@ -447,17 +429,23 @@ class Settings extends Base {
 	 * @param array $ghu_tokens
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
-		$ghu_unset_keys = array_diff_key( static::$options, $ghu_options_keys );
-		$always_unset   = array(
+		$running_servers = $this->get_running_git_servers();
+		$ghu_unset_keys  = array_diff_key( static::$options, $ghu_options_keys );
+		$always_unset    = array(
 			'db_version',
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
 			'bitbucket_username',
 			'bitbucket_password',
-			'bitbucket_server_username',
-			'bitbucket_server_password',
 		);
+
+		if ( in_array( 'bbserver', $running_servers ) ) {
+			$always_unset = array_merge( $always_unset, array(
+				'bitbucket_server_username',
+				'bitbucket_server_password',
+			) );
+		}
 
 		array_map( function( $e ) use ( &$ghu_unset_keys ) {
 			unset( $ghu_unset_keys[ $e ] );
@@ -468,6 +456,7 @@ class Settings extends Base {
 			'github_enterprise' => 'github_enterprise_token',
 			'gitlab'            => 'gitlab_access_token',
 			'gitlab_enterprise' => 'gitlab_enterprise_token',
+			'gitea'             => 'gitea_access_token',
 		);
 
 		array_map( function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
@@ -545,14 +534,16 @@ class Settings extends Base {
 			) {
 				static::$auth_required['gitlab_private'] = true;
 			}
+			if ( ! static::$auth_required['gitea_private'] &&
+			     false !== strpos( $token->type, 'gitea' )
+			) {
+				static::$auth_required['gitea_private'] = true;
+			}
 		}
 
-		if ( empty( $token->enterprise ) &&
-		     ! static::$auth_required['gitlab'] &&
-		     false !== strpos( $token->type, 'gitlab' )
-		) {
-			static::$auth_required['gitlab'] = true;
-		}
+		// Always set to true.
+		static::$auth_required['gitlab'] = true;
+		static::$auth_required['gitea']  = true;
 	}
 
 	/**

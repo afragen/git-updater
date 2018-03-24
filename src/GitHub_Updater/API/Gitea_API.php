@@ -24,14 +24,15 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class GitHub_API
+ * Class Gitea_API
  *
- * Get remote data from a GitHub repo.
+ * Get remote data from a Gitea repo.
  *
  * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
+ * @author  Marco Betschart
  */
-class GitHub_API extends API implements API_Interface {
+class Gitea_API extends API implements API_Interface {
 
 	/**
 	 * Holds loose class method name.
@@ -55,6 +56,28 @@ class GitHub_API extends API implements API_Interface {
 				? $branch->cache['current_branch']
 				: $type->branch;
 		}
+		$this->set_default_credentials();
+	}
+
+	/**
+	 * Set default credentials if option not set.
+	 */
+	protected function set_default_credentials() {
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
+		$set_credentials = false;
+		if ( ! isset( static::$options['gitea_access_token'] ) ) {
+			static::$options['gitea_access_token'] = null;
+			$set_credentials                       = true;
+		}
+		if ( empty( static::$options['gitea_access_token'] ) &&
+		     in_array( 'gitea', $running_servers, true )
+		) {
+			$this->gitea_error_notices();
+		}
+
+		if ( $set_credentials ) {
+			add_site_option( 'github_updater', static::$options );
+		}
 	}
 
 	/**
@@ -69,13 +92,10 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response     = $this->api( '/repos/:owner/:repo/contents/' . $file );
-			if ( ! isset( $response->content ) ) {
-				return false;
-			}
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
 
 			if ( $response ) {
-				$contents = base64_decode( $response->content );
+				$contents = $response;
 				$response = $this->base->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
@@ -103,7 +123,7 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'tags';
-			$response     = $this->api( '/repos/:owner/:repo/tags' );
+			$response     = $this->api( '/repos/:owner/:repo/releases' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -152,7 +172,7 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->api( '/repos/:owner/:repo/contents/' . $changes );
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -199,9 +219,9 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response     = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
-		}
+			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
 
+		}
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
@@ -284,8 +304,7 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API.
-	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
+	 * Construct $this->type->download_link using Gitea API.
 	 *
 	 * @param boolean $rollback      for theme rollback
 	 * @param boolean $branch_switch for direct branch changing
@@ -293,15 +312,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
+		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/archive/', true );
 		$endpoint           = '';
-
-		/*
-		 * If release asset.
-		 */
-		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			return $this->get_github_release_asset_url();
-		}
 
 		/*
 		 * Check for rollback.
@@ -310,23 +322,23 @@ class GitHub_API extends API implements API_Interface {
 		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
 		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
 		) {
-			$endpoint .= $rollback;
+			$endpoint .= $rollback . '.zip';
 
 			/*
 			 * For users wanting to update against branch other than master
 			 * or if not using tags, else use newest_tag.
 			 */
 		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint .= $this->type->branch;
+			$endpoint .= $this->type->branch . '.zip';
 		} else {
-			$endpoint .= $this->type->newest_tag;
+			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
 		/*
 		 * Create endpoint for branch switching.
 		 */
 		if ( $branch_switch ) {
-			$endpoint = $branch_switch;
+			$endpoint = $branch_switch . '.zip';
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
@@ -335,23 +347,21 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Create GitHub API endpoints.
+	 * Create Gitea API endpoints.
 	 *
-	 * @param GitHub_API|API $git
-	 * @param string         $endpoint
+	 * @param Gitea_API|API $git
+	 * @param string        $endpoint
 	 *
 	 * @return string $endpoint
 	 */
 	public function add_endpoints( $git, $endpoint ) {
+
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
-				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
-				break;
 			case 'meta':
 			case 'tags':
 			case 'changes':
-			case 'download_link':
 			case 'translation':
 				break;
 			case 'branches':
@@ -363,39 +373,15 @@ class GitHub_API extends API implements API_Interface {
 
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
-		/*
-		 * If GitHub Enterprise return this endpoint.
-		 */
-		if ( ! empty( $git->type->enterprise_api ) ) {
-			return $git->type->enterprise_api . $endpoint;
-		}
-
 		return $endpoint;
-	}
-
-	/**
-	 * Calculate and store time until rate limit reset.
-	 *
-	 * @param $response
-	 * @param $repo
-	 */
-	public static function ratelimit_reset( $response, $repo ) {
-		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
-			$wait                        = date( 'i', $reset - time() );
-			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], array(
-				'git'  => 'github',
-				'wait' => $wait,
-			) );
-		}
 	}
 
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param \stdClass|array $response Response from API call for tags.
 	 *
-	 * @return \stdClass|array $arr Array of tag numbers, object is error.
+	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( isset( $response->message ) ) {
@@ -404,7 +390,7 @@ class GitHub_API extends API implements API_Interface {
 
 		$arr = array();
 		array_map( function( $e ) use ( &$arr ) {
-			$arr[] = $e->name;
+			$arr[] = $e->tag_name;
 
 			return $arr;
 		}, (array) $response );
@@ -425,10 +411,10 @@ class GitHub_API extends API implements API_Interface {
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['private']      = $e->private;
-			$arr['last_updated'] = $e->pushed_at;
-			$arr['watchers']     = $e->watchers;
-			$arr['forks']        = $e->forks;
-			$arr['open_issues']  = $e->open_issues;
+			$arr['last_updated'] = $e->updated_at;
+			$arr['watchers']     = $e->watchers_count;
+			$arr['forks']        = $e->forks_count;
+			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
 		} );
 
 		return $arr;
@@ -439,14 +425,18 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array $arr Array of changes in base64.
+	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
+		if ( isset( $response->messages ) ) {
+			return $response;
+		}
+
 		$arr      = array();
 		$response = array( $response );
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['changes'] = $e->content;
+			$arr['changes'] = base64_encode( $e );
 		} );
 
 		return $arr;
@@ -465,155 +455,57 @@ class GitHub_API extends API implements API_Interface {
 		$rollback = array();
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode( '/', array(
+			$download_link    = implode( '/', array(
 				$repo_type['base_uri'],
 				'repos',
 				$this->type->owner,
 				$this->type->repo,
-				'zipball/',
+				'archive/',
 			) );
 			$tags[]           = $tag;
-			$rollback[ $tag ] = $download_base . $tag;
-
+			$rollback[ $tag ] = $download_link . $tag . '.zip';
 		}
 
 		return array( $tags, $rollback );
 	}
 
 	/**
-	 * Return the AWS download link for a GitHub release asset.
-	 * AWS download link sets a link expiration of ONLY 5 minutes.
-	 *
-	 * @since 6.1.0
-	 * @uses  Requests, requires WP 4.6
-	 *
-	 * @return array|bool|\stdClass
-	 */
-	private function get_github_release_asset_url() {
-		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
-			unset( $this->response['release_asset_url'] );
-		}
-
-		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
-
-		if ( $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No release asset found';
-			}
-
-			if ( is_wp_error( $response ) ) {
-				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
-
-				return false;
-			}
-
-			if ( $response ) {
-				add_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
-
-				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
-				$response_new = wp_remote_get( $url );
-
-				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
-
-				if ( is_wp_error( $response_new ) ) {
-					Singleton::get_instance( 'Messages', $this )->create_error_message( $response_new );
-
-					return false;
-				}
-
-				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
-					$response_object = $response_new['http_response']->get_response_object();
-					if ( ! $response_object->success ) {
-						return false;
-					}
-					$response_headers = $response_object->history[0]->headers;
-					$download_link    = $response_headers->getValues( 'location' );
-				} else {
-					return false;
-				}
-
-				$response = $download_link[0];
-				$this->set_repo_cache( 'release_asset_url', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Set HTTP header for following GitHub release assets.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param        $args
-	 * @param string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function set_github_release_asset_header( $args, $url = '' ) {
-		$args['headers']['accept'] = 'application/octet-stream';
-
-		return $args;
-	}
-
-	/**
-	 * Add settings for GitHub Personal Access Token.
+	 * Add settings for Gitea Access Token.
 	 *
 	 * @param array $auth_required
 	 *
 	 * @return void
 	 */
 	public function add_settings( $auth_required ) {
-		add_settings_section(
-			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			array( &$this, 'print_section_github_access_token' ),
-			'github_updater_github_install_settings'
-		);
-
-		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
-			'github_updater_github_install_settings',
-			'github_access_token',
-			array( 'id' => 'github_access_token', 'token' => true )
-		);
-
-		if ( $auth_required['github_enterprise'] ) {
-			add_settings_field(
-				'github_enterprise_token',
-				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
-				'github_updater_github_install_settings',
-				'github_access_token',
-				array( 'id' => 'github_enterprise_token', 'token' => true )
-			);
-		}
-
-		/*
-		 * Show section for private GitHub repositories.
-		 */
-		if ( $auth_required['github_private'] || $auth_required['github_enterprise'] ) {
+		if ( $auth_required['gitea'] ) {
 			add_settings_section(
-				'github_id',
-				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_github_info' ),
-				'github_updater_github_install_settings'
+				'gitea_settings',
+				esc_html__( 'Gitea Access Token', 'github-updater' ),
+				array( &$this, 'print_section_gitea_token' ),
+				'github_updater_gitea_install_settings'
 			);
 		}
+
+		if ( $auth_required['gitea_private'] ) {
+			add_settings_section(
+				'gitea_id',
+				esc_html__( 'Gitea Private Settings', 'github-updater' ),
+				array( &$this, 'print_section_gitea_info' ),
+				'github_updater_gitea_install_settings'
+			);
+		}
+
+		if ( $auth_required['gitea'] ) {
+			add_settings_field(
+				'gitea_access_token',
+				esc_html__( 'Gitea Access Token', 'github-updater' ),
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				'github_updater_gitea_install_settings',
+				'gitea_settings',
+				array( 'id' => 'gitea_access_token', 'token' => true )
+			);
+		}
+
 	}
 
 	/**
@@ -622,8 +514,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return mixed
 	 */
 	public function add_repo_setting_field() {
-		$setting_field['page']            = 'github_updater_github_install_settings';
-		$setting_field['section']         = 'github_id';
+		$setting_field['page']            = 'github_updater_gitea_install_settings';
+		$setting_field['section']         = 'gitea_id';
 		$setting_field['callback_method'] = array(
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
@@ -633,111 +525,120 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Print the GitHub text.
+	 * Print the Gitea Settings text.
 	 */
-	public function print_section_github_info() {
-		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+	public function print_section_gitea_info() {
+		esc_html_e( 'Enter your repository specific Gitea Access Token.', 'github-updater' );
 	}
 
 	/**
-	 * Print the GitHub Personal Access Token text.
+	 * Print the Gitea Access Token Settings text.
 	 */
-	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
+	public function print_section_gitea_token() {
+		esc_html_e( 'Enter your Gitea Access Token.', 'github-updater' );
 	}
 
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param $type
+	 * @param string $type
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
-			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'github_access_token' ),
+			'gitea_access_token',
+			esc_html__( 'Gitea Access Token', 'github-updater' ),
+			array( &$this, 'gitea_access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
 	}
 
 	/**
-	 * GitHub Access Token for remote install.
+	 * Gitea Access Token for remote install.
 	 */
-	public function github_access_token() {
+	public function gitea_access_token() {
 		?>
-		<label for="github_access_token">
-			<input class="github_setting" type="password" style="width:50%;" name="github_access_token" value="">
+		<label for="gitea_access_token">
+			<input class="gitea_setting" type="password" style="width:50%;" name="gitea_access_token" value="">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Enter Gitea Access Token for private Gitea repositories.', 'github-updater' ) ?>
 			</span>
 		</label>
 		<?php
 	}
 
 	/**
+	 * Display Gitea error admin notices.
+	 */
+	public function gitea_error_notices() {
+		add_action( 'admin_notices', array( &$this, 'gitea_error' ) );
+		add_action( 'network_admin_notices', array( &$this, 'gitea_error', ) );
+	}
+
+	/**
+	 * Generate error message for missing Gitea Access Token.
+	 */
+	public function gitea_error() {
+		$base       = Singleton::get_instance( 'Base', $this );
+		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+
+		if ( ! isset( $error_code['gitea'] ) &&
+		     empty( static::$options['gitea_access_token'] ) &&
+		     $base::$auth_required['gitea']
+		) {
+			self::$error_code['gitea'] = array( 'error' => true );
+			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
+				return;
+			}
+			?>
+			<div data-dismissible="gitea-error-1" class="error notice is-dismissible">
+				<p>
+					<?php esc_html_e( 'You must set a Gitea Access Token.', 'github-updater' ); ?>
+				</p>
+			</div>
+			<?php
+		}
+	}
+
+
+	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param $headers
-	 * @param $install
+	 * @param array $headers
+	 * @param array $install
 	 *
-	 * @return mixed
+	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$github_com = true;
-
-		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
-			$base            = 'https://api.github.com';
-			$headers['host'] = 'github.com';
-		} else {
-			$base       = $headers['base_uri'] . '/api/v3';
-			$github_com = false;
-		}
+		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = implode( '/', array(
 			$base,
 			'repos',
 			$install['github_updater_repo'],
-			'zipball',
-			$install['github_updater_branch'],
+			'archive',
+			$install['github_updater_branch'] . '.zip',
 		) );
-
-		// If asset is entered install it.
-		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
-			$install['download_link'] = $headers['uri'];
-		}
 
 		/*
 		 * Add/Save access token if present.
 		 */
-		if ( ! empty( $install['github_access_token'] ) ) {
-			$install['options'][ $install['repo'] ] = $install['github_access_token'];
-			if ( $github_com ) {
-				$install['options']['github_access_token'] = $install['github_access_token'];
-			} else {
-				$install['options']['github_enterprise_token'] = $install['github_access_token'];
-			}
+		if ( ! empty( $install['gitea_access_token'] ) ) {
+			$install['options'][ $install['repo'] ]   = $install['gitea_access_token'];
+			$install['options']['gitea_access_token'] = $install['gitea_access_token'];
 		}
-		if ( $github_com ) {
-			$token = ! empty( $install['options']['github_access_token'] )
-				? $install['options']['github_access_token']
-				: static::$options['github_access_token'];
-		} else {
-			$token = ! empty( $install['options']['github_enterprise_token'] )
-				? $install['options']['github_enterprise_token']
-				: static::$options['github_enterprise_token'];
-		}
+
+		$token = ! empty( $install['options']['gitea_access_token'] )
+			? $install['options']['gitea_access_token']
+			: static::$options['gitea_access_token'];
 
 		if ( ! empty( $token ) ) {
 			$install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );
 		}
 
-		if ( ! empty( static::$options['github_access_token'] ) ) {
-			unset( $install['options']['github_access_token'] );
-		}
-		if ( ! empty( static::$options['github_enterprise_token'] ) ) {
-			unset( $install['options']['github_enterprise_token'] );
+		if ( ! empty( static::$options['gitea_access_token'] ) ) {
+			unset( $install['options']['gitea_access_token'] );
 		}
 
 		return $install;

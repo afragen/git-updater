@@ -89,7 +89,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--token=<access_token>]
-	 * : GitHub or GitLab access token if not already saved
+	 * : GitHub, GitLab, or Gitea access token if not already saved
 	 *
 	 * [--bitbucket-private]
 	 * : Indicates a private Bitbucket repository
@@ -105,6 +105,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitlab]
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
+	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
 	 *
 	 * ## EXAMPLES
 	 *
@@ -129,11 +133,11 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Plugin %s installed.', "'$slug'" ) );
 	}
 
 	/**
-	 * Install theme from GitHub, Bitbucket, or GitLab using GitHub Updater.
+	 * Install theme from GitHub, Bitbucket, GitLab, or Gitea using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
@@ -164,6 +168,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
 	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-theme
@@ -187,7 +195,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Theme %s installed.', "'$slug'" ) );
 	}
 
 	/**
@@ -217,6 +225,9 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 			case isset( $assoc_args['gitlab'] ):
 				$cli_config['git'] = 'gitlab';
+				break;
+			case isset( $assoc_args['gitea'] ):
+				$cli_config['git'] = 'gitea';
 				break;
 		}
 

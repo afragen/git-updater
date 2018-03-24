@@ -62,6 +62,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Set default credentials if option not set.
 	 */
 	protected function set_default_credentials() {
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
 		$set_credentials = false;
 		if ( ! isset( static::$options['gitlab_access_token'] ) ) {
 			static::$options['gitlab_access_token'] = null;
@@ -71,8 +72,10 @@ class GitLab_API extends API implements API_Interface {
 			static::$options['gitlab_enterprise_token'] = null;
 			$set_credentials                            = true;
 		}
-		if ( empty( static::$options['gitlab_access_token'] ) ||
-		     ( empty( static::$options['gitlab_enterprise_token'] ) && ! empty( $this->type->enterprise ) )
+		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+		       ! empty( $this->type->enterprise ) ) ||
+		     ( empty( static::$options['gitlab_access_token'] ) &&
+		       in_array( 'gitlab', $running_servers, true ) )
 		) {
 			$this->gitlab_error_notices();
 		}
@@ -148,7 +151,8 @@ class GitLab_API extends API implements API_Interface {
 			return false;
 		}
 
-		$this->parse_tags( $response, $repo_type );
+		$tags = $this->parse_tags( $response, $repo_type );
+		$this->sort_tags( $tags );
 
 		return true;
 	}
@@ -379,6 +383,27 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @access private
+	 *
+	 * @return string $download_link
+	 */
+	private function make_release_asset_download_link() {
+		$download_link = implode( '/', array(
+			'https://gitlab.com/api/v3/projects',
+			urlencode( $this->type->owner . '/' . $this->type->repo ),
+			'builds/artifacts',
+			$this->type->newest_tag,
+			'download',
+		) );
+		$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
+
+		return $download_link;
+	}
+
+	/**
 	 * Create GitLab API endpoints.
 	 *
 	 * @param GitLab_API|API $git
@@ -521,6 +546,33 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Parse tags and create download links.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return array
+	 */
+	private function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+
+		foreach ( (array) $response as $tag ) {
+			$download_link    = implode( '/', array(
+				$repo_type['base_download'],
+				$this->type->owner,
+				$this->type->repo,
+				'repository/archive.zip',
+			) );
+			$download_link    = add_query_arg( 'ref', $tag, $download_link );
+			$tags[]           = $tag;
+			$rollback[ $tag ] = $download_link;
+		}
+
+		return array( $tags, $rollback );
+	}
+
+	/**
 	 * Add settings for GitLab.com, GitLab Community Edition.
 	 * or GitLab Enterprise Access Token.
 	 *
@@ -642,13 +694,17 @@ class GitLab_API extends API implements API_Interface {
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public function gitlab_error() {
-		$base = Singleton::get_instance( 'Base', $this );
+		$base       = Singleton::get_instance( 'Base', $this );
+		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
 
-		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		       $base::$auth_required['gitlab_enterprise'] ) ||
-		     ( empty( static::$options['gitlab_access_token'] ) &&
-		       $base::$auth_required['gitlab'] )
+		if ( ! isset( $error_code['gitlab'] ) &&
+		     ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+		         $base::$auth_required['gitlab_enterprise'] ) ||
+		       ( empty( static::$options['gitlab_access_token'] ) &&
+		         $base::$auth_required['gitlab'] ) )
+
 		) {
+			self::$error_code['gitlab'] = array( 'error' => true );
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;
 			}

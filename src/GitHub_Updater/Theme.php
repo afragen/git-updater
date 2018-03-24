@@ -642,7 +642,8 @@ class Theme extends Base {
 				);
 
 				// Skip on RESTful updating.
-				if ( isset( $_GET['action'] ) && 'github-updater-update' === $_GET['action'] &&
+				if ( isset( $_GET['action'], $_GET['theme'] ) &&
+				     'github-updater-update' === $_GET['action'] &&
 				     $response['theme'] === $_GET['theme']
 				) {
 					continue;

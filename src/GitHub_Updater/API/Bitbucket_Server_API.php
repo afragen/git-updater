@@ -114,7 +114,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			return false;
 		}
 
-		$this->parse_tags( $response, $repo_type );
+		$tags = $this->parse_tags( $response, $repo_type );
+		$this->sort_tags( $tags );
 
 		return true;
 	}

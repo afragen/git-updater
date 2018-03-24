@@ -56,6 +56,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Set default credentials if option not set.
 	 */
 	protected function set_default_credentials() {
+		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
 		$set_credentials = false;
 		if ( $this instanceof Bitbucket_API ) {
 			$username = 'bitbucket_username';
@@ -72,6 +73,15 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( ! isset( static::$options[ $password ] ) ) {
 			static::$options[ $password ] = null;
 			$set_credentials              = true;
+		}
+		if ( ( empty( static::$options[ $username ] ) || empty( static::$options[ $password ] ) ) &&
+		     ( ( 'bitbucket_username' === $username &&
+		         in_array( 'bitbucket', $running_servers, true ) ) ||
+		       ( 'bitbucket_server_username' === $username &&
+		         in_array( 'bbserver', $running_servers, true ) ) )
+		) {
+			Singleton::get_instance( 'Messages', $this )->create_error_message( 'bitbucket' );
+			static::$error_code['bitbucket'] = array( 'code' => 401 );
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
@@ -141,7 +151,8 @@ class Bitbucket_API extends API implements API_Interface {
 			return false;
 		}
 
-		$this->parse_tags( $response, $repo_type );
+		$tags = $this->parse_tags( $response, $repo_type );
+		$this->sort_tags( $tags );
 
 		return true;
 	}
@@ -321,8 +332,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
-
-		$endpoint = '';
+		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			return $this->make_release_asset_download_link();
@@ -364,6 +374,26 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Create release asset download link.
+	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 *
+	 * @access private
+	 *
+	 * @return string $download_link
+	 */
+	private function make_release_asset_download_link() {
+		$download_link = implode( '/', array(
+			'https://bitbucket.org',
+			$this->type->owner,
+			$this->type->repo,
+			'downloads',
+			$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+		) );
+
+		return $download_link;
 	}
 
 	/**
@@ -434,6 +464,32 @@ class Bitbucket_API extends API implements API_Interface {
 		} );
 
 		return $arr;
+	}
+
+	/**
+	 * Parse tags and create download links.
+	 *
+	 * @param $response
+	 * @param $repo_type
+	 *
+	 * @return array
+	 */
+	protected function parse_tags( $response, $repo_type ) {
+		$tags     = array();
+		$rollback = array();
+
+		foreach ( (array) $response as $tag ) {
+			$download_base    = implode( '/', array(
+				$repo_type['base_download'],
+				$this->type->owner,
+				$this->type->repo,
+				'get/',
+			) );
+			$tags[]           = $tag;
+			$rollback[ $tag ] = $download_base . $tag . '.zip';
+		}
+
+		return array( $tags, $rollback );
 	}
 
 	/**
