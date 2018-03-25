@@ -319,8 +319,9 @@ class Gitea_API extends API implements API_Interface {
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
-		     ( isset( $_GET['action'] ) && 'upgrade-theme' === $_GET['action'] ) &&
-		     ( isset( $_GET['theme'] ) && $this->type->repo === $_GET['theme'] )
+		     ( isset( $_GET['action'], $_GET['theme'] ) &&
+		       'upgrade-theme' === $_GET['action'] &&
+		       $this->type->repo === $_GET['theme'] )
 		) {
 			$endpoint .= $rollback . '.zip';
 
