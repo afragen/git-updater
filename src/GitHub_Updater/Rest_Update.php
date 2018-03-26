@@ -140,6 +140,14 @@ class Rest_Update extends Base {
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->repo );
 	}
+	
+	/**
+	 * Refresh the cache.
+	 */
+	public function refresh_cache() {
+		$this->delete_all_cached_data();
+		$this->upgrader_skin->messages[] = "Cache refreshed successfully.";
+	}
 
 	/**
 	 * Is there an error?
@@ -204,6 +212,8 @@ class Rest_Update extends Base {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
+			} elseif ( isset( $_REQUEST['refresh_cache'] ) ) {
+				$this->refresh_cache();
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
