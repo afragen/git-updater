@@ -177,6 +177,14 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'Bad api key.' );
 			}
 
+			/**
+			 * Allow access into the REST Update process.
+			 *
+			 * @since  7.6.0
+			 * @access public
+			 */
+			do_action( 'github_updater_pre_rest_process_request' );
+
 			$tag = 'master';
 			if ( isset( $_REQUEST['tag'] ) ) {
 				$tag = $_REQUEST['tag'];
