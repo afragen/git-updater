@@ -174,7 +174,7 @@ class Rest_Update extends Base {
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
-				throw new \UnexpectedValueException( 'Bad api key.' );
+				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
 
 			/**
@@ -192,20 +192,10 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			/**
-			 * Parse webhook response and convert 'tag' to 'committish'.
-			 * This will avoid potential race conditions.
-			 *
-			 * Throw Exception if `$_REQUEST['tag'] !== webhook branch` this avoids
-			 * unnecessary updates for PUSH to different branch.
-			 */
-			$webhook_response = $this->get_webhook_data();
-			if ( $webhook_response ) {
-				if ( $tag === $webhook_response['branch'] ) {
-					$tag = $webhook_response['hash'];
-				} else {
-					throw new \UnexpectedValueException( 'Request tag and webhook are not matching. ' . 'Response: ' . http_build_query( $webhook_response, null, ', ' ) );
-				}
+			$current_branch   = $this->get_local_branch();
+			$webhook_response = $this->get_webhook_source();
+			if ( null !== $current_branch && $tag !== $current_branch ) {
+				throw new \UnexpectedValueException( 'Request tag and webhook are not matching.' );
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
@@ -247,139 +237,42 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * For compatibility with PHP 5.3
+	 * Returns the current branch of the local repository referenced in the webhook.
 	 *
-	 * @param string $name $_SERVER index.
-	 *
-	 * @return bool
+	 * @return string $current_branch
 	 */
-	private function is_server_variable_set( $name ) {
-		return isset( $_SERVER[ $name ] );
+	private function get_local_branch() {
+		if ( isset( $_REQUEST['plugin'] ) ) {
+			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+			$repo  = $repos[ $_REQUEST['plugin'] ];
+		}
+		if ( isset( $_REQUEST['theme'] ) ) {
+			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+			$repo  = $repos[ $_REQUEST['theme'] ];
+		}
+		$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
+
+		return $current_branch;
 	}
 
 	/**
-	 * Checks the headers of the request and sends webhook data to be parsed.
-	 * If the request did not come from a webhook, this function returns false.
-	 *
-	 * @return bool|array false if no data; array of parsed webhook response
+	 * Sets the source of the webhook in upgrader skin.
 	 */
-	private function get_webhook_data() {
-		$request_body = file_get_contents( 'php://input' );
-
-		// GitHub
-		if ( $this->is_server_variable_set( 'HTTP_X_GITHUB_EVENT' ) &&
-		     ( 'push' === $_SERVER['HTTP_X_GITHUB_EVENT'] ||
-		       'create' === $_SERVER['HTTP_X_GITHUB_EVENT'] )
-		) {
-			return $this->parse_github_webhook( $request_body );
+	private function get_webhook_source() {
+		switch ( $_SERVER ) {
+			case isset( $_SERVER['HTTP_X_GITHUB_EVENT'] ):
+				$webhook_source = 'GitHub webhook';
+				break;
+			case isset( $_SERVER['HTTP_X_EVENT_KEY'] ):
+				$webhook_source = 'Bitbucket webhook';
+				break;
+			case isset( $_SERVER['HTTP_X_GITLAB_EVENT'] ):
+				$webhook_source = 'GitLab webhook';
+				break;
+			default:
+				$webhook_source = 'browser';
+				break;
 		}
-
-		// Bitbucket
-		if ( $this->is_server_variable_set( 'HTTP_X_EVENT_KEY' ) &&
-		     'repo:push' === $_SERVER['HTTP_X_EVENT_KEY']
-		) {
-			return $this->parse_bitbucket_webhook( $request_body );
-		}
-
-		// GitLab
-		if ( $this->is_server_variable_set( 'HTTP_X_GITLAB_EVENT' ) &&
-		     ( 'Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT'] ||
-		       'Tag Push Hook' === $_SERVER['HTTP_X_GITLAB_EVENT'] )
-		) {
-			return $this->parse_gitlab_webhook( $request_body );
-		}
-
-		return false;
+		$this->upgrader_skin->messages[] = $webhook_source;
 	}
-
-	/**
-	 * Parses GitHub webhook data.
-	 *
-	 * @link https://developer.github.com/v3/activity/events/types/#pushevent
-	 *
-	 * @param string|bool $request_body
-	 *
-	 * @return array $response
-	 */
-	private function parse_github_webhook( $request_body ) {
-		$request_body = urldecode( $request_body );
-		if ( false !== $pos = strpos( $request_body, '{' ) ) {
-			$request_body = substr( $request_body, $pos );
-		}
-
-		if ( false !== $pos = strpos( $request_body, '}}' ) ) {
-			$request_body = substr( $request_body, 0, $pos ) . '}}';
-		}
-
-		$request_data = json_decode( $request_body, true );
-		$request_ref  = explode( '/', $request_data['ref'] );
-
-		$response               = array();
-		$response['hash']       = isset( $request_data['ref_type'] )
-			? $request_data['ref']
-			: $request_data['after'];
-		$response['branch']     = isset( $request_data['ref_type'] )
-			? 'master'
-			: array_pop( $request_ref );
-		$response['json_error'] = json_last_error_msg();
-
-		//$response['payload'] = $request_data;
-
-		return $response;
-	}
-
-	/**
-	 * Parses GitLab webhook data.
-	 *
-	 * @link https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md
-	 *
-	 * @param string $request_body
-	 *
-	 * @return array $response
-	 */
-	private function parse_gitlab_webhook( $request_body ) {
-		$request_data = json_decode( $request_body, true );
-		$request_ref  = explode( '/', $request_data['ref'] );
-
-		$response               = array();
-		$response['hash']       = $request_data['after'];
-		$response['branch']     = array_pop( $request_ref );
-		$response['json_error'] = json_last_error_msg();
-
-		//$response['payload'] = $request_data;
-
-		return $response;
-	}
-
-	/**
-	 * Parses Bitbucket webhook data.
-	 *
-	 * We assume here that changes contains one single entry and that first
-	 * entry is the correct one.
-	 *
-	 * @link https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-HTTPHeaders
-	 *
-	 * @param string $request_body
-	 *
-	 * @return bool|array $response
-	 */
-	private function parse_bitbucket_webhook( $request_body ) {
-		Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
-
-		$request_data = json_decode( $request_body, true );
-
-		$new = $request_data['push']['changes'][0]['new'];
-
-		$response               = array();
-		$response['hash']       = $new['target']['hash'];
-		$response['branch']     = 'tag' === $new['type'] ? 'master' : $new['name'];
-		$response['json_error'] = json_last_error_msg();
-
-		//$response['payload'] = $new;
-
-		Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->remove_authentication_hooks();
-
-		return $response;
-	}
-
 }
