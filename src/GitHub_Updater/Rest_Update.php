@@ -79,8 +79,7 @@ class Rest_Update extends Base {
 
 		$this->get_remote_repo_meta( $plugin );
 
-		$updates_transient = get_site_transient( 'update_plugins' );
-		$update            = array(
+		$update = array(
 			'slug'        => $plugin->repo,
 			'plugin'      => $plugin->slug,
 			'new_version' => null,
@@ -88,8 +87,11 @@ class Rest_Update extends Base {
 			'package'     => $this->repo_api->construct_download_link( false, $tag ),
 		);
 
-		$updates_transient->response[ $plugin->slug ] = (object) $update;
-		set_site_transient( 'update_plugins', $updates_transient );
+		add_filter( 'site_transient_update_plugins', function( $value ) use ( $plugin, $update ) {
+			$value->response[ $plugin->slug ] = (object) $update;
+
+			return $value;
+		} );
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->slug );
@@ -126,16 +128,18 @@ class Rest_Update extends Base {
 
 		$this->get_remote_repo_meta( $theme );
 
-		$updates_transient = get_site_transient( 'update_themes' );
-		$update            = array(
+		$update = array(
 			'theme'       => $theme->repo,
 			'new_version' => null,
 			'url'         => $theme->uri,
 			'package'     => $this->repo_api->construct_download_link( false, $tag ),
 		);
 
-		$updates_transient->response[ $theme->repo ] = $update;
-		set_site_transient( 'update_themes', $updates_transient );
+		add_filter( 'site_transient_update_themes', function( $value ) use ( $theme, $update ) {
+			$value->response[ $theme->repo ] = $update;
+
+			return $value;
+		} );
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->repo );
