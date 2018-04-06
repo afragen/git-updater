@@ -160,6 +160,25 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * Log messages during update
+	 */
+	public function log($message, $obj=""){
+
+		if(!defined('GHU_DEBUG'))
+			return;
+
+		$current_time = microtime(true);
+
+		if(!isset($this->start)) {
+			$this->start = $current_time;
+		}
+
+		$time_lapse = $current_time - $this->start;
+		$millis = round( $time_lapse * 1000 );
+		error_log( $millis . " ms : ". $message . " " . print_r( $obj, true ) );
+	}
+
+	/**
 	 * Process request.
 	 *
 	 * Relies on data in $_REQUEST, prints out json and exits.
@@ -169,6 +188,11 @@ class Rest_Update extends Base {
 	 */
 	public function process_request() {
 		try {
+
+			// DEBUG
+			$this->log("ENTERING IN \"process_request\", \$_REQUEST = ", $_REQUEST);
+			//
+
 			/*
 			 * 128 == JSON_PRETTY_PRINT
 			 * 64 == JSON_UNESCAPED_SLASHES
@@ -180,6 +204,10 @@ class Rest_Update extends Base {
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
+
+			// DEBUG
+			$this->log("doing action: \"github_updater_pre_rest_process_request\"");
+			//
 
 			/**
 			 * Allow access into the REST Update process.
@@ -198,6 +226,12 @@ class Rest_Update extends Base {
 
 			$current_branch   = $this->get_local_branch();
 			$webhook_response = $this->get_webhook_source();
+
+			// DEBUG
+			 $this->log("\$current_branch = ", $current_branch);
+			 $this->log("\$webhook_response = ", $webhook_response);
+			//
+
 			if ( null !== $current_branch && $tag !== $current_branch ) {
 				throw new \UnexpectedValueException( 'Request tag and webhook are not matching.' );
 			}
@@ -214,10 +248,16 @@ class Rest_Update extends Base {
 			header( 'HTTP/1.1 417 Expectation Failed' );
 			header( 'Content-Type: application/json' );
 
-			echo json_encode( array(
+			$http_response = json_encode( array(
 				'message' => $e->getMessage(),
 				'error'   => true,
 			), $json_encode_flags );
+
+			// DEBUG
+			$this->log("ENDING \"\\Exception\", \$http_response = ", $http_response);
+			//
+
+			echo $http_response;
 			exit;
 		}
 
@@ -236,7 +276,13 @@ class Rest_Update extends Base {
 			$response['success'] = true;
 		}
 
-		echo json_encode( $response, $json_encode_flags ) . "\n";
+		$http_response = json_encode( $response, $json_encode_flags ) . "\n";
+
+		// DEBUG
+		$this->log("ENDING \"process_request\", \$http_response = ", $http_response);
+		//
+
+		echo $http_response;
 		exit;
 	}
 
@@ -248,15 +294,17 @@ class Rest_Update extends Base {
 	private function get_local_branch() {
 		if ( isset( $_REQUEST['plugin'] ) ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-			$repo  = $repos[ $_REQUEST['plugin'] ];
+			$repo  = isset($repos[ $_REQUEST['plugin'] ]) ? $repos[ $_REQUEST['plugin'] ] : null;
 		}
 		if ( isset( $_REQUEST['theme'] ) ) {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-			$repo  = $repos[ $_REQUEST['theme'] ];
+			$repo  = isset($repos[ $_REQUEST['theme'] ]) ? $repos[ $_REQUEST['theme'] ] : null;
 		}
-		$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
-		return $current_branch;
+		if ( isset($repo) ) {
+			$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
+			return $current_branch;
+		}
 	}
 
 	/**
