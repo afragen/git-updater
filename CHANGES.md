@@ -11,6 +11,10 @@
 * refactored code out of `class API` into specific API classes
 * simplify RESTful update code, no longer parses webhook payload just webhook itself
 * updated RESTful update code to use `site_transient_{$transient}` filter to add to update transient
+* added a `log` function into the `Rest_Update` class
+* added `GHU_DEBUG` constant support
+* fixed some undefined variable warning
+* fixed missing statment `return $webhook_source` into `get_webhook_source()`
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
@@ -142,7 +146,7 @@
 * fixed GitLab Settings to show individual access tokens
 
 #### 6.2.1 / 2017-02-02
-* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
+* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()`
 * hotfix for upgrade routine to properly flush caches :P
 
 #### 6.2.0 / 2017-02-02
