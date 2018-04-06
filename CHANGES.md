@@ -14,6 +14,7 @@
 * added a `log` function into the `Rest_Update` class
 * added `GHU_DEBUG` constant support
 * fixed some undefined variable warning
+* fixed missing statment `return $webhook_source` into `get_webhook_source()`
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

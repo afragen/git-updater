@@ -326,5 +326,6 @@ class Rest_Update extends Base {
 				break;
 		}
 		$this->upgrader_skin->messages[] = $webhook_source;
+		return $webhook_source;
 	}
 }
