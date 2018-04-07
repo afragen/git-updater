@@ -218,7 +218,7 @@ class Rest_Update extends Base {
 			$http_response = json_encode( array(
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
-				'elapsed_time' => ( ( microtime( true ) - $start ) * 1000 ) . ' ms',
+				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'error'        => true,
 			), $json_encode_flags );
 			error_log( $http_response );
@@ -231,7 +231,7 @@ class Rest_Update extends Base {
 		$response = array(
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET,
-			'elapsed_time' => ( ( microtime( true ) - $start ) * 1000 ) . ' ms',
+			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 		);
 
 		if ( $this->is_error() ) {
