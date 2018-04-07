@@ -215,8 +215,9 @@ class Rest_Update extends Base {
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
-				'message' => $e->getMessage(),
-				'error'   => true,
+				'messages' => $e->getMessage(),
+				'webhook'  => $_GET,
+				'error'    => true,
 			), $json_encode_flags );
 			exit;
 		}
@@ -225,7 +226,7 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'response' => $_GET,
+			'webhook'  => $_GET,
 		);
 
 		if ( $this->is_error() ) {
@@ -263,7 +264,7 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Sets the source of the webhook in upgrader skin.
+	 * Sets the source of the webhook to $_GET variable.
 	 */
 	private function get_webhook_source() {
 		switch ( $_SERVER ) {
