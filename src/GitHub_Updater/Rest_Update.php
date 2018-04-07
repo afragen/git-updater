@@ -168,6 +168,7 @@ class Rest_Update extends Base {
 	 * update available as specified in the webhook payload.
 	 */
 	public function process_request() {
+		$start = microtime( true );
 		try {
 			/*
 			 * 128 == JSON_PRETTY_PRINT
@@ -215,9 +216,10 @@ class Rest_Update extends Base {
 			header( 'Content-Type: application/json' );
 
 			echo json_encode( array(
-				'messages' => $e->getMessage(),
-				'webhook'  => $_GET,
-				'error'    => true,
+				'messages'     => $e->getMessage(),
+				'webhook'      => $_GET,
+				'elapsed_time' => ( ( microtime( true ) - $start ) * 1000 ) . ' ms',
+				'error'        => true,
 			), $json_encode_flags );
 			exit;
 		}
@@ -225,8 +227,9 @@ class Rest_Update extends Base {
 		header( 'Content-Type: application/json' );
 
 		$response = array(
-			'messages' => $this->get_messages(),
-			'webhook'  => $_GET,
+			'messages'     => $this->get_messages(),
+			'webhook'      => $_GET,
+			'elapsed_time' => ( ( microtime( true ) - $start ) * 1000 ) . ' ms',
 		);
 
 		if ( $this->is_error() ) {
