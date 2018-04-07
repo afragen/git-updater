@@ -215,12 +215,14 @@ class Rest_Update extends Base {
 			header( 'HTTP/1.1 417 Expectation Failed' );
 			header( 'Content-Type: application/json' );
 
-			echo json_encode( array(
+			$http_response = json_encode( array(
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
 				'elapsed_time' => ( ( microtime( true ) - $start ) * 1000 ) . ' ms',
 				'error'        => true,
 			), $json_encode_flags );
+			error_log( $http_response );
+			echo $http_response;
 			exit;
 		}
 
@@ -240,7 +242,9 @@ class Rest_Update extends Base {
 			$response['success'] = true;
 		}
 
-		echo json_encode( $response, $json_encode_flags ) . "\n";
+		$http_response = json_encode( $response, $json_encode_flags ) . "\n";
+		error_log( $http_response );
+		echo $http_response;
 		exit;
 	}
 
