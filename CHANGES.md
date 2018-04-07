@@ -11,6 +11,7 @@
 * refactored code out of `class API` into specific API classes
 * simplify RESTful update code, no longer parses webhook payload just webhook itself
 * updated RESTful update code to use `site_transient_{$transient}` filter to add to update transient
+* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
