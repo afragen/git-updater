@@ -198,7 +198,7 @@ class Rest_Update extends Base {
 
 			$current_branch = $this->get_local_branch();
 			$this->get_webhook_source();
-			if ( null !== $current_branch && $tag !== $current_branch ) {
+			if ( $tag !== $current_branch ) {
 				throw new \UnexpectedValueException( 'Request tag and webhook are not matching.' );
 			}
 
@@ -243,9 +243,10 @@ class Rest_Update extends Base {
 	/**
 	 * Returns the current branch of the local repository referenced in the webhook.
 	 *
-	 * @return string $current_branch
+	 * @return string $current_branch Default return is 'master'.
 	 */
 	private function get_local_branch() {
+		$repo = false;
 		if ( isset( $_REQUEST['plugin'] ) ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 			$repo  = $repos[ $_REQUEST['plugin'] ];
@@ -254,7 +255,9 @@ class Rest_Update extends Base {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 			$repo  = $repos[ $_REQUEST['theme'] ];
 		}
-		$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
+		$current_branch = $repo ?
+			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
+			'master';
 
 		return $current_branch;
 	}
