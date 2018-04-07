@@ -257,11 +257,11 @@ class Rest_Update extends Base {
 		$repo = false;
 		if ( isset( $_REQUEST['plugin'] ) ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-			$repo  = $repos[ $_REQUEST['plugin'] ];
+			$repo  = isset( $repos[ $_REQUEST['plugin'] ] ) ? $repos[ $_REQUEST['plugin'] ] : false;
 		}
 		if ( isset( $_REQUEST['theme'] ) ) {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-			$repo  = $repos[ $_REQUEST['theme'] ];
+			$repo  = isset( $repos[ $_REQUEST['theme'] ] ) ? $repos[ $_REQUEST['theme'] ] : false;
 		}
 		$current_branch = $repo ?
 			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
