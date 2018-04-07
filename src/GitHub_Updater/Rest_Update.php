@@ -196,8 +196,8 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			$current_branch   = $this->get_local_branch();
-			$webhook_response = $this->get_webhook_source();
+			$current_branch = $this->get_local_branch();
+			$this->get_webhook_source();
 			if ( null !== $current_branch && $tag !== $current_branch ) {
 				throw new \UnexpectedValueException( 'Request tag and webhook are not matching.' );
 			}
@@ -225,7 +225,7 @@ class Rest_Update extends Base {
 
 		$response = array(
 			'messages' => $this->get_messages(),
-			'response' => $webhook_response ?: $_GET,
+			'response' => $_GET,
 		);
 
 		if ( $this->is_error() ) {
@@ -277,6 +277,6 @@ class Rest_Update extends Base {
 				$webhook_source = 'browser';
 				break;
 		}
-		$this->upgrader_skin->messages[] = $webhook_source;
+		$_GET['webhook_source'] = $webhook_source;
 	}
 }
