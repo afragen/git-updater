@@ -33,6 +33,18 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * GHU_DB_VERSION - holds current database version,
+ * checked on plugin update when changes are made to
+ * the structure of tables
+ */
+define("GHU_DB_VERSION", "0.0");
+
+/**
+ * GHU_TABLE_LOGS - holds current log table name
+ */
+define("GHU_TABLE_LOGS", "ghu_logs");
+
 if ( version_compare( '5.3.0', PHP_VERSION, '>=' ) ) {
 	?>
 	<div class="error notice is-dismissible">
@@ -77,5 +89,7 @@ $ghu['init']->run();
  */
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
 
-//TODO: better place?
+// TODO: move in a better place
 register_activation_hook( __FILE__, array( 'Fragen\\GitHub_Updater\\Init', 'install') );
+add_action('plugins_loaded', array( 'Fragen\\GitHub_Updater\\Rest_Log_Table', 'update_db_table')); // Trick to update database version of the plugin
+//
