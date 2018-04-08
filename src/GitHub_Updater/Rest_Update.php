@@ -252,11 +252,7 @@ class Rest_Update extends Base {
 		$current_branch = $repo ?
 			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
 			'master';
-
-		if ( isset($repo) ) {
-			$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
-			return $current_branch;
-		}
+		return $current_branch;
 	}
 
 	/**
