@@ -41,5 +41,4 @@ $delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT
 $wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
 
 // Also delete Logs Table
-$sql = "DROP TABLE {$wpdb->prefix}ghu_logs";
-$wpdb->query($sql);
+Rest_Log_Table::drop_db_table();
