@@ -48,6 +48,7 @@ class Rest_Update extends Base {
 		parent::__construct();
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
+		$this->time = current_time( 'mysql' );
 	}
 
 	/**
@@ -160,25 +161,6 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Log messages during update
-	 */
-	public function log($message, $obj=""){
-
-		if(!defined('GHU_DEBUG'))
-			return;
-
-		$current_time = microtime(true);
-
-		if(!isset($this->start)) {
-			$this->start = $current_time;
-		}
-
-		$time_lapse = $current_time - $this->start;
-		$millis = round( $time_lapse * 1000 );
-		error_log( $millis . " ms : ". $message . " " . print_r( $obj, true ) );
-	}
-
-	/**
 	 * Process request.
 	 *
 	 * Relies on data in $_REQUEST, prints out json and exits.
@@ -194,10 +176,6 @@ class Rest_Update extends Base {
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
-
-			// DEBUG
-			$this->log("doing action: \"github_updater_pre_rest_process_request\"");
-			//
 
 			/**
 			 * Allow access into the REST Update process.
@@ -301,19 +279,44 @@ class Rest_Update extends Base {
 	 *
 	 * @param array $response
 	 * @param int   $code
-	 *
-	 * 128 == JSON_PRETTY_PRINT
-	 * 64 == JSON_UNESCAPED_SLASHES
 	 */
 	private function log_exit( $response, $code ) {
-		$json_encode_flags = 128 | 64;
 
-		error_log( json_encode( $response, $json_encode_flags ) );
-		unset( $response['success'] );
+		$this->log($response, $code);
+
 		if ( 200 === $code ) {
-			wp_die( wp_send_json_success( $response, $code ) );
+			wp_send_json_success( $response, $code );
 		} else {
-			wp_die( wp_send_json_error( $response, $code ) );
+			wp_send_json_error( $response, $code );
 		}
 	}
+
+	/**
+	 * Create a new record within the "ghu_logs" table and
+	 * (optionally) append to debug.log
+	 */
+	public function log($response, $code)
+	{
+		  // 128 == JSON_PRETTY_PRINT
+		  // 64 == JSON_UNESCAPED_SLASHES
+			$json_encode_flags = 128 | 64;
+
+			error_log( json_encode( $response, $json_encode_flags ) );
+
+	    global $wpdb;
+	    $table_name = $wpdb->prefix . 'ghu_logs'; // do not forget about tables prefix
+
+			$update_resource="";
+			if(isset( $_REQUEST['plugin'] )) $update_resource=$_REQUEST['plugin'];
+			if(isset( $_REQUEST['theme'] )) $update_resource=$_REQUEST['theme'];
+
+	    $wpdb->insert($table_name, array(
+				  'status' => $code,
+	        'time' => $this->time ,
+					'elapsed_time' => $response['elapsed_time'],
+					'update_resource' => $update_resource,
+					'webhook_source' => $response['webhook']['webhook_source'],
+	    ));
+	}
+
 }
