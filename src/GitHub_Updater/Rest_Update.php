@@ -48,7 +48,10 @@ class Rest_Update extends Base {
 		parent::__construct();
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
-		$this->time = current_time( 'mysql' );
+
+		$this->datetime = current_time( 'mysql' );
+		$this->update_resource = "";
+		$this->error = false;
 	}
 
 	/**
@@ -150,7 +153,7 @@ class Rest_Update extends Base {
 	 * Is there an error?
 	 */
 	public function is_error() {
-		return $this->upgrader_skin->error;
+		return $this->upgrader_skin->error || $this->error;
 	}
 
 	/**
@@ -199,33 +202,38 @@ class Rest_Update extends Base {
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
+				$this->update_resource = $_REQUEST['plugin'];
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
+				$this->update_resource = $_REQUEST['theme'];
 				$this->update_theme( $_REQUEST['theme'], $tag );
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = array(
-				'success'      => false,
-				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET,
-				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-			);
-			$this->log_exit( $http_response, 417 );
+			$this->error = true;
 		}
 
-		$response = array(
-			'success'      => true,
-			'messages'     => $this->get_messages(),
+		$http_response = array(
+			'messages'     => $e->getMessage(),
 			'webhook'      => $_GET,
-			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+			'elapsed_time' => $this->time_lapse($start),
 		);
+		$code = $this->status_code();
 
-		if ( $this->is_error() ) {
-			$this->log_exit( $response, 417 );
+		$this->log( $http_response, $code);
+
+		// Send the HTTP Response
+		switch($code){
+			case 200: wp_send_json_success( $response, $code );	break;
+			case 417: wp_send_json_error( $response, $code );		break;
+			default:
+				//TODO: handle other response codes
+				$response['success'] = false; // or better true?
+				wp_send_json( $response, $code );
+			break;
 		}
-		$this->log_exit( $response, 200 );
+
 	}
 
 	/**
@@ -275,48 +283,49 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Append $response to debug.log and wp_die().
+  * A "fancy" time_lapse calculator (it prefers "s" vs "ms")
+  */
+public function time_lapse($start, $end = null){
+	$end = isset($end) ? $end : microtime( true );
+	$lapse = ( $end - $start ); 													// microseconds
+	if($lapse < 1) return round($lapse * 1000, 2). ' ms'; // millis
+	return round($lapse, 2) . ' s'; 											// seconds
+}
+
+/**
+  * Calculate the status code for the HTTP Response
+  */
+  public function status_code() {
+       $status_code = 200;
+       if ( $this->is_error() ) {
+            $status_code = 417;
+       }
+       return $status_code;
+  }
+
+	/**
+	 * Append $response to debug.log and within the GHU_TABLE_LOGS table
 	 *
 	 * @param array $response
 	 * @param int   $code
 	 */
-	private function log_exit( $response, $code ) {
+	private function log( $response, $code ) {
 
-		$this->log($response, $code);
+    // Append to debug.log
+		// 128 == JSON_PRETTY_PRINT
+		// 64 == JSON_UNESCAPED_SLASHES
+		$json_encode_flags = 128 | 64;
+		error_log( json_encode( $response, $json_encode_flags ) );
 
-		if ( 200 === $code ) {
-			wp_send_json_success( $response, $code );
-		} else {
-			wp_send_json_error( $response, $code );
-		}
-	}
+    // Create a new record within the GHU_TABLE_LOGS table
+		Rest_Log_Table::insert_db_record(array(
+				'status' => $code,
+				'time' => $this->datetime ,
+				'elapsed_time' => $response['elapsed_time'],
+				'update_resource' => $this->update_resource,
+				'webhook_source' => $response['webhook']['webhook_source'],
+		));
 
-	/**
-	 * Create a new record within the "ghu_logs" table and
-	 * (optionally) append to debug.log
-	 */
-	public function log($response, $code)
-	{
-		  // 128 == JSON_PRETTY_PRINT
-		  // 64 == JSON_UNESCAPED_SLASHES
-			$json_encode_flags = 128 | 64;
-
-			error_log( json_encode( $response, $json_encode_flags ) );
-
-	    global $wpdb;
-	    $table_name = $wpdb->prefix . 'ghu_logs'; // do not forget about tables prefix
-
-			$update_resource="";
-			if(isset( $_REQUEST['plugin'] )) $update_resource=$_REQUEST['plugin'];
-			if(isset( $_REQUEST['theme'] )) $update_resource=$_REQUEST['theme'];
-
-	    $wpdb->insert($table_name, array(
-				  'status' => $code,
-	        'time' => $this->time ,
-					'elapsed_time' => $response['elapsed_time'],
-					'update_resource' => $update_resource,
-					'webhook_source' => $response['webhook']['webhook_source'],
-	    ));
 	}
 
 }
