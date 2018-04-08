@@ -222,6 +222,7 @@ class Rest_Update extends Base {
 		);
 
 		if ( $this->is_error() ) {
+			$response['success'] = false;
 			$this->log_exit( $response, 417 );
 		}
 		$this->log_exit( $response, 200 );
