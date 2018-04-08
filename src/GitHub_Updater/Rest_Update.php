@@ -170,12 +170,6 @@ class Rest_Update extends Base {
 	public function process_request() {
 		$start = microtime( true );
 		try {
-			/*
-			 * 128 == JSON_PRETTY_PRINT
-			 * 64 == JSON_UNESCAPED_SLASHES
-			 */
-			$json_encode_flags = 128 | 64;
-
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
@@ -211,41 +205,26 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			//http_response_code( 417 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 417 Expectation Failed' );
-			header( 'Content-Type: application/json' );
-
-			$http_response = json_encode( array(
+			$http_response = array(
+				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-				'error'        => true,
-			), $json_encode_flags );
-			error_log( $http_response );
-			echo $http_response;
-			exit;
+			);
+			$this->log_exit( $http_response, 417 );
 		}
 
-		header( 'Content-Type: application/json' );
-
 		$response = array(
+			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 		);
 
 		if ( $this->is_error() ) {
-			$response['error'] = true;
-			//http_response_code( 417 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 417 Expectation Failed' );
-		} else {
-			$response['success'] = true;
+			$this->log_exit( $response, 417 );
 		}
-
-		$http_response = json_encode( $response, $json_encode_flags ) . "\n";
-		error_log( $http_response );
-		echo $http_response;
-		exit;
+		$this->log_exit( $response, 200 );
 	}
 
 	/**
@@ -289,5 +268,26 @@ class Rest_Update extends Base {
 				break;
 		}
 		$_GET['webhook_source'] = $webhook_source;
+	}
+
+	/**
+	 * Append $response to debug.log and wp_die().
+	 *
+	 * @param array $response
+	 * @param int   $code
+	 *
+	 * 128 == JSON_PRETTY_PRINT
+	 * 64 == JSON_UNESCAPED_SLASHES
+	 */
+	private function log_exit( $response, $code ) {
+		$json_encode_flags = 128 | 64;
+
+		error_log( json_encode( $response, $json_encode_flags ) );
+		unset( $response['success'] );
+		if ( 200 === $code ) {
+			wp_die( wp_send_json_success( $response, $code ) );
+		} else {
+			wp_die( wp_send_json_error( $response, $code ) );
+		}
 	}
 }
