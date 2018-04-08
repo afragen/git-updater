@@ -134,9 +134,11 @@ class Init extends Base {
 
        $sql = "CREATE TABLE " . $table_name . " (
 				 id int(11) NOT NULL AUTO_INCREMENT,
+				 status int(11) NOT NULL,
 	       time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	       url text DEFAULT '' NOT NULL,
 	       elapsed_time tinytext DEFAULT '' NOT NULL,
+				 update_resource tinytext DEFAULT '' NOT NULL,
+				 webhook_source tinytext DEFAULT '' NOT NULL,
 	       PRIMARY KEY  (id)
 			 );";
 

@@ -91,9 +91,11 @@ if ( ! defined( 'WPINC' ) ) {
      {
          $columns = array(
              'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
+						 'status' => __('Status', 'github-updater'),
              'time' => __('Request Time', 'github-updater'),
-             'url' => __('Request URL', 'github-updater'),
              'elapsed_time' => __('Elapsed Time', 'github-updater'),
+						 'update_resource' => __('Update Resource', 'github-updater'),
+						 'webhook_source' => __('Webhook Source', 'github-updater'),
          );
          return $columns;
      }
@@ -108,9 +110,11 @@ if ( ! defined( 'WPINC' ) ) {
      function get_sortable_columns()
      {
          $sortable_columns = array(
+					   'status' => array('status', false),
              'time' => array('time', true),
-             'url' => array('url', false),
              'elapsed_time' => array('elapsed_time', false),
+						 'update_resource' => array('update_resource', false),
+						 'webhook_source' => array('webhook_source', false),
          );
          return $sortable_columns;
      }
