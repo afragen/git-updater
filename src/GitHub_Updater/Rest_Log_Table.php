@@ -23,6 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Rest Log Table
  *
  * Class that will display our custom table records in nice table
+ * based on: https://github.com/pmbaldha/WP-Custom-List-Table-With-Database-Example
  *
  * @package Fragen\GitHub_Updater
  */
@@ -91,11 +92,11 @@ if ( ! defined( 'WPINC' ) ) {
      {
          $columns = array(
              'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
-						 'status' => __('Status', 'github-updater'),
-             'time' => __('Request Time', 'github-updater'),
-             'elapsed_time' => __('Elapsed Time', 'github-updater'),
-						 'update_resource' => __('Update Resource', 'github-updater'),
-						 'webhook_source' => __('Webhook Source', 'github-updater'),
+						 'status' => __('Status Code', 'github-updater'),
+             'time' => __('Local Time', 'github-updater'),
+             'elapsed_time' => __('Elapsed time', 'github-updater'),
+						 'update_resource' => __('Theme/Plugin Name', 'github-updater'),
+						 'webhook_source' => __('Hook Source', 'github-updater'),
          );
          return $columns;
      }
@@ -142,7 +143,7 @@ if ( ! defined( 'WPINC' ) ) {
      function process_bulk_action()
      {
          global $wpdb;
-         $table_name = $wpdb->prefix . 'ghu_logs'; // do not forget about tables prefix
+         $table_name = $wpdb->prefix . GHU_TABLE_LOGS; // do not forget about tables prefix
 
          if ('delete' === $this->current_action()) {
              $ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
@@ -162,7 +163,7 @@ if ( ! defined( 'WPINC' ) ) {
      function prepare_items()
      {
          global $wpdb;
-         $table_name = $wpdb->prefix . 'ghu_logs'; // do not forget about tables prefix
+         $table_name = $wpdb->prefix . GHU_TABLE_LOGS; // do not forget about tables prefix
 
          $per_page = 5; // constant, how much records will be shown per page
 
@@ -220,7 +221,7 @@ if ( ! defined( 'WPINC' ) ) {
 		     ?>
 				 <hr style="clear: both;">
 				 <div class="wrap">
-				     <h3><?php _e('Logs', 'github-updater')?></h3>
+				     <h3><?php _e('Recent Requests', 'github-updater')?></h3>
 				     <?php echo $message; ?>
 
 				     <form id="persons-table" method="GET">
@@ -230,5 +231,63 @@ if ( ! defined( 'WPINC' ) ) {
 
 				 </div>
 				 <?php
+		 }
+
+		 /**
+		  * Create or updates to the "ghu_logs" table latest db version
+		  *
+		  * TODO: move in a better place?
+		  */
+		 public static function update_db_table()
+		 {
+			 global $wpdb;
+
+			 $installed_ver = get_site_option('ghu_db_version');
+			 if ($installed_ver != GHU_DB_VERSION) {
+
+				 $table_name = $wpdb->prefix . GHU_TABLE_LOGS;
+
+				 if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+
+					 $sql = "CREATE TABLE " . $table_name . " (
+						 id int(11) NOT NULL AUTO_INCREMENT,
+						 status int(11) NOT NULL,
+						 time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+						 elapsed_time tinytext DEFAULT '' NOT NULL,
+						 update_resource tinytext DEFAULT '' NOT NULL,
+						 webhook_source tinytext DEFAULT '' NOT NULL,
+						 test tinytext DEFAULT '' NOT NULL,
+						 PRIMARY KEY  (id)
+					 );";
+
+					 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+					 dbDelta($sql);
+
+					 // save current database version for later use (on upgrade)
+					 update_site_option('ghu_db_version', GHU_DB_VERSION);
+				 }
+			 }
+		 }
+
+		 /**
+		  * Delete the "ghu_logs" table from db
+		  *
+		  * TODO: move in a better place?
+		  */
+		 public static function drop_db_table()
+		 {
+			 global $wpdb;
+			 $sql = "DROP TABLE {$wpdb->prefix}".GHU_TABLE_LOGS;
+			 $wpdb->query($sql);
+		 }
+
+		 /**
+		  * Insert a new log entry to the "ghu_logs" table
+		  */
+		 public static function insert_db_record($row)
+		 {
+			 global $wpdb;
+			 $table_name = $wpdb->prefix . GHU_TABLE_LOGS; // do not forget about tables prefix
+			 $wpdb->insert($table_name, $row);
 		 }
  }
