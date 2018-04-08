@@ -123,28 +123,11 @@ class Init extends Base {
 	}
 
 	/**
-	* Runs via plugin activation hook & creates a database table ("ghu-logs")
+	* Runs via plugin activation hook
 	*/
 	public static function install()
 	{
-		global $wpdb;
-
-    $table_name = $wpdb->prefix . "ghu_logs";
-    if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-
-       $sql = "CREATE TABLE " . $table_name . " (
-				 id int(11) NOT NULL AUTO_INCREMENT,
-				 status int(11) NOT NULL,
-	       time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	       elapsed_time tinytext DEFAULT '' NOT NULL,
-				 update_resource tinytext DEFAULT '' NOT NULL,
-				 webhook_source tinytext DEFAULT '' NOT NULL,
-	       PRIMARY KEY  (id)
-			 );";
-
-       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-       dbDelta($sql);
-    }
+		Rest_Log_Table::update_db_table(); // create a database table ("ghu-logs")
 	}
 
 }
