@@ -187,18 +187,8 @@ class Rest_Update extends Base {
 	 * update available as specified in the webhook payload.
 	 */
 	public function process_request() {
+		$start = microtime( true );
 		try {
-
-			// DEBUG
-			$this->log("ENTERING IN \"process_request\", \$_REQUEST = ", $_REQUEST);
-			//
-
-			/*
-			 * 128 == JSON_PRETTY_PRINT
-			 * 64 == JSON_UNESCAPED_SLASHES
-			 */
-			$json_encode_flags = 128 | 64;
-
 			if ( ! isset( $_REQUEST['key'] ) ||
 			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
 			) {
@@ -224,15 +214,9 @@ class Rest_Update extends Base {
 				$tag = $_REQUEST['committish'];
 			}
 
-			$current_branch   = $this->get_local_branch();
-			$webhook_response = $this->get_webhook_source();
-
-			// DEBUG
-			 $this->log("\$current_branch = ", $current_branch);
-			 $this->log("\$webhook_response = ", $webhook_response);
-			//
-
-			if ( null !== $current_branch && $tag !== $current_branch ) {
+			$current_branch = $this->get_local_branch();
+			$this->get_webhook_source();
+			if ( $tag !== $current_branch ) {
 				throw new \UnexpectedValueException( 'Request tag and webhook are not matching.' );
 			}
 
@@ -244,62 +228,46 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			//http_response_code( 417 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 417 Expectation Failed' );
-			header( 'Content-Type: application/json' );
-
-			$http_response = json_encode( array(
-				'message' => $e->getMessage(),
-				'error'   => true,
-			), $json_encode_flags );
-
-			// DEBUG
-			$this->log("ENDING \"\\Exception\", \$http_response = ", $http_response);
-			//
-
-			echo $http_response;
-			exit;
+			$http_response = array(
+				'success'      => false,
+				'messages'     => $e->getMessage(),
+				'webhook'      => $_GET,
+				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+			);
+			$this->log_exit( $http_response, 417 );
 		}
 
-		header( 'Content-Type: application/json' );
-
 		$response = array(
-			'messages' => $this->get_messages(),
-			'response' => $webhook_response ?: $_GET,
+			'success'      => true,
+			'messages'     => $this->get_messages(),
+			'webhook'      => $_GET,
+			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 		);
 
 		if ( $this->is_error() ) {
-			$response['error'] = true;
-			//http_response_code( 417 ); //@TODO PHP 5.4
-			header( 'HTTP/1.1 417 Expectation Failed' );
-		} else {
-			$response['success'] = true;
+			$this->log_exit( $response, 417 );
 		}
-
-		$http_response = json_encode( $response, $json_encode_flags ) . "\n";
-
-		// DEBUG
-		$this->log("ENDING \"process_request\", \$http_response = ", $http_response);
-		//
-
-		echo $http_response;
-		exit;
+		$this->log_exit( $response, 200 );
 	}
 
 	/**
 	 * Returns the current branch of the local repository referenced in the webhook.
 	 *
-	 * @return string $current_branch
+	 * @return string $current_branch Default return is 'master'.
 	 */
 	private function get_local_branch() {
+		$repo = false;
 		if ( isset( $_REQUEST['plugin'] ) ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-			$repo  = isset($repos[ $_REQUEST['plugin'] ]) ? $repos[ $_REQUEST['plugin'] ] : null;
+			$repo  = isset( $repos[ $_REQUEST['plugin'] ] ) ? $repos[ $_REQUEST['plugin'] ] : false;
 		}
 		if ( isset( $_REQUEST['theme'] ) ) {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-			$repo  = isset($repos[ $_REQUEST['theme'] ]) ? $repos[ $_REQUEST['theme'] ] : null;
+			$repo  = isset( $repos[ $_REQUEST['theme'] ] ) ? $repos[ $_REQUEST['theme'] ] : false;
 		}
+		$current_branch = $repo ?
+			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
+			'master';
 
 		if ( isset($repo) ) {
 			$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
@@ -308,7 +276,7 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Sets the source of the webhook in upgrader skin.
+	 * Sets the source of the webhook to $_GET variable.
 	 */
 	private function get_webhook_source() {
 		switch ( $_SERVER ) {
@@ -325,7 +293,27 @@ class Rest_Update extends Base {
 				$webhook_source = 'browser';
 				break;
 		}
-		$this->upgrader_skin->messages[] = $webhook_source;
-		return $webhook_source;
+		$_GET['webhook_source'] = $webhook_source;
+	}
+
+	/**
+	 * Append $response to debug.log and wp_die().
+	 *
+	 * @param array $response
+	 * @param int   $code
+	 *
+	 * 128 == JSON_PRETTY_PRINT
+	 * 64 == JSON_UNESCAPED_SLASHES
+	 */
+	private function log_exit( $response, $code ) {
+		$json_encode_flags = 128 | 64;
+
+		error_log( json_encode( $response, $json_encode_flags ) );
+		unset( $response['success'] );
+		if ( 200 === $code ) {
+			wp_die( wp_send_json_success( $response, $code ) );
+		} else {
+			wp_die( wp_send_json_error( $response, $code ) );
+		}
 	}
 }
