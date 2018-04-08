@@ -76,3 +76,6 @@ $ghu['init']->run();
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
 add_action( 'admin_init', array( 'PAnD', 'init' ) );
+
+//TODO: better place?
+register_activation_hook( __FILE__, array( 'Fragen\\GitHub_Updater\\Init', 'install') );

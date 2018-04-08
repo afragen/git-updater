@@ -122,4 +122,27 @@ class Init extends Base {
 		return $can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
 	}
 
+	/**
+	* Runs via plugin activation hook & creates a database table ("ghu-logs")
+	*/
+	public static function install()
+	{
+		global $wpdb;
+
+    $table_name = $wpdb->prefix . "ghu_logs";
+    if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+
+       $sql = "CREATE TABLE " . $table_name . " (
+				 id int(11) NOT NULL AUTO_INCREMENT,
+	       time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	       url text DEFAULT '' NOT NULL,
+	       elapsed_time tinytext DEFAULT '' NOT NULL,
+	       PRIMARY KEY  (id)
+			 );";
+
+       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+       dbDelta($sql);
+    }
+	}
+
 }
