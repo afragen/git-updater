@@ -276,6 +276,10 @@ class Settings extends Base {
 				<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
 					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
 				</form>
+				<?php
+					$table = new Rest_Log_Table();
+					$table->output();
+				?>
 			<?php endif; ?>
 		</div>
 		<?php
