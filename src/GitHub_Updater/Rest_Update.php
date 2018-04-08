@@ -51,7 +51,6 @@ class Rest_Update extends Base {
 
 		$this->datetime = current_time( 'mysql' );
 		$this->update_resource = "";
-		$this->error = false;
 	}
 
 	/**
@@ -153,7 +152,7 @@ class Rest_Update extends Base {
 	 * Is there an error?
 	 */
 	public function is_error() {
-		return $this->upgrader_skin->error || $this->error;
+		return $this->upgrader_skin->error;
 	}
 
 	/**
@@ -210,30 +209,29 @@ class Rest_Update extends Base {
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
+
+			if ( $this->is_error() ) {
+				$status_code = 417;
+			} else {
+				$status_code = 200;
+			}
+
+			$messages = $this->getMessage();
+
 		} catch ( \Exception $e ) {
-			$this->error = true;
+			$status_code = 417;
+			$messages = $e->getMessage();
+
+		} finally{
+
+			$http_response = array(
+				'messages'     => $messages,
+				'webhook'      => $_GET,
+				'elapsed_time' => $this->time_lapse($start),
+			);
+			$this->log_exit( $http_response, $status_code);
+
 		}
-
-		$http_response = array(
-			'messages'     => $e->getMessage(),
-			'webhook'      => $_GET,
-			'elapsed_time' => $this->time_lapse($start),
-		);
-		$code = $this->status_code();
-
-		$this->log( $http_response, $code);
-
-		// Send the HTTP Response
-		switch($code){
-			case 200: wp_send_json_success( $response, $code );	break;
-			case 417: wp_send_json_error( $response, $code );		break;
-			default:
-				//TODO: handle other response codes
-				$response['success'] = false; // or better true?
-				wp_send_json( $response, $code );
-			break;
-		}
-
 	}
 
 	/**
@@ -292,24 +290,14 @@ public function time_lapse($start, $end = null){
 	return round($lapse, 2) . ' s'; 											// seconds
 }
 
-/**
-  * Calculate the status code for the HTTP Response
-  */
-  public function status_code() {
-       $status_code = 200;
-       if ( $this->is_error() ) {
-            $status_code = 417;
-       }
-       return $status_code;
-  }
-
 	/**
 	 * Append $response to debug.log and within the GHU_TABLE_LOGS table
+	 * and finally do a "wp_send_json"
 	 *
 	 * @param array $response
-	 * @param int   $code
+	 * @param int   $status_code
 	 */
-	private function log( $response, $code ) {
+	private function log_exit( $response, $status_code ) {
 
     // Append to debug.log
 		// 128 == JSON_PRETTY_PRINT
@@ -319,12 +307,23 @@ public function time_lapse($start, $end = null){
 
     // Create a new record within the GHU_TABLE_LOGS table
 		Rest_Log_Table::insert_db_record(array(
-				'status' => $code,
+				'status' => $status_code,
 				'time' => $this->datetime ,
 				'elapsed_time' => $response['elapsed_time'],
 				'update_resource' => $this->update_resource,
 				'webhook_source' => $response['webhook']['webhook_source'],
 		));
+
+		// Send the HTTP Response
+		switch($status_code){
+			case 200: wp_send_json_success( $response, $status_code );	break;
+			case 417: wp_send_json_error( $response, $status_code );		break;
+			default:
+				//TODO: handle other response codes
+				$response['success'] = false; // or better true?
+				wp_send_json( $response, $status_code );
+			break;
+		}
 
 	}
 
