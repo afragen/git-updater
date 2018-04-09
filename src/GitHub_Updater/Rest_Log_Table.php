@@ -222,6 +222,7 @@ if ( ! defined( 'WPINC' ) ) {
 				 <hr style="clear: both;">
 				 <div class="wrap">
 				     <h3><?php _e('Recent Requests', 'github-updater')?></h3>
+						 <p>Refer to the wiki to know about: <a href="https://github.com/afragen/github-updater/wiki/Messages" target="_blank">Response Codes</a>, <a href="https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints#restful-endpoints-for-remote-management" target="_blank">Rest API</a></p>
 				     <?php echo $message; ?>
 
 				     <form id="persons-table" method="GET">
