@@ -103,6 +103,7 @@ class Settings extends Base {
 			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
 			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
 			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
+			'github_updater_faq' => esc_html__( 'FAQ', 'github-updater' ),
 		);
 	}
 
@@ -280,6 +281,23 @@ class Settings extends Base {
 					$table = new Rest_Log_Table();
 					$table->output();
 				?>
+			<?php endif; ?>
+
+			<?php if ( 'github_updater_faq' === $tab ) : ?>
+				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
+				<p>
+					<?php
+						 printf(esc_html__('FAQs under construction, for any doubts refer to: %s, %s, %s', 'github-updater'),'<a href="https://github.com/afragen/github-updater/wiki" target="_blank">wiki</a>','<a href="https://github.com/afragen/github-updater/issues" target="_blank">github</a>',
+						 '<a href="https://github-updater.herokuapp.com/" target="_blank">slack</a>'
+						 );
+					 ?>
+				</p>
+				<hr>
+				<span style="float:right;">
+				<?php
+					 printf(esc_html__('Contribute to %s', 'github-updater'),'<a href="https://github.com/afragen/github-updater" target="_blank">github-updater</a>');
+				?>
+				</span>
 			<?php endif; ?>
 		</div>
 		<?php
