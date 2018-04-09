@@ -601,6 +601,11 @@ class Settings extends Base {
 	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
+
+		printf( '<p>' . esc_html( 'Please refer to the %s for more details on how to configure the Git Hosts tabs') . '</p>', '<a href="https://github.com/afragen/github-updater/wiki/Settings#settings-tabs-for-git-hosts" target="_blank">wiki</a>' );
+
+		print( '<hr>' );
+
 		if ( $this->is_override_dot_org() ) {
 			printf( esc_html__( 'Override Dot Org is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
 		} else {
