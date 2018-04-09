@@ -8,7 +8,6 @@ notifications:
     on_failure: change
 
 php:
-  - 5.4
   - 5.6
   - 7.0
   - 7.1
@@ -17,15 +16,6 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
   - WP_VERSION=latest WP_MULTISITE=1
-
-matrix:
-  include:
-    - php: 5.3
-      env: WP_VERSION=latest WP_MULTISITE=0
-      dist: precise
-    - php: 5.3
-      env: WP_VERSION=latest WP_MULTISITE=1
-      dist: precise
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION

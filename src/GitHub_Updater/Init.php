@@ -45,6 +45,9 @@ class Init extends Base {
 		add_action( 'init', array( &$this, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
+		add_action( 'upgrader_process_complete', function() {
+			delete_site_option( 'ghu-' . md5( 'repos' ) );
+		} );
 
 		// Delete get_plugins() and wp_get_themes() cache.
 		add_action( 'deleted_plugin', function() {
@@ -54,7 +57,7 @@ class Init extends Base {
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', self::$options )->load_authentication_hooks();
+			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->load_authentication_hooks();
 		}
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
@@ -65,7 +68,7 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download',
 				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', self::$options ),
+					Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options ),
 					'upgrader_pre_download',
 				), 10, 3 );
 		}
@@ -109,7 +112,7 @@ class Init extends Base {
 		// Add Settings menu.
 		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
 			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( Singleton::get_instance( 'Settings' ), 'add_plugin_page' ) );
+				array( Singleton::get_instance( 'Settings', $this ), 'add_plugin_page' ) );
 		}
 
 		foreach ( array_keys( Settings::$remote_management ) as $key ) {

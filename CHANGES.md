@@ -1,5 +1,20 @@
 #### [unreleased]
 
+#### 7.6.0 / 2018-04-08
+* added "safety orange" warning dashicon when waiting for WP-Cron to finish
+* changed all password fields to use `type="password"`
+* refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
+* moved GitLab specific admin notices to `GitLab_API`
+* pass `$this` in `Singleton::get_instance()` instead of using `debug_backtrace()`
+* refactor `Singleton` to automatically find namespaced class
+* added some error handling to `Singleton`
+* fixed error messaging
+* added support for [Gitea](http://gitea.io/) thanks to [Marco Betschart](https://github.com/marbetschar)
+* refactored code out of `class API` into specific API classes
+* simplify RESTful update code, no longer parses webhook payload just webhook itself
+* updated RESTful update code to use `site_transient_{$transient}` filter to add to update transient
+* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response, thanks @Raruto
+
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues
 * fixed `API::set_readme_info()` to see passed parameter as readme data

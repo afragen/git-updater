@@ -8,7 +8,7 @@
  */
 jQuery( document ).ready( function( $ ) {
 	// Hide non-default (Bitbucket & GitLab) settings on page load
-	$.each( [ 'bitbucket', 'gitlab' ], function() {
+	$.each( [ 'bitbucket', 'gitlab', 'gitea' ], function() {
 		$( 'input.'.concat( this, '_setting') ).parents( 'tr').hide();
 	});
 
@@ -16,7 +16,7 @@ jQuery( document ).ready( function( $ ) {
 	$( 'select[ name="github_updater_api" ]' ).on( 'change', function() {
 
 		// create difference array
-		var hideMe = $( [ 'github', 'bitbucket', 'gitlab' ] ).not( [ this.value ] ).get();
+		var hideMe = $( [ 'github', 'bitbucket', 'gitlab', 'gitea' ] ).not( [ this.value ] ).get();
 
 		/*
 		 * Show/hide all settings that have the selected api's class.

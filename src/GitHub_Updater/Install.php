@@ -48,7 +48,7 @@ class Install extends Base {
 		$this->load_options();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu_install.js' ), array(), false, true );
+		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
 	}
 
 	/**
@@ -86,6 +86,9 @@ class Install extends Base {
 				case 'gitlab':
 					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
 					break;
+				case 'gitea':
+					$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
+					break;
 			}
 		}
 
@@ -120,7 +123,7 @@ class Install extends Base {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['github_updater_api'] ) {
-				self::$install = Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->remote_install( $headers, self::$install );
+				self::$install = Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 			}
 
 			/*
@@ -129,13 +132,13 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
 				if ( static::$installed_apis['bitbucket_api'] ) {
-					self::$install = Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
 				if ( static::$installed_apis['bitbucket_server_api'] ) {
-					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -146,7 +149,17 @@ class Install extends Base {
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
 				if ( static::$installed_apis['gitlab_api'] ) {
-					self::$install = Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->remote_install( $headers, self::$install );
+					self::$install = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
+				}
+			}
+
+			/*
+			 * Create Gitea endpoint.
+			 * Save Access Token if present.
+			 */
+			if ( 'gitea' === self::$install['github_updater_api'] ) {
+				if ( static::$installed_apis['gitea_api'] ) {
+					self::$install = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
@@ -197,7 +210,7 @@ class Install extends Base {
 				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
 
 				// Save branch setting.
-				Singleton::get_instance( 'Branch' )->set_branch_on_install( self::$install );
+				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
 
 				// Delete get_plugins() and wp_get_themes() cache.
 				delete_site_option( 'ghu-' . md5( 'repos' ) );
@@ -292,14 +305,18 @@ class Install extends Base {
 			$type
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', new \stdClass() )->add_install_settings_fields( $type );
+		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_install_settings_fields( $type );
 
 		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', new \stdClass() )->add_install_settings_fields( $type );
+			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_install_settings_fields( $type );
 		}
 
 		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', new \stdClass() )->add_install_settings_fields( $type );
+			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_install_settings_fields( $type );
+		}
+
+		if ( static::$installed_apis['gitea_api'] ) {
+			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_install_settings_fields( $type );
 		}
 	}
 

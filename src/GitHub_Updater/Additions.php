@@ -80,7 +80,7 @@ class Additions {
 		}
 		if ( null === ( $config = json_decode( $json_config, true ) ) ) {
 			$error = new \WP_Error( 'json_invalid', 'JSON ' . json_last_error_msg() );
-			Singleton::get_instance( 'Messages' )->create_error_message( $error );
+			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
 
 			return false;
 		}
@@ -132,6 +132,11 @@ class Additions {
 				case 'gitlab_theme':
 					$addition['slug']                                  = $repo['slug'];
 					$addition[ 'GitLab ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
+					break;
+				case 'gitea_plugin':
+				case 'gitea_theme':
+					$addition['slug']                                 = $repo['slug'];
+					$addition[ 'Gitea ' . ucwords( $type ) . ' URI' ] = $repo['uri'];
 					break;
 			}
 

@@ -36,7 +36,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * GitHub_Updater_CLI_Integration constructor.
 	 */
 	public function __construct() {
-		$this->base = Singleton::get_instance( 'Base' );
+		$this->base = Singleton::get_instance( 'Base', $this );
 		$this->run();
 	}
 
@@ -57,7 +57,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_plugins() {
 		$this->base->get_meta_plugins();
 		$current = get_site_transient( 'update_plugins' );
-		$current = Singleton::get_instance( 'Plugin' )->pre_set_site_transient_update_plugins( $current );
+		$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
 	}
 
@@ -70,7 +70,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_themes() {
 		$this->base->get_meta_themes();
 		$current = get_site_transient( 'update_themes' );
-		$current = Singleton::get_instance( 'Theme' )->pre_set_site_transient_update_themes( $current );
+		$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
 	}
 
@@ -89,7 +89,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--token=<access_token>]
-	 * : GitHub or GitLab access token if not already saved
+	 * : GitHub, GitLab, or Gitea access token if not already saved
 	 *
 	 * [--bitbucket-private]
 	 * : Indicates a private Bitbucket repository
@@ -105,6 +105,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitlab]
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
+	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
 	 *
 	 * ## EXAMPLES
 	 *
@@ -124,16 +128,16 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_plugin( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install' )->install( 'plugin', $cli_config );
+		Singleton::get_instance( 'Install', $this )->install( 'plugin', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Plugin %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Plugin %s installed.', "'$slug'" ) );
 	}
 
 	/**
-	 * Install theme from GitHub, Bitbucket, or GitLab using GitHub Updater.
+	 * Install theme from GitHub, Bitbucket, GitLab, or Gitea using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
@@ -164,6 +168,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * : Optional switch to denote a GitLab repository
 	 * Required when installing from a self-hosted GitLab installation
 	 *
+	 * [--gitea]
+	 * : Optional switch to denote a Gitea repository
+	 * Required when installing from a Gitea installation
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-theme
@@ -182,12 +190,12 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_theme( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install' )->install( 'theme', $cli_config );
+		Singleton::get_instance( 'Install', $this )->install( 'theme', $cli_config );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( esc_html__( 'Theme %s installed.', 'github-updater' ), "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Theme %s installed.', "'$slug'" ) );
 	}
 
 	/**
@@ -218,6 +226,9 @@ class CLI_Integration extends WP_CLI_Command {
 			case isset( $assoc_args['gitlab'] ):
 				$cli_config['git'] = 'gitlab';
 				break;
+			case isset( $assoc_args['gitea'] ):
+				$cli_config['git'] = 'gitea';
+				break;
 		}
 
 		return $cli_config;
@@ -233,7 +244,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$branch_data['github_updater_branch'] = $cli_config['branch'];
 		$branch_data['repo']                  = $slug;
 
-		Singleton::get_instance( 'Branch' )->set_branch_on_install( $branch_data );
+		Singleton::get_instance( 'Branch', $this )->set_branch_on_install( $branch_data );
 	}
 
 }

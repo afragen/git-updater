@@ -12,7 +12,8 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\GitHub_API,
-	Fragen\GitHub_Updater\API\GitLab_API;
+	Fragen\GitHub_Updater\API\GitLab_API,
+	Fragen\GitHub_Updater\API\Gitea_API;
 
 
 /*
@@ -78,7 +79,7 @@ class API {
 	 *
 	 */
 	public function __construct() {
-		$this->base            = $base = Singleton::get_instance( 'Base' );
+		$this->base            = $base = Singleton::get_instance( 'Base', $this );
 		static::$options       = $base::$options;
 		static::$extra_headers = $this->base->add_headers( array() );
 	}
@@ -121,10 +122,10 @@ class API {
 
 		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
 			if ( isset( $args['body']['plugins'] ) ) {
-				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_plugins' );
+				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_plugins' );
 			}
 			if ( isset( $args['body']['themes'] ) ) {
-				Singleton::get_instance( 'Base' )->make_update_transient_current( 'update_themes' );
+				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_themes' );
 			}
 		}
 
@@ -165,6 +166,10 @@ class API {
 				$arr['base_uri']      = 'https://gitlab.com/api/v3';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
+			case 'gitea':
+				$arr['repo']          = 'gitea';
+				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
+				$arr['base_download'] = $this->type->enterprise;
 		}
 
 		return $arr;
@@ -190,7 +195,7 @@ class API {
 		$allowed_codes = array( 200, 404 );
 
 		if ( is_wp_error( $response ) ) {
-			Singleton::get_instance( 'Messages' )->create_error_message( $response );
+			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
 			return false;
 		}
@@ -209,9 +214,17 @@ class API {
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
 			}
-			Singleton::get_instance( 'Messages' )->create_error_message( $type['repo'] );
+			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['repo'] );
 
 			return false;
+		}
+
+		// Gitea doesn't return json encoded raw file.
+		if ( $this instanceof Gitea_API ) {
+			$body = wp_remote_retrieve_body( $response );
+			if ( null === json_decode( $body ) ) {
+				return $body;
+			}
 		}
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
@@ -269,15 +282,23 @@ class API {
 				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				Singleton::get_instance( 'Basic_Auth_Loader', static::$options )->load_authentication_hooks();
+				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
+				break;
+			case 'gitea':
+				if ( $download_link ) {
+					$type['base_download'] = $type['base_uri'];
+					break;
+				}
+				$api      = new Gitea_API( $type['type'] );
+				$endpoint = $api->add_endpoints( $this, $endpoint );
 				break;
 			default:
 				break;
@@ -353,54 +374,6 @@ class API {
 	}
 
 	/**
-	 * Create release asset download link.
-	 * Filename must be `{$slug}-{$newest_tag}.zip`
-	 *
-	 * @access protected
-	 *
-	 * @return string $download_link
-	 */
-	protected function make_release_asset_download_link() {
-		$download_link = '';
-		switch ( $this->type->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$download_link = implode( '/', array(
-					'https://github.com',
-					$this->type->owner,
-					$this->type->repo,
-					'releases/download',
-					$this->type->newest_tag,
-					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
-				) );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				$download_link = implode( '/', array(
-					'https://bitbucket.org',
-					$this->type->owner,
-					$this->type->repo,
-					'downloads',
-					$this->type->repo . '-' . $this->type->newest_tag . '.zip',
-				) );
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				$download_link = implode( '/', array(
-					'https://gitlab.com/api/v3/projects',
-					urlencode( $this->type->owner . '/' . $this->type->repo ),
-					'builds/artifacts',
-					$this->type->newest_tag,
-					'download',
-				) );
-				$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
-				break;
-		}
-
-		return $download_link;
-	}
-
-	/**
 	 * Query wp.org for plugin/theme information.
 	 * Exit early and false for override dot org active.
 	 *
@@ -425,7 +398,7 @@ class API {
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
-				Singleton::get_instance( 'Messages' )->create_error_message( $response );
+				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
 				return false;
 			}
@@ -494,6 +467,12 @@ class API {
 				$token            = 'gitlab_access_token';
 				$token_enterprise = 'gitlab_enterprise_token';
 				break;
+			case 'gitea_plugin':
+			case 'gitea_theme':
+				$key              = 'access_token';
+				$token            = 'gitea_access_token';
+				$token_enterprise = 'gitea_access_token';
+				break;
 		}
 
 		// Add hosted access token.
@@ -545,63 +524,18 @@ class API {
 	}
 
 	/**
-	 * Parse tags and set object data.
+	 * Sort tags and set object data.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param array $parsed_tags
 	 *
 	 * @return bool
 	 */
-	protected function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
-		if ( false !== $response ) {
-			switch ( $repo_type['repo'] ) {
-				case 'github':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_uri'],
-							'repos',
-							$this->type->owner,
-							$this->type->repo,
-							'zipball/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag;
-					}
-					break;
-				case 'bitbucket':
-					foreach ( (array) $response as $tag ) {
-						$download_base    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'get/',
-						) );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_base . $tag . '.zip';
-					}
-					break;
-				case 'gitlab':
-					foreach ( (array) $response as $tag ) {
-						$download_link    = implode( '/', array(
-							$repo_type['base_download'],
-							$this->type->owner,
-							$this->type->repo,
-							'repository/archive.zip',
-						) );
-						$download_link    = add_query_arg( 'ref', $tag, $download_link );
-						$tags[]           = $tag;
-						$rollback[ $tag ] = $download_link;
-					}
-					break;
-			}
-
-		}
-		if ( empty( $tags ) ) {
+	protected function sort_tags( $parsed_tags ) {
+		if ( empty( $parsed_tags ) ) {
 			return false;
 		}
 
+		list( $tags, $rollback ) = $parsed_tags;
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 
@@ -638,15 +572,10 @@ class API {
 		}
 
 		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$response = base64_encode( $response );
-				break;
 			case 'bitbucket_plugin':
 			case 'bitbucket_theme':
 				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
+			default:
 				$response = base64_encode( $response );
 				break;
 		}
