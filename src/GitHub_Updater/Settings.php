@@ -257,9 +257,15 @@ class Settings extends Base {
 
 			<?php
 			if ( 'github_updater_install_plugin' === $tab ) {
+
+				printf( '<p>' . esc_html__( "Refer to %s for more details on remote %s installations", 'github-updater' ) . '</p><hr>','<a href="https://github.com/afragen/github-updater/wiki/Remote-Installation" target="_blank">wiki</a>', 'plugin');
+
 				Singleton::get_instance( 'Install', $this )->install( 'plugin' );
 			}
 			if ( 'github_updater_install_theme' === $tab ) {
+
+				printf( '<p>' . esc_html__( "Refer to %s for more details on remote %s installations", 'github-updater' ) . '</p><hr>','<a href="https://github.com/afragen/github-updater/wiki/Remote-Installation" target="_blank">wiki</a>', 'theme');
+
 				Singleton::get_instance( 'Install', $this )->install( 'theme' );
 			}
 			?>
