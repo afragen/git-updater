@@ -628,8 +628,11 @@ class Settings extends Base {
 
 		?>
 		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
-			<br>
+			<?php
+				printf(esc_html__( 'Please refer to the %s for a complete list of attributes and more details.', 'github-updater' ), '<a href="https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints" target="_blank">wiki</a>');
+			?>
+			<hr>
+			<?php esc_html_e( 'RESTful endpoints begin at:', 'github-updater' ); ?>
 			<span style="font-family:monospace;"><a href="<?php echo $api_url ?>" target="_blank"><?php echo $api_url ?></a></span>
 		</p>
 		<p>
