@@ -225,6 +225,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 				     <?php echo $message; ?>
 
+						 <p>
+							 <?php
+							 		esc_html_e('Everytime someone made a call to the Rest API Endpoint we stored some basic info about the request, you can use these details to easily figure out if something went wrong (or detect an excessive use of the api).', 'github-updater');
+							  ?>
+						 </p>
+
 				     <form id="persons-table" method="GET">
 				         <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>"/>
 				         <?php $table->display() ?>
