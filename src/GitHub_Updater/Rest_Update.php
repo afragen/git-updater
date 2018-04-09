@@ -212,8 +212,10 @@ class Rest_Update extends Base {
 
 			if ( $this->is_error() ) {
 				$status_code = 417;
+				$success = false;
 			} else {
 				$status_code = 200;
+				$success = true;
 			}
 
 			$messages = $this->getMessage();
@@ -221,10 +223,12 @@ class Rest_Update extends Base {
 		} catch ( \Exception $e ) {
 			$status_code = 417;
 			$messages = $e->getMessage();
+			$success = false;
 
 		} finally{
 
 			$http_response = array(
+				'success'      => $success,
 				'messages'     => $messages,
 				'webhook'      => $_GET,
 				'elapsed_time' => $this->time_lapse($start),
@@ -309,6 +313,8 @@ public function time_lapse($start, $end = null){
 				'update_resource' => $this->update_resource,
 				'webhook_source' => $response['webhook']['webhook_source'],
 		));
+
+		unset( $response['success'] ); // used only to log (wp_send_json already add it)
 
 		// Send the HTTP Response
 		switch($status_code){
