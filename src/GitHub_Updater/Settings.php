@@ -631,6 +631,7 @@ class Settings extends Base {
 			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
 			<br>
 			<span style="font-family:monospace;"><a href="<?php echo $api_url ?>" target="_blank"><?php echo $api_url ?></a></span>
+		</p>
 		<p>
 			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
 		</p>
