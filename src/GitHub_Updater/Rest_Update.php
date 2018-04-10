@@ -299,13 +299,13 @@ public function time_lapse($start, $end = null){
 	 */
 	private function log_exit( $response, $status_code ) {
 
-    // Append to debug.log
+		// Append to debug.log
 		// 128 == JSON_PRETTY_PRINT
 		// 64 == JSON_UNESCAPED_SLASHES
 		$json_encode_flags = 128 | 64;
 		error_log( json_encode( $response, $json_encode_flags ) );
 
-    // Create a new record within the GHU_TABLE_LOGS table
+		// Create a new record within the GHU_TABLE_LOGS table
 		Rest_Log_Table::insert_db_record(array(
 				'status' => $status_code,
 				'time' => $this->datetime ,
