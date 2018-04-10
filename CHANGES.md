@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.6.0 / 2018-04-08
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
 * changed all password fields to use `type="password"`
 * refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
@@ -11,7 +13,7 @@
 * refactored code out of `class API` into specific API classes
 * simplify RESTful update code, no longer parses webhook payload just webhook itself
 * updated RESTful update code to use `site_transient_{$transient}` filter to add to update transient
-* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response
+* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response, thanks @Raruto
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

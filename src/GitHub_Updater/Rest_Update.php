@@ -273,6 +273,9 @@ class Rest_Update extends Base {
 			case isset( $_SERVER['HTTP_X_GITLAB_EVENT'] ):
 				$webhook_source = 'GitLab webhook';
 				break;
+			case isset( $_SERVER['HTTP_X_GITEA_EVENT'] ):
+				$webhook_source = 'Gitea webhook';
+				break;
 			default:
 				$webhook_source = 'browser';
 				break;
