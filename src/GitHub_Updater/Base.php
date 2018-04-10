@@ -137,22 +137,22 @@ class Base {
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
-		if ( class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_API' ) ) {
+		if ( file_exists( __DIR__ . '/API/Bitbucket_API.php' ) ) {
 			self::$installed_apis['bitbucket_api'] = true;
 			self::$git_servers['bitbucket']        = 'Bitbucket';
 		} else {
 			self::$installed_apis['bitbucket_api'] = false;
 		}
 
-		self::$installed_apis['bitbucket_server_api'] = class_exists( 'Fragen\GitHub_Updater\API\Bitbucket_Server_API' );
+		self::$installed_apis['bitbucket_server_api'] = file_exists( __DIR__ . '/API/Bitbucket_Server_API.php' );
 
-		if ( class_exists( 'Fragen\GitHub_Updater\API\GitLab_API' ) ) {
+		if ( file_exists( __DIR__ . '/API/GitLab_API.php' ) ) {
 			self::$installed_apis['gitlab_api'] = true;
 			self::$git_servers['gitlab']        = 'GitLab';
 		} else {
 			self::$installed_apis['gitlab_api'] = false;
 		}
-		if ( class_exists( 'Fragen\GitHub_Updater\API\Gitea_API' ) ) {
+		if ( file_exists( __DIR__ . '/API/Gitea_API.php' ) ) {
 			self::$installed_apis['gitea_api'] = true;
 			self::$git_servers['gitea']        = 'Gitea';
 		} else {
