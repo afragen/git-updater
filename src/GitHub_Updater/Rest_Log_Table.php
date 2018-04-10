@@ -267,7 +267,6 @@ class Rest_Log_Table extends \WP_List_Table
 						elapsed_time tinytext DEFAULT '' NOT NULL,
 						update_resource tinytext DEFAULT '' NOT NULL,
 						webhook_source tinytext DEFAULT '' NOT NULL,
-						test tinytext DEFAULT '' NOT NULL,
 						PRIMARY KEY  (id)
 					);";
 
