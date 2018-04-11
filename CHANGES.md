@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 7.6.1 / 2018-04-11
+* check `file_exists()` in `Base::set_installed_apis()` to avoid issue if class not yet loaded prior to checking Settings, fixes [#662](https://github.com/afragen/github-updater/issues/662) and [#667](https://github.com/afragen/github-updater/issues/667)
+
 #### 7.6.0 / 2018-04-08
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
 * changed all password fields to use `type="password"`
