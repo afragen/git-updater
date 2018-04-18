@@ -50,6 +50,22 @@ class Settings extends Base {
 	);
 
 	/**
+	 * Holds boolean on whether or not the repo requires authentication.
+	 * Used by class Settings and class Messages.
+	 *
+	 * @var array
+	 */
+	public static $auth_required = array(
+		'github_private'    => false,
+		'github_enterprise' => false,
+		'bitbucket_private' => false,
+		'bitbucket_server'  => false,
+		'gitlab_private'    => false,
+		'gitlab_enterprise' => false,
+		'gitea_private'     => false,
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
