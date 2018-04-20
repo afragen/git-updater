@@ -73,7 +73,8 @@ class GitLab_API extends API implements API_Interface {
 			$set_credentials                            = true;
 		}
 		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		       ! empty( $this->type->enterprise ) ) ||
+		       ! empty( $this->type->enterprise ) &&
+		       'gitlab.com' === $this->type->enterprise ) ||
 		     ( empty( static::$options['gitlab_access_token'] ) &&
 		       in_array( 'gitlab', $running_servers, true ) )
 		) {

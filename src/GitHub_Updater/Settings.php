@@ -134,6 +134,8 @@ class Settings extends Base {
 		}
 
 		foreach ( $gits as $git ) {
+			$parts = explode('-', $git);
+			$git = $parts[0];
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
 				$git_subtab[ $git ] = $ghu_subtabs[ $git ];
 			}
