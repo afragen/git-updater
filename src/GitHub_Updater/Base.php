@@ -1270,6 +1270,9 @@ class Base {
 			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
 				return 'bbserver';
 			}
+			if (! empty( $e->enterprise ) && 'gitlab.com' !== $e->enterprise ) {
+				return 'gitlab-selfhosted';
+			}
 
 			return $e->type;
 		}, $repos );
