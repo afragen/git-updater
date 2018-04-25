@@ -569,9 +569,6 @@ class Base {
 
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
 
-		// Delete get_plugins() and wp_get_themes() cache.
-		delete_site_option( 'ghu-' . md5( 'repos' ) );
-
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 

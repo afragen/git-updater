@@ -84,21 +84,9 @@ class Theme extends Base {
 	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
-		$git_themes = array();
 		$this->delete_current_theme_cache();
-
-		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( 'repos' );
-		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
-			? $repo_cache['extra_headers']
-			: static::$extra_headers;
-
-		$themes = ! empty( $repo_cache['themes'] ) ? $repo_cache['themes'] : false;
-		if ( ! $themes ) {
-			$themes = wp_get_themes( array( 'errors' => null ) );
-			// @TODO why cache themes when there are no hooks to reset?
-			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'themes', $themes, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
-		}
+		$git_themes = array();
+		$themes     = wp_get_themes( array( 'errors' => null ) );
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
@@ -176,11 +164,6 @@ class Theme extends Base {
 			// Exit if not git hosted theme.
 			if ( empty( $git_theme ) ) {
 				continue;
-			}
-
-			if ( ! is_dir( $git_theme['local_path'] ) ) {
-				// Delete get_plugins() and wp_get_themes() cache.
-				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
 
 			$git_themes[ $git_theme['repo'] ] = (object) $git_theme;
