@@ -99,8 +99,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array $fields
-	 * @param array $repo
+	 * @param array  $fields
+	 * @param array  $repo
 	 * @param string $type
 	 *
 	 * @return array
@@ -109,13 +109,8 @@ class API {
 		if ( ! empty( $fields ) ) {
 			return $fields;
 		}
-		$base = $this->base;
-		$git  = $base::$git_servers[ $type ] . '_API';
-		if ( 'bitbucket' === $type && ! empty( $repo->enterprise ) ) {
-			$git = 'Bitbucket_Server_API';
-		}
 
-		return Singleton::get_instance( 'API\\' . $git, $this, new \stdClass() )->add_repo_setting_field();
+		return $repo->repo_api->add_repo_setting_field();
 	}
 
 	/**
@@ -640,6 +635,7 @@ class API {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
 		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
 		$this->type->is_private   = $this->type->repo_meta['private'];
+		$this->type->repo_api     = $this;
 	}
 
 	/**
