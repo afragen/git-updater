@@ -57,6 +57,7 @@ class GitHub_API extends API implements API_Interface {
 		}
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**

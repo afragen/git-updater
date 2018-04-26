@@ -58,6 +58,7 @@ class GitLab_API extends API implements API_Interface {
 		$this->set_default_credentials();
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**

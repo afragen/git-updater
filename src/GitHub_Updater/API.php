@@ -114,6 +114,17 @@ class API {
 	}
 
 	/**
+	 * Add Install settings fields.
+	 *
+	 * @param object $git Git API from caller.
+	 */
+	public function add_install_fields( $git ) {
+		add_action( 'github_updater_add_install_settings_fields', function( $type ) use ( $git ) {
+			$git->add_install_settings_fields( $type );
+		} );
+	}
+
+	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @access public

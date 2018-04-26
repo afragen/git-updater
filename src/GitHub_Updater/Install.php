@@ -317,19 +317,14 @@ class Install extends Base {
 			$type
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
+		/**
+		 * Action hook to add git API install settings fields.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param string $type 'plugin'|'theme'.
+		 */
+		do_action( 'github_updater_add_install_settings_fields', $type );
 	}
 
 	/**
