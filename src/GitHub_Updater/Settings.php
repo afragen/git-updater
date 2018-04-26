@@ -137,7 +137,7 @@ class Settings extends Base {
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->get_running_git_servers();
-		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
+		$gits[]  = in_array( 'gitlabce', $gits, true ) ? 'gitlab' : null;
 		$gits    = array_unique( $gits );
 
 		$git_subtab  = array();
@@ -149,6 +149,8 @@ class Settings extends Base {
 		 * @since 8.0.0
 		 *
 		 * @param array $ghu_subtabs Array of added subtabs.
+		 *
+		 * @return array $subtabs Array of subtabs.
 		 */
 		$ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
 
