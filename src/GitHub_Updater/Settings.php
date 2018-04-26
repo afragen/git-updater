@@ -416,11 +416,16 @@ class Settings extends Base {
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
-			'bitbucket_username',
-			'bitbucket_password',
 		);
 
-		if ( in_array( 'bbserver', $running_servers ) ) {
+		if ( in_array( 'bitbucket', $running_servers, true ) ) {
+			$always_unset = array_merge( $always_unset, array(
+				'bitbucket_username',
+				'bitbucket_password',
+			) );
+		}
+
+		if ( in_array( 'bbserver', $running_servers, true ) ) {
 			$always_unset = array_merge( $always_unset, array(
 				'bitbucket_server_username',
 				'bitbucket_server_password',
