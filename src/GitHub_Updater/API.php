@@ -85,6 +85,17 @@ class API {
 	}
 
 	/**
+	 * Add data in Settings page.
+	 *
+	 * @param object $git Git API object.
+	 */
+	public function settings_hook( $git ) {
+		add_action( 'github_updater_add_settings', function( $auth_required ) use ( $git ) {
+			$git->add_settings( $auth_required );
+		} );
+	}
+
+	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @access public

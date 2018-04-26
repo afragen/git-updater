@@ -50,6 +50,7 @@ class Bitbucket_API extends API implements API_Interface {
 				: $type->branch;
 		}
 		$this->set_default_credentials();
+		$this->settings_hook( $this );
 	}
 
 	/**

@@ -334,23 +334,17 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_settings( static::$auth_required );
+		// Need to ensure Install is activated here for hooks to fire.
+		Singleton::get_instance( 'Install', $this );
 
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
+		/**
+		 * Hook to add Git API settings.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $auth_required Array containing authorization needs of git APIs.
+		 */
+		do_action( 'github_updater_add_settings', static::$auth_required );
 	}
 
 	/**

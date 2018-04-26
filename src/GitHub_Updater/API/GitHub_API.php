@@ -55,6 +55,7 @@ class GitHub_API extends API implements API_Interface {
 				? $branch->cache['current_branch']
 				: $type->branch;
 		}
+		$this->settings_hook( $this );
 	}
 
 	/**

@@ -85,7 +85,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	protected static $git_servers = array(
+	public static $git_servers = array(
 		'github' => 'GitHub',
 	);
 
