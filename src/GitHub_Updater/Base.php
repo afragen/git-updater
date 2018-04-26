@@ -1249,8 +1249,13 @@ class Base {
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
-				return 'bbserver';
+			if ( ! empty( $e->enterprise ) ) {
+				if ( false !== stripos( $e->type, 'bitbucket' ) ) {
+					return 'bbserver';
+				}
+				if ( false !== stripos( $e->type, 'gitlab' ) ) {
+					return 'gitlabce';
+				}
 			}
 
 			return $e->type;
@@ -1263,7 +1268,6 @@ class Base {
 
 			return $e[0];
 		}, $gits );
-
 
 		return array_unique( $gits );
 	}

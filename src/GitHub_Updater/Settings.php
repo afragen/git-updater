@@ -54,7 +54,7 @@ class Settings extends Base {
 	 *
 	 * @var array
 	 */
-	protected static $auth_required = array(
+	public static $auth_required = array(
 		'github_private'    => false,
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
@@ -130,6 +130,7 @@ class Settings extends Base {
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->get_running_git_servers();
+		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
 
 		$git_subtab  = array();
 		$ghu_subtabs = array(
