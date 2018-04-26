@@ -252,20 +252,13 @@ class Settings extends Base {
 					<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 						<?php
 						settings_fields( 'github_updater' );
-						switch ( $subtab ) {
-							case 'github':
-							case 'bitbucket':
-							case 'bbserver':
-							case 'gitlab':
-							case 'gitea':
-								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
-								$this->display_ghu_repos( $subtab );
-								$this->add_hidden_settings_sections( $subtab );
-								break;
-							default:
-								do_settings_sections( 'github_updater_install_settings' );
-								$this->add_hidden_settings_sections();
-								break;
+						if ( 'github_updater' === $subtab ) {
+							do_settings_sections( 'github_updater_install_settings' );
+							$this->add_hidden_settings_sections();
+						} else {
+							do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
+							$this->display_ghu_repos( $subtab );
+							$this->add_hidden_settings_sections( $subtab );
 						}
 						submit_button();
 						?>
