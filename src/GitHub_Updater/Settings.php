@@ -113,12 +113,19 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_tabs() {
-		return array(
+		$tabs = array(
 			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
-			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
-			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
 			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
 		);
+
+		/**
+		 * Filter settings tabs.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $tabs Array of default tabs.
+		 */
+		return apply_filters( 'github_updater_add_settings_tabs', $tabs );
 	}
 
 	/**
