@@ -58,6 +58,7 @@ class Gitea_API extends API implements API_Interface {
 		}
 		$this->set_default_credentials();
 		$this->settings_hook( $this );
+		$this->add_settings_subtab();
 	}
 
 	/**
@@ -524,6 +525,15 @@ class Gitea_API extends API implements API_Interface {
 		);
 
 		return $setting_field;
+	}
+
+	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter( 'github_updater_add_settings_subtabs', function( $subtabs ) {
+			return array_merge( $subtabs, [ 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ] );
+		} );
 	}
 
 	/**

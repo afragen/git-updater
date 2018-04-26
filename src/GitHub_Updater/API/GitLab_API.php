@@ -57,6 +57,7 @@ class GitLab_API extends API implements API_Interface {
 		}
 		$this->set_default_credentials();
 		$this->settings_hook( $this );
+		$this->add_settings_subtab();
 	}
 
 	/**
@@ -638,6 +639,15 @@ class GitLab_API extends API implements API_Interface {
 		);
 
 		return $setting_field;
+	}
+
+	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter( 'github_updater_add_settings_subtabs', function( $subtabs ) {
+			return array_merge( $subtabs, [ 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) ] );
+		} );
 	}
 
 	/**

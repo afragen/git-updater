@@ -140,21 +140,16 @@ class Settings extends Base {
 		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
 
 		$git_subtab  = array();
-		$ghu_subtabs = array(
-			'github' => esc_html__( 'GitHub', 'github-updater' ),
-		);
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
-		}
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitlab_api'] ) {
-			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitea_api'] ) {
-			$ghu_subtabs['gitea'] = esc_html__( 'Gitea', 'github-updater' );
-		}
+		$ghu_subtabs = array();
+
+		/**
+		 * Filter subtabs to be able to add subtab from git API class.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $ghu_subtabs Array of added subtabs.
+		 */
+		$ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
 
 		foreach ( $gits as $git ) {
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
