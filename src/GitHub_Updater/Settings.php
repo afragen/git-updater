@@ -138,6 +138,7 @@ class Settings extends Base {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->get_running_git_servers();
 		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
+		$gits    = array_unique( $gits );
 
 		$git_subtab  = array();
 		$ghu_subtabs = array();
