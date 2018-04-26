@@ -377,37 +377,11 @@ class Settings extends Base {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
-			$repo_setting_field     = array();
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
-			$token_type = explode( '_', $token->type );
-			switch ( $token_type[0] ) {
-				case 'github':
-					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_repo_setting_field();
-					break;
-				case 'bitbucket':
-					if ( empty( $token->enterprise ) ) {
-						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					} else {
-						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					}
-					break;
-				case 'gitlab':
-					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-				case 'gitea':
-					if ( static::$installed_apis['gitea_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-			}
+			$token_type         = explode( '_', $token->type );
+			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', array(), $token, $token_type[0] );
 
 			if ( empty( $repo_setting_field ) ) {
 				continue;

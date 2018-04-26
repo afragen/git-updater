@@ -93,6 +93,29 @@ class API {
 		add_action( 'github_updater_add_settings', function( $auth_required ) use ( $git ) {
 			$git->add_settings( $auth_required );
 		} );
+		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 3 );
+	}
+
+	/**
+	 * Add data to the setting_field in Settings.
+	 *
+	 * @param array $fields
+	 * @param array $repo
+	 * @param string $type
+	 *
+	 * @return array
+	 */
+	public function add_setting_field( $fields, $repo, $type ) {
+		if ( ! empty( $fields ) ) {
+			return $fields;
+		}
+		$base = $this->base;
+		$git  = $base::$git_servers[ $type ] . '_API';
+		if ( 'bitbucket' === $type && ! empty( $repo->enterprise ) ) {
+			$git = 'Bitbucket_Server_API';
+		}
+
+		return Singleton::get_instance( 'API\\' . $git, $this, new \stdClass() )->add_repo_setting_field();
 	}
 
 	/**
