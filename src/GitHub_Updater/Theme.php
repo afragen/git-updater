@@ -179,6 +179,7 @@ class Theme extends Base {
 	public function get_remote_theme_meta() {
 		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
+			$theme->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $theme->type, $theme );
 
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.

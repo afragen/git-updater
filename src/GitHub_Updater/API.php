@@ -12,6 +12,8 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\GitHub_API,
+	Fragen\GitHub_Updater\API\Bitbucket_API,
+	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
 	Fragen\GitHub_Updater\API\GitLab_API,
 	Fragen\GitHub_Updater\API\Gitea_API;
 
@@ -82,6 +84,46 @@ class API {
 		$this->base            = $base = Singleton::get_instance( 'Base', $this );
 		static::$options       = $base::$options;
 		static::$extra_headers = $this->base->add_headers( array() );
+	}
+
+	/**
+	 * Get repo's API.
+	 *
+	 * @param string         $type
+	 * @param bool|\stdClass $repo
+	 *
+	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
+	 * \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
+	 * \Fragen\GitHub_Updater\API\Gitea_API|
+	 * \Fragen\GitHub_Updater\API\GitHub_API|
+	 * \Fragen\GitHub_Updater\API\GitLab_API
+	 */
+	public function get_repo_api( $type, $repo = false ) {
+		$repo = $repo ?: new \stdClass();
+		switch ( $type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$repo_api = new GitHub_API( $repo );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				if ( ! empty( $repo->enterprise ) ) {
+					$repo_api = new Bitbucket_Server_API( $repo );
+				} else {
+					$repo_api = new Bitbucket_API( $repo );
+				}
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$repo_api = new GitLab_API( $repo );
+				break;
+			case 'gitea_plugin':
+			case 'gitea_theme':
+				$repo_api = new Gitea_API( $repo );
+				break;
+		}
+
+		return $repo_api;
 	}
 
 	/**

@@ -352,6 +352,7 @@ class Base {
 		$this->$type->num_ratings          = 0;
 		$this->$type->transient            = array();
 		$this->$type->repo_meta            = array();
+		$this->$type->repo_api             = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $type, $this->$type );
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
@@ -448,35 +449,7 @@ class Base {
 			$file = basename( $repo->slug );
 		}
 
-		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$this->repo_api = new GitHub_API( $repo );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				if ( $repo->enterprise_api ) {
-					if ( self::$installed_apis['bitbucket_server_api'] ) {
-						$this->repo_api = new Bitbucket_Server_API( $repo );
-					}
-				} elseif ( self::$installed_apis['bitbucket_api'] ) {
-					$this->repo_api = new Bitbucket_API( $repo );
-				}
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				if ( self::$installed_apis['gitlab_api'] ) {
-					$this->repo_api = new GitLab_API( $repo );
-				}
-				break;
-			case 'gitea_plugin':
-			case 'gitea_theme':
-				if ( self::$installed_apis['gitea_api'] ) {
-					$this->repo_api = new Gitea_API( $repo );
-				}
-				break;
-		}
-
+		$this->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this, $repo )->get_repo_api( $repo->type, $repo );
 		if ( null === $this->repo_api ) {
 			return false;
 		}
@@ -1069,32 +1042,10 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		switch ( $repo->type ) {
-			case 'github_plugin':
-			case 'github_theme':
-				$this->repo_api = new GitHub_API( $repo );
-				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-				if ( ! empty( $repo->enterprise ) ) {
-					$this->repo_api = new Bitbucket_Server_API( $repo );
-				} else {
-					$this->repo_api = new Bitbucket_API( $repo );
-				}
-				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
-				$this->repo_api = new GitLab_API( $repo );
-				break;
-			case 'gitea_plugin':
-			case 'gitea_theme':
-				$this->repo_api = new Gitea_API( $repo );
-				break;
-		}
-
-		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
-		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
-		$rollback  = array(
+		$this->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $repo->type, $repo );
+		$this->tag      = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
+		$slug           = 'plugin' === $type ? $repo->slug : $repo->repo;
+		$rollback       = array(
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
