@@ -401,6 +401,8 @@ class Settings extends Base {
 
 		if ( ! $this->waiting_for_background_update() ) {
 			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+		} else {
+			Singleton::get_instance( 'Messages', $this )->create_error_message( 'waiting' );
 		}
 	}
 

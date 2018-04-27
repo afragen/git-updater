@@ -69,6 +69,8 @@ class Messages extends Base {
 					add_action( 'network_admin_notices', array( &$this, 'show_403_error_message' ) );
 					add_action( 'admin_notices', array( &$this, 'show_401_error_message' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_401_error_message' ) );
+					add_action( 'admin_notices', array( &$this, 'waiting' ) );
+					add_action( 'network_admin_notices', array( &$this, 'waiting' ) );
 			}
 		}
 
@@ -89,7 +91,7 @@ class Messages extends Base {
 					return;
 				}
 				?>
-				<div data-dismissible="403-error-1" class="error notice is-dismissible">
+				<div data-dismissible="403-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
@@ -128,7 +130,7 @@ class Messages extends Base {
 					return;
 				}
 				?>
-				<div data-dismissible="401-error-1" class="error notice is-dismissible">
+				<div data-dismissible="401-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
@@ -151,12 +153,27 @@ class Messages extends Base {
 			return;
 		}
 		?>
-		<div data-dismissible="wp-error-1" class="error notice is-dismissible">
+		<div data-dismissible="wp-error-1" class="notice-error notice is-dismissible">
 			<p>
 				<?php
 				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
 				echo ' ' . self::$error_message;
 				?>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Generate information message when waiting for WP-Cron to finish.
+	 */
+	public function waiting() {
+		?>
+		<div class="notice-info notice is-dismissible">
+			<p>
+				<?php esc_html_e( 'GitHub Updater Information', 'github-updater' ); ?>
+				<br>
+				<?php esc_html_e( 'Please be patient while WP-Cron finishes. Please report any issues if this notice is not present.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
