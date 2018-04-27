@@ -88,6 +88,9 @@ class Settings extends Base {
 	 */
 	public function run() {
 		$this->load_hooks();
+
+		// Need to ensure Install is activated here for hooks to fire.
+		Singleton::get_instance( 'Install', $this );
 	}
 
 	/**
@@ -331,9 +334,6 @@ class Settings extends Base {
 			'github_updater_settings',
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
-
-		// Need to ensure Install is activated here for hooks to fire.
-		Singleton::get_instance( 'Install', $this );
 
 		/**
 		 * Hook to add Git API settings.
