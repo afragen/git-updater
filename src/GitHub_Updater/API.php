@@ -96,10 +96,11 @@ class API {
 	 * \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
 	 * \Fragen\GitHub_Updater\API\Gitea_API|
 	 * \Fragen\GitHub_Updater\API\GitHub_API|
-	 * \Fragen\GitHub_Updater\API\GitLab_API
+	 * \Fragen\GitHub_Updater\API\GitLab_API $repo_api
 	 */
 	public function get_repo_api( $type, $repo = false ) {
-		$repo = $repo ?: new \stdClass();
+		$repo_api = null;
+		$repo     = $repo ?: new \stdClass();
 		switch ( $type ) {
 			case 'github_plugin':
 			case 'github_theme':
