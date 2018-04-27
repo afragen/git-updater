@@ -264,6 +264,7 @@ class Base {
 	/**
 	 * Allows developers to use 'github_updater_set_options' hook to set access tokens or other settings.
 	 * Saves results of filter hook to self::$options.
+	 * Single plugin/theme should not be using both hooks.
 	 *
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
@@ -271,12 +272,11 @@ class Base {
 	 *
 	 */
 	public function set_options_filter() {
-		// Single plugin/theme should not be using both hooks.
 		$config = apply_filters( 'github_updater_set_options', array() );
 		if ( empty( $config ) ) {
-			$config = function_exists( 'apply_filters_deprecated' ) ?
-				apply_filters_deprecated( 'github_updater_token_distribution', array( null ), '6.1.0', 'github_updater_set_options' ) :
-				apply_filters( 'github_updater_token_distribution', array() );
+			$config = function_exists( 'apply_filters_deprecated' )
+				? apply_filters_deprecated( 'github_updater_token_distribution', array( null ), '6.1.0', 'github_updater_set_options' )
+				: apply_filters( 'github_updater_token_distribution', array() );
 		}
 
 		if ( ! empty( $config ) ) {
