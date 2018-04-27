@@ -93,7 +93,7 @@ class API {
 		add_action( 'github_updater_add_settings', function( $auth_required ) use ( $git ) {
 			$git->add_settings( $auth_required );
 		} );
-		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 3 );
+		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 2 );
 	}
 
 	/**
@@ -105,12 +105,15 @@ class API {
 	 *
 	 * @return array
 	 */
-	public function add_setting_field( $fields, $repo, $type ) {
+	public function add_setting_field( $fields, $repo ) {
 		if ( ! empty( $fields ) ) {
 			return $fields;
 		}
+		$repo_api = isset( $repo->repo_api )
+			? $repo->repo_api
+			: $this->get_repo_api( $repo->type, $repo );
 
-		return $repo->repo_api->add_repo_setting_field();
+		return $repo_api->add_repo_setting_field();
 	}
 
 	/**
