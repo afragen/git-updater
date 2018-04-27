@@ -708,14 +708,13 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	public function gitlab_error() {
 		$settings   = Singleton::get_instance( 'Settings', $this );
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitlab'] ) &&
 		     ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
 		         $settings::$auth_required['gitlab_enterprise'] ) ||
 		       ( empty( static::$options['gitlab_access_token'] ) &&
 		         $settings::$auth_required['gitlab'] ) )
-
 		) {
 			self::$error_code['gitlab'] = array( 'error' => true );
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {

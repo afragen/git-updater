@@ -594,7 +594,7 @@ class Gitea_API extends API implements API_Interface {
 	 */
 	public function gitea_error() {
 		$base       = Singleton::get_instance( 'Base', $this );
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitea'] ) &&
 		     empty( static::$options['gitea_access_token'] ) &&
