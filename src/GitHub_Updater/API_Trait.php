@@ -10,8 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API\GitHub_API,
+use Fragen\GitHub_Updater\API\GitHub_API,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
 	Fragen\GitHub_Updater\API\GitLab_API,
@@ -24,6 +23,7 @@ use Fragen\Singleton,
  * @package Fragen\GitHub_Updater
  */
 trait API_Trait {
+	use GHU_Trait;
 
 	/**
 	 * Adds custom user agent for GitHub Updater.
@@ -123,7 +123,7 @@ trait API_Trait {
 	 * @return bool
 	 */
 	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
-		$hours = $this->get_api_vars( 'hours' );
+		$hours = $this->get_class_vars( 'API', 'hours' );
 		if ( ! $repo ) {
 			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
@@ -139,32 +139,12 @@ trait API_Trait {
 	}
 
 	/**
-	 * Getter for Fragen\GitHub_Updater\API variables.
-	 * Uses ReflectionProperty->isStatic() for testing.
-	 *
-	 * @param string $var Name of variable.
-	 *
-	 * @return mixed
-	 */
-	private function get_api_vars( $var ) {
-		$api = Singleton::get_instance( 'API', $this );
-		try {
-			$prop = new \ReflectionProperty( get_class( $api ), $var );
-		} catch ( \ReflectionException $Exception ) {
-			die( '<table>' . $Exception->xdebug_message . '</table>' );
-		}
-		$static = $prop->isStatic();
-
-		return $static ? $api::${$var} : $api->$var;
-	}
-
-	/**
 	 * Returns static class variable $error_code.
 	 *
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		return $this->get_api_vars( 'error_code' );
+		return $this->get_class_vars( 'API', 'error_code' );
 	}
 
 	/**

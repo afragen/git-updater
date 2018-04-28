@@ -110,6 +110,14 @@ class Base {
 	);
 
 	/**
+	 * Stores the object calling Basic_Auth_Loader.
+	 *
+	 * @access public
+	 * @var    \stdClass
+	 */
+	public $caller;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
