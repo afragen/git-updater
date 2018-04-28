@@ -12,6 +12,8 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\GitHub_API,
+	Fragen\GitHub_Updater\API\Bitbucket_API,
+	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
 	Fragen\GitHub_Updater\API\GitLab_API,
 	Fragen\GitHub_Updater\API\Gitea_API;
 
@@ -82,6 +84,90 @@ class API {
 		$this->base            = $base = Singleton::get_instance( 'Base', $this );
 		static::$options       = $base::$options;
 		static::$extra_headers = $this->base->add_headers( array() );
+	}
+
+	/**
+	 * Get repo's API.
+	 *
+	 * @param string         $type
+	 * @param bool|\stdClass $repo
+	 *
+	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
+	 * \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
+	 * \Fragen\GitHub_Updater\API\Gitea_API|
+	 * \Fragen\GitHub_Updater\API\GitHub_API|
+	 * \Fragen\GitHub_Updater\API\GitLab_API $repo_api
+	 */
+	public function get_repo_api( $type, $repo = false ) {
+		$repo_api = null;
+		$repo     = $repo ?: new \stdClass();
+		switch ( $type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$repo_api = new GitHub_API( $repo );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				if ( ! empty( $repo->enterprise ) ) {
+					$repo_api = new Bitbucket_Server_API( $repo );
+				} else {
+					$repo_api = new Bitbucket_API( $repo );
+				}
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$repo_api = new GitLab_API( $repo );
+				break;
+			case 'gitea_plugin':
+			case 'gitea_theme':
+				$repo_api = new Gitea_API( $repo );
+				break;
+		}
+
+		return $repo_api;
+	}
+
+	/**
+	 * Add data in Settings page.
+	 *
+	 * @param object $git Git API object.
+	 */
+	public function settings_hook( $git ) {
+		add_action( 'github_updater_add_settings', function( $auth_required ) use ( $git ) {
+			$git->add_settings( $auth_required );
+		} );
+		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 2 );
+	}
+
+	/**
+	 * Add data to the setting_field in Settings.
+	 *
+	 * @param array  $fields
+	 * @param array  $repo
+	 * @param string $type
+	 *
+	 * @return array
+	 */
+	public function add_setting_field( $fields, $repo ) {
+		if ( ! empty( $fields ) ) {
+			return $fields;
+		}
+		$repo_api = isset( $repo->repo_api )
+			? $repo->repo_api
+			: $this->get_repo_api( $repo->type, $repo );
+
+		return $repo_api->add_repo_setting_field();
+	}
+
+	/**
+	 * Add Install settings fields.
+	 *
+	 * @param object $git Git API from caller.
+	 */
+	public function add_install_fields( $git ) {
+		add_action( 'github_updater_add_install_settings_fields', function( $type ) use ( $git ) {
+			$git->add_install_settings_fields( $type );
+		} );
 	}
 
 	/**
@@ -252,6 +338,7 @@ class API {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
+		$repo_api = $this->get_repo_api( $type['repo'] .'_'. $type['type'], $type );
 		switch ( $type['repo'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -264,8 +351,7 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -278,8 +364,7 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
 				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
@@ -287,7 +372,7 @@ class API {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -297,8 +382,7 @@ class API {
 					$type['base_download'] = $type['base_uri'];
 					break;
 				}
-				$api      = new Gitea_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			default:
 				break;
@@ -606,6 +690,7 @@ class API {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
 		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
 		$this->type->is_private   = $this->type->repo_meta['private'];
+		$this->type->repo_api     = $this;
 	}
 
 	/**

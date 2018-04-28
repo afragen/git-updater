@@ -88,6 +88,9 @@ class Settings extends Base {
 	 */
 	public function run() {
 		$this->load_hooks();
+
+		// Need to ensure Install is activated here for hooks to fire.
+		Singleton::get_instance( 'Install', $this );
 	}
 
 	/**
@@ -113,12 +116,19 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_tabs() {
-		return array(
+		$tabs = array(
 			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
-			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
-			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
 			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
 		);
+
+		/**
+		 * Filter settings tabs.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $tabs Array of default tabs.
+		 */
+		return apply_filters( 'github_updater_add_settings_tabs', $tabs );
 	}
 
 	/**
@@ -130,24 +140,22 @@ class Settings extends Base {
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->get_running_git_servers();
-		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
+		$gits[]  = in_array( 'gitlabce', $gits, true ) ? 'gitlab' : null;
+		$gits    = array_unique( $gits );
 
 		$git_subtab  = array();
-		$ghu_subtabs = array(
-			'github' => esc_html__( 'GitHub', 'github-updater' ),
-		);
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
-		}
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitlab_api'] ) {
-			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitea_api'] ) {
-			$ghu_subtabs['gitea'] = esc_html__( 'Gitea', 'github-updater' );
-		}
+		$ghu_subtabs = array();
+
+		/**
+		 * Filter subtabs to be able to add subtab from git API class.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $ghu_subtabs Array of added subtabs.
+		 *
+		 * @return array $subtabs Array of subtabs.
+		 */
+		$ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
 
 		foreach ( $gits as $git ) {
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
@@ -245,20 +253,13 @@ class Settings extends Base {
 					<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 						<?php
 						settings_fields( 'github_updater' );
-						switch ( $subtab ) {
-							case 'github':
-							case 'bitbucket':
-							case 'bbserver':
-							case 'gitlab':
-							case 'gitea':
-								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
-								$this->display_ghu_repos( $subtab );
-								$this->add_hidden_settings_sections( $subtab );
-								break;
-							default:
-								do_settings_sections( 'github_updater_install_settings' );
-								$this->add_hidden_settings_sections();
-								break;
+						if ( 'github_updater' === $subtab ) {
+							do_settings_sections( 'github_updater_install_settings' );
+							$this->add_hidden_settings_sections();
+						} else {
+							do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
+							$this->display_ghu_repos( $subtab );
+							$this->add_hidden_settings_sections( $subtab );
 						}
 						submit_button();
 						?>
@@ -334,23 +335,14 @@ class Settings extends Base {
 			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
+		/**
+		 * Hook to add Git API settings.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $auth_required Array containing authorization needs of git APIs.
+		 */
+		do_action( 'github_updater_add_settings', static::$auth_required );
 	}
 
 	/**
@@ -383,37 +375,11 @@ class Settings extends Base {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
-			$repo_setting_field     = array();
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
-			$token_type = explode( '_', $token->type );
-			switch ( $token_type[0] ) {
-				case 'github':
-					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_repo_setting_field();
-					break;
-				case 'bitbucket':
-					if ( empty( $token->enterprise ) ) {
-						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					} else {
-						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					}
-					break;
-				case 'gitlab':
-					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-				case 'gitea':
-					if ( static::$installed_apis['gitea_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-			}
+			$token_type         = explode( '_', $token->type );
+			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', array(), $token, $token_type[0] );
 
 			if ( empty( $repo_setting_field ) ) {
 				continue;
@@ -435,6 +401,8 @@ class Settings extends Base {
 
 		if ( ! $this->waiting_for_background_update() ) {
 			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+		} else {
+			Singleton::get_instance( 'Messages', $this )->create_error_message( 'waiting' );
 		}
 	}
 
@@ -452,11 +420,16 @@ class Settings extends Base {
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
-			'bitbucket_username',
-			'bitbucket_password',
 		);
 
-		if ( in_array( 'bbserver', $running_servers ) ) {
+		if ( in_array( 'bitbucket', $running_servers, true ) ) {
+			$always_unset = array_merge( $always_unset, array(
+				'bitbucket_username',
+				'bitbucket_password',
+			) );
+		}
+
+		if ( in_array( 'bbserver', $running_servers, true ) ) {
 			$always_unset = array_merge( $always_unset, array(
 				'bitbucket_server_username',
 				'bitbucket_server_password',

@@ -46,9 +46,24 @@ class Install extends Base {
 	public function __construct( $type, $wp_cli_config = array() ) {
 		parent::__construct();
 		$this->load_options();
+		$this->add_install_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
+	}
+
+	/**
+	 * Adds Install tabs to Settings page.
+	 */
+	public function add_install_tabs() {
+		add_filter( 'github_updater_add_settings_tabs', function( $tabs ) {
+			$install_tabs = array(
+				'github_updater_install_plugin' => esc_html__( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'  => esc_html__( 'Install Theme', 'github-updater' ),
+			);
+
+			return array_merge( $tabs, $install_tabs );
+		} );
 	}
 
 	/**
@@ -302,19 +317,14 @@ class Install extends Base {
 			$type
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
+		/**
+		 * Action hook to add git API install settings fields.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param string $type 'plugin'|'theme'.
+		 */
+		do_action( 'github_updater_add_install_settings_fields', $type );
 	}
 
 	/**

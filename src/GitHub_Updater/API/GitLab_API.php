@@ -56,6 +56,9 @@ class GitLab_API extends API implements API_Interface {
 				: $type->branch;
 		}
 		$this->set_default_credentials();
+		$this->settings_hook( $this );
+		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**
@@ -640,6 +643,15 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter( 'github_updater_add_settings_subtabs', function( $subtabs ) {
+			return array_merge( $subtabs, [ 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) ] );
+		} );
+	}
+
+	/**
 	 * Print the GitLab Settings text.
 	 */
 	public function print_section_gitlab_info() {
@@ -696,14 +708,13 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	public function gitlab_error() {
 		$settings   = Singleton::get_instance( 'Settings', $this );
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitlab'] ) &&
 		     ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
 		         $settings::$auth_required['gitlab_enterprise'] ) ||
 		       ( empty( static::$options['gitlab_access_token'] ) &&
 		         $settings::$auth_required['gitlab'] ) )
-
 		) {
 			self::$error_code['gitlab'] = array( 'error' => true );
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
