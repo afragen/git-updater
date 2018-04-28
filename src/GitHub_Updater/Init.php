@@ -11,7 +11,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 
 
 /*

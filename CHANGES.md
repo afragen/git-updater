@@ -4,6 +4,7 @@
 * refactor some of `class API` to `trait API_Trait`
 * refactor `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
 * added `trait GHU_Trait` wih common code
+* moved traits to own sub-directory
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`

@@ -8,7 +8,7 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\Traits;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\Bitbucket_API,

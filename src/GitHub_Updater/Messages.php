@@ -10,7 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\API_Trait;
 
 
 /*

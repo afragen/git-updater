@@ -11,7 +11,7 @@
 namespace Fragen\GitHub_Updater\API;
 
 use Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\API_Trait;
+	Fragen\GitHub_Updater\Traits\API_Trait;
 
 
 /**

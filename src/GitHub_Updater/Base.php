@@ -12,6 +12,8 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\API_Trait,
+	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader,
 	Fragen\GitHub_Updater\API\GitHub_API,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
