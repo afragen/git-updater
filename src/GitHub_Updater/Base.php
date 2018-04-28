@@ -353,7 +353,6 @@ class Base {
 		$this->$type->num_ratings          = 0;
 		$this->$type->transient            = array();
 		$this->$type->repo_meta            = array();
-		$this->$type->repo_api             = $this->get_repo_api( $type, $this->$type );
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
@@ -444,36 +443,35 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		$this->repo_api = null;
-		$file           = 'style.css';
+		$file = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
 			$file = basename( $repo->slug );
 		}
 
-		$this->repo_api = $this->get_repo_api( $repo->type, $repo );
-		if ( null === $this->repo_api ) {
+		$repo_api = $this->get_repo_api( $repo->type, $repo );
+		if ( null === $repo_api ) {
 			return false;
 		}
 
 		$this->{$repo->type} = $repo;
 		$this->set_defaults( $repo->type );
 
-		if ( $this->repo_api->get_remote_info( $file ) ) {
+		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
-					$this->repo_api->get_repo_meta();
+					$repo_api->get_repo_meta();
 					$changelog = $this->get_changelog_filename( $repo->type );
 					if ( $changelog ) {
-						$this->repo_api->get_remote_changes( $changelog );
+						$repo_api->get_remote_changes( $changelog );
 					}
-					$this->repo_api->get_remote_readme();
+					$repo_api->get_remote_readme();
 				}
 				if ( ! empty( self::$options['branch_switch'] ) ) {
-					$this->repo_api->get_remote_branches();
+					$repo_api->get_remote_branches();
 				}
 			}
-			$this->repo_api->get_remote_tag();
-			$repo->download_link = $this->repo_api->construct_download_link();
+			$repo_api->get_remote_tag();
+			$repo->download_link = $repo_api->construct_download_link();
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}

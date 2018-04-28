@@ -112,11 +112,8 @@ class API {
 		if ( ! empty( $fields ) ) {
 			return $fields;
 		}
-		$repo_api = isset( $repo->repo_api )
-			? $repo->repo_api
-			: $this->get_repo_api( $repo->type, $repo );
 
-		return $repo_api->add_repo_setting_field();
+		return $this->get_repo_api( $repo->type, $repo )->add_repo_setting_field();
 	}
 
 	/**
@@ -590,7 +587,6 @@ class API {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
 		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
 		$this->type->is_private   = $this->type->repo_meta['private'];
-		$this->type->repo_api     = $this;
 	}
 
 	/**
