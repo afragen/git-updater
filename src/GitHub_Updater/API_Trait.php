@@ -118,16 +118,17 @@ trait API_Trait {
 	 * @param mixed       $response Data to be stored.
 	 * @param string|bool $repo     Repo name or false.
 	 * @param string|bool $timeout  Timeout for cache.
-	 *                              Default is static::$hours (12 hours).
+	 *                              Default is $hours (12 hours).
 	 *
 	 * @return bool
 	 */
 	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
+		$hours = $this->get_api_vars( 'hours' );
 		if ( ! $repo ) {
 			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
-		$timeout   = $timeout ? $timeout : '+' . static::$hours . ' hours';
+		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
 		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
@@ -138,13 +139,34 @@ trait API_Trait {
 	}
 
 	/**
+	 * Getter for Fragen\GitHub_Updater\API variables.
+	 * Uses ReflectionProperty->isStatic() for testing.
+	 *
+	 * @param string $var Name of variable.
+	 *
+	 * @return mixed
+	 */
+	private function get_api_vars( $var ) {
+		$api = Singleton::get_instance( 'API', $this );
+		try {
+			$prop = new \ReflectionProperty( get_class( $api ), $var );
+		} catch ( \ReflectionException $Exception ) {
+			die( '<table>' . $Exception->xdebug_message . '</table>' );
+		}
+		$static = $prop->isStatic();
+
+		return $static ? $api::${$var} : $api->$var;
+	}
+
+	/**
 	 * Returns static class variable $error_code.
 	 *
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		$api = Singleton::get_instance('API', $this);
-		return $api::$error_code;
+		return $this->get_api_vars( 'error_code' );
+	}
+
 	/**
 	 * Validate wp_remote_get response.
 	 *

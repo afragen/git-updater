@@ -39,7 +39,7 @@ class API {
 	 *
 	 * @var integer
 	 */
-	protected static $hours = 12;
+	public $hours = 12;
 
 	/**
 	 * Variable to hold all repository remote info.
