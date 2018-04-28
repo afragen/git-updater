@@ -338,6 +338,7 @@ class API {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
+		$repo_api = $this->get_repo_api( $type['repo'] .'_'. $type['type'], $type );
 		switch ( $type['repo'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -350,8 +351,7 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -364,8 +364,7 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
 				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
@@ -373,7 +372,7 @@ class API {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -383,8 +382,7 @@ class API {
 					$type['base_download'] = $type['base_uri'];
 					break;
 				}
-				$api      = new Gitea_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			default:
 				break;
