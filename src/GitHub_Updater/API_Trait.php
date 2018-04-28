@@ -10,7 +10,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\GitHub_Updater\API\GitHub_API,
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\API\GitHub_API,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API,
 	Fragen\GitHub_Updater\API\GitLab_API,
@@ -18,13 +19,6 @@ use Fragen\GitHub_Updater\API\GitHub_API,
 
 
 trait API_Trait {
-
-	/**
-	 * Holds HTTP error code from API call.
-	 *
-	 * @var array ( $this->type-repo => $code )
-	 */
-	protected static $error_code = array();
 
 	/**
 	 * Get repo's API.
@@ -124,7 +118,8 @@ trait API_Trait {
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		return self::$error_code;
+		$api = Singleton::get_instance('API', $this);
+		return $api::$error_code;
 	}
 
 }

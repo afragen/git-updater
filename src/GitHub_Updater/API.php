@@ -71,6 +71,13 @@ class API {
 	protected static $extra_headers;
 
 	/**
+	 * Holds HTTP error code from API call.
+	 *
+	 * @var array ( $this->type-repo => $code )
+	 */
+	public static $error_code = array();
+
+	/**
 	 * API constructor.
 	 *
 	 */
