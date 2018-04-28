@@ -45,15 +45,6 @@ class Init extends Base {
 		add_action( 'init', array( &$this, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
-		add_action( 'upgrader_process_complete', function() {
-			delete_site_option( 'ghu-' . md5( 'repos' ) );
-		} );
-
-		// Delete get_plugins() and wp_get_themes() cache.
-		add_action( 'deleted_plugin', function() {
-			wp_cache_delete( 'plugins', 'plugins' );
-			delete_site_option( 'ghu-' . md5( 'repos' ) );
-		} );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {

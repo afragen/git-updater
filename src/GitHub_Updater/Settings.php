@@ -50,6 +50,21 @@ class Settings extends Base {
 	);
 
 	/**
+	 * Holds boolean on whether or not the repo requires authentication.
+	 *
+	 * @var array
+	 */
+	public static $auth_required = array(
+		'github_private'    => false,
+		'github_enterprise' => false,
+		'bitbucket_private' => false,
+		'bitbucket_server'  => false,
+		'gitlab_private'    => false,
+		'gitlab_enterprise' => false,
+		'gitea_private'     => false,
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -115,6 +130,7 @@ class Settings extends Base {
 	private function settings_sub_tabs() {
 		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
 		$gits    = $this->get_running_git_servers();
+		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
 
 		$git_subtab  = array();
 		$ghu_subtabs = array(
@@ -490,55 +506,32 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Check to see if it's a private repo and set variables.
+	 * Check to see if it's an enterprise or private repo and set variables.
 	 *
 	 * @param $token
 	 */
 	private function set_auth_required( $token ) {
 
-		// Set booleans for Enterprise headers.
+		// Set booleans for Enterprise repos.
 		if ( $token->enterprise ) {
-			if ( ! static::$auth_required['github_enterprise'] &&
-			     false !== strpos( $token->type, 'github' )
-
-			) {
-				static::$auth_required['github_enterprise'] = true;
-			}
-
-			if ( ! static::$auth_required['gitlab_enterprise'] &&
-			     false !== strpos( $token->type, 'gitlab' )
-			) {
-				static::$auth_required['gitlab_enterprise'] = true;
-			}
-
-			if ( ! static::$auth_required['bitbucket_server'] &&
-			     false !== strpos( $token->type, 'bitbucket' )
-			) {
-				static::$auth_required['bitbucket_server'] = true;
-			}
+			static::$auth_required['github_enterprise'] = static::$auth_required['github_enterprise']
+				?: false !== strpos( $token->type, 'github' );
+			static::$auth_required['gitlab_enterprise'] = static::$auth_required['gitlab_enterprise']
+				?: false !== strpos( $token->type, 'gitlab' );
+			static::$auth_required['bitbucket_server']  = static::$auth_required['bitbucket_server']
+				?: false !== strpos( $token->type, 'bitbucket' );
 		}
 
+		// Set booleans for private repos.
 		if ( $this->is_private( $token ) ) {
-			if ( ! static::$auth_required['github_private'] &&
-			     false !== strpos( $token->type, 'github' )
-			) {
-				static::$auth_required['github_private'] = true;
-			}
-			if ( ! static::$auth_required['bitbucket_private'] &&
-			     false !== strpos( $token->type, 'bitbucket' )
-			) {
-				static::$auth_required['bitbucket_private'] = true;
-			}
-			if ( ! static::$auth_required['gitlab_private'] &&
-			     false !== strpos( $token->type, 'gitlab' )
-			) {
-				static::$auth_required['gitlab_private'] = true;
-			}
-			if ( ! static::$auth_required['gitea_private'] &&
-			     false !== strpos( $token->type, 'gitea' )
-			) {
-				static::$auth_required['gitea_private'] = true;
-			}
+			static::$auth_required['github_private']    = static::$auth_required['github_private']
+				?: false !== strpos( $token->type, 'github' );
+			static::$auth_required['bitbucket_private'] = static::$auth_required['bitbucket_private']
+				?: false !== strpos( $token->type, 'bitbucket' );
+			static::$auth_required['gitlab_private']    = static::$auth_required['gitlab_private']
+				?: false !== strpos( $token->type, 'gitlab' );
+			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
+				?: false !== strpos( $token->type, 'gitea' );
 		}
 
 		// Always set to true.

@@ -109,24 +109,6 @@ class Base {
 	);
 
 	/**
-	 * Holds boolean on whether or not the repo requires authentication.
-	 * Used by class Settings and class Messages.
-	 *
-	 * @var array
-	 */
-	public static $auth_required = array(
-		'github_private'    => false,
-		'github_enterprise' => false,
-		'bitbucket_private' => false,
-		'bitbucket_server'  => false,
-		'gitlab'            => false,
-		'gitlab_private'    => false,
-		'gitlab_enterprise' => false,
-		'gitea'             => false,
-		'gitea_private'     => false,
-	);
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -586,9 +568,6 @@ class Base {
 		}
 
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
-
-		// Delete get_plugins() and wp_get_themes() cache.
-		delete_site_option( 'ghu-' . md5( 'repos' ) );
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
@@ -1267,8 +1246,13 @@ class Base {
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) && false !== stripos( $e->type, 'bitbucket' ) ) {
-				return 'bbserver';
+			if ( ! empty( $e->enterprise ) ) {
+				if ( false !== stripos( $e->type, 'bitbucket' ) ) {
+					return 'bbserver';
+				}
+				if ( false !== stripos( $e->type, 'gitlab' ) ) {
+					return 'gitlabce';
+				}
 			}
 
 			return $e->type;
@@ -1281,7 +1265,6 @@ class Base {
 
 			return $e[0];
 		}, $gits );
-
 
 		return array_unique( $gits );
 	}

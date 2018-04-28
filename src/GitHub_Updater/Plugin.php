@@ -72,18 +72,7 @@ class Plugin extends Base {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
-		$repo_cache            = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( 'repos' );
-		static::$extra_headers = ! empty( $repo_cache['extra_headers'] )
-			? $repo_cache['extra_headers']
-			: static::$extra_headers;
-
-		$plugins = ! empty( $repo_cache['plugins'] ) ? $repo_cache['plugins'] : false;
-		if ( ! $plugins ) {
-			$plugins = get_plugins();
-			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'plugins', $plugins, 'repos', '+30 minutes' );
-			Singleton::get_instance( 'API_PseudoTrait', $this )->set_repo_cache( 'extra_headers', static::$extra_headers, 'repos', '+30 minutes' );
-		}
-
+		$plugins     = get_plugins();
 		$git_plugins = array();
 
 		/**
@@ -186,11 +175,6 @@ class Plugin extends Base {
 			// Exit if not git hosted plugin.
 			if ( empty( $git_plugin ) ) {
 				continue;
-			}
-
-			if ( ! is_dir( $git_plugin['local_path'] ) ) {
-				// Delete get_plugins() and wp_get_themes() cache.
-				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
 
 			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
