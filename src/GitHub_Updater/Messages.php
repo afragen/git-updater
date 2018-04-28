@@ -26,6 +26,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  */
 class Messages extends Base {
+	use API_Trait;
 
 	/**
 	 * Holds WP_Error message.
@@ -83,7 +84,7 @@ class Messages extends Base {
 	 */
 	public function show_403_error_message() {
 		$_403       = false;
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ( ! $_403 && isset( $repo['code'], $repo['git'] ) )
 			     && 403 === $repo['code'] && 'github' === $repo['git'] ) {
@@ -123,7 +124,7 @@ class Messages extends Base {
 	 */
 	public function show_401_error_message() {
 		$_401       = false;
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
 			if ( ( ! $_401 && isset( $repo['code'] ) ) && 401 === $repo['code'] ) {
 				$_401 = true;
