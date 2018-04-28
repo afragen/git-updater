@@ -85,7 +85,8 @@ class Messages extends Base {
 		$_403       = false;
 		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
-			if ( ! $_403 && 403 === $repo['code'] && 'github' === $repo['git'] ) {
+			if ( ( ! $_403 && isset( $repo['code'], $repo['git'] ) )
+			     && 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
 				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
 					return;
@@ -124,7 +125,7 @@ class Messages extends Base {
 		$_401       = false;
 		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
-			if ( ! $_401 && 401 === $repo['code'] ) {
+			if ( ( ! $_401 && isset( $repo['code'] ) ) && 401 === $repo['code'] ) {
 				$_401 = true;
 				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
 					return;
@@ -173,7 +174,7 @@ class Messages extends Base {
 			<p>
 				<?php esc_html_e( 'GitHub Updater Information', 'github-updater' ); ?>
 				<br>
-				<?php esc_html_e( 'Please be patient while WP-Cron finishes. Please report any issues if this notice is not present.', 'github-updater' ); ?>
+				<?php esc_html_e( 'Please be patient while WP-Cron finishes.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
