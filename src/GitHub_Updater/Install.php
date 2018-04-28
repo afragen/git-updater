@@ -28,6 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  */
 class Install extends Base {
+	use Basic_Auth_Loader;
 
 	/**
 	 * Class options.
@@ -147,7 +148,7 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
+				$this->load_authentication_hooks();
 				if ( static::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}

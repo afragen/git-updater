@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @uses    \Fragen\GitHub_Updater\Base
  */
 class API {
-	use API_Trait;
+	use API_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Variable for setting update transient hours.
@@ -327,7 +327,7 @@ class API {
 				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
+				$this->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;

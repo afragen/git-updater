@@ -37,7 +37,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Gary Jones
  */
 class Base {
-	use API_Trait;
+	use API_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Store details of all repositories that are installed.
@@ -162,7 +162,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->remove_authentication_hooks();
+			$this->remove_authentication_hooks();
 		}
 	}
 

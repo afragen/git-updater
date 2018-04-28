@@ -23,19 +23,11 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Basic_Auth_Loader
+ * Trait Basic_Auth_Loader
  *
  * @package Fragen\GitHub_Updater
  */
-class Basic_Auth_Loader {
-
-	/**
-	 * Stores Basic::$options.
-	 *
-	 * @access private
-	 * @var    mixed
-	 */
-	private static $options;
+trait Basic_Auth_Loader {
 
 	/**
 	 * Stores array of git servers requiring Basic Authentication.
@@ -51,19 +43,6 @@ class Basic_Auth_Loader {
 	 * @var    \stdClass
 	 */
 	public $caller;
-
-	/**
-	 * Basic_Auth_Loader constructor.
-	 *
-	 * @access public
-	 *
-	 * @param array $options Options to pass to the updater.
-	 */
-	public function __construct( $options ) {
-		static::$options = empty( $options )
-			? get_site_option( 'github_updater', array() )
-			: $options;
-	}
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.

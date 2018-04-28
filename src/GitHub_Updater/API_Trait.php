@@ -18,6 +18,11 @@ use Fragen\Singleton,
 	Fragen\GitHub_Updater\API\Gitea_API;
 
 
+/**
+ * Trait API_Trait
+ *
+ * @package Fragen\GitHub_Updater
+ */
 trait API_Trait {
 
 	/**
