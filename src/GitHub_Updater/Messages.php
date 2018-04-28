@@ -64,14 +64,15 @@ class Messages extends Base {
 					add_action( 'admin_notices', array( &$this, 'show_wp_error' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_wp_error' ) );
 					break;
+				case 'waiting':
+					add_action( 'admin_notices', array( &$this, 'waiting' ) );
+					add_action( 'network_admin_notices', array( &$this, 'waiting' ) );
 				case 'git':
 				default:
 					add_action( 'admin_notices', array( &$this, 'show_403_error_message' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_403_error_message' ) );
 					add_action( 'admin_notices', array( &$this, 'show_401_error_message' ) );
 					add_action( 'network_admin_notices', array( &$this, 'show_401_error_message' ) );
-					add_action( 'admin_notices', array( &$this, 'waiting' ) );
-					add_action( 'network_admin_notices', array( &$this, 'waiting' ) );
 			}
 		}
 
