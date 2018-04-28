@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`
 * fix admin notice from showing when no GitLab.com repo exists
 * remove caching of `get_plugins()` and `wp_get_themes()` as it seems to result in issues for some users
