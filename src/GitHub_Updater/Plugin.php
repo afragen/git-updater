@@ -31,6 +31,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @link    https://github.com/codepress/github-plugin-updater
  */
 class Plugin extends Base {
+	use API_Trait;
 
 	/**
 	 * Rollback variable
@@ -190,8 +191,6 @@ class Plugin extends Base {
 	public function get_remote_plugin_meta() {
 		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
-			$plugin->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $plugin->type, $plugin );
-
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *

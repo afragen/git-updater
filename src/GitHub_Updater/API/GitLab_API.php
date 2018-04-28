@@ -12,6 +12,7 @@ namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API,
+	Fragen\GitHub_Updater\API_Trait,
 	Fragen\GitHub_Updater\Branch,
 	Fragen\GitHub_Updater\Readme_Parser;
 
@@ -32,6 +33,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class GitLab_API extends API implements API_Interface {
+	use API_Trait;
 
 	/**
 	 * Holds loose class method name.

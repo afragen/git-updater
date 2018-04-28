@@ -37,6 +37,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Gary Jones
  */
 class Base {
+	use API_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Store details of all repositories that are installed.
@@ -109,6 +110,14 @@ class Base {
 	);
 
 	/**
+	 * Stores the object calling Basic_Auth_Loader.
+	 *
+	 * @access public
+	 * @var    \stdClass
+	 */
+	public $caller;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -161,7 +170,7 @@ class Base {
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
 		if ( $this->repo_api instanceof Bitbucket_API ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->remove_authentication_hooks();
+			$this->remove_authentication_hooks();
 		}
 	}
 
@@ -352,7 +361,6 @@ class Base {
 		$this->$type->num_ratings          = 0;
 		$this->$type->transient            = array();
 		$this->$type->repo_meta            = array();
-		$this->$type->repo_api             = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $type, $this->$type );
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
@@ -381,7 +389,7 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = array();
 		if ( null !== $repo ) {
-			$cache = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( $repo->repo );
+			$cache = $this->get_repo_cache( $repo->repo );
 
 			return empty( $cache );
 		}
@@ -390,7 +398,7 @@ class Base {
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->repo ] = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_cache( $git_repo->repo );
+			$caches[ $git_repo->repo ] = $this->get_repo_cache( $git_repo->repo );
 		}
 		$waiting = array_filter( $caches, function( $e ) {
 			return empty( $e );
@@ -443,36 +451,35 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		$this->repo_api = null;
-		$file           = 'style.css';
+		$file = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
 			$file = basename( $repo->slug );
 		}
 
-		$this->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this, $repo )->get_repo_api( $repo->type, $repo );
-		if ( null === $this->repo_api ) {
+		$repo_api = $this->get_repo_api( $repo->type, $repo );
+		if ( null === $repo_api ) {
 			return false;
 		}
 
 		$this->{$repo->type} = $repo;
 		$this->set_defaults( $repo->type );
 
-		if ( $this->repo_api->get_remote_info( $file ) ) {
+		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
-					$this->repo_api->get_repo_meta();
+					$repo_api->get_repo_meta();
 					$changelog = $this->get_changelog_filename( $repo->type );
 					if ( $changelog ) {
-						$this->repo_api->get_remote_changes( $changelog );
+						$repo_api->get_remote_changes( $changelog );
 					}
-					$this->repo_api->get_remote_readme();
+					$repo_api->get_remote_readme();
 				}
 				if ( ! empty( self::$options['branch_switch'] ) ) {
-					$this->repo_api->get_remote_branches();
+					$repo_api->get_remote_branches();
 				}
 			}
-			$this->repo_api->get_remote_tag();
-			$repo->download_link = $this->repo_api->construct_download_link();
+			$repo_api->get_remote_tag();
+			$repo->download_link = $repo_api->construct_download_link();
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}
@@ -1042,7 +1049,7 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$this->repo_api = Singleton::get_instance( 'API_PseudoTrait', $this )->get_repo_api( $repo->type, $repo );
+		$this->repo_api = $this->get_repo_api( $repo->type, $repo );
 		$this->tag      = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug           = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$rollback       = array(
