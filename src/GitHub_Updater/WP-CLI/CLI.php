@@ -56,7 +56,7 @@ class CLI extends WP_CLI_Command {
 	public function cache( $args ) {
 		list( $action ) = $args;
 		if ( 'delete' === $action ) {
-			$this->base->delete_all_cached_data();
+			$this->delete_all_cached_data();
 			WP_CLI::success( 'GitHub Updater cache has been cleared.' );
 		} else {
 			WP_CLI::error( sprintf( 'Incorrect command syntax, see %s for proper syntax.', '`wp help github-updater cache`' ) );
@@ -76,7 +76,7 @@ class CLI extends WP_CLI_Command {
 	 */
 	public function reset_api_key() {
 		delete_site_option( 'github_updater_api_key' );
-		$this->base->ensure_api_key_is_set();
+		$this->ensure_api_key_is_set();
 		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg( array(
 			'action' => 'github-updater-update',

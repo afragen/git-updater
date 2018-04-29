@@ -111,7 +111,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 			if ( $response && isset( $response->data ) ) {
 				$contents = $response->data;
-				$response = $this->base->get_file_headers( $contents, $this->type->type );
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -178,7 +178,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
@@ -230,7 +230,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {

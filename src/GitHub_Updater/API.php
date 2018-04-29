@@ -52,13 +52,6 @@ class API {
 	protected $response = array();
 
 	/**
-	 * Holds instance of class Base.
-	 *
-	 * @var \Fragen\GitHub_Updater\Base
-	 */
-	protected $base;
-
-	/**
 	 * Holds site options.
 	 *
 	 * @var array $options
@@ -341,7 +334,7 @@ class API {
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		if ( $this->base->is_override_dot_org() ) {
+		if ( $this->is_override_dot_org() ) {
 			return false;
 		}
 
@@ -454,7 +447,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update_repo( $this->type ) );
+		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type ) );
 	}
 
 
