@@ -11,7 +11,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\API_Trait;
 
 
 /*
@@ -33,6 +34,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * @package Fragen\GitHub_Updater
  */
 class Rest_Update extends Base {
+use API_Trait;
 
 	/**
 	 * Holds REST Upgrader Skin.
@@ -78,13 +80,14 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $plugin );
+		$repo_api = $this->get_repo_api( $plugin->type, $plugin );
 
 		$update = array(
 			'slug'        => $plugin->repo,
 			'plugin'      => $plugin->slug,
 			'new_version' => null,
 			'url'         => $plugin->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( false, $tag ),
 		);
 
 		add_filter( 'site_transient_update_plugins', function( $value ) use ( $plugin, $update ) {
@@ -127,12 +130,13 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $theme );
+		$repo_api = $this->get_repo_api( $theme->type, $theme );
 
 		$update = array(
 			'theme'       => $theme->repo,
 			'new_version' => null,
 			'url'         => $theme->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( false, $tag ),
 		);
 
 		add_filter( 'site_transient_update_themes', function( $value ) use ( $theme, $update ) {
