@@ -36,6 +36,13 @@ class Language_Pack extends Base {
 	protected $repo;
 
 	/**
+	 * Variable containing the Language_Pack_API.
+	 *
+	 * @var \Fragen\GitHub_Updater\API\Language_Pack_API
+	 */
+	private $repo_api;
+
+	/**
 	 * Language_Pack constructor.
 	 *
 	 * @param Plugin|Theme      $repo Plugin/Theme object

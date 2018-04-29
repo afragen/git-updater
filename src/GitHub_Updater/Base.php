@@ -49,13 +49,6 @@ class Base {
 	protected $config;
 
 	/**
-	 * Class Object for API.
-	 *
-	 * @var GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API
-	 */
-	protected $repo_api;
-
-	/**
 	 * Variable for holding extra theme and plugin headers.
 	 *
 	 * @var array
@@ -164,14 +157,16 @@ class Base {
 
 	/**
 	 * Remove hooks after use.
+	 *
+	 * @param object $repo_api
 	 */
-	public function remove_hooks() {
+	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		remove_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
 		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
 		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
 
-		if ( $this->repo_api instanceof Bitbucket_API ) {
+		if ( $repo_api instanceof Bitbucket_API ) {
 			$this->remove_authentication_hooks();
 		}
 	}
@@ -486,7 +481,7 @@ class Base {
 			$language_pack->run();
 		}
 
-		$this->remove_hooks();
+		$this->remove_hooks( $repo_api );
 
 		return true;
 	}
@@ -1044,14 +1039,14 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$this->repo_api = $this->get_repo_api( $repo->type, $repo );
+		$repo_api = $this->get_repo_api( $repo->type, $repo );
 		$this->tag      = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug           = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$rollback       = array(
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $this->tag ),
+			'package'     => $repo_api->construct_download_link( false, $this->tag ),
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
