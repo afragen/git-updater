@@ -158,9 +158,7 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
-		/**
-		 * Mod for GitHub Updater.
-		 */
+		// TODO: Mod for GitHub Updater.
 		//$contents = file_get_contents( $file );
 		$contents = $file;
 
@@ -377,8 +375,7 @@ class Parser {
 
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
-			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-			$this->short_description = $this->short_description_53(); //GitHub Updater
+			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
 		}
 
 		// Sanitize and trim the short_description to match requirements.
@@ -412,7 +409,7 @@ class Parser {
 					$this->sections['faq'] .= "<dt id='{$question_slug}'>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
-				$this->faq_as_h4(); //GitHub Updater
+				$this->faq_as_h4(); // TODO: GitHub Updater
 			}
 		}
 

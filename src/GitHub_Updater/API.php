@@ -349,9 +349,7 @@ class API {
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			//@TODO shorten syntax for PHP 5.4
-			$type     = explode( '_', $this->type->type );
-			$type     = $type[1];
+			$type     = explode( '_', $this->type->type )[1];
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
 			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
 			$response = wp_remote_get( $url );

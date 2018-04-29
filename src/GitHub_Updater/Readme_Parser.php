@@ -90,18 +90,6 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
-	 * Makes generation of short description PHP 5.3 compliant.
-	 * Original requires PHP 5.4 for array dereference.
-	 *
-	 * @return string $description[0]
-	 */
-	protected function short_description_53() {
-		$description = array_filter( explode( "\n", $this->sections['description'] ) );
-
-		return $description[0];
-	}
-
-	/**
 	 * Converts FAQ from dictionary list to h4 style.
 	 */
 	protected function faq_as_h4() {
