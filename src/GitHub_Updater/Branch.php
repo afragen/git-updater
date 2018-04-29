@@ -53,8 +53,7 @@ class Branch {
 	 */
 	public function __construct( $cache = null ) {
 		$this->cache     = $cache;
-		$base            = Singleton::get_instance( 'Base', $this );
-		static::$options = $base::$options;
+		static::$options = $this->get_class_vars( 'Base', 'options' );;
 	}
 
 	/**
