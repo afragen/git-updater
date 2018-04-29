@@ -77,9 +77,8 @@ class API {
 	 *
 	 */
 	public function __construct() {
-		$this->base            = $base = Singleton::get_instance( 'Base', $this );
-		static::$extra_headers = $this->base->add_headers( array() );
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
+		static::$extra_headers = Singleton::get_instance( 'Base', $this )->add_headers( array() );
 	}
 
 	/**
