@@ -639,10 +639,8 @@ class Base {
 	}
 
 	/**
-	 * Set array with normal and extended repo names.
+	 * Set array with normal repo names.
 	 * Fix name even if installed without renaming originally, eg <repo>-master
-	 *
-	 * @TODO remove extended naming stuff
 	 *
 	 * @param string            $slug
 	 * @param Base|Plugin|Theme $upgrader_object
@@ -661,12 +659,8 @@ class Base {
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( ( $slug === $repo->repo ||
-			       ( isset( $repo->extended_repo ) && $slug === $repo->extended_repo ) ) ||
-			     ( $rename === $repo->owner . '-' . $repo->repo || $rename === $repo->repo )
-			) {
-				$arr['repo']          = $repo->repo;
-				$arr['extended_repo'] = isset( $repo->extended_repo ) ? $repo->extended_repo : null;
+			if ( $slug === $repo->repo || $rename === $repo->repo ) {
+				$arr['repo'] = $repo->repo;
 				break;
 			}
 		}
@@ -1023,7 +1017,6 @@ class Base {
 			$slug = dirname( $_GET['plugin'] );
 			$type = 'plugin';
 
-			// For extended naming @TODO remove extended naming stuff
 			$repo = $this->get_repo_slugs( $slug );
 			$slug = ! empty( $repo ) ? $repo['repo'] : $slug;
 		}

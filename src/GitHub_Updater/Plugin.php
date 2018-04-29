@@ -131,13 +131,6 @@ class Plugin extends Base {
 				$git_plugin['slug']           = $plugin;
 				$git_plugin['local_path']     = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
 
-				// @TODO remove extended naming stuff
-				$git_plugin['extended_repo'] = implode( '-', array(
-					$repo_parts['git_server'],
-					str_replace( '/', '-', $header['owner'] ),
-					$header['repo'],
-				) );
-
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
 				$git_plugin['name']                    = $plugin_data['Name'];
