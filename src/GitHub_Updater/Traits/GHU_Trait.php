@@ -31,21 +31,64 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Checks to see if DOING_AJAX.
-	 *
-	 * @return bool
-	 */
-	public static function is_doing_ajax() {
-		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
-	}
-
-	/**
 	 * Checks to see if WP_CLI.
 	 *
 	 * @return bool
 	 */
 	public static function is_wp_cli() {
 		return ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
+	 * Returns repo cached data.
+	 *
+	 * @access protected
+	 *
+	 * @param string|bool $repo Repo name or false.
+	 *
+	 * @return array|bool The repo cache. False if expired.
+	 */
+	public function get_repo_cache( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		}
+		$cache_key = 'ghu-' . md5( $repo );
+		$cache     = get_site_option( $cache_key );
+
+		if ( empty( $cache['timeout'] ) || time() > $cache['timeout'] ) {
+			return false;
+		}
+
+		return $cache;
+	}
+
+	/**
+	 * Sets repo data for cache in site option.
+	 *
+	 * @access protected
+	 *
+	 * @param string      $id       Data Identifier.
+	 * @param mixed       $response Data to be stored.
+	 * @param string|bool $repo     Repo name or false.
+	 * @param string|bool $timeout  Timeout for cache.
+	 *                              Default is $hours (12 hours).
+	 *
+	 * @return bool
+	 */
+	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
+		$hours = $this->get_class_vars( 'API', 'hours' );
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+		}
+		$cache_key = 'ghu-' . md5( $repo );
+		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
+
+		$this->response['timeout'] = strtotime( $timeout );
+		$this->response[ $id ]     = $response;
+
+		update_site_option( $cache_key, $this->response );
+
+		return true;
 	}
 
 	/**
@@ -66,6 +109,15 @@ trait GHU_Trait {
 		$static = $prop->isStatic();
 
 		return $static ? $class::${$var} : $class->$var;
+	}
+
+	/**
+	 * Returns static class variable $error_code.
+	 *
+	 * @return array self::$error_code
+	 */
+	public function get_error_codes() {
+		return $this->get_class_vars( 'API', 'error_code' );
 	}
 
 	/**
@@ -259,6 +311,15 @@ trait GHU_Trait {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks to see if DOING_AJAX.
+	 *
+	 * @return bool
+	 */
+	public static function is_doing_ajax() {
+		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 	}
 
 	/**
