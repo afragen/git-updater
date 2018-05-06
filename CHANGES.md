@@ -8,6 +8,8 @@
 * moved traits to own sub-directory
 * removed old extended naming code
 * refactor Remote Management to new `class Remote_Management`
+* converted short array syntax
+* removed callback passing of object by reference, it seems of dubious value
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`
