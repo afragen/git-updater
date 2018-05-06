@@ -85,14 +85,14 @@ class Settings extends Base {
 	 * Load relevant action/filter hooks.
 	 */
 	protected function load_hooks() {
-		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ &$this, 'add_plugin_page' ] );
-		add_action( 'network_admin_edit_github-updater', [ &$this, 'update_settings' ] );
-		add_action( 'admin_init', [ &$this, 'page_init' ] );
+		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
+		add_action( 'network_admin_edit_github-updater', [ $this, 'update_settings' ] );
+		add_action( 'admin_init', [ $this, 'page_init' ] );
 
 		add_filter( is_multisite()
 			? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name
 			: 'plugin_action_links_' . $this->ghu_plugin_name,
-			[ &$this, 'plugin_action_links' ] );
+			[ $this, 'plugin_action_links' ] );
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Settings extends Base {
 			esc_html__( 'GitHub Updater', 'github-updater' ),
 			$capability,
 			'github-updater',
-			[ &$this, 'create_admin_page' ]
+			[ $this, 'create_admin_page' ]
 		);
 	}
 
@@ -292,7 +292,7 @@ class Settings extends Base {
 		register_setting(
 			'github_updater',
 			'github_updater',
-			[ &$this, 'sanitize' ]
+			[ $this, 'sanitize' ]
 		);
 
 		$this->ghu_tokens();
@@ -303,14 +303,14 @@ class Settings extends Base {
 		add_settings_section(
 			'github_updater_settings',
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			[ &$this, 'print_section_ghu_settings' ],
+			[ $this, 'print_section_ghu_settings' ],
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'branch_switch',
 			null,
-			[ &$this, 'token_callback_checkbox' ],
+			[ $this, 'token_callback_checkbox' ],
 			'github_updater_install_settings',
 			'github_updater_settings',
 			[ 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) ]

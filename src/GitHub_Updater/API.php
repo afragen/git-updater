@@ -204,7 +204,7 @@ class API {
 	 */
 	protected function api( $url ) {
 
-		add_filter( 'http_request_args', [ &$this, 'http_request_args' ], 10, 2 );
+		add_filter( 'http_request_args', [ $this, 'http_request_args' ], 10, 2 );
 
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );

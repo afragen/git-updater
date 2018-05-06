@@ -487,7 +487,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_settings',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				[ &$this, 'print_section_gitea_token' ],
+				[ $this, 'print_section_gitea_token' ],
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -496,7 +496,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_id',
 				esc_html__( 'Gitea Private Settings', 'github-updater' ),
-				[ &$this, 'print_section_gitea_info' ],
+				[ $this, 'print_section_gitea_info' ],
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -562,7 +562,7 @@ class Gitea_API extends API implements API_Interface {
 		add_settings_field(
 			'gitea_access_token',
 			esc_html__( 'Gitea Access Token', 'github-updater' ),
-			[ &$this, 'gitea_access_token' ],
+			[ $this, 'gitea_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -587,8 +587,8 @@ class Gitea_API extends API implements API_Interface {
 	 * Display Gitea error admin notices.
 	 */
 	public function gitea_error_notices() {
-		add_action( 'admin_notices', [ &$this, 'gitea_error' ] );
-		add_action( 'network_admin_notices', [ &$this, 'gitea_error', ] );
+		add_action( 'admin_notices', [ $this, 'gitea_error' ] );
+		add_action( 'network_admin_notices', [ $this, 'gitea_error', ] );
 	}
 
 	/**

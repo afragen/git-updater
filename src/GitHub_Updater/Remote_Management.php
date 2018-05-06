@@ -65,7 +65,7 @@ class Remote_Management {
 	 * Load needed action/filter hooks.
 	 */
 	private function load_hooks() {
-		add_action( 'admin_init', [ &$this, 'remote_management_page_init' ] );
+		add_action( 'admin_init', [ $this, 'remote_management_page_init' ] );
 		add_action( 'github_updater_update_settings', function( $post_data ) {
 			$this->save_settings( $post_data );
 		} );
@@ -108,7 +108,7 @@ class Remote_Management {
 		add_settings_section(
 			'remote_management',
 			esc_html__( 'Remote Management', 'github-updater' ),
-			[ &$this, 'print_section_remote_management' ],
+			[ $this, 'print_section_remote_management' ],
 			'github_updater_remote_settings'
 		);
 
@@ -116,7 +116,7 @@ class Remote_Management {
 			add_settings_field(
 				$id,
 				null,
-				[ &$this, 'token_callback_checkbox_remote' ],
+				[ $this, 'token_callback_checkbox_remote' ],
 				'github_updater_remote_settings',
 				'remote_management',
 				[ 'id' => $id, 'title' => esc_html( $name ) ]

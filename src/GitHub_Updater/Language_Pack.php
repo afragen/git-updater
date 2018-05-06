@@ -69,8 +69,8 @@ class Language_Pack extends Base {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'pre_set_site_transient_update_plugins', [ &$this, 'pre_set_site_transient' ] );
-		add_filter( 'pre_set_site_transient_update_themes', [ &$this, 'pre_set_site_transient' ] );
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient' ] );
+		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient' ] );
 	}
 
 	/**

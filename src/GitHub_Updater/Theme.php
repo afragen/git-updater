@@ -203,11 +203,11 @@ class Theme extends Base {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
-				add_action( 'after_theme_row', [ &$this, 'remove_after_theme_row' ], 10, 2 );
+				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_$theme->repo", [ &$this, 'wp_theme_update_row' ], 10, 2 );
+					add_action( "after_theme_row_$theme->repo", [ $this, 'wp_theme_update_row' ], 10, 2 );
 					if ( ! $theme->release_asset ) {
-						add_action( "after_theme_row_$theme->repo", [ &$this, 'multisite_branch_switcher' ], 15, 2 );
+						add_action( "after_theme_row_$theme->repo", [ $this, 'multisite_branch_switcher' ], 15, 2 );
 					}
 				}
 			}
@@ -221,7 +221,7 @@ class Theme extends Base {
 		}
 
 		// Update theme transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', [ &$this, 'set_rollback' ] );
+		add_filter( 'wp_get_update_data', [ $this, 'set_rollback' ] );
 
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
@@ -233,10 +233,10 @@ class Theme extends Base {
 	 */
 	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', [ &$this, 'customize_theme_update_html' ] );
+			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
 		}
-		add_filter( 'themes_api', [ &$this, 'themes_api' ], 99, 3 );
-		add_filter( 'pre_set_site_transient_update_themes', [ &$this, 'pre_set_site_transient_update_themes' ] );
+		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
+		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient_update_themes' ] );
 	}
 
 	/**

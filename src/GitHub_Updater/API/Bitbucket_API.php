@@ -510,7 +510,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_section(
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			[ &$this, 'print_section_bitbucket_username' ],
+			[ $this, 'print_section_bitbucket_username' ],
 			'github_updater_bitbucket_install_settings'
 		);
 
@@ -539,7 +539,7 @@ class Bitbucket_API extends API implements API_Interface {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
-				[ &$this, 'print_section_bitbucket_info' ],
+				[ $this, 'print_section_bitbucket_info' ],
 				'github_updater_bitbucket_install_settings'
 			);
 		}
@@ -600,7 +600,7 @@ class Bitbucket_API extends API implements API_Interface {
 			add_settings_field(
 				'bitbucket_username',
 				esc_html__( 'Bitbucket Username', 'github-updater' ),
-				[ &$this, 'bitbucket_username' ],
+				[ $this, 'bitbucket_username' ],
 				'github_updater_install_' . $type,
 				$type
 			);
@@ -608,7 +608,7 @@ class Bitbucket_API extends API implements API_Interface {
 			add_settings_field(
 				'bitbucket_password',
 				esc_html__( 'Bitbucket Password', 'github-updater' ),
-				[ &$this, 'bitbucket_password' ],
+				[ $this, 'bitbucket_password' ],
 				'github_updater_install_' . $type,
 				$type
 			);
@@ -617,7 +617,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'is_private',
 			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			[ &$this, 'is_private_repo' ],
+			[ $this, 'is_private_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);

@@ -522,12 +522,12 @@ class GitHub_API extends API implements API_Interface {
 			}
 
 			if ( $response ) {
-				add_filter( 'http_request_args', [ &$this, 'set_github_release_asset_header' ] );
+				add_filter( 'http_request_args', [ $this, 'set_github_release_asset_header' ] );
 
 				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
 				$response_new = wp_remote_get( $url );
 
-				remove_filter( 'http_request_args', [ &$this, 'set_github_release_asset_header' ] );
+				remove_filter( 'http_request_args', [ $this, 'set_github_release_asset_header' ] );
 
 				if ( is_wp_error( $response_new ) ) {
 					Singleton::get_instance( 'Messages', $this )->create_error_message( $response_new );
@@ -585,7 +585,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			[ &$this, 'print_section_github_access_token' ],
+			[ $this, 'print_section_github_access_token' ],
 			'github_updater_github_install_settings'
 		);
 
@@ -616,7 +616,7 @@ class GitHub_API extends API implements API_Interface {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				[ &$this, 'print_section_github_info' ],
+				[ $this, 'print_section_github_info' ],
 				'github_updater_github_install_settings'
 			);
 		}
@@ -661,7 +661,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			[ &$this, 'github_access_token' ],
+			[ $this, 'github_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);

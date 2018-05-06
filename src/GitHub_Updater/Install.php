@@ -220,7 +220,7 @@ class Install extends Base {
 					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
 				add_filter( 'install_plugin_complete_actions', [
-					&$this,
+					$this,
 					'install_plugin_complete_actions',
 				], 10, 3 );
 			}
@@ -236,7 +236,7 @@ class Install extends Base {
 					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
 				add_filter( 'install_theme_complete_actions', [
-					&$this,
+					$this,
 					'install_theme_complete_actions',
 				], 10, 3 );
 			}
@@ -317,7 +317,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_repo',
 			sprintf( esc_html__( '%s URI', 'github-updater' ), $repo_type ),
-			[ &$this, 'get_repo' ],
+			[ $this, 'get_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -325,7 +325,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_branch',
 			esc_html__( 'Repository Branch', 'github-updater' ),
-			[ &$this, 'branch' ],
+			[ $this, 'branch' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -333,7 +333,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_api',
 			esc_html__( 'Remote Repository Host', 'github-updater' ),
-			[ &$this, 'install_api' ],
+			[ $this, 'install_api' ],
 			'github_updater_install_' . $type,
 			$type
 		);

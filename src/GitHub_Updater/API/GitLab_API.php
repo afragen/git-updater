@@ -591,7 +591,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
-				[ &$this, 'print_section_gitlab_token' ],
+				[ $this, 'print_section_gitlab_token' ],
 				'github_updater_gitlab_install_settings'
 			);
 		}
@@ -600,7 +600,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
-				[ &$this, 'print_section_gitlab_info' ],
+				[ $this, 'print_section_gitlab_info' ],
 				'github_updater_gitlab_install_settings'
 			);
 		}
@@ -676,7 +676,7 @@ class GitLab_API extends API implements API_Interface {
 		add_settings_field(
 			'gitlab_access_token',
 			esc_html__( 'GitLab Access Token', 'github-updater' ),
-			[ &$this, 'gitlab_access_token' ],
+			[ $this, 'gitlab_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -701,8 +701,8 @@ class GitLab_API extends API implements API_Interface {
 	 * Display GitLab error admin notices.
 	 */
 	public function gitlab_error_notices() {
-		add_action( 'admin_notices', [ &$this, 'gitlab_error' ] );
-		add_action( 'network_admin_notices', [ &$this, 'gitlab_error', ] );
+		add_action( 'admin_notices', [ $this, 'gitlab_error' ] );
+		add_action( 'network_admin_notices', [ $this, 'gitlab_error', ] );
 	}
 
 	/**

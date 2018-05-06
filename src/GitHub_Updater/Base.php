@@ -141,8 +141,8 @@ class Base {
 	 * @param object $repo_api
 	 */
 	public function remove_hooks( $repo_api ) {
-		remove_filter( 'extra_theme_headers', [ &$this, 'add_headers' ] );
-		remove_filter( 'extra_plugin_headers', [ &$this, 'add_headers' ] );
+		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
+		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
 		remove_filter( 'http_request_args', [ 'Fragen\\GitHub_Updater\\API', 'http_request_args' ] );
 		remove_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ] );
 
@@ -172,7 +172,7 @@ class Base {
 		} );
 
 		// Ensure transient updated on plugins.php and themes.php pages.
-		add_action( 'admin_init', [ &$this, 'admin_pages_update_transient' ] );
+		add_action( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
@@ -203,12 +203,12 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', [ &$this, 'get_meta_plugins' ] );
-		add_action( 'wp_update_themes', [ &$this, 'get_meta_themes' ] );
-		add_action( 'ghu_get_remote_plugin', [ &$this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'ghu_get_remote_theme', [ &$this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ &$this, 'get_meta_remote_management' ] );
-		add_action( 'update_option_auto_updater.lock', [ &$this, 'get_meta_remote_management' ] );
+		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
+		add_action( 'wp_update_themes', [ $this, 'get_meta_themes' ] );
+		add_action( 'ghu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
+		add_action( 'ghu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ $this, 'get_meta_remote_management' ] );
+		add_action( 'update_option_auto_updater.lock', [ $this, 'get_meta_remote_management' ] );
 
 	}
 
@@ -546,7 +546,7 @@ class Base {
 		     ! empty( $upgrader_object->config[ $slug ]->ci_job )
 		) {
 			$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-			add_filter( 'upgrader_post_install', [ &$this, 'upgrader_post_install' ], 10, 3 );
+			add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
 		}
 
 		return $new_source;
@@ -565,7 +565,7 @@ class Base {
 		global $wp_filesystem;
 
 		$wp_filesystem->delete( $result['source'], true );
-		remove_filter( 'upgrader_post_install', [ &$this, 'upgrader_post_install' ] );
+		remove_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ] );
 
 		return $result;
 	}
@@ -811,7 +811,7 @@ class Base {
 			$this->make_update_transient_current( $transient );
 		}
 
-		remove_filter( 'admin_init', [ &$this, 'admin_pages_update_transient' ] );
+		remove_filter( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
 	}
 
 	/**

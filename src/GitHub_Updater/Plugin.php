@@ -207,7 +207,7 @@ class Plugin extends Base {
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 			     ( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_$plugin->slug", [ &$this, 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_$plugin->slug", [ $this, 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
@@ -219,7 +219,7 @@ class Plugin extends Base {
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', [ &$this, 'set_rollback' ] );
+		add_filter( 'wp_get_update_data', [ $this, 'set_rollback' ] );
 
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
@@ -230,9 +230,9 @@ class Plugin extends Base {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		add_filter( 'plugin_row_meta', [ &$this, 'plugin_row_meta' ], 10, 2 );
-		add_filter( 'plugins_api', [ &$this, 'plugins_api' ], 99, 3 );
-		add_filter( 'pre_set_site_transient_update_plugins', [ &$this, 'pre_set_site_transient_update_plugins' ] );
+		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
+		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient_update_plugins' ] );
 	}
 
 	/**

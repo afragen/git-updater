@@ -486,7 +486,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_section(
 			'bitbucket_server_user',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
-			[ &$this, 'print_section_bitbucket_username' ],
+			[ $this, 'print_section_bitbucket_username' ],
 			'github_updater_bbserver_install_settings'
 		);
 
@@ -515,7 +515,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			add_settings_section(
 				'bitbucket_server_id',
 				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
-				[ &$this, 'print_section_bitbucket_info' ],
+				[ $this, 'print_section_bitbucket_info' ],
 				'github_updater_bbserver_install_settings'
 			);
 		}
