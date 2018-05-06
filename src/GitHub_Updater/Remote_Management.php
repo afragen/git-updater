@@ -69,22 +69,7 @@ class Remote_Management {
 		add_action( 'github_updater_update_settings', function( $post_data ) {
 			$this->save_settings( $post_data );
 		} );
-		add_action( 'init', [ &$this, 'load_hooks_on_init' ] );
 		$this->add_settings_tabs();
-	}
-
-	/**
-	 * Load certain hooks on init.
-	 */
-	private function load_hooks_on_init() {
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array(
-			Singleton::get_instance( 'Base', $this ),
-			'get_meta_remote_management',
-		) );
-		add_action( 'update_option_auto_updater.lock', array(
-			Singleton::get_instance( 'Base', $this ),
-			'get_meta_remote_management',
-		) );
 	}
 
 	/**
