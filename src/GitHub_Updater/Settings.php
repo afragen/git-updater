@@ -38,18 +38,6 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Supported remote management services.
-	 *
-	 * @var array
-	 */
-	public static $remote_management = array(
-		'ithemes_sync' => 'iThemes Sync',
-		'infinitewp'   => 'InfiniteWP',
-		'managewp'     => 'ManageWP',
-		'mainwp'       => 'MainWP',
-	);
-
-	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 *
 	 * @var array
@@ -70,7 +58,6 @@ class Settings extends Base {
 	public function __construct() {
 		parent::__construct();
 		$this->refresh_caches();
-		$this->ensure_api_key_is_set();
 		$this->load_options();
 	}
 
@@ -89,8 +76,9 @@ class Settings extends Base {
 	public function run() {
 		$this->load_hooks();
 
-		// Need to ensure Install is activated here for hooks to fire.
+		// Need to ensure these classes are activated here for hooks to fire.
 		Singleton::get_instance( 'Install', $this );
+		Singleton::get_instance( 'Remote_Management', $this );
 	}
 
 	/**
@@ -100,7 +88,6 @@ class Settings extends Base {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
 		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
 		add_action( 'admin_init', array( &$this, 'page_init' ) );
-		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
 
 		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array(
 			&$this,
@@ -116,10 +103,7 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_tabs() {
-		$tabs = array(
-			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
-			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
-		);
+		$tabs = [ 'github_updater_settings' => esc_html__( 'Settings', 'github-updater' ) ];
 
 		/**
 		 * Filter settings tabs.
@@ -233,69 +217,66 @@ class Settings extends Base {
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h1>
 			<?php $this->options_tabs(); ?>
-			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
-				<?php if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ): ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
-					</div>
-				<?php elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ): ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
-					</div>
-				<?php elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) : ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'Cache refreshed.', 'github-updater' ); ?></p>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( 'github_updater_settings' === $tab ) : ?>
-					<?php $this->options_sub_tabs(); ?>
-					<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-						<?php
-						settings_fields( 'github_updater' );
-						if ( 'github_updater' === $subtab ) {
-							do_settings_sections( 'github_updater_install_settings' );
-							$this->add_hidden_settings_sections();
-						} else {
-							do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
-							$this->display_ghu_repos( $subtab );
-							$this->add_hidden_settings_sections( $subtab );
-						}
-						submit_button();
-						?>
-					</form>
-					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
-					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
-					</form>
-				<?php endif; ?>
-			<?php endif; ?>
-
-			<?php
-			if ( 'github_updater_install_plugin' === $tab ) {
-				Singleton::get_instance( 'Install', $this )->install( 'plugin' );
-			}
-			if ( 'github_updater_install_theme' === $tab ) {
-				Singleton::get_instance( 'Install', $this )->install( 'theme' );
-			}
-			?>
-			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
-				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
-
+			<?php $this->admin_page_notices(); ?>
+			<?php if ( 'github_updater_settings' === $tab ) : ?>
+				<?php $this->options_sub_tabs(); ?>
 				<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 					<?php
-					settings_fields( 'github_updater_remote_management' );
-					do_settings_sections( 'github_updater_remote_settings' );
+					settings_fields( 'github_updater' );
+					if ( 'github_updater' === $subtab ) {
+						do_settings_sections( 'github_updater_install_settings' );
+						$this->add_hidden_settings_sections();
+					} else {
+						do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
+						$this->display_ghu_repos( $subtab );
+						$this->add_hidden_settings_sections( $subtab );
+					}
 					submit_button();
 					?>
 				</form>
-				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
-				<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
+				<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
+				<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+					<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
 				</form>
 			<?php endif; ?>
+
+			<?php
+			/**
+			 * Action hook to add admin page data to appropriate $tab.
+			 *
+			 * @since 8.0.0
+			 *
+			 * @param string $tab    Name of tab.
+			 * @param string $action Save action for appropriate WordPress installation.
+			 *                       Single site or Multisite.
+			 */
+			do_action( 'github_updater_add_admin_page', $tab, $action );
+			?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Display appropriate notice for Settings page actions.
+	 */
+	private function admin_page_notices() {
+		$display = ( isset( $_GET['updated'] ) && is_multisite() )
+		           || isset( $_GET['reset'] )
+		           || isset( $_GET['refresh_transients'] );
+
+		if ( $display ) {
+			echo '<div class="updated"><p>';
+		}
+		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
+			esc_html_e( 'Settings saved.', 'github-updater' );
+		} elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ) {
+			esc_html_e( 'RESTful key reset.', 'github-updater' );
+		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
+			esc_html_e( 'Cache refreshed.', 'github-updater' );
+		}
+		if ( $display ) {
+			echo '</p></div>';
+		}
 	}
 
 	/**
@@ -512,36 +493,6 @@ class Settings extends Base {
 		static::$auth_required['gitea']  = true;
 	}
 
-	/**
-	 * Settings for Remote Management.
-	 */
-	public function remote_management_page_init() {
-		register_setting(
-			'github_updater_remote_management',
-			'github_updater_remote_settings',
-			array( &$this, 'sanitize' )
-		);
-
-		add_settings_section(
-			'remote_management',
-			esc_html__( 'Remote Management', 'github-updater' ),
-			array( &$this, 'print_section_remote_management' ),
-			'github_updater_remote_settings'
-		);
-
-		foreach ( self::$remote_management as $id => $name ) {
-			add_settings_field(
-				$id,
-				null,
-				array( &$this, 'token_callback_checkbox_remote' ),
-				'github_updater_remote_settings',
-				'remote_management',
-				array( 'id' => $id, 'title' => esc_html( $name ) )
-			);
-		}
-
-		$this->update_settings();
-	}
 
 	/**
 	 * Sanitize each setting field as needed.
@@ -575,26 +526,6 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Print the Remote Management text.
-	 */
-	public function print_section_remote_management() {
-		$api_url = add_query_arg( array(
-			'action' => 'github-updater-update',
-			'key'    => static::$api_key,
-		), admin_url( 'admin-ajax.php' ) );
-
-		?>
-		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
-			<br>
-			<span style="font-family:monospace;"><?php echo $api_url ?></span>
-		<p>
-			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
-		</p>
-		<?php
-	}
-
-	/**
 	 * Get the settings option array and print one of its values.
 	 *
 	 * @param $args
@@ -625,24 +556,6 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Get the settings option array and print one of its values.
-	 * For remote management settings.
-	 *
-	 * @param $args
-	 *
-	 * @return bool|void
-	 */
-	public function token_callback_checkbox_remote( $args ) {
-		$checked = isset( static::$options_remote[ $args['id'] ] ) ? static::$options_remote[ $args['id'] ] : null;
-		?>
-		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo $args['title']; ?>
-		</label>
-		<?php
-	}
-
-	/**
 	 * Update settings for single site or network activated.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
@@ -654,10 +567,13 @@ class Settings extends Base {
 				$options = $this->filter_options();
 				update_site_option( 'github_updater', self::sanitize( $options ) );
 			}
-			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-				$options = $this->filter_options( true );
-				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $options ) );
-			}
+
+			/**
+			 * Save $options in add-on classes.
+			 *
+			 * @since 8.0.0
+			 */
+			do_action( 'github_updater_update_settings', $_POST );
 		}
 		$this->redirect_on_save();
 	}
@@ -667,20 +583,9 @@ class Settings extends Base {
 	 *
 	 * @access private
 	 *
-	 * @param bool $remote True if setting remote management options.
-	 *                     Default is false.
-	 *
 	 * @return array|mixed
 	 */
-	private function filter_options( $remote = false ) {
-		if ( $remote ) {
-			$options = isset( $_POST['github_updater_remote_management'] )
-				? $_POST['github_updater_remote_management']
-				: array();
-
-			return $options;
-		}
-
+	private function filter_options() {
 		$options = static::$options;
 
 		// Remove checkbox options.
@@ -699,8 +604,15 @@ class Settings extends Base {
 	protected function redirect_on_save() {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
-		$reset_api_key      = $this->reset_api_key();
-		$option_page        = array( 'github_updater', 'github_updater_remote_management' );
+		$reset_api_key      = Singleton::get_instance( 'Remote_Management', $this )->reset_api_key();
+
+		/**
+		 * Filter to add to $option_page array.
+		 *
+		 * @since 8.0.0
+		 * @return array
+		 */
+		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
 		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
@@ -731,26 +643,6 @@ class Settings extends Base {
 			wp_redirect( $location );
 			exit;
 		}
-	}
-
-	/**
-	 * Reset RESTful API key.
-	 * Deleting site option will cause it to be re-created.
-	 *
-	 * @return bool
-	 */
-	private function reset_api_key() {
-		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
-		     'github_updater_remote_management' === $_REQUEST['tab']
-		) {
-			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
-			delete_site_option( 'github_updater_api_key' );
-
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

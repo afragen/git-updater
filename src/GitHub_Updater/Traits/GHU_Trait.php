@@ -121,15 +121,6 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Ensure api key is set.
-	 */
-	public function ensure_api_key_is_set() {
-		if ( ! static::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
-		}
-	}
-
-	/**
 	 * Take remote file contents as string and parse headers.
 	 *
 	 * @param $contents
