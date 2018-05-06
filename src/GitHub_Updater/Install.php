@@ -48,7 +48,7 @@ class Install extends Base {
 	public function __construct( $type, $wp_cli_config = array() ) {
 		parent::__construct();
 		$this->load_options();
-		$this->add_install_tabs();
+		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
@@ -57,7 +57,7 @@ class Install extends Base {
 	/**
 	 * Adds Install tabs to Settings page.
 	 */
-	public function add_install_tabs() {
+	public function add_settings_tabs() {
 		add_filter( 'github_updater_add_settings_tabs', function( $tabs ) {
 			$install_tabs = array(
 				'github_updater_install_plugin' => esc_html__( 'Install Plugin', 'github-updater' ),
@@ -66,6 +66,25 @@ class Install extends Base {
 
 			return array_merge( $tabs, $install_tabs );
 		} );
+		add_action( 'github_updater_add_admin_page', function( $tab ) {
+			$this->add_admin_page( $tab );
+		} );
+	}
+
+	/**
+	 * Add Settings page data via action hook.
+	 *
+	 * @uses 'github_updater_add_admin_page' action hook
+	 *
+	 * @param $tab
+	 */
+	public function add_admin_page( $tab ) {
+		if ( 'github_updater_install_plugin' === $tab ) {
+			$this->install( 'plugin' );
+		}
+		if ( 'github_updater_install_theme' === $tab ) {
+			$this->install( 'theme' );
+		}
 	}
 
 	/**
