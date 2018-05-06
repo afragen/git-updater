@@ -1,11 +1,13 @@
 #### [unreleased]
 **This update requires PHP 5.6 or greater**
-* refactor `Settings` to add git API data via hooks
+* added multiple action/filter hooks for adding data to Settings
+* refactor `Settings` to add data via hooks
 * refactor some of `class API` to `trait API_Trait`
 * refactor `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
 * added `trait GHU_Trait` wih common code
 * moved traits to own sub-directory
 * removed old extended naming code
+* refactor Remote Management to new `class Remote_Management`
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`
