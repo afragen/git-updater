@@ -63,20 +63,6 @@ class Base {
 	public static $options;
 
 	/**
-	 * Holds the values for remote management settings.
-	 *
-	 * @var mixed
-	 */
-	protected static $options_remote;
-
-	/**
-	 * Holds the value for the Remote Management API key.
-	 *
-	 * @var
-	 */
-	protected static $api_key;
-
-	/**
 	 * Holds git server types.
 	 *
 	 * @var array
@@ -150,9 +136,7 @@ class Base {
 	 * Load site options.
 	 */
 	public function load_options() {
-		self::$options        = get_site_option( 'github_updater', array() );
-		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
-		self::$api_key        = get_site_option( 'github_updater_api_key' );
+		self::$options = get_site_option( 'github_updater', array() );
 	}
 
 	/**
@@ -223,12 +207,13 @@ class Base {
 	 * Piggyback on built-in update function to get metadata.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', array( &$this, 'get_meta_plugins' ) );
-		add_action( 'wp_update_themes', array( &$this, 'get_meta_themes' ) );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( &$this, 'get_meta_remote_management' ) );
-		add_action( 'update_option_auto_updater.lock', array( &$this, 'get_meta_remote_management' ) );
-		add_action( 'ghu_get_remote_plugin', array( &$this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'wp_update_plugins', [ &$this, 'get_meta_plugins' ] );
+		add_action( 'wp_update_themes', [ &$this, 'get_meta_themes' ] );
+		add_action( 'ghu_get_remote_plugin', [ &$this, 'run_cron_batch' ], 10, 1 );
 		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ &$this, 'get_meta_remote_management' ] );
+		add_action( 'update_option_auto_updater.lock', [ &$this, 'get_meta_remote_management' ] );
+
 	}
 
 	/**
