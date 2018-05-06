@@ -145,7 +145,7 @@ class GitHub_API extends API implements API_Interface {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = array();
+			$response = [];
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
@@ -257,7 +257,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -389,10 +389,10 @@ class GitHub_API extends API implements API_Interface {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
 			$reset                       = (integer) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
-			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], array(
+			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], [
 				'git'  => 'github',
 				'wait' => $wait,
-			) );
+			] );
 		}
 	}
 
@@ -408,7 +408,7 @@ class GitHub_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = array();
+		$arr = [];
 		array_map( function( $e ) use ( &$arr ) {
 			$arr[] = $e->name;
 
@@ -426,8 +426,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['private']      = $e->private;
@@ -448,8 +448,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['changes'] = $e->content;
@@ -467,23 +467,23 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array
 	 */
 	private function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
+		$tags     = [];
+		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode( '/', array(
+			$download_base    = implode( '/', [
 				$repo_type['base_uri'],
 				'repos',
 				$this->type->owner,
 				$this->type->repo,
 				'zipball/',
-			) );
+			] );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag;
 
 		}
 
-		return array( $tags, $rollback );
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -522,12 +522,12 @@ class GitHub_API extends API implements API_Interface {
 			}
 
 			if ( $response ) {
-				add_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+				add_filter( 'http_request_args', [ &$this, 'set_github_release_asset_header' ] );
 
 				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
 				$response_new = wp_remote_get( $url );
 
-				remove_filter( 'http_request_args', array( &$this, 'set_github_release_asset_header' ) );
+				remove_filter( 'http_request_args', [ &$this, 'set_github_release_asset_header' ] );
 
 				if ( is_wp_error( $response_new ) ) {
 					Singleton::get_instance( 'Messages', $this )->create_error_message( $response_new );
@@ -585,27 +585,27 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			array( &$this, 'print_section_github_access_token' ),
+			[ &$this, 'print_section_github_access_token' ],
 			'github_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_github_install_settings',
 			'github_access_token',
-			array( 'id' => 'github_access_token', 'token' => true )
+			[ 'id' => 'github_access_token', 'token' => true ]
 		);
 
 		if ( $auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 				'github_updater_github_install_settings',
 				'github_access_token',
-				array( 'id' => 'github_enterprise_token', 'token' => true )
+				[ 'id' => 'github_enterprise_token', 'token' => true ]
 			);
 		}
 
@@ -616,7 +616,7 @@ class GitHub_API extends API implements API_Interface {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_github_info' ),
+				[ &$this, 'print_section_github_info' ],
 				'github_updater_github_install_settings'
 			);
 		}
@@ -630,10 +630,10 @@ class GitHub_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_github_install_settings';
 		$setting_field['section']         = 'github_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		);
+		];
 
 		return $setting_field;
 	}
@@ -661,7 +661,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( &$this, 'github_access_token' ),
+			[ &$this, 'github_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -710,13 +710,13 @@ class GitHub_API extends API implements API_Interface {
 			$github_com = false;
 		}
 
-		$install['download_link'] = implode( '/', array(
+		$install['download_link'] = implode( '/', [
 			$base,
 			'repos',
 			$install['github_updater_repo'],
 			'zipball',
 			$install['github_updater_branch'],
-		) );
+		] );
 
 		// If asset is entered install it.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {

@@ -75,7 +75,7 @@ class Plugin extends Base {
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
-		$git_plugins = array();
+		$git_plugins = [];
 
 		/**
 		 * Filter to add plugins not containing appropriate header line.
@@ -92,12 +92,12 @@ class Plugin extends Base {
 		$plugins   = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $plugin => $headers ) {
-			$git_plugin = array();
+			$git_plugin = [];
 
 			foreach ( (array) static::$extra_headers as $value ) {
 				$header = null;
 
-				if ( in_array( $value, array( 'Requires PHP', 'Requires WP', 'Languages' ), true ) ) {
+				if ( in_array( $value, [ 'Requires PHP', 'Requires WP', 'Languages' ], true ) ) {
 					continue;
 				}
 
@@ -151,14 +151,14 @@ class Plugin extends Base {
 						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
 						: null;
 
-				$git_plugin['icons'] = array();
-				$icons               = array(
+				$git_plugin['icons'] = [];
+				$icons               = [
 					'svg'    => 'icon.svg',
 					'1x_png' => 'icon-128x128.png',
 					'1x_jpg' => 'icon-128x128.jpg',
 					'2x_png' => 'icon-256x256.png',
 					'2x_jpg' => 'icon-256x256.jpg',
-				);
+				];
 				foreach ( $icons as $key => $filename ) {
 					$key  = preg_replace( '/_png|_jpg/', '', $key );
 					$icon = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
@@ -183,7 +183,7 @@ class Plugin extends Base {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
-		$plugins = array();
+		$plugins = [];
 		foreach ( (array) $this->config as $plugin ) {
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
@@ -207,7 +207,7 @@ class Plugin extends Base {
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 			     ( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_$plugin->slug", array( &$this, 'plugin_branch_switcher' ), 15, 3 );
+				add_action( "after_plugin_row_$plugin->slug", [ &$this, 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
@@ -215,11 +215,11 @@ class Plugin extends Base {
 		     ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
 		     ! apply_filters( 'github_updater_disable_wpcron', false )
 		) {
-			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
+			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', array( &$this, 'set_rollback' ) );
+		add_filter( 'wp_get_update_data', [ &$this, 'set_rollback' ] );
 
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
@@ -230,9 +230,9 @@ class Plugin extends Base {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		add_filter( 'plugin_row_meta', array( &$this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( 'plugins_api', array( &$this, 'plugins_api' ), 99, 3 );
-		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient_update_plugins' ) );
+		add_filter( 'plugin_row_meta', [ &$this, 'plugin_row_meta' ], 10, 2 );
+		add_filter( 'plugins_api', [ &$this, 'plugins_api' ], 99, 3 );
+		add_filter( 'pre_set_site_transient_update_plugins', [ &$this, 'pre_set_site_transient_update_plugins' ] );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class Plugin extends Base {
 		$repo   = $this->config[ $plugin['repo'] ];
 		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
-		$branch_switch_data                      = array();
+		$branch_switch_data                      = [];
 		$branch_switch_data['slug']              = $plugin['repo'];
 		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
 		$branch_switch_data['id']                = $id;
@@ -315,13 +315,13 @@ class Plugin extends Base {
 				$links[] = sprintf( '<a href="%s" class="thickbox">%s</a>',
 					esc_url(
 						add_query_arg(
-							array(
+							[
 								'tab'       => 'plugin-information',
 								'plugin'    => $repo,
 								'TB_iframe' => 'true',
 								'width'     => 600,
 								'height'    => 550,
-							),
+							],
 							network_admin_url( 'plugin-install.php' )
 						)
 					),
@@ -368,7 +368,7 @@ class Plugin extends Base {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
-		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
+		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : [];
 		$response->contributors  = $plugin->contributors;
 		if ( ! $this->is_private( $plugin ) ) {
 			$response->num_ratings = $plugin->num_ratings;
@@ -390,7 +390,7 @@ class Plugin extends Base {
 		foreach ( (array) $this->config as $plugin ) {
 
 			if ( $this->can_update_repo( $plugin ) ) {
-				$response = array(
+				$response = [
 					'slug'        => dirname( $plugin->slug ),
 					'plugin'      => $plugin->slug,
 					'new_version' => $plugin->remote_version,
@@ -400,7 +400,7 @@ class Plugin extends Base {
 					'branch'      => $plugin->branch,
 					'branches'    => array_keys( $plugin->branches ),
 					'type'        => $plugin->type,
-				);
+				];
 
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'], $_GET['plugin'] ) &&

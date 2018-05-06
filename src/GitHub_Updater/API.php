@@ -49,7 +49,7 @@ class API {
 	 * @access protected
 	 * @var    array
 	 */
-	protected $response = array();
+	protected $response = [];
 
 	/**
 	 * Holds site options.
@@ -70,7 +70,7 @@ class API {
 	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
-	public static $error_code = array();
+	public static $error_code = [];
 
 	/**
 	 * API constructor.
@@ -78,7 +78,7 @@ class API {
 	 */
 	public function __construct() {
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
-		static::$extra_headers = Singleton::get_instance( 'Base', $this )->add_headers( array() );
+		static::$extra_headers = Singleton::get_instance( 'Base', $this )->add_headers( [] );
 	}
 
 	/**
@@ -90,7 +90,7 @@ class API {
 		add_action( 'github_updater_add_settings', function( $auth_required ) use ( $git ) {
 			$git->add_settings( $auth_required );
 		} );
-		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 2 );
+		add_filter( 'github_updater_add_repo_setting_field', [ $this, 'add_setting_field' ], 10, 2 );
 	}
 
 	/**
@@ -158,7 +158,7 @@ class API {
 	 */
 	protected function return_repo_type() {
 		$type        = explode( '_', $this->type->type );
-		$arr         = array();
+		$arr         = [];
 		$arr['type'] = $type[1];
 
 		switch ( $type[0] ) {
@@ -204,12 +204,12 @@ class API {
 	 */
 	protected function api( $url ) {
 
-		add_filter( 'http_request_args', array( &$this, 'http_request_args' ), 10, 2 );
+		add_filter( 'http_request_args', [ &$this, 'http_request_args' ], 10, 2 );
 
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = array( 200, 404 );
+		$allowed_codes = [ 200, 404 ];
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -219,14 +219,14 @@ class API {
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			static::$error_code = array_merge(
 				static::$error_code,
-				array(
-					$this->type->repo => array(
+				[
+					$this->type->repo => [
 						'repo' => $this->type->repo,
 						'code' => $code,
 						'name' => $this->type->name,
 						'git'  => $this->type->type,
-					),
-				)
+					],
+				]
 			);
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
@@ -259,11 +259,11 @@ class API {
 	 */
 	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
-		$segments = array(
+		$segments = [
 			'owner'  => $this->type->owner,
 			'repo'   => $this->type->repo,
 			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
-		);
+		];
 
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
@@ -343,7 +343,7 @@ class API {
 		if ( ! $response ) {
 			$type     = explode( '_', $this->type->type )[1];
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
-			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
+			$url      = add_query_arg( [ 'action' => $type . '_information', 'request[slug]' => $slug ], $url );
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {

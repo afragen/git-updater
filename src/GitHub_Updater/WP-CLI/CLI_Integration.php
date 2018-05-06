@@ -17,8 +17,8 @@ use WP_CLI,
 
 // Add WP-CLI commands.
 $class = new CLI_Integration();
-WP_CLI::add_command( 'plugin install-git', array( $class, 'install_plugin' ) );
-WP_CLI::add_command( 'theme install-git', array( $class, 'install_theme' ) );
+WP_CLI::add_command( 'plugin install-git', [ $class, 'install_plugin' ] );
+WP_CLI::add_command( 'theme install-git', [ $class, 'install_theme' ] );
 
 /**
  * Manage GitHub Updater repository commands.
@@ -207,7 +207,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return array $cli_config
 	 */
 	private function process_args( $uri, $assoc_args ) {
-		$cli_config            = array();
+		$cli_config            = [];
 		$cli_config['uri']     = $uri;
 		$cli_config['private'] = isset( $assoc_args['token'] )
 			? $assoc_args['token']

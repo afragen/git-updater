@@ -37,12 +37,12 @@ class Remote_Management {
 	 *
 	 * @var array
 	 */
-	public static $remote_management = array(
+	public static $remote_management = [
 		'ithemes_sync' => 'iThemes Sync',
 		'infinitewp'   => 'InfiniteWP',
 		'managewp'     => 'ManageWP',
 		'mainwp'       => 'MainWP',
-	);
+	];
 
 	/**
 	 * Remote_Management constructor.
@@ -77,9 +77,7 @@ class Remote_Management {
 	 */
 	public function add_settings_tabs() {
 		add_filter( 'github_updater_add_settings_tabs', function( $tabs ) {
-			$install_tabs = array(
-				'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
-			);
+			$install_tabs = [ 'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ) ];
 
 			return array_merge( $tabs, $install_tabs );
 		} );
@@ -104,13 +102,13 @@ class Remote_Management {
 		register_setting(
 			'github_updater_remote_management',
 			'github_updater_remote_settings',
-			array( Singleton::get_instance( 'Settings', $this ), 'sanitize' )
+			[ 'Fragen\\GitHub_Updater\\Settings', 'sanitize' ]
 		);
 
 		add_settings_section(
 			'remote_management',
 			esc_html__( 'Remote Management', 'github-updater' ),
-			array( &$this, 'print_section_remote_management' ),
+			[ &$this, 'print_section_remote_management' ],
 			'github_updater_remote_settings'
 		);
 
@@ -118,10 +116,10 @@ class Remote_Management {
 			add_settings_field(
 				$id,
 				null,
-				array( &$this, 'token_callback_checkbox_remote' ),
+				[ &$this, 'token_callback_checkbox_remote' ],
 				'github_updater_remote_settings',
 				'remote_management',
-				array( 'id' => $id, 'title' => esc_html( $name ) )
+				[ 'id' => $id, 'title' => esc_html( $name ) ]
 			);
 		}
 
@@ -135,10 +133,10 @@ class Remote_Management {
 		if ( empty( self::$api_key ) ) {
 			$this->load_options();
 		}
-		$api_url = add_query_arg( array(
+		$api_url = add_query_arg( [
 			'action' => 'github-updater-update',
 			'key'    => self::$api_key,
-		), admin_url( 'admin-ajax.php' ) );
+		], admin_url( 'admin-ajax.php' ) );
 
 		?>
 		<p>
@@ -210,7 +208,7 @@ class Remote_Management {
 				?>
 			</form>
 			<?php
-			$reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action );
+			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );
 
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
@@ -231,7 +229,7 @@ class Remote_Management {
 	public function save_settings( $post_data ) {
 		$options = isset( $post_data['github_updater_remote_management'] )
 			? $post_data['github_updater_remote_management']
-			: array();
+			: [];
 
 		update_site_option( 'github_updater_remote_management', (array) Settings::sanitize( $options ) );
 

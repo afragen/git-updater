@@ -135,7 +135,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = array();
+			$response = [];
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
@@ -263,7 +263,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -340,7 +340,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$endpoint = add_query_arg( 'at', $git->type->branch, $endpoint );
 				break;
 			case 'changes':
-				$endpoint = add_query_arg( array( 'at' => $git->type->branch, 'raw' => '' ), $endpoint );
+				$endpoint = add_query_arg( [ 'at' => $git->type->branch, 'raw' => '' ], $endpoint );
 				break;
 			case 'download_link':
 				/*
@@ -348,7 +348,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				 * as the repo, e.g. 'my-repo' becomes 'my-repo/'
 				 * Required for using stash-archive.
 				 */
-				$defaults = array( 'prefix' => $git->type->repo . '/', 'at' => $git->type->branch );
+				$defaults = [ 'prefix' => $git->type->repo . '/', 'at' => $git->type->branch ];
 				$endpoint = add_query_arg( $defaults, $endpoint );
 				if ( ! empty( $git->type->tags ) ) {
 					$endpoint = urldecode( add_query_arg( 'at', $git->type->newest_tag, $endpoint ) );
@@ -413,8 +413,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['private']      = ! $e->public;
@@ -435,7 +435,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
-		return array( 'changes' => $this->bbserver_recombine_response( $response ) );
+		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
 	}
 
 	/**
@@ -465,7 +465,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			return $response;
 		}
 
-		$arr = array();
+		$arr = [];
 		array_map( function( $e ) use ( &$arr ) {
 			$arr[] = $e->displayId;
 
@@ -486,26 +486,26 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_section(
 			'bitbucket_server_user',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
-			array( &$this, 'print_section_bitbucket_username' ),
+			[ &$this, 'print_section_bitbucket_username' ],
 			'github_updater_bbserver_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_server_username',
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
-			array( 'id' => 'bitbucket_server_username' )
+			[ 'id' => 'bitbucket_server_username' ]
 		);
 
 		add_settings_field(
 			'bitbucket_server_password',
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
-			array( 'id' => 'bitbucket_server_password', 'token' => true )
+			[ 'id' => 'bitbucket_server_password', 'token' => true ]
 		);
 
 		/*
@@ -515,7 +515,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			add_settings_section(
 				'bitbucket_server_id',
 				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
-				array( &$this, 'print_section_bitbucket_info' ),
+				[ &$this, 'print_section_bitbucket_info' ],
 				'github_updater_bbserver_install_settings'
 			);
 		}
@@ -530,10 +530,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bbserver_install_settings';
 		$setting_field['section']         = 'bitbucket_server_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_checkbox',
-		);
+		];
 
 		return $setting_field;
 	}
@@ -567,19 +567,19 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = implode( '/', array(
+			$install['download_link'] = implode( '/', [
 				$base,
 				'rest/archive/1.0/projects',
 				$headers['owner'],
 				'repos',
 				$headers['repo'],
 				'archive',
-			) );
+			] );
 
-			$install['download_link'] = add_query_arg( array(
+			$install['download_link'] = add_query_arg( [
 				'prefix' => $headers['repo'] . '/',
 				'at'     => $install['github_updater_branch'],
-			), $install['download_link'] );
+			], $install['download_link'] );
 
 			if ( isset( $install['is_private'] ) ) {
 				$install['options'][ $install['repo'] ] = 1;

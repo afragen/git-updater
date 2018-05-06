@@ -34,7 +34,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * @package Fragen\GitHub_Updater
  */
 class Rest_Update extends Base {
-use API_Trait;
+	use API_Trait;
 
 	/**
 	 * Holds REST Upgrader Skin.
@@ -82,13 +82,13 @@ use API_Trait;
 		$this->get_remote_repo_meta( $plugin );
 		$repo_api = $this->get_repo_api( $plugin->type, $plugin );
 
-		$update = array(
+		$update = [
 			'slug'        => $plugin->repo,
 			'plugin'      => $plugin->slug,
 			'new_version' => null,
 			'url'         => $plugin->uri,
 			'package'     => $repo_api->construct_download_link( false, $tag ),
-		);
+		];
 
 		add_filter( 'site_transient_update_plugins', function( $value ) use ( $plugin, $update ) {
 			$value->response[ $plugin->slug ] = (object) $update;
@@ -132,12 +132,12 @@ use API_Trait;
 		$this->get_remote_repo_meta( $theme );
 		$repo_api = $this->get_repo_api( $theme->type, $theme );
 
-		$update = array(
+		$update = [
 			'theme'       => $theme->repo,
 			'new_version' => null,
 			'url'         => $theme->uri,
 			'package'     => $repo_api->construct_download_link( false, $tag ),
-		);
+		];
 
 		add_filter( 'site_transient_update_themes', function( $value ) use ( $theme, $update ) {
 			$value->response[ $theme->repo ] = $update;
@@ -209,21 +209,21 @@ use API_Trait;
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = array(
+			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-			);
+			];
 			$this->log_exit( $http_response, 417 );
 		}
 
-		$response = array(
+		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-		);
+		];
 
 		if ( $this->is_error() ) {
 			$response['success'] = false;

@@ -39,7 +39,7 @@ trait API_Trait {
 		$args['sslverify'] = true;
 		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
 			$args['user-agent']    .= '; GitHub Updater - https://github.com/afragen/github-updater';
-			$args['wp-rest-cache'] = array( 'tag' => 'github-updater' );
+			$args['wp-rest-cache'] = [ 'tag' => 'github-updater' ];
 		}
 
 		return $args;
@@ -243,7 +243,7 @@ trait API_Trait {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
 		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
-		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : array();
+		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;

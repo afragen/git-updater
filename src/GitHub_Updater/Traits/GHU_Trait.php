@@ -129,8 +129,8 @@ trait GHU_Trait {
 	 * @return array
 	 */
 	public function get_file_headers( $contents, $type ) {
-		$all_headers            = array();
-		$default_plugin_headers = array(
+		$all_headers            = [];
+		$default_plugin_headers = [
 			'Name'        => 'Plugin Name',
 			'PluginURI'   => 'Plugin URI',
 			'Version'     => 'Version',
@@ -140,9 +140,9 @@ trait GHU_Trait {
 			'TextDomain'  => 'Text Domain',
 			'DomainPath'  => 'Domain Path',
 			'Network'     => 'Network',
-		);
+		];
 
-		$default_theme_headers = array(
+		$default_theme_headers = [
 			'Name'        => 'Theme Name',
 			'ThemeURI'    => 'Theme URI',
 			'Description' => 'Description',
@@ -154,7 +154,7 @@ trait GHU_Trait {
 			'Tags'        => 'Tags',
 			'TextDomain'  => 'Text Domain',
 			'DomainPath'  => 'Domain Path',
-		);
+		];
 
 		if ( false !== strpos( $type, 'plugin' ) ) {
 			$all_headers = $default_plugin_headers;
@@ -225,7 +225,7 @@ trait GHU_Trait {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
 		$this->force_run_cron_job();
 
@@ -237,14 +237,14 @@ trait GHU_Trait {
 	 */
 	public function force_run_cron_job() {
 		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
-		$cron_request  = array(
+		$cron_request  = [
 			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),
-			'args' => array(
+			'args' => [
 				'timeout'   => 0.01,
 				'blocking'  => false,
 				'sslverify' => apply_filters( 'https_local_ssl_verify', true ),
-			),
-		);
+			],
+		];
 
 		wp_remote_post( $cron_request['url'], $cron_request['args'] );
 	}
@@ -333,7 +333,7 @@ trait GHU_Trait {
 	 * @return array
 	 */
 	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = array();
+		$arr    = [];
 		$rename = explode( '-', $slug );
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
@@ -361,7 +361,7 @@ trait GHU_Trait {
 	 * @return bool|string
 	 */
 	protected function get_changelog_filename( $type ) {
-		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
+		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$changes     = null;
 		$local_files = null;
 
@@ -393,7 +393,7 @@ trait GHU_Trait {
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$header['owner']      = trim( $header_path['dirname'], '/' );
 		$header['repo']       = $header_path['filename'];
-		$header['owner_repo'] = implode( '/', array( $header['owner'], $header['repo'] ) );
+		$header['owner_repo'] = implode( '/', [ $header['owner'], $header['repo'] ] );
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 

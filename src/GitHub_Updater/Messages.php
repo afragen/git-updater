@@ -45,8 +45,8 @@ class Messages extends Base {
 	public function create_error_message( $type = '' ) {
 		global $pagenow;
 
-		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
-		$settings_pages = array( 'settings.php', 'options-general.php' );
+		$update_pages   = [ 'update-core.php', 'plugins.php', 'themes.php' ];
+		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if (
 			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
@@ -61,18 +61,18 @@ class Messages extends Base {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					add_action( 'admin_notices', array( &$this, 'show_wp_error' ) );
-					add_action( 'network_admin_notices', array( &$this, 'show_wp_error' ) );
+					add_action( 'admin_notices', [ &$this, 'show_wp_error' ] );
+					add_action( 'network_admin_notices', [ &$this, 'show_wp_error' ] );
 					break;
 				case 'waiting':
-					add_action( 'admin_notices', array( &$this, 'waiting' ) );
-					add_action( 'network_admin_notices', array( &$this, 'waiting' ) );
+					add_action( 'admin_notices', [ &$this, 'waiting' ] );
+					add_action( 'network_admin_notices', [ &$this, 'waiting' ] );
 				case 'git':
 				default:
-					add_action( 'admin_notices', array( &$this, 'show_403_error_message' ) );
-					add_action( 'network_admin_notices', array( &$this, 'show_403_error_message' ) );
-					add_action( 'admin_notices', array( &$this, 'show_401_error_message' ) );
-					add_action( 'network_admin_notices', array( &$this, 'show_401_error_message' ) );
+					add_action( 'admin_notices', [ &$this, 'show_403_error_message' ] );
+					add_action( 'network_admin_notices', [ &$this, 'show_403_error_message' ] );
+					add_action( 'admin_notices', [ &$this, 'show_401_error_message' ] );
+					add_action( 'network_admin_notices', [ &$this, 'show_401_error_message' ] );
 			}
 		}
 

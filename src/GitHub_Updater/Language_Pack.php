@@ -69,8 +69,8 @@ class Language_Pack extends Base {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient' ) );
-		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient' ) );
+		add_filter( 'pre_set_site_transient_update_plugins', [ &$this, 'pre_set_site_transient' ] );
+		add_filter( 'pre_set_site_transient_update_themes', [ &$this, 'pre_set_site_transient' ] );
 	}
 
 	/**
@@ -82,8 +82,8 @@ class Language_Pack extends Base {
 	 */
 	public function pre_set_site_transient( $transient ) {
 		$locales = get_available_languages();
-		$locales = ! empty( $locales ) ? $locales : array( get_locale() );
-		$repos   = array();
+		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
+		$repos   = [];
 
 		if ( ! isset( $transient->translations ) ) {
 			return $transient;

@@ -36,7 +36,7 @@ class Install extends Base {
 	 *
 	 * @var array
 	 */
-	protected static $install = array();
+	protected static $install = [];
 
 	/**
 	 * Constructor.
@@ -45,13 +45,13 @@ class Install extends Base {
 	 * @param string $type
 	 * @param array  $wp_cli_config
 	 */
-	public function __construct( $type, $wp_cli_config = array() ) {
+	public function __construct( $type, $wp_cli_config = [] ) {
 		parent::__construct();
 		$this->load_options();
 		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
+		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), [], false, true );
 	}
 
 	/**
@@ -59,10 +59,10 @@ class Install extends Base {
 	 */
 	public function add_settings_tabs() {
 		add_filter( 'github_updater_add_settings_tabs', function( $tabs ) {
-			$install_tabs = array(
+			$install_tabs = [
 				'github_updater_install_plugin' => esc_html__( 'Install Plugin', 'github-updater' ),
 				'github_updater_install_theme'  => esc_html__( 'Install Theme', 'github-updater' ),
-			);
+			];
 
 			return array_merge( $tabs, $install_tabs );
 		} );
@@ -219,10 +219,10 @@ class Install extends Base {
 					? new CLI_Plugin_Installer_Skin()
 					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
-				add_filter( 'install_plugin_complete_actions', array(
+				add_filter( 'install_plugin_complete_actions', [
 					&$this,
 					'install_plugin_complete_actions',
-				), 10, 3 );
+				], 10, 3 );
 			}
 
 			if ( 'theme' === $type ) {
@@ -235,10 +235,10 @@ class Install extends Base {
 					? new CLI_Theme_Installer_Skin()
 					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
-				add_filter( 'install_theme_complete_actions', array(
+				add_filter( 'install_theme_complete_actions', [
 					&$this,
 					'install_theme_complete_actions',
-				), 10, 3 );
+				], 10, 3 );
 			}
 
 			// Perform the action and install the repo from the $source urldecode().
@@ -304,20 +304,20 @@ class Install extends Base {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			array( 'Fragen\\GitHub_Updater\\Settings', 'sanitize' )
+			[ 'Fragen\\GitHub_Updater\\Settings', 'sanitize' ]
 		);
 
 		add_settings_section(
 			$type,
 			sprintf( esc_html__( 'GitHub Updater Install %s', 'github-updater' ), $repo_type ),
-			array(),
+			[],
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
 			sprintf( esc_html__( '%s URI', 'github-updater' ), $repo_type ),
-			array( &$this, 'get_repo' ),
+			[ &$this, 'get_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -325,7 +325,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_branch',
 			esc_html__( 'Repository Branch', 'github-updater' ),
-			array( &$this, 'branch' ),
+			[ &$this, 'branch' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -333,7 +333,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_api',
 			esc_html__( 'Remote Repository Host', 'github-updater' ),
-			array( &$this, 'install_api' ),
+			[ &$this, 'install_api' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -427,20 +427,20 @@ class Install extends Base {
 		}
 
 		$stylesheet    = self::$install['repo'];
-		$activate_link = add_query_arg( array(
+		$activate_link = add_query_arg( [
 			'action'     => 'activate',
 			//'template'   => urlencode( $template ),
 			'stylesheet' => urlencode( $stylesheet ),
-		), admin_url( 'themes.php' ) );
+		], admin_url( 'themes.php' ) );
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
 		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'github-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
-			$network_activate_link = add_query_arg( array(
+			$network_activate_link = add_query_arg( [
 				'action' => 'enable',
 				'theme'  => urlencode( $stylesheet ),
-			), network_admin_url( 'themes.php' ) );
+			], network_admin_url( 'themes.php' ) );
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
 
 			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'github-updater' ) . '</a>';

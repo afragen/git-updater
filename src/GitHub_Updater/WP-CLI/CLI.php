@@ -78,10 +78,10 @@ class CLI extends WP_CLI_Command {
 		delete_site_option( 'github_updater_api_key' );
 		$this->ensure_api_key_is_set();
 		$api_key = get_site_option( 'github_updater_api_key' );
-		$api_url = add_query_arg( array(
+		$api_url = add_query_arg( [
 			'action' => 'github-updater-update',
 			'key'    => $api_key,
-		), admin_url( 'admin-ajax.php' ) );
+		], admin_url( 'admin-ajax.php' ) );
 
 		WP_CLI::success( 'GitHub Updater REST API key has been reset.' );
 		WP_CLI::success( sprintf( 'The current RESTful endpoint is `%s`', $api_url ) );

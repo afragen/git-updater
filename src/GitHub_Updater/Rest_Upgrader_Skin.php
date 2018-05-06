@@ -31,7 +31,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  */
 class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 
-	public $messages = array();
+	public $messages = [];
 	public $error;
 
 	/**

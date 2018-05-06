@@ -53,7 +53,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $extra_headers = array();
+	public static $extra_headers = [];
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
@@ -67,28 +67,24 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $git_servers = array(
-		'github' => 'GitHub',
-	);
+	public static $git_servers = [ 'github' => 'GitHub' ];
 
 	/**
 	 * Holds extra repo header types.
 	 *
 	 * @var array
 	 */
-	protected static $extra_repo_headers = array(
+	protected static $extra_repo_headers = [
 		'languages' => 'Languages',
 		'ci_job'    => 'CI Job',
-	);
+	];
 
 	/**
 	 * Holds an array of installed git APIs.
 	 *
 	 * @var array
 	 */
-	protected static $installed_apis = array(
-		'github_api' => true,
-	);
+	protected static $installed_apis = [ 'github_api' => true ];
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
@@ -136,7 +132,7 @@ class Base {
 	 * Load site options.
 	 */
 	public function load_options() {
-		self::$options = get_site_option( 'github_updater', array() );
+		self::$options = get_site_option( 'github_updater', [] );
 	}
 
 	/**
@@ -145,10 +141,10 @@ class Base {
 	 * @param object $repo_api
 	 */
 	public function remove_hooks( $repo_api ) {
-		remove_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
-		remove_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
-		remove_filter( 'http_request_args', array( 'Fragen\\GitHub_Updater\\API', 'http_request_args' ) );
-		remove_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ) );
+		remove_filter( 'extra_theme_headers', [ &$this, 'add_headers' ] );
+		remove_filter( 'extra_plugin_headers', [ &$this, 'add_headers' ] );
+		remove_filter( 'http_request_args', [ 'Fragen\\GitHub_Updater\\API', 'http_request_args' ] );
+		remove_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ] );
 
 		if ( $repo_api instanceof Bitbucket_API ) {
 			$this->remove_authentication_hooks();
@@ -176,7 +172,7 @@ class Base {
 		} );
 
 		// Ensure transient updated on plugins.php and themes.php pages.
-		add_action( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
+		add_action( 'admin_init', [ &$this, 'admin_pages_update_transient' ] );
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
@@ -210,7 +206,7 @@ class Base {
 		add_action( 'wp_update_plugins', [ &$this, 'get_meta_plugins' ] );
 		add_action( 'wp_update_themes', [ &$this, 'get_meta_themes' ] );
 		add_action( 'ghu_get_remote_plugin', [ &$this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'ghu_get_remote_theme', array( &$this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'ghu_get_remote_theme', [ &$this, 'run_cron_batch' ], 10, 1 );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ &$this, 'get_meta_remote_management' ] );
 		add_action( 'update_option_auto_updater.lock', [ &$this, 'get_meta_remote_management' ] );
 
@@ -254,11 +250,11 @@ class Base {
 	 *
 	 */
 	public function set_options_filter() {
-		$config = apply_filters( 'github_updater_set_options', array() );
+		$config = apply_filters( 'github_updater_set_options', [] );
 		if ( empty( $config ) ) {
 			$config = function_exists( 'apply_filters_deprecated' )
-				? apply_filters_deprecated( 'github_updater_token_distribution', array( null ), '6.1.0', 'github_updater_set_options' )
-				: apply_filters( 'github_updater_token_distribution', array() );
+				? apply_filters_deprecated( 'github_updater_token_distribution', [ null ], '6.1.0', 'github_updater_set_options' )
+				: apply_filters( 'github_updater_token_distribution', [] );
 		}
 
 		if ( ! empty( $config ) ) {
@@ -276,13 +272,13 @@ class Base {
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
-		$ghu_extra_headers = array(
+		$ghu_extra_headers = [
 			'Requires WP'   => 'Requires WP',
 			'Requires PHP'  => 'Requires PHP',
 			'Release Asset' => 'Release Asset',
-		);
+		];
 
-		$uri_types = array( 'plugin' => ' Plugin URI', 'theme' => ' Theme URI' );
+		$uri_types = [ 'plugin' => ' Plugin URI', 'theme' => ' Theme URI' ];
 
 		foreach ( self::$git_servers as $server ) {
 			foreach ( $uri_types as $uri_type ) {
@@ -321,19 +317,19 @@ class Base {
 		$this->$type->remote_version       = '0.0.0';
 		$this->$type->newest_tag           = '0.0.0';
 		$this->$type->download_link        = null;
-		$this->$type->tags                 = array();
-		$this->$type->rollback             = array();
-		$this->$type->branches             = array();
+		$this->$type->tags                 = [];
+		$this->$type->rollback             = [];
+		$this->$type->branches             = [];
 		$this->$type->requires             = null;
 		$this->$type->tested               = null;
 		$this->$type->donate_link          = null;
-		$this->$type->contributors         = array();
+		$this->$type->contributors         = [];
 		$this->$type->downloaded           = 0;
 		$this->$type->last_updated         = null;
 		$this->$type->rating               = 0;
 		$this->$type->num_ratings          = 0;
-		$this->$type->transient            = array();
-		$this->$type->repo_meta            = array();
+		$this->$type->transient            = [];
+		$this->$type->repo_meta            = [];
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
@@ -360,7 +356,7 @@ class Base {
 	 * @return bool true when waiting for background job to finish.
 	 */
 	protected function waiting_for_background_update( $repo = null ) {
-		$caches = array();
+		$caches = [];
 		if ( null !== $repo ) {
 			$cache = $this->get_repo_cache( $repo->repo );
 
@@ -550,7 +546,7 @@ class Base {
 		     ! empty( $upgrader_object->config[ $slug ]->ci_job )
 		) {
 			$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-			add_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ), 10, 3 );
+			add_filter( 'upgrader_post_install', [ &$this, 'upgrader_post_install' ], 10, 3 );
 		}
 
 		return $new_source;
@@ -569,7 +565,7 @@ class Base {
 		global $wp_filesystem;
 
 		$wp_filesystem->delete( $result['source'], true );
-		remove_filter( 'upgrader_post_install', array( &$this, 'upgrader_post_install' ) );
+		remove_filter( 'upgrader_post_install', [ &$this, 'upgrader_post_install' ] );
 
 		return $result;
 	}
@@ -586,18 +582,18 @@ class Base {
 		$arr['bool']    = false;
 		$pattern        = '/' . strtolower( $repo ) . '_/';
 		$type           = preg_replace( $pattern, '', $type );
-		$repo_types     = array(
+		$repo_types     = [
 			'GitHub'    => 'github_' . $type,
 			'Bitbucket' => 'bitbucket_' . $type,
 			'GitLab'    => 'gitlab_' . $type,
 			'Gitea'     => 'gitea_' . $type,
-		);
-		$repo_base_uris = array(
+		];
+		$repo_base_uris = [
 			'GitHub'    => 'https://github.com/',
 			'Bitbucket' => 'https://bitbucket.org/',
 			'GitLab'    => 'https://gitlab.com/',
 			'Gitea'     => '',
-		);
+		];
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
 			$arr['type']       = $repo_types[ $repo ];
@@ -635,10 +631,10 @@ class Base {
 		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
 		<div class="update-message">';
 
-		$enclosure = array(
+		$enclosure = [
 			'open'  => $open,
 			'close' => '</div></td></tr>',
-		);
+		];
 
 		if ( version_compare( $wp_version, '4.6', '>=' ) ) {
 			$open_p  = '<p>';
@@ -647,10 +643,10 @@ class Base {
 				$open_p  = '';
 				$close_p = '';
 			}
-			$enclosure = array(
+			$enclosure = [
 				'open'  => substr_replace( $open, $shiny_classes, - 2, 0 ) . $open_p,
 				'close' => $close_p . '</div></td></tr>',
-			);
+			];
 		}
 
 		return $enclosure;
@@ -664,7 +660,7 @@ class Base {
 	 * @return void
 	 */
 	protected function make_branch_switch_row( $data ) {
-		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? array() : $this->config[ $data['slug'] ]->rollback;
+		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? [] : $this->config[ $data['slug'] ]->rollback;
 
 		printf( esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
@@ -717,10 +713,10 @@ class Base {
 	protected function get_update_url( $type, $action, $repo_name ) {
 		$update_url = esc_attr(
 			add_query_arg(
-				array(
+				[
 					'action' => $action,
 					$type    => urlencode( $repo_name ),
-				),
+				],
 				self_admin_url( 'update.php' )
 			) );
 
@@ -775,7 +771,7 @@ class Base {
 		$repo_api  = $this->get_repo_api( $repo->type, $repo );
 		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
-		$rollback  = array(
+		$rollback  = [
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
@@ -783,7 +779,7 @@ class Base {
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
-		);
+		];
 
 		if ( 'plugin' === $type ) {
 			$rollback['slug'] = $repo->repo;
@@ -806,7 +802,7 @@ class Base {
 	public function admin_pages_update_transient() {
 		global $pagenow;
 
-		$admin_pages   = array( 'plugins.php', 'themes.php', 'update-core.php' );
+		$admin_pages   = [ 'plugins.php', 'themes.php', 'update-core.php' ];
 		$is_admin_page = in_array( $pagenow, $admin_pages, true ) ? true : false;
 		$transient     = 'update_' . rtrim( $pagenow, '.php' );
 		$transient     = 'update_update-core' === $transient ? 'update_core' : $transient;
@@ -815,7 +811,7 @@ class Base {
 			$this->make_update_transient_current( $transient );
 		}
 
-		remove_filter( 'admin_init', array( &$this, 'admin_pages_update_transient' ) );
+		remove_filter( 'admin_init', [ &$this, 'admin_pages_update_transient' ] );
 	}
 
 	/**
@@ -825,7 +821,7 @@ class Base {
 	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' )
 	 */
 	public function make_update_transient_current( $transient ) {
-		if ( ! in_array( $transient, array( 'update_plugins', 'update_themes', 'update_core' ), true ) ) {
+		if ( ! in_array( $transient, [ 'update_plugins', 'update_themes', 'update_core' ], true ) ) {
 			return;
 		}
 
@@ -862,7 +858,7 @@ class Base {
 	 * @return array $header
 	 */
 	protected function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
-		$hosted_domains = array( 'github.com', 'bitbucket.org', 'gitlab.com' );
+		$hosted_domains = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
 		$theme          = null;
 
 		$header['enterprise_uri'] = null;
@@ -887,7 +883,7 @@ class Base {
 
 		if ( $headers instanceof \WP_Theme ) {
 			$theme                    = $headers;
-			$headers                  = array();
+			$headers                  = [];
 			$headers['Release Asset'] = '';
 			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
 		}

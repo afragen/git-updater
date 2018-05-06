@@ -128,16 +128,16 @@ class Language_Pack_API extends API {
 		$package = null;
 		switch ( $type ) {
 			case 'github':
-				$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
+				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
 				$package = implode( '/', $package ) . $locale->package;
-				$package = add_query_arg( array( 'raw' => 'true' ), $package );
+				$package = add_query_arg( [ 'raw' => 'true' ], $package );
 				break;
 			case 'bitbucket':
-				$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitlab':
-				$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 		}

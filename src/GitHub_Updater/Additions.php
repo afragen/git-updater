@@ -46,7 +46,7 @@ class Additions {
 	 * @access public
 	 * @var    array
 	 */
-	public $add_to_github_updater = array();
+	public $add_to_github_updater = [];
 
 	/**
 	 * Singleton
@@ -103,15 +103,15 @@ class Additions {
 	 * @return void
 	 */
 	public function add_headers( $config, $repos, $type ) {
-		$this->add_to_github_updater = array();
+		$this->add_to_github_updater = [];
 		foreach ( $config as $repo ) {
 			// Continue if repo not installed.
 			if ( ! array_key_exists( $repo['slug'], $repos ) ) {
 				continue;
 			}
 
-			$addition                   = array();
-			$additions[ $repo['slug'] ] = array();
+			$addition                   = [];
+			$additions[ $repo['slug'] ] = [];
 
 			if ( 'plugin' === $type ) {
 				$additions[ $repo['slug'] ] = $repos[ $repo['slug'] ];
