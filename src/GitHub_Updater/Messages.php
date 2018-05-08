@@ -60,17 +60,20 @@ class Messages {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'show_wp_error' ] );
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+						$this,
+						'show_wp_error',
+					] );
 					break;
 				case 'waiting':
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'waiting' ] );
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 				case 'git':
 				default:
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
 						$this,
 						'show_403_error_message',
 					] );
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
 						$this,
 						'show_401_error_message',
 					] );
