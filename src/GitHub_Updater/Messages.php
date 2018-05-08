@@ -10,8 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\GitHub_Updater\Traits\API_Trait;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -25,8 +24,8 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Messages extends Base {
-	use API_Trait;
+class Messages {
+	use GHU_Trait;
 
 	/**
 	 * Holds WP_Error message.

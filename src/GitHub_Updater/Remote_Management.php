@@ -8,8 +8,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-
-use Fragen\Singleton;
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
  * Class Remote_Management
@@ -17,6 +17,7 @@ use Fragen\Singleton;
  * @package Fragen\GitHub_Updater
  */
 class Remote_Management {
+	use GHU_Trait;
 
 	/**
 	 * Holds the values for remote management settings.
@@ -102,7 +103,7 @@ class Remote_Management {
 		register_setting(
 			'github_updater_remote_management',
 			'github_updater_remote_settings',
-			[ 'Fragen\\GitHub_Updater\\Settings', 'sanitize' ]
+			[ $this, 'sanitize' ]
 		);
 
 		add_settings_section(
@@ -231,7 +232,7 @@ class Remote_Management {
 			? $post_data['github_updater_remote_management']
 			: [];
 
-		update_site_option( 'github_updater_remote_management', (array) Settings::sanitize( $options ) );
+		update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
 
 		add_filter( 'github_updater_save_redirect', function( $option_page ) {
 			return array_merge( $option_page, [ 'github_updater_remote_management' ] );

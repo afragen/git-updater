@@ -13,7 +13,6 @@ namespace Fragen\GitHub_Updater;
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 
-
 /*
  * Exit if called directly.
  */
@@ -150,7 +149,7 @@ class Install extends Base {
 			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install         = Settings::sanitize( $_POST );
+			self::$install         = $this->sanitize( $_POST );
 			self::$install['repo'] = $headers['repo'];
 
 			/*
@@ -243,7 +242,7 @@ class Install extends Base {
 
 			// Perform the action and install the repo from the $source urldecode().
 			if ( $upgrader->install( $url ) ) {
-				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
+				update_site_option( 'github_updater', $this->sanitize( static::$options ) );
 
 				// Save branch setting.
 				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
@@ -304,7 +303,7 @@ class Install extends Base {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			[ 'Fragen\\GitHub_Updater\\Settings', 'sanitize' ]
+			[ $this, 'sanitize' ]
 		);
 
 		add_settings_section(

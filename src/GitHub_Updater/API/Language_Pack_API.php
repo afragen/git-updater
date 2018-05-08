@@ -11,8 +11,7 @@
 namespace Fragen\GitHub_Updater\API;
 
 use Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Traits\API_Trait;
-
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
  * Class Language_Pack_API
@@ -20,7 +19,7 @@ use Fragen\GitHub_Updater\API,
  * @package Fragen\GitHub_Updater
  */
 class Language_Pack_API extends API {
-	use API_Trait;
+	use GHU_Trait;
 
 	/**
 	 * Holds loose class method name.

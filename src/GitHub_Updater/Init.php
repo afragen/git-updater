@@ -12,8 +12,8 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait,
 	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
-
 
 /*
  * Exit if called directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 class Init extends Base {
-	use Basic_Auth_Loader;
+	use GHU_Trait, Basic_Auth_Loader;
 
 	public function __construct() {
 		parent::__construct();

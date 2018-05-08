@@ -13,7 +13,6 @@ namespace Fragen\GitHub_Updater\Traits;
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\Settings;
 
-
 /**
  * Trait GHU_Trait
  *
@@ -121,78 +120,6 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Take remote file contents as string and parse headers.
-	 *
-	 * @param $contents
-	 * @param $type
-	 *
-	 * @return array
-	 */
-	public function get_file_headers( $contents, $type ) {
-		$all_headers            = [];
-		$default_plugin_headers = [
-			'Name'        => 'Plugin Name',
-			'PluginURI'   => 'Plugin URI',
-			'Version'     => 'Version',
-			'Description' => 'Description',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'Author URI',
-			'TextDomain'  => 'Text Domain',
-			'DomainPath'  => 'Domain Path',
-			'Network'     => 'Network',
-		];
-
-		$default_theme_headers = [
-			'Name'        => 'Theme Name',
-			'ThemeURI'    => 'Theme URI',
-			'Description' => 'Description',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'Author URI',
-			'Version'     => 'Version',
-			'Template'    => 'Template',
-			'Status'      => 'Status',
-			'Tags'        => 'Tags',
-			'TextDomain'  => 'Text Domain',
-			'DomainPath'  => 'Domain Path',
-		];
-
-		if ( false !== strpos( $type, 'plugin' ) ) {
-			$all_headers = $default_plugin_headers;
-		}
-
-		if ( false !== strpos( $type, 'theme' ) ) {
-			$all_headers = $default_theme_headers;
-		}
-
-		/*
-		 * Make sure we catch CR-only line endings.
-		 */
-		$file_data = str_replace( "\r", "\n", $contents );
-
-		/*
-		 * Merge extra headers and default headers.
-		 */
-		$all_headers = array_merge( self::$extra_headers, $all_headers );
-		$all_headers = array_unique( $all_headers );
-
-		foreach ( $all_headers as $field => $regex ) {
-			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
-				$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
-			} else {
-				$all_headers[ $field ] = '';
-			}
-		}
-
-		// Reduce array to only headers with data.
-		$all_headers = array_filter( $all_headers,
-			function( $e ) {
-				return ! empty( $e );
-			} );
-
-		return $all_headers;
-	}
-
-	/**
 	 * Function to check if plugin or theme object is able to be updated.
 	 *
 	 * @param $type
@@ -250,41 +177,6 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Checks if dupicate wp-cron event exists.
-	 *
-	 * @param string $event Name of wp-cron event.
-	 *
-	 * @return bool
-	 */
-	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array();
-		foreach ( $cron as $timestamp => $cronhooks ) {
-			if ( $event === key( $cronhooks ) ) {
-				$this->is_cron_overdue( $cron, $timestamp );
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
-	 *
-	 * @param $cron
-	 * @param $timestamp
-	 */
-	public function is_cron_overdue( $cron, $timestamp ) {
-		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
-		if ( $overdue ) {
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
-			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
-		}
-	}
-
-	/**
 	 * Is this a private repo with a token/checked or needing token/checked?
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
@@ -324,62 +216,6 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Set array with normal repo names.
-	 * Fix name even if installed without renaming originally, eg <repo>-master
-	 *
-	 * @param string            $slug
-	 * @param Base|Plugin|Theme $upgrader_object
-	 *
-	 * @return array
-	 */
-	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
-
-		if ( null === $upgrader_object ) {
-			$upgrader_object = $this;
-		}
-
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->repo || $rename === $repo->repo ) {
-				$arr['repo'] = $repo->repo;
-				break;
-			}
-		}
-
-		return $arr;
-	}
-
-	/**
-	 * Get filename of changelog and return.
-	 *
-	 * @param $type
-	 *
-	 * @return bool|string
-	 */
-	protected function get_changelog_filename( $type ) {
-		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
-		$changes     = null;
-		$local_files = null;
-
-		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path, 0 );
-		}
-
-		$changes = array_intersect( (array) $local_files, $changelogs );
-		$changes = array_pop( $changes );
-
-		if ( ! empty( $changes ) ) {
-			return $changes;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Parse URI param returning array of parts.
 	 *
 	 * @param string $repo_header
@@ -397,9 +233,25 @@ trait GHU_Trait {
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 
-		$header = Settings::sanitize( $header );
+		$header = $this->sanitize( $header );
 
 		return $header;
+	}
+
+	/**
+	 * Sanitize each setting field as needed.
+	 *
+	 * @param array $input Contains all settings fields as array keys
+	 *
+	 * @return array
+	 */
+	public function sanitize( $input ) {
+		$new_input = [];
+		foreach ( array_keys( (array) $input ) as $id ) {
+			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
+		}
+
+		return $new_input;
 	}
 
 }

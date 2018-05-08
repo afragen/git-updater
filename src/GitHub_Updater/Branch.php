@@ -10,9 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\Traits\API_Trait;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -27,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  */
 class Branch {
-	use API_Trait;
+	use GHU_Trait;
 
 	/**
 	 * Holds repo cache data.
