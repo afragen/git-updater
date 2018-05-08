@@ -587,8 +587,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Display Gitea error admin notices.
 	 */
 	public function gitea_error_notices() {
-		add_action( 'admin_notices', [ $this, 'gitea_error' ] );
-		add_action( 'network_admin_notices', [ $this, 'gitea_error', ] );
+		add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'gitea_error' ] );
 	}
 
 	/**
