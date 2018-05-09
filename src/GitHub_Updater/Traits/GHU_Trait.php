@@ -51,7 +51,7 @@ trait GHU_Trait {
 	 * Load site options.
 	 */
 	public function load_options() {
-		$base = Singleton::get_instance('Base', $this);
+		$base           = Singleton::get_instance( 'Base', $this );
 		$base::$options = get_site_option( 'github_updater', [] );
 	}
 
