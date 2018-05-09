@@ -547,19 +547,20 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) ) {
-			if ( 'github_updater' === $_POST['option_page'] ) {
-				$options = $this->filter_options();
-				update_site_option( 'github_updater', $this->sanitize( $options ) );
-			}
-
-			/**
-			 * Save $options in add-on classes.
-			 *
-			 * @since 8.0.0
-			 */
-			do_action( 'github_updater_update_settings', $_POST );
+		if ( isset( $_POST['option_page'] ) &&
+		     'github_updater' === $_POST['option_page']
+		) {
+			$options = $this->filter_options();
+			update_site_option( 'github_updater', $this->sanitize( $options ) );
 		}
+
+		/**
+		 * Save $options in add-on classes.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'github_updater_update_settings', $_POST );
+
 		$this->redirect_on_save();
 	}
 

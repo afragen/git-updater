@@ -91,19 +91,19 @@ class Remote_Management {
 	 * @param $post_data
 	 */
 	public function save_settings( $post_data ) {
-		$options = isset( $post_data['github_updater_remote_management'] )
-			? $post_data['github_updater_remote_management']
-			: [];
+		if ( isset( $post_data['option_page'] ) &&
+		     'github_updater_remote_management' === $post_data['option_page']
+		) {
+			$options = isset( $post_data['github_updater_remote_management'] )
+				? $post_data['github_updater_remote_management']
+				: [];
 
-		if ( empty( $options ) ) {
-			return;
+			update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
+
+			add_filter( 'github_updater_save_redirect', function( $option_page ) {
+				return array_merge( $option_page, [ 'github_updater_remote_management' ] );
+			} );
 		}
-
-		update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
-
-		add_filter( 'github_updater_save_redirect', function( $option_page ) {
-			return array_merge( $option_page, [ 'github_updater_remote_management' ] );
-		} );
 	}
 
 	/**
