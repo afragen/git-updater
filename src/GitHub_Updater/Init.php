@@ -37,8 +37,8 @@ class Init extends Base {
 		$this->load_hooks();
 
 		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/WP-CLI/CLI.php';
-			include_once __DIR__ . '/WP-CLI/CLI_Integration.php';
+			include_once __DIR__ . '/WP_CLI/CLI.php';
+			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
 		}
 	}
 
