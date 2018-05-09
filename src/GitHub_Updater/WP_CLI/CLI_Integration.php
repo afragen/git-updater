@@ -8,12 +8,11 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\WP_CLI;
 
 use WP_CLI,
 	WP_CLI_Command,
 	Fragen\Singleton;
-
 
 // Add WP-CLI commands.
 $class = new CLI_Integration();
@@ -21,22 +20,16 @@ WP_CLI::add_command( 'plugin install-git', [ $class, 'install_plugin' ] );
 WP_CLI::add_command( 'theme install-git', [ $class, 'install_theme' ] );
 
 /**
- * Manage GitHub Updater repository commands.
+ * Class CLI_Integration
  *
- * Class GitHub_Updater_CLI_Integration
+ * @package Fragen\GitHub_Updater\WP_CLI
  */
 class CLI_Integration extends WP_CLI_Command {
 
 	/**
-	 * @var \Fragen\GitHub_Updater\Base
-	 */
-	private $base;
-
-	/**
-	 * GitHub_Updater_CLI_Integration constructor.
+	 * CLI_Integration constructor.
 	 */
 	public function __construct() {
-		$this->base = Singleton::get_instance( 'Base', $this );
 		$this->run();
 	}
 
@@ -55,7 +48,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp plugin` commands with GitHub Updater repositories.
 	 */
 	public function init_plugins() {
-		$this->base->get_meta_plugins();
+		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
 		$current = get_site_transient( 'update_plugins' );
 		$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
@@ -68,7 +61,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp theme` commands with GitHub Updater repositories.
 	 */
 	public function init_themes() {
-		$this->base->get_meta_themes();
+		Singleton::get_instance( 'Base', $this )->get_meta_themes();
 		$current = get_site_transient( 'update_themes' );
 		$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );

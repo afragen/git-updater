@@ -11,9 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
-	Fragen\GitHub_Updater\Traits\API_Trait;
-
-
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 /*
  * Exit if called directly.
  */
@@ -32,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @link    https://github.com/codepress/github-plugin-updater
  */
 class Plugin extends Base {
-	use API_Trait;
+	use GHU_Trait;
 
 	/**
 	 * Rollback variable

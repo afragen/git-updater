@@ -11,8 +11,8 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait,
 	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
-
 
 /*
  * Exit if called directly.
@@ -28,8 +28,8 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Install extends Base {
-	use Basic_Auth_Loader;
+class Install {
+	use GHU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Class options.
@@ -39,6 +39,27 @@ class Install extends Base {
 	protected static $install = [];
 
 	/**
+	 * Hold local copy of GitHub Updater options.
+	 *
+	 * @var mixed
+	 */
+	private static $options;
+
+	/**
+	 * Hold local copy of installed APIs.
+	 *
+	 * @var mixed
+	 */
+	private static $installed_apis;
+
+	/**
+	 * Hold local copy of git servers.
+	 *
+	 * @var mixed
+	 */
+	private static $git_servers;
+
+	/**
 	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
 	 *
@@ -46,8 +67,10 @@ class Install extends Base {
 	 * @param array  $wp_cli_config
 	 */
 	public function __construct( $type, $wp_cli_config = [] ) {
-		parent::__construct();
-		$this->load_options();
+		self::$options        = $this->get_class_vars( 'Base', 'options' );
+		self::$installed_apis = $this->get_class_vars( 'Base', 'installed_apis' );
+		self::$git_servers    = $this->get_class_vars( 'Base', 'git_servers' );
+
 		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
@@ -150,7 +173,7 @@ class Install extends Base {
 			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install         = Settings::sanitize( $_POST );
+			self::$install         = $this->sanitize( $_POST );
 			self::$install['repo'] = $headers['repo'];
 
 			/*
@@ -169,11 +192,11 @@ class Install extends Base {
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
 				$this->load_authentication_hooks();
-				if ( static::$installed_apis['bitbucket_api'] ) {
+				if ( self::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
-				if ( static::$installed_apis['bitbucket_server_api'] ) {
+				if ( self::$installed_apis['bitbucket_server_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
@@ -184,7 +207,7 @@ class Install extends Base {
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( static::$installed_apis['gitlab_api'] ) {
+				if ( self::$installed_apis['gitlab_api'] ) {
 					self::$install = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
@@ -194,16 +217,16 @@ class Install extends Base {
 			 * Save Access Token if present.
 			 */
 			if ( 'gitea' === self::$install['github_updater_api'] ) {
-				if ( static::$installed_apis['gitea_api'] ) {
+				if ( self::$installed_apis['gitea_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
-			static::$options = isset( self::$install['options'] )
-				? array_merge( static::$options, self::$install['options'] )
-				: static::$options;
+			self::$options = isset( self::$install['options'] )
+				? array_merge( self::$options, self::$install['options'] )
+				: self::$options;
 
-			static::$options['github_updater_install_repo'] = self::$install['repo'];
+			self::$options['github_updater_install_repo'] = self::$install['repo'];
 
 			$url      = self::$install['download_link'];
 			$nonce    = wp_nonce_url( $url );
@@ -243,12 +266,11 @@ class Install extends Base {
 
 			// Perform the action and install the repo from the $source urldecode().
 			if ( $upgrader->install( $url ) ) {
-				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
+				update_site_option( 'github_updater', $this->sanitize( self::$options ) );
 
 				// Save branch setting.
 				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
 			}
-
 		}
 
 		if ( $wp_cli ) {
@@ -304,7 +326,7 @@ class Install extends Base {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			[ 'Fragen\\GitHub_Updater\\Settings', 'sanitize' ]
+			[ $this, 'sanitize' ]
 		);
 
 		add_settings_section(
@@ -385,8 +407,8 @@ class Install extends Base {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
-				<?php foreach ( static::$git_servers as $key => $value ): ?>
-					<?php if ( static::$installed_apis[ $key . '_api' ] ): ?>
+				<?php foreach ( self::$git_servers as $key => $value ): ?>
+					<?php if ( self::$installed_apis[ $key . '_api' ] ): ?>
 						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>

@@ -12,10 +12,8 @@ namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Traits\API_Trait,
 	Fragen\GitHub_Updater\Branch,
 	Fragen\GitHub_Updater\Readme_Parser;
-
 
 /*
  * Exit if called directly.
@@ -33,7 +31,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class GitLab_API extends API implements API_Interface {
-	use API_Trait;
 
 	/**
 	 * Holds loose class method name.
@@ -701,7 +698,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Display GitLab error admin notices.
 	 */
 	public function gitlab_error_notices() {
-		add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'gitlab_error' ] );
+		add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'gitlab_error' ] );
 	}
 
 	/**

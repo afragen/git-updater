@@ -10,8 +10,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
-
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -29,6 +29,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class Settings extends Base {
+	use GHU_Trait;
 
 	/**
 	 * Holds the plugin basename.
@@ -495,22 +496,6 @@ class Settings extends Base {
 
 
 	/**
-	 * Sanitize each setting field as needed.
-	 *
-	 * @param array $input Contains all settings fields as array keys
-	 *
-	 * @return array
-	 */
-	public static function sanitize( $input ) {
-		$new_input = [];
-		foreach ( array_keys( (array) $input ) as $id ) {
-			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
-		}
-
-		return $new_input;
-	}
-
-	/**
 	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
@@ -562,19 +547,20 @@ class Settings extends Base {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) ) {
-			if ( 'github_updater' === $_POST['option_page'] ) {
-				$options = $this->filter_options();
-				update_site_option( 'github_updater', self::sanitize( $options ) );
-			}
-
-			/**
-			 * Save $options in add-on classes.
-			 *
-			 * @since 8.0.0
-			 */
-			do_action( 'github_updater_update_settings', $_POST );
+		if ( isset( $_POST['option_page'] ) &&
+		     'github_updater' === $_POST['option_page']
+		) {
+			$options = $this->filter_options();
+			update_site_option( 'github_updater', $this->sanitize( $options ) );
 		}
+
+		/**
+		 * Save $options in add-on classes.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'github_updater_update_settings', $_POST );
+
 		$this->redirect_on_save();
 	}
 

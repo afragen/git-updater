@@ -11,9 +11,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\Traits\API_Trait;
-
+use Fragen\Singleton;
 
 /*
  * Exit if called directly.
@@ -34,7 +32,6 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * @package Fragen\GitHub_Updater
  */
 class Rest_Update extends Base {
-	use API_Trait;
 
 	/**
 	 * Holds REST Upgrader Skin.
@@ -80,7 +77,7 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $plugin );
-		$repo_api = $this->get_repo_api( $plugin->type, $plugin );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->type, $plugin );
 
 		$update = [
 			'slug'        => $plugin->repo,
@@ -130,7 +127,7 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $theme );
-		$repo_api = $this->get_repo_api( $theme->type, $theme );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->type, $theme );
 
 		$update = [
 			'theme'       => $theme->repo,

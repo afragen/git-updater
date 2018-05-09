@@ -10,12 +10,11 @@
 
 namespace Fragen\GitHub_Updater\API;
 
+
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Traits\API_Trait,
 	Fragen\GitHub_Updater\Branch,
 	Fragen\GitHub_Updater\Readme_Parser;
-
 
 /*
  * Exit if called directly.
@@ -33,7 +32,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class Bitbucket_API extends API implements API_Interface {
-	use API_Trait;
 
 	/**
 	 * Constructor.

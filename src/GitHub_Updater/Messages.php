@@ -10,8 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\GitHub_Updater\Traits\API_Trait;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -25,8 +24,8 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Messages extends Base {
-	use API_Trait;
+class Messages {
+	use GHU_Trait;
 
 	/**
 	 * Holds WP_Error message.
@@ -61,17 +60,20 @@ class Messages extends Base {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'show_wp_error' ] );
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+						$this,
+						'show_wp_error',
+					] );
 					break;
 				case 'waiting':
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [ $this, 'waiting' ] );
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 				case 'git':
 				default:
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
 						$this,
 						'show_403_error_message',
 					] );
-					add_action( is_multisite() ? 'network_' : null . 'admin_notices', [
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [
 						$this,
 						'show_401_error_message',
 					] );

@@ -12,8 +12,8 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait,
 	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
-
 
 /*
  * Exit if called directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 class Init extends Base {
-	use Basic_Auth_Loader;
+	use GHU_Trait, Basic_Auth_Loader;
 
 	public function __construct() {
 		parent::__construct();
@@ -37,8 +37,8 @@ class Init extends Base {
 		$this->load_hooks();
 
 		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/WP-CLI/CLI.php';
-			include_once __DIR__ . '/WP-CLI/CLI_Integration.php';
+			include_once __DIR__ . '/WP_CLI/CLI.php';
+			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
 		}
 	}
 

@@ -10,9 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\Traits\API_Trait;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -27,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @package Fragen\GitHub_Updater
  */
 class Branch {
-	use API_Trait;
+	use GHU_Trait;
 
 	/**
 	 * Holds repo cache data.
@@ -42,7 +40,7 @@ class Branch {
 	 *
 	 * @var array $options
 	 */
-	protected static $options;
+	private static $options;
 
 	/**
 	 * Branch constructor.
@@ -52,8 +50,8 @@ class Branch {
 	 * @param null $cache
 	 */
 	public function __construct( $cache = null ) {
-		$this->cache     = $cache;
-		static::$options = $this->get_class_vars( 'Base', 'options' );;
+		$this->cache   = $cache;
+		self::$options = $this->get_class_vars( 'Base', 'options' );
 	}
 
 	/**
@@ -91,8 +89,8 @@ class Branch {
 				: 'master';
 
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
-			static::$options[ 'current_branch_' . $repo ] = $current_branch;
-			update_site_option( 'github_updater', static::$options );
+			self::$options[ 'current_branch_' . $repo ] = $current_branch;
+			update_site_option( 'github_updater', self::$options );
 		}
 	}
 
@@ -105,8 +103,8 @@ class Branch {
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
-		static::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
-		update_site_option( 'github_updater', static::$options );
+		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
+		update_site_option( 'github_updater', self::$options );
 	}
 
 }

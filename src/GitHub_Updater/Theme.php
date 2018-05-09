@@ -10,8 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\Traits\API_Trait;
+use Fragen\Singleton;
 
 
 /*
@@ -34,7 +33,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @link      https://github.com/UCF/Theme-Updater
  */
 class Theme extends Base {
-	use API_Trait;
 
 	/**
 	 * Rollback variable.
