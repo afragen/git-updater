@@ -12,7 +12,6 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
 
-
 /*
  * Exit if called directly.
  */

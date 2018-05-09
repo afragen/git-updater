@@ -42,18 +42,21 @@ class Base {
 	 * @var array
 	 */
 	public static $extra_headers = [];
+
 	/**
 	 * Holds the values to be used in the fields callbacks.
 	 *
 	 * @var array
 	 */
 	public static $options;
+
 	/**
 	 * Holds git server types.
 	 *
 	 * @var array
 	 */
 	public static $git_servers = [ 'github' => 'GitHub' ];
+
 	/**
 	 * Holds extra repo header types.
 	 *
@@ -63,12 +66,14 @@ class Base {
 		'languages' => 'Languages',
 		'ci_job'    => 'CI Job',
 	];
+
 	/**
 	 * Holds an array of installed git APIs.
 	 *
 	 * @var array
 	 */
-	protected static $installed_apis = [ 'github_api' => true ];
+	public static $installed_apis = [ 'github_api' => true ];
+
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
@@ -76,6 +81,7 @@ class Base {
 	 * @var    \stdClass
 	 */
 	public $caller;
+
 	/**
 	 * Store details of all repositories that are installed.
 	 *

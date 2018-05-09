@@ -12,7 +12,6 @@ namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Traits\API_Trait,
 	Fragen\GitHub_Updater\Branch,
 	Fragen\GitHub_Updater\Readme_Parser,
 	Fragen\GitHub_Updater\Traits\GHU_Trait;
