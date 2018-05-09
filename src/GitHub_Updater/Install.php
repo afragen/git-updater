@@ -32,18 +32,18 @@ class Install {
 	use GHU_Trait, Basic_Auth_Loader;
 
 	/**
-	 * Hold local copy of GitHub Updater options.
-	 *
-	 * @var mixed
-	 */
-	public static $options;
-
-	/**
 	 * Class options.
 	 *
 	 * @var array
 	 */
 	protected static $install = [];
+
+	/**
+	 * Hold local copy of GitHub Updater options.
+	 *
+	 * @var mixed
+	 */
+	private static $options;
 
 	/**
 	 * Hold local copy of installed APIs.

@@ -40,25 +40,29 @@ class API {
 	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
-	public static $error_code = [];
+	protected static $error_code = [];
+
 	/**
 	 * Holds site options.
 	 *
 	 * @var array $options
 	 */
 	protected static $options;
+
 	/**
 	 * Holds extra headers.
 	 *
 	 * @var
 	 */
 	protected static $extra_headers;
+
 	/**
 	 * Variable for setting update transient hours.
 	 *
 	 * @var integer
 	 */
-	public $hours = 12;
+	protected $hours = 12;
+
 	/**
 	 * Variable to hold all repository remote info.
 	 *
