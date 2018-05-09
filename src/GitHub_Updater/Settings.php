@@ -10,7 +10,8 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -28,6 +29,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class Settings extends Base {
+	use GHU_Trait;
 
 	/**
 	 * Holds the plugin basename.

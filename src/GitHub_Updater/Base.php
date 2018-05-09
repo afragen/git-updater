@@ -124,13 +124,6 @@ class Base {
 	}
 
 	/**
-	 * Load site options.
-	 */
-	public function load_options() {
-		self::$options = get_site_option( 'github_updater', [] );
-	}
-
-	/**
 	 * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
 	 *
 	 * @return bool
@@ -504,9 +497,10 @@ class Base {
 		/*
 		 * Remote install source.
 		 */
-		if ( empty( $repo ) && isset( self::$options['github_updater_install_repo'] ) ) {
-			$repo['repo'] = self::$options['github_updater_install_repo'];
-			$new_source   = trailingslashit( $remote_source ) . self::$options['github_updater_install_repo'];
+		$install_options = $this->get_class_vars( 'Install', 'options' );
+		if ( empty( $repo ) && isset( $install_options['github_updater_install_repo'] ) ) {
+			$slug       = $install_options['github_updater_install_repo'];
+			$new_source = trailingslashit( $remote_source ) . $slug;
 		}
 
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
@@ -517,36 +511,6 @@ class Base {
 		$wp_filesystem->move( $source, $new_source );
 
 		return trailingslashit( $new_source );
-	}
-
-	/**
-	 * Set array with normal repo names.
-	 * Fix name even if installed without renaming originally, eg <repo>-master
-	 *
-	 * @param string            $slug
-	 * @param Base|Plugin|Theme $upgrader_object
-	 *
-	 * @return array
-	 */
-	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
-
-		if ( null === $upgrader_object ) {
-			$upgrader_object = $this;
-		}
-
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->repo || $rename === $repo->repo ) {
-				$arr['repo'] = $repo->repo;
-				break;
-			}
-		}
-
-		return $arr;
 	}
 
 	/**
@@ -629,6 +593,36 @@ class Base {
 	}
 
 	/**
+	 * Set array with normal repo names.
+	 * Fix name even if installed without renaming originally, eg <repo>-master
+	 *
+	 * @param string            $slug
+	 * @param Base|Plugin|Theme $upgrader_object
+	 *
+	 * @return array
+	 */
+	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
+		$arr    = [];
+		$rename = explode( '-', $slug );
+		array_pop( $rename );
+		$rename = implode( '-', $rename );
+
+		if ( null === $upgrader_object ) {
+			$upgrader_object = $this;
+		}
+
+		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
+		foreach ( (array) $upgrader_object->config as $repo ) {
+			if ( $slug === $repo->repo || $rename === $repo->repo ) {
+				$arr['repo'] = $repo->repo;
+				break;
+			}
+		}
+
+		return $arr;
+	}
+
+	/**
 	 * Test if rollback and then run `set_rollback_transient`.
 	 *
 	 * @uses filter hook 'wp_get_update_data'
@@ -673,7 +667,7 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$repo_api  = $this->get_repo_api( $repo->type, $repo );
+		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
 		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$rollback  = [
@@ -750,41 +744,6 @@ class Base {
 			}
 			set_site_transient( $transient, $current );
 		}
-	}
-
-	/**
-	 * Return an array of the running git servers.
-	 *
-	 * @access public
-	 * @return array $gits
-	 */
-	public function get_running_git_servers() {
-		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-
-		$repos = array_merge( $plugins, $themes );
-		$gits  = array_map( function( $e ) {
-			if ( ! empty( $e->enterprise ) ) {
-				if ( false !== stripos( $e->type, 'bitbucket' ) ) {
-					return 'bbserver';
-				}
-				if ( false !== stripos( $e->type, 'gitlab' ) ) {
-					return 'gitlabce';
-				}
-			}
-
-			return $e->type;
-		}, $repos );
-
-		$gits = array_unique( array_values( $gits ) );
-
-		$gits = array_map( function( $e ) {
-			$e = explode( '_', $e );
-
-			return $e[0];
-		}, $gits );
-
-		return array_unique( $gits );
 	}
 
 	/**

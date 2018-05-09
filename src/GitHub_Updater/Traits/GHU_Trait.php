@@ -39,6 +39,23 @@ trait GHU_Trait {
 	}
 
 	/**
+	 * Checks to see if DOING_AJAX.
+	 *
+	 * @return bool
+	 */
+	public static function is_doing_ajax() {
+		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
+	}
+
+	/**
+	 * Load site options.
+	 */
+	public function load_options() {
+		$base = Singleton::get_instance('Base', $this);
+		$base::$options = get_site_option( 'github_updater', [] );
+	}
+
+	/**
 	 * Returns repo cached data.
 	 *
 	 * @access protected
@@ -197,15 +214,6 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Checks to see if DOING_AJAX.
-	 *
-	 * @return bool
-	 */
-	public static function is_doing_ajax() {
-		return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
-	}
-
-	/**
 	 * Is override dot org option active?
 	 *
 	 * @return bool
@@ -213,6 +221,57 @@ trait GHU_Trait {
 	public function is_override_dot_org() {
 		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG )
 		       || ( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
+	}
+
+	/**
+	 * Sanitize each setting field as needed.
+	 *
+	 * @param array $input Contains all settings fields as array keys
+	 *
+	 * @return array
+	 */
+	public function sanitize( $input ) {
+		$new_input = [];
+		foreach ( array_keys( (array) $input ) as $id ) {
+			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
+		}
+
+		return $new_input;
+	}
+
+	/**
+	 * Return an array of the running git servers.
+	 *
+	 * @access public
+	 * @return array $gits
+	 */
+	public function get_running_git_servers() {
+		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+
+		$repos = array_merge( $plugins, $themes );
+		$gits  = array_map( function( $e ) {
+			if ( ! empty( $e->enterprise ) ) {
+				if ( false !== stripos( $e->type, 'bitbucket' ) ) {
+					return 'bbserver';
+				}
+				if ( false !== stripos( $e->type, 'gitlab' ) ) {
+					return 'gitlabce';
+				}
+			}
+
+			return $e->type;
+		}, $repos );
+
+		$gits = array_unique( array_values( $gits ) );
+
+		$gits = array_map( function( $e ) {
+			$e = explode( '_', $e );
+
+			return $e[0];
+		}, $gits );
+
+		return array_unique( $gits );
 	}
 
 	/**
@@ -236,22 +295,6 @@ trait GHU_Trait {
 		$header = $this->sanitize( $header );
 
 		return $header;
-	}
-
-	/**
-	 * Sanitize each setting field as needed.
-	 *
-	 * @param array $input Contains all settings fields as array keys
-	 *
-	 * @return array
-	 */
-	public function sanitize( $input ) {
-		$new_input = [];
-		foreach ( array_keys( (array) $input ) as $id ) {
-			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
-		}
-
-		return $new_input;
 	}
 
 }
