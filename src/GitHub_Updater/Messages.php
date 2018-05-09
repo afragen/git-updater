@@ -180,7 +180,7 @@ class Messages {
 			<p>
 				<?php esc_html_e( 'GitHub Updater Information', 'github-updater' ); ?>
 				<br>
-				<?php esc_html_e( 'Please be patient while WP-Cron finishes.', 'github-updater' ); ?>
+				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
