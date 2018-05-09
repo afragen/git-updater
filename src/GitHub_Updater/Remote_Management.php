@@ -88,15 +88,6 @@ class Remote_Management {
 	}
 
 	/**
-	 * Ensure api key is set.
-	 */
-	public function ensure_api_key_is_set() {
-		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
-		}
-	}
-
-	/**
 	 * Settings for Remote Management.
 	 */
 	public function remote_management_page_init() {
