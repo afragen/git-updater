@@ -10,8 +10,7 @@
 
 namespace Fragen\GitHub_Updater\Traits;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\Settings;
+use Fragen\Singleton;
 
 /**
  * Trait GHU_Trait
@@ -234,15 +233,6 @@ trait GHU_Trait {
 		}
 
 		return $new_input;
-	}
-
-	/**
-	 * Ensure api key is set.
-	 */
-	public function ensure_api_key_is_set() {
-		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
-		}
 	}
 
 	/**

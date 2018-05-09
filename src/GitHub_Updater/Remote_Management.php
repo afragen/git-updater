@@ -1,9 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: afragen
- * Date: 5/6/18
- * Time: 9:08 AM
+ * GitHub Updater
+ *
+ * @package   GitHub_Updater
+ * @author    Andy Fragen
+ * @license   GPL-2.0+
+ * @link      https://github.com/afragen/github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -25,14 +27,6 @@ class Remote_Management {
 	 * @var mixed
 	 */
 	public static $options_remote;
-
-	/**
-	 * Holds the value for the Remote Management API key.
-	 *
-	 * @var
-	 */
-	private static $api_key;
-
 	/**
 	 * Supported remote management services.
 	 *
@@ -44,6 +38,12 @@ class Remote_Management {
 		'managewp'     => 'ManageWP',
 		'mainwp'       => 'MainWP',
 	];
+	/**
+	 * Holds the value for the Remote Management API key.
+	 *
+	 * @var
+	 */
+	private static $api_key;
 
 	/**
 	 * Remote_Management constructor.
@@ -63,6 +63,15 @@ class Remote_Management {
 	}
 
 	/**
+	 * Ensure api key is set.
+	 */
+	public function ensure_api_key_is_set() {
+		if ( ! self::$api_key ) {
+			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
+		}
+	}
+
+	/**
 	 * Load needed action/filter hooks.
 	 */
 	private function load_hooks() {
@@ -71,6 +80,26 @@ class Remote_Management {
 			$this->save_settings( $post_data );
 		} );
 		$this->add_settings_tabs();
+	}
+
+	/**
+	 * Save Remote Management settings.
+	 *
+	 * @uses 'github_updater_update_settings' action hook
+	 * @uses 'github_updater_save_redirect' filter hook
+	 *
+	 * @param $post_data
+	 */
+	public function save_settings( $post_data ) {
+		$options = isset( $post_data['github_updater_remote_management'] )
+			? $post_data['github_updater_remote_management']
+			: [];
+
+		update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
+
+		add_filter( 'github_updater_save_redirect', function( $option_page ) {
+			return array_merge( $option_page, [ 'github_updater_remote_management' ] );
+		} );
 	}
 
 	/**
@@ -85,6 +114,37 @@ class Remote_Management {
 		add_filter( 'github_updater_add_admin_page', function( $tab, $action ) {
 			$this->add_admin_page( $tab, $action );
 		}, 10, 2 );
+	}
+
+	/**
+	 * Add Settings page data via action hook.
+	 *
+	 * @uses 'github_updater_add_admin_page' action hook
+	 *
+	 * @param $tab
+	 * @param $action
+	 */
+	public function add_admin_page( $tab, $action ) {
+		if ( 'github_updater_remote_management' === $tab ) {
+			$action = add_query_arg( 'tab', $tab, $action );
+
+			?>
+			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
+				<?php
+				settings_fields( 'github_updater_remote_management' );
+				do_settings_sections( 'github_updater_remote_settings' );
+				submit_button();
+				?>
+			</form>
+			<?php
+			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );
+
+			?>
+			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
+				<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
+			</form>
+			<?php
+		}
 	}
 
 	/**
@@ -177,57 +237,6 @@ class Remote_Management {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Add Settings page data via action hook.
-	 *
-	 * @uses 'github_updater_add_admin_page' action hook
-	 *
-	 * @param $tab
-	 * @param $action
-	 */
-	public function add_admin_page( $tab, $action ) {
-		if ( 'github_updater_remote_management' === $tab ) {
-			$action = add_query_arg( 'tab', $tab, $action );
-
-			?>
-			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-				<?php
-				settings_fields( 'github_updater_remote_management' );
-				do_settings_sections( 'github_updater_remote_settings' );
-				submit_button();
-				?>
-			</form>
-			<?php
-			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );
-
-			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-				<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
-			</form>
-			<?php
-		}
-	}
-
-	/**
-	 * Save Remote Management settings.
-	 *
-	 * @uses 'github_updater_update_settings' action hook
-	 * @uses 'github_updater_save_redirect' filter hook
-	 *
-	 * @param $post_data
-	 */
-	public function save_settings( $post_data ) {
-		$options = isset( $post_data['github_updater_remote_management'] )
-			? $post_data['github_updater_remote_management']
-			: [];
-
-		update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
-
-		add_filter( 'github_updater_save_redirect', function( $option_page ) {
-			return array_merge( $option_page, [ 'github_updater_remote_management' ] );
-		} );
 	}
 
 }
