@@ -68,7 +68,7 @@ class CLI_Integration extends WP_CLI_Command {
 	}
 
 	/**
-	 * Install plugin from GitHub, Bitbucket, or GitLab using GitHub Updater.
+	 * Install plugin from GitHub, Bitbucket, GitLab, or Gitea using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
