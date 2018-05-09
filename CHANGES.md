@@ -2,7 +2,6 @@
 **This update requires PHP 5.6 or greater**
 * added multiple action/filter hooks for adding data to Settings
 * refactor `Settings` to add data via hooks
-* refactor some of `class API` to `trait API_Trait`
 * refactor `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
 * added `trait GHU_Trait` wih common code
 * moved traits to own sub-directory
@@ -10,6 +9,7 @@
 * refactor Remote Management to new `class Remote_Management`
 * converted short array syntax
 * removed callback passing of object by reference, it seems of dubious value
+* use `ReflectionObject` in `GHU_Trait::get_class_vars()` to pass arbitrary class properties
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`

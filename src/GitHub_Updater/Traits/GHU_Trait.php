@@ -109,22 +109,19 @@ trait GHU_Trait {
 
 	/**
 	 * Getter for class variables.
-	 * Uses ReflectionProperty->isStatic() for testing.
 	 *
-	 * @param string $var Name of variable.
+	 * @param string $class_name Name of class.
+	 * @param string $var        Name of variable.
 	 *
 	 * @return mixed
 	 */
 	public function get_class_vars( $class_name, $var ) {
-		$class = Singleton::get_instance( $class_name, $this );
-		try {
-			$prop = new \ReflectionProperty( get_class( $class ), $var );
-		} catch ( \ReflectionException $Exception ) {
-			die( '<table>' . $Exception->xdebug_message . '</table>' );
-		}
-		$static = $prop->isStatic();
+		$class          = Singleton::get_instance( $class_name, $this );
+		$reflection_obj = new \ReflectionObject( $class );
+		$property       = $reflection_obj->getProperty( $var );
+		$property->setAccessible( true );
 
-		return $static ? $class::${$var} : $class->$var;
+		return $property->getValue( $class );
 	}
 
 	/**
