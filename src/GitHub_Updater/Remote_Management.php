@@ -95,6 +95,10 @@ class Remote_Management {
 			? $post_data['github_updater_remote_management']
 			: [];
 
+		if ( empty( $options ) ) {
+			return;
+		}
+
 		update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
 
 		add_filter( 'github_updater_save_redirect', function( $option_page ) {
