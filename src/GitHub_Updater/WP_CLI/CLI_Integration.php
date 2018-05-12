@@ -200,11 +200,11 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return array $cli_config
 	 */
 	private function process_args( $uri, $assoc_args ) {
+		$token                 = isset( $assoc_args['token'] ) ? $assoc_args['token'] : false;
+		$bitbucket_private     = isset( $assoc_args['bitbucket-private'] ) ? $assoc_args['bitbucket-private'] : false;
 		$cli_config            = [];
 		$cli_config['uri']     = $uri;
-		$cli_config['private'] = isset( $assoc_args['token'] )
-			? $assoc_args['token']
-			: $assoc_args['bitbucket-private'];
+		$cli_config['private'] = $token ?: $bitbucket_private;
 		$cli_config['branch']  = isset( $assoc_args['branch'] )
 			? $assoc_args['branch']
 			: 'master';

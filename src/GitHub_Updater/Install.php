@@ -12,7 +12,9 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\Traits\GHU_Trait,
-	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
+	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader,
+	Fragen\GitHub_Updater\WP_CLI\CLI_Plugin_Installer_Skin,
+	Fragen\GitHub_Updater\WP_CLI\CLI_Theme_Installer_Skin;
 
 /*
  * Exit if called directly.
