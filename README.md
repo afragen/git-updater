@@ -1,18 +1,18 @@
 ![GitHub Updater](./assets/GitHub_Updater_logo_small.png)
 
 # GitHub Updater
+
 [![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.6
-* Requires PHP: 5.3
+* Requires PHP: 5.6
 * Tested up to: 5.0
 * Stable tag: master
 * Donate link: http://thefragens.com/github-updater-donate
 * License: GPLv2 or later
 * License URI: http://www.gnu.org/licenses/gpl-2.0.html
-
 
 A simple plugin to enable automatic updates to your GitHub, Bitbucket, GitLab, or Gitea hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
 
@@ -25,7 +25,7 @@ This plugin was designed to simply update any GitHub hosted WordPress plugin or 
 `GitHub Plugin URI: afragen/github-updater`  
 `GitHub Plugin URI: https://github.com/afragen/github-updater`
 
-or 
+or
 
 `GitHub Theme URI: afragen/test-child`  
 `GitHub Theme URI: https://github.com/afragen/test-child`

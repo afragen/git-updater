@@ -1,4 +1,27 @@
 #### [unreleased]
+**This update requires PHP 5.6 or greater**
+* added multiple action/filter hooks for adding data to Settings
+* refactored `Settings` to add data via hooks
+* refactored `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
+* added `trait GHU_Trait` wih common code
+* moved traits to own sub-directory
+* removed old extended naming code
+* refactored Remote Management to new `class Remote_Management`
+* converted short array syntax
+* removed callback passing of object by reference, it seems of dubious value
+* use `ReflectionObject` in `GHU_Trait::get_class_vars()` to pass arbitrary class properties
+* refactored WP-CLI integrations
+* removed `class Additions`, now self-contained in [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
+
+#### 7.6.2 / 2018-04-27
+* move `auth_required` stuff from `Base` to `Settings`
+* prevent admin notice from showing when no GitLab.com repo exists
+* remove caching of `get_plugins()` and `wp_get_themes()` as it seems to result in issues for some users
+
+#### 7.6.1 / 2018-04-11
+* check `file_exists()` in `Base::set_installed_apis()` to avoid issue if class not yet loaded prior to checking Settings, fixes [#662](https://github.com/afragen/github-updater/issues/662) and [#667](https://github.com/afragen/github-updater/issues/667)
+
+#### 7.6.0 / 2018-04-08
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
 * changed all password fields to use `type="password"`
 * refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
@@ -11,7 +34,7 @@
 * refactored code out of `class API` into specific API classes
 * simplify RESTful update code, no longer parses webhook payload just webhook itself
 * updated RESTful update code to use `site_transient_{$transient}` filter to add to update transient
-* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response
+* added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response, thanks @Raruto
 
 #### 7.5.0 / 2018-01-28
 * fixed _View detail_ ratings for large projects with lots of issues

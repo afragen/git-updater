@@ -13,7 +13,6 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
 
-
 /*
  * Exit if called directly.
  */
@@ -78,14 +77,15 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $plugin );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->type, $plugin );
 
-		$update = array(
+		$update = [
 			'slug'        => $plugin->repo,
 			'plugin'      => $plugin->slug,
 			'new_version' => null,
 			'url'         => $plugin->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
-		);
+			'package'     => $repo_api->construct_download_link( false, $tag ),
+		];
 
 		add_filter( 'site_transient_update_plugins', function( $value ) use ( $plugin, $update ) {
 			$value->response[ $plugin->slug ] = (object) $update;
@@ -127,13 +127,14 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $theme );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->type, $theme );
 
-		$update = array(
+		$update = [
 			'theme'       => $theme->repo,
 			'new_version' => null,
 			'url'         => $theme->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
-		);
+			'package'     => $repo_api->construct_download_link( false, $tag ),
+		];
 
 		add_filter( 'site_transient_update_themes', function( $value ) use ( $theme, $update ) {
 			$value->response[ $theme->repo ] = $update;
@@ -205,23 +206,24 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = array(
+			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-			);
+			];
 			$this->log_exit( $http_response, 417 );
 		}
 
-		$response = array(
+		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-		);
+		];
 
 		if ( $this->is_error() ) {
+			$response['success'] = false;
 			$this->log_exit( $response, 417 );
 		}
 		$this->log_exit( $response, 200 );
@@ -262,6 +264,9 @@ class Rest_Update extends Base {
 				break;
 			case isset( $_SERVER['HTTP_X_GITLAB_EVENT'] ):
 				$webhook_source = 'GitLab webhook';
+				break;
+			case isset( $_SERVER['HTTP_X_GITEA_EVENT'] ):
+				$webhook_source = 'Gitea webhook';
 				break;
 			default:
 				$webhook_source = 'browser';

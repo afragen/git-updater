@@ -10,8 +10,11 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
-
+use Fragen\Singleton,
+	Fragen\GitHub_Updater\Traits\GHU_Trait,
+	Fragen\GitHub_Updater\Traits\Basic_Auth_Loader,
+	Fragen\GitHub_Updater\WP_CLI\CLI_Plugin_Installer_Skin,
+	Fragen\GitHub_Updater\WP_CLI\CLI_Theme_Installer_Skin;
 
 /*
  * Exit if called directly.
@@ -27,14 +30,36 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @package Fragen\GitHub_Updater
  */
-class Install extends Base {
+class Install {
+	use GHU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Class options.
 	 *
 	 * @var array
 	 */
-	protected static $install = array();
+	protected static $install = [];
+
+	/**
+	 * Hold local copy of GitHub Updater options.
+	 *
+	 * @var mixed
+	 */
+	private static $options;
+
+	/**
+	 * Hold local copy of installed APIs.
+	 *
+	 * @var mixed
+	 */
+	private static $installed_apis;
+
+	/**
+	 * Hold local copy of git servers.
+	 *
+	 * @var mixed
+	 */
+	private static $git_servers;
 
 	/**
 	 * Constructor.
@@ -43,12 +68,48 @@ class Install extends Base {
 	 * @param string $type
 	 * @param array  $wp_cli_config
 	 */
-	public function __construct( $type, $wp_cli_config = array() ) {
-		parent::__construct();
-		$this->load_options();
+	public function __construct( $type, $wp_cli_config = [] ) {
+		self::$options        = $this->get_class_vars( 'Base', 'options' );
+		self::$installed_apis = $this->get_class_vars( 'Base', 'installed_apis' );
+		self::$git_servers    = $this->get_class_vars( 'Base', 'git_servers' );
+
+		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), array(), false, true );
+		wp_enqueue_script( 'ghu-install', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/js/ghu-install.js' ), [], false, true );
+	}
+
+	/**
+	 * Adds Install tabs to Settings page.
+	 */
+	public function add_settings_tabs() {
+		add_filter( 'github_updater_add_settings_tabs', function( $tabs ) {
+			$install_tabs = [
+				'github_updater_install_plugin' => esc_html__( 'Install Plugin', 'github-updater' ),
+				'github_updater_install_theme'  => esc_html__( 'Install Theme', 'github-updater' ),
+			];
+
+			return array_merge( $tabs, $install_tabs );
+		} );
+		add_action( 'github_updater_add_admin_page', function( $tab ) {
+			$this->add_admin_page( $tab );
+		} );
+	}
+
+	/**
+	 * Add Settings page data via action hook.
+	 *
+	 * @uses 'github_updater_add_admin_page' action hook
+	 *
+	 * @param $tab
+	 */
+	public function add_admin_page( $tab ) {
+		if ( 'github_updater_install_plugin' === $tab ) {
+			$this->install( 'plugin' );
+		}
+		if ( 'github_updater_install_theme' === $tab ) {
+			$this->install( 'theme' );
+		}
 	}
 
 	/**
@@ -114,7 +175,7 @@ class Install extends Base {
 			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install         = Settings::sanitize( $_POST );
+			self::$install         = $this->sanitize( $_POST );
 			self::$install['repo'] = $headers['repo'];
 
 			/*
@@ -132,12 +193,12 @@ class Install extends Base {
 			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
-				if ( static::$installed_apis['bitbucket_api'] ) {
+				$this->load_authentication_hooks();
+				if ( self::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 
-				if ( static::$installed_apis['bitbucket_server_api'] ) {
+				if ( self::$installed_apis['bitbucket_server_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
@@ -148,7 +209,7 @@ class Install extends Base {
 			 * Check for GitLab Self-Hosted.
 			 */
 			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( static::$installed_apis['gitlab_api'] ) {
+				if ( self::$installed_apis['gitlab_api'] ) {
 					self::$install = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
@@ -158,16 +219,16 @@ class Install extends Base {
 			 * Save Access Token if present.
 			 */
 			if ( 'gitea' === self::$install['github_updater_api'] ) {
-				if ( static::$installed_apis['gitea_api'] ) {
+				if ( self::$installed_apis['gitea_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
 			}
 
-			static::$options = isset( self::$install['options'] )
-				? array_merge( static::$options, self::$install['options'] )
-				: static::$options;
+			self::$options = isset( self::$install['options'] )
+				? array_merge( self::$options, self::$install['options'] )
+				: self::$options;
 
-			static::$options['github_updater_install_repo'] = self::$install['repo'];
+			self::$options['github_updater_install_repo'] = self::$install['repo'];
 
 			$url      = self::$install['download_link'];
 			$nonce    = wp_nonce_url( $url );
@@ -183,10 +244,10 @@ class Install extends Base {
 					? new CLI_Plugin_Installer_Skin()
 					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
-				add_filter( 'install_plugin_complete_actions', array(
-					&$this,
+				add_filter( 'install_plugin_complete_actions', [
+					$this,
 					'install_plugin_complete_actions',
-				), 10, 3 );
+				], 10, 3 );
 			}
 
 			if ( 'theme' === $type ) {
@@ -199,23 +260,19 @@ class Install extends Base {
 					? new CLI_Theme_Installer_Skin()
 					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
-				add_filter( 'install_theme_complete_actions', array(
-					&$this,
+				add_filter( 'install_theme_complete_actions', [
+					$this,
 					'install_theme_complete_actions',
-				), 10, 3 );
+				], 10, 3 );
 			}
 
 			// Perform the action and install the repo from the $source urldecode().
 			if ( $upgrader->install( $url ) ) {
-				update_site_option( 'github_updater', Settings::sanitize( static::$options ) );
+				update_site_option( 'github_updater', $this->sanitize( self::$options ) );
 
 				// Save branch setting.
 				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
-
-				// Delete get_plugins() and wp_get_themes() cache.
-				delete_site_option( 'ghu-' . md5( 'repos' ) );
 			}
-
 		}
 
 		if ( $wp_cli ) {
@@ -271,20 +328,20 @@ class Install extends Base {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			array( 'Fragen\\GitHub_Updater\\Settings', 'sanitize' )
+			[ $this, 'sanitize' ]
 		);
 
 		add_settings_section(
 			$type,
 			sprintf( esc_html__( 'GitHub Updater Install %s', 'github-updater' ), $repo_type ),
-			array(),
+			[],
 			'github_updater_install_' . $type
 		);
 
 		add_settings_field(
 			$type . '_repo',
 			sprintf( esc_html__( '%s URI', 'github-updater' ), $repo_type ),
-			array( &$this, 'get_repo' ),
+			[ $this, 'get_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -292,7 +349,7 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_branch',
 			esc_html__( 'Repository Branch', 'github-updater' ),
-			array( &$this, 'branch' ),
+			[ $this, 'branch' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -300,24 +357,19 @@ class Install extends Base {
 		add_settings_field(
 			$type . '_api',
 			esc_html__( 'Remote Repository Host', 'github-updater' ),
-			array( &$this, 'install_api' ),
+			[ $this, 'install_api' ],
 			'github_updater_install_' . $type,
 			$type
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_install_settings_fields( $type );
-		}
+		/**
+		 * Action hook to add git API install settings fields.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param string $type 'plugin'|'theme'.
+		 */
+		do_action( 'github_updater_add_install_settings_fields', $type );
 	}
 
 	/**
@@ -357,8 +409,8 @@ class Install extends Base {
 		?>
 		<label for="github_updater_api">
 			<select name="github_updater_api">
-				<?php foreach ( static::$git_servers as $key => $value ): ?>
-					<?php if ( static::$installed_apis[ $key . '_api' ] ): ?>
+				<?php foreach ( self::$git_servers as $key => $value ): ?>
+					<?php if ( self::$installed_apis[ $key . '_api' ] ): ?>
 						<option value="<?php esc_attr_e( $key ) ?>" <?php selected( $key ) ?> >
 							<?php esc_html_e( $value ) ?>
 						</option>
@@ -399,20 +451,20 @@ class Install extends Base {
 		}
 
 		$stylesheet    = self::$install['repo'];
-		$activate_link = add_query_arg( array(
+		$activate_link = add_query_arg( [
 			'action'     => 'activate',
 			//'template'   => urlencode( $template ),
 			'stylesheet' => urlencode( $stylesheet ),
-		), admin_url( 'themes.php' ) );
+		], admin_url( 'themes.php' ) );
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
 		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'github-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'github-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
-			$network_activate_link = add_query_arg( array(
+			$network_activate_link = add_query_arg( [
 				'action' => 'enable',
 				'theme'  => urlencode( $stylesheet ),
-			), network_admin_url( 'themes.php' ) );
+			], network_admin_url( 'themes.php' ) );
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
 
 			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'github-updater' ) . '</a>';

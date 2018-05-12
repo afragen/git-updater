@@ -8,9 +8,10 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\Traits;
 
 use Fragen\Singleton,
+	Fragen\GitHub_Updater\Install,
 	Fragen\GitHub_Updater\API\Bitbucket_API,
 	Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 
@@ -23,57 +24,18 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Basic_Auth_Loader
+ * Trait Basic_Auth_Loader
  *
  * @package Fragen\GitHub_Updater
  */
-class Basic_Auth_Loader {
-
-	/**
-	 * Stores Basic::$options.
-	 *
-	 * @access private
-	 * @var    mixed
-	 */
-	private static $options;
+trait Basic_Auth_Loader {
 
 	/**
 	 * Stores array of git servers requiring Basic Authentication.
 	 *
 	 * @var array
 	 */
-	private static $basic_auth_required = array( 'Bitbucket' );
-
-	/**
-	 * Stores the object calling Basic_Auth_Loader.
-	 *
-	 * @access public
-	 * @var    \stdClass
-	 */
-	public $caller;
-
-	/**
-	 * Basic_Auth_Loader constructor.
-	 *
-	 * @access public
-	 *
-	 * @param array $options Options to pass to the updater.
-	 */
-	public function __construct( $options ) {
-		static::$options = empty( $options )
-			? get_site_option( 'github_updater', array() )
-			: $options;
-	}
-
-	/**
-	 * Load hooks for Bitbucket authentication headers.
-	 *
-	 * @access public
-	 */
-	public function load_authentication_hooks() {
-		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
-		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
-	}
+	private static $basic_auth_required = [ 'Bitbucket' ];
 
 	/**
 	 * Remove hooks for Bitbucket authentication headers.
@@ -81,8 +43,8 @@ class Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function remove_authentication_hooks() {
-		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
-		remove_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ) );
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
 	/**
@@ -113,7 +75,7 @@ class Basic_Auth_Loader {
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
-	 * @access public
+	 * @access private
 	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
 	 *
 	 * @param string $url The URL.
@@ -122,16 +84,16 @@ class Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = $this->caller;
+		$type         = $this->get_class_vars( 'Base', 'caller' );
 		$username_key = null;
 		$password_key = null;
-		$credentials  = array(
+		$credentials  = [
 			'username'      => null,
 			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
-		);
+		];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
@@ -146,10 +108,10 @@ class Basic_Auth_Loader {
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
 				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
-				: array();
+				: [];
 			$themes      = isset( $_REQUEST['themes'] )
 				? explode( ',', $_REQUEST['themes'] )
-				: array();
+				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter( $bulk_update, function( $e ) use ( $url ) {
@@ -192,9 +154,9 @@ class Basic_Auth_Loader {
 				break;
 		}
 
-		// @TODO can use `( $this->caller )::$options` in PHP7
-		$caller          = $this->caller;
-		static::$options = $this->caller instanceof Install ? $caller::$options : static::$options;
+		// TODO: can use `( $this->caller )::$options` in PHP7
+		$caller          = $this->get_class_vars( 'Base', 'caller' );
+		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
 
 		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
@@ -302,9 +264,19 @@ class Basic_Auth_Loader {
 				}
 			}
 		}
-		remove_filter( 'upgrader_pre_download', array( &$this, 'upgrader_pre_download' ) );
+		remove_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ] );
 
 		return $reply;
+	}
+
+	/**
+	 * Load hooks for Bitbucket authentication headers.
+	 *
+	 * @access public
+	 */
+	public function load_authentication_hooks() {
+		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
 }

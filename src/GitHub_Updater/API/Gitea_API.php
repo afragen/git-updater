@@ -13,8 +13,8 @@ namespace Fragen\GitHub_Updater\API;
 use Fragen\Singleton,
 	Fragen\GitHub_Updater\API,
 	Fragen\GitHub_Updater\Branch,
-	Fragen\GitHub_Updater\Readme_Parser;
-
+	Fragen\GitHub_Updater\Readme_Parser,
+	Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -33,6 +33,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Marco Betschart
  */
 class Gitea_API extends API implements API_Interface {
+	use GHU_Trait;
 
 	/**
 	 * Holds loose class method name.
@@ -57,6 +58,9 @@ class Gitea_API extends API implements API_Interface {
 				: $type->branch;
 		}
 		$this->set_default_credentials();
+		$this->settings_hook( $this );
+		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**
@@ -96,7 +100,7 @@ class Gitea_API extends API implements API_Interface {
 
 			if ( $response ) {
 				$contents = $response;
-				$response = $this->base->get_file_headers( $contents, $this->type->type );
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -159,8 +163,8 @@ class Gitea_API extends API implements API_Interface {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
-			$response = array();
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
+			$response = [];
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
@@ -207,7 +211,7 @@ class Gitea_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -272,7 +276,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -389,7 +393,7 @@ class Gitea_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = array();
+		$arr = [];
 		array_map( function( $e ) use ( &$arr ) {
 			$arr[] = $e->tag_name;
 
@@ -407,8 +411,8 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['private']      = $e->private;
@@ -433,8 +437,8 @@ class Gitea_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter( $response, function( $e ) use ( &$arr ) {
 			$arr['changes'] = base64_encode( $e );
@@ -452,22 +456,22 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array
 	 */
 	private function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
+		$tags     = [];
+		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_link    = implode( '/', array(
+			$download_link    = implode( '/', [
 				$repo_type['base_uri'],
 				'repos',
 				$this->type->owner,
 				$this->type->repo,
 				'archive/',
-			) );
+			] );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_link . $tag . '.zip';
 		}
 
-		return array( $tags, $rollback );
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -482,7 +486,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_settings',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				array( &$this, 'print_section_gitea_token' ),
+				[ $this, 'print_section_gitea_token' ],
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -491,7 +495,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_id',
 				esc_html__( 'Gitea Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_gitea_info' ),
+				[ $this, 'print_section_gitea_info' ],
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -500,10 +504,10 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_field(
 				'gitea_access_token',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 				'github_updater_gitea_install_settings',
 				'gitea_settings',
-				array( 'id' => 'gitea_access_token', 'token' => true )
+				[ 'id' => 'gitea_access_token', 'token' => true ]
 			);
 		}
 
@@ -517,12 +521,21 @@ class Gitea_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_gitea_install_settings';
 		$setting_field['section']         = 'gitea_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		);
+		];
 
 		return $setting_field;
+	}
+
+	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter( 'github_updater_add_settings_subtabs', function( $subtabs ) {
+			return array_merge( $subtabs, [ 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ] );
+		} );
 	}
 
 	/**
@@ -548,7 +561,7 @@ class Gitea_API extends API implements API_Interface {
 		add_settings_field(
 			'gitea_access_token',
 			esc_html__( 'Gitea Access Token', 'github-updater' ),
-			array( &$this, 'gitea_access_token' ),
+			[ $this, 'gitea_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -573,8 +586,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Display Gitea error admin notices.
 	 */
 	public function gitea_error_notices() {
-		add_action( 'admin_notices', array( &$this, 'gitea_error' ) );
-		add_action( 'network_admin_notices', array( &$this, 'gitea_error', ) );
+		add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'gitea_error' ] );
 	}
 
 	/**
@@ -582,13 +594,13 @@ class Gitea_API extends API implements API_Interface {
 	 */
 	public function gitea_error() {
 		$base       = Singleton::get_instance( 'Base', $this );
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$error_code = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitea'] ) &&
 		     empty( static::$options['gitea_access_token'] ) &&
 		     $base::$auth_required['gitea']
 		) {
-			self::$error_code['gitea'] = array( 'error' => true );
+			self::$error_code['gitea'] = [ 'error' => true ];
 			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
 				return;
 			}
@@ -614,13 +626,13 @@ class Gitea_API extends API implements API_Interface {
 	public function remote_install( $headers, $install ) {
 		$base = $headers['base_uri'] . '/api/v1';
 
-		$install['download_link'] = implode( '/', array(
+		$install['download_link'] = implode( '/', [
 			$base,
 			'repos',
 			$install['github_updater_repo'],
 			'archive',
 			$install['github_updater_branch'] . '.zip',
-		) );
+		] );
 
 		/*
 		 * Add/Save access token if present.

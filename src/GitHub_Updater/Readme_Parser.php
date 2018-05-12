@@ -50,7 +50,7 @@ class Readme_Parser extends Parser {
 	 * @return array $data
 	 */
 	public function parse_data() {
-		$data = array();
+		$data = [];
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
@@ -76,7 +76,7 @@ class Readme_Parser extends Parser {
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
-		$contributors = array();
+		$contributors = [];
 		foreach ( (array) $users as $contributor ) {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
@@ -87,18 +87,6 @@ class Readme_Parser extends Parser {
 		}
 
 		return $contributors;
-	}
-
-	/**
-	 * Makes generation of short description PHP 5.3 compliant.
-	 * Original requires PHP 5.4 for array dereference.
-	 *
-	 * @return string $description[0]
-	 */
-	protected function short_description_53() {
-		$description = array_filter( explode( "\n", $this->sections['description'] ) );
-
-		return $description[0];
 	}
 
 	/**
