@@ -121,7 +121,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_plugin( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install', $this )->install( 'plugin', $cli_config );
+		Singleton::get_instance( 'Install', $this )->install( 'plugin', $cli_config, true );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
@@ -183,7 +183,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function install_theme( $args, $assoc_args ) {
 		list( $uri ) = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
-		Singleton::get_instance( 'Install', $this )->install( 'theme', $cli_config );
+		Singleton::get_instance( 'Install', $this )->install( 'theme', $cli_config, true );
 
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );

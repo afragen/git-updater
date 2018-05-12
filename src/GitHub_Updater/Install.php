@@ -115,40 +115,39 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string $type
-	 * @param array  $wp_cli_config
+	 * @param string $type     valid types: 'plugin', 'theme'.
+	 * @param array  $config   an array of installation parameters (refer to: 'CLI Integration::install plugin()' and ' CLI_Integration::install_theme()' for a complete list of valid parameters)
+	 * @param bool  $is_wp_cli set to True when calling this from terminal (default: false)
 	 *
 	 * @return bool
 	 */
-	public function install( $type, $wp_cli_config = null ) {
-		$wp_cli = false;
+	public function install( $type, $config = null, $is_wp_cli = false ) {
 
-		if ( ! empty( $wp_cli_config['uri'] ) ) {
-			$wp_cli  = true;
-			$headers = $this->parse_header_uri( $wp_cli_config['uri'] );
+		if ( ! empty( $config['uri'] ) ) {
+			$headers = $this->parse_header_uri( $config['uri'] );
 			$api     = false !== strpos( $headers['host'], '.com' )
 				? rtrim( $headers['host'], '.com' )
 				: rtrim( $headers['host'], '.org' );
 
-			$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
+			$api = isset( $config['git'] ) ? $config['git'] : $api;
 
-			$_POST['github_updater_repo']   = $wp_cli_config['uri'];
-			$_POST['github_updater_branch'] = $wp_cli_config['branch'];
+			$_POST['github_updater_repo']   = $config['uri'];
+			$_POST['github_updater_branch'] = $config['branch'];
 			$_POST['github_updater_api']    = $api;
 			$_POST['option_page']           = 'github_updater_install';
 
 			switch ( $api ) {
 				case 'github':
-					$_POST['github_access_token'] = $wp_cli_config['private'] ?: null;
+					$_POST['github_access_token'] = $config['private'] ?: null;
 					break;
 				case 'bitbucket':
-					$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
+					$_POST['is_private'] = $config['private'] ? '1' : null;
 					break;
 				case 'gitlab':
-					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
+					$_POST['gitlab_access_token'] = $config['private'] ?: null;
 					break;
 				case 'gitea':
-					$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
+					$_POST['gitea_access_token'] = $config['private'] ?: null;
 					break;
 			}
 		}
@@ -240,7 +239,7 @@ class Install {
 				/*
 				 * Create a new instance of Plugin_Upgrader.
 				 */
-				$skin     = $wp_cli
+				$skin     = $is_wp_cli
 					? new CLI_Plugin_Installer_Skin()
 					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
 				$upgrader = new \Plugin_Upgrader( $skin );
@@ -256,7 +255,7 @@ class Install {
 				/*
 				 * Create a new instance of Theme_Upgrader.
 				 */
-				$skin     = $wp_cli
+				$skin     = $is_wp_cli
 					? new CLI_Theme_Installer_Skin()
 					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
 				$upgrader = new \Theme_Upgrader( $skin );
@@ -275,7 +274,7 @@ class Install {
 			}
 		}
 
-		if ( $wp_cli ) {
+		if ( $is_wp_cli ) {
 			return true;
 		}
 
