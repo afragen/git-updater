@@ -160,25 +160,6 @@ class Rest_Update extends Base {
 	}
 
 	/**
-	 * Log messages during update
-	 */
-	public function log($message, $obj=""){
-
-		if(!defined('GHU_DEBUG'))
-			return;
-
-		$current_time = microtime(true);
-
-		if(!isset($this->start)) {
-			$this->start = $current_time;
-		}
-
-		$time_lapse = $current_time - $this->start;
-		$millis = round( $time_lapse * 1000 );
-		error_log( $millis . " ms : ". $message . " " . print_r( $obj, true ) );
-	}
-
-	/**
 	 * Process request.
 	 *
 	 * Relies on data in $_REQUEST, prints out json and exits.
@@ -194,10 +175,6 @@ class Rest_Update extends Base {
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
-
-			// DEBUG
-			$this->log("doing action: \"github_updater_pre_rest_process_request\"");
-			//
 
 			/**
 			 * Allow access into the REST Update process.
@@ -269,10 +246,7 @@ class Rest_Update extends Base {
 			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
 			'master';
 
-		if ( isset($repo) ) {
-			$current_branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
-			return $current_branch;
-		}
+		return $current_branch;
 	}
 
 	/**
