@@ -121,46 +121,14 @@ class Install {
 	 * @return bool
 	 */
 	public function install( $type, $wp_cli_config = null ) {
-		$wp_cli = false;
-
-		if ( ! empty( $wp_cli_config['uri'] ) ) {
-			$wp_cli  = true;
-			$headers = $this->parse_header_uri( $wp_cli_config['uri'] );
-			$api     = false !== strpos( $headers['host'], '.com' )
-				? rtrim( $headers['host'], '.com' )
-				: rtrim( $headers['host'], '.org' );
-
-			$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
-
-			$_POST['github_updater_repo']   = $wp_cli_config['uri'];
-			$_POST['github_updater_branch'] = $wp_cli_config['branch'];
-			$_POST['github_updater_api']    = $api;
-			$_POST['option_page']           = 'github_updater_install';
-
-			switch ( $api ) {
-				case 'github':
-					$_POST['github_access_token'] = $wp_cli_config['private'] ?: null;
-					break;
-				case 'bitbucket':
-					$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
-					break;
-				case 'gitlab':
-					$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
-					break;
-				case 'gitea':
-					$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
-					break;
-			}
-		}
+		$this->set_wpcli_install_post_data( $wp_cli_config );
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
 				$_POST['github_updater_branch'] = 'master';
 			}
 
-			/*
-			 * Exit early if no repo entered.
-			 */
+			// Exit early if no repo entered.
 			if ( empty( $_POST['github_updater_repo'] ) ) {
 				echo '<h3>';
 				esc_html_e( 'A repository URI is required.', 'github-updater' );
@@ -169,9 +137,7 @@ class Install {
 				return false;
 			}
 
-			/*
-			 * Transform URI to owner/repo
-			 */
+			// Transform URI to owner/repo.
 			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
@@ -231,43 +197,10 @@ class Install {
 			self::$options['github_updater_install_repo'] = self::$install['repo'];
 
 			$url      = self::$install['download_link'];
-			$nonce    = wp_nonce_url( $url );
-			$upgrader = null;
-
-			if ( 'plugin' === $type ) {
-				$plugin = self::$install['repo'];
-
-				/*
-				 * Create a new instance of Plugin_Upgrader.
-				 */
-				$skin     = $wp_cli
-					? new CLI_Plugin_Installer_Skin()
-					: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin', 'api' ) );
-				$upgrader = new \Plugin_Upgrader( $skin );
-				add_filter( 'install_plugin_complete_actions', [
-					$this,
-					'install_plugin_complete_actions',
-				], 10, 3 );
-			}
-
-			if ( 'theme' === $type ) {
-				$theme = self::$install['repo'];
-
-				/*
-				 * Create a new instance of Theme_Upgrader.
-				 */
-				$skin     = $wp_cli
-					? new CLI_Theme_Installer_Skin()
-					: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme', 'api' ) );
-				$upgrader = new \Theme_Upgrader( $skin );
-				add_filter( 'install_theme_complete_actions', [
-					$this,
-					'install_theme_complete_actions',
-				], 10, 3 );
-			}
+			$upgrader = $this->get_upgrader( $type, $url );
 
 			// Perform the action and install the repo from the $source urldecode().
-			if ( $upgrader->install( $url ) ) {
+			if ( $upgrader && $upgrader->install( $url ) ) {
 				update_site_option( 'github_updater', $this->sanitize( self::$options ) );
 
 				// Save branch setting.
@@ -275,7 +208,7 @@ class Install {
 			}
 		}
 
-		if ( $wp_cli ) {
+		if ( static::is_wp_cli() ) {
 			return true;
 		}
 
@@ -284,6 +217,87 @@ class Install {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Set WP-CLI remote install data into $_POST.
+	 *
+	 * @param array $wp_cli_config Data from WP-CLI remote install.
+	 */
+	private function set_wpcli_install_post_data( $wp_cli_config ) {
+		if ( ! static::is_wp_cli() ) {
+			return;
+		}
+
+		$headers = $this->parse_header_uri( $wp_cli_config['uri'] );
+		$api     = false !== strpos( $headers['host'], '.com' )
+			? rtrim( $headers['host'], '.com' )
+			: rtrim( $headers['host'], '.org' );
+
+		$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
+
+		$_POST['github_updater_repo']   = $wp_cli_config['uri'];
+		$_POST['github_updater_branch'] = $wp_cli_config['branch'];
+		$_POST['github_updater_api']    = $api;
+		$_POST['option_page']           = 'github_updater_install';
+
+		switch ( $api ) {
+			case 'github':
+				$_POST['github_access_token'] = $wp_cli_config['private'] ?: null;
+				break;
+			case 'bitbucket':
+				$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
+				break;
+			case 'gitlab':
+				$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
+				break;
+			case 'gitea':
+				$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
+				break;
+		}
+	}
+
+	/**
+	 * Get the appropriate upgrader for remote installation.
+	 *
+	 * @param string $type 'plugin' | 'theme'
+	 * @param string $url  URL of the repository to be installed.
+	 *
+	 * @return bool|\Plugin_Upgrader|\Theme_Upgrader
+	 */
+	private function get_upgrader( $type, $url ) {
+		$nonce    = wp_nonce_url( $url );
+		$upgrader = false;
+
+		if ( 'plugin' === $type ) {
+			$plugin = self::$install['repo'];
+
+			// Create a new instance of Plugin_Upgrader.
+			$skin     = static::is_wp_cli()
+				? new CLI_Plugin_Installer_Skin()
+				: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
+			$upgrader = new \Plugin_Upgrader( $skin );
+			add_filter( 'install_plugin_complete_actions', [
+				$this,
+				'install_plugin_complete_actions',
+			], 10, 3 );
+		}
+
+		if ( 'theme' === $type ) {
+			$theme = self::$install['repo'];
+
+			// Create a new instance of Theme_Upgrader.
+			$skin     = static::is_wp_cli()
+				? new CLI_Theme_Installer_Skin()
+				: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme' ) );
+			$upgrader = new \Theme_Upgrader( $skin );
+			add_filter( 'install_theme_complete_actions', [
+				$this,
+				'install_theme_complete_actions',
+			], 10, 3 );
+		}
+
+		return $upgrader;
 	}
 
 	/**
