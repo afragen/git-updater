@@ -106,9 +106,11 @@ class Install {
 	public function add_admin_page( $tab ) {
 		if ( 'github_updater_install_plugin' === $tab ) {
 			$this->install( 'plugin' );
+			$this->create_form( 'plugin' );
 		}
 		if ( 'github_updater_install_theme' === $tab ) {
 			$this->install( 'theme' );
+			$this->create_form( 'theme' );
 		}
 	}
 
@@ -208,14 +210,6 @@ class Install {
 			}
 		}
 
-		if ( static::is_wp_cli() ) {
-			return true;
-		}
-
-		if ( ! isset( $_POST['option_page'] ) || ! ( 'github_updater_install' === $_POST['option_page'] ) ) {
-			$this->create_form( $type );
-		}
-
 		return true;
 	}
 
@@ -306,6 +300,12 @@ class Install {
 	 * @param string $type
 	 */
 	public function create_form( $type ) {
+
+		// Bail if installing.
+		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
+			return;
+		}
+
 		$this->register_settings( $type );
 		?>
 		<form method="post">
