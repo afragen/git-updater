@@ -118,12 +118,12 @@ class Install {
 	 * Install remote plugin or theme.
 	 *
 	 * @param string $type
-	 * @param array  $wp_cli_config
+	 * @param array  $config
 	 *
 	 * @return bool
 	 */
-	public function install( $type, $wp_cli_config = null ) {
-		$this->set_wpcli_install_post_data( $wp_cli_config );
+	public function install( $type, $config = null ) {
+		$this->set_install_post_data( $config );
 
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
@@ -214,39 +214,39 @@ class Install {
 	}
 
 	/**
-	 * Set WP-CLI remote install data into $_POST.
+	 * Set remote install data into $_POST.
 	 *
-	 * @param array $wp_cli_config Data from WP-CLI remote install.
+	 * @param array $config Data for a remote install.
 	 */
-	private function set_wpcli_install_post_data( $wp_cli_config ) {
-		if ( ! static::is_wp_cli() ) {
+	private function set_install_post_data( $config ) {
+		if ( ! isset( $config['uri'] ) ) {
 			return;
 		}
 
-		$headers = $this->parse_header_uri( $wp_cli_config['uri'] );
+		$headers = $this->parse_header_uri( $config['uri'] );
 		$api     = false !== strpos( $headers['host'], '.com' )
 			? rtrim( $headers['host'], '.com' )
 			: rtrim( $headers['host'], '.org' );
 
-		$api = isset( $wp_cli_config['git'] ) ? $wp_cli_config['git'] : $api;
+		$api = isset( $config['git'] ) ? $config['git'] : $api;
 
-		$_POST['github_updater_repo']   = $wp_cli_config['uri'];
-		$_POST['github_updater_branch'] = $wp_cli_config['branch'];
+		$_POST['github_updater_repo']   = $config['uri'];
+		$_POST['github_updater_branch'] = $config['branch'];
 		$_POST['github_updater_api']    = $api;
 		$_POST['option_page']           = 'github_updater_install';
 
 		switch ( $api ) {
 			case 'github':
-				$_POST['github_access_token'] = $wp_cli_config['private'] ?: null;
+				$_POST['github_access_token'] = $config['private'] ?: null;
 				break;
 			case 'bitbucket':
-				$_POST['is_private'] = $wp_cli_config['private'] ? '1' : null;
+				$_POST['is_private'] = $config['private'] ? '1' : null;
 				break;
 			case 'gitlab':
-				$_POST['gitlab_access_token'] = $wp_cli_config['private'] ?: null;
+				$_POST['gitlab_access_token'] = $config['private'] ?: null;
 				break;
 			case 'gitea':
-				$_POST['gitea_access_token'] = $wp_cli_config['private'] ?: null;
+				$_POST['gitea_access_token'] = $config['private'] ?: null;
 				break;
 		}
 	}
