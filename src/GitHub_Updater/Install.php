@@ -144,7 +144,7 @@ class Install {
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
 			self::$install         = $this->sanitize( $_POST );
-			self::$install['repo'] = $headers['repo'];
+			self::$install['repo'] = self::$install['github_updater_install_repo'] = $headers['repo'];
 
 			/*
 			 * Create GitHub endpoint.
@@ -192,20 +192,11 @@ class Install {
 				}
 			}
 
-			self::$options = isset( self::$install['options'] )
-				? array_merge( self::$options, self::$install['options'] )
-				: self::$options;
-
-			self::$options['github_updater_install_repo'] = self::$install['repo'];
-
 			$url      = self::$install['download_link'];
 			$upgrader = $this->get_upgrader( $type, $url );
 
-			// Perform the action and install the repo from the $source urldecode().
+			// Install the repo from the $source urldecode() and save branch setting.
 			if ( $upgrader && $upgrader->install( $url ) ) {
-				update_site_option( 'github_updater', $this->sanitize( self::$options ) );
-
-				// Save branch setting.
 				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
 			}
 		}

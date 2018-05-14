@@ -497,10 +497,11 @@ class Base {
 		/*
 		 * Remote install source.
 		 */
-		$install_options = $this->get_class_vars( 'Install', 'options' );
+		$install_options = $this->get_class_vars( 'Install', 'install' );
 		if ( empty( $repo ) && isset( $install_options['github_updater_install_repo'] ) ) {
-			$slug       = $install_options['github_updater_install_repo'];
-			$new_source = trailingslashit( $remote_source ) . $slug;
+			$slug                            = $install_options['github_updater_install_repo'];
+			$new_source                      = trailingslashit( $remote_source ) . $slug;
+			self::$options['remote_install'] = true;
 		}
 
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
@@ -527,7 +528,7 @@ class Base {
 	 */
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
-		     ! isset( self::$options['github_updater_install_repo'] )
+		     ! isset( self::$options['remote_install'] )
 		) {
 			if ( $upgrader_object instanceof Plugin ) {
 				foreach ( (array) $upgrader_object->config as $plugin ) {
