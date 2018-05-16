@@ -117,7 +117,10 @@ trait GHU_Trait {
 	public function get_class_vars( $class_name, $var ) {
 		$class          = Singleton::get_instance( $class_name, $this );
 		$reflection_obj = new \ReflectionObject( $class );
-		$property       = $reflection_obj->getProperty( $var );
+		if ( ! $reflection_obj->hasProperty( $var ) ) {
+			return false;
+		}
+		$property = $reflection_obj->getProperty( $var );
 		$property->setAccessible( true );
 
 		return $property->getValue( $class );
