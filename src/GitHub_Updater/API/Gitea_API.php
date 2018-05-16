@@ -593,12 +593,12 @@ class Gitea_API extends API implements API_Interface {
 	 * Generate error message for missing Gitea Access Token.
 	 */
 	public function gitea_error() {
-		$base       = Singleton::get_instance( 'Base', $this );
-		$error_code = $this->get_error_codes();
+		$auth_required = $this->get_class_vars( 'Settings', 'auth_required' );
+		$error_code    = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitea'] ) &&
 		     empty( static::$options['gitea_access_token'] ) &&
-		     $base::$auth_required['gitea']
+		     $auth_required['gitea']
 		) {
 			self::$error_code['gitea'] = [ 'error' => true ];
 			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
