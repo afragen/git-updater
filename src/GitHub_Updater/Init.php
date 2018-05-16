@@ -109,10 +109,11 @@ class Init extends Base {
 				[ Singleton::get_instance( 'Settings', $this ), 'add_plugin_page' ] );
 		}
 
+		$options_remote = $this->get_class_vars( 'Remote_Management', 'options_remote' );
 		foreach ( array_keys( Remote_Management::$remote_management ) as $key ) {
 			// Remote management only needs to be active for admin pages.
-			if ( ! empty( Remote_Management::$options_remote[ $key ] ) && is_admin() ) {
-				$admin_pages = array_merge( $admin_pages, [ 'index.php', 'admin-ajax.php' ] );
+			if ( ! empty( $options_remote[ $key ] ) && is_admin() ) {
+				$admin_pages = array_merge( $admin_pages, [ 'index.php' ] );
 			}
 		}
 
