@@ -79,7 +79,7 @@ class Remote_Management {
 		add_action( 'github_updater_update_settings', function( $post_data ) {
 			$this->save_settings( $post_data );
 		} );
-		add_filter( 'github_updater_admin_pages', [ $this, 'extra_admin_pages' ] );
+		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
 		$this->add_settings_tabs();
 	}
 

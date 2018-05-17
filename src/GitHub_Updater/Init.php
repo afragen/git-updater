@@ -110,7 +110,7 @@ class Init extends Base {
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
-		$admin_pages = array_unique( apply_filters( 'github_updater_admin_pages', $admin_pages ) );
+		$admin_pages = array_unique( apply_filters( 'github_updater_add_admin_pages', $admin_pages ) );
 
 		return $can_user_update && in_array( $pagenow, $admin_pages, true );
 	}
