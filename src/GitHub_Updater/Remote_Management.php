@@ -79,7 +79,27 @@ class Remote_Management {
 		add_action( 'github_updater_update_settings', function( $post_data ) {
 			$this->save_settings( $post_data );
 		} );
+		add_filter( 'github_updater_admin_pages', [ $this, 'extra_admin_pages' ] );
 		$this->add_settings_tabs();
+	}
+
+	/**
+	 * Return list of pages where GitHub Updater loads/runs.
+	 *
+	 * @param array $admin_pages Default list of pages where GitHub Updater loads.
+	 *
+	 * @return array $admin_pages
+	 */
+	public function extra_admin_pages( $admin_pages ) {
+		$extra_admin_pages = [];
+		foreach ( array_keys( self::$remote_management ) as $key ) {
+			if ( ! empty( self::$options_remote[ $key ] ) ) {
+				$extra_admin_pages = [ 'index.php' ];
+				break;
+			}
+		}
+
+		return array_merge( $admin_pages, $extra_admin_pages );
 	}
 
 	/**

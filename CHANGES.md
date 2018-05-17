@@ -13,6 +13,7 @@
 * refactored WP-CLI integrations
 * removed `class Additions`, now self-contained in [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
 * refactored `Install::install()` a bit more
+* use new `github_updater_admin_pages` filter hook for adding `index.php` from Remote Management
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`

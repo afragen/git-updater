@@ -129,6 +129,9 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
+		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
+			Singleton::get_instance( 'Settings', $this )->run();
+		}
 		if ( ! Singleton::get_instance( 'Init', $this )->can_update() ) {
 			return false;
 		}
@@ -157,9 +160,6 @@ class Base {
 
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
-		if ( is_admin() && ! apply_filters( 'github_updater_hide_settings', false ) ) {
-			Singleton::get_instance( 'Settings', $this )->run();
-		}
 
 		return true;
 	}

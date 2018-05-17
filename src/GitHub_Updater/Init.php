@@ -103,21 +103,16 @@ class Init extends Base {
 			'admin-ajax.php',
 		];
 
-		// Add Settings menu.
-		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
-			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				[ Singleton::get_instance( 'Settings', $this ), 'add_plugin_page' ] );
-		}
+		/**
+		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
+		 */
+		$admin_pages = array_unique( apply_filters( 'github_updater_admin_pages', $admin_pages ) );
 
-		$options_remote = $this->get_class_vars( 'Remote_Management', 'options_remote' );
-		foreach ( array_keys( Remote_Management::$remote_management ) as $key ) {
-			// Remote management only needs to be active for admin pages.
-			if ( ! empty( $options_remote[ $key ] ) && is_admin() ) {
-				$admin_pages = array_merge( $admin_pages, [ 'index.php' ] );
-			}
-		}
-
-		return $can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
+		return $can_user_update && in_array( $pagenow, $admin_pages, true );
 	}
 
 }
