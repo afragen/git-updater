@@ -375,6 +375,17 @@ class Install {
 		 * @param string $type 'plugin'|'theme'.
 		 */
 		do_action( 'github_updater_add_install_settings_fields', $type );
+
+		// Load install settings fields for existing APIs that are not loaded.
+		$running_servers     = $this->get_running_git_servers();
+		$git_servers         = $this->get_class_vars( 'Base', 'git_servers' );
+		$servers_not_running = array_diff( array_flip( $git_servers ), $running_servers );
+		if ( ! empty( $servers_not_running ) ) {
+			foreach ( array_keys( $servers_not_running ) as $server ) {
+				$class = 'API\\' . $server . '_API';
+				Singleton::get_instance( $class, $this )->add_install_settings_fields( $type );
+			}
+		}
 	}
 
 	/**
