@@ -317,6 +317,15 @@ class Settings extends Base {
 			[ 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) ]
 		);
 
+		add_settings_field(
+			'github_updater_settings',
+			null,
+			[ $this, 'token_callback_checkbox' ],
+			'github_updater_install_settings',
+			'github_updater_settings',
+			[ 'id' => 'local_servers', 'title' => esc_html( 'Enable Local Git Servers (192.168.x.x)', 'github_updater' ) ]
+		);
+
 		/**
 		 * Hook to add Git API settings.
 		 *
@@ -400,6 +409,7 @@ class Settings extends Base {
 		$always_unset    = [
 			'db_version',
 			'branch_switch',
+			'local_servers',
 			'github_access_token',
 			'github_enterprise_token',
 		];

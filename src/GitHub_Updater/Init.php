@@ -69,6 +69,39 @@ class Init extends Base {
 
 		// The following hook needed to ensure transient is reset correctly after shiny updates.
 		add_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ], 10, 3 );
+
+		if (isset(static::$options['local_servers'])) {
+			$this->allow_local_servers();
+		}
+	}
+
+	/**
+	 * In case the developer is running a local instance of a git server.
+	 *
+	 * @return void
+	 */
+	public function allow_local_servers() {
+		add_filter('http_request_args', function ($r, $url) {
+			if (! $r['reject_unsafe_urls']) {
+				return $r;
+			}
+			$host = parse_url($url, PHP_URL_HOST);
+			if (preg_match('#^(([1-9]?\d|1\d\d|25[0-5]|2[0-4]\d)\.){3}([1-9]?\d|1\d\d|25[0-5]|2[0-4]\d)$#', $host)) {
+				$ip = $host;
+			} else {
+				return $r;
+			}
+
+			$parts = array_map('intval', explode('.', $ip));
+			if (127 === $parts[0] || 10 === $parts[0] || 0 === $parts[0]
+				|| (172 === $parts[0] && 16 <= $parts[1] && 31 >= $parts[1])
+				|| (192 === $parts[0] && 168 === $parts[1])
+			) {
+				$r['reject_unsafe_urls'] = false;
+			}
+
+			return $r;
+		}, 10, 2);
 	}
 
 	/**
