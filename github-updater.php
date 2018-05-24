@@ -2,7 +2,6 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
@@ -12,7 +11,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           7.6.2.17
+ * Version:           7.6.2.18
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -29,15 +28,15 @@
  * Exit if called directly.
  * PHP version check and exit.
  */
-if ( ! defined( 'WPINC' ) ) {
+if (! defined('WPINC')) {
 	die;
 }
 
-if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
+if (version_compare('5.6.0', PHP_VERSION, '>=')) {
 	?>
 	<div class="error notice is-dismissible">
 		<p>
-			<?php printf( esc_html__( 'GitHub Updater cannot run on PHP versions older than %s. Please contact your hosting provider to update your site.', 'github-updater' ), '5.6.0' ); ?>
+			<?php printf(esc_html__('GitHub Updater cannot run on PHP versions older than %s. Please contact your hosting provider to update your site.', 'github-updater'), '5.6.0'); ?>
 		</p>
 	</div>
 	<?php
@@ -46,7 +45,7 @@ if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
 }
 
 // Load textdomain.
-load_plugin_textdomain( 'github-updater' );
+load_plugin_textdomain('github-updater');
 
 // Plugin namespace root.
 $ghu['root'] = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
@@ -63,7 +62,7 @@ $ghu['extra_classes'] = array(
 // Load Autoloader.
 require_once __DIR__ . '/src/Autoloader.php';
 $ghu['loader'] = 'Fragen\\Autoloader';
-new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
+new $ghu['loader']($ghu['root'], $ghu['extra_classes']);
 
 // Instantiate class GitHub_Updater.
 $ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
@@ -75,4 +74,4 @@ $ghu['init']->run();
  *
  * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
  */
-add_action( 'admin_init', array( 'PAnD', 'init' ) );
+add_action('admin_init', array( 'PAnD', 'init' ));

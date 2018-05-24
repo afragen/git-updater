@@ -2,7 +2,6 @@
 /**
  * GitHub Updater
  *
- * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
@@ -10,14 +9,11 @@
 
 namespace Fragen\GitHub_Updater\API;
 
-
 /**
  * Interface API_Interface
  *
- * @package Fragen\GitHub_Updater
  */
 interface API_Interface {
-
 	/**
 	 * Read the remote file and parse headers.
 	 *
@@ -27,7 +23,7 @@ interface API_Interface {
 	 *
 	 * @return mixed
 	 */
-	public function get_remote_info( $file );
+	public function get_remote_info($file);
 
 	/**
 	 * Get remote info for tags.
@@ -47,7 +43,7 @@ interface API_Interface {
 	 *
 	 * @return mixed
 	 */
-	public function get_remote_changes( $changes );
+	public function get_remote_changes($changes);
 
 	/**
 	 * Read and parse remote readme.txt.
@@ -86,7 +82,7 @@ interface API_Interface {
 	 *
 	 * @return string URL for download link.
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false );
+	public function construct_download_link($rollback = false, $branch_switch = false);
 
 	/**
 	 * Create endpoints.
@@ -98,7 +94,7 @@ interface API_Interface {
 	 *
 	 * @return string $endpoint
 	 */
-	public function add_endpoints( $git, $endpoint );
+	public function add_endpoints($git, $endpoint);
 
 	/**
 	 * Parse API response call and return only array of tag numbers.
@@ -109,7 +105,7 @@ interface API_Interface {
 	 *
 	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
-	public function parse_tag_response( $response );
+	public function parse_tag_response($response);
 
 	/**
 	 * Parse API response and return array of meta variables.
@@ -120,7 +116,7 @@ interface API_Interface {
 	 *
 	 * @return array|\stdClass Array of meta variables.
 	 */
-	public function parse_meta_response( $response );
+	public function parse_meta_response($response);
 
 	/**
 	 * Parse API response and return array with changelog.
@@ -131,7 +127,7 @@ interface API_Interface {
 	 *
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
-	public function parse_changelog_response( $response );
+	public function parse_changelog_response($response);
 
 	/**
 	 * Add values for individual repo add_setting_field().
@@ -147,14 +143,14 @@ interface API_Interface {
 	 *
 	 * @return mixed
 	 */
-	public function add_settings( $auth_required );
+	public function add_settings($auth_required);
 
 	/**
 	 * Add remote install settings fields.
 	 *
 	 * @param $type
 	 */
-	public function add_install_settings_fields( $type );
+	public function add_install_settings_fields($type);
 
 	/**
 	 *  Add remote install feature, create endpoint.
@@ -164,6 +160,5 @@ interface API_Interface {
 	 *
 	 * @return mixed $install
 	 */
-	public function remote_install( $headers, $install );
-
+	public function remote_install($headers, $install);
 }

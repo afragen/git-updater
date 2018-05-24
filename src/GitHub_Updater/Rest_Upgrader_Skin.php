@@ -2,7 +2,6 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @author    Mikael Lindqvist
  * @license   GPL-2.0+
@@ -11,11 +10,10 @@
 
 namespace Fragen\GitHub_Updater;
 
-
 /*
  * Exit if called directly.
  */
-if ( ! defined( 'WPINC' ) ) {
+if (! defined('WPINC')) {
 	die;
 }
 
@@ -27,10 +25,8 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Extends WP_Upgrader_Skin and collects outputed messages for later
  * processing, rather than printing them out.
  *
- * @package Fragen\GitHub_Updater
  */
 class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
-
 	public $messages = [];
 	public $error;
 
@@ -40,21 +36,21 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param string $string
 	 */
-	public function feedback( $string ) {
-		if ( isset( $this->upgrader->strings[ $string ] ) ) {
-			$string = $this->upgrader->strings[ $string ];
+	public function feedback($string) {
+		if (isset($this->upgrader->strings[$string])) {
+			$string = $this->upgrader->strings[$string];
 		}
 
-		if ( false !== strpos( $string, '%' ) ) {
+		if (false !== strpos($string, '%')) {
 			$args = func_get_args();
-			$args = array_splice( $args, 1 );
-			if ( $args ) {
-				$args   = array_map( 'strip_tags', $args );
-				$args   = array_map( 'esc_html', $args );
-				$string = vsprintf( $string, $args );
+			$args = array_splice($args, 1);
+			if ($args) {
+				$args   = array_map('strip_tags', $args);
+				$args   = array_map('esc_html', $args);
+				$string = vsprintf($string, $args);
 			}
 		}
-		if ( empty( $string ) ) {
+		if (empty($string)) {
 			return;
 		}
 
@@ -66,9 +62,9 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param $errors
 	 */
-	public function error( $errors ) {
+	public function error($errors) {
 		$this->error = true;
-		parent::error( $errors );
+		parent::error($errors);
 	}
 
 	/**
@@ -76,7 +72,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param $type
 	 */
-	protected function decrement_update_count( $type ) {
+	protected function decrement_update_count($type) {
 	}
 
 	/**

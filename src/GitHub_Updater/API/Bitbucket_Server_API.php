@@ -2,7 +2,6 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
@@ -10,15 +9,14 @@
 
 namespace Fragen\GitHub_Updater\API;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Readme_Parser;
-
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\API;
+use Fragen\GitHub_Updater\Readme_Parser;
 
 /*
  * Exit if called directly.
  */
-if ( ! defined( 'WPINC' ) ) {
+if (! defined('WPINC')) {
 	die;
 }
 
@@ -28,12 +26,10 @@ if ( ! defined( 'WPINC' ) ) {
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
  *
- * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
 class Bitbucket_Server_API extends Bitbucket_API {
-
 	/**
 	 * Holds loose class method name.
 	 *
@@ -46,8 +42,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @param \stdClass $type
 	 */
-	public function __construct( $type ) {
-		parent::__construct( $type );
+	public function __construct($type) {
+		parent::__construct($type);
 		$this->add_settings_subtab();
 	}
 
@@ -58,29 +54,29 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_info( $file ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
+	public function get_remote_info($file) {
+		$response = isset($this->response[$file]) ? $this->response[$file] : false;
 
-		if ( ! $response ) {
+		if (! $response) {
 			self::$method = 'file';
 			$path         = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
 
-			$response = $this->api( $path );
+			$response = $this->api($path);
 
-			if ( $response ) {
-				$contents = $this->bbserver_recombine_response( $response );
-				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+			if ($response) {
+				$contents = $this->bbserver_recombine_response($response);
+				$response = $this->get_file_headers($contents, $this->type->type);
+				$this->set_repo_cache($file, $response);
+				$this->set_repo_cache('repo', $this->type->repo);
 			}
 		}
 
-		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
+		if (! is_array($response) || $this->validate_response($response)) {
 			return false;
 		}
 
 		$response['dot_org'] = $this->get_dot_org_data();
-		$this->set_file_info( $response );
+		$this->set_file_info($response);
 
 		return true;
 	}
@@ -92,31 +88,31 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_tag() {
 		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
+		$response  = isset($this->response['tags']) ? $this->response['tags'] : false;
 
-		if ( ! $response ) {
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo/tags' );
+		if (! $response) {
+			$response = $this->api('/1.0/projects/:owner/repos/:repo/tags');
 
-			if ( ! $response ||
-			     ( isset( $response->size ) && $response->size < 1 ) ||
-			     isset( $response->errors )
+			if (! $response ||
+				(isset($response->size) && $response->size < 1) ||
+				isset($response->errors)
 			) {
 				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
 
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
+			if ($response) {
+				$response = $this->parse_tag_response($response);
+				$this->set_repo_cache('tags', $response);
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ($this->validate_response($response)) {
 			return false;
 		}
 
-		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
+		$tags = $this->parse_tags($response, $repo_type);
+		$this->sort_tags($tags);
 
 		return true;
 	}
@@ -128,45 +124,45 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_changes( $changes ) {
-		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
+	public function get_remote_changes($changes) {
+		$response = isset($this->response['changes']) ? $this->response['changes'] : false;
 
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
+		if (! $response && ! $this->can_update_repo($this->type)) {
 			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
+			$content  = $this->get_local_info($this->type, $changes);
+			if ($content) {
 				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
+				$this->set_repo_cache('changes', $response);
 			} else {
 				$response = false;
 			}
 		}
 
-		if ( ! $response ) {
+		if (! $response) {
 			self::$method = 'changes';
-			$response     = $this->bbserver_fetch_raw_file( $changes );
+			$response     = $this->bbserver_fetch_raw_file($changes);
 
-			if ( ! $response ) {
+			if (! $response) {
 				$response          = new \stdClass();
 				$response->message = 'No changelog found';
 			}
 
-			if ( $response ) {
-				$response = wp_remote_retrieve_body( $response );
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
+			if ($response) {
+				$response = wp_remote_retrieve_body($response);
+				$response = $this->parse_changelog_response($response);
+				$this->set_repo_cache('changes', $response);
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ($this->validate_response($response)) {
 			return false;
 		}
 
 		$parser    = new \Parsedown;
-		$changelog = $parser->text( $response['changes'] );
+		$changelog = $parser->text($response['changes']);
 
 		$this->type->sections['changelog'] = $changelog;
 
@@ -179,52 +175,52 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
+		if (! $this->local_file_exists('readme.txt')) {
 			return false;
 		}
 
-		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
+		$response = isset($this->response['readme']) ? $this->response['readme'] : false;
 
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
+		if (! $response && ! $this->can_update_repo($this->type)) {
 			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
+			$content  = $this->get_local_info($this->type, 'readme.txt');
+			if ($content) {
 				$response->data = $content;
 			} else {
 				$response = false;
 			}
 		}
 
-		if ( ! $response ) {
+		if (! $response) {
 			self::$method = 'readme';
-			$response     = $this->bbserver_fetch_raw_file( 'readme.txt' );
+			$response     = $this->bbserver_fetch_raw_file('readme.txt');
 
-			if ( ! $response ) {
+			if (! $response) {
 				$response          = new \stdClass();
 				$response->message = 'No readme found';
 			}
 
-			if ( $response ) {
-				$response = wp_remote_retrieve_body( $response );
-				$response = $this->parse_readme_response( $response );
+			if ($response) {
+				$response = wp_remote_retrieve_body($response);
+				$response = $this->parse_readme_response($response);
 			}
 		}
 
-		if ( $response && isset( $response->data ) ) {
+		if ($response && isset($response->data)) {
 			$file     = $response->data;
-			$parser   = new Readme_Parser( $file );
+			$parser   = new Readme_Parser($file);
 			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
+			$this->set_repo_cache('readme', $response);
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ($this->validate_response($response)) {
 			return false;
 		}
 
-		$this->set_readme_info( $response );
+		$this->set_readme_info($response);
 
 		return true;
 	}
@@ -235,19 +231,19 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
+		$response = isset($this->response['meta']) ? $this->response['meta'] : false;
 
-		if ( ! $response ) {
+		if (! $response) {
 			self::$method = 'meta';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo' );
+			$response     = $this->api('/1.0/projects/:owner/repos/:repo');
 
-			if ( $response ) {
-				$response = $this->parse_meta_response( $response );
-				$this->set_repo_cache( 'meta', $response );
+			if ($response) {
+				$response = $this->parse_meta_response($response);
+				$this->set_repo_cache('meta', $response);
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ($this->validate_response($response)) {
 			return false;
 		}
 
@@ -264,28 +260,28 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_branches() {
 		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
+		$response = isset($this->response['branches']) ? $this->response['branches'] : false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
+		if ($this->exit_no_update($response, true)) {
 			return false;
 		}
 
-		if ( ! $response ) {
+		if (! $response) {
 			self::$method = 'branches';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
-			if ( $response && isset( $response->values ) ) {
-				foreach ( (array) $response->values as $value ) {
-					$branch              = $value->displayId;
-					$branches[ $branch ] = $this->construct_download_link( false, $branch );
+			$response     = $this->api('/1.0/projects/:owner/repos/:repo/branches');
+			if ($response && isset($response->values)) {
+				foreach ((array) $response->values as $value) {
+					$branch            = $value->displayId;
+					$branches[$branch] = $this->construct_download_link(false, $branch);
 				}
 				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
+				$this->set_repo_cache('branches', $branches);
 
 				return true;
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
+		if ($this->validate_response($response)) {
 			return false;
 		}
 
@@ -307,14 +303,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
+	public function construct_download_link($rollback = false, $branch_switch = false) {
+		$download_link_base = $this->get_api_url('/rest/archive/1.0/projects/:owner/repos/:repo/archive', true);
 
 		self::$method = 'download_link';
-		$endpoint     = $this->add_endpoints( $this, '' );
+		$endpoint     = $this->add_endpoints($this, '');
 
-		if ( $branch_switch ) {
-			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
+		if ($branch_switch) {
+			$endpoint = urldecode(add_query_arg('at', $branch_switch, $endpoint));
 		}
 
 		return $download_link_base . $endpoint;
@@ -328,8 +324,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return string $endpoint
 	 */
-	public function add_endpoints( $git, $endpoint ) {
-		switch ( self::$method ) {
+	public function add_endpoints($git, $endpoint) {
+		switch (self::$method) {
 			case 'meta':
 			case 'tags':
 			case 'translation':
@@ -337,10 +333,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				break;
 			case 'file':
 			case 'readme':
-				$endpoint = add_query_arg( 'at', $git->type->branch, $endpoint );
+				$endpoint = add_query_arg('at', $git->type->branch, $endpoint);
 				break;
 			case 'changes':
-				$endpoint = add_query_arg( [ 'at' => $git->type->branch, 'raw' => '' ], $endpoint );
+				$endpoint = add_query_arg([ 'at' => $git->type->branch, 'raw' => '' ], $endpoint);
 				break;
 			case 'download_link':
 				/*
@@ -349,9 +345,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				 * Required for using stash-archive.
 				 */
 				$defaults = [ 'prefix' => $git->type->repo . '/', 'at' => $git->type->branch ];
-				$endpoint = add_query_arg( $defaults, $endpoint );
-				if ( ! empty( $git->type->tags ) ) {
-					$endpoint = urldecode( add_query_arg( 'at', $git->type->newest_tag, $endpoint ) );
+				$endpoint = add_query_arg($defaults, $endpoint);
+				if (! empty($git->type->tags)) {
+					$endpoint = urldecode(add_query_arg('at', $git->type->newest_tag, $endpoint));
 				}
 				break;
 			default:
@@ -369,15 +365,15 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/
-	private function bbserver_fetch_raw_file( $file ) {
-		$file         = urlencode( $file );
+	private function bbserver_fetch_raw_file($file) {
+		$file         = urlencode($file);
 		$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-		$download_url = $this->add_endpoints( $this, $download_url );
-		$download_url = $this->get_api_url( $download_url );
+		$download_url = $this->add_endpoints($this, $download_url);
+		$download_url = $this->get_api_url($download_url);
 
-		$response = wp_safe_remote_get( $download_url );
+		$response = wp_safe_remote_get($download_url);
 
-		if ( is_wp_error( $response ) ) {
+		if (is_wp_error($response)) {
 			return false;
 		}
 
@@ -392,12 +388,12 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
-	private function bbserver_recombine_response( $response ) {
+	private function bbserver_recombine_response($response) {
 		$remote_info_file = '';
-		$json_decoded     = is_string( $response ) ? json_decode( $response ) : '';
-		$response         = empty( $json_decoded ) ? $response : $json_decoded;
-		if ( isset( $response->lines ) ) {
-			foreach ( (array) $response->lines as $line ) {
+		$json_decoded     = is_string($response) ? json_decode($response) : '';
+		$response         = empty($json_decoded) ? $response : $json_decoded;
+		if (isset($response->lines)) {
+			foreach ((array) $response->lines as $line) {
 				$remote_info_file .= $line->text . "\n";
 			}
 		}
@@ -412,17 +408,17 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
-	public function parse_meta_response( $response ) {
+	public function parse_meta_response($response) {
 		$arr      = [];
 		$response = [ $response ];
 
-		array_filter( $response, function( $e ) use ( &$arr ) {
+		array_filter($response, function ($e) use (&$arr) {
 			$arr['private']      = ! $e->public;
 			$arr['last_updated'] = null;
 			$arr['watchers']     = 0;
 			$arr['forks']        = 0;
 			$arr['open_issues']  = 0;
-		} );
+		});
 
 		return $arr;
 	}
@@ -434,8 +430,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
-	public function parse_changelog_response( $response ) {
-		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
+	public function parse_changelog_response($response) {
+		return [ 'changes' => $this->bbserver_recombine_response($response) ];
 	}
 
 	/**
@@ -445,8 +441,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return \stdClass $response
 	 */
-	protected function parse_readme_response( $response ) {
-		$content        = $this->bbserver_recombine_response( $response );
+	protected function parse_readme_response($response) {
+		$content        = $this->bbserver_recombine_response($response);
 		$response       = new \stdClass();
 		$response->data = $content;
 
@@ -460,17 +456,17 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
-	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) || ! isset( $response->values ) ) {
+	public function parse_tag_response($response) {
+		if (isset($response->message) || ! isset($response->values)) {
 			return $response;
 		}
 
 		$arr = [];
-		array_map( function( $e ) use ( &$arr ) {
+		array_map(function ($e) use (&$arr) {
 			$arr[] = $e->displayId;
 
 			return $arr;
-		}, (array) $response->values );
+		}, (array) $response->values);
 
 		return $arr;
 	}
@@ -482,18 +478,18 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return void
 	 */
-	public function add_settings( $auth_required ) {
+	public function add_settings($auth_required) {
 		add_settings_section(
 			'bitbucket_server_user',
-			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
+			esc_html__('Bitbucket Server Private Settings', 'github-updater'),
 			[ $this, 'print_section_bitbucket_username' ],
 			'github_updater_bbserver_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_server_username',
-			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			esc_html__('Bitbucket Server Username', 'github-updater'),
+			[ Singleton::get_instance('Settings', $this), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			[ 'id' => 'bitbucket_server_username' ]
@@ -501,8 +497,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		add_settings_field(
 			'bitbucket_server_password',
-			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			esc_html__('Bitbucket Server Password', 'github-updater'),
+			[ Singleton::get_instance('Settings', $this), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
 			[ 'id' => 'bitbucket_server_password', 'token' => true ]
@@ -511,15 +507,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		/*
 		 * Show section for private Bitbucket Server repositories.
 		 */
-		if ( $auth_required['bitbucket_server'] ) {
+		if ($auth_required['bitbucket_server']) {
 			add_settings_section(
 				'bitbucket_server_id',
-				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
+				esc_html__('Bitbucket Server Private Repositories', 'github-updater'),
 				[ $this, 'print_section_bitbucket_info' ],
 				'github_updater_bbserver_install_settings'
 			);
 		}
-
 	}
 
 	/**
@@ -531,7 +526,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$setting_field['page']            = 'github_updater_bbserver_install_settings';
 		$setting_field['section']         = 'bitbucket_server_id';
 		$setting_field['callback_method'] = [
-			Singleton::get_instance( 'Settings', $this ),
+			Singleton::get_instance('Settings', $this),
 			'token_callback_checkbox',
 		];
 
@@ -542,9 +537,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * Add subtab to Settings page.
 	 */
 	private function add_settings_subtab() {
-		add_filter( 'github_updater_add_settings_subtabs', function( $subtabs ) {
-			return array_merge( $subtabs, [ 'bbserver' => esc_html__( 'Bitbucket Server', 'github-updater' ) ] );
-		} );
+		add_filter('github_updater_add_settings_subtabs', function ($subtabs) {
+			return array_merge($subtabs, [ 'bbserver' => esc_html__('Bitbucket Server', 'github-updater') ]);
+		});
 	}
 
 	/**
@@ -555,10 +550,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return array $install
 	 */
-	public function remote_install( $headers, $install ) {
+	public function remote_install($headers, $install) {
 		$bitbucket_org = true;
 
-		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
+		if ('bitbucket.org' === $headers['host'] || empty($headers['host'])) {
 			$base            = 'https://bitbucket.org';
 			$headers['host'] = 'bitbucket.org';
 		} else {
@@ -566,33 +561,32 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			$bitbucket_org = false;
 		}
 
-		if ( ! $bitbucket_org ) {
-			$install['download_link'] = implode( '/', [
+		if (! $bitbucket_org) {
+			$install['download_link'] = implode('/', [
 				$base,
 				'rest/archive/1.0/projects',
 				$headers['owner'],
 				'repos',
 				$headers['repo'],
 				'archive',
-			] );
+			]);
 
-			$install['download_link'] = add_query_arg( [
+			$install['download_link'] = add_query_arg([
 				'prefix' => $headers['repo'] . '/',
 				'at'     => $install['github_updater_branch'],
-			], $install['download_link'] );
+			], $install['download_link']);
 
-			if ( isset( $install['is_private'] ) ) {
-				$install['options'][ $install['repo'] ] = 1;
+			if (isset($install['is_private'])) {
+				$install['options'][$install['repo']] = 1;
 			}
-			if ( ! empty( $install['bitbucket_username'] ) ) {
+			if (! empty($install['bitbucket_username'])) {
 				$install['options']['bitbucket_server_username'] = $install['bitbucket_username'];
 			}
-			if ( ! empty( $install['bitbucket_password'] ) ) {
+			if (! empty($install['bitbucket_password'])) {
 				$install['options']['bitbucket_server_password'] = $install['bitbucket_password'];
 			}
 		}
 
 		return $install;
 	}
-
 }
