@@ -318,7 +318,7 @@ class Settings extends Base {
 			[ $this, 'token_callback_checkbox' ],
 			'github_updater_install_settings',
 			'github_updater_settings',
-			[ 'id' => 'local_servers', 'title' => esc_html( 'Enable Local Git Servers (192.168.x.x)', 'github_updater' ) ]
+			[ 'id' => 'local_servers', 'title' => esc_html('Enable Local Git Servers (192.168.x.x)', 'github_updater') ]
 		);
 
 		/**
