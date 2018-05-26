@@ -16,7 +16,6 @@
 * use new `github_updater_admin_pages` filter hook for adding `index.php` from Remote Management
 * ensure that all API install fields are available for all installed APIs
 * change to PSR2 formatting
-* added setting to allow for using a local git server on LAN
 
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`
