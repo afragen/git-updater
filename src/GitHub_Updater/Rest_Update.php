@@ -84,10 +84,10 @@ class Rest_Update extends Base {
 			'package'     => $repo_api->construct_download_link(false, $tag),
 		];
 
-		add_filter('site_transient_update_plugins', function ($value) use ($plugin, $update) {
-			$value->response[$plugin->slug] = (object) $update;
+		add_filter('site_transient_update_plugins', function ($current) use ($plugin, $update) {
+			$current->response[$plugin->slug] = (object) $update;
 
-			return $value;
+			return $current;
 		});
 
 		$upgrader = new \Plugin_Upgrader($this->upgrader_skin);
@@ -133,10 +133,10 @@ class Rest_Update extends Base {
 			'package'     => $repo_api->construct_download_link(false, $tag),
 		];
 
-		add_filter('site_transient_update_themes', function ($value) use ($theme, $update) {
-			$value->response[$theme->repo] = $update;
+		add_filter('site_transient_update_themes', function ($current) use ($theme, $update) {
+			$current->response[$theme->repo] = $update;
 
-			return $value;
+			return $current;
 		});
 
 		$upgrader = new \Theme_Upgrader($this->upgrader_skin);
