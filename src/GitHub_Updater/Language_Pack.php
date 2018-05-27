@@ -10,6 +10,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\GitHub_Updater\API\Language_Pack_API;
 
 /**
@@ -23,7 +24,9 @@ if (! defined('WPINC')) {
  * Class Language_Pack
  *
  */
-class Language_Pack extends Base {
+class Language_Pack {
+	use GHU_Trait;
+
 	/**
 	 * Variable containing the plugin/theme object.
 	 *
@@ -34,7 +37,7 @@ class Language_Pack extends Base {
 	/**
 	 * Variable containing the Language_Pack_API.
 	 *
-	 * @var \Fragen\GitHub_Updater\API\Language_Pack_API
+	 * @var Language_Pack_API
 	 */
 	private $repo_api;
 
@@ -45,7 +48,6 @@ class Language_Pack extends Base {
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct($repo, Language_Pack_API $api) {
-		parent::__construct();
 		if (null === $repo->languages) {
 			return;
 		}
