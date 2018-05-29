@@ -9,7 +9,6 @@
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
@@ -191,8 +190,6 @@ class Remote_Management {
 				[ 'id' => $id, 'title' => esc_html($name) ]
 			);
 		}
-
-		Singleton::get_instance('Settings', $this)->update_settings();
 	}
 
 	/**
