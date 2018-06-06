@@ -341,27 +341,27 @@ class Base {
 			add_site_option('github_updater', self::$options);
 		}
 
-		$this->$type->remote_version       = '0.0.0';
-		$this->$type->newest_tag           = '0.0.0';
-		$this->$type->download_link        = null;
-		$this->$type->tags                 = [];
-		$this->$type->rollback             = [];
-		$this->$type->branches             = [];
-		$this->$type->requires             = null;
-		$this->$type->tested               = null;
-		$this->$type->donate_link          = null;
-		$this->$type->contributors         = [];
-		$this->$type->downloaded           = 0;
-		$this->$type->last_updated         = null;
-		$this->$type->rating               = 0;
-		$this->$type->num_ratings          = 0;
-		$this->$type->transient            = [];
-		$this->$type->repo_meta            = [];
-		$this->$type->watchers             = 0;
-		$this->$type->forks                = 0;
-		$this->$type->open_issues          = 0;
-		$this->$type->requires_wp_version  = '4.6';
-		$this->$type->requires_php_version = '5.6';
+		$this->$type->remote_version = '0.0.0';
+		$this->$type->newest_tag     = '0.0.0';
+		$this->$type->download_link  = null;
+		$this->$type->tags           = [];
+		$this->$type->rollback       = [];
+		$this->$type->branches       = [];
+		$this->$type->requires       = null;
+		$this->$type->tested         = null;
+		$this->$type->donate_link    = null;
+		$this->$type->contributors   = [];
+		$this->$type->downloaded     = 0;
+		$this->$type->last_updated   = null;
+		$this->$type->rating         = 0;
+		$this->$type->num_ratings    = 0;
+		$this->$type->transient      = [];
+		$this->$type->repo_meta      = [];
+		$this->$type->watchers       = 0;
+		$this->$type->forks          = 0;
+		$this->$type->open_issues    = 0;
+		$this->$type->requires       = null;
+		$this->$type->requires_php   = false;
 	}
 
 	/**

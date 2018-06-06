@@ -387,15 +387,17 @@ class Plugin extends Base {
 		foreach ((array) $this->config as $plugin) {
 			if ($this->can_update_repo($plugin)) {
 				$response = [
-					'slug'        => dirname($plugin->slug),
-					'plugin'      => $plugin->slug,
-					'new_version' => $plugin->remote_version,
-					'url'         => $plugin->uri,
-					'package'     => $plugin->download_link,
-					'icons'       => $plugin->icons,
-					'branch'      => $plugin->branch,
-					'branches'    => array_keys($plugin->branches),
-					'type'        => $plugin->type,
+					'slug'         => dirname($plugin->slug),
+					'plugin'       => $plugin->slug,
+					'new_version'  => $plugin->remote_version,
+					'url'          => $plugin->uri,
+					'package'      => $plugin->download_link,
+					'icons'        => $plugin->icons,
+					'tested'       => $plugin->tested,
+					'requires_php' => $plugin->requires_php,
+					'branch'       => $plugin->branch,
+					'branches'     => array_keys($plugin->branches),
+					'type'         => $plugin->type,
 				];
 
 				// Skip on RESTful updating.

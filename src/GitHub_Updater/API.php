@@ -672,11 +672,11 @@ class API {
 	 * @param $response
 	 */
 	protected function set_file_info($response) {
-		$this->type->transient            = $response;
-		$this->type->remote_version       = strtolower($response['Version']);
-		$this->type->requires_php_version = ! empty($response['Requires PHP']) ? $response['Requires PHP'] : $this->type->requires_php_version;
-		$this->type->requires_wp_version  = ! empty($response['Requires WP']) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->dot_org              = $response['dot_org'];
+		$this->type->transient      = $response;
+		$this->type->remote_version = strtolower($response['Version']);
+		$this->type->requires_php   = ! empty($response['Requires PHP']) ? $response['Requires PHP'] : $this->type->requires_php;
+		$this->type->requires       = ! empty($response['Requires WP']) ? $response['Requires WP'] : $this->type->requires;
+		$this->type->dot_org        = $response['dot_org'];
 	}
 
 	/**
