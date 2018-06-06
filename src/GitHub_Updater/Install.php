@@ -71,12 +71,21 @@ class Install {
 		self::$installed_apis = $this->get_class_vars('Base', 'installed_apis');
 		self::$git_servers    = $this->get_class_vars('Base', 'git_servers');
 
+		$this->load_js();
 		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	}
 
-		if (is_admin()) {
-			wp_enqueue_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), [], false, true);
-		}
+	/**
+	 * Load javascript for Install.
+	 *
+	 * @return void
+	 */
+	public function load_js() {
+		add_action('admin_enqueue_scripts', function () {
+			wp_register_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), [], false, true);
+			wp_enqueue_script('ghu-install');
+		});
 	}
 
 	/**
