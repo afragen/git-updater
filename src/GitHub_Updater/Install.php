@@ -62,11 +62,8 @@ class Install {
 	/**
 	 * Constructor.
 	 * Need class-wp-upgrader.php for upgrade classes.
-	 *
-	 * @param string $type
-	 * @param array  $wp_cli_config
 	 */
-	public function __construct($type, $wp_cli_config = []) {
+	public function __construct() {
 		self::$options        = $this->get_class_vars('Base', 'options');
 		self::$installed_apis = $this->get_class_vars('Base', 'installed_apis');
 		self::$git_servers    = $this->get_class_vars('Base', 'git_servers');
