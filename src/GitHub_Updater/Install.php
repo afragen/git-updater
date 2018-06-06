@@ -74,7 +74,9 @@ class Install {
 		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-		wp_enqueue_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), [], false, true);
+		if (is_admin()) {
+			wp_enqueue_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), [], false, true);
+		}
 	}
 
 	/**
