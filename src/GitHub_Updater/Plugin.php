@@ -157,9 +157,9 @@ class Plugin extends Base {
 					'2x_jpg' => 'icon-256x256.jpg',
 				];
 				foreach ($icons as $key => $filename) {
-					$key                             = preg_replace('/_png|_jpg/', '', $key);
-					$icon                            = file_exists($git_plugin['local_path'] . 'assets/' . $filename)
-						? $git_plugin['icons'][$key] = trailingslashit(WP_PLUGIN_URL) . $git_plugin['repo'] . '/assets/' . $filename
+					$key                       = preg_replace('/_png|_jpg/', '', $key);
+					$git_plugin['icons'][$key] = file_exists($git_plugin['local_path'] . 'assets/' . $filename)
+						? trailingslashit(WP_PLUGIN_URL) . $git_plugin['repo'] . '/assets/' . $filename
 						: null;
 				}
 			}
