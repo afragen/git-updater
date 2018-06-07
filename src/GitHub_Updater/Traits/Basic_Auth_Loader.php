@@ -58,7 +58,6 @@ trait Basic_Auth_Loader {
 	 * for private repositories only.
 	 *
 	 * @access public
-	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::get_credentials()
 	 *
 	 * @param array  $args Args passed to the URL.
 	 * @param string $url  The URL.
@@ -82,7 +81,6 @@ trait Basic_Auth_Loader {
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
 	 * @access private
-	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
 	 *
 	 * @param string $url The URL.
 	 *
