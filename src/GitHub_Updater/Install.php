@@ -80,7 +80,7 @@ class Install {
 	 */
 	public function load_js() {
 		add_action('admin_enqueue_scripts', function () {
-			wp_register_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), [], false, true);
+			wp_register_script('ghu-install', plugins_url(basename(dirname(dirname(__DIR__))) . '/js/ghu-install.js'), ['jquery'], false, true);
 			wp_enqueue_script('ghu-install');
 		});
 	}
