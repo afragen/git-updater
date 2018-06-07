@@ -341,6 +341,7 @@ class Install {
 
 		add_settings_section(
 			$type,
+			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf(esc_html__('GitHub Updater Install %s', 'github-updater'), $repo_type),
 			[],
 			'github_updater_install_' . $type
@@ -348,6 +349,7 @@ class Install {
 
 		add_settings_field(
 			$type . '_repo',
+			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf(esc_html__('%s URI', 'github-updater'), $repo_type),
 			[ $this, 'get_repo' ],
 			'github_updater_install_' . $type,
