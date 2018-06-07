@@ -34,6 +34,16 @@ trait Basic_Auth_Loader {
 	private static $basic_auth_required = [ 'Bitbucket' ];
 
 	/**
+	 * Load hooks for Bitbucket authentication headers.
+	 *
+	 * @access public
+	 */
+	public function load_authentication_hooks() {
+		add_filter('http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2);
+		add_filter('http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2);
+	}
+
+	/**
 	 * Remove hooks for Bitbucket authentication headers.
 	 *
 	 * @access public
@@ -263,15 +273,5 @@ trait Basic_Auth_Loader {
 		remove_filter('upgrader_pre_download', [ $this, 'upgrader_pre_download' ]);
 
 		return $reply;
-	}
-
-	/**
-	 * Load hooks for Bitbucket authentication headers.
-	 *
-	 * @access public
-	 */
-	public function load_authentication_hooks() {
-		add_filter('http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2);
-		add_filter('http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2);
 	}
 }
