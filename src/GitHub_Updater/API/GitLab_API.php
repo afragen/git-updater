@@ -97,7 +97,7 @@ class GitLab_API extends API implements API_Interface {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
 
-			$response = $this->api('/projects/' . $id . '/repository/files?file_path=' . $file);
+			$response = $this->api('/projects/' . $id . '/repository/files/' . $file);
 
 			if (empty($response) || ! isset($response->content)) {
 				return false;
@@ -183,7 +183,7 @@ class GitLab_API extends API implements API_Interface {
 		if (! $response) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'changes';
-			$response     = $this->api('/projects/' . $id . '/repository/files?file_path=' . $changes);
+			$response     = $this->api('/projects/' . $id . '/repository/files' . $changes);
 
 			if ($response) {
 				$response = $this->parse_changelog_response($response);
@@ -231,7 +231,7 @@ class GitLab_API extends API implements API_Interface {
 		if (! $response) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'readme';
-			$response     = $this->api('/projects/' . $id . '/repository/files?file_path=readme.txt');
+			$response     = $this->api('/projects/' . $id . '/repository/files/readme.txt');
 		}
 		if ($response && isset($response->content)) {
 			$file     = base64_decode($response->content);
@@ -391,7 +391,7 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	private function make_release_asset_download_link() {
 		$download_link = implode('/', [
-			'https://gitlab.com/api/v3/projects',
+			'https://gitlab.com/api/v4/projects',
 			urlencode($this->type->owner . '/' . $this->type->repo),
 			'builds/artifacts',
 			$this->type->newest_tag,
@@ -460,7 +460,10 @@ class GitLab_API extends API implements API_Interface {
 				$id = implode('/', [ $this->type->owner, $this->type->repo ]);
 				$id = urlencode($id);
 
-				return $id;
+				$response[] = $this->api('/projects/' . $id);
+				if (! $response) {
+					return $id;
+				}
 			}
 
 			foreach ((array) $response as $project) {
@@ -511,7 +514,8 @@ class GitLab_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter($response, function ($e) use (&$arr) {
-			$arr['private']      = ! $e->public;
+			$arr['private']      = isset($e->visibility) && 'private' === $e->visibility ? true : false;
+			$arr['private']      =  isset($e->public) ? ! $e->public : $arr['private'];
 			$arr['last_updated'] = $e->last_activity_at;
 			$arr['watchers']     = 0;
 			$arr['forks']        = $e->forks_count;
