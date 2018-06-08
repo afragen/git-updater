@@ -454,26 +454,16 @@ class GitLab_API extends API implements API_Interface {
 
 		if (! $response) {
 			self::$method = 'projects';
-			$response     = $this->api('/projects');
+			$id           = implode('/', [ $this->type->owner, $this->type->repo ]);
+			$id           = urlencode($id);
+			$response     = $this->api('/projects/' . $id);
 
-			if (empty($response)) {
-				$id = implode('/', [ $this->type->owner, $this->type->repo ]);
-				$id = urlencode($id);
+			if ($this->type->repo === $response->path) {
+				$id = $response->id;
+				$this->set_repo_cache('project_id', $id);
+				$this->set_repo_cache('project', $response);
 
-				$response[] = $this->api('/projects/' . $id);
-				if (! $response) {
-					return $id;
-				}
-			}
-
-			foreach ((array) $response as $project) {
-				if ($this->type->repo === $project->path) {
-					$id = $project->id;
-					$this->set_repo_cache('project_id', $id);
-					$this->set_repo_cache('project', $project);
-
-					return $id;
-				}
+				return $id;
 			}
 		}
 
