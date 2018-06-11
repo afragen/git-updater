@@ -183,7 +183,7 @@ class GitLab_API extends API implements API_Interface {
 		if (! $response) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'changes';
-			$response     = $this->api('/projects/' . $id . '/repository/files' . $changes);
+			$response     = $this->api('/projects/' . $id . '/repository/files/' . $changes);
 
 			if ($response) {
 				$response = $this->parse_changelog_response($response);
@@ -505,7 +505,7 @@ class GitLab_API extends API implements API_Interface {
 
 		array_filter($response, function ($e) use (&$arr) {
 			$arr['private']      = isset($e->visibility) && 'private' === $e->visibility ? true : false;
-			$arr['private']      =  isset($e->public) ? ! $e->public : $arr['private'];
+			$arr['private']      = isset($e->public) ? ! $e->public : $arr['private'];
 			$arr['last_updated'] = $e->last_activity_at;
 			$arr['watchers']     = 0;
 			$arr['forks']        = $e->forks_count;
