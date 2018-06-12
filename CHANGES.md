@@ -16,7 +16,7 @@
 * use new `github_updater_admin_pages` filter hook for adding `index.php` from Remote Management
 * ensure that all API install fields are available for all installed APIs
 * updated `class-parser.php` the dot org readme parser
-* updated POT
+* updated POT with more translator messages
 * fixed to only load install JS in admin pages
 * updated `GitLab_API` for API v4
 
