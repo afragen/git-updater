@@ -116,7 +116,7 @@ class Messages {
 						);
 						echo '<br>';
 						printf(
-							/* translators: */
+							/* translators: %s: GitHub personal access token URL */
 							esc_html__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a <a href="%s"Personal Access Token</a> to avoid this issue.', 'github-updater' ),
 							esc_url( 'https://help.github.com/articles/creating-an-access-token-for-command-line-use/' )
 						);

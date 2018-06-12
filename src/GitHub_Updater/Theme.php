@@ -534,7 +534,7 @@ class Theme extends Base {
 						esc_attr( $theme->name )
 					);
 					printf(
-						/* translators: 1: remote version, 2: closing anchor tag, 3: update URL */
+						/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
 						esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
 						$theme->remote_version = isset( $theme->remote_version ) ? $theme->remote_version : null,
 						'</a>',
