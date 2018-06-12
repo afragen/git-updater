@@ -31,7 +31,7 @@ class Language_Pack_API extends API {
 	 *
 	 * @param \stdClass $type
 	 */
-	public function __construct($type) {
+	public function __construct( $type ) {
 		parent::__construct();
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
@@ -44,23 +44,23 @@ class Language_Pack_API extends API {
 	 *
 	 * @return bool When invalid response.
 	 */
-	public function get_language_pack($headers) {
-		$response = ! empty($this->response['languages']) ? $this->response['languages'] : false;
-		$type     = explode('_', $this->type->type);
+	public function get_language_pack( $headers ) {
+		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$type     = explode( '_', $this->type->type );
 
-		if (! $response) {
-			$response = $this->get_language_pack_json($type[0], $headers, $response);
+		if ( ! $response ) {
+			$response = $this->get_language_pack_json( $type[0], $headers, $response );
 
-			if ($response) {
-				foreach ($response as $locale) {
-					$package = $this->process_language_pack_package($type[0], $locale, $headers);
+			if ( $response ) {
+				foreach ( $response as $locale ) {
+					$package = $this->process_language_pack_package( $type[0], $locale, $headers );
 
 					$response->{$locale->language}->package = $package;
 					$response->{$locale->language}->type    = $type[1];
 					$response->{$locale->language}->version = $this->type->local_version;
 				}
 
-				$this->set_repo_cache('languages', $response);
+				$this->set_repo_cache( 'languages', $response );
 			} else {
 				return false;
 			}
@@ -80,32 +80,32 @@ class Language_Pack_API extends API {
 	 *
 	 * @return array|bool|mixed
 	 */
-	private function get_language_pack_json($type, $headers, $response) {
-		switch ($type) {
+	private function get_language_pack_json( $type, $headers, $response ) {
+		switch ( $type ) {
 			case 'github':
-				$response = $this->api('/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json');
-				$contents = base64_decode($response->content);
-				$response = json_decode($contents);
+				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
 				break;
 			case 'bitbucket':
-				$response = $this->api('/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json');
-				$response = json_decode($response->data);
+				$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
+				$response = json_decode( $response->data );
 				break;
 			case 'gitlab':
-				$id       = urlencode($headers['owner'] . '/' . $headers['repo']);
-				$response = $this->api('/projects/' . $id . '/repository/files?file_path=language-pack.json');
-				$contents = base64_decode($response->content);
-				$response = json_decode($contents);
+				$id       = urlencode( $headers['owner'] . '/' . $headers['repo'] );
+				$response = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
 				break;
 			case 'gitea':
-				$response = $this->api('/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json');
+				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
 				// @TODO fix for Gitea Languages and add to readme.txt
 				//$contents = base64_decode( $response->content );
 				//$response = json_decode( $contents );
 				break;
 		}
 
-		if ($this->validate_response($response)) {
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -121,21 +121,21 @@ class Language_Pack_API extends API {
 	 *
 	 * @return array|null|string
 	 */
-	private function process_language_pack_package($type, $locale, $headers) {
+	private function process_language_pack_package( $type, $locale, $headers ) {
 		$package = null;
-		switch ($type) {
+		switch ( $type ) {
 			case 'github':
 				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
-				$package = implode('/', $package) . $locale->package;
-				$package = add_query_arg([ 'raw' => 'true' ], $package);
+				$package = implode( '/', $package ) . $locale->package;
+				$package = add_query_arg( [ 'raw' => 'true' ], $package );
 				break;
 			case 'bitbucket':
 				$package = [ 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' ];
-				$package = implode('/', $package) . $locale->package;
+				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitlab':
 				$package = [ 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' ];
-				$package = implode('/', $package) . $locale->package;
+				$package = implode( '/', $package ) . $locale->package;
 				break;
 		}
 

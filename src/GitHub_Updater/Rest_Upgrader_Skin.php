@@ -13,7 +13,7 @@ namespace Fragen\GitHub_Updater;
 /*
  * Exit if called directly.
  */
-if (! defined('WPINC')) {
+if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
@@ -36,21 +36,21 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param string $string
 	 */
-	public function feedback($string) {
-		if (isset($this->upgrader->strings[$string])) {
-			$string = $this->upgrader->strings[$string];
+	public function feedback( $string ) {
+		if ( isset( $this->upgrader->strings[ $string ] ) ) {
+			$string = $this->upgrader->strings[ $string ];
 		}
 
-		if (false !== strpos($string, '%')) {
+		if ( false !== strpos( $string, '%' ) ) {
 			$args = func_get_args();
-			$args = array_splice($args, 1);
-			if ($args) {
-				$args   = array_map('strip_tags', $args);
-				$args   = array_map('esc_html', $args);
-				$string = vsprintf($string, $args);
+			$args = array_splice( $args, 1 );
+			if ( $args ) {
+				$args   = array_map( 'strip_tags', $args );
+				$args   = array_map( 'esc_html', $args );
+				$string = vsprintf( $string, $args );
 			}
 		}
-		if (empty($string)) {
+		if ( empty( $string ) ) {
 			return;
 		}
 
@@ -62,9 +62,9 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param $errors
 	 */
-	public function error($errors) {
+	public function error( $errors ) {
 		$this->error = true;
-		parent::error($errors);
+		parent::error( $errors );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @param $type
 	 */
-	protected function decrement_update_count($type) {
+	protected function decrement_update_count( $type ) {
 	}
 
 	/**

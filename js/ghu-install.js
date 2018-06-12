@@ -6,27 +6,35 @@
  * @since  4.6.0
  * @access public
  */
-jQuery(document).ready(function ($) {
-	// Hide non-default (Bitbucket & GitLab) settings on page load
-	$.each(['bitbucket', 'gitlab', 'gitea'], function () {
-		$('input.'.concat(this, '_setting')).parents('tr').hide();
-	});
+jQuery( document ).ready(
+	function ($) {
+		// Hide non-default (Bitbucket & GitLab) settings on page load
+		$.each(
+			['bitbucket', 'gitlab', 'gitea'], function () {
+				$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+			}
+		);
 
-	// When the api selector changes
-	$('select[ name="github_updater_api" ]').on('change', function () {
+		// When the api selector changes
+		$( 'select[ name="github_updater_api" ]' ).on(
+			'change', function () {
 
-		// create difference array
-		var hideMe = $(['github', 'bitbucket', 'gitlab', 'gitea']).not([this.value]).get();
+				// create difference array
+				var hideMe = $( ['github', 'bitbucket', 'gitlab', 'gitea'] ).not( [this.value] ).get();
 
-		/*
-		 * Show/hide all settings that have the selected api's class.
-		 * this.value equals either 'github', 'bitbucket', or 'gitlab'.
-		 */
-		$.each(hideMe, function () {
-			$('input.'.concat(this, '_setting')).parents('tr').hide();
-		});
+				/*
+				* Show/hide all settings that have the selected api's class.
+				* this.value equals either 'github', 'bitbucket', or 'gitlab'.
+				*/
+				$.each(
+					hideMe, function () {
+						$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+					}
+				);
 
-		$('input.'.concat(this.value, '_setting')).parents('tr').show();
+				$( 'input.'.concat( this.value, '_setting' ) ).parents( 'tr' ).show();
 
-	});
-});
+			}
+		);
+	}
+);

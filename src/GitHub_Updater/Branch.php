@@ -14,7 +14,7 @@ use Fragen\GitHub_Updater\Traits\GHU_Trait;
 /*
  * Exit if called directly.
  */
-if (! defined('WPINC')) {
+if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
@@ -47,9 +47,9 @@ class Branch {
 	 *
 	 * @param null $cache
 	 */
-	public function __construct($cache = null) {
+	public function __construct( $cache = null ) {
 		$this->cache   = $cache;
-		self::$options = $this->get_class_vars('Base', 'options');
+		self::$options = $this->get_class_vars( 'Base', 'options' );
 	}
 
 	/**
@@ -61,8 +61,8 @@ class Branch {
 	 *
 	 * @return mixed
 	 */
-	public function get_current_branch($repo) {
-		$current_branch = ! empty($this->cache['current_branch'])
+	public function get_current_branch( $repo ) {
+		$current_branch = ! empty( $this->cache['current_branch'] )
 			? $this->cache['current_branch']
 			: $repo->branch;
 
@@ -76,19 +76,19 @@ class Branch {
 	 *
 	 * @param string $repo Repository slug.
 	 */
-	public function set_branch_on_switch($repo) {
-		$this->cache = $this->get_repo_cache($repo);
+	public function set_branch_on_switch( $repo ) {
+		$this->cache = $this->get_repo_cache( $repo );
 
-		if (isset($_GET['action'], $_GET['rollback'], $this->cache['branches']) &&
-			('upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'])
+		if ( isset( $_GET['action'], $_GET['rollback'], $this->cache['branches'] ) &&
+			( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
-			$current_branch = array_key_exists($_GET['rollback'], $this->cache['branches'])
+			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
 				? $_GET['rollback']
 				: 'master';
 
-			$this->set_repo_cache('current_branch', $current_branch, $repo);
-			self::$options['current_branch_' . $repo] = $current_branch;
-			update_site_option('github_updater', self::$options);
+			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
+			self::$options[ 'current_branch_' . $repo ] = $current_branch;
+			update_site_option( 'github_updater', self::$options );
 		}
 	}
 
@@ -99,12 +99,12 @@ class Branch {
 	 *
 	 * @param array $install Array of install data.
 	 */
-	public function set_branch_on_install($install) {
-		self::$options = isset($install['options'])
-			? array_merge(self::$options, $install['options'])
+	public function set_branch_on_install( $install ) {
+		self::$options = isset( $install['options'] )
+			? array_merge( self::$options, $install['options'] )
 			: self::$options;
-		$this->set_repo_cache('current_branch', $install['github_updater_branch'], $install['repo']);
-		self::$options['current_branch_' . $install['repo']] = $install['github_updater_branch'];
-		update_site_option('github_updater', self::$options);
+		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
+		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
+		update_site_option( 'github_updater', self::$options );
 	}
 }

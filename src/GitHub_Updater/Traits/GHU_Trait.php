@@ -22,7 +22,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
-		return  isset($_POST['action']) && 'heartbeat' === $_POST['action'] ;
+		return  isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
 	}
 
 	/**
@@ -31,7 +31,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_wp_cli() {
-		return  defined('WP_CLI') && WP_CLI ;
+		return  defined( 'WP_CLI' ) && WP_CLI;
 	}
 
 	/**
@@ -40,15 +40,15 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_doing_ajax() {
-		return  defined('DOING_AJAX') && DOING_AJAX ;
+		return  defined( 'DOING_AJAX' ) && DOING_AJAX;
 	}
 
 	/**
 	 * Load site options.
 	 */
 	public function load_options() {
-		$base           = Singleton::get_instance('Base', $this);
-		$base::$options = get_site_option('github_updater', []);
+		$base           = Singleton::get_instance( 'Base', $this );
+		$base::$options = get_site_option( 'github_updater', [] );
 	}
 
 	/**
@@ -60,14 +60,14 @@ trait GHU_Trait {
 	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	public function get_repo_cache($repo = false) {
-		if (! $repo) {
-			$repo = isset($this->type->repo) ? $this->type->repo : 'ghu';
+	public function get_repo_cache( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
-		$cache_key = 'ghu-' . md5($repo);
-		$cache     = get_site_option($cache_key);
+		$cache_key = 'ghu-' . md5( $repo );
+		$cache     = get_site_option( $cache_key );
 
-		if (empty($cache['timeout']) || time() > $cache['timeout']) {
+		if ( empty( $cache['timeout'] ) || time() > $cache['timeout'] ) {
 			return false;
 		}
 
@@ -87,18 +87,18 @@ trait GHU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function set_repo_cache($id, $response, $repo = false, $timeout = false) {
-		$hours = $this->get_class_vars('API', 'hours');
-		if (! $repo) {
-			$repo = isset($this->type->repo) ? $this->type->repo : 'ghu';
+	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
+		$hours = $this->get_class_vars( 'API', 'hours' );
+		if ( ! $repo ) {
+			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
 		}
-		$cache_key = 'ghu-' . md5($repo);
+		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
-		$this->response['timeout'] = strtotime($timeout);
-		$this->response[$id]       = $response;
+		$this->response['timeout'] = strtotime( $timeout );
+		$this->response[ $id ]     = $response;
 
-		update_site_option($cache_key, $this->response);
+		update_site_option( $cache_key, $this->response );
 
 		return true;
 	}
@@ -111,16 +111,16 @@ trait GHU_Trait {
 	 *
 	 * @return mixed
 	 */
-	public function get_class_vars($class_name, $var) {
-		$class          = Singleton::get_instance($class_name, $this);
-		$reflection_obj = new \ReflectionObject($class);
-		if (! $reflection_obj->hasProperty($var)) {
+	public function get_class_vars( $class_name, $var ) {
+		$class          = Singleton::get_instance( $class_name, $this );
+		$reflection_obj = new \ReflectionObject( $class );
+		if ( ! $reflection_obj->hasProperty( $var ) ) {
 			return false;
 		}
-		$property = $reflection_obj->getProperty($var);
-		$property->setAccessible(true);
+		$property = $reflection_obj->getProperty( $var );
+		$property->setAccessible( true );
 
-		return $property->getValue($class);
+		return $property->getValue( $class );
 	}
 
 	/**
@@ -129,7 +129,7 @@ trait GHU_Trait {
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		return $this->get_class_vars('API', 'error_code');
+		return $this->get_class_vars( 'API', 'error_code' );
 	}
 
 	/**
@@ -139,17 +139,17 @@ trait GHU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function can_update_repo($type) {
-		$wp_version = get_bloginfo('version');
+	public function can_update_repo( $type ) {
+		$wp_version = get_bloginfo( 'version' );
 
-		$remote_is_newer = isset($type->remote_version)
-			? version_compare($type->remote_version, $type->local_version, '>')
+		$remote_is_newer = isset( $type->remote_version )
+			? version_compare( $type->remote_version, $type->local_version, '>' )
 			: false;
-		$wp_version_ok   = ! empty($type->requires)
-			? version_compare($wp_version, $type->requires, '>=')
+		$wp_version_ok   = ! empty( $type->requires )
+			? version_compare( $wp_version, $type->requires, '>=' )
 			: true;
-		$php_version_ok  = ! empty($type->requires_php)
-			? version_compare(PHP_VERSION, $type->requires_php, '>=')
+		$php_version_ok  = ! empty( $type->requires_php )
+			? version_compare( PHP_VERSION, $type->requires_php, '>=' )
 			: true;
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
@@ -167,7 +167,7 @@ trait GHU_Trait {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		$wpdb->query($wpdb->prepare($delete_string, [ '%ghu-%' ]));
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
 		$this->force_run_cron_job();
 
@@ -178,17 +178,17 @@ trait GHU_Trait {
 	 * Force wp-cron.php to run.
 	 */
 	public function force_run_cron_job() {
-		$doing_wp_cron = sprintf('%.22F', microtime(true));
+		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
 		$cron_request  = [
-			'url'  => site_url('wp-cron.php?doing_wp_cron=' . $doing_wp_cron),
+			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),
 			'args' => [
 				'timeout'   => 0.01,
 				'blocking'  => false,
-				'sslverify' => apply_filters('https_local_ssl_verify', true),
+				'sslverify' => apply_filters( 'https_local_ssl_verify', true ),
 			],
 		];
 
-		wp_remote_post($cron_request['url'], $cron_request['args']);
+		wp_remote_post( $cron_request['url'], $cron_request['args'] );
 	}
 
 	/**
@@ -200,12 +200,12 @@ trait GHU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function is_private($repo) {
-		if (! isset($repo->remote_version) && ! self::is_doing_ajax()) {
+	public function is_private( $repo ) {
+		if ( ! isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
 			return true;
 		}
-		if (isset($repo->remote_version) && ! self::is_doing_ajax()) {
-			return ('0.0.0' === $repo->remote_version) || ! empty(self::$options[$repo->repo]);
+		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
+			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
 		}
 
 		return false;
@@ -217,8 +217,8 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public function is_override_dot_org() {
-		return (defined('GITHUB_UPDATER_OVERRIDE_DOT_ORG') && GITHUB_UPDATER_OVERRIDE_DOT_ORG) ||
-			(defined('GITHUB_UPDATER_EXTENDED_NAMING') && GITHUB_UPDATER_EXTENDED_NAMING);
+		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) ||
+			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
 	}
 
 	/**
@@ -228,10 +228,10 @@ trait GHU_Trait {
 	 *
 	 * @return array
 	 */
-	public function sanitize($input) {
+	public function sanitize( $input ) {
 		$new_input = [];
-		foreach (array_keys((array) $input) as $id) {
-			$new_input[sanitize_file_name($id)] = sanitize_text_field($input[$id]);
+		foreach ( array_keys( (array) $input ) as $id ) {
+			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
 		return $new_input;
@@ -244,32 +244,36 @@ trait GHU_Trait {
 	 * @return array $gits
 	 */
 	public function get_running_git_servers() {
-		$plugins = Singleton::get_instance('Plugin', $this)->get_plugin_configs();
-		$themes  = Singleton::get_instance('Theme', $this)->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 
-		$repos = array_merge($plugins, $themes);
-		$gits  = array_map(function ($e) {
-			if (! empty($e->enterprise)) {
-				if (false !== stripos($e->type, 'bitbucket')) {
-					return 'bbserver';
+		$repos = array_merge( $plugins, $themes );
+		$gits  = array_map(
+			function ( $e ) {
+				if ( ! empty( $e->enterprise ) ) {
+					if ( false !== stripos( $e->type, 'bitbucket' ) ) {
+						return 'bbserver';
+					}
+					if ( false !== stripos( $e->type, 'gitlab' ) ) {
+						return 'gitlabce';
+					}
 				}
-				if (false !== stripos($e->type, 'gitlab')) {
-					return 'gitlabce';
-				}
-			}
 
-			return $e->type;
-		}, $repos);
+				return $e->type;
+			}, $repos
+		);
 
-		$gits = array_unique(array_values($gits));
+		$gits = array_unique( array_values( $gits ) );
 
-		$gits = array_map(function ($e) {
-			$e = explode('_', $e);
+		$gits = array_map(
+			function ( $e ) {
+				$e = explode( '_', $e );
 
-			return $e[0];
-		}, $gits);
+				return $e[0];
+			}, $gits
+		);
 
-		return array_unique($gits);
+		return array_unique( $gits );
 	}
 
 	/**
@@ -279,18 +283,18 @@ trait GHU_Trait {
 	 *
 	 * @return array $header
 	 */
-	protected function parse_header_uri($repo_header) {
-		$header_parts         = parse_url($repo_header);
-		$header_path          = pathinfo($header_parts['path']);
-		$header['scheme']     = isset($header_parts['scheme']) ? $header_parts['scheme'] : null;
-		$header['host']       = isset($header_parts['host']) ? $header_parts['host'] : null;
-		$header['owner']      = trim($header_path['dirname'], '/');
+	protected function parse_header_uri( $repo_header ) {
+		$header_parts         = parse_url( $repo_header );
+		$header_path          = pathinfo( $header_parts['path'] );
+		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
+		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$header['owner']      = trim( $header_path['dirname'], '/' );
 		$header['repo']       = $header_path['filename'];
-		$header['owner_repo'] = implode('/', [ $header['owner'], $header['repo'] ]);
-		$header['base_uri']   = str_replace($header_parts['path'], '', $repo_header);
-		$header['uri']        = isset($header['scheme']) ? trim($repo_header, '/') : null;
+		$header['owner_repo'] = implode( '/', [ $header['owner'], $header['repo'] ] );
+		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
+		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 
-		$header = $this->sanitize($header);
+		$header = $this->sanitize( $header );
 
 		return $header;
 	}

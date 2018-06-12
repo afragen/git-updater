@@ -15,7 +15,6 @@
 * refactored `Install::install()` a bit more
 * use new `github_updater_admin_pages` filter hook for adding `index.php` from Remote Management
 * ensure that all API install fields are available for all installed APIs
-* change to PSR2 formatting
 * updated `class-parser.php` the dot org readme parser
 * updated POT
 * fixed to only load install JS in admin pages

@@ -16,7 +16,7 @@ use Fragen\GitHub_Updater\API\Language_Pack_API;
 /**
  * Exit if called directly.
  */
-if (! defined('WPINC')) {
+if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
@@ -47,8 +47,8 @@ class Language_Pack {
 	 * @param Plugin|Theme      $repo Plugin/Theme object
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
-	public function __construct($repo, Language_Pack_API $api) {
-		if (null === $repo->languages) {
+	public function __construct( $repo, Language_Pack_API $api ) {
+		if ( null === $repo->languages ) {
 			return;
 		}
 
@@ -60,15 +60,15 @@ class Language_Pack {
 	 * Do the Language Pack integration.
 	 */
 	public function run() {
-		if (null === $this->repo) {
+		if ( null === $this->repo ) {
 			return false;
 		}
 
-		$headers = $this->parse_header_uri($this->repo->languages);
-		$this->repo_api->get_language_pack($headers);
+		$headers = $this->parse_header_uri( $this->repo->languages );
+		$this->repo_api->get_language_pack( $headers );
 
-		add_filter('pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient' ]);
-		add_filter('pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient' ]);
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient' ] );
+		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient' ] );
 	}
 
 	/**
@@ -78,43 +78,45 @@ class Language_Pack {
 	 *
 	 * @return mixed
 	 */
-	public function pre_set_site_transient($transient) {
+	public function pre_set_site_transient( $transient ) {
 		$locales = get_available_languages();
-		$locales = ! empty($locales) ? $locales : [ get_locale() ];
+		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
 		$repos   = [];
 
-		if (! isset($transient->translations)) {
+		if ( ! isset( $transient->translations ) ) {
 			return $transient;
 		}
 
-		if ('pre_set_site_transient_update_plugins' === current_filter()) {
-			$repos        = Singleton::get_instance('Plugin', $this)->get_plugin_configs();
-			$translations = wp_get_installed_translations('plugins');
+		if ( 'pre_set_site_transient_update_plugins' === current_filter() ) {
+			$repos        = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+			$translations = wp_get_installed_translations( 'plugins' );
 		}
-		if ('pre_set_site_transient_update_themes' === current_filter()) {
-			$repos        = Singleton::get_instance('Theme', $this)->get_theme_configs();
-			$translations = wp_get_installed_translations('themes');
+		if ( 'pre_set_site_transient_update_themes' === current_filter() ) {
+			$repos        = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+			$translations = wp_get_installed_translations( 'themes' );
 		}
 
-		$repos = array_filter($repos, function ($e) {
-			return isset($e->language_packs);
-		});
+		$repos = array_filter(
+			$repos, function ( $e ) {
+				return isset( $e->language_packs );
+			}
+		);
 
-		foreach ($repos as $repo) {
-			foreach ($locales as $locale) {
-				$lang_pack_mod   = isset($repo->language_packs->$locale)
-					? strtotime($repo->language_packs->$locale->updated)
+		foreach ( $repos as $repo ) {
+			foreach ( $locales as $locale ) {
+				$lang_pack_mod   = isset( $repo->language_packs->$locale )
+					? strtotime( $repo->language_packs->$locale->updated )
 					: 0;
-				$translation_mod = isset($translations[$repo->repo][$locale])
-					? strtotime($translations[$repo->repo][$locale]['PO-Revision-Date'])
+				$translation_mod = isset( $translations[ $repo->repo ][ $locale ] )
+					? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] )
 					: 0;
-				if ($lang_pack_mod > $translation_mod) {
+				if ( $lang_pack_mod > $translation_mod ) {
 					$transient->translations[] = (array) $repo->language_packs->$locale;
 				}
 			}
 		}
 
-		$transient->translations = array_unique($transient->translations, SORT_REGULAR);
+		$transient->translations = array_unique( $transient->translations, SORT_REGULAR );
 
 		return $transient;
 	}

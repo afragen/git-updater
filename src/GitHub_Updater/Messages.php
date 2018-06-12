@@ -14,7 +14,7 @@ use Fragen\GitHub_Updater\Traits\GHU_Trait;
 /*
  * Exit if called directly.
  */
-if (! defined('WPINC')) {
+if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
@@ -39,42 +39,48 @@ class Messages {
 	 *
 	 * @return bool
 	 */
-	public function create_error_message($type = '') {
+	public function create_error_message( $type = '' ) {
 		global $pagenow;
 
 		$update_pages   = [ 'update-core.php', 'plugins.php', 'themes.php' ];
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if (
-			((! isset($_GET['page']) || 'github-updater' !== $_GET['page']) &&
-			in_array($pagenow, $settings_pages, true)) ||
-			! in_array($pagenow, array_merge($update_pages, $settings_pages), true)
+			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
+			in_array( $pagenow, $settings_pages, true ) ) ||
+			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
 		) {
 			return false;
 		}
 
-		if (is_admin() && ! static::is_doing_ajax()) {
-			switch ($type) {
-				case is_wp_error($type):
+		if ( is_admin() && ! static::is_doing_ajax() ) {
+			switch ( $type ) {
+				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
-					add_action(is_multisite() ? 'network_admin_notices' : 'admin_notices', [
-						$this,
-						'show_wp_error',
-					]);
+					add_action(
+						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+							$this,
+							'show_wp_error',
+						]
+					);
 					break;
 				case 'waiting':
-					add_action(is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ]);
+					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 					// no break
 				case 'git':
 				default:
-					add_action(is_multisite() ? 'network_admin_notices' : 'admin_notices', [
-						$this,
-						'show_403_error_message',
-					]);
-					add_action(is_multisite() ? 'network_admin_notices' : 'admin_notices', [
-						$this,
-						'show_401_error_message',
-					]);
+					add_action(
+						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+							$this,
+							'show_403_error_message',
+						]
+					);
+					add_action(
+						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+							$this,
+							'show_401_error_message',
+						]
+					);
 			}
 		}
 
@@ -88,30 +94,33 @@ class Messages {
 	public function show_403_error_message() {
 		$_403       = false;
 		$error_code = $this->get_error_codes();
-		foreach ((array) $error_code as $repo) {
-			if ((! $_403 && isset($repo['code'], $repo['git']))
-				&& 403 === $repo['code'] && 'github' === $repo['git']) {
+		foreach ( (array) $error_code as $repo ) {
+			if ( ( ! $_403 && isset( $repo['code'], $repo['git'] ) )
+				&& 403 === $repo['code'] && 'github' === $repo['git'] ) {
 				$_403 = true;
-				if (! \PAnD::is_admin_notice_active('403-error-1')) {
+				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
 					return;
 				} ?>
 				<div data-dismissible="403-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e('GitHub Updater Error Code:', 'github-updater');
-				echo ' ' . $repo['code']; ?>
+						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						echo ' ' . $repo['code'];
+				?>
 						<br>
 						<?php
 						printf(
-							esc_html__('GitHub API\'s rate limit will reset in %s minutes.', 'github-updater'),
+							/* translators: %s: wait time */
+							esc_html__( 'GitHub API&#8217;s rate limit will reset in %s minutes.', 'github-updater' ),
 							$repo['wait']
 						);
-				echo '<br>';
-				printf(
-							esc_html__('It looks like you are running into GitHub API rate limits. Be sure and configure a %sPersonal Access Token%s to avoid this issue.', 'github-updater'),
-							'<a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">',
-							'</a>'
-						); ?>
+						echo '<br>';
+						printf(
+							/* translators: */
+							esc_html__( 'It looks like you are running into GitHub API rate limits. Be sure and configure a <a href="%s"Personal Access Token</a> to avoid this issue.', 'github-updater' ),
+							esc_url( 'https://help.github.com/articles/creating-an-access-token-for-command-line-use/' )
+						);
+						?>
 					</p>
 				</div>
 				<?php
@@ -126,19 +135,21 @@ class Messages {
 	public function show_401_error_message() {
 		$_401       = false;
 		$error_code = $this->get_error_codes();
-		foreach ((array) $error_code as $repo) {
-			if ((! $_401 && isset($repo['code'])) && 401 === $repo['code']) {
+		foreach ( (array) $error_code as $repo ) {
+			if ( ( ! $_401 && isset( $repo['code'] ) ) && 401 === $repo['code'] ) {
 				$_401 = true;
-				if (! \PAnD::is_admin_notice_active('401-error-1')) {
+				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
 					return;
-				} ?>
+				}
+				?>
 				<div data-dismissible="401-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e('GitHub Updater Error Code:', 'github-updater');
-				echo ' ' . $repo['code']; ?>
+						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						echo ' ' . $repo['code'];
+				?>
 						<br>
-						<?php esc_html_e('There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater'); ?>
+						<?php esc_html_e( 'There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater' ); ?>
 					</p>
 				</div>
 				<?php
@@ -150,14 +161,16 @@ class Messages {
 	 * Generate error message for WP_Error.
 	 */
 	public function show_wp_error() {
-		if (! \PAnD::is_admin_notice_active('wp-error-1')) {
+		if ( ! \PAnD::is_admin_notice_active( 'wp-error-1' ) ) {
 			return;
-		} ?>
+		}
+		?>
 		<div data-dismissible="wp-error-1" class="notice-error notice is-dismissible">
 			<p>
 				<?php
-				esc_html_e('GitHub Updater Error Code:', 'github-updater');
-		echo ' ' . self::$error_message; ?>
+				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+				echo ' ' . self::$error_message;
+		?>
 			</p>
 		</div>
 		<?php
@@ -170,9 +183,9 @@ class Messages {
 		?>
 		<div class="notice-info notice is-dismissible">
 			<p>
-				<?php esc_html_e('GitHub Updater Information', 'github-updater'); ?>
+				<?php esc_html_e( 'GitHub Updater Information', 'github-updater' ); ?>
 				<br>
-				<?php esc_html_e('Please be patient while WP-Cron finishes making API calls.', 'github-updater'); ?>
+				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'github-updater' ); ?>
 			</p>
 		</div>
 		<?php
