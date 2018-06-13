@@ -33,16 +33,14 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
-	?>
-	<div class="error notice is-dismissible">
-		<p>
-			<?php
-			/* translators: %s: minimum PHP version required */
-			printf( esc_html__( 'GitHub Updater cannot run on PHP versions older than %s. Please contact your hosting provider to update your site.', 'github-updater' ), '5.6.0' );
-			?>
-		</p>
-	</div>
-	<?php
+	echo '<div class="error notice is-dismissible"><p>';
+			printf(
+				/* translators: 1: minimum PHP version required, 2: Upgrade PHP URL */
+				esc_html__( 'GitHub Updater cannot run on PHP versions older than %1$s. <a href="%2$s">Learn about upgrading your PHP.</a>', 'github-updater' ),
+				'5.6.0',
+				esc_url( __( 'https://wordpress.org/support/upgrade-php/' ) )
+			);
+	echo '</p></div>';
 
 	return false;
 }
@@ -64,7 +62,7 @@ $ghu['extra_classes'] = array(
 // Load Autoloader.
 require_once __DIR__ . '/src/Autoloader.php';
 $ghu['loader'] = 'Fragen\\Autoloader';
-new $ghu['loader']($ghu['root'], $ghu['extra_classes']);
+new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
 
 // Instantiate class GitHub_Updater.
 $ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
