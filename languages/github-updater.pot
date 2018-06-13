@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2018-06-12 16:45-0700\n"
+"POT-Creation-Date: 2018-06-13 10:01-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,12 +19,16 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#. translators: %s: minimum PHP version required
-#: github-updater.php:41
+#. translators: 1: minimum PHP version required, 2: Upgrade PHP URL
+#: github-updater.php:39
 #, php-format
 msgid ""
-"GitHub Updater cannot run on PHP versions older than %s. Please contact "
-"your hosting provider to update your site."
+"GitHub Updater cannot run on PHP versions older than %1$s. <a href=\"%2$s"
+"\">Learn about upgrading your PHP.</a>"
+msgstr ""
+
+#: github-updater.php:41
+msgid "https://wordpress.org/support/upgrade-php/"
 msgstr ""
 
 #: mu/ghu-loader.php:65
