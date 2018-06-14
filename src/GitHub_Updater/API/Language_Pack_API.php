@@ -99,9 +99,8 @@ class Language_Pack_API extends API {
 				break;
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
-				// @TODO fix for Gitea Languages and add to readme.txt
-				// $contents = base64_decode( $response->content );
-				// $response = json_decode( $contents );
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
 				break;
 		}
 
