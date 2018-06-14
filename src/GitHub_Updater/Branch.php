@@ -48,7 +48,8 @@ class Branch {
 	 * @param null $cache
 	 */
 	public function __construct( $cache = null ) {
-		$this->cache   = $cache;
+		$this->cache = $cache;
+		$this->load_options();
 		self::$options = $this->get_class_vars( 'Base', 'options' );
 	}
 
@@ -93,16 +94,13 @@ class Branch {
 	}
 
 	/**
-	 * Set current branch on install.
+	 * Set current branch on install and update options.
 	 *
 	 * @access public
 	 *
 	 * @param array $install Array of install data.
 	 */
 	public function set_branch_on_install( $install ) {
-		self::$options = isset( $install['options'] )
-			? array_merge( self::$options, $install['options'] )
-			: self::$options;
 		$this->set_repo_cache( 'current_branch', $install['github_updater_branch'], $install['repo'] );
 		self::$options[ 'current_branch_' . $install['repo'] ] = $install['github_updater_branch'];
 		update_site_option( 'github_updater', self::$options );

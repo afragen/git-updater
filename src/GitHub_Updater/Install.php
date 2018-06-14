@@ -204,16 +204,33 @@ class Install {
 				}
 			}
 
+			if ( isset( self::$install['options'] ) ) {
+				$this->save_options_on_install( self::$install['options'] );
+			}
+
 			$url      = self::$install['download_link'];
 			$upgrader = $this->get_upgrader( $type, $url );
 
 			// Install the repo from the $source urldecode() and save branch setting.
 			if ( $upgrader && $upgrader->install( $url ) ) {
 				Singleton::get_instance( 'Branch', $this )->set_branch_on_install( self::$install );
+			} else {
+				return false;
 			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * Save options set during installation.
+	 *
+	 * @param array $install_options Array of options from remote install process.
+	 * @return void
+	 */
+	private function save_options_on_install( $install_options ) {
+		self::$options = array_merge( self::$options, $install_options );
+		update_site_option( 'github_updater', self::$options );
 	}
 
 	/**
