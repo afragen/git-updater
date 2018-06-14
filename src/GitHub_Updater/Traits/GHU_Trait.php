@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\Traits;
@@ -13,7 +14,6 @@ use Fragen\Singleton;
 
 /**
  * Trait GHU_Trait
- *
  */
 trait GHU_Trait {
 	/**
@@ -22,7 +22,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
-		return  isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
+		return isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
 	}
 
 	/**
@@ -31,7 +31,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_wp_cli() {
-		return  defined( 'WP_CLI' ) && WP_CLI;
+		return defined( 'WP_CLI' ) && WP_CLI;
 	}
 
 	/**
@@ -40,7 +40,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_doing_ajax() {
-		return  defined( 'DOING_AJAX' ) && DOING_AJAX;
+		return defined( 'DOING_AJAX' ) && DOING_AJAX;
 	}
 
 	/**

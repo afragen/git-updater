@@ -6,6 +6,7 @@
  * @author    Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -27,7 +28,6 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Updates a single plugin or theme, in a way suitable for rest requests.
  * This class inherits from Base in order to be able to call the
  * set_defaults function.
- *
  */
 class Rest_Update extends Base {
 	/**

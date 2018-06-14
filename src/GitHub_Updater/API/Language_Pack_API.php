@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
@@ -14,7 +15,6 @@ use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
  * Class Language_Pack_API
- *
  */
 class Language_Pack_API extends API {
 	use GHU_Trait;
@@ -100,8 +100,8 @@ class Language_Pack_API extends API {
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
 				// @TODO fix for Gitea Languages and add to readme.txt
-				//$contents = base64_decode( $response->content );
-				//$response = json_decode( $contents );
+				// $contents = base64_decode( $response->content );
+				// $response = json_decode( $contents );
 				break;
 		}
 

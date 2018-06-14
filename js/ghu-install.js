@@ -5,6 +5,7 @@
  * @class  Fragen\GitHub_Updater\Install
  * @since  4.6.0
  * @access public
+ * @package	github-updater
  */
 jQuery( document ).ready(
 	function ($) {

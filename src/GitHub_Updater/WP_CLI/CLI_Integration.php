@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\WP_CLI;
@@ -20,7 +21,6 @@ WP_CLI::add_command( 'theme install-git', [ $class, 'install_theme' ] );
 
 /**
  * Class CLI_Integration
- *
  */
 class CLI_Integration extends WP_CLI_Command {
 	/**

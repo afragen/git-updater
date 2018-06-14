@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 /**
@@ -78,7 +79,7 @@ add_filter( 'plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 add_action(
 	'after_plugin_row_' . $ghu_plugin_file,
 	function () {
-		print  '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>';
-		print  '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>';
+		print '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>';
+		print '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>';
 	}
 );

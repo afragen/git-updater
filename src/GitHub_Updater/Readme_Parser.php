@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
  */
 
@@ -22,7 +23,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class Readme_Parser
- *
  */
 class Readme_Parser extends Parser {
 	/**

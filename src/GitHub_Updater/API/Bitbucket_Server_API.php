@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
@@ -161,7 +162,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			return false;
 		}
 
-		$parser    = new \Parsedown;
+		$parser    = new \Parsedown();
 		$changelog = $parser->text( $response['changes'] );
 
 		$this->type->sections['changelog'] = $changelog;

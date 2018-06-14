@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -200,7 +201,7 @@ class Plugin extends Base {
 				$plugins[ $plugin->repo ] = $plugin;
 			}
 
-			//current_filter() check due to calling hook for shiny updates, don't show row twice
+			// current_filter() check due to calling hook for shiny updates, don't show row twice
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 				( ! is_multisite() || is_network_admin() )
 			) {

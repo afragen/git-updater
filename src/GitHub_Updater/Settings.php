@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -517,10 +518,10 @@ class Settings extends Base {
 		} else {
 			esc_html_e( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' );
 		}
-		echo  '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
+		echo '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
 		/* translators: %s: code fragment */
 		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
-		echo  '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
+		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
 	}
 
 	/**
@@ -719,10 +720,10 @@ class Settings extends Base {
 		$type_repos = array_filter(
 			$repos, function ( $e ) use ( $type, $bbserver ) {
 				if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver, true ) ) {
-					return  false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type;
+					return false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type;
 				}
 
-				return  false !== stripos( $e->type, $type );
+				return false !== stripos( $e->type, $type );
 			}
 		);
 

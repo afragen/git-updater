@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -20,7 +21,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class Messages
- *
  */
 class Messages {
 	use GHU_Trait;

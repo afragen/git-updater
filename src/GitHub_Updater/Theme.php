@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -297,7 +298,7 @@ class Theme extends Base {
 			'strong'  => [],
 		];
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
-		//$wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
+		// $wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url       = esc_attr(
 			add_query_arg(
 				[

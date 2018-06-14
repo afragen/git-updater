@@ -5,6 +5,7 @@
  * @class  Fragen\GitHub_Updater\Install
  * @since  4.6.0
  * @access public
+ * @package	github-updater
  *
  * Was working, then stopped working.
  * Seems not to get all 3 bitbucket_setting elements.

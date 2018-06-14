@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
@@ -163,7 +164,7 @@ class GitHub_API extends API implements API_Interface {
 			return false;
 		}
 
-		$parser    = new \Parsedown;
+		$parser    = new \Parsedown();
 		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;
@@ -284,6 +285,7 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Construct $this->type->download_link using Repository Contents API.
+	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @param boolean $rollback      for theme rollback

@@ -6,6 +6,7 @@
  * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -218,7 +219,6 @@ class Base {
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
-	 *
 	 */
 	public function set_options_filter() {
 		$config = apply_filters( 'github_updater_set_options', [] );
@@ -822,7 +822,7 @@ class Base {
 	 *
 	 * @param      $repo_name
 	 * @param      $type
-	 * @param bool $branch_switcher
+	 * @param bool      $branch_switcher
 	 *
 	 * @return array
 	 */
@@ -879,7 +879,7 @@ class Base {
 			'</a>.'
 		);
 
-		print  '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">';
+		print '<ul id="' . $data['id'] . '" style="display:none; width: 100%;">';
 
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
@@ -911,7 +911,7 @@ class Base {
 			esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
 		}
 
-		print  '</ul>';
+		print '</ul>';
 	}
 
 	/**

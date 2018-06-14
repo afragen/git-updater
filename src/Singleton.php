@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   MIT
  * @link      https://github.com/afragen/singleton-factory
+ * @package   singleton-factory
  */
 
 namespace Fragen;

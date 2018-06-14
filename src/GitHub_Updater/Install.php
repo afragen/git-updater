@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
@@ -26,7 +27,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Install
  *
  * Install <author>/<repo> directly from GitHub Updater.
- *
  */
 class Install {
 	use GHU_Trait, Basic_Auth_Loader;
@@ -503,7 +503,7 @@ class Install {
 		$activate_link = add_query_arg(
 			[
 				'action'     => 'activate',
-				//'template'   => urlencode( $template ),
+				// 'template'   => urlencode( $template ),
 				'stylesheet' => urlencode( $stylesheet ),
 			], admin_url( 'themes.php' )
 		);

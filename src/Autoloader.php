@@ -6,6 +6,7 @@
  * @license   GPL-2.0+
  * @link      http://github.com/afragen/autoloader
  * @copyright 2015 Andy Fragen
+ * @package   autoloader
  */
 
 namespace Fragen;

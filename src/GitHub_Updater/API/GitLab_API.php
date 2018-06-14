@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
@@ -195,7 +196,7 @@ class GitLab_API extends API implements API_Interface {
 			return false;
 		}
 
-		$parser    = new \Parsedown;
+		$parser    = new \Parsedown();
 		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;

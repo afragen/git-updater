@@ -5,6 +5,7 @@
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package    github-updater
  */
 
 /**
@@ -66,7 +67,7 @@ new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
 
 // Instantiate class GitHub_Updater.
 $ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
-$ghu['init']        = new $ghu['instantiate'];
+$ghu['init']        = new $ghu['instantiate']();
 $ghu['init']->run();
 
 /**
