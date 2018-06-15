@@ -514,9 +514,9 @@ class Settings extends Base {
 	 */
 	public function print_section_ghu_settings() {
 		if ( $this->is_override_dot_org() ) {
-			esc_html_e( 'Override Dot Org is <strong>active</strong>.', 'github-updater' );
+			echo ( wp_kses_post( __( 'Override Dot Org is <strong>active</strong>.', 'github-updater' ) ) );
 		} else {
-			esc_html_e( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' );
+			echo( wp_kses_post( __( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' ) ) );
 		}
 		echo '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
 		/* translators: %s: code fragment */
