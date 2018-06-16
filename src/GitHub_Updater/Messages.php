@@ -66,7 +66,7 @@ class Messages {
 					break;
 				case 'waiting':
 					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
-					// no break
+					// no break.
 				case 'git':
 				default:
 					add_action(

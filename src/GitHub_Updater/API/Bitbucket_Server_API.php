@@ -299,8 +299,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @link https://bitbucket.org/atlassian/stash-archive
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      for theme rollback.
+	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
@@ -370,7 +370,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * The Bitbucket Server REST API does not support downloading files directly at the moment
 	 * therefore we'll use this to construct urls to fetch the raw files ourselves.
 	 *
-	 * @param string $file filename
+	 * @param string $file filename.
 	 *
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/

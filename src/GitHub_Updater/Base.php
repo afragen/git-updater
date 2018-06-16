@@ -663,7 +663,7 @@ class Base {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string    $type          plugin|theme
+	 * @param string    $type          plugin|theme.
 	 * @param \stdClass $repo
 	 * @param bool      $set_transient Default false, if true then set update transient.
 	 *
@@ -720,7 +720,7 @@ class Base {
 	 * Checks user capabilities then updates the update transient to ensure
 	 * our repositories display update notices correctly.
 	 *
-	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' )
+	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' ).
 	 */
 	public function make_update_transient_current( $transient ) {
 		if ( ! in_array( $transient, [ 'update_plugins', 'update_themes', 'update_core' ], true ) ) {
@@ -917,7 +917,7 @@ class Base {
 	/**
 	 * Generate update URL.
 	 *
-	 * @param string $type      ( plugin or theme )
+	 * @param string $type      ( plugin or theme ).
 	 * @param string $action
 	 * @param string $repo_name
 	 *

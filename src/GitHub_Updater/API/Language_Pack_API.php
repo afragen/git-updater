@@ -74,7 +74,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $type     ( github|bitbucket|gitlab )
+	 * @param string $type     ( github|bitbucket|gitlab ).
 	 * @param array  $headers
 	 * @param mixed  $response API response.
 	 *
@@ -114,7 +114,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $type    ( github|bitbucket|gitlab )
+	 * @param string $type    ( github|bitbucket|gitlab ).
 	 * @param string $locale
 	 * @param array  $headers
 	 *

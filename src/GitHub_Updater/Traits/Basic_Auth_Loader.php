@@ -160,7 +160,7 @@ trait Basic_Auth_Loader {
 				break;
 		}
 
-		// TODO: can use `( $this->caller )::$options` in PHP7
+		// TODO: can use `( $this->caller )::$options` in PHP7.
 		$caller          = $this->get_class_vars( 'Base', 'caller' );
 		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
 
@@ -241,7 +241,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @param bool                             $reply
 	 * @param string                           $package Update package URL, unused.
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object
+	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object.
 	 *
 	 * @return mixed
 	 */

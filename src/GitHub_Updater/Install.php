@@ -113,7 +113,7 @@ class Install {
 	 *
 	 * @uses 'github_updater_add_admin_page' action hook
 	 *
-	 * @param $tab
+	 * @param string $tab Name of tab.
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'github_updater_install_plugin' === $tab ) {
@@ -274,7 +274,7 @@ class Install {
 	/**
 	 * Get the appropriate upgrader for remote installation.
 	 *
-	 * @param string $type 'plugin' | 'theme'
+	 * @param string $type 'plugin' | 'theme'.
 	 * @param string $url  URL of the repository to be installed.
 	 *
 	 * @return bool|\Plugin_Upgrader|\Theme_Upgrader

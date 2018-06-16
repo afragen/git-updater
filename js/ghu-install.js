@@ -7,20 +7,21 @@
  * @access public
  * @package	github-updater
  */
+
 jQuery( document ).ready(
 	function ($) {
-		// Hide non-default (Bitbucket & GitLab) settings on page load
+		// Hide non-default (Bitbucket & GitLab) settings on page load.
 		$.each(
 			['bitbucket', 'gitlab', 'gitea'], function () {
 				$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
 			}
 		);
 
-		// When the api selector changes
+		// When the api selector changes.
 		$( 'select[ name="github_updater_api" ]' ).on(
 			'change', function () {
 
-				// create difference array
+				// create difference array.
 				var hideMe = $( ['github', 'bitbucket', 'gitlab', 'gitea'] ).not( [this.value] ).get();
 
 				/*

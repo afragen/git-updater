@@ -288,8 +288,8 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      for theme rollback.
+	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */

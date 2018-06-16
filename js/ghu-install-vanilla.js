@@ -10,6 +10,7 @@
  * Was working, then stopped working.
  * Seems not to get all 3 bitbucket_setting elements.
  */
+
 (function () {
 
 	// Hide non-default (Bitbucket & GitLab) settings on page load.
@@ -60,12 +61,12 @@
 		return array;
 	}
 
-	// Return query and selector for `$(query).parents.(selector)`
+	// Return query and selector for `$(query).parents.(selector)`.
 	function getParents(item, selector) {
 		return vanillaParents( document.querySelector( 'input.'.concat( item, '_setting' ) ), selector );
 	}
 
-	// Vanilla JS version of jQuery `$(query).parents(selector)`
+	// Vanilla JS version of jQuery `$(query).parents(selector)`.
 	function vanillaParents(element, selector) {
 		var parents = [];
 		while (element = element.parentElement.closest( selector )) {

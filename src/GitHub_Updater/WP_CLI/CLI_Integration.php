@@ -110,7 +110,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
 	 *
-	 * @param array $args       An array of $uri
+	 * @param array $args       An array of $uri.
 	 * @param array $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git
@@ -172,7 +172,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
 	 *
-	 * @param array $args       An array of $uri
+	 * @param array $args       An array of $uri.
 	 * @param array $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git

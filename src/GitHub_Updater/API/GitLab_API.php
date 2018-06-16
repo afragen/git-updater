@@ -262,7 +262,7 @@ class GitLab_API extends API implements API_Interface {
 			self::$method = 'meta';
 			$project      = isset( $this->response['project'] ) ? $this->response['project'] : false;
 
-			// exit if transient is empty
+			// exit if transient is empty.
 			if ( ! $project ) {
 				return false;
 			}
@@ -327,8 +327,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using GitLab API.
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      for theme rollback.
+	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */

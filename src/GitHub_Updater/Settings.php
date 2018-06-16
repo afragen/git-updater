@@ -682,7 +682,7 @@ class Settings extends Base {
 	 * Create settings sections that are hidden.
 	 * Required to preserve subtab settings during saves.
 	 *
-	 * @param array $subtab Subtab to display
+	 * @param array $subtab Subtab to display.
 	 */
 	private function add_hidden_settings_sections( $subtab = [] ) {
 		$subtabs   = array_keys( $this->settings_sub_tabs() );

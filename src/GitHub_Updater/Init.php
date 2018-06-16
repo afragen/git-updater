@@ -24,6 +24,11 @@ if ( ! defined( 'WPINC' ) ) {
 class Init extends Base {
 	use GHU_Trait, Basic_Auth_Loader;
 
+	/**
+	 * Constuctor.
+	 *
+	 * @return void
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load_options();

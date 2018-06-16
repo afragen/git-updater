@@ -224,7 +224,7 @@ trait GHU_Trait {
 	/**
 	 * Sanitize each setting field as needed.
 	 *
-	 * @param array $input Contains all settings fields as array keys
+	 * @param array $input Contains all settings fields as array keys.
 	 *
 	 * @return array
 	 */

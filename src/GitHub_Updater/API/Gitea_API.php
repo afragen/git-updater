@@ -308,8 +308,8 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Gitea API.
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      for theme rollback.
+	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */

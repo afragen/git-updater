@@ -44,7 +44,7 @@ class Language_Pack {
 	/**
 	 * Language_Pack constructor.
 	 *
-	 * @param Plugin|Theme      $repo Plugin/Theme object
+	 * @param Plugin|Theme      $repo Plugin/Theme object.
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {

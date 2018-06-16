@@ -726,7 +726,7 @@ class API {
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param array $readme Array of parsed readme.txt data
+	 * @param array $readme Array of parsed readme.txt data.
 	 *
 	 * @return bool
 	 */
