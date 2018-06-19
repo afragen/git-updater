@@ -65,7 +65,9 @@ class Messages {
 					);
 					break;
 				case 'waiting':
-					add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
+					if ( ! apply_filters( 'github_updater_disable_wpcron', false ) ) {
+						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
+					}
 					// no break.
 				case 'git':
 				default:
