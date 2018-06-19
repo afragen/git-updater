@@ -570,6 +570,10 @@ class Theme extends Base {
 		);
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
+		if ( ! isset( static::$options['branch_switch'] ) ) {
+			return;
+		}
+
 		ob_start();
 		if ( '1' === static::$options['branch_switch'] ) {
 			printf(
