@@ -461,7 +461,7 @@ class GitLab_API extends API implements API_Interface {
 			$id           = urlencode( $id );
 			$response     = $this->api( '/projects/' . $id );
 
-			if ( property_exists( $response, 'path' ) && $this->type->repo === $response->path ) {
+			if ( $response && $this->type->repo === $response->path ) {
 				$id = $response->id;
 				$this->set_repo_cache( 'project_id', $id );
 
