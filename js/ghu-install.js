@@ -5,28 +5,38 @@
  * @class  Fragen\GitHub_Updater\Install
  * @since  4.6.0
  * @access public
+ * @package	github-updater
  */
-jQuery( document ).ready( function( $ ) {
-	// Hide non-default (Bitbucket & GitLab) settings on page load
-	$.each( [ 'bitbucket', 'gitlab', 'gitea' ], function() {
-		$( 'input.'.concat( this, '_setting') ).parents( 'tr').hide();
-	});
 
-	// When the api selector changes
-	$( 'select[ name="github_updater_api" ]' ).on( 'change', function() {
+jQuery( document ).ready(
+	function ($) {
+		// Hide non-default (Bitbucket & GitLab) settings on page load.
+		$.each(
+			['bitbucket', 'gitlab', 'gitea'], function () {
+				$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+			}
+		);
 
-		// create difference array
-		var hideMe = $( [ 'github', 'bitbucket', 'gitlab', 'gitea' ] ).not( [ this.value ] ).get();
+		// When the api selector changes.
+		$( 'select[ name="github_updater_api" ]' ).on(
+			'change', function () {
 
-		/*
-		 * Show/hide all settings that have the selected api's class.
-		 * this.value equals either 'github', 'bitbucket', or 'gitlab'.
-		 */
-		$.each( hideMe, function() {
-			$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
-		});
+				// create difference array.
+				var hideMe = $( ['github', 'bitbucket', 'gitlab', 'gitea'] ).not( [this.value] ).get();
 
-		$( 'input.'.concat( this.value, '_setting' ) ).parents( 'tr' ).show();
+				/*
+				* Show/hide all settings that have the selected api's class.
+				* this.value equals either 'github', 'bitbucket', or 'gitlab'.
+				*/
+				$.each(
+					hideMe, function () {
+						$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
+					}
+				);
 
-	});
-});
+				$( 'input.'.concat( this.value, '_setting' ) ).parents( 'tr' ).show();
+
+			}
+		);
+	}
+);

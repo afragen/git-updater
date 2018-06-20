@@ -2,11 +2,11 @@
 /**
  * Contains autoloading functionality.
  *
- * @package   Fragen\Autoloader
  * @author    Andy Fragen <andy@thefragens.com>
  * @license   GPL-2.0+
  * @link      http://github.com/afragen/autoloader
  * @copyright 2015 Andy Fragen
+ * @package   autoloader
  */
 
 namespace Fragen;
@@ -24,7 +24,6 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 	 *
 	 * To use with different plugins be sure to create a new namespace.
 	 *
-	 * @package   Fragen\Autoloader
 	 * @author    Andy Fragen <andy@thefragens.com>
 	 * @author    Barry Hughes <barry@codingkillsme.com>
 	 * @link      http://github.com/afragen/autoloader
@@ -52,9 +51,9 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		 *
 		 * @access public
 		 *
-		 * @param array      $roots            Roots to scan when autoloading.
-		 * @param array|null $static_map       Array of classes that deviate from convention.
-		 *                                     Defaults to null.
+		 * @param array      $roots      Roots to scan when autoloading.
+		 * @param array|null $static_map Array of classes that deviate from convention.
+		 *                               Defaults to null.
 		 */
 		public function __construct( array $roots, array $static_map = null ) {
 			$this->roots = $roots;
@@ -122,9 +121,11 @@ if ( ! class_exists( 'Fragen\\Autoloader' ) ) {
 		 */
 		private function get_paths( $dirs, $file_names ) {
 			foreach ( $file_names as $file_name ) {
-				$paths[] = array_map( function( $dir ) use ( $file_name ) {
-					return $dir . DIRECTORY_SEPARATOR . $file_name . '.php';
-				}, $dirs );
+				$paths[] = array_map(
+					function ( $dir ) use ( $file_name ) {
+						return $dir . DIRECTORY_SEPARATOR . $file_name . '.php';
+					}, $dirs
+				);
 			}
 
 			return call_user_func_array( 'array_merge', $paths );

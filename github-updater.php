@@ -2,17 +2,17 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package    github-updater
  */
 
 /**
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           7.6.2
+ * Version:           8.0.0
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -22,7 +22,7 @@
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Languages:  https://github.com/afragen/github-updater-translations
  * Requires WP:       4.6
- * Requires PHP:      5.3
+ * Requires PHP:      5.6
  */
 
 /*
@@ -33,14 +33,15 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( version_compare( '5.3.0', PHP_VERSION, '>=' ) ) {
-	?>
-	<div class="error notice is-dismissible">
-		<p>
-			<?php printf( esc_html__( 'GitHub Updater cannot run on PHP versions older than %s. Please contact your hosting provider to update your site.', 'github-updater' ), '5.3.0' ); ?>
-		</p>
-	</div>
-	<?php
+if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
+	echo '<div class="error notice is-dismissible"><p>';
+	printf(
+		/* translators: 1: minimum PHP version required, 2: Upgrade PHP URL */
+		wp_kses_post( __( 'GitHub Updater cannot run on PHP versions older than %1$s. <a href="%2$s">Learn about upgrading your PHP.</a>', 'github-updater' ) ),
+		'5.6.0',
+		esc_url( __( 'https://wordpress.org/support/upgrade-php/' ) )
+	);
+	echo '</p></div>';
 
 	return false;
 }
@@ -54,10 +55,9 @@ $ghu['root'] = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater
 // Add extra classes.
 $ghu['extra_classes'] = array(
 	'WordPressdotorg\Plugin_Directory\Readme\Parser' => __DIR__ . '/vendor/class-parser.php',
-
-	'Fragen\Singleton' => __DIR__ . '/src/Singleton.php',
-	'Parsedown'        => __DIR__ . '/vendor/parsedown/Parsedown.php',
-	'PAnD'             => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
+	'Fragen\Singleton'                               => __DIR__ . '/src/Singleton.php',
+	'Parsedown'                                      => __DIR__ . '/vendor/parsedown/Parsedown.php',
+	'PAnD'                                           => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
 );
 
 // Load Autoloader.
@@ -67,7 +67,7 @@ new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
 
 // Instantiate class GitHub_Updater.
 $ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
-$ghu['init']        = new $ghu['instantiate'];
+$ghu['init']        = new $ghu['instantiate']();
 $ghu['init']->run();
 
 /**

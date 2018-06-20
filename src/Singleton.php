@@ -2,10 +2,10 @@
 /**
  * Singleton Factory
  *
- * @package   Singleton Factory
  * @author    Andy Fragen
  * @license   MIT
  * @link      https://github.com/afragen/singleton-factory
+ * @package   singleton-factory
  */
 
 namespace Fragen;
@@ -18,22 +18,19 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 if ( ! class_exists( 'Fragen\\Singleton' ) ) {
-
 	/**
 	 * Class Singleton
 	 *
 	 * A static proxy for creating Singletons from passed class names.
 	 *
-	 * @package Fragen
 	 * @version 1.0.0
 	 */
 	final class Singleton {
-
 		/**
 		 * Get instance of class.
 		 *
 		 * @param string               $class_name
-		 * @param object               $caller Originating object.
+		 * @param object               $caller     Originating object.
 		 * @param null|array|\stdClass $options
 		 *
 		 * @return array $instance
@@ -71,9 +68,9 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			$namespace       = $reflection->getNamespaceName();
 			$namespace_parts = explode( '\\', $namespace );
 			$count           = count( $namespace_parts );
-			$classes[ - 1 ]  = null;
+			$classes[-1]     = null;
 
-			for ( $i = 0; $i < $count; $i ++ ) {
+			for ( $i = 0; $i < $count; $i++ ) {
 				$classes[ $i ] = ltrim( $classes[ $i - 1 ] . '\\' . $namespace_parts[ $i ], '\\' );
 			}
 
@@ -116,12 +113,13 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			$trace     = $Exception->getTrace();
 			$trace     = array_reverse( $trace );
 			$message   = $Exception->getMessage();
-			$message   .= '<tr><td><pre>PHP Stack Trace:</pre></td></tr>';
+			$message  .= '<tr><td><pre>PHP Stack Trace:</pre></td></tr>';
 			$i         = 0;
 			foreach ( $trace as $err ) {
-				$i ++;
+				$i++;
 				$message .= '<tr><td><pre>';
-				$message .= sprintf( $i . '. %1$s called from %2$s:%3$s',
+				$message .= sprintf(
+					$i . '. %1$s called from %2$s:%3$s',
 					'<strong>' . $err['class'] . $err['type'] . $err['function'] . '()</strong>',
 					'<strong>' . $err['file'] . '</strong>',
 					$err['line'] . '</pre></td></tr>'

@@ -2,18 +2,18 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Branch,
-	Fragen\GitHub_Updater\Readme_Parser;
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\API;
+use Fragen\GitHub_Updater\Branch;
+use Fragen\GitHub_Updater\Readme_Parser;
 
 /*
  * Exit if called directly.
@@ -27,11 +27,9 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a Bitbucket repo.
  *
- * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class Bitbucket_API extends API implements API_Interface {
-
 	/**
 	 * Constructor.
 	 *
@@ -50,6 +48,9 @@ class Bitbucket_API extends API implements API_Interface {
 				: $type->branch;
 		}
 		$this->set_default_credentials();
+		$this->settings_hook( $this );
+		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**
@@ -75,13 +76,13 @@ class Bitbucket_API extends API implements API_Interface {
 			$set_credentials              = true;
 		}
 		if ( ( empty( static::$options[ $username ] ) || empty( static::$options[ $password ] ) ) &&
-		     ( ( 'bitbucket_username' === $username &&
-		         in_array( 'bitbucket', $running_servers, true ) ) ||
-		       ( 'bitbucket_server_username' === $username &&
-		         in_array( 'bbserver', $running_servers, true ) ) )
+			( ( 'bitbucket_username' === $username &&
+				in_array( 'bitbucket', $running_servers, true ) ) ||
+			( 'bitbucket_server_username' === $username &&
+				in_array( 'bbserver', $running_servers, true ) ) )
 		) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( 'bitbucket' );
-			static::$error_code['bitbucket'] = array( 'code' => 401 );
+			static::$error_code['bitbucket'] = [ 'code' => 401 ];
 		}
 		if ( $set_credentials ) {
 			add_site_option( 'github_updater', static::$options );
@@ -105,7 +106,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 			if ( $response && isset( $response->data ) ) {
 				$contents = $response->data;
-				$response = $this->base->get_file_headers( $contents, $this->type->type );
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -172,8 +173,8 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
-			$response = array();
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
+			$response = [];
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
@@ -201,7 +202,7 @@ class Bitbucket_API extends API implements API_Interface {
 			return false;
 		}
 
-		$parser    = new \Parsedown;
+		$parser    = new \Parsedown();
 		$changelog = $parser->text( $response['changes'] );
 
 		$this->type->sections['changelog'] = $changelog;
@@ -224,7 +225,7 @@ class Bitbucket_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -292,7 +293,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -342,9 +343,9 @@ class Bitbucket_API extends API implements API_Interface {
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
-		     ( isset( $_GET['action'], $_GET['theme'] ) &&
-		       'upgrade-theme' === $_GET['action'] &&
-		       $this->type->repo === $_GET['theme'] )
+			( isset( $_GET['action'], $_GET['theme'] ) &&
+			'upgrade-theme' === $_GET['action'] &&
+			$this->type->repo === $_GET['theme'] )
 		) {
 			$endpoint .= $rollback . '.zip';
 
@@ -386,13 +387,15 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return string $download_link
 	 */
 	private function make_release_asset_download_link() {
-		$download_link = implode( '/', array(
-			'https://bitbucket.org',
-			$this->type->owner,
-			$this->type->repo,
-			'downloads',
-			$this->type->repo . '-' . $this->type->newest_tag . '.zip',
-		) );
+		$download_link = implode(
+			'/', [
+				'https://bitbucket.org',
+				$this->type->owner,
+				$this->type->repo,
+				'downloads',
+				$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+			]
+		);
 
 		return $download_link;
 	}
@@ -431,16 +434,18 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['private']      = $e->is_private;
-			$arr['last_updated'] = $e->updated_on;
-			$arr['watchers']     = 0;
-			$arr['forks']        = 0;
-			$arr['open_issues']  = 0;
-		} );
+		array_filter(
+			$response, function ( $e ) use ( &$arr ) {
+				$arr['private']      = $e->is_private;
+				$arr['last_updated'] = $e->updated_on;
+				$arr['watchers']     = 0;
+				$arr['forks']        = 0;
+				$arr['open_issues']  = 0;
+			}
+		);
 
 		return $arr;
 	}
@@ -457,12 +462,14 @@ class Bitbucket_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['changes'] = $e->data;
-		} );
+		array_filter(
+			$response, function ( $e ) use ( &$arr ) {
+				$arr['changes'] = $e->data;
+			}
+		);
 
 		return $arr;
 	}
@@ -476,21 +483,23 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
+		$tags     = [];
+		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode( '/', array(
-				$repo_type['base_download'],
-				$this->type->owner,
-				$this->type->repo,
-				'get/',
-			) );
+			$download_base    = implode(
+				'/', [
+					$repo_type['base_download'],
+					$this->type->owner,
+					$this->type->repo,
+					'get/',
+				]
+			);
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag . '.zip';
 		}
 
-		return array( $tags, $rollback );
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -504,26 +513,29 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_section(
 			'bitbucket_user',
 			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			array( &$this, 'print_section_bitbucket_username' ),
+			[ $this, 'print_section_bitbucket_username' ],
 			'github_updater_bitbucket_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_username',
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
-			array( 'id' => 'bitbucket_username' )
+			[ 'id' => 'bitbucket_username' ]
 		);
 
 		add_settings_field(
 			'bitbucket_password',
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
 			'bitbucket_user',
-			array( 'id' => 'bitbucket_password', 'token' => true )
+			[
+				'id'    => 'bitbucket_password',
+				'token' => true,
+			]
 		);
 
 		/*
@@ -533,11 +545,10 @@ class Bitbucket_API extends API implements API_Interface {
 			add_settings_section(
 				'bitbucket_id',
 				esc_html__( 'Bitbucket Private Repositories', 'github-updater' ),
-				array( &$this, 'print_section_bitbucket_info' ),
+				[ $this, 'print_section_bitbucket_info' ],
 				'github_updater_bitbucket_install_settings'
 			);
 		}
-
 	}
 
 	/**
@@ -548,12 +559,23 @@ class Bitbucket_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bitbucket_install_settings';
 		$setting_field['section']         = 'bitbucket_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_checkbox',
-		);
+		];
 
 		return $setting_field;
+	}
+
+	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter(
+			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+				return array_merge( $subtabs, [ 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) ] );
+			}
+		);
 	}
 
 	/**
@@ -577,15 +599,15 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	public function add_install_settings_fields( $type ) {
 		if ( ( empty( static::$options['bitbucket_username'] ) ||
-		       empty( static::$options['bitbucket_password'] ) ) ||
+			empty( static::$options['bitbucket_password'] ) ) ||
 
-		     ( empty( static::$options['bitbucket_server_username'] ) ||
-		       empty( static::$options['bitbucket_server_password'] ) )
+			( empty( static::$options['bitbucket_server_username'] ) ||
+			empty( static::$options['bitbucket_server_password'] ) )
 		) {
 			add_settings_field(
 				'bitbucket_username',
 				esc_html__( 'Bitbucket Username', 'github-updater' ),
-				array( &$this, 'bitbucket_username' ),
+				[ $this, 'bitbucket_username' ],
 				'github_updater_install_' . $type,
 				$type
 			);
@@ -593,7 +615,7 @@ class Bitbucket_API extends API implements API_Interface {
 			add_settings_field(
 				'bitbucket_password',
 				esc_html__( 'Bitbucket Password', 'github-updater' ),
-				array( &$this, 'bitbucket_password' ),
+				[ $this, 'bitbucket_password' ],
 				'github_updater_install_' . $type,
 				$type
 			);
@@ -602,7 +624,7 @@ class Bitbucket_API extends API implements API_Interface {
 		add_settings_field(
 			'is_private',
 			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			array( &$this, 'is_private_repo' ),
+			[ $this, 'is_private_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -614,10 +636,10 @@ class Bitbucket_API extends API implements API_Interface {
 	public function is_private_repo() {
 		?>
 		<label for="is_private">
-			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false ) ?> >
+			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false ); ?> >
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -632,7 +654,7 @@ class Bitbucket_API extends API implements API_Interface {
 			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_username" value="">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -647,7 +669,7 @@ class Bitbucket_API extends API implements API_Interface {
 			<input class="bitbucket_setting" type="password" style="width:50%;" name="bitbucket_password" value="">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -673,12 +695,14 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		if ( $bitbucket_org ) {
-			$install['download_link'] = implode( '/', array(
-				$base,
-				$install['github_updater_repo'],
-				'get',
-				$install['github_updater_branch'] . '.zip',
-			) );
+			$install['download_link'] = implode(
+				'/', [
+					$base,
+					$install['github_updater_repo'],
+					'get',
+					$install['github_updater_branch'] . '.zip',
+				]
+			);
 			if ( isset( $install['is_private'] ) ) {
 				$install['options'][ $install['repo'] ] = 1;
 			}
@@ -692,5 +716,4 @@ class Bitbucket_API extends API implements API_Interface {
 
 		return $install;
 	}
-
 }

@@ -2,16 +2,16 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -25,10 +25,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Add a settings page.
  *
- * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class Settings extends Base {
+	use GHU_Trait;
 
 	/**
 	 * Holds the plugin basename.
@@ -38,23 +38,11 @@ class Settings extends Base {
 	private $ghu_plugin_name = 'github-updater/github-updater.php';
 
 	/**
-	 * Supported remote management services.
-	 *
-	 * @var array
-	 */
-	public static $remote_management = array(
-		'ithemes_sync' => 'iThemes Sync',
-		'infinitewp'   => 'InfiniteWP',
-		'managewp'     => 'ManageWP',
-		'mainwp'       => 'MainWP',
-	);
-
-	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 *
 	 * @var array
 	 */
-	public static $auth_required = array(
+	public static $auth_required = [
 		'github_private'    => false,
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
@@ -62,7 +50,7 @@ class Settings extends Base {
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
 		'gitea_private'     => false,
-	);
+	];
 
 	/**
 	 * Constructor.
@@ -70,7 +58,6 @@ class Settings extends Base {
 	public function __construct() {
 		parent::__construct();
 		$this->refresh_caches();
-		$this->ensure_api_key_is_set();
 		$this->load_options();
 	}
 
@@ -88,21 +75,27 @@ class Settings extends Base {
 	 */
 	public function run() {
 		$this->load_hooks();
+
+		// Need to ensure these classes are activated here for hooks to fire.
+		Singleton::get_instance( 'Install', $this );
+		Singleton::get_instance( 'Remote_Management', $this );
 	}
 
 	/**
 	 * Load relevant action/filter hooks.
 	 */
 	protected function load_hooks() {
-		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', array( &$this, 'add_plugin_page' ) );
-		add_action( 'network_admin_edit_github-updater', array( &$this, 'update_settings' ) );
-		add_action( 'admin_init', array( &$this, 'page_init' ) );
-		add_action( 'admin_init', array( &$this, 'remote_management_page_init' ) );
+		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
+		add_action( 'network_admin_edit_github-updater', [ $this, 'update_settings' ] );
+		add_action( 'admin_init', [ $this, 'update_settings' ] );
+		add_action( 'admin_init', [ $this, 'page_init' ] );
 
-		add_filter( is_multisite() ? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name : 'plugin_action_links_' . $this->ghu_plugin_name, array(
-			&$this,
-			'plugin_action_links',
-		) );
+		add_filter(
+			is_multisite()
+			? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name
+			: 'plugin_action_links_' . $this->ghu_plugin_name,
+			[ $this, 'plugin_action_links' ]
+		);
 	}
 
 	/**
@@ -113,12 +106,16 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_tabs() {
-		return array(
-			'github_updater_settings'          => esc_html__( 'Settings', 'github-updater' ),
-			'github_updater_install_plugin'    => esc_html__( 'Install Plugin', 'github-updater' ),
-			'github_updater_install_theme'     => esc_html__( 'Install Theme', 'github-updater' ),
-			'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ),
-		);
+		$tabs = [ 'github_updater_settings' => esc_html__( 'Settings', 'github-updater' ) ];
+
+		/**
+		 * Filter settings tabs.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $tabs Array of default tabs.
+		 */
+		return apply_filters( 'github_updater_add_settings_tabs', $tabs );
 	}
 
 	/**
@@ -128,26 +125,24 @@ class Settings extends Base {
 	 * @return array
 	 */
 	private function settings_sub_tabs() {
-		$subtabs = array( 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) );
+		$subtabs = [ 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) ];
 		$gits    = $this->get_running_git_servers();
-		$gits[]  = in_array( 'gitlabce', $gits ) ? 'gitlab' : null;
+		$gits[]  = in_array( 'gitlabce', $gits, true ) ? 'gitlab' : null;
+		$gits    = array_unique( $gits );
 
-		$git_subtab  = array();
-		$ghu_subtabs = array(
-			'github' => esc_html__( 'GitHub', 'github-updater' ),
-		);
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			$ghu_subtabs['bitbucket'] = esc_html__( 'Bitbucket', 'github-updater' );
-		}
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			$ghu_subtabs['bbserver'] = esc_html__( 'Bitbucket Server', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitlab_api'] ) {
-			$ghu_subtabs['gitlab'] = esc_html__( 'GitLab', 'github-updater' );
-		}
-		if ( static::$installed_apis['gitea_api'] ) {
-			$ghu_subtabs['gitea'] = esc_html__( 'Gitea', 'github-updater' );
-		}
+		$git_subtab  = [];
+		$ghu_subtabs = [];
+
+		/**
+		 * Filter subtabs to be able to add subtab from git API class.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $ghu_subtabs Array of added subtabs.
+		 *
+		 * @return array $subtabs Array of subtabs.
+		 */
+		$ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
 
 		foreach ( $gits as $git ) {
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
@@ -172,7 +167,7 @@ class Settings extends Base {
 			esc_html__( 'GitHub Updater', 'github-updater' ),
 			$capability,
 			'github-updater',
-			array( &$this, 'create_admin_page' )
+			[ $this, 'create_admin_page' ]
 		);
 	}
 
@@ -207,7 +202,6 @@ class Settings extends Base {
 			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>';
 		}
 		echo '</h3>';
-
 	}
 
 	/**
@@ -217,84 +211,73 @@ class Settings extends Base {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
-		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' );
-		?>
+		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
 				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
 			</h1>
 			<?php $this->options_tabs(); ?>
-			<?php if ( ! isset( $_GET['settings-updated'] ) ): ?>
-				<?php if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ): ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'Settings saved.', 'github-updater' ); ?></p>
-					</div>
-				<?php elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ): ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'RESTful key reset.', 'github-updater' ); ?></p>
-					</div>
-				<?php elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) : ?>
-					<div class="updated">
-						<p><?php esc_html_e( 'Cache refreshed.', 'github-updater' ); ?></p>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( 'github_updater_settings' === $tab ) : ?>
-					<?php $this->options_sub_tabs(); ?>
-					<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-						<?php
-						settings_fields( 'github_updater' );
-						switch ( $subtab ) {
-							case 'github':
-							case 'bitbucket':
-							case 'bbserver':
-							case 'gitlab':
-							case 'gitea':
-								do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
-								$this->display_ghu_repos( $subtab );
-								$this->add_hidden_settings_sections( $subtab );
-								break;
-							default:
-								do_settings_sections( 'github_updater_install_settings' );
-								$this->add_hidden_settings_sections();
-								break;
-						}
-						submit_button();
-						?>
-					</form>
-					<?php $refresh_transients = add_query_arg( array( 'github_updater_refresh_transients' => true ), $action ); ?>
-					<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-						<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
-					</form>
-				<?php endif; ?>
+			<?php $this->admin_page_notices(); ?>
+			<?php if ( 'github_updater_settings' === $tab ) : ?>
+				<?php $this->options_sub_tabs(); ?>
+				<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
+					<?php
+					settings_fields( 'github_updater' );
+					if ( 'github_updater' === $subtab ) {
+						do_settings_sections( 'github_updater_install_settings' );
+						$this->add_hidden_settings_sections();
+					} else {
+						do_settings_sections( 'github_updater_' . $subtab . '_install_settings' );
+						$this->display_ghu_repos( $subtab );
+						$this->add_hidden_settings_sections( $subtab );
+					}
+					submit_button();
+		?>
+				</form>
+				<?php $refresh_transients = add_query_arg( [ 'github_updater_refresh_transients' => true ], $action ); ?>
+				<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+					<?php submit_button( esc_html__( 'Refresh Cache', 'github-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
+				</form>
 			<?php endif; ?>
 
 			<?php
-			if ( 'github_updater_install_plugin' === $tab ) {
-				Singleton::get_instance( 'Install', $this )->install( 'plugin' );
-			}
-			if ( 'github_updater_install_theme' === $tab ) {
-				Singleton::get_instance( 'Install', $this )->install( 'theme' );
-			}
+			/**
+			 * Action hook to add admin page data to appropriate $tab.
+			 *
+			 * @since 8.0.0
+			 *
+			 * @param string $tab    Name of tab.
+			 * @param string $action Save action for appropriate WordPress installation.
+			 *                       Single site or Multisite.
+			 */
+			do_action( 'github_updater_add_admin_page', $tab, $action );
 			?>
-			<?php if ( 'github_updater_remote_management' === $tab ) : ?>
-				<?php $action = add_query_arg( 'tab', $tab, $action ); ?>
-
-				<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-					<?php
-					settings_fields( 'github_updater_remote_management' );
-					do_settings_sections( 'github_updater_remote_settings' );
-					submit_button();
-					?>
-				</form>
-				<?php $reset_api_action = add_query_arg( array( 'github_updater_reset_api_key' => true ), $action ); ?>
-				<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-					<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
-				</form>
-			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Display appropriate notice for Settings page actions.
+	 */
+	private function admin_page_notices() {
+		$display = ( isset( $_GET['updated'] ) && is_multisite() )
+				|| isset( $_GET['reset'] )
+				|| isset( $_GET['refresh_transients'] );
+
+		if ( $display ) {
+			echo '<div class="updated"><p>';
+		}
+		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
+			esc_html_e( 'Settings saved.', 'github-updater' );
+		} elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ) {
+			esc_html_e( 'RESTful key reset.', 'github-updater' );
+		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
+			esc_html_e( 'Cache refreshed.', 'github-updater' );
+		}
+		if ( $display ) {
+			echo '</p></div>';
+		}
 	}
 
 	/**
@@ -302,7 +285,6 @@ class Settings extends Base {
 	 * Check to see if it's a private repo.
 	 */
 	public function page_init() {
-
 		if ( static::is_doing_ajax() ) {
 			return;
 		}
@@ -310,7 +292,7 @@ class Settings extends Base {
 		register_setting(
 			'github_updater',
 			'github_updater',
-			array( &$this, 'sanitize' )
+			[ $this, 'sanitize' ]
 		);
 
 		$this->ghu_tokens();
@@ -321,50 +303,44 @@ class Settings extends Base {
 		add_settings_section(
 			'github_updater_settings',
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			array( &$this, 'print_section_ghu_settings' ),
+			[ $this, 'print_section_ghu_settings' ],
 			'github_updater_install_settings'
 		);
 
 		add_settings_field(
 			'branch_switch',
 			null,
-			array( &$this, 'token_callback_checkbox' ),
+			[ $this, 'token_callback_checkbox' ],
 			'github_updater_install_settings',
 			'github_updater_settings',
-			array( 'id' => 'branch_switch', 'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ) )
+			[
+				'id'    => 'branch_switch',
+				'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ),
+			]
 		);
 
-		Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-
-		if ( static::$installed_apis['gitlab_api'] ) {
-			Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['bitbucket_server_api'] ) {
-			Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
-
-		if ( static::$installed_apis['gitea_api'] ) {
-			Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_settings( static::$auth_required );
-		}
+		/**
+		 * Hook to add Git API settings.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $auth_required Array containing authorization needs of git APIs.
+		 */
+		do_action( 'github_updater_add_settings', static::$auth_required );
 	}
 
 	/**
 	 * Create and return settings fields for private repositories.
 	 */
 	public function ghu_tokens() {
-		$ghu_options_keys = array();
+		$ghu_options_keys = [];
 		$ghu_plugins      = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$ghu_themes       = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
 
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
-			$setting_field                    = array();
+			$setting_field                    = [];
 			$ghu_options_keys[ $token->repo ] = null;
 
 			/*
@@ -383,37 +359,11 @@ class Settings extends Base {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
-			$repo_setting_field     = array();
 			$setting_field['id']    = $token->repo;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
-			$token_type = explode( '_', $token->type );
-			switch ( $token_type[0] ) {
-				case 'github':
-					$repo_setting_field = Singleton::get_instance( 'API\GitHub_API', $this, new \stdClass() )->add_repo_setting_field();
-					break;
-				case 'bitbucket':
-					if ( empty( $token->enterprise ) ) {
-						if ( static::$installed_apis['bitbucket_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					} else {
-						if ( static::$installed_apis['bitbucket_server_api'] ) {
-							$repo_setting_field = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_repo_setting_field();
-						}
-					}
-					break;
-				case 'gitlab':
-					if ( static::$installed_apis['gitlab_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-				case 'gitea':
-					if ( static::$installed_apis['gitea_api'] ) {
-						$repo_setting_field = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->add_repo_setting_field();
-					}
-					break;
-			}
+			$token_type         = explode( '_', $token->type );
+			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', [], $token, $token_type[0] );
 
 			if ( empty( $repo_setting_field ) ) {
 				continue;
@@ -429,12 +379,18 @@ class Settings extends Base {
 				$setting_field['callback_method'],
 				$setting_field['page'],
 				$setting_field['section'],
-				array( 'id' => $setting_field['callback'], 'token' => true, 'title' => $setting_field['title'] )
+				[
+					'id'    => $setting_field['callback'],
+					'token' => true,
+					'title' => $setting_field['title'],
+				]
 			);
 		}
 
 		if ( ! $this->waiting_for_background_update() ) {
 			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+		} else {
+			Singleton::get_instance( 'Messages', $this )->create_error_message( 'waiting' );
 		}
 	}
 
@@ -447,59 +403,74 @@ class Settings extends Base {
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
 		$running_servers = $this->get_running_git_servers();
 		$ghu_unset_keys  = array_diff_key( static::$options, $ghu_options_keys );
-		$always_unset    = array(
+		$always_unset    = [
 			'db_version',
 			'branch_switch',
 			'github_access_token',
 			'github_enterprise_token',
-			'bitbucket_username',
-			'bitbucket_password',
-		);
+		];
 
-		if ( in_array( 'bbserver', $running_servers ) ) {
-			$always_unset = array_merge( $always_unset, array(
-				'bitbucket_server_username',
-				'bitbucket_server_password',
-			) );
+		if ( in_array( 'bitbucket', $running_servers, true ) ) {
+			$always_unset = array_merge(
+				$always_unset, [
+					'bitbucket_username',
+					'bitbucket_password',
+				]
+			);
 		}
 
-		array_map( function( $e ) use ( &$ghu_unset_keys ) {
-			unset( $ghu_unset_keys[ $e ] );
-		}, $always_unset );
+		if ( in_array( 'bbserver', $running_servers, true ) ) {
+			$always_unset = array_merge(
+				$always_unset, [
+					'bitbucket_server_username',
+					'bitbucket_server_password',
+				]
+			);
+		}
+
+		array_map(
+			function ( $e ) use ( &$ghu_unset_keys ) {
+				unset( $ghu_unset_keys[ $e ] );
+			}, $always_unset
+		);
 
 		$auth_required       = static::$auth_required;
-		$auth_required_unset = array(
+		$auth_required_unset = [
 			'github_enterprise' => 'github_enterprise_token',
 			'gitlab'            => 'gitlab_access_token',
 			'gitlab_enterprise' => 'gitlab_enterprise_token',
 			'gitea'             => 'gitea_access_token',
+		];
+
+		array_map(
+			function ( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
+				$key = array_search( $e, $auth_required_unset, true );
+				if ( $auth_required[ $key ] ) {
+					unset( $ghu_unset_keys[ $e ] );
+				}
+			}, $auth_required_unset
 		);
 
-		array_map( function( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
-			$key = array_search( $e, $auth_required_unset, true );
-			if ( $auth_required[ $key ] ) {
-				unset( $ghu_unset_keys[ $e ] );
-			}
-		}, $auth_required_unset );
-
 		// Unset if current_branch AND if associated with repo.
-		array_map( function( $e ) use ( &$ghu_unset_keys, $ghu_tokens, &$reset_keys ) {
-			$key  = array_search( $e, $ghu_unset_keys, true );
-			$repo = str_replace( 'current_branch_', '', $key );
-			if ( array_key_exists( $key, $ghu_unset_keys )
-			     && false !== strpos( $key, 'current_branch' )
-			) {
-				unset( $ghu_unset_keys[ $key ] );
-			}
-			if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
-				$reset_keys[ $key ] = $e;
-			}
-		}, $ghu_unset_keys );
+		array_map(
+			function ( $e ) use ( &$ghu_unset_keys, $ghu_tokens, &$reset_keys ) {
+				$key  = array_search( $e, $ghu_unset_keys, true );
+				$repo = str_replace( 'current_branch_', '', $key );
+				if ( array_key_exists( $key, $ghu_unset_keys )
+				&& false !== strpos( $key, 'current_branch' )
+				) {
+					unset( $ghu_unset_keys[ $key ] );
+				}
+				if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
+					$reset_keys[ $key ] = $e;
+				}
+			}, $ghu_unset_keys
+		);
 		$ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
 
 		if ( ! empty( $ghu_unset_keys ) ) {
 			foreach ( $ghu_unset_keys as $key => $value ) {
-				unset( static::$options [ $key ] );
+				unset( static::$options[ $key ] );
 			}
 			update_site_option( 'github_updater', static::$options );
 		}
@@ -511,7 +482,6 @@ class Settings extends Base {
 	 * @param $token
 	 */
 	private function set_auth_required( $token ) {
-
 		// Set booleans for Enterprise repos.
 		if ( $token->enterprise ) {
 			static::$auth_required['github_enterprise'] = static::$auth_required['github_enterprise']
@@ -540,85 +510,18 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Settings for Remote Management.
-	 */
-	public function remote_management_page_init() {
-		register_setting(
-			'github_updater_remote_management',
-			'github_updater_remote_settings',
-			array( &$this, 'sanitize' )
-		);
-
-		add_settings_section(
-			'remote_management',
-			esc_html__( 'Remote Management', 'github-updater' ),
-			array( &$this, 'print_section_remote_management' ),
-			'github_updater_remote_settings'
-		);
-
-		foreach ( self::$remote_management as $id => $name ) {
-			add_settings_field(
-				$id,
-				null,
-				array( &$this, 'token_callback_checkbox_remote' ),
-				'github_updater_remote_settings',
-				'remote_management',
-				array( 'id' => $id, 'title' => esc_html( $name ) )
-			);
-		}
-
-		$this->update_settings();
-	}
-
-	/**
-	 * Sanitize each setting field as needed.
-	 *
-	 * @param array $input Contains all settings fields as array keys
-	 *
-	 * @return array
-	 */
-	public static function sanitize( $input ) {
-		$new_input = array();
-		foreach ( array_keys( (array) $input ) as $id ) {
-			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
-		}
-
-		return $new_input;
-	}
-
-	/**
 	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
 		if ( $this->is_override_dot_org() ) {
-			printf( esc_html__( 'Override Dot Org is %sactive%s.', 'github-updater' ), '<strong>', '</strong>' );
+			echo ( wp_kses_post( __( 'Override Dot Org is <strong>active</strong>.', 'github-updater' ) ) );
 		} else {
-			printf( esc_html__( 'Override Dot Org is %snot active%s.', 'github-updater' ), '<strong>', '</strong>' );
+			echo( wp_kses_post( __( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' ) ) );
 		}
-		print( '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' ) );
+		echo '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
+		/* translators: %s: code fragment */
 		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
-
-		print( '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>' );
-	}
-
-	/**
-	 * Print the Remote Management text.
-	 */
-	public function print_section_remote_management() {
-		$api_url = add_query_arg( array(
-			'action' => 'github-updater-update',
-			'key'    => static::$api_key,
-		), admin_url( 'admin-ajax.php' ) );
-
-		?>
-		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
-			<br>
-			<span style="font-family:monospace;"><?php echo $api_url ?></span>
-		<p>
-			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
-		</p>
-		<?php
+		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
 	}
 
 	/**
@@ -652,40 +555,26 @@ class Settings extends Base {
 	}
 
 	/**
-	 * Get the settings option array and print one of its values.
-	 * For remote management settings.
-	 *
-	 * @param $args
-	 *
-	 * @return bool|void
-	 */
-	public function token_callback_checkbox_remote( $args ) {
-		$checked = isset( static::$options_remote[ $args['id'] ] ) ? static::$options_remote[ $args['id'] ] : null;
-		?>
-		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo $args['title']; ?>
-		</label>
-		<?php
-	}
-
-	/**
 	 * Update settings for single site or network activated.
 	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) ) {
-			if ( 'github_updater' === $_POST['option_page'] ) {
-				$options = $this->filter_options();
-				update_site_option( 'github_updater', self::sanitize( $options ) );
-			}
-			if ( 'github_updater_remote_management' === $_POST['option_page'] ) {
-				$options = $this->filter_options( true );
-				update_site_option( 'github_updater_remote_management', (array) self::sanitize( $options ) );
-			}
+		if ( isset( $_POST['option_page'] ) &&
+			'github_updater' === $_POST['option_page']
+		) {
+			$options = $this->filter_options();
+			update_site_option( 'github_updater', $this->sanitize( $options ) );
 		}
+
+		/**
+		 * Save $options in add-on classes.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'github_updater_update_settings', $_POST );
+
 		$this->redirect_on_save();
 	}
 
@@ -694,26 +583,17 @@ class Settings extends Base {
 	 *
 	 * @access private
 	 *
-	 * @param bool $remote True if setting remote management options.
-	 *                     Default is false.
-	 *
 	 * @return array|mixed
 	 */
-	private function filter_options( $remote = false ) {
-		if ( $remote ) {
-			$options = isset( $_POST['github_updater_remote_management'] )
-				? $_POST['github_updater_remote_management']
-				: array();
-
-			return $options;
-		}
-
+	private function filter_options() {
 		$options = static::$options;
 
 		// Remove checkbox options.
-		$options = array_filter( $options, function( $e ) {
-			return $e !== '1';
-		} );
+		$options = array_filter(
+			$options, function ( $e ) {
+				return '1' !== $e;
+			}
+		);
 
 		$options = array_merge( $options, $_POST['github_updater'] );
 
@@ -726,12 +606,18 @@ class Settings extends Base {
 	protected function redirect_on_save() {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
-		$reset_api_key      = $this->reset_api_key();
-		$option_page        = array( 'github_updater', 'github_updater_remote_management' );
+		$reset_api_key      = Singleton::get_instance( 'Remote_Management', $this )->reset_api_key();
+
+		/**
+		 * Filter to add to $option_page array.
+		 *
+		 * @since 8.0.0
+		 * @return array
+		 */
+		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-		     ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
-
+			( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
 		) {
 			$update = true;
 		}
@@ -745,39 +631,19 @@ class Settings extends Base {
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'github_updater';
 
 			$location = add_query_arg(
-				array(
+				[
 					'page'               => 'github-updater',
 					'tab'                => $arr['tab'],
 					'subtab'             => $arr['subtab'],
 					'refresh_transients' => $refresh_transients,
 					'reset'              => $reset_api_key,
 					'updated'            => $update,
-				),
+				],
 				$redirect_url
 			);
 			wp_redirect( $location );
 			exit;
 		}
-	}
-
-	/**
-	 * Reset RESTful API key.
-	 * Deleting site option will cause it to be re-created.
-	 *
-	 * @return bool
-	 */
-	private function reset_api_key() {
-		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
-		     'github_updater_remote_management' === $_REQUEST['tab']
-		) {
-			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
-			delete_site_option( 'github_updater_api_key' );
-
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -807,7 +673,7 @@ class Settings extends Base {
 	 */
 	public function plugin_action_links( $links ) {
 		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
-		$link          = array( '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' );
+		$link          = [ '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' ];
 
 		return array_merge( $links, $link );
 	}
@@ -816,11 +682,11 @@ class Settings extends Base {
 	 * Create settings sections that are hidden.
 	 * Required to preserve subtab settings during saves.
 	 *
-	 * @param array $subtab Subtab to display
+	 * @param array $subtab Subtab to display.
 	 */
-	private function add_hidden_settings_sections( $subtab = array() ) {
+	private function add_hidden_settings_sections( $subtab = [] ) {
 		$subtabs   = array_keys( $this->settings_sub_tabs() );
-		$hide_tabs = array_diff( $subtabs, (array) $subtab, array( 'github_updater' ) );
+		$hide_tabs = array_diff( $subtabs, (array) $subtab, [ 'github_updater' ] );
 		if ( ! empty( $subtab ) ) {
 			echo '<div id="github_updater" class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_install_settings' );
@@ -849,27 +715,31 @@ class Settings extends Base {
 		$plugins  = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes   = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$repos    = array_merge( $plugins, $themes );
-		$bbserver = array( 'bitbucket', 'bbserver' );
+		$bbserver = [ 'bitbucket', 'bbserver' ];
 
-		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbserver ) {
-			if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver, true ) ) {
-				return ( false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type );
+		$type_repos = array_filter(
+			$repos, function ( $e ) use ( $type, $bbserver ) {
+				if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver, true ) ) {
+					return false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type;
+				}
+
+				return false !== stripos( $e->type, $type );
 			}
+		);
 
-			return ( false !== stripos( $e->type, $type ) );
-		} );
-
-		$display_data = array_map( function( $e ) {
-			return array(
-				'type'    => $e->type,
-				'repo'    => $e->repo,
-				'name'    => $e->name,
-				'private' => isset( $e->is_private ) ? $e->is_private : false,
-				'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
-				'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
-				'waiting' => $e->waiting,
-			);
-		}, $type_repos );
+		$display_data = array_map(
+			function ( $e ) {
+				return [
+					'type'    => $e->type,
+					'repo'    => $e->repo,
+					'name'    => $e->name,
+					'private' => isset( $e->is_private ) ? $e->is_private : false,
+					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
+					'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
+					'waiting' => $e->waiting,
+				];
+			}, $type_repos
+		);
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
@@ -887,5 +757,4 @@ class Settings extends Base {
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . $waiting_or_broken . $is_dot_org . '</p>' );
 		}
 	}
-
 }

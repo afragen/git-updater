@@ -2,18 +2,18 @@
 /**
  * GitHub Updater
  *
- * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\Traits;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API\Bitbucket_API,
-	Fragen\GitHub_Updater\API\Bitbucket_Server_API;
-
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\Install;
+use Fragen\GitHub_Updater\API\Bitbucket_API;
+use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 
 /*
  * Exit if called directly.
@@ -23,47 +23,15 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Basic_Auth_Loader
- *
- * @package Fragen\GitHub_Updater
+ * Trait Basic_Auth_Loader
  */
-class Basic_Auth_Loader {
-
-	/**
-	 * Stores Basic::$options.
-	 *
-	 * @access private
-	 * @var    mixed
-	 */
-	private static $options;
-
+trait Basic_Auth_Loader {
 	/**
 	 * Stores array of git servers requiring Basic Authentication.
 	 *
 	 * @var array
 	 */
-	private static $basic_auth_required = array( 'Bitbucket' );
-
-	/**
-	 * Stores the object calling Basic_Auth_Loader.
-	 *
-	 * @access public
-	 * @var    \stdClass
-	 */
-	public $caller;
-
-	/**
-	 * Basic_Auth_Loader constructor.
-	 *
-	 * @access public
-	 *
-	 * @param array $options Options to pass to the updater.
-	 */
-	public function __construct( $options ) {
-		static::$options = empty( $options )
-			? get_site_option( 'github_updater', array() )
-			: $options;
-	}
+	private static $basic_auth_required = [ 'Bitbucket' ];
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
@@ -71,8 +39,8 @@ class Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function load_authentication_hooks() {
-		add_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ), 5, 2 );
-		add_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ), 15, 2 );
+		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
 	/**
@@ -81,8 +49,8 @@ class Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function remove_authentication_hooks() {
-		remove_filter( 'http_request_args', array( &$this, 'maybe_basic_authenticate_http' ) );
-		remove_filter( 'http_request_args', array( &$this, 'http_release_asset_auth' ) );
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
 	/**
@@ -90,10 +58,9 @@ class Basic_Auth_Loader {
 	 * for private repositories only.
 	 *
 	 * @access public
-	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::get_credentials()
 	 *
-	 * @param  array  $args Args passed to the URL.
-	 * @param  string $url  The URL.
+	 * @param array  $args Args passed to the URL.
+	 * @param string $url  The URL.
 	 *
 	 * @return array $args
 	 */
@@ -113,8 +80,7 @@ class Basic_Auth_Loader {
 	/**
 	 * Get credentials (username/password) for Basic Authentication.
 	 *
-	 * @access public
-	 * @uses   \Fragen\GitHub_Updater\Basic_Auth_Loader::is_repo_private()
+	 * @access private
 	 *
 	 * @param string $url The URL.
 	 *
@@ -122,16 +88,16 @@ class Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = $this->caller;
+		$type         = $this->get_class_vars( 'Base', 'caller' );
 		$username_key = null;
 		$password_key = null;
-		$credentials  = array(
+		$credentials  = [
 			'username'      => null,
 			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
-		);
+		];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
@@ -146,21 +112,23 @@ class Basic_Auth_Loader {
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
 				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
-				: array();
+				: [];
 			$themes      = isset( $_REQUEST['themes'] )
 				? explode( ',', $_REQUEST['themes'] )
-				: array();
+				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
-				$slug = array_filter( $bulk_update, function( $e ) use ( $url ) {
-					return false !== strpos( $url, $e );
-				} );
+				$slug = array_filter(
+					$bulk_update, function ( $e ) use ( $url ) {
+						return false !== strpos( $url, $e );
+					}
+				);
 				$slug = array_pop( $slug );
 			}
 		}
 
 		$type = $slug &&
-		        isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
+				isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
 			? $repos[ $slug ]->type
 			: $type;
 
@@ -176,25 +144,25 @@ class Basic_Auth_Loader {
 
 		// Set for Remote Install.
 		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
-		        false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
+				false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
 			? $_POST['github_updater_api'] . '_install'
 			: $type;
 
 		switch ( $type ) {
-			case ( 'bitbucket_plugin' ):
-			case ( 'bitbucket_theme' ):
-			case ( 'bitbucket_install' ):
-			case ( $type instanceof Bitbucket_API ):
-			case ( $type instanceof Bitbucket_Server_API ):
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+			case 'bitbucket_install':
+			case $type instanceof Bitbucket_API:
+			case $type instanceof Bitbucket_Server_API:
 				$bitbucket_org = 'bitbucket.org' === $headers['host'];
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 				break;
 		}
 
-		// @TODO can use `( $this->caller )::$options` in PHP7
-		$caller          = $this->caller;
-		static::$options = $this->caller instanceof Install ? $caller::$options : static::$options;
+		// TODO: can use `( $this->caller )::$options` in PHP7.
+		$caller          = $this->get_class_vars( 'Base', 'caller' );
+		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
 
 		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
@@ -222,15 +190,15 @@ class Basic_Auth_Loader {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 
 		if ( $slug && array_key_exists( $slug, static::$options ) &&
-		     1 === (int) static::$options[ $slug ] &&
-		     false !== stripos( $url, $slug )
+			1 === (int) static::$options[ $slug ] &&
+			false !== stripos( $url, $slug )
 		) {
 			return true;
 		}
 
 		// Used for remote install tab.
 		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-		     'github_updater_install' === $_POST['option_page']
+			'github_updater_install' === $_POST['option_page']
 		) {
 			return true;
 		}
@@ -238,7 +206,7 @@ class Basic_Auth_Loader {
 		// Used for refreshing cache.
 		foreach ( array_keys( static::$options ) as $option ) {
 			if ( 1 === (int) static::$options[ $option ] &&
-			     false !== strpos( $url, $option )
+				false !== strpos( $url, $option )
 			) {
 				return true;
 			}
@@ -273,13 +241,13 @@ class Basic_Auth_Loader {
 	 *
 	 * @param bool                             $reply
 	 * @param string                           $package Update package URL, unused.
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object
+	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object.
 	 *
 	 * @return mixed
 	 */
 	public function upgrader_pre_download( $reply, $package, $class ) {
 		if ( $class instanceof \Plugin_Upgrader &&
-		     property_exists( $class->skin, 'plugin_info' )
+			property_exists( $class->skin, 'plugin_info' )
 		) {
 			$headers = $class->skin->plugin_info;
 			foreach ( self::$basic_auth_required as $git_server ) {
@@ -291,7 +259,7 @@ class Basic_Auth_Loader {
 			}
 		}
 		if ( $class instanceof \Theme_Upgrader &&
-		     property_exists( $class->skin, 'theme_info' )
+			property_exists( $class->skin, 'theme_info' )
 		) {
 			$theme = $class->skin->theme_info;
 			foreach ( self::$basic_auth_required as $git_server ) {
@@ -302,9 +270,8 @@ class Basic_Auth_Loader {
 				}
 			}
 		}
-		remove_filter( 'upgrader_pre_download', array( &$this, 'upgrader_pre_download' ) );
+		remove_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ] );
 
 		return $reply;
 	}
-
 }

@@ -2,18 +2,17 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
  */
 
 namespace Fragen\GitHub_Updater;
 
-use WordPressdotorg\Plugin_Directory\Readme\Parser,
-	Parsedown;
-
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
+use Parsedown;
 
 /*
  * Exit if called directly.
@@ -24,11 +23,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class Readme_Parser
- *
- * @package Fragen\GitHub_Updater
  */
 class Readme_Parser extends Parser {
-
 	/**
 	 * @param string $text
 	 *
@@ -50,7 +46,7 @@ class Readme_Parser extends Parser {
 	 * @return array $data
 	 */
 	public function parse_data() {
-		$data = array();
+		$data = [];
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
@@ -76,7 +72,7 @@ class Readme_Parser extends Parser {
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
-		$contributors = array();
+		$contributors = [];
 		foreach ( (array) $users as $contributor ) {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
@@ -87,18 +83,6 @@ class Readme_Parser extends Parser {
 		}
 
 		return $contributors;
-	}
-
-	/**
-	 * Makes generation of short description PHP 5.3 compliant.
-	 * Original requires PHP 5.4 for array dereference.
-	 *
-	 * @return string $description[0]
-	 */
-	protected function short_description_53() {
-		$description = array_filter( explode( "\n", $this->sections['description'] ) );
-
-		return $description[0];
 	}
 
 	/**
@@ -132,12 +116,11 @@ class Readme_Parser extends Parser {
 			} else {
 				$pos = strrpos( $desc, '.' );
 			}
-			if ( $pos > ( 0.8 * $length ) && '.' !== mb_substr( $desc, - 1 ) ) {
+			if ( $pos > ( 0.8 * $length ) && '.' !== mb_substr( $desc, -1 ) ) {
 				$desc = mb_substr( $desc, 0, $pos + 1 );
 			}
 		}
 
 		return trim( $desc );
 	}
-
 }

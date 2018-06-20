@@ -1,8 +1,30 @@
 #### [unreleased]
 
+#### 8.0.0 / 2018-06-20
+##### This update requires PHP 5.6 or greater
+* added multiple action/filter hooks for adding data to Settings
+* refactored `Settings` to add data via hooks
+* refactored `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
+* added `trait GHU_Trait` wih common code
+* moved traits to own sub-directory
+* removed old extended naming code
+* refactored Remote Management to new `class Remote_Management`
+* converted short array syntax
+* removed callback passing of object by reference, it seems of dubious value
+* use `ReflectionObject` in `GHU_Trait::get_class_vars()` to pass arbitrary class properties
+* refactored WP-CLI integrations
+* removed `class Additions`, now self-contained in [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
+* refactored `Install::install()` a bit more
+* use new `github_updater_admin_pages` filter hook for adding `index.php` from Remote Management
+* ensure that all API install fields are available for all installed APIs
+* updated `class-parser.php` the dot org readme parser
+* updated POT with more translator messages
+* fixed to only load install JS in admin pages
+* updated `GitLab_API` for API v4
+
 #### 7.6.2 / 2018-04-27
 * move `auth_required` stuff from `Base` to `Settings`
-* fix admin notice from showing when no GitLab.com repo exists
+* prevent admin notice from showing when no GitLab.com repo exists
 * remove caching of `get_plugins()` and `wp_get_themes()` as it seems to result in issues for some users
 
 #### 7.6.1 / 2018-04-11
@@ -153,7 +175,7 @@
 * fixed GitLab Settings to show individual access tokens
 
 #### 6.2.1 / 2017-02-02
-* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()` 
+* removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()`
 * hotfix for upgrade routine to properly flush caches :P
 
 #### 6.2.0 / 2017-02-02
@@ -304,11 +326,11 @@
 * code simplification for `upgrader_source_selection`
 * fixed plugin branch switching to override _up-to-date_ message (most of the time)
 * added filters for developers, well I wanted them anyway ;-)
-	* `github_updater_plugin_transient_update`
-	* `github_updater_theme_transient_update`
-	* `github_updater_plugin_row_meta`
-	* `github_updater_theme_row_meta`
-	* `github_updater_append_theme_action`
+  * `github_updater_plugin_transient_update`
+  * `github_updater_theme_transient_update`
+  * `github_updater_plugin_row_meta`
+  * `github_updater_theme_row_meta`
+  * `github_updater_append_theme_action`
 * fixed renaming of updating plugins that were never initially renamed when first installed. Strange bug.
 
 #### 5.3.1 / 2015-12-03
@@ -321,7 +343,7 @@
 * moved `{get|set}_transient` functions to `abstract class API`
 * fixed settings page saving errors.
 * fixed shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
-* overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra'] to `upgrader_source_selection` filter. Thanks @dd32!
+* overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra']` to `upgrader_source_selection` filter. Thanks @dd32!
 
 #### 5.2.0 / 2015-10-14
 * fixed [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints

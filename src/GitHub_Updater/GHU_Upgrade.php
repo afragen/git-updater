@@ -2,14 +2,15 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
  * Exit if called directly.
@@ -20,10 +21,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class GHU_Upgrade
- *
- * @package Fragen\GitHub_Updater
  */
-class GHU_Upgrade extends Base {
+class GHU_Upgrade {
+	use GHU_Trait;
 
 	/**
 	 * DB version.
@@ -33,32 +33,25 @@ class GHU_Upgrade extends Base {
 	private $db_version = 7400;
 
 	/**
-	 * GHU_Upgrade constructor.
-	 */
-	public function __construct() {
-		parent::__construct();
-		$this->load_options();
-	}
-
-	/**
 	 * Run update check against db_version.
 	 */
 	public function run() {
-		$db_version = isset( static::$options['db_version'] ) ? (int) static::$options['db_version'] : 6000;
+		$options    = $this->get_class_vars( 'Base', 'options' );
+		$db_version = isset( $options['db_version'] ) ? (int) $options['db_version'] : 6000;
 
 		if ( $db_version === $this->db_version ) {
 			return;
 		}
 
 		switch ( $db_version ) {
-			case ( $db_version < $this->db_version ):
+			case $db_version < $this->db_version:
 				$this->delete_flush_cache();
 				break;
 			default:
 				break;
 		}
 
-		$options = array_merge( (array) static::$options, array( 'db_version' => (int) $this->db_version ) );
+		$options = array_merge( (array) $options, [ 'db_version' => (int) $this->db_version ] );
 		update_site_option( 'github_updater', $options );
 	}
 
@@ -69,5 +62,4 @@ class GHU_Upgrade extends Base {
 		wp_cache_flush();
 		$this->delete_all_cached_data();
 	}
-
 }

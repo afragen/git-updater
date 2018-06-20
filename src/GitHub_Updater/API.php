@@ -2,19 +2,22 @@
 /**
  * GitHub Updater
  *
- * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API\GitHub_API,
-	Fragen\GitHub_Updater\API\GitLab_API,
-	Fragen\GitHub_Updater\API\Gitea_API;
-
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
+use Fragen\GitHub_Updater\API\GitHub_API;
+use Fragen\GitHub_Updater\API\Bitbucket_API;
+use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
+use Fragen\GitHub_Updater\API\GitLab_API;
+use Fragen\GitHub_Updater\API\Gitea_API;
 
 /*
  * Exit if called directly.
@@ -26,39 +29,17 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class API
  *
- * @package Fragen\GitHub_Updater
  * @uses    \Fragen\GitHub_Updater\Base
  */
 class API {
-
-	/**
-	 * Variable for setting update transient hours.
-	 *
-	 * @var integer
-	 */
-	protected static $hours = 12;
+	use GHU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Holds HTTP error code from API call.
 	 *
 	 * @var array ( $this->type-repo => $code )
 	 */
-	protected static $error_code = array();
-
-	/**
-	 * Variable to hold all repository remote info.
-	 *
-	 * @access protected
-	 * @var    array
-	 */
-	protected $response = array();
-
-	/**
-	 * Holds instance of class Base.
-	 *
-	 * @var \Fragen\GitHub_Updater\Base
-	 */
-	protected $base;
+	protected static $error_code = [];
 
 	/**
 	 * Holds site options.
@@ -75,33 +56,26 @@ class API {
 	protected static $extra_headers;
 
 	/**
-	 * API constructor.
+	 * Variable for setting update transient hours.
 	 *
+	 * @var integer
 	 */
-	public function __construct() {
-		$this->base            = $base = Singleton::get_instance( 'Base', $this );
-		static::$options       = $base::$options;
-		static::$extra_headers = $this->base->add_headers( array() );
-	}
+	protected $hours = 12;
 
 	/**
-	 * Adds custom user agent for GitHub Updater.
+	 * Variable to hold all repository remote info.
 	 *
-	 * @access public
-	 *
-	 * @param array  $args Existing HTTP Request arguments.
-	 * @param string $url  URL being passed.
-	 *
-	 * @return array Amended HTTP Request arguments.
+	 * @access protected
+	 * @var array
 	 */
-	public static function http_request_args( $args, $url ) {
-		$args['sslverify'] = true;
-		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent']    .= '; GitHub Updater - https://github.com/afragen/github-updater';
-			$args['wp-rest-cache'] = array( 'tag' => 'github-updater' );
-		}
+	protected $response = [];
 
-		return $args;
+	/**
+	 * API constructor.
+	 */
+	public function __construct() {
+		static::$options       = $this->get_class_vars( 'Base', 'options' );
+		static::$extra_headers = Singleton::get_instance( 'Base', $this )->add_headers( [] );
 	}
 
 	/**
@@ -133,46 +107,182 @@ class API {
 	}
 
 	/**
-	 * Return repo data for API calls.
+	 * Adds custom user agent for GitHub Updater.
 	 *
-	 * @access protected
+	 * @access public
+	 *
+	 * @param array  $args Existing HTTP Request arguments.
+	 * @param string $url  URL being passed.
+	 *
+	 * @return array Amended HTTP Request arguments.
+	 */
+	public static function http_request_args( $args, $url ) {
+		$args['sslverify'] = true;
+		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
+			$args['user-agent']   .= '; GitHub Updater - https://github.com/afragen/github-updater';
+			$args['wp-rest-cache'] = [ 'tag' => 'github-updater' ];
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Add data in Settings page.
+	 *
+	 * @param object $git Git API object.
+	 */
+	public function settings_hook( $git ) {
+		add_action(
+			'github_updater_add_settings', function ( $auth_required ) use ( $git ) {
+				$git->add_settings( $auth_required );
+			}
+		);
+		add_filter( 'github_updater_add_repo_setting_field', [ $this, 'add_setting_field' ], 10, 2 );
+	}
+
+	/**
+	 * Add data to the setting_field in Settings.
+	 *
+	 * @param array  $fields
+	 * @param array  $repo
+	 * @param string $type
 	 *
 	 * @return array
 	 */
-	protected function return_repo_type() {
-		$type        = explode( '_', $this->type->type );
-		$arr         = array();
-		$arr['type'] = $type[1];
-
-		switch ( $type[0] ) {
-			case 'github':
-				$arr['repo']          = 'github';
-				$arr['base_uri']      = 'https://api.github.com';
-				$arr['base_download'] = 'https://github.com';
-				break;
-			case 'bitbucket':
-				$arr['repo'] = 'bitbucket';
-				if ( empty( $this->type->enterprise ) ) {
-					$arr['base_uri']      = 'https://bitbucket.org/api';
-					$arr['base_download'] = 'https://bitbucket.org';
-
-				} else {
-					$arr['base_uri']      = $this->type->enterprise_api;
-					$arr['base_download'] = $this->type->enterprise;
-				}
-				break;
-			case 'gitlab':
-				$arr['repo']          = 'gitlab';
-				$arr['base_uri']      = 'https://gitlab.com/api/v3';
-				$arr['base_download'] = 'https://gitlab.com';
-				break;
-			case 'gitea':
-				$arr['repo']          = 'gitea';
-				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
-				$arr['base_download'] = $this->type->enterprise;
+	public function add_setting_field( $fields, $repo ) {
+		if ( ! empty( $fields ) ) {
+			return $fields;
 		}
 
-		return $arr;
+		return $this->get_repo_api( $repo->type, $repo )->add_repo_setting_field();
+	}
+
+	/**
+	 * Get repo's API.
+	 *
+	 * @param string         $type
+	 * @param bool|\stdClass $repo
+	 *
+	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
+	 *                                                   \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
+	 *                                                   \Fragen\GitHub_Updater\API\Gitea_API|
+	 *                                                   \Fragen\GitHub_Updater\API\GitHub_API|
+	 *                                                   \Fragen\GitHub_Updater\API\GitLab_API $repo_api
+	 */
+	public function get_repo_api( $type, $repo = false ) {
+		$repo_api = null;
+		$repo     = $repo ?: new \stdClass();
+		switch ( $type ) {
+			case 'github_plugin':
+			case 'github_theme':
+				$repo_api = new GitHub_API( $repo );
+				break;
+			case 'bitbucket_plugin':
+			case 'bitbucket_theme':
+				if ( ! empty( $repo->enterprise ) ) {
+					$repo_api = new Bitbucket_Server_API( $repo );
+				} else {
+					$repo_api = new Bitbucket_API( $repo );
+				}
+				break;
+			case 'gitlab_plugin':
+			case 'gitlab_theme':
+				$repo_api = new GitLab_API( $repo );
+				break;
+			case 'gitea_plugin':
+			case 'gitea_theme':
+				$repo_api = new Gitea_API( $repo );
+				break;
+		}
+
+		return $repo_api;
+	}
+
+	/**
+	 * Add Install settings fields.
+	 *
+	 * @param object $git Git API from caller.
+	 */
+	public function add_install_fields( $git ) {
+		add_action(
+			'github_updater_add_install_settings_fields', function ( $type ) use ( $git ) {
+				$git->add_install_settings_fields( $type );
+			}
+		);
+	}
+
+	/**
+	 * Take remote file contents as string and parse headers.
+	 *
+	 * @param $contents
+	 * @param $type
+	 *
+	 * @return array
+	 */
+	public function get_file_headers( $contents, $type ) {
+		$all_headers            = [];
+		$default_plugin_headers = [
+			'Name'        => 'Plugin Name',
+			'PluginURI'   => 'Plugin URI',
+			'Version'     => 'Version',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+			'Network'     => 'Network',
+		];
+
+		$default_theme_headers = [
+			'Name'        => 'Theme Name',
+			'ThemeURI'    => 'Theme URI',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'Version'     => 'Version',
+			'Template'    => 'Template',
+			'Status'      => 'Status',
+			'Tags'        => 'Tags',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+		];
+
+		if ( false !== strpos( $type, 'plugin' ) ) {
+			$all_headers = $default_plugin_headers;
+		}
+
+		if ( false !== strpos( $type, 'theme' ) ) {
+			$all_headers = $default_theme_headers;
+		}
+
+		/*
+		 * Make sure we catch CR-only line endings.
+		 */
+		$file_data = str_replace( "\r", "\n", $contents );
+
+		/*
+		 * Merge extra headers and default headers.
+		 */
+		$all_headers = array_merge( self::$extra_headers, $all_headers );
+		$all_headers = array_unique( $all_headers );
+
+		foreach ( $all_headers as $field => $regex ) {
+			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
+				$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
+			} else {
+				$all_headers[ $field ] = '';
+			}
+		}
+
+		// Reduce array to only headers with data.
+		$all_headers = array_filter(
+			$all_headers,
+			function ( $e ) {
+				return ! empty( $e );
+			}
+		);
+
+		return $all_headers;
 	}
 
 	/**
@@ -186,13 +296,12 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-
-		add_filter( 'http_request_args', array( &$this, 'http_request_args' ), 10, 2 );
+		add_filter( 'http_request_args', [ $this, 'http_request_args' ], 10, 2 );
 
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = array( 200, 404 );
+		$allowed_codes = [ 200, 404 ];
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -200,16 +309,16 @@ class API {
 			return false;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
-			self::$error_code = array_merge(
-				self::$error_code,
-				array(
-					$this->type->repo => array(
+			static::$error_code = array_merge(
+				static::$error_code,
+				[
+					$this->type->repo => [
 						'repo' => $this->type->repo,
 						'code' => $code,
 						'name' => $this->type->name,
 						'git'  => $this->type->type,
-					),
-				)
+					],
+				]
 			);
 			if ( 'github' === $type['repo'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->repo );
@@ -231,6 +340,48 @@ class API {
 	}
 
 	/**
+	 * Return repo data for API calls.
+	 *
+	 * @access protected
+	 *
+	 * @return array
+	 */
+	protected function return_repo_type() {
+		$type        = explode( '_', $this->type->type );
+		$arr         = [];
+		$arr['type'] = $type[1];
+
+		switch ( $type[0] ) {
+			case 'github':
+				$arr['repo']          = 'github';
+				$arr['base_uri']      = 'https://api.github.com';
+				$arr['base_download'] = 'https://github.com';
+				break;
+			case 'bitbucket':
+				$arr['repo'] = 'bitbucket';
+				if ( empty( $this->type->enterprise ) ) {
+					$arr['base_uri']      = 'https://bitbucket.org/api';
+					$arr['base_download'] = 'https://bitbucket.org';
+				} else {
+					$arr['base_uri']      = $this->type->enterprise_api;
+					$arr['base_download'] = $this->type->enterprise;
+				}
+				break;
+			case 'gitlab':
+				$arr['repo']          = 'gitlab';
+				$arr['base_uri']      = 'https://gitlab.com/api/v4';
+				$arr['base_download'] = 'https://gitlab.com';
+				break;
+			case 'gitea':
+				$arr['repo']          = 'gitea';
+				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
+				$arr['base_download'] = $this->type->enterprise;
+		}
+
+		return $arr;
+	}
+
+	/**
 	 * Return API url.
 	 *
 	 * @access protected
@@ -242,16 +393,17 @@ class API {
 	 */
 	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
-		$segments = array(
+		$segments = [
 			'owner'  => $this->type->owner,
 			'repo'   => $this->type->repo,
 			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
-		);
+		];
 
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
+		$repo_api = $this->get_repo_api( $type['repo'] . '_' . $type['type'], $type );
 		switch ( $type['repo'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -264,8 +416,7 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitHub_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitlab':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -278,16 +429,15 @@ class API {
 						break;
 					}
 				}
-				$api      = new GitLab_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				Singleton::get_instance( 'Basic_Auth_Loader', $this, static::$options )->load_authentication_hooks();
+				$this->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						break;
 					}
-					$endpoint = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->add_endpoints( $this, $endpoint );
+					$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 
 					return $this->type->enterprise_api . $endpoint;
 				}
@@ -297,8 +447,7 @@ class API {
 					$type['base_download'] = $type['base_uri'];
 					break;
 				}
-				$api      = new Gitea_API( $type['type'] );
-				$endpoint = $api->add_endpoints( $this, $endpoint );
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			default:
 				break;
@@ -310,70 +459,6 @@ class API {
 	}
 
 	/**
-	 * Validate wp_remote_get response.
-	 *
-	 * @access protected
-	 *
-	 * @param \stdClass $response The response.
-	 *
-	 * @return bool true if invalid
-	 */
-	protected function validate_response( $response ) {
-		return empty( $response ) || isset( $response->message );
-	}
-
-	/**
-	 * Returns repo cached data.
-	 *
-	 * @access protected
-	 *
-	 * @param string|bool $repo Repo name or false.
-	 *
-	 * @return array|bool The repo cache. False if expired.
-	 */
-	public function get_repo_cache( $repo = false ) {
-		if ( ! $repo ) {
-			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
-		$cache     = get_site_option( $cache_key );
-
-		if ( empty( $cache['timeout'] ) || time() > $cache['timeout'] ) {
-			return false;
-		}
-
-		return $cache;
-	}
-
-	/**
-	 * Sets repo data for cache in site option.
-	 *
-	 * @access protected
-	 *
-	 * @param string      $id       Data Identifier.
-	 * @param mixed       $response Data to be stored.
-	 * @param string|bool $repo     Repo name or false.
-	 * @param string|bool $timeout  Timeout for cache.
-	 *                              Default is static::$hours (12 hours).
-	 *
-	 * @return bool
-	 */
-	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
-		if ( ! $repo ) {
-			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
-		$timeout   = $timeout ? $timeout : '+' . static::$hours . ' hours';
-
-		$this->response['timeout'] = strtotime( $timeout );
-		$this->response[ $id ]     = $response;
-
-		update_site_option( $cache_key, $this->response );
-
-		return true;
-	}
-
-	/**
 	 * Query wp.org for plugin/theme information.
 	 * Exit early and false for override dot org active.
 	 *
@@ -382,7 +467,7 @@ class API {
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		if ( $this->base->is_override_dot_org() ) {
+		if ( $this->is_override_dot_org() ) {
 			return false;
 		}
 
@@ -390,11 +475,14 @@ class API {
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			//@TODO shorten syntax for PHP 5.4
-			$type     = explode( '_', $this->type->type );
-			$type     = $type[1];
+			$type     = explode( '_', $this->type->type )[1];
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
-			$url      = add_query_arg( array( 'action' => $type . '_information', 'request[slug]' => $slug ), $url );
+			$url      = add_query_arg(
+				[
+					'action'        => $type . '_information',
+					'request[slug]' => $slug,
+				], $url
+			);
 			$response = wp_remote_get( $url );
 
 			if ( is_wp_error( $response ) ) {
@@ -410,29 +498,6 @@ class API {
 		}
 
 		return 'in dot org' === $response;
-	}
-
-	/**
-	 * Check if a local file for the repository exists.
-	 * Only checks the root directory of the repository.
-	 *
-	 * @access protected
-	 *
-	 * @param string $filename The filename to check for.
-	 *
-	 * @return bool
-	 */
-	protected function local_file_exists( $filename ) {
-		return file_exists( $this->type->local_path . $filename );
-	}
-
-	/**
-	 * Returns static class variable $error_code.
-	 *
-	 * @return array self::$error_code
-	 */
-	public function get_error_codes() {
-		return self::$error_code;
 	}
 
 	/**
@@ -482,7 +547,7 @@ class API {
 
 		// Add Enterprise access token.
 		if ( ! empty( $git->type->enterprise ) &&
-		     ! empty( static::$options[ $token_enterprise ] )
+			! empty( static::$options[ $token_enterprise ] )
 		) {
 			$endpoint = remove_query_arg( $key, $endpoint );
 			$endpoint = add_query_arg( $key, static::$options[ $token_enterprise ], $endpoint );
@@ -520,7 +585,34 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		return ( ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->base->can_update_repo( $this->type ) );
+		return ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
+	}
+
+	/**
+	 * Validate wp_remote_get response.
+	 *
+	 * @access protected
+	 *
+	 * @param \stdClass $response The response.
+	 *
+	 * @return bool true if invalid
+	 */
+	protected function validate_response( $response ) {
+		return empty( $response ) || isset( $response->message );
+	}
+
+	/**
+	 * Check if a local file for the repository exists.
+	 * Only checks the root directory of the repository.
+	 *
+	 * @access protected
+	 *
+	 * @param string $filename The filename to check for.
+	 *
+	 * @return bool
+	 */
+	protected function local_file_exists( $filename ) {
+		return file_exists( $this->type->local_path . $filename );
 	}
 
 	/**
@@ -535,11 +627,11 @@ class API {
 			return false;
 		}
 
-		list( $tags, $rollback ) = $parsed_tags;
+		list($tags, $rollback) = $parsed_tags;
 		usort( $tags, 'version_compare' );
 		krsort( $rollback );
 
-		$newest_tag     = array_slice( $tags, - 1, 1, true );
+		$newest_tag     = array_slice( $tags, -1, 1, true );
 		$newest_tag_key = key( $newest_tag );
 		$newest_tag     = $tags[ $newest_tag_key ];
 
@@ -566,7 +658,7 @@ class API {
 		}
 
 		if ( is_dir( $repo->local_path ) &&
-		     file_exists( $repo->local_path . $file )
+			file_exists( $repo->local_path . $file )
 		) {
 			$response = file_get_contents( $repo->local_path . $file );
 		}
@@ -589,11 +681,11 @@ class API {
 	 * @param $response
 	 */
 	protected function set_file_info( $response ) {
-		$this->type->transient            = $response;
-		$this->type->remote_version       = strtolower( $response['Version'] );
-		$this->type->requires_php_version = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php_version;
-		$this->type->requires_wp_version  = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires_wp_version;
-		$this->type->dot_org              = $response['dot_org'];
+		$this->type->transient      = $response;
+		$this->type->remote_version = strtolower( $response['Version'] );
+		$this->type->requires_php   = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php;
+		$this->type->requires       = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires;
+		$this->type->dot_org        = $response['dot_org'];
 	}
 
 	/**
@@ -634,7 +726,7 @@ class API {
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param array $readme Array of parsed readme.txt data
+	 * @param array $readme Array of parsed readme.txt data.
 	 *
 	 * @return bool
 	 */
@@ -653,7 +745,7 @@ class API {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
 		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
-		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : array();
+		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
@@ -662,5 +754,4 @@ class API {
 
 		return true;
 	}
-
 }

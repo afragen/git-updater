@@ -2,17 +2,16 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @author    Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
-
 
 /*
  * Exit if called directly.
@@ -29,11 +28,8 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Updates a single plugin or theme, in a way suitable for rest requests.
  * This class inherits from Base in order to be able to call the
  * set_defaults function.
- *
- * @package Fragen\GitHub_Updater
  */
 class Rest_Update extends Base {
-
 	/**
 	 * Holds REST Upgrader Skin.
 	 *
@@ -78,20 +74,23 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $plugin );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->type, $plugin );
 
-		$update = array(
+		$update = [
 			'slug'        => $plugin->repo,
 			'plugin'      => $plugin->slug,
 			'new_version' => null,
 			'url'         => $plugin->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( false, $tag ),
+		];
+
+		add_filter(
+			'site_transient_update_plugins', function ( $current ) use ( $plugin, $update ) {
+				$current->response[ $plugin->slug ] = (object) $update;
+
+				return $current;
+			}
 		);
-
-		add_filter( 'site_transient_update_plugins', function( $value ) use ( $plugin, $update ) {
-			$value->response[ $plugin->slug ] = (object) $update;
-
-			return $value;
-		} );
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->slug );
@@ -127,19 +126,22 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $theme );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->type, $theme );
 
-		$update = array(
+		$update = [
 			'theme'       => $theme->repo,
 			'new_version' => null,
 			'url'         => $theme->uri,
-			'package'     => $this->repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( false, $tag ),
+		];
+
+		add_filter(
+			'site_transient_update_themes', function ( $current ) use ( $theme, $update ) {
+				$current->response[ $theme->repo ] = $update;
+
+				return $current;
+			}
 		);
-
-		add_filter( 'site_transient_update_themes', function( $value ) use ( $theme, $update ) {
-			$value->response[ $theme->repo ] = $update;
-
-			return $value;
-		} );
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->repo );
@@ -171,7 +173,7 @@ class Rest_Update extends Base {
 		$start = microtime( true );
 		try {
 			if ( ! isset( $_REQUEST['key'] ) ||
-			     $_REQUEST['key'] !== get_site_option( 'github_updater_api_key' )
+				get_site_option( 'github_updater_api_key' ) !== $_REQUEST['key']
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
@@ -205,21 +207,21 @@ class Rest_Update extends Base {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = array(
+			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET,
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-			);
+			];
 			$this->log_exit( $http_response, 417 );
 		}
 
-		$response = array(
+		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET,
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-		);
+		];
 
 		if ( $this->is_error() ) {
 			$response['success'] = false;

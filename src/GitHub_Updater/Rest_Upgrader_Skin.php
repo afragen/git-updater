@@ -2,15 +2,14 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @author    Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
-
 
 /*
  * Exit if called directly.
@@ -26,12 +25,9 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  *
  * Extends WP_Upgrader_Skin and collects outputed messages for later
  * processing, rather than printing them out.
- *
- * @package Fragen\GitHub_Updater
  */
 class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
-
-	public $messages = array();
+	public $messages = [];
 	public $error;
 
 	/**

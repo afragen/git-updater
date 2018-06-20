@@ -2,19 +2,18 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API,
-	Fragen\GitHub_Updater\Branch,
-	Fragen\GitHub_Updater\Readme_Parser;
-
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\API;
+use Fragen\GitHub_Updater\Branch;
+use Fragen\GitHub_Updater\Readme_Parser;
 
 /*
  * Exit if called directly.
@@ -28,11 +27,9 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a GitLab repo.
  *
- * @package Fragen\GitHub_Updater
  * @author  Andy Fragen
  */
 class GitLab_API extends API implements API_Interface {
-
 	/**
 	 * Holds loose class method name.
 	 *
@@ -56,6 +53,9 @@ class GitLab_API extends API implements API_Interface {
 				: $type->branch;
 		}
 		$this->set_default_credentials();
+		$this->settings_hook( $this );
+		$this->add_settings_subtab();
+		$this->add_install_fields( $this );
 	}
 
 	/**
@@ -73,9 +73,9 @@ class GitLab_API extends API implements API_Interface {
 			$set_credentials                            = true;
 		}
 		if ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		       in_array( 'gitlabce', $running_servers, true ) ) ||
-		     ( empty( static::$options['gitlab_access_token'] ) &&
-		       in_array( 'gitlab', $running_servers, true ) )
+			in_array( 'gitlabce', $running_servers, true ) ) ||
+			( empty( static::$options['gitlab_access_token'] ) &&
+			in_array( 'gitlab', $running_servers, true ) )
 		) {
 			$this->gitlab_error_notices();
 		}
@@ -98,7 +98,7 @@ class GitLab_API extends API implements API_Interface {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
 
-			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
+			$response = $this->api( '/projects/' . $id . '/repository/files/' . $file );
 
 			if ( empty( $response ) || ! isset( $response->content ) ) {
 				return false;
@@ -106,7 +106,7 @@ class GitLab_API extends API implements API_Interface {
 
 			if ( $response && isset( $response->content ) ) {
 				$contents = base64_decode( $response->content );
-				$response = $this->base->get_file_headers( $contents, $this->type->type );
+				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->repo );
 			}
@@ -170,8 +170,8 @@ class GitLab_API extends API implements API_Interface {
 		/*
 		 * Set response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
-			$response = array();
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
+			$response = [];
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
 				$response['changes'] = $content;
@@ -184,7 +184,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'changes';
-			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $changes );
+			$response     = $this->api( '/projects/' . $id . '/repository/files/' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -196,7 +196,7 @@ class GitLab_API extends API implements API_Interface {
 			return false;
 		}
 
-		$parser    = new \Parsedown;
+		$parser    = new \Parsedown();
 		$changelog = $parser->text( base64_decode( $response['changes'] ) );
 
 		$this->type->sections['changelog'] = $changelog;
@@ -219,7 +219,7 @@ class GitLab_API extends API implements API_Interface {
 		/*
 		 * Set $response from local file if no update available.
 		 */
-		if ( ! $response && ! $this->base->can_update_repo( $this->type ) ) {
+		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = new \stdClass();
 			$content  = $this->get_local_info( $this->type, 'readme.txt' );
 			if ( $content ) {
@@ -232,8 +232,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'readme';
-			$response     = $this->api( '/projects/' . $id . '/repository/files?file_path=readme.txt' );
-
+			$response     = $this->api( '/projects/' . $id . '/repository/files/readme.txt' );
 		}
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
@@ -263,7 +262,7 @@ class GitLab_API extends API implements API_Interface {
 			self::$method = 'meta';
 			$project      = isset( $this->response['project'] ) ? $this->response['project'] : false;
 
-			// exit if transient is empty
+			// exit if transient is empty.
 			if ( ! $project ) {
 				return false;
 			}
@@ -293,7 +292,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -328,8 +327,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using GitLab API.
 	 *
-	 * @param boolean $rollback      for theme rollback
-	 * @param boolean $branch_switch for direct branch changing
+	 * @param boolean $rollback      for theme rollback.
+	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
@@ -362,9 +361,9 @@ class GitLab_API extends API implements API_Interface {
 		 * Check for rollback.
 		 */
 		if ( ! empty( $_GET['rollback'] ) &&
-		     ( isset( $_GET['action'], $_GET['theme'] ) &&
-		       'upgrade-theme' === $_GET['action'] &&
-		       $this->type->repo === $_GET['theme'] )
+			( isset( $_GET['action'], $_GET['theme'] ) &&
+			'upgrade-theme' === $_GET['action'] &&
+			$this->type->repo === $_GET['theme'] )
 		) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
@@ -392,13 +391,15 @@ class GitLab_API extends API implements API_Interface {
 	 * @return string $download_link
 	 */
 	private function make_release_asset_download_link() {
-		$download_link = implode( '/', array(
-			'https://gitlab.com/api/v3/projects',
-			urlencode( $this->type->owner . '/' . $this->type->repo ),
-			'builds/artifacts',
-			$this->type->newest_tag,
-			'download',
-		) );
+		$download_link = implode(
+			'/', [
+				'https://gitlab.com/api/v4/projects',
+				urlencode( $this->type->owner . '/' . $this->type->repo ),
+				'builds/artifacts',
+				$this->type->newest_tag,
+				'download',
+			]
+		);
 		$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
 
 		return $download_link;
@@ -413,7 +414,6 @@ class GitLab_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function add_endpoints( $git, $endpoint ) {
-
 		switch ( $git::$method ) {
 			case 'projects':
 				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
@@ -457,24 +457,18 @@ class GitLab_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$response     = $this->api( '/projects' );
+			$id           = implode( '/', [ $this->type->owner, $this->type->repo ] );
+			$id           = urlencode( $id );
+			$response     = $this->api( '/projects/' . $id );
 
-			if ( empty( $response ) ) {
-				$id = implode( '/', array( $this->type->owner, $this->type->repo ) );
-				$id = urlencode( $id );
+			if ( $response && $this->type->repo === $response->path ) {
+				$id = $response->id;
+				$this->set_repo_cache( 'project_id', $id );
 
-				return $id;
+				$this->set_repo_cache( 'project', $response );
 			}
 
-			foreach ( (array) $response as $project ) {
-				if ( $this->type->repo === $project->path ) {
-					$id = $project->id;
-					$this->set_repo_cache( 'project_id', $id );
-					$this->set_repo_cache( 'project', $project );
-
-					return $id;
-				}
-			}
+			return $id;
 		}
 
 		return $response;
@@ -492,12 +486,14 @@ class GitLab_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = array();
-		array_map( function( $e ) use ( &$arr ) {
-			$arr[] = $e->name;
+		$arr = [];
+		array_map(
+			function ( $e ) use ( &$arr ) {
+				$arr[] = $e->name;
 
-			return $arr;
-		}, (array) $response );
+				return $arr;
+			}, (array) $response
+		);
 
 		return $arr;
 	}
@@ -510,16 +506,19 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['private']      = ! $e->public;
-			$arr['last_updated'] = $e->last_activity_at;
-			$arr['watchers']     = 0;
-			$arr['forks']        = $e->forks_count;
-			$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
-		} );
+		array_filter(
+			$response, function ( $e ) use ( &$arr ) {
+				$arr['private']      = isset( $e->visibility ) && 'private' === $e->visibility ? true : false;
+				$arr['private']      = isset( $e->public ) ? ! $e->public : $arr['private'];
+				$arr['last_updated'] = $e->last_activity_at;
+				$arr['watchers']     = 0;
+				$arr['forks']        = $e->forks_count;
+				$arr['open_issues']  = isset( $e->open_issues_count ) ? $e->open_issues_count : 0;
+			}
+		);
 
 		return $arr;
 	}
@@ -536,12 +535,14 @@ class GitLab_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
-		array_filter( $response, function( $e ) use ( &$arr ) {
-			$arr['changes'] = $e->content;
-		} );
+		array_filter(
+			$response, function ( $e ) use ( &$arr ) {
+				$arr['changes'] = $e->content;
+			}
+		);
 
 		return $arr;
 	}
@@ -555,22 +556,24 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array
 	 */
 	private function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
+		$tags     = [];
+		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_link    = implode( '/', array(
-				$repo_type['base_download'],
-				$this->type->owner,
-				$this->type->repo,
-				'repository/archive.zip',
-			) );
+			$download_link    = implode(
+				'/', [
+					$repo_type['base_download'],
+					$this->type->owner,
+					$this->type->repo,
+					'repository/archive.zip',
+				]
+			);
 			$download_link    = add_query_arg( 'ref', $tag, $download_link );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_link;
 		}
 
-		return array( $tags, $rollback );
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -586,7 +589,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_section(
 				'gitlab_settings',
 				esc_html__( 'GitLab Personal Access Token', 'github-updater' ),
-				array( &$this, 'print_section_gitlab_token' ),
+				[ $this, 'print_section_gitlab_token' ],
 				'github_updater_gitlab_install_settings'
 			);
 		}
@@ -595,7 +598,7 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_section(
 				'gitlab_id',
 				esc_html__( 'GitLab Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_gitlab_info' ),
+				[ $this, 'print_section_gitlab_info' ],
 				'github_updater_gitlab_install_settings'
 			);
 		}
@@ -604,10 +607,13 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_access_token',
 				esc_html__( 'GitLab.com Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_access_token', 'token' => true )
+				[
+					'id'    => 'gitlab_access_token',
+					'token' => true,
+				]
 			);
 		}
 
@@ -615,10 +621,13 @@ class GitLab_API extends API implements API_Interface {
 			add_settings_field(
 				'gitlab_enterprise_token',
 				esc_html__( 'GitLab CE or GitLab Enterprise Personal Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 				'github_updater_gitlab_install_settings',
 				'gitlab_settings',
-				array( 'id' => 'gitlab_enterprise_token', 'token' => true )
+				[
+					'id'    => 'gitlab_enterprise_token',
+					'token' => true,
+				]
 			);
 		}
 	}
@@ -631,12 +640,23 @@ class GitLab_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_gitlab_install_settings';
 		$setting_field['section']         = 'gitlab_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		);
+		];
 
 		return $setting_field;
+	}
+
+	/**
+	 * Add subtab to Settings page.
+	 */
+	private function add_settings_subtab() {
+		add_filter(
+			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+				return array_merge( $subtabs, [ 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) ] );
+			}
+		);
 	}
 
 	/**
@@ -662,7 +682,7 @@ class GitLab_API extends API implements API_Interface {
 		add_settings_field(
 			'gitlab_access_token',
 			esc_html__( 'GitLab Access Token', 'github-updater' ),
-			array( &$this, 'gitlab_access_token' ),
+			[ $this, 'gitlab_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -677,7 +697,7 @@ class GitLab_API extends API implements API_Interface {
 			<input class="gitlab_setting" type="password" style="width:50%;" name="gitlab_access_token" value="">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ) ?>
+				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -687,25 +707,23 @@ class GitLab_API extends API implements API_Interface {
 	 * Display GitLab error admin notices.
 	 */
 	public function gitlab_error_notices() {
-		add_action( 'admin_notices', array( &$this, 'gitlab_error' ) );
-		add_action( 'network_admin_notices', array( &$this, 'gitlab_error', ) );
+		add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'gitlab_error' ] );
 	}
 
 	/**
 	 * Generate error message for missing GitLab Private Token.
 	 */
 	public function gitlab_error() {
-		$settings   = Singleton::get_instance( 'Settings', $this );
-		$error_code = Singleton::get_instance( 'API_PseudoTrait', $this )->get_error_codes();
+		$auth_required = $this->get_class_vars( 'Settings', 'auth_required' );
+		$error_code    = $this->get_error_codes();
 
 		if ( ! isset( $error_code['gitlab'] ) &&
-		     ( ( empty( static::$options['gitlab_enterprise_token'] ) &&
-		         $settings::$auth_required['gitlab_enterprise'] ) ||
-		       ( empty( static::$options['gitlab_access_token'] ) &&
-		         $settings::$auth_required['gitlab'] ) )
-
+			( ( empty( static::$options['gitlab_enterprise_token'] ) &&
+				$auth_required['gitlab_enterprise'] ) ||
+			( empty( static::$options['gitlab_access_token'] ) &&
+				$auth_required['gitlab'] ) )
 		) {
-			self::$error_code['gitlab'] = array( 'error' => true );
+			self::$error_code['gitlab'] = [ 'error' => true ];
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;
 			}
@@ -738,11 +756,13 @@ class GitLab_API extends API implements API_Interface {
 			$gitlab_com = false;
 		}
 
-		$install['download_link'] = implode( '/', array(
-			$base,
-			$install['github_updater_repo'],
-			'repository/archive.zip',
-		) );
+		$install['download_link'] = implode(
+			'/', [
+				$base,
+				$install['github_updater_repo'],
+				'repository/archive.zip',
+			]
+		);
 		$install['download_link'] = add_query_arg( 'ref', $install['github_updater_branch'], $install['download_link'] );
 
 		/*
@@ -779,5 +799,4 @@ class GitLab_API extends API implements API_Interface {
 
 		return $install;
 	}
-
 }

@@ -88,6 +88,13 @@ class Parser {
 	public $faq = array();
 
 	/**
+	 * Warning flags which indicate specific parsing failures have occured.
+	 *
+	 * @var array
+	 */
+	public $warnings = array();
+
+	/**
 	 * These are the readme sections that we expect.
 	 *
 	 * @var array
@@ -158,9 +165,7 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
-		/**
-		 * Mod for GitHub Updater.
-		 */
+		// TODO: Mod for GitHub Updater.
 		//$contents = file_get_contents( $file );
 		$contents = $file;
 
@@ -241,7 +246,7 @@ class Parser {
 			$this->tested = $headers['tested'];
 		}
 		if ( ! empty( $headers['requires_php'] ) ) {
-			$this->requires_php = $headers['requires_php'];
+			$this->requires_php = $this->sanitize_requires_php( $headers['requires_php'] );
 		}
 		if ( ! empty( $headers['contributors'] ) ) {
 			$this->contributors = explode( ',', $headers['contributors'] );
@@ -377,8 +382,7 @@ class Parser {
 
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
-			//$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
-			$this->short_description = $this->short_description_53(); //GitHub Updater
+			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
 		}
 
 		// Sanitize and trim the short_description to match requirements.
@@ -412,7 +416,7 @@ class Parser {
 					$this->sections['faq'] .= "<dt id='{$question_slug}'>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
-				$this->faq_as_h4(); //GitHub Updater
+				$this->faq_as_h4(); // TODO: GitHub Updater
 			}
 		}
 
@@ -550,6 +554,7 @@ class Parser {
 			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
 			if ( ! $user ) {
 				unset( $users[ $i ] );
+				$this->warnings['contributor_ignored'] = true;
 				continue;
 			}
 
@@ -578,6 +583,25 @@ class Parser {
 		}
 
 		return $stable_tag;
+	}
+
+	/**
+	 * Sanitizes the Requires PHP header to ensure that it's a valid version header.
+	 *
+	 * @param string $version
+	 * @return string The sanitized $version
+	 */
+	protected function sanitize_requires_php( $version ) {
+		$version = trim( $version );
+
+		// x.y or x.y.z
+		if ( $version && ! preg_match( '!^\d+(\.\d+){1,2}$!', $version ) ) {
+			$this->warnings['requires_php_ignored'] = true;
+			// Ignore the readme value.
+			$version = '';
+		}
+
+		return $version;
 	}
 
 	/**

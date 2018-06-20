@@ -2,22 +2,22 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 /**
  * Plugin Name:       GitHub Updater MU loader
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to load GitHub Updater as a must-use plugin. Disables normal plugin activation and deletion.
- * Version:           1.5.1
+ * Version:           1.5.2
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
  * GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
-*/
+ */
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 /*
  * Load normal plugin.
  */
-if ( ! class_exists( 'Fragen\\GitHub_Updater\\Base' ) ) {
+if ( ! class_exists( 'Fragen\\GitHub_Updater\\Init' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	require trailingslashit( WP_PLUGIN_DIR ) . $ghu_plugin_file;
 }
@@ -76,8 +76,10 @@ add_action( 'activated_plugin', 'ghu_deactivate', 10, 2 );
  */
 add_filter( 'network_admin_plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
 add_filter( 'plugin_action_links_' . $ghu_plugin_file, 'ghu_mu_plugin_active' );
-add_action( 'after_plugin_row_' . $ghu_plugin_file,
+add_action(
+	'after_plugin_row_' . $ghu_plugin_file,
 	function () {
-		print( '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>' );
-		print( '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>' );
-	} );
+		print '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>';
+		print '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>';
+	}
+);

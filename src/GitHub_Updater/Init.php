@@ -2,17 +2,17 @@
 /**
  * GitHub Updater
  *
- * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 
 /*
  * Exit if called directly.
@@ -22,6 +22,17 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 class Init extends Base {
+	use GHU_Trait, Basic_Auth_Loader;
+
+	/**
+	 * Constuctor.
+	 *
+	 * @return void
+	 */
+	public function __construct() {
+		parent::__construct();
+		$this->load_options();
+	}
 
 	/**
 	 * Let's get going.
@@ -30,8 +41,8 @@ class Init extends Base {
 		$this->load_hooks();
 
 		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/WP-CLI/CLI.php';
-			include_once __DIR__ . '/WP-CLI/CLI_Integration.php';
+			include_once __DIR__ . '/WP_CLI/CLI.php';
+			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
 		}
 	}
 
@@ -40,32 +51,28 @@ class Init extends Base {
 	 * Use 'init' hook for user capabilities.
 	 */
 	protected function load_hooks() {
-		add_action( 'init', array( &$this, 'load' ) );
-		add_action( 'init', array( &$this, 'background_update' ) );
-		add_action( 'init', array( &$this, 'set_options_filter' ) );
-		add_action( 'wp_ajax_github-updater-update', array( &$this, 'ajax_update' ) );
-		add_action( 'wp_ajax_nopriv_github-updater-update', array( &$this, 'ajax_update' ) );
+		add_action( 'init', [ $this, 'load' ] );
+		add_action( 'init', [ $this, 'background_update' ] );
+		add_action( 'init', [ $this, 'set_options_filter' ] );
+		add_action( 'wp_ajax_github-updater-update', [ $this, 'ajax_update' ] );
+		add_action( 'wp_ajax_nopriv_github-updater-update', [ $this, 'ajax_update' ] );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options )->load_authentication_hooks();
+			$this->load_authentication_hooks();
 		}
 
-		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
-		add_filter( 'upgrader_source_selection', array( &$this, 'upgrader_source_selection' ), 10, 4 );
+		add_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
+		add_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
+		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 4 );
 
 		// Needed for updating from update-core.php.
 		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download',
-				array(
-					Singleton::get_instance( 'Basic_Auth_Loader', $this, self::$options ),
-					'upgrader_pre_download',
-				), 10, 3 );
+			add_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ], 10, 3 );
 		}
 
 		// The following hook needed to ensure transient is reset correctly after shiny updates.
-		add_filter( 'http_response', array( 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ), 10, 3 );
+		add_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ], 10, 3 );
 	}
 
 	/**
@@ -86,7 +93,7 @@ class Init extends Base {
 			: current_user_can( 'manage_options' );
 		$this->load_options();
 
-		$admin_pages = array(
+		$admin_pages = [
 			'plugins.php',
 			'plugin-install.php',
 			'themes.php',
@@ -98,22 +105,17 @@ class Init extends Base {
 			'settings.php',
 			'edit.php',
 			'admin-ajax.php',
-		);
+		];
 
-		// Add Settings menu.
-		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
-			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',
-				array( Singleton::get_instance( 'Settings', $this ), 'add_plugin_page' ) );
-		}
+		/**
+		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
+		 */
+		$admin_pages = array_unique( apply_filters( 'github_updater_add_admin_pages', $admin_pages ) );
 
-		foreach ( array_keys( Settings::$remote_management ) as $key ) {
-			// Remote management only needs to be active for admin pages.
-			if ( ! empty( self::$options_remote[ $key ] ) && is_admin() ) {
-				$admin_pages = array_merge( $admin_pages, array( 'index.php', 'admin-ajax.php' ) );
-			}
-		}
-
-		return $can_user_update && in_array( $pagenow, array_unique( $admin_pages ), true );
+		return $can_user_update && in_array( $pagenow, $admin_pages, true );
 	}
-
 }

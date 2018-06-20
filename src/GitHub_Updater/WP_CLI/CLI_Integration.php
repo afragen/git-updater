@@ -2,41 +2,31 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\WP_CLI;
 
-use WP_CLI,
-	WP_CLI_Command,
-	Fragen\Singleton;
-
+use WP_CLI;
+use WP_CLI_Command;
+use Fragen\Singleton;
 
 // Add WP-CLI commands.
 $class = new CLI_Integration();
-WP_CLI::add_command( 'plugin install-git', array( $class, 'install_plugin' ) );
-WP_CLI::add_command( 'theme install-git', array( $class, 'install_theme' ) );
+WP_CLI::add_command( 'plugin install-git', [ $class, 'install_plugin' ] );
+WP_CLI::add_command( 'theme install-git', [ $class, 'install_theme' ] );
 
 /**
- * Manage GitHub Updater repository commands.
- *
- * Class GitHub_Updater_CLI_Integration
+ * Class CLI_Integration
  */
 class CLI_Integration extends WP_CLI_Command {
-
 	/**
-	 * @var \Fragen\GitHub_Updater\Base
-	 */
-	private $base;
-
-	/**
-	 * GitHub_Updater_CLI_Integration constructor.
+	 * CLI_Integration constructor.
 	 */
 	public function __construct() {
-		$this->base = Singleton::get_instance( 'Base', $this );
 		$this->run();
 	}
 
@@ -55,7 +45,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp plugin` commands with GitHub Updater repositories.
 	 */
 	public function init_plugins() {
-		$this->base->get_meta_plugins();
+		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
 		$current = get_site_transient( 'update_plugins' );
 		$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
 		set_site_transient( 'update_plugins', $current );
@@ -68,14 +58,14 @@ class CLI_Integration extends WP_CLI_Command {
 	 * `wp theme` commands with GitHub Updater repositories.
 	 */
 	public function init_themes() {
-		$this->base->get_meta_themes();
+		Singleton::get_instance( 'Base', $this )->get_meta_themes();
 		$current = get_site_transient( 'update_themes' );
 		$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
 		set_site_transient( 'update_themes', $current );
 	}
 
 	/**
-	 * Install plugin from GitHub, Bitbucket, or GitLab using GitHub Updater.
+	 * Install plugin from GitHub, Bitbucket, GitLab, or Gitea using GitHub Updater.
 	 *
 	 * ## OPTIONS
 	 *
@@ -120,13 +110,13 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
 	 *
-	 * @param array $args       An array of $uri
+	 * @param array $args       An array of $uri.
 	 * @param array $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git
 	 */
 	public function install_plugin( $args, $assoc_args ) {
-		list( $uri ) = $args;
+		list($uri)  = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
 		Singleton::get_instance( 'Install', $this )->install( 'plugin', $cli_config );
 
@@ -182,13 +172,13 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
 	 *
-	 * @param array $args       An array of $uri
+	 * @param array $args       An array of $uri.
 	 * @param array $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand install-git
 	 */
 	public function install_theme( $args, $assoc_args ) {
-		list( $uri ) = $args;
+		list($uri)  = $args;
 		$cli_config = $this->process_args( $uri, $assoc_args );
 		Singleton::get_instance( 'Install', $this )->install( 'theme', $cli_config );
 
@@ -207,11 +197,11 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return array $cli_config
 	 */
 	private function process_args( $uri, $assoc_args ) {
-		$cli_config            = array();
+		$token                 = isset( $assoc_args['token'] ) ? $assoc_args['token'] : false;
+		$bitbucket_private     = isset( $assoc_args['bitbucket-private'] ) ? $assoc_args['bitbucket-private'] : false;
+		$cli_config            = [];
 		$cli_config['uri']     = $uri;
-		$cli_config['private'] = isset( $assoc_args['token'] )
-			? $assoc_args['token']
-			: $assoc_args['bitbucket-private'];
+		$cli_config['private'] = $token ?: $bitbucket_private;
 		$cli_config['branch']  = isset( $assoc_args['branch'] )
 			? $assoc_args['branch']
 			: 'master';
@@ -246,7 +236,6 @@ class CLI_Integration extends WP_CLI_Command {
 
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_install( $branch_data );
 	}
-
 }
 
 /**

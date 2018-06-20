@@ -2,17 +2,17 @@
 /**
  * GitHub Updater
  *
- * @package   GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater;
 
-use Fragen\Singleton,
-	Fragen\GitHub_Updater\API\Language_Pack_API;
-
+use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\GitHub_Updater\API\Language_Pack_API;
 
 /**
  * Exit if called directly.
@@ -23,10 +23,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class Language_Pack
- *
- * @package Fragen\GitHub_Updater
  */
-class Language_Pack extends Base {
+class Language_Pack {
+	use GHU_Trait;
 
 	/**
 	 * Variable containing the plugin/theme object.
@@ -36,13 +35,19 @@ class Language_Pack extends Base {
 	protected $repo;
 
 	/**
+	 * Variable containing the Language_Pack_API.
+	 *
+	 * @var Language_Pack_API
+	 */
+	private $repo_api;
+
+	/**
 	 * Language_Pack constructor.
 	 *
-	 * @param Plugin|Theme      $repo Plugin/Theme object
+	 * @param Plugin|Theme      $repo Plugin/Theme object.
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {
-		parent::__construct();
 		if ( null === $repo->languages ) {
 			return;
 		}
@@ -62,8 +67,8 @@ class Language_Pack extends Base {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'pre_set_site_transient_update_plugins', array( &$this, 'pre_set_site_transient' ) );
-		add_filter( 'pre_set_site_transient_update_themes', array( &$this, 'pre_set_site_transient' ) );
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient' ] );
+		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient' ] );
 	}
 
 	/**
@@ -75,8 +80,8 @@ class Language_Pack extends Base {
 	 */
 	public function pre_set_site_transient( $transient ) {
 		$locales = get_available_languages();
-		$locales = ! empty( $locales ) ? $locales : array( get_locale() );
-		$repos   = array();
+		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
+		$repos   = [];
 
 		if ( ! isset( $transient->translations ) ) {
 			return $transient;
@@ -91,9 +96,11 @@ class Language_Pack extends Base {
 			$translations = wp_get_installed_translations( 'themes' );
 		}
 
-		$repos = array_filter( $repos, function( $e ) {
-			return isset( $e->language_packs );
-		} );
+		$repos = array_filter(
+			$repos, function ( $e ) {
+				return isset( $e->language_packs );
+			}
+		);
 
 		foreach ( $repos as $repo ) {
 			foreach ( $locales as $locale ) {
@@ -113,5 +120,4 @@ class Language_Pack extends Base {
 
 		return $transient;
 	}
-
 }

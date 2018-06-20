@@ -2,23 +2,22 @@
 /**
  * GitHub Updater
  *
- * @package   Fragen\GitHub_Updater
  * @author    Andy Fragen
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
+ * @package   github-updater
  */
 
 namespace Fragen\GitHub_Updater\API;
 
 use Fragen\GitHub_Updater\API;
-
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**
  * Class Language_Pack_API
- *
- * @package Fragen\GitHub_Updater
  */
 class Language_Pack_API extends API {
+	use GHU_Trait;
 
 	/**
 	 * Holds loose class method name.
@@ -75,7 +74,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $type     ( github|bitbucket|gitlab )
+	 * @param string $type     ( github|bitbucket|gitlab ).
 	 * @param array  $headers
 	 * @param mixed  $response API response.
 	 *
@@ -94,15 +93,14 @@ class Language_Pack_API extends API {
 				break;
 			case 'gitlab':
 				$id       = urlencode( $headers['owner'] . '/' . $headers['repo'] );
-				$response = $this->api( '/projects/' . $id . '/repository/files?file_path=language-pack.json' );
+				$response = $this->api( '/projects/' . $id . '/repository/files/language-pack.json' );
 				$contents = base64_decode( $response->content );
 				$response = json_decode( $contents );
 				break;
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
-				// @TODO fix for Gitea Languages and add to readme.txt
-				//$contents = base64_decode( $response->content );
-				//$response = json_decode( $contents );
+				$contents = base64_decode( $response->content );
+				$response = json_decode( $contents );
 				break;
 		}
 
@@ -116,7 +114,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $type ( github|bitbucket|gitlab )
+	 * @param string $type    ( github|bitbucket|gitlab ).
 	 * @param string $locale
 	 * @param array  $headers
 	 *
@@ -126,21 +124,20 @@ class Language_Pack_API extends API {
 		$package = null;
 		switch ( $type ) {
 			case 'github':
-				$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
+				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
 				$package = implode( '/', $package ) . $locale->package;
-				$package = add_query_arg( array( 'raw' => 'true' ), $package );
+				$package = add_query_arg( [ 'raw' => 'true' ], $package );
 				break;
 			case 'bitbucket':
-				$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitlab':
-				$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 		}
 
 		return $package;
 	}
-
 }
