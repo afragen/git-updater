@@ -324,11 +324,11 @@
 * code simplification for `upgrader_source_selection`
 * fixed plugin branch switching to override _up-to-date_ message (most of the time)
 * added filters for developers, well I wanted them anyway ;-)
-	* `github_updater_plugin_transient_update`
-	* `github_updater_theme_transient_update`
-	* `github_updater_plugin_row_meta`
-	* `github_updater_theme_row_meta`
-	* `github_updater_append_theme_action`
+  * `github_updater_plugin_transient_update`
+  * `github_updater_theme_transient_update`
+  * `github_updater_plugin_row_meta`
+  * `github_updater_theme_row_meta`
+  * `github_updater_append_theme_action`
 * fixed renaming of updating plugins that were never initially renamed when first installed. Strange bug.
 
 #### 5.3.1 / 2015-12-03
@@ -341,7 +341,7 @@
 * moved `{get|set}_transient` functions to `abstract class API`
 * fixed settings page saving errors.
 * fixed shiny updates [#321](https://github.com/afragen/github-updater/issues/321)
-* overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra'] to `upgrader_source_selection` filter. Thanks @dd32!
+* overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra']` to `upgrader_source_selection` filter. Thanks @dd32!
 
 #### 5.2.0 / 2015-10-14
 * fixed [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
