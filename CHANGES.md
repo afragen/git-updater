@@ -1,5 +1,7 @@
 #### [unreleased]
-**This update requires PHP 5.6 or greater**
+
+#### 8.0.0 / 2018-06-20
+##### This update requires PHP 5.6 or greater
 * added multiple action/filter hooks for adding data to Settings
 * refactored `Settings` to add data via hooks
 * refactored `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
