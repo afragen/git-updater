@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.1.0 / 2018-06-26
 * added `register_activation_hook` to correctly rename directory to `github-updater` on activation; activation will fail if rename successful.
 
 #### 8.0.0 / 2018-06-20
