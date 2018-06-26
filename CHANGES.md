@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 8.1.0 / 2018-06-26
+* added `register_activation_hook` to correctly rename directory to `github-updater` on activation; activation will fail if rename successful.
+
 #### 8.0.0 / 2018-06-20
 ##### This update requires PHP 5.6 or greater
 * added multiple action/filter hooks for adding data to Settings

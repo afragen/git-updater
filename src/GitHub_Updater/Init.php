@@ -35,6 +35,24 @@ class Init extends Base {
 	}
 
 	/**
+	 * Rename on activation.
+	 *
+	 * Correctly renames the slug when GitHub Updater is installed
+	 * via FTP or from plugin upload. Causes activation to fail.
+	 *
+	 * @return void
+	 */
+	public function rename_on_activation() {
+		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
+		$slug       = isset( $_GET['plugin'] ) ? $_GET['plugin'] : false;
+
+		if ( $slug !== 'github-updater/github-updater.php' ) {
+			// This results in failed plugin activation.
+			rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'github-updater' );
+		}
+	}
+
+	/**
 	 * Let's get going.
 	 */
 	public function run() {
