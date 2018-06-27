@@ -1,5 +1,6 @@
 #### [unreleased]
 * updated GitLab CE/Enterprise to use GitLab API v4
+* urlencode part of request to dot org API to avoid redirect
 
 #### 8.1.0 / 2018-06-26
 * added `register_activation_hook` to correctly rename directory to `github-updater` on activation; activation will fail if rename successful.

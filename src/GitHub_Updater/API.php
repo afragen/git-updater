@@ -479,8 +479,8 @@ class API {
 			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
 			$url      = add_query_arg(
 				[
-					'action'        => $type . '_information',
-					'request[slug]' => $slug,
+					'action'                     => $type . '_information',
+					urlencode( 'request[slug]' ) => $slug,
 				], $url
 			);
 			$response = wp_remote_get( $url );
