@@ -466,7 +466,7 @@
 
 #### 4.3.0
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
-* use https://api.wordpress.org not http
+* use <https://api.wordpress.org> not http
 * Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
 * make strings better for translation - thanks @pedro-mendonca and @fxbenard
 * additional Portuguese translation by [Pedro Mendonça](https://github.com/pedro-mendonca)
@@ -520,7 +520,7 @@
 * hotfix to force an array type when sanitizing settings, it gave me a fatal I wasn't expecting.
 
 #### 4.0.0
-* changed `is_a()` to `instanceof` per https://core.trac.wordpress.org/changeset/31188
+* changed `is_a()` to `instanceof` per <https://core.trac.wordpress.org/changeset/31188>
 * requires PHP 5.3 or greater as autoloader class requires namespacing 
 * updated all classes for namespacing
 * renamed directory and class names to allow for PSR 4 style loading 
