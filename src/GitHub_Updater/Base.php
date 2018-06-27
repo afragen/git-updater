@@ -962,11 +962,13 @@ class Base {
 			$header['enterprise_uri'] = trim( $header['enterprise_uri'], '/' );
 			switch ( $header_parts[0] ) {
 				case 'GitHub':
+					$header['enterprise_api'] .= '/api/v3';
+					break;
 				case 'GitLab':
-					$header['enterprise_api'] = $header['enterprise_uri'] . '/api/v3';
+					$header['enterprise_api'] .= '/api/v4';
 					break;
 				case 'Bitbucket':
-					$header['enterprise_api'] = $header['enterprise_uri'] . '/rest/api';
+					$header['enterprise_api'] .= '/rest/api';
 					break;
 			}
 		}
