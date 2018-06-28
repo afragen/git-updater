@@ -28,8 +28,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class API
- *
- * @uses    \Fragen\GitHub_Updater\Base
  */
 class API {
 	use GHU_Trait, Basic_Auth_Loader;
@@ -82,7 +80,6 @@ class API {
 	 * Shiny updates results in the update transient being reset with only the wp.org data.
 	 * This catches the response and reloads the transients.
 	 *
-	 * @uses \Fragen\GitHub_Updater\Base
 	 * @uses \Fragen\GitHub_Updater\Base::make_update_transient_current()
 	 *
 	 * @param mixed  $response HTTP server response.
