@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 8.1.2 / 2018-06-28
+* fixed malformed link tag, thanks @alexclassroom
+* updated POT
+
 #### 8.1.1 / 2018-06-27
 * updated GitLab CE/Enterprise to use GitLab API v4
 * urlencode part of request to dot org API to avoid redirect
