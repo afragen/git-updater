@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GitHub Updater\n"
-"POT-Creation-Date: 2018-06-20 09:04-0700\n"
+"POT-Creation-Date: 2018-06-28 08:55-0700\n"
 "PO-Revision-Date: 2015-05-20 19:10-0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -140,43 +140,43 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:591
+#: src/GitHub_Updater/API/GitLab_API.php:590
 msgid "GitLab Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:600
+#: src/GitHub_Updater/API/GitLab_API.php:599
 msgid "GitLab Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:609
+#: src/GitHub_Updater/API/GitLab_API.php:608
 msgid "GitLab.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:623
+#: src/GitHub_Updater/API/GitLab_API.php:622
 msgid "GitLab CE or GitLab Enterprise Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:657
+#: src/GitHub_Updater/API/GitLab_API.php:656
 msgid "GitLab"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:666
+#: src/GitHub_Updater/API/GitLab_API.php:665
 msgid "Enter your repository specific GitLab Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:673
+#: src/GitHub_Updater/API/GitLab_API.php:672
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:684
+#: src/GitHub_Updater/API/GitLab_API.php:683
 msgid "GitLab Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:700
+#: src/GitHub_Updater/API/GitLab_API.php:699
 msgid "Enter GitLab Access Token for private GitLab repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:733
+#: src/GitHub_Updater/API/GitLab_API.php:732
 msgid ""
 "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
@@ -309,7 +309,7 @@ msgstr ""
 #, php-format
 msgid ""
 "It looks like you are running into GitHub API rate limits. Be sure and "
-"configure a <a href=\"%s\"Personal Access Token</a> to avoid this issue."
+"configure a <a href=\"%s\">Personal Access Token</a> to avoid this issue."
 msgstr ""
 
 #: src/GitHub_Updater/Messages.php:154
