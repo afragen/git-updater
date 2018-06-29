@@ -38,7 +38,11 @@ class Init extends Base {
 	 * Rename on activation.
 	 *
 	 * Correctly renames the slug when GitHub Updater is installed
-	 * via FTP or from plugin upload. `rename()` causes activation to fail.
+	 * via FTP or from plugin upload.
+	 *
+	 * Set current branch to `develop` if appropriate.
+	 *
+	 * `rename()` causes activation to fail.
 	 *
 	 * @return void
 	 */
