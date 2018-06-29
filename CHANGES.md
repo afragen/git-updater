@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed `register_activation_hook` to add the `develop` branch if that is the source
 
 #### 8.1.2 / 2018-06-28
 * fixed malformed link tag, thanks @alexclassroom
