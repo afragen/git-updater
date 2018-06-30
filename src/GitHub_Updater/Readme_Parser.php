@@ -6,7 +6,7 @@
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
- * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
+ * @uses      http://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
  */
 
 namespace Fragen\GitHub_Updater;
@@ -25,7 +25,27 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Readme_Parser
  */
 class Readme_Parser extends Parser {
+
 	/**
+	 * Constructor.
+	 *
+	 * @param string $file
+	 *
+	 * @return void
+	 */
+	public function __construct( $file ) {
+		add_filter(
+			'pre_parser_parse_readme', function( $contents, $file ) {
+				return $file;
+			}, 10, 2
+		);
+		add_action( 'post_parser_parse_readme', [ $this, 'faq_as_h4' ] );
+		parent::__construct( $file );
+	}
+
+	/**
+	 * Parse text into markdown.
+	 *
 	 * @param string $text
 	 *
 	 * @return string
@@ -87,9 +107,14 @@ class Readme_Parser extends Parser {
 
 	/**
 	 * Converts FAQ from dictionary list to h4 style.
+	 *
+	 * @return bool|void
 	 */
-	protected function faq_as_h4() {
+	public function faq_as_h4() {
 		unset( $this->sections['faq'] );
+		if ( empty( $this->faq ) ) {
+			return;
+		}
 		$this->sections['faq'] = '';
 		foreach ( $this->faq as $question => $answer ) {
 			$this->sections['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
