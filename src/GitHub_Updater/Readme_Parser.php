@@ -35,7 +35,7 @@ class Readme_Parser extends Parser {
 	 */
 	public function __construct( $file ) {
 		add_filter(
-			'pre_parser_parse_readme', function( $contents, $file ) {
+			'pre_parser_parse_readme', function( $false, $file ) {
 				return $file;
 			}, 10, 2
 		);
