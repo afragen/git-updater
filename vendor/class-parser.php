@@ -165,17 +165,7 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
-		/**
-		 * Filter $contents to allow for use outside of wp.org.
-		 *
-		 * @since x.x.x
-		 *
-		 * @param string $file
-		 * @return bool|string $contents Default is false.
-		 */
-		$contents = apply_filters( 'pre_parser_parse_readme', false, $file );
-
-		$contents = $contents ?: file_get_contents( $file );
+		$contents = file_get_contents( $file );
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
@@ -425,13 +415,6 @@ class Parser {
 				$this->sections['faq'] .= "\n</dl>\n";
 			}
 		}
-
-		/**
-		 * Action to allow post-processing of readme parsing for usage outside of wp.org.
-		 *
-		 * @since x.x.x
-		 */
-		do_action( 'post_parser_parse_readme' );
 
 		// Filter the HTML.
 		$this->sections = array_map( array( $this, 'filter_text' ), $this->sections );
