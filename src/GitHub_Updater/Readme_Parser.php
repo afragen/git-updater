@@ -29,18 +29,19 @@ class Readme_Parser extends Parser {
 	/**
 	 * Constructor.
 	 *
+	 * Convert file contents string to temporary file.
+	 * Pass file path into class-parser.php.
+	 * Delete temporary file when finished.
+	 *
 	 * @param string $file
 	 *
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		add_filter(
-			'pre_parser_parse_readme', function( $false, $file ) {
-				return file_exists( $file ) ? false : $file;
-			}, 10, 2
-		);
-		add_action( 'post_parser_parse_readme', [ $this, 'faq_as_h4' ] );
-		parent::__construct( $file );
+		$file_path = WP_CONTENT_DIR . '/ghu-readme.txt';
+		file_put_contents( $file_path, $file );
+		parent::__construct( $file_path );
+		unlink( $file_path );
 	}
 
 	/**
@@ -70,6 +71,7 @@ class Readme_Parser extends Parser {
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
+		$data = $this->faq_as_h4( $data );
 
 		return $data;
 	}
@@ -108,17 +110,21 @@ class Readme_Parser extends Parser {
 	/**
 	 * Converts FAQ from dictionary list to h4 style.
 	 *
-	 * @return bool|void
+	 * @param array $data Array of parsed readme data.
+	 *
+	 * @return array $data
 	 */
-	public function faq_as_h4() {
-		unset( $this->sections['faq'] );
-		if ( empty( $this->faq ) ) {
-			return;
+	public function faq_as_h4( $data ) {
+		if ( empty( $data['faq'] ) ) {
+			return $data;
 		}
-		$this->sections['faq'] = '';
-		foreach ( $this->faq as $question => $answer ) {
-			$this->sections['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
+		unset( $data['sections']['faq'] );
+		$data['sections']['faq'] = '';
+		foreach ( $data['faq'] as $question => $answer ) {
+			$data['sections']['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
 		}
+
+		return $data;
 	}
 
 	/**
