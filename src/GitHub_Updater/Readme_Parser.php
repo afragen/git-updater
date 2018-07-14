@@ -38,7 +38,7 @@ class Readme_Parser extends Parser {
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		$file_path = WP_CONTENT_DIR . '/ghu-readme.txt';
+		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
 		file_put_contents( $file_path, $file );
 		parent::__construct( $file_path );
 		@unlink( $file_path );
