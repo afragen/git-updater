@@ -1,6 +1,7 @@
 #### [unreleased]
 * fixed `register_activation_hook` to add the `develop` branch if that is the source
 * refactored `class Readme_Parser` to use unmodified `vendor/class-parser.php`
+* add `Requires PHP` info to _More Detail_ window
 
 #### 8.1.2 / 2018-06-28
 * fixed malformed link tag, thanks @alexclassroom
