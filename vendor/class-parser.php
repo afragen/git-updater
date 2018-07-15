@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Readme;
 
-//use WordPressdotorg\Plugin_Directory\Markdown;
+use WordPressdotorg\Plugin_Directory\Markdown;
 
 /**
  * WordPress.org Plugin Readme Parser.
@@ -165,10 +165,7 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file ) {
-		// TODO: Mod for GitHub Updater.
-		//$contents = file_get_contents( $file );
-		$contents = $file;
-
+		$contents = file_get_contents( $file );
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
@@ -416,7 +413,6 @@ class Parser {
 					$this->sections['faq'] .= "<dt id='{$question_slug}'>{$question}</dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
-				$this->faq_as_h4(); // TODO: GitHub Updater
 			}
 		}
 

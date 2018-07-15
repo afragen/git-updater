@@ -6,7 +6,7 @@
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
- * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
+ * @uses      http://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
  */
 
 namespace Fragen\GitHub_Updater;
@@ -25,7 +25,28 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Readme_Parser
  */
 class Readme_Parser extends Parser {
+
 	/**
+	 * Constructor.
+	 *
+	 * Convert file contents string to temporary file.
+	 * Pass file path into class-parser.php.
+	 * Delete temporary file when finished.
+	 *
+	 * @param string $file
+	 *
+	 * @return void
+	 */
+	public function __construct( $file ) {
+		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
+		file_put_contents( $file_path, $file );
+		parent::__construct( $file_path );
+		@unlink( $file_path );
+	}
+
+	/**
+	 * Parse text into markdown.
+	 *
 	 * @param string $text
 	 *
 	 * @return string
@@ -50,6 +71,7 @@ class Readme_Parser extends Parser {
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
+		$data = $this->faq_as_h4( $data );
 
 		return $data;
 	}
@@ -87,13 +109,22 @@ class Readme_Parser extends Parser {
 
 	/**
 	 * Converts FAQ from dictionary list to h4 style.
+	 *
+	 * @param array $data Array of parsed readme data.
+	 *
+	 * @return array $data
 	 */
-	protected function faq_as_h4() {
-		unset( $this->sections['faq'] );
-		$this->sections['faq'] = '';
-		foreach ( $this->faq as $question => $answer ) {
-			$this->sections['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
+	public function faq_as_h4( $data ) {
+		if ( empty( $data['faq'] ) ) {
+			return $data;
 		}
+		unset( $data['sections']['faq'] );
+		$data['sections']['faq'] = '';
+		foreach ( $data['faq'] as $question => $answer ) {
+			$data['sections']['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
+		}
+
+		return $data;
 	}
 
 	/**

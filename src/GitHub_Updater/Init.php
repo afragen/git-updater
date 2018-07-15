@@ -38,16 +38,25 @@ class Init extends Base {
 	 * Rename on activation.
 	 *
 	 * Correctly renames the slug when GitHub Updater is installed
-	 * via FTP or from plugin upload. Causes activation to fail.
+	 * via FTP or from plugin upload.
+	 *
+	 * Set current branch to `develop` if appropriate.
+	 *
+	 * `rename()` causes activation to fail.
 	 *
 	 * @return void
 	 */
 	public function rename_on_activation() {
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
 		$slug       = isset( $_GET['plugin'] ) ? $_GET['plugin'] : false;
+		$exploded   = explode( '-', dirname( $slug ) );
+
+		if ( in_array( 'develop', $exploded ) ) {
+			$options = $this->get_class_vars( 'Base', 'options' );
+			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
+		}
 
 		if ( $slug !== 'github-updater/github-updater.php' ) {
-			// This results in failed plugin activation.
 			rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'github-updater' );
 		}
 	}

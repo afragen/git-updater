@@ -362,6 +362,7 @@ class Plugin extends Base {
 		$response->version       = $plugin->remote_version;
 		$response->sections      = $plugin->sections;
 		$response->requires      = $plugin->requires;
+		$response->requires_php  = $plugin->requires_php;
 		$response->tested        = $plugin->tested;
 		$response->downloaded    = $plugin->downloaded;
 		$response->last_updated  = $plugin->last_updated;
