@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed setting of `Requires PHP` header in `API::set_readme_info()`
 
 #### 8.2.0 / 2018-07-15
 * fixed `register_activation_hook` to add the `develop` branch if that is the source

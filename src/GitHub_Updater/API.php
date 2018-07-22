@@ -746,6 +746,7 @@ class API {
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
+		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : null;
 		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : null;
 		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : null;
 
