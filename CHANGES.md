@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 8.2.1 / 2018-07-22
+* fixed setting of `Requires PHP` header in `API::set_readme_info()`
+
 #### 8.2.0 / 2018-07-15
 * fixed `register_activation_hook` to add the `develop` branch if that is the source
 * refactored `class Readme_Parser` to use unmodified `vendor/class-parser.php`
