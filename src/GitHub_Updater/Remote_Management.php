@@ -161,7 +161,7 @@ class Remote_Management {
 				settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
 				submit_button();
-			?>
+				?>
 			</form>
 			<?php
 			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );

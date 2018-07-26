@@ -233,7 +233,7 @@ class Settings extends Base {
 						$this->add_hidden_settings_sections( $subtab );
 					}
 					submit_button();
-		?>
+					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'github_updater_refresh_transients' => true ], $action ); ?>
 				<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">

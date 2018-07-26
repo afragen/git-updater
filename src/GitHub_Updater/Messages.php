@@ -108,7 +108,7 @@ class Messages {
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
 						echo ' ' . $repo['code'];
-				?>
+						?>
 						<br>
 						<?php
 						printf(
@@ -149,7 +149,7 @@ class Messages {
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
 						echo ' ' . $repo['code'];
-				?>
+						?>
 						<br>
 						<?php esc_html_e( 'There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater' ); ?>
 					</p>
@@ -172,7 +172,7 @@ class Messages {
 				<?php
 				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
 				echo ' ' . self::$error_message;
-		?>
+				?>
 			</p>
 		</div>
 		<?php

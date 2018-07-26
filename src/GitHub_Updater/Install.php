@@ -340,7 +340,7 @@ class Install {
 			if ( 'theme' === $type ) {
 				submit_button( esc_html__( 'Install Theme', 'github-updater' ) );
 			}
-		?>
+			?>
 		</form>
 		<?php
 	}
