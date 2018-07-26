@@ -39,9 +39,8 @@ class Readme_Parser extends Parser {
 	 */
 	public function __construct( $file ) {
 		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
-		file_put_contents( $file_path, $file );
+		$file_path = file_put_contents( $file_path, $file ) ? $file_path : false;
 		parent::__construct( $file_path );
-		@unlink( $file_path );
 	}
 
 	/**
