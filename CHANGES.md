@@ -1,4 +1,6 @@
 #### [unreleased]
+* test to ensure `file_put_contents()` works
+* overwrite `tmp-readme.txt` instead of delete
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
