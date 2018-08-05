@@ -2,6 +2,8 @@
 * test to ensure `file_put_contents()` works
 * overwrite `tmp-readme.txt` instead of delete
 * delete `tmp-readme.txt` on uninstall
+* switched check for user privileges to `update_{plugins|themes}` and `install_{plugins|themes}`
+* refactored addition of Install tabs for specific privileges
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
