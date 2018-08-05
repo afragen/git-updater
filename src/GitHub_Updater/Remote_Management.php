@@ -131,10 +131,9 @@ class Remote_Management {
 	 * Adds Remote Management tab to Settings page.
 	 */
 	public function add_settings_tabs() {
+		$install_tabs = [ 'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ) ];
 		add_filter(
-			'github_updater_add_settings_tabs', function ( $tabs ) {
-				$install_tabs = [ 'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ) ];
-
+			'github_updater_add_settings_tabs', function ( $tabs ) use ( $install_tabs ) {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
