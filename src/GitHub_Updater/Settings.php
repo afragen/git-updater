@@ -77,7 +77,7 @@ class Settings extends Base {
 		$this->load_hooks();
 
 		// Need to ensure these classes are activated here for hooks to fire.
-		Singleton::get_instance( 'Install', $this );
+		Singleton::get_instance( 'Install', $this )->run();
 		Singleton::get_instance( 'Remote_Management', $this );
 	}
 

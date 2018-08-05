@@ -61,13 +61,20 @@ class Install {
 
 	/**
 	 * Constructor.
-	 * Need class-wp-upgrader.php for upgrade classes.
 	 */
 	public function __construct() {
 		self::$options        = $this->get_class_vars( 'Base', 'options' );
 		self::$installed_apis = $this->get_class_vars( 'Base', 'installed_apis' );
 		self::$git_servers    = $this->get_class_vars( 'Base', 'git_servers' );
+	}
 
+	/**
+	 * Let's set up the Install tabs.
+	 * Need class-wp-upgrader.php for upgrade classes.
+	 *
+	 * @return void
+	 */
+	public function run() {
 		$this->load_js();
 		$this->add_settings_tabs();
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
