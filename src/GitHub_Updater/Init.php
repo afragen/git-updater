@@ -115,9 +115,7 @@ class Init extends Base {
 			return true;
 		}
 
-		$can_user_update = is_multisite()
-			? current_user_can( 'manage_network' )
-			: current_user_can( 'manage_options' );
+		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
 		$this->load_options();
 
 		$admin_pages = [
