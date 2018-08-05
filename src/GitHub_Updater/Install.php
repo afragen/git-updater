@@ -99,6 +99,12 @@ class Install {
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [];
+		if ( current_user_can( 'install_plugins' ) ) {
+			$install_tabs['github_updater_install_plugin'] = esc_html__( 'Install Plugin', 'github-updater' );
+		}
+		if ( current_user_can( 'install_themes' ) ) {
+			$install_tabs['github_updater_install_theme'] = esc_html__( 'Install Theme', 'github-updater' );
+		}
 		add_filter(
 			'github_updater_add_settings_tabs', function ( $tabs ) use ( $install_tabs ) {
 				return array_merge( $tabs, $install_tabs );
