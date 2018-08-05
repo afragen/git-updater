@@ -710,7 +710,6 @@ class Settings extends Base {
 		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
-		$waiting_title = esc_html__( 'Waiting for WP-Cron to finish.', 'github-updater' );
 
 		$plugins  = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes   = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
@@ -736,25 +735,22 @@ class Settings extends Base {
 					'private' => isset( $e->is_private ) ? $e->is_private : false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
-					'waiting' => $e->waiting,
 				];
 			}, $type_repos
 		);
 
-		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
-		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
-		$waiting = '&nbsp;<span title="' . $waiting_title . '" style="color:#ff7900;" class="dashicons dashicons-warning"></span>';
+		$lock   = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
+		$broken = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'github-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon          = false !== strpos( $data['type'], 'theme' )
+			$dashicon   = false !== strpos( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private        = $data['private'] ? $lock : null;
-			$is_broken         = $data['broken'] ? $broken : null;
-			$is_dot_org        = $data['dot_org'] ? $dot_org : null;
-			$waiting_or_broken = $data['waiting'] ? $waiting : $is_broken;
-			printf( '<p>' . $dashicon . $data['name'] . $is_private . $waiting_or_broken . $is_dot_org . '</p>' );
+			$is_private = $data['private'] ? $lock : null;
+			$is_broken  = $data['broken'] ? $broken : null;
+			$is_dot_org = $data['dot_org'] ? $dot_org : null;
+			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . '</p>' );
 		}
 	}
 }
