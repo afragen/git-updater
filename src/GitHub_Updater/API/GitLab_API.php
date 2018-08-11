@@ -108,7 +108,7 @@ class GitLab_API extends API implements API_Interface {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -267,7 +267,7 @@ class GitLab_API extends API implements API_Interface {
 				return false;
 			}
 
-			$response = ( $this->type->repo === $project->path ) ? $project : false;
+			$response = ( $this->type->slug === $project->path ) ? $project : false;
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
@@ -363,7 +363,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! empty( $_GET['rollback'] ) &&
 			( isset( $_GET['action'], $_GET['theme'] ) &&
 			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
+			$this->type->slug === $_GET['theme'] )
 		) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
@@ -394,7 +394,7 @@ class GitLab_API extends API implements API_Interface {
 		$download_link = implode(
 			'/', [
 				'https://gitlab.com/api/v4/projects',
-				urlencode( $this->type->owner . '/' . $this->type->repo ),
+				urlencode( $this->type->owner . '/' . $this->type->slug ),
 				'builds/artifacts',
 				$this->type->newest_tag,
 				'download',
@@ -457,7 +457,7 @@ class GitLab_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'projects';
-			$id           = implode( '/', [ $this->type->owner, $this->type->repo ] );
+			$id           = implode( '/', [ $this->type->owner, $this->type->slug ] );
 			$id           = urlencode( $id );
 			$response     = $this->api( '/projects/' . $id );
 
@@ -465,7 +465,7 @@ class GitLab_API extends API implements API_Interface {
 				return $id;
 			}
 
-			if ( $response && $this->type->repo === $response->path ) {
+			if ( $response && $this->type->slug === $response->path ) {
 				$id = $response->id;
 				$this->set_repo_cache( 'project_id', $id );
 				$this->set_repo_cache( 'project', $response );
@@ -567,7 +567,7 @@ class GitLab_API extends API implements API_Interface {
 				'/', [
 					$repo_type['base_download'],
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'repository/archive.zip',
 				]
 			);

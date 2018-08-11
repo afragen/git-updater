@@ -78,7 +78,7 @@ class GitHub_API extends API implements API_Interface {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -310,7 +310,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( ! empty( $_GET['rollback'] ) &&
 			( isset( $_GET['action'], $_GET['theme'] ) &&
 			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
+			$this->type->slug === $_GET['theme'] )
 		) {
 			$endpoint .= $rollback;
 
@@ -480,7 +480,7 @@ class GitHub_API extends API implements API_Interface {
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'zipball/',
 				]
 			);

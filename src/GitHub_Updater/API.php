@@ -35,7 +35,7 @@ class API {
 	/**
 	 * Holds HTTP error code from API call.
 	 *
-	 * @var array ( $this->type-repo => $code )
+	 * @var array ( $this->type->slug => $code )
 	 */
 	protected static $error_code = [];
 
@@ -309,8 +309,8 @@ class API {
 			static::$error_code = array_merge(
 				static::$error_code,
 				[
-					$this->type->repo => [
-						'repo' => $this->type->repo,
+					$this->type->slug => [
+						'repo' => $this->type->slug,
 						'code' => $code,
 						'name' => $this->type->name,
 						'git'  => $this->type->type,
@@ -318,7 +318,7 @@ class API {
 				]
 			);
 			if ( 'github' === $type['repo'] ) {
-				GitHub_API::ratelimit_reset( $response, $this->type->repo );
+				GitHub_API::ratelimit_reset( $response, $this->type->slug );
 			}
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['repo'] );
 
@@ -392,7 +392,7 @@ class API {
 		$type     = $this->return_repo_type();
 		$segments = [
 			'owner'  => $this->type->owner,
-			'repo'   => $this->type->repo,
+			'repo'   => $this->type->slug,
 			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
 		];
 
@@ -468,7 +468,7 @@ class API {
 			return false;
 		}
 
-		$slug     = $this->type->repo;
+		$slug     = $this->type->slug;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
@@ -551,9 +551,9 @@ class API {
 		}
 
 		// Add repo access token.
-		if ( ! empty( static::$options[ $git->type->repo ] ) ) {
+		if ( ! empty( static::$options[ $git->type->slug ] ) ) {
 			$endpoint = remove_query_arg( $key, $endpoint );
-			$endpoint = add_query_arg( $key, static::$options[ $git->type->repo ], $endpoint );
+			$endpoint = add_query_arg( $key, static::$options[ $git->type->slug ], $endpoint );
 		}
 
 		return $endpoint;

@@ -62,7 +62,7 @@ trait GHU_Trait {
 	 */
 	public function get_repo_cache( $repo = false ) {
 		if ( ! $repo ) {
-			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$cache     = get_site_option( $cache_key );
@@ -90,7 +90,7 @@ trait GHU_Trait {
 	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
 		$hours = $this->get_class_vars( 'API', 'hours' );
 		if ( ! $repo ) {
-			$repo = isset( $this->type->repo ) ? $this->type->repo : 'ghu';
+			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
@@ -205,7 +205,7 @@ trait GHU_Trait {
 			return true;
 		}
 		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
-			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->repo ] );
+			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->slug ] );
 		}
 
 		return false;

@@ -108,7 +108,7 @@ class Bitbucket_API extends API implements API_Interface {
 				$contents = $response->data;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -345,7 +345,7 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( ! empty( $_GET['rollback'] ) &&
 			( isset( $_GET['action'], $_GET['theme'] ) &&
 			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
+			$this->type->slug === $_GET['theme'] )
 		) {
 			$endpoint .= $rollback . '.zip';
 
@@ -391,9 +391,9 @@ class Bitbucket_API extends API implements API_Interface {
 			'/', [
 				'https://bitbucket.org',
 				$this->type->owner,
-				$this->type->repo,
+				$this->type->slug,
 				'downloads',
-				$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				$this->type->slug . '-' . $this->type->newest_tag . '.zip',
 			]
 		);
 
@@ -491,7 +491,7 @@ class Bitbucket_API extends API implements API_Interface {
 				'/', [
 					$repo_type['base_download'],
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'get/',
 				]
 			);
