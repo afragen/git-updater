@@ -5,6 +5,7 @@
 * switched check for user privileges to `update_{plugins|themes}` and `install_{plugins|themes}`
 * refactored addition of Install tabs for specific privileges
 * switch `repo -> slug` and `slug -> file` in plugin/theme objects for more consistency with WP core
+* add `override` query arg for RESTful updates to specific tags
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
