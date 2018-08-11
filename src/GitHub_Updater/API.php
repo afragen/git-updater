@@ -680,8 +680,8 @@ class API {
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
 		$this->type->remote_version = strtolower( $response['Version'] );
-		$this->type->requires_php   = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : $this->type->requires_php;
-		$this->type->requires       = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : $this->type->requires;
+		$this->type->requires_php   = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : false;
+		$this->type->requires       = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
 		$this->type->dot_org        = $response['dot_org'];
 	}
 
@@ -706,9 +706,9 @@ class API {
 	 * @return integer
 	 */
 	protected function make_rating( $repo_meta ) {
-		$watchers    = empty( $repo_meta['watchers'] ) ? $this->type->watchers : $repo_meta['watchers'];
-		$forks       = empty( $repo_meta['forks'] ) ? $this->type->forks : $repo_meta['forks'];
-		$open_issues = empty( $repo_meta['open_issues'] ) ? $this->type->open_issues : $repo_meta['open_issues'];
+		$watchers    = ! empty( $repo_meta['watchers'] ) ? $repo_meta['watchers'] : 0;
+		$forks       = ! empty( $repo_meta['forks'] ) ? $repo_meta['forks'] : 0;
+		$open_issues = ! empty( $repo_meta['open_issues'] ) ? $repo_meta['open_issues'] : 0;
 
 		$rating = abs( (int) round( $watchers + ( $forks * 1.5 ) - ( $open_issues * 0.1 ) ) );
 
