@@ -306,7 +306,7 @@ class GitLab_API extends API implements API_Interface {
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
+					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -327,12 +327,11 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using GitLab API.
 	 *
-	 * @param boolean $rollback      for theme rollback.
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/:owner/:repo/repository/archive.zip', true );
 		$endpoint           = '';
 
@@ -346,7 +345,7 @@ class GitLab_API extends API implements API_Interface {
 		}
 
 		/*
-		 * If a branch has been given, only check that for the remote info.
+		 * If a branch has been given, use branch.
 		 * If branch is master (default) and tags are used, use newest tag.
 		 */
 		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
@@ -355,18 +354,6 @@ class GitLab_API extends API implements API_Interface {
 		} elseif ( ! empty( $this->type->branch ) ) {
 			$endpoint = remove_query_arg( 'ref', $endpoint );
 			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-
-		/*
-		 * Check for rollback.
-		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-			( isset( $_GET['action'], $_GET['theme'] ) &&
-			'upgrade-theme' === $_GET['action'] &&
-			$this->type->slug === $_GET['theme'] )
-		) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', esc_attr( $_GET['rollback'] ), $endpoint );
 		}
 
 		/*

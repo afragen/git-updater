@@ -305,7 +305,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 			if ( $response ) {
 				foreach ( $response as $branch => $api_response ) {
-					$branches[ $branch ] = $this->construct_download_link( false, $branch );
+					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -326,12 +326,11 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Bitbucket API
 	 *
-	 * @param boolean $rollback      For theme rollback. Defaults to false.
 	 * @param boolean $branch_switch For direct branch changing. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 		$endpoint           = '';
 
@@ -340,17 +339,10 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		/*
-		 * Check for rollback.
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
 		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-			( isset( $_GET['action'], $_GET['theme'] ) &&
-			'upgrade-theme' === $_GET['action'] &&
-			$this->type->slug === $_GET['theme'] )
-		) {
-			$endpoint .= $rollback . '.zip';
-
-			// For users wanting to update against branch other than master or not using tags, else use newest_tag.
-		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {
 				$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 			} else {

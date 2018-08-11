@@ -671,13 +671,13 @@ class Base {
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
-		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
+		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
 		$slug      = 'plugin' === $type ? $repo->file : $repo->slug;
 		$rollback  = [
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
-			'package'     => $repo_api->construct_download_link( false, $this->tag ),
+			'package'     => $repo_api->construct_download_link( $this->tag ),
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,

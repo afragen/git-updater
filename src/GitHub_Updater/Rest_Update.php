@@ -81,7 +81,7 @@ class Rest_Update extends Base {
 			'plugin'      => $plugin->file,
 			'new_version' => null,
 			'url'         => $plugin->uri,
-			'package'     => $repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( $tag ),
 		];
 
 		add_filter(
@@ -132,7 +132,7 @@ class Rest_Update extends Base {
 			'theme'       => $theme->slug,
 			'new_version' => null,
 			'url'         => $theme->uri,
-			'package'     => $repo_api->construct_download_link( false, $tag ),
+			'package'     => $repo_api->construct_download_link( $tag ),
 		];
 
 		add_filter(
