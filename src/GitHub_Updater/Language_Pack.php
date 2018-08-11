@@ -107,8 +107,8 @@ class Language_Pack {
 				$lang_pack_mod   = isset( $repo->language_packs->$locale )
 					? strtotime( $repo->language_packs->$locale->updated )
 					: 0;
-				$translation_mod = isset( $translations[ $repo->repo ][ $locale ] )
-					? strtotime( $translations[ $repo->repo ][ $locale ]['PO-Revision-Date'] )
+				$translation_mod = isset( $translations[ $repo->slug ][ $locale ] )
+					? strtotime( $translations[ $repo->slug ][ $locale ]['PO-Revision-Date'] )
 					: 0;
 				if ( $lang_pack_mod > $translation_mod ) {
 					$transient->translations[] = (array) $repo->language_packs->$locale;

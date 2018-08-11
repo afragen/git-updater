@@ -341,7 +341,7 @@ class Settings extends Base {
 		foreach ( $ghu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = [];
-			$ghu_options_keys[ $token->repo ] = null;
+			$ghu_options_keys[ $token->slug ] = null;
 
 			/*
 			 * Check to see if it's a private repo or Enterprise and set variables.
@@ -359,7 +359,7 @@ class Settings extends Base {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
-			$setting_field['id']    = $token->repo;
+			$setting_field['id']    = $token->slug;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
 			$token_type         = explode( '_', $token->type );
@@ -370,7 +370,7 @@ class Settings extends Base {
 			}
 
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
-			$setting_field['callback'] = $token->repo;
+			$setting_field['callback'] = $token->slug;
 
 			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
 			add_settings_field(
@@ -730,7 +730,7 @@ class Settings extends Base {
 			function ( $e ) {
 				return [
 					'type'    => $e->type,
-					'repo'    => $e->repo,
+					'repo'    => $e->slug,
 					'name'    => $e->name,
 					'private' => isset( $e->is_private ) ? $e->is_private : false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,

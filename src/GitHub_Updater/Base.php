@@ -292,7 +292,7 @@ class Base {
 	public function get_remote_repo_meta( $repo ) {
 		$file = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
-			$file = basename( $repo->slug );
+			$file = basename( $repo->file );
 		}
 
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
@@ -338,11 +338,11 @@ class Base {
 			self::$options['branch_switch'] = null;
 		}
 
-		if ( ! isset( $this->$type->repo ) ) {
+		if ( ! isset( $this->$type->slug ) ) {
 			$this->$type       = new \stdClass();
-			$this->$type->repo = null;
-		} elseif ( ! isset( self::$options[ $this->$type->repo ] ) ) {
-			self::$options[ $this->$type->repo ] = null;
+			$this->$type->slug = null;
+		} elseif ( ! isset( self::$options[ $this->$type->slug ] ) ) {
+			self::$options[ $this->$type->slug ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
 
@@ -616,8 +616,8 @@ class Base {
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->repo || $rename === $repo->repo ) {
-				$arr['repo'] = $repo->repo;
+			if ( $slug === $repo->slug || $rename === $repo->slug ) {
+				$arr['slug'] = $repo->slug;
 				break;
 			}
 		}
@@ -644,7 +644,7 @@ class Base {
 			$type = 'plugin';
 
 			$repo = $this->get_repo_slugs( $slug );
-			$slug = ! empty( $repo ) ? $repo['repo'] : $slug;
+			$slug = ! empty( $repo ) ? $repo['slug'] : $slug;
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
@@ -672,7 +672,7 @@ class Base {
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
 		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
-		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
+		$slug      = 'plugin' === $type ? $repo->file : $repo->slug;
 		$rollback  = [
 			$type         => $slug,
 			'new_version' => $this->tag,
@@ -684,7 +684,7 @@ class Base {
 		];
 
 		if ( 'plugin' === $type ) {
-			$rollback['slug'] = $repo->repo;
+			$rollback['slug'] = $repo->slug;
 			$rollback         = (object) $rollback;
 		}
 
@@ -759,7 +759,7 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = [];
 		if ( null !== $repo ) {
-			$cache = $this->get_repo_cache( $repo->repo );
+			$cache = $this->get_repo_cache( $repo->slug );
 
 			return empty( $cache );
 		}
@@ -768,7 +768,7 @@ class Base {
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->repo ] = $this->get_repo_cache( $git_repo->repo );
+			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
 		}
 		$waiting = array_filter(
 			$caches, function ( $e ) {
