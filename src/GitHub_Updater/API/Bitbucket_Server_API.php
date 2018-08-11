@@ -273,7 +273,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			if ( $response && isset( $response->values ) ) {
 				foreach ( (array) $response->values as $value ) {
 					$branch              = $value->displayId;
-					$branches[ $branch ] = $this->construct_download_link( false, $branch );
+					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -299,12 +299,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @link https://bitbucket.org/atlassian/stash-archive
 	 *
-	 * @param boolean $rollback      for theme rollback.
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
 
 		self::$method = 'download_link';
