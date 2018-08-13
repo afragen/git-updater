@@ -350,7 +350,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				 * Required for using stash-archive.
 				 */
 				$defaults = [
-					'prefix' => $git->type->repo . '/',
+					'prefix' => $git->type->slug . '/',
 					'at'     => $git->type->branch,
 				];
 				$endpoint = add_query_arg( $defaults, $endpoint );

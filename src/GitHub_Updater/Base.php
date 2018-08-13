@@ -534,8 +534,7 @@ class Base {
 		) {
 			if ( $upgrader_object instanceof Plugin ) {
 				foreach ( (array) $upgrader_object->config as $plugin ) {
-					if ( dirname( $plugin->slug ) === $slug ) {
-						$slug       = $plugin->repo;
+					if ( $slug === $plugin->slug ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
 						break;
 					}
@@ -543,7 +542,7 @@ class Base {
 			}
 			if ( $upgrader_object instanceof Theme ) {
 				foreach ( (array) $upgrader_object->config as $theme ) {
-					if ( $slug === $theme->repo ) {
+					if ( $slug === $theme->slug ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
 						break;
 					}
