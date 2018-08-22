@@ -7,6 +7,7 @@
 * switch `repo -> slug` and `slug -> file` in plugin/theme objects for more consistency with WP core
 * add `override` query arg for RESTful updates to specific tags
 * refactor to remove redundancy between rollback and branch switch
+* fixed incorrect update notification after update
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`

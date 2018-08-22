@@ -655,6 +655,10 @@ class Theme extends Base {
 				}
 
 				$transient->response[ $theme->slug ] = $response;
+			} else {
+				if ( isset( $transient->response[ $theme->slug ] ) ) {
+					unset( $transient->response[ $theme->slug ] );
+				}
 			}
 
 			// Unset if override dot org AND same slug on dot org.

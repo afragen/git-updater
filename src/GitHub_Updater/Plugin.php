@@ -420,6 +420,10 @@ class Plugin extends Base {
 				}
 
 				$transient->response[ $plugin->file ] = (object) $response;
+			} else {
+				if ( isset( $transient->response[ $plugin->file ] ) ) {
+					unset( $transient->response[ $plugin->file ] );
+				}
 			}
 
 			// Unset if override dot org AND same slug on dot org.
