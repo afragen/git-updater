@@ -52,6 +52,17 @@ trait GHU_Trait {
 	}
 
 	/**
+	 * Check current page.
+	 *
+	 * @param array $pages
+	 * @return bool
+	 */
+	public function is_current_page( array $pages ) {
+		global $pagenow;
+		return in_array( $pagenow, $pages );
+	}
+
+	/**
 	 * Returns repo cached data.
 	 *
 	 * @access protected
