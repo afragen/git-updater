@@ -593,12 +593,14 @@ class Settings extends Base {
 	private function filter_options() {
 		$options = static::$options;
 
-		// Remove checkbox options.
-		$options = array_filter(
-			$options, function ( $e ) {
-				return '1' !== $e;
-			}
-		);
+		// Remove checkbox options, only after background update complete.
+		if ( ! $this->waiting_for_background_update() ) {
+			$options = array_filter(
+				$options, function ( $e ) {
+					return '1' !== $e;
+				}
+			);
+		}
 
 		$options = array_merge( $options, $_POST['github_updater'] );
 
