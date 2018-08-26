@@ -10,6 +10,7 @@
 * fixed incorrect update notification after update
 * fixed to only load `Settings` on appropriate pages
 * fixed issue where saving options during background updating could cause some checkbox options to be cleared
+* updated error handling of Singleton factory
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
