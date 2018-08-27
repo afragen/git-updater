@@ -7,9 +7,9 @@
 * switch `repo -> slug` and `slug -> file` in plugin/theme objects for more consistency with WP core
 * add `override` query arg for RESTful updates to specific tags
 * refactor to remove redundancy between rollback and branch switch
-* fixed incorrect update notification after update
-* fixed to only load `Settings` on appropriate pages
-* fixed issue where saving options during background updating could cause some checkbox options to be cleared
+* fixed incorrect update notification after update, fixes [#698](https://github.com/afragen/github-updater/issues/698)
+* fixed to only load `Settings` on appropriate pages, fixes [#711](https://github.com/afragen/github-updater/issues/711)
+* fixed issue where saving options during background updating could cause some checkbox options to be cleared, [5d68ea5](https://github.com/afragen/github-updater/commit/5d68ea54385a2fe62093e25ef42672bbfd504f89)
 * updated error handling of Singleton factory
 
 #### 8.2.1 / 2018-07-22
