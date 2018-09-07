@@ -297,6 +297,7 @@ trait GHU_Trait {
 	protected function parse_header_uri( $repo_header ) {
 		$header_parts         = parse_url( $repo_header );
 		$header_path          = pathinfo( $header_parts['path'] );
+		$header['original']   = $repo_header;
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$header['owner']      = trim( $header_path['dirname'], '/' );

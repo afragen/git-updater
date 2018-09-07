@@ -213,6 +213,13 @@ class Install {
 				}
 			}
 
+			/*
+			 * Install from Zipfile.
+			 */
+			if ( 'zipfile' === self::$install['github_updater_api'] ) {
+				self::$install = Singleton::get_instance( 'API\Zipfile_API', $this )->remote_install( $headers, self::$install );
+			}
+
 			if ( isset( self::$install['options'] ) ) {
 				$this->save_options_on_install( self::$install['options'] );
 			}
@@ -276,6 +283,9 @@ class Install {
 				break;
 			case 'gitea':
 				$_POST['gitea_access_token'] = $config['private'] ?: null;
+				break;
+			case 'zipfile':
+				$_POST['zipfile_slug'] = $config['slug'];
 				break;
 		}
 	}
