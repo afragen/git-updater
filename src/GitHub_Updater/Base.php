@@ -120,6 +120,13 @@ class Base {
 		} else {
 			self::$installed_apis['gitea_api'] = false;
 		}
+		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
+			self::$installed_apis['zipfile_api'] = true;
+			self::$git_servers['zipfile']        = 'Zipfile';
+
+		} else {
+			self::$installed_apis['zipfile_api'] = false;
+		}
 	}
 
 	/**
