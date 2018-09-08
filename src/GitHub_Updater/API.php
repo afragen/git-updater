@@ -373,6 +373,7 @@ class API {
 				$arr['repo']          = 'gitea';
 				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
 				$arr['base_download'] = $this->type->enterprise;
+				break;
 		}
 
 		return $arr;
