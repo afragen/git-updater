@@ -84,23 +84,28 @@ class Language_Pack_API extends API {
 		switch ( $type ) {
 			case 'github':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
+				$response = isset( $response->content )
+					? json_decode( base64_decode( $response->content ) )
+					: null;
 				break;
 			case 'bitbucket':
 				$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
-				$response = json_decode( $response->data );
+				$response = isset( $response->data )
+					? json_decode( $response->data )
+					: null;
 				break;
 			case 'gitlab':
 				$id       = urlencode( $headers['owner'] . '/' . $headers['repo'] );
 				$response = $this->api( '/projects/' . $id . '/repository/files/language-pack.json' );
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
+				$response = isset( $response->content )
+					? json_decode( base64_decode( $response->content ) )
+					: null;
 				break;
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
-				$contents = base64_decode( $response->content );
-				$response = json_decode( $contents );
+				$response = isset( $response->content )
+					? json_decode( base64_decode( $response->content ) )
+					: null;
 				break;
 		}
 
