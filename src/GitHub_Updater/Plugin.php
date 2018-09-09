@@ -119,7 +119,8 @@ class Plugin extends Base {
 					? static::$options[ $current_branch ]
 					: false;
 
-				$git_plugin['type']           = $repo_parts['type'];
+				$git_plugin['type']           = 'plugin';
+				$git_plugin['git']            = $repo_parts['git_server'];
 				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
 				$git_plugin['enterprise']     = $header['enterprise_uri'];
 				$git_plugin['enterprise_api'] = $header['enterprise_api'];

@@ -151,7 +151,7 @@ class API {
 			return $fields;
 		}
 
-		return $this->get_repo_api( $repo->type, $repo )->add_repo_setting_field();
+		return $this->get_repo_api( $repo->git, $repo )->add_repo_setting_field();
 	}
 
 	/**
@@ -170,24 +170,20 @@ class API {
 		$repo_api = null;
 		$repo     = $repo ?: new \stdClass();
 		switch ( $type ) {
-			case 'github_plugin':
-			case 'github_theme':
+			case 'github':
 				$repo_api = new GitHub_API( $repo );
 				break;
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
+			case 'bitbucket':
 				if ( ! empty( $repo->enterprise ) ) {
 					$repo_api = new Bitbucket_Server_API( $repo );
 				} else {
 					$repo_api = new Bitbucket_API( $repo );
 				}
 				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
+			case 'gitlab':
 				$repo_api = new GitLab_API( $repo );
 				break;
-			case 'gitea_plugin':
-			case 'gitea_theme':
+			case 'gitea':
 				$repo_api = new Gitea_API( $repo );
 				break;
 		}
@@ -244,11 +240,10 @@ class API {
 			'DomainPath'  => 'Domain Path',
 		];
 
-		if ( false !== strpos( $type, 'plugin' ) ) {
+		if ( 'plugin' === $type ) {
 			$all_headers = $default_plugin_headers;
 		}
-
-		if ( false !== strpos( $type, 'theme' ) ) {
+		if ( 'theme' === $type ) {
 			$all_headers = $default_theme_headers;
 		}
 
@@ -313,7 +308,7 @@ class API {
 						'repo' => $this->type->slug,
 						'code' => $code,
 						'name' => $this->type->name,
-						'git'  => $this->type->type,
+						'git'  => $this->type->git,
 					],
 				]
 			);
@@ -344,11 +339,10 @@ class API {
 	 * @return array
 	 */
 	protected function return_repo_type() {
-		$type        = explode( '_', $this->type->type );
 		$arr         = [];
-		$arr['type'] = $type[1];
+		$arr['type'] = $this->type->type;
 
-		switch ( $type[0] ) {
+		switch ( $this->type->git ) {
 			case 'github':
 				$arr['repo']          = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
@@ -401,7 +395,7 @@ class API {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
-		$repo_api = $this->get_repo_api( $type['repo'] . '_' . $type['type'], $type );
+		$repo_api = $this->get_repo_api( $type['repo'], $this->type );
 		switch ( $type['repo'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -469,16 +463,14 @@ class API {
 			return false;
 		}
 
-		$slug     = $this->type->slug;
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$type     = explode( '_', $this->type->type )[1];
-			$url      = 'https://api.wordpress.org/' . $type . 's/info/1.1/';
+			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.1/";
 			$url      = add_query_arg(
 				[
-					'action'                     => $type . '_information',
-					urlencode( 'request[slug]' ) => $slug,
+					'action'                     => "{$this->type->type}_information",
+					urlencode( 'request[slug]' ) => $this->type->slug,
 				], $url
 			);
 			$response = wp_remote_get( $url );
@@ -517,21 +509,18 @@ class API {
 		$token            = null;
 		$token_enterprise = null;
 
-		switch ( $git->type->type ) {
-			case 'github_plugin':
-			case 'github_theme':
+		switch ( $git->type->git ) {
+			case 'github':
 				$key              = 'access_token';
 				$token            = 'github_access_token';
 				$token_enterprise = 'github_enterprise_token';
 				break;
-			case 'gitlab_plugin':
-			case 'gitlab_theme':
+			case 'gitlab':
 				$key              = 'private_token';
 				$token            = 'gitlab_access_token';
 				$token_enterprise = 'gitlab_enterprise_token';
 				break;
-			case 'gitea_plugin':
-			case 'gitea_theme':
+			case 'gitea':
 				$key              = 'access_token';
 				$token            = 'gitea_access_token';
 				$token_enterprise = 'gitea_access_token';

@@ -302,7 +302,7 @@ class Base {
 			$file = basename( $repo->file );
 		}
 
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		if ( null === $repo_api ) {
 			return false;
 		}
@@ -314,7 +314,7 @@ class Base {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 					$repo_api->get_repo_meta();
-					$changelog = $this->get_changelog_filename( $repo->type );
+					$changelog = $this->get_changelog_filename( $repo );
 					if ( $changelog ) {
 						$repo_api->get_remote_changes( $changelog );
 					}
@@ -379,17 +379,17 @@ class Base {
 	/**
 	 * Get filename of changelog and return.
 	 *
-	 * @param $type
+	 * @param \stdClass $repo
 	 *
 	 * @return bool|string
 	 */
-	protected function get_changelog_filename( $type ) {
+	protected function get_changelog_filename( $repo ) {
 		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$changes     = null;
 		$local_files = null;
 
-		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path, 0 );
+		if ( is_dir( $repo->local_path ) ) {
+			$local_files = scandir( $repo->local_path, 0 );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
@@ -676,7 +676,7 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
+		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
 		$slug      = 'plugin' === $type ? $repo->file : $repo->slug;
 		$rollback  = [

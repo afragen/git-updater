@@ -360,15 +360,14 @@ class Settings extends Base {
 				continue;
 			}
 
-			if ( false !== strpos( $token->type, 'theme' ) ) {
+			if ( 'theme' === $token->type ) {
 				$type = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;';
 			}
 
 			$setting_field['id']    = $token->slug;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
-			$token_type         = explode( '_', $token->type );
-			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', [], $token, $token_type[0] );
+			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', [], $token, $token->git );
 
 			if ( empty( $repo_setting_field ) ) {
 				continue;
@@ -490,23 +489,23 @@ class Settings extends Base {
 		// Set booleans for Enterprise repos.
 		if ( $token->enterprise ) {
 			static::$auth_required['github_enterprise'] = static::$auth_required['github_enterprise']
-				?: false !== strpos( $token->type, 'github' );
+				?: 'github' === $token->git;
 			static::$auth_required['gitlab_enterprise'] = static::$auth_required['gitlab_enterprise']
-				?: false !== strpos( $token->type, 'gitlab' );
+				?: 'gitlab' === $token->git;
 			static::$auth_required['bitbucket_server']  = static::$auth_required['bitbucket_server']
-				?: false !== strpos( $token->type, 'bitbucket' );
+				?: 'bitbucket' === $token->git;
 		}
 
 		// Set booleans for private repos.
 		if ( $this->is_private( $token ) ) {
 			static::$auth_required['github_private']    = static::$auth_required['github_private']
-				?: false !== strpos( $token->type, 'github' );
+				?: 'github' === $token->git;
 			static::$auth_required['bitbucket_private'] = static::$auth_required['bitbucket_private']
-				?: false !== strpos( $token->type, 'bitbucket' );
+				?: 'bitbucket' === $token->git;
 			static::$auth_required['gitlab_private']    = static::$auth_required['gitlab_private']
-				?: false !== strpos( $token->type, 'gitlab' );
+				?: 'gitlab' === $token->git;
 			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
-				?: false !== strpos( $token->type, 'gitea' );
+				?: 'gitea' === $token->git;
 		}
 
 		// Always set to true.
@@ -711,9 +710,9 @@ class Settings extends Base {
 	 * Places a lock dashicon after the repo name if it's a private repo.
 	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *
-	 * @param $type
+	 * @param string $git (github|bitbucket|bbserver|gitlab|gitea)
 	 */
-	private function display_ghu_repos( $type ) {
+	private function display_ghu_repos( $git ) {
 		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
@@ -724,12 +723,12 @@ class Settings extends Base {
 		$bbserver = [ 'bitbucket', 'bbserver' ];
 
 		$type_repos = array_filter(
-			$repos, function ( $e ) use ( $type, $bbserver ) {
-				if ( ! empty( $e->enterprise ) && in_array( $type, $bbserver, true ) ) {
-					return false !== stripos( $e->type, 'bitbucket' ) && 'bbserver' === $type;
+			$repos, function ( $e ) use ( $git, $bbserver ) {
+				if ( ! empty( $e->enterprise ) && in_array( $git, $bbserver, true ) ) {
+					return false !== stripos( $e->git, 'bitbucket' ) && 'bbserver' === $git;
 				}
 
-				return false !== stripos( $e->type, $type );
+				return false !== stripos( $e->git, $git );
 			}
 		);
 

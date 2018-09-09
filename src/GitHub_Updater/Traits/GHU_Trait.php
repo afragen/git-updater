@@ -262,29 +262,19 @@ trait GHU_Trait {
 		$gits  = array_map(
 			function ( $e ) {
 				if ( ! empty( $e->enterprise ) ) {
-					if ( false !== stripos( $e->type, 'bitbucket' ) ) {
+					if ( 'bitbucket' === $e->git ) {
 						return 'bbserver';
 					}
-					if ( false !== stripos( $e->type, 'gitlab' ) ) {
+					if ( 'gitlab' === $e->git ) {
 						return 'gitlabce';
 					}
 				}
 
-				return $e->type;
+				return $e->git;
 			}, $repos
 		);
 
-		$gits = array_unique( array_values( $gits ) );
-
-		$gits = array_map(
-			function ( $e ) {
-				$e = explode( '_', $e );
-
-				return $e[0];
-			}, $gits
-		);
-
-		return array_unique( $gits );
+		return array_unique( array_values( $gits ) );
 	}
 
 	/**

@@ -74,7 +74,7 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $plugin );
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->type, $plugin );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
 
 		$update = [
 			'slug'        => $plugin->slug,
@@ -126,7 +126,7 @@ class Rest_Update extends Base {
 		}
 
 		$this->get_remote_repo_meta( $theme );
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->type, $theme );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
 
 		$update = [
 			'theme'       => $theme->slug,

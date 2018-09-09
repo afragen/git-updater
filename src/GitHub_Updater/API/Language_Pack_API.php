@@ -46,17 +46,16 @@ class Language_Pack_API extends API {
 	 */
 	public function get_language_pack( $headers ) {
 		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
-		$type     = explode( '_', $this->type->type );
 
 		if ( ! $response ) {
-			$response = $this->get_language_pack_json( $type[0], $headers, $response );
+			$response = $this->get_language_pack_json( $this->type->git, $headers, $response );
 
 			if ( $response ) {
 				foreach ( $response as $locale ) {
-					$package = $this->process_language_pack_package( $type[0], $locale, $headers );
+					$package = $this->process_language_pack_package( $this->type->git, $locale, $headers );
 
 					$response->{$locale->language}->package = $package;
-					$response->{$locale->language}->type    = $type[1];
+					$response->{$locale->language}->type    = $this->type->type;
 					$response->{$locale->language}->version = $this->type->local_version;
 				}
 
@@ -74,14 +73,14 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $type     ( github|bitbucket|gitlab ).
+	 * @param string $git     ( github|bitbucket|gitlab|gitea ).
 	 * @param array  $headers
 	 * @param mixed  $response API response.
 	 *
 	 * @return array|bool|mixed
 	 */
-	private function get_language_pack_json( $type, $headers, $response ) {
-		switch ( $type ) {
+	private function get_language_pack_json( $git, $headers, $response ) {
+		switch ( $git ) {
 			case 'github':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
 				$response = isset( $response->content )
@@ -119,15 +118,15 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $type    ( github|bitbucket|gitlab ).
+	 * @param string $git    ( github|bitbucket|gitlab|gitea ).
 	 * @param string $locale
 	 * @param array  $headers
 	 *
 	 * @return array|null|string
 	 */
-	private function process_language_pack_package( $type, $locale, $headers ) {
+	private function process_language_pack_package( $git, $locale, $headers ) {
 		$package = null;
-		switch ( $type ) {
+		switch ( $git ) {
 			case 'github':
 				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
 				$package = implode( '/', $package ) . $locale->package;
