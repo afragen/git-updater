@@ -398,7 +398,7 @@ class Plugin extends Base {
 					'requires_php' => $plugin->requires_php,
 					'branch'       => $plugin->branch,
 					'branches'     => array_keys( $plugin->branches ),
-					'type'         => $plugin->type,
+					'type'         => "{$plugin->git}-{$plugin->type}",
 				];
 
 				// Skip on RESTful updating.

@@ -633,7 +633,7 @@ class Theme extends Base {
 					'package'     => $theme->download_link,
 					'branch'      => $theme->branch,
 					'branches'    => array_keys( $theme->branches ),
-					'type'        => $theme->type,
+					'type'        => "{$theme->git}-{$theme->type}",
 				];
 
 				// Skip on RESTful updating.
