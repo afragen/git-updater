@@ -199,9 +199,9 @@ class Theme extends Base {
 			if ( is_multisite() ) {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_$theme->slug", [ $this, 'wp_theme_update_row' ], 10, 2 );
+					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
 					if ( ! $theme->release_asset ) {
-						add_action( "after_theme_row_$theme->slug", [ $this, 'multisite_branch_switcher' ], 15, 2 );
+						add_action( "after_theme_row_{$theme->slug}", [ $this, 'multisite_branch_switcher' ], 15, 2 );
 					}
 				}
 			}

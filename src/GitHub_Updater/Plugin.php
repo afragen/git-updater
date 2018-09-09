@@ -204,7 +204,7 @@ class Plugin extends Base {
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 				( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_$plugin->file", [ $this, 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
