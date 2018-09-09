@@ -114,21 +114,21 @@ class Plugin extends Base {
 				}
 
 				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
-				$current_branch = 'current_branch_' . $header['repo'];
+				$current_branch = "current_branch_{$header['repo']}";
 				$branch         = isset( static::$options[ $current_branch ] )
 					? static::$options[ $current_branch ]
 					: false;
 
 				$git_plugin['type']           = 'plugin';
 				$git_plugin['git']            = $repo_parts['git_server'];
-				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
 				$git_plugin['enterprise']     = $header['enterprise_uri'];
 				$git_plugin['enterprise_api'] = $header['enterprise_api'];
 				$git_plugin['owner']          = $header['owner'];
 				$git_plugin['slug']           = $header['repo'];
 				$git_plugin['branch']         = $branch ?: 'master';
 				$git_plugin['file']           = $plugin;
-				$git_plugin['local_path']     = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['local_path']     = WP_PLUGIN_DIR . "/{$header['repo']}/";
 
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['file'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
@@ -141,13 +141,13 @@ class Plugin extends Base {
 				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				$git_plugin['banners']['high'] =
-					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )
-						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-1544x500.png'
+					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-1544x500.png" )
+						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-1544x500.png"
 						: null;
 
 				$git_plugin['banners']['low'] =
-					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-772x250.png' )
-						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
+					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-772x250.png" )
+						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-772x250.png"
 						: null;
 
 				$git_plugin['icons'] = [];
@@ -161,7 +161,7 @@ class Plugin extends Base {
 				foreach ( $icons as $key => $filename ) {
 					$key                         = preg_replace( '/_png|_jpg/', '', $key );
 					$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-						? trailingslashit( WP_PLUGIN_URL ) . $git_plugin['slug'] . '/assets/' . $filename
+						? WP_PLUGIN_URL . "/{$git_plugin['slug']}/assets/{$filename}"
 						: null;
 				}
 			}
