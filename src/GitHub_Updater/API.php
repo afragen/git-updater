@@ -650,9 +650,8 @@ class API {
 			$response = file_get_contents( $repo->local_path . $file );
 		}
 
-		switch ( $repo->type ) {
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
+		switch ( $repo->git ) {
+			case 'bitbucket':
 				break;
 			default:
 				$response = base64_encode( $response );
