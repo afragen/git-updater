@@ -312,10 +312,10 @@ class API {
 					],
 				]
 			);
-			if ( 'github' === $type['repo'] ) {
+			if ( 'github' === $type['git'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->slug );
 			}
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['repo'] );
+			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 			return false;
 		}
@@ -344,12 +344,12 @@ class API {
 
 		switch ( $this->type->git ) {
 			case 'github':
-				$arr['repo']          = 'github';
+				$arr['git']          = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
 				$arr['base_download'] = 'https://github.com';
 				break;
 			case 'bitbucket':
-				$arr['repo'] = 'bitbucket';
+				$arr['git'] = 'bitbucket';
 				if ( empty( $this->type->enterprise ) ) {
 					$arr['base_uri']      = 'https://bitbucket.org/api';
 					$arr['base_download'] = 'https://bitbucket.org';
@@ -359,12 +359,12 @@ class API {
 				}
 				break;
 			case 'gitlab':
-				$arr['repo']          = 'gitlab';
+				$arr['git']          = 'gitlab';
 				$arr['base_uri']      = 'https://gitlab.com/api/v4';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
 			case 'gitea':
-				$arr['repo']          = 'gitea';
+				$arr['git']          = 'gitea';
 				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
 				$arr['base_download'] = $this->type->enterprise;
 				break;
@@ -395,8 +395,8 @@ class API {
 			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
 		}
 
-		$repo_api = $this->get_repo_api( $type['repo'], $this->type );
-		switch ( $type['repo'] ) {
+		$repo_api = $this->get_repo_api( $type['git'], $this->type );
+		switch ( $type['git'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
 					$type['base_download'] = $type['base_uri'];
