@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.3.0 / 2018-09-12
 * test to ensure `file_put_contents()` works
 * overwrite `tmp-readme.txt` instead of delete
 * delete `tmp-readme.txt` on uninstall
