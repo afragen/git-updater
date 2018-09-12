@@ -77,12 +77,11 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param bool $rollback      For theme rollback. Defaults to false.
 	 * @param bool $branch_switch For direct branch switching. Defaults to false.
 	 *
 	 * @return string URL for download link.
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false);
+	public function construct_download_link( $branch_switch = false);
 
 	/**
 	 * Create endpoints.

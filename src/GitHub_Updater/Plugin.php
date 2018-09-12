@@ -114,22 +114,23 @@ class Plugin extends Base {
 				}
 
 				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
-				$current_branch = 'current_branch_' . $header['repo'];
+				$current_branch = "current_branch_{$header['repo']}";
 				$branch         = isset( static::$options[ $current_branch ] )
 					? static::$options[ $current_branch ]
 					: false;
 
-				$git_plugin['type']           = $repo_parts['type'];
-				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['type']           = 'plugin';
+				$git_plugin['git']            = $repo_parts['git_server'];
+				$git_plugin['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
 				$git_plugin['enterprise']     = $header['enterprise_uri'];
 				$git_plugin['enterprise_api'] = $header['enterprise_api'];
 				$git_plugin['owner']          = $header['owner'];
-				$git_plugin['repo']           = $header['repo'];
+				$git_plugin['slug']           = $header['repo'];
 				$git_plugin['branch']         = $branch ?: 'master';
-				$git_plugin['slug']           = $plugin;
-				$git_plugin['local_path']     = WP_PLUGIN_DIR . '/' . $header['repo'] . '/';
+				$git_plugin['file']           = $plugin;
+				$git_plugin['local_path']     = WP_PLUGIN_DIR . "/{$header['repo']}/";
 
-				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['slug'] );
+				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['file'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
 				$git_plugin['name']                    = $plugin_data['Name'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
@@ -140,13 +141,13 @@ class Plugin extends Base {
 				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 				$git_plugin['banners']['high'] =
-					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-1544x500.png' )
-						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-1544x500.png'
+					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-1544x500.png" )
+						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-1544x500.png"
 						: null;
 
 				$git_plugin['banners']['low'] =
-					file_exists( trailingslashit( WP_PLUGIN_DIR ) . $header['repo'] . '/assets/banner-772x250.png' )
-						? trailingslashit( WP_PLUGIN_URL ) . $header['repo'] . '/assets/banner-772x250.png'
+					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-772x250.png" )
+						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-772x250.png"
 						: null;
 
 				$git_plugin['icons'] = [];
@@ -160,7 +161,7 @@ class Plugin extends Base {
 				foreach ( $icons as $key => $filename ) {
 					$key                         = preg_replace( '/_png|_jpg/', '', $key );
 					$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-						? trailingslashit( WP_PLUGIN_URL ) . $git_plugin['repo'] . '/assets/' . $filename
+						? WP_PLUGIN_URL . "/{$git_plugin['slug']}/assets/{$filename}"
 						: null;
 				}
 			}
@@ -170,7 +171,7 @@ class Plugin extends Base {
 				continue;
 			}
 
-			$git_plugins[ $git_plugin['repo'] ] = (object) $git_plugin;
+			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
 		}
 
 		return $git_plugins;
@@ -195,17 +196,15 @@ class Plugin extends Base {
 				|| apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				$this->get_remote_repo_meta( $plugin );
-				$plugin->waiting = false;
 			} else {
-				$plugin->waiting          = true;
-				$plugins[ $plugin->repo ] = $plugin;
+				$plugins[ $plugin->slug ] = $plugin;
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 				( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_$plugin->slug", [ $this, 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
@@ -254,20 +253,20 @@ class Plugin extends Base {
 		);
 
 		if ( ! empty( $plugin ) ) {
-			$id       = $plugin['repo'] . '-id';
-			$branches = isset( $this->config[ $plugin['repo'] ]->branches )
-				? $this->config[ $plugin['repo'] ]->branches
+			$id       = $plugin['slug'] . '-id';
+			$branches = isset( $this->config[ $plugin['slug'] ]->branches )
+				? $this->config[ $plugin['slug'] ]->branches
 				: null;
 		} else {
 			return false;
 		}
 
 		// Get current branch.
-		$repo   = $this->config[ $plugin['repo'] ];
+		$repo   = $this->config[ $plugin['slug'] ];
 		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
 		$branch_switch_data                      = [];
-		$branch_switch_data['slug']              = $plugin['repo'];
+		$branch_switch_data['slug']              = $plugin['slug'];
 		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
@@ -353,7 +352,7 @@ class Plugin extends Base {
 			return $false;
 		}
 
-		$response->slug          = $plugin->repo;
+		$response->slug          = $plugin->slug;
 		$response->plugin_name   = $plugin->name;
 		$response->name          = $plugin->name;
 		$response->author        = $plugin->author;
@@ -389,8 +388,8 @@ class Plugin extends Base {
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $this->can_update_repo( $plugin ) ) {
 				$response = [
-					'slug'         => dirname( $plugin->slug ),
-					'plugin'       => $plugin->slug,
+					'slug'         => $plugin->slug,
+					'plugin'       => $plugin->file,
 					'new_version'  => $plugin->remote_version,
 					'url'          => $plugin->uri,
 					'package'      => $plugin->download_link,
@@ -399,7 +398,7 @@ class Plugin extends Base {
 					'requires_php' => $plugin->requires_php,
 					'branch'       => $plugin->branch,
 					'branches'     => array_keys( $plugin->branches ),
-					'type'         => $plugin->type,
+					'type'         => "{$plugin->git}-{$plugin->type}",
 				];
 
 				// Skip on RESTful updating.
@@ -413,30 +412,34 @@ class Plugin extends Base {
 				// If branch is 'master' and plugin is in wp.org repo then pull update from wp.org.
 				if ( $plugin->dot_org && 'master' === $plugin->branch ) {
 					$transient = empty( $transient ) ? get_site_transient( 'update_plugins' ) : $transient;
-					if ( isset( $transient->response[ $plugin->slug ], $transient->response[ $plugin->slug ]->type ) ) {
-						unset( $transient->response[ $plugin->slug ] );
+					if ( isset( $transient->response[ $plugin->file ], $transient->response[ $plugin->file ]->type ) ) {
+						unset( $transient->response[ $plugin->file ] );
 					}
 					if ( ! $this->tag ) {
 						continue;
 					}
 				}
 
-				$transient->response[ $plugin->slug ] = (object) $response;
+				$transient->response[ $plugin->file ] = (object) $response;
+			} else {
+				if ( isset( $transient->response[ $plugin->file ] ) ) {
+					unset( $transient->response[ $plugin->file ] );
+				}
 			}
 
 			// Unset if override dot org AND same slug on dot org.
-			if ( isset( $transient->response[ $plugin->slug ] ) &&
-				! isset( $transient->response[ $plugin->slug ]->type ) &&
+			if ( isset( $transient->response[ $plugin->file ] ) &&
+				! isset( $transient->response[ $plugin->file ]->type ) &&
 				$this->is_override_dot_org()
 			) {
-				unset( $transient->response[ $plugin->slug ] );
+				unset( $transient->response[ $plugin->file ] );
 			}
 
 			// Set transient on rollback.
 			if ( $this->tag &&
-				( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->slug === $_GET['plugin'] )
+				( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin'] )
 			) {
-				$transient->response[ $plugin->slug ] = $this->set_rollback_transient( 'plugin', $plugin );
+				$transient->response[ $plugin->file ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 

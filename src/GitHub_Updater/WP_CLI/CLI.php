@@ -68,7 +68,8 @@ class CLI extends WP_CLI_Command {
 			[
 				'action' => 'github-updater-update',
 				'key'    => $api_key,
-			], admin_url( 'admin-ajax.php' )
+			],
+			admin_url( 'admin-ajax.php' )
 		);
 
 		WP_CLI::success( 'GitHub Updater REST API key has been reset.' );

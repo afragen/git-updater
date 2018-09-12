@@ -101,7 +101,7 @@ class Gitea_API extends API implements API_Interface {
 				$contents = $response;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -287,7 +287,7 @@ class Gitea_API extends API implements API_Interface {
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
+					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -308,30 +308,19 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Gitea API.
 	 *
-	 * @param boolean $rollback      for theme rollback.
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/archive/', true );
 		$endpoint           = '';
 
 		/*
-		 * Check for rollback.
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
 		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-			( isset( $_GET['action'], $_GET['theme'] ) &&
-			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
-		) {
-			$endpoint .= $rollback . '.zip';
-
-			/*
-			* For users wanting to update against branch other than master
-			* or if not using tags, else use newest_tag.
-			*/
-		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch . '.zip';
 		} else {
 			$endpoint .= $this->type->newest_tag . '.zip';
@@ -396,7 +385,8 @@ class Gitea_API extends API implements API_Interface {
 				$arr[] = $e->tag_name;
 
 				return $arr;
-			}, (array) $response
+			},
+			(array) $response
 		);
 
 		return $arr;
@@ -414,7 +404,8 @@ class Gitea_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->private;
 				$arr['last_updated'] = $e->updated_at;
 				$arr['watchers']     = $e->watchers_count;
@@ -442,7 +433,8 @@ class Gitea_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = base64_encode( $e );
 			}
 		);
@@ -464,11 +456,12 @@ class Gitea_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_link    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'archive/',
 				]
 			);
@@ -541,7 +534,8 @@ class Gitea_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ] );
 			}
 		);
@@ -635,7 +629,8 @@ class Gitea_API extends API implements API_Interface {
 		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = implode(
-			'/', [
+			'/',
+			[
 				$base,
 				'repos',
 				$install['github_updater_repo'],

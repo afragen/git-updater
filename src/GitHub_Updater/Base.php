@@ -120,6 +120,13 @@ class Base {
 		} else {
 			self::$installed_apis['gitea_api'] = false;
 		}
+		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
+			self::$installed_apis['zipfile_api'] = true;
+			self::$git_servers['zipfile']        = 'Zipfile';
+
+		} else {
+			self::$installed_apis['zipfile_api'] = false;
+		}
 	}
 
 	/**
@@ -141,7 +148,8 @@ class Base {
 
 		// Load plugin stylesheet.
 		add_action(
-			'admin_enqueue_scripts', function () {
+			'admin_enqueue_scripts',
+			function () {
 				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
 				wp_enqueue_style( 'github-updater' );
 			}
@@ -292,10 +300,10 @@ class Base {
 	public function get_remote_repo_meta( $repo ) {
 		$file = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
-			$file = basename( $repo->slug );
+			$file = basename( $repo->file );
 		}
 
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
+		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		if ( null === $repo_api ) {
 			return false;
 		}
@@ -307,7 +315,7 @@ class Base {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 					$repo_api->get_repo_meta();
-					$changelog = $this->get_changelog_filename( $repo->type );
+					$changelog = $this->get_changelog_filename( $repo );
 					if ( $changelog ) {
 						$repo_api->get_remote_changes( $changelog );
 					}
@@ -338,11 +346,11 @@ class Base {
 			self::$options['branch_switch'] = null;
 		}
 
-		if ( ! isset( $this->$type->repo ) ) {
+		if ( ! isset( $this->$type->slug ) ) {
 			$this->$type       = new \stdClass();
-			$this->$type->repo = null;
-		} elseif ( ! isset( self::$options[ $this->$type->repo ] ) ) {
-			self::$options[ $this->$type->repo ] = null;
+			$this->$type->slug = null;
+		} elseif ( ! isset( self::$options[ $this->$type->slug ] ) ) {
+			self::$options[ $this->$type->slug ] = null;
 			add_site_option( 'github_updater', self::$options );
 		}
 
@@ -372,17 +380,17 @@ class Base {
 	/**
 	 * Get filename of changelog and return.
 	 *
-	 * @param $type
+	 * @param \stdClass $repo
 	 *
 	 * @return bool|string
 	 */
-	protected function get_changelog_filename( $type ) {
+	protected function get_changelog_filename( $repo ) {
 		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$changes     = null;
 		$local_files = null;
 
-		if ( is_dir( $this->$type->local_path ) ) {
-			$local_files = scandir( $this->$type->local_path, 0 );
+		if ( is_dir( $repo->local_path ) ) {
+			$local_files = scandir( $repo->local_path, 0 );
 		}
 
 		$changes = array_intersect( (array) $local_files, $changelogs );
@@ -534,8 +542,7 @@ class Base {
 		) {
 			if ( $upgrader_object instanceof Plugin ) {
 				foreach ( (array) $upgrader_object->config as $plugin ) {
-					if ( dirname( $plugin->slug ) === $slug ) {
-						$slug       = $plugin->repo;
+					if ( $slug === $plugin->slug ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
 						break;
 					}
@@ -543,7 +550,7 @@ class Base {
 			}
 			if ( $upgrader_object instanceof Theme ) {
 				foreach ( (array) $upgrader_object->config as $theme ) {
-					if ( $slug === $theme->repo ) {
+					if ( $slug === $theme->slug ) {
 						$new_source = trailingslashit( $remote_source ) . $slug;
 						break;
 					}
@@ -616,8 +623,8 @@ class Base {
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->repo || $rename === $repo->repo ) {
-				$arr['repo'] = $repo->repo;
+			if ( $slug === $repo->slug || $rename === $repo->slug ) {
+				$arr['slug'] = $repo->slug;
 				break;
 			}
 		}
@@ -644,7 +651,7 @@ class Base {
 			$type = 'plugin';
 
 			$repo = $this->get_repo_slugs( $slug );
-			$slug = ! empty( $repo ) ? $repo['repo'] : $slug;
+			$slug = ! empty( $repo ) ? $repo['slug'] : $slug;
 		}
 
 		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
@@ -670,21 +677,21 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->type, $repo );
-		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
-		$slug      = 'plugin' === $type ? $repo->slug : $repo->repo;
+		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
+		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
+		$slug      = 'plugin' === $type ? $repo->file : $repo->slug;
 		$rollback  = [
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
-			'package'     => $repo_api->construct_download_link( false, $this->tag ),
+			'package'     => $repo_api->construct_download_link( $this->tag ),
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
 		];
 
 		if ( 'plugin' === $type ) {
-			$rollback['slug'] = $repo->repo;
+			$rollback['slug'] = $repo->slug;
 			$rollback         = (object) $rollback;
 		}
 
@@ -759,7 +766,7 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = [];
 		if ( null !== $repo ) {
-			$cache = $this->get_repo_cache( $repo->repo );
+			$cache = $this->get_repo_cache( $repo->slug );
 
 			return empty( $cache );
 		}
@@ -768,10 +775,11 @@ class Base {
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->repo ] = $this->get_repo_cache( $git_repo->repo );
+			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
 		}
 		$waiting = array_filter(
-			$caches, function ( $e ) {
+			$caches,
+			function ( $e ) {
 				return empty( $e );
 			}
 		);

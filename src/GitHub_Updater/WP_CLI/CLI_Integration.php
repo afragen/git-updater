@@ -84,6 +84,9 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--bitbucket-private]
 	 * : Indicates a private Bitbucket repository
 	 *
+	 * [--slug=<slug>]
+	 * : Optional string indicating the plugin slug
+
 	 * [--github]
 	 * : Optional to denote a GitHub repository
 	 * Required when installing from a self-hosted GitHub installation
@@ -99,6 +102,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitea]
 	 * : Optional switch to denote a Gitea repository
 	 * Required when installing from a Gitea installation
+	 *
+	 * [--zipfile]
+	 * : Optional switch to denote a Zipfile
+	 * Required when installing from a Zipfile
 	 *
 	 * ## EXAMPLES
 	 *
@@ -146,6 +153,9 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--bitbucket-private]
 	 * : Indicates a private Bitbucket repository
 	 *
+	 * [--slug=<slug>]
+	 * : Optional string indicating the theme slug
+	 *
 	 * [--github]
 	 * : Optional to denote a GitHub repository
 	 * Required when installing from a self-hosted GitHub installation
@@ -161,6 +171,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitea]
 	 * : Optional switch to denote a Gitea repository
 	 * Required when installing from a Gitea installation
+	 *
+	 * [--zipfile]
+	 * : Optional switch to denote a Zipfile
+	 * Required when installing from a Zipfile
 	 *
 	 * ## EXAMPLES
 	 *
@@ -202,9 +216,8 @@ class CLI_Integration extends WP_CLI_Command {
 		$cli_config            = [];
 		$cli_config['uri']     = $uri;
 		$cli_config['private'] = $token ?: $bitbucket_private;
-		$cli_config['branch']  = isset( $assoc_args['branch'] )
-			? $assoc_args['branch']
-			: 'master';
+		$cli_config['branch']  = isset( $assoc_args['branch'] ) ? $assoc_args['branch'] : 'master';
+		$cli_config['slug']    = isset( $assoc_args['slug'] ) ? $assoc_args['slug'] : null;
 
 		switch ( $assoc_args ) {
 			case isset( $assoc_args['github'] ):
@@ -218,6 +231,9 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 			case isset( $assoc_args['gitea'] ):
 				$cli_config['git'] = 'gitea';
+				break;
+			case isset( $assoc_args['zipfile'] ):
+				$cli_config['git'] = 'zipfile';
 				break;
 		}
 

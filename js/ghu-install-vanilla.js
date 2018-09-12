@@ -27,7 +27,8 @@
 	var selects = document.querySelector( 'select[ name="github_updater_api" ]' );
 
 	selects.addEventListener(
-		'change', function () {
+		'change',
+		function () {
 			var defaults = ['github', 'bitbucket', 'gitlab', 'gitea'];
 
 			// Create difference array.

@@ -119,7 +119,8 @@ trait Basic_Auth_Loader {
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter(
-					$bulk_update, function ( $e ) use ( $url ) {
+					$bulk_update,
+					function ( $e ) use ( $url ) {
 						return false !== strpos( $url, $e );
 					}
 				);
@@ -128,15 +129,15 @@ trait Basic_Auth_Loader {
 		}
 
 		$type = $slug &&
-				isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'type' )
-			? $repos[ $slug ]->type
+				isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
+			? $repos[ $slug ]->git
 			: $type;
 
 		// Set for WP-CLI.
 		if ( ! $slug ) {
 			foreach ( $repos as $repo ) {
 				if ( property_exists( $repo, 'download_link' ) && $url === $repo->download_link ) {
-					$type = $repo->type;
+					$type = $repo->git;
 					break;
 				}
 			}
@@ -145,13 +146,11 @@ trait Basic_Auth_Loader {
 		// Set for Remote Install.
 		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
 				false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
-			? $_POST['github_updater_api'] . '_install'
+			? $_POST['github_updater_api']
 			: $type;
 
 		switch ( $type ) {
-			case 'bitbucket_plugin':
-			case 'bitbucket_theme':
-			case 'bitbucket_install':
+			case 'bitbucket':
 			case $type instanceof Bitbucket_API:
 			case $type instanceof Bitbucket_Server_API:
 				$bitbucket_org = 'bitbucket.org' === $headers['host'];

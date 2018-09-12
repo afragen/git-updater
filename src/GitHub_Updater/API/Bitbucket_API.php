@@ -108,7 +108,7 @@ class Bitbucket_API extends API implements API_Interface {
 				$contents = $response->data;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -305,7 +305,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 			if ( $response ) {
 				foreach ( $response as $branch => $api_response ) {
-					$branches[ $branch ] = $this->construct_download_link( false, $branch );
+					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -326,12 +326,11 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Bitbucket API
 	 *
-	 * @param boolean $rollback      For theme rollback. Defaults to false.
 	 * @param boolean $branch_switch For direct branch changing. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 		$endpoint           = '';
 
@@ -340,17 +339,10 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		/*
-		 * Check for rollback.
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
 		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-			( isset( $_GET['action'], $_GET['theme'] ) &&
-			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
-		) {
-			$endpoint .= $rollback . '.zip';
-
-			// For users wanting to update against branch other than master or not using tags, else use newest_tag.
-		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {
 				$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 			} else {
@@ -388,12 +380,13 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	private function make_release_asset_download_link() {
 		$download_link = implode(
-			'/', [
+			'/',
+			[
 				'https://bitbucket.org',
 				$this->type->owner,
-				$this->type->repo,
+				$this->type->slug,
 				'downloads',
-				$this->type->repo . '-' . $this->type->newest_tag . '.zip',
+				$this->type->slug . '-' . $this->type->newest_tag . '.zip',
 			]
 		);
 
@@ -438,7 +431,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->is_private;
 				$arr['last_updated'] = $e->updated_on;
 				$arr['watchers']     = 0;
@@ -466,7 +460,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->data;
 			}
 		);
@@ -488,10 +483,11 @@ class Bitbucket_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_download'],
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'get/',
 				]
 			);
@@ -572,7 +568,8 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) ] );
 			}
 		);
@@ -696,7 +693,8 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( $bitbucket_org ) {
 			$install['download_link'] = implode(
-				'/', [
+				'/',
+				[
 					$base,
 					$install['github_updater_repo'],
 					'get',

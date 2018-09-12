@@ -41,10 +41,6 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			$class = get_class( $caller );
 			$class = self::get_class( $class_name, $class );
 
-			if ( ! $class ) {
-				self::get_error( $class_name );
-			}
-
 			if ( null === $instance || ! isset( $instance[ $class ] ) ) {
 				$instance[ $class ] = new $class( $options );
 			}
@@ -82,7 +78,14 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 				}
 			}
 
-			return false;
+			try {
+				throw new \Exception( "Undefined class '{$class_name}'" );
+			} catch ( \Exception $e ) {
+				$message = "PHP Fatal error: {$e->getMessage()}\nPHP Stack trace:\n";
+				$trace   = $e->getTraceAsString();
+				error_log( $message . $trace );
+				die( "<pre><strong>{$message}</strong>{$trace}</pre>" );
+			}
 		}
 
 		/**
@@ -100,32 +103,6 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			}
 
 			return $reflection;
-		}
-
-		/**
-		 * Returns error message for not finding a class.
-		 *
-		 * @param string $class_name
-		 */
-		private static function get_error( $class_name ) {
-			$error     = '<tr><td><pre><strong>PHP Fatal:</strong> Undefined class "' . $class_name . '"</pre></td></tr>';
-			$Exception = new \Exception( $error );
-			$trace     = $Exception->getTrace();
-			$trace     = array_reverse( $trace );
-			$message   = $Exception->getMessage();
-			$message  .= '<tr><td><pre>PHP Stack Trace:</pre></td></tr>';
-			$i         = 0;
-			foreach ( $trace as $err ) {
-				$i++;
-				$message .= '<tr><td><pre>';
-				$message .= sprintf(
-					$i . '. %1$s called from %2$s:%3$s',
-					'<strong>' . $err['class'] . $err['type'] . $err['function'] . '()</strong>',
-					'<strong>' . $err['file'] . '</strong>',
-					$err['line'] . '</pre></td></tr>'
-				);
-			}
-			die( '<table>' . $message . '</table>' );
 		}
 	}
 }

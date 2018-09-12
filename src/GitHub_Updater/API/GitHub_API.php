@@ -78,7 +78,7 @@ class GitHub_API extends API implements API_Interface {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -265,7 +265,7 @@ class GitHub_API extends API implements API_Interface {
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( false, $branch->name );
+					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -288,12 +288,11 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
-	 * @param boolean $rollback      for theme rollback.
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
 
@@ -305,20 +304,10 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		/*
-		 * Check for rollback.
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
 		 */
-		if ( ! empty( $_GET['rollback'] ) &&
-			( isset( $_GET['action'], $_GET['theme'] ) &&
-			'upgrade-theme' === $_GET['action'] &&
-			$this->type->repo === $_GET['theme'] )
-		) {
-			$endpoint .= $rollback;
-
-			/*
-			* For users wanting to update against branch other than master
-			* or if not using tags, else use newest_tag.
-			*/
-		} elseif ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;
@@ -386,7 +375,8 @@ class GitHub_API extends API implements API_Interface {
 			$reset                       = (int) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
 			static::$error_code[ $repo ] = array_merge(
-				static::$error_code[ $repo ], [
+				static::$error_code[ $repo ],
+				[
 					'git'  => 'github',
 					'wait' => $wait,
 				]
@@ -412,7 +402,8 @@ class GitHub_API extends API implements API_Interface {
 				$arr[] = $e->name;
 
 				return $arr;
-			}, (array) $response
+			},
+			(array) $response
 		);
 
 		return $arr;
@@ -430,7 +421,8 @@ class GitHub_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->private;
 				$arr['last_updated'] = $e->pushed_at;
 				$arr['watchers']     = $e->watchers;
@@ -454,7 +446,8 @@ class GitHub_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->content;
 			}
 		);
@@ -476,11 +469,12 @@ class GitHub_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
-					$this->type->repo,
+					$this->type->slug,
 					'zipball/',
 				]
 			);
@@ -683,7 +677,8 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'github-updater' ) ] );
 			}
 		);
@@ -724,7 +719,8 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		$install['download_link'] = implode(
-			'/', [
+			'/',
+			[
 				$base,
 				'repos',
 				$install['github_updater_repo'],

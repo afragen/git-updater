@@ -68,7 +68,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->repo );
+				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
 		}
 
@@ -273,7 +273,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			if ( $response && isset( $response->values ) ) {
 				foreach ( (array) $response->values as $value ) {
 					$branch              = $value->displayId;
-					$branches[ $branch ] = $this->construct_download_link( false, $branch );
+					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
@@ -299,12 +299,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @link https://bitbucket.org/atlassian/stash-archive
 	 *
-	 * @param boolean $rollback      for theme rollback.
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
-	public function construct_download_link( $rollback = false, $branch_switch = false ) {
+	public function construct_download_link( $branch_switch = false ) {
 		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
 
 		self::$method = 'download_link';
@@ -341,7 +340,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 					[
 						'at'  => $git->type->branch,
 						'raw' => '',
-					], $endpoint
+					],
+					$endpoint
 				);
 				break;
 			case 'download_link':
@@ -351,7 +351,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				 * Required for using stash-archive.
 				 */
 				$defaults = [
-					'prefix' => $git->type->repo . '/',
+					'prefix' => $git->type->slug . '/',
 					'at'     => $git->type->branch,
 				];
 				$endpoint = add_query_arg( $defaults, $endpoint );
@@ -422,7 +422,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = ! $e->public;
 				$arr['last_updated'] = null;
 				$arr['watchers']     = 0;
@@ -478,7 +479,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$arr[] = $e->displayId;
 
 				return $arr;
-			}, (array) $response->values
+			},
+			(array) $response->values
 		);
 
 		return $arr;
@@ -554,7 +556,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'bbserver' => esc_html__( 'Bitbucket Server', 'github-updater' ) ] );
 			}
 		);
@@ -581,7 +584,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $bitbucket_org ) {
 			$install['download_link'] = implode(
-				'/', [
+				'/',
+				[
 					$base,
 					'rest/archive/1.0/projects',
 					$headers['owner'],
@@ -595,7 +599,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				[
 					'prefix' => $headers['repo'] . '/',
 					'at'     => $install['github_updater_branch'],
-				], $install['download_link']
+				],
+				$install['download_link']
 			);
 
 			if ( isset( $install['is_private'] ) ) {
