@@ -158,7 +158,7 @@ class API {
 	/**
 	 * Get repo's API.
 	 *
-	 * @param string         $type
+	 * @param string         $git (github|bitbucket|gitlab|gitea)
 	 * @param bool|\stdClass $repo
 	 *
 	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
@@ -167,10 +167,10 @@ class API {
 	 *                                                   \Fragen\GitHub_Updater\API\GitHub_API|
 	 *                                                   \Fragen\GitHub_Updater\API\GitLab_API $repo_api
 	 */
-	public function get_repo_api( $type, $repo = false ) {
+	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
 		$repo     = $repo ?: new \stdClass();
-		switch ( $type ) {
+		switch ( $git ) {
 			case 'github':
 				$repo_api = new GitHub_API( $repo );
 				break;
