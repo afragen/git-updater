@@ -14,6 +14,7 @@
 * added remote install from a zipfile, remote URL or local file
 * added 'git' and directly declare 'type' in `class Plugin|Theme`
 * started to add language pack support for Gitea
+* use WPCS 1.1.0
 
 #### 8.2.1 / 2018-07-22
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
