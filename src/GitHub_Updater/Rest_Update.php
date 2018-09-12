@@ -85,7 +85,8 @@ class Rest_Update extends Base {
 		];
 
 		add_filter(
-			'site_transient_update_plugins', function ( $current ) use ( $plugin, $update ) {
+			'site_transient_update_plugins',
+			function ( $current ) use ( $plugin, $update ) {
 				$current->response[ $plugin->file ] = (object) $update;
 
 				return $current;
@@ -136,7 +137,8 @@ class Rest_Update extends Base {
 		];
 
 		add_filter(
-			'site_transient_update_themes', function ( $current ) use ( $theme, $update ) {
+			'site_transient_update_themes',
+			function ( $current ) use ( $theme, $update ) {
 				$current->response[ $theme->slug ] = $update;
 
 				return $current;

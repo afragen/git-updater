@@ -375,7 +375,8 @@ class GitHub_API extends API implements API_Interface {
 			$reset                       = (int) $response['headers']['x-ratelimit-reset'];
 			$wait                        = date( 'i', $reset - time() );
 			static::$error_code[ $repo ] = array_merge(
-				static::$error_code[ $repo ], [
+				static::$error_code[ $repo ],
+				[
 					'git'  => 'github',
 					'wait' => $wait,
 				]
@@ -401,7 +402,8 @@ class GitHub_API extends API implements API_Interface {
 				$arr[] = $e->name;
 
 				return $arr;
-			}, (array) $response
+			},
+			(array) $response
 		);
 
 		return $arr;
@@ -419,7 +421,8 @@ class GitHub_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->private;
 				$arr['last_updated'] = $e->pushed_at;
 				$arr['watchers']     = $e->watchers;
@@ -443,7 +446,8 @@ class GitHub_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->content;
 			}
 		);
@@ -465,7 +469,8 @@ class GitHub_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
@@ -672,7 +677,8 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'github-updater' ) ] );
 			}
 		);
@@ -713,7 +719,8 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		$install['download_link'] = implode(
-			'/', [
+			'/',
+			[
 				$base,
 				'repos',
 				$install['github_updater_repo'],

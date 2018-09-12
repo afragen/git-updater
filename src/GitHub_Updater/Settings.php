@@ -416,7 +416,8 @@ class Settings extends Base {
 
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
 			$always_unset = array_merge(
-				$always_unset, [
+				$always_unset,
+				[
 					'bitbucket_username',
 					'bitbucket_password',
 				]
@@ -425,7 +426,8 @@ class Settings extends Base {
 
 		if ( in_array( 'bbserver', $running_servers, true ) ) {
 			$always_unset = array_merge(
-				$always_unset, [
+				$always_unset,
+				[
 					'bitbucket_server_username',
 					'bitbucket_server_password',
 				]
@@ -435,7 +437,8 @@ class Settings extends Base {
 		array_map(
 			function ( $e ) use ( &$ghu_unset_keys ) {
 				unset( $ghu_unset_keys[ $e ] );
-			}, $always_unset
+			},
+			$always_unset
 		);
 
 		$auth_required       = static::$auth_required;
@@ -452,7 +455,8 @@ class Settings extends Base {
 				if ( $auth_required[ $key ] ) {
 					unset( $ghu_unset_keys[ $e ] );
 				}
-			}, $auth_required_unset
+			},
+			$auth_required_unset
 		);
 
 		// Unset if current_branch AND if associated with repo.
@@ -468,7 +472,8 @@ class Settings extends Base {
 				if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
 					$reset_keys[ $key ] = $e;
 				}
-			}, $ghu_unset_keys
+			},
+			$ghu_unset_keys
 		);
 		$ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
 
@@ -595,7 +600,8 @@ class Settings extends Base {
 		// Remove checkbox options, only after background update complete.
 		if ( ! $this->waiting_for_background_update() ) {
 			$options = array_filter(
-				$options, function ( $e ) {
+				$options,
+				function ( $e ) {
 					return '1' !== $e;
 				}
 			);
@@ -723,7 +729,8 @@ class Settings extends Base {
 		$bbserver = [ 'bitbucket', 'bbserver' ];
 
 		$type_repos = array_filter(
-			$repos, function ( $e ) use ( $git, $bbserver ) {
+			$repos,
+			function ( $e ) use ( $git, $bbserver ) {
 				if ( ! empty( $e->enterprise ) && in_array( $git, $bbserver, true ) ) {
 					return false !== stripos( $e->git, 'bitbucket' ) && 'bbserver' === $git;
 				}
@@ -742,7 +749,8 @@ class Settings extends Base {
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
 				];
-			}, $type_repos
+			},
+			$type_repos
 		);
 
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';

@@ -130,7 +130,8 @@ class API {
 	 */
 	public function settings_hook( $git ) {
 		add_action(
-			'github_updater_add_settings', function ( $auth_required ) use ( $git ) {
+			'github_updater_add_settings',
+			function ( $auth_required ) use ( $git ) {
 				$git->add_settings( $auth_required );
 			}
 		);
@@ -198,7 +199,8 @@ class API {
 	 */
 	public function add_install_fields( $git ) {
 		add_action(
-			'github_updater_add_install_settings_fields', function ( $type ) use ( $git ) {
+			'github_updater_add_install_settings_fields',
+			function ( $type ) use ( $git ) {
 				$git->add_install_settings_fields( $type );
 			}
 		);
@@ -344,7 +346,7 @@ class API {
 
 		switch ( $this->type->git ) {
 			case 'github':
-				$arr['git']          = 'github';
+				$arr['git']           = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
 				$arr['base_download'] = 'https://github.com';
 				break;
@@ -359,12 +361,12 @@ class API {
 				}
 				break;
 			case 'gitlab':
-				$arr['git']          = 'gitlab';
+				$arr['git']           = 'gitlab';
 				$arr['base_uri']      = 'https://gitlab.com/api/v4';
 				$arr['base_download'] = 'https://gitlab.com';
 				break;
 			case 'gitea':
-				$arr['git']          = 'gitea';
+				$arr['git']           = 'gitea';
 				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
 				$arr['base_download'] = $this->type->enterprise;
 				break;
@@ -471,7 +473,8 @@ class API {
 				[
 					'action'                     => "{$this->type->type}_information",
 					urlencode( 'request[slug]' ) => $this->type->slug,
-				], $url
+				],
+				$url
 			);
 			$response = wp_remote_get( $url );
 

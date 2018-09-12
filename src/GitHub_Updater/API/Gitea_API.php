@@ -385,7 +385,8 @@ class Gitea_API extends API implements API_Interface {
 				$arr[] = $e->tag_name;
 
 				return $arr;
-			}, (array) $response
+			},
+			(array) $response
 		);
 
 		return $arr;
@@ -403,7 +404,8 @@ class Gitea_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->private;
 				$arr['last_updated'] = $e->updated_at;
 				$arr['watchers']     = $e->watchers_count;
@@ -431,7 +433,8 @@ class Gitea_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = base64_encode( $e );
 			}
 		);
@@ -453,7 +456,8 @@ class Gitea_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_link    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
@@ -530,7 +534,8 @@ class Gitea_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ] );
 			}
 		);
@@ -624,7 +629,8 @@ class Gitea_API extends API implements API_Interface {
 		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = implode(
-			'/', [
+			'/',
+			[
 				$base,
 				'repos',
 				$install['github_updater_repo'],

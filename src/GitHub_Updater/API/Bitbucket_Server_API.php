@@ -340,7 +340,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 					[
 						'at'  => $git->type->branch,
 						'raw' => '',
-					], $endpoint
+					],
+					$endpoint
 				);
 				break;
 			case 'download_link':
@@ -421,7 +422,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = ! $e->public;
 				$arr['last_updated'] = null;
 				$arr['watchers']     = 0;
@@ -477,7 +479,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$arr[] = $e->displayId;
 
 				return $arr;
-			}, (array) $response->values
+			},
+			(array) $response->values
 		);
 
 		return $arr;
@@ -553,7 +556,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'bbserver' => esc_html__( 'Bitbucket Server', 'github-updater' ) ] );
 			}
 		);
@@ -580,7 +584,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $bitbucket_org ) {
 			$install['download_link'] = implode(
-				'/', [
+				'/',
+				[
 					$base,
 					'rest/archive/1.0/projects',
 					$headers['owner'],
@@ -594,7 +599,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				[
 					'prefix' => $headers['repo'] . '/',
 					'at'     => $install['github_updater_branch'],
-				], $install['download_link']
+				],
+				$install['download_link']
 			);
 
 			if ( isset( $install['is_private'] ) ) {

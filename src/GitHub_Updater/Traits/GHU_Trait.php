@@ -271,7 +271,8 @@ trait GHU_Trait {
 				}
 
 				return $e->git;
-			}, $repos
+			},
+			$repos
 		);
 
 		return array_unique( array_values( $gits ) );

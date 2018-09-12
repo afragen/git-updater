@@ -379,7 +379,8 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	private function make_release_asset_download_link() {
 		$download_link = implode(
-			'/', [
+			'/',
+			[
 				'https://gitlab.com/api/v4/projects',
 				urlencode( $this->type->owner . '/' . $this->type->slug ),
 				'builds/artifacts',
@@ -482,7 +483,8 @@ class GitLab_API extends API implements API_Interface {
 				$arr[] = $e->name;
 
 				return $arr;
-			}, (array) $response
+			},
+			(array) $response
 		);
 
 		return $arr;
@@ -500,7 +502,8 @@ class GitLab_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = isset( $e->visibility ) && 'private' === $e->visibility ? true : false;
 				$arr['private']      = isset( $e->public ) ? ! $e->public : $arr['private'];
 				$arr['last_updated'] = $e->last_activity_at;
@@ -529,7 +532,8 @@ class GitLab_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->content;
 			}
 		);
@@ -551,7 +555,8 @@ class GitLab_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_link    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_download'],
 					$this->type->owner,
 					$this->type->slug,
@@ -643,7 +648,8 @@ class GitLab_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'gitlab' => esc_html__( 'GitLab', 'github-updater' ) ] );
 			}
 		);
@@ -747,7 +753,8 @@ class GitLab_API extends API implements API_Interface {
 		}
 
 		$install['download_link'] = implode(
-			'/', [
+			'/',
+			[
 				$base,
 				$install['github_updater_repo'],
 				'repository/archive.zip',

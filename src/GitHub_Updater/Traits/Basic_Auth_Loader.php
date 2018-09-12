@@ -119,7 +119,8 @@ trait Basic_Auth_Loader {
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter(
-					$bulk_update, function ( $e ) use ( $url ) {
+					$bulk_update,
+					function ( $e ) use ( $url ) {
 						return false !== strpos( $url, $e );
 					}
 				);

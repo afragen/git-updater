@@ -380,7 +380,8 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	private function make_release_asset_download_link() {
 		$download_link = implode(
-			'/', [
+			'/',
+			[
 				'https://bitbucket.org',
 				$this->type->owner,
 				$this->type->slug,
@@ -430,7 +431,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->is_private;
 				$arr['last_updated'] = $e->updated_on;
 				$arr['watchers']     = 0;
@@ -458,7 +460,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = [ $response ];
 
 		array_filter(
-			$response, function ( $e ) use ( &$arr ) {
+			$response,
+			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->data;
 			}
 		);
@@ -480,7 +483,8 @@ class Bitbucket_API extends API implements API_Interface {
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
-				'/', [
+				'/',
+				[
 					$repo_type['base_download'],
 					$this->type->owner,
 					$this->type->slug,
@@ -564,7 +568,8 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	private function add_settings_subtab() {
 		add_filter(
-			'github_updater_add_settings_subtabs', function ( $subtabs ) {
+			'github_updater_add_settings_subtabs',
+			function ( $subtabs ) {
 				return array_merge( $subtabs, [ 'bitbucket' => esc_html__( 'Bitbucket', 'github-updater' ) ] );
 			}
 		);
@@ -688,7 +693,8 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( $bitbucket_org ) {
 			$install['download_link'] = implode(
-				'/', [
+				'/',
+				[
 					$base,
 					$install['github_updater_repo'],
 					'get',

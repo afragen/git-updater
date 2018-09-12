@@ -148,7 +148,8 @@ class Base {
 
 		// Load plugin stylesheet.
 		add_action(
-			'admin_enqueue_scripts', function () {
+			'admin_enqueue_scripts',
+			function () {
 				wp_register_style( 'github-updater', plugins_url( basename( dirname( dirname( __DIR__ ) ) ) ) . '/css/github-updater.css' );
 				wp_enqueue_style( 'github-updater' );
 			}
@@ -777,7 +778,8 @@ class Base {
 			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
 		}
 		$waiting = array_filter(
-			$caches, function ( $e ) {
+			$caches,
+			function ( $e ) {
 				return empty( $e );
 			}
 		);

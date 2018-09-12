@@ -58,7 +58,8 @@ class Messages {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();
 					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+						is_multisite() ? 'network_admin_notices' : 'admin_notices',
+						[
 							$this,
 							'show_wp_error',
 						]
@@ -72,13 +73,15 @@ class Messages {
 				case 'git':
 				default:
 					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+						is_multisite() ? 'network_admin_notices' : 'admin_notices',
+						[
 							$this,
 							'show_403_error_message',
 						]
 					);
 					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices', [
+						is_multisite() ? 'network_admin_notices' : 'admin_notices',
+						[
 							$this,
 							'show_401_error_message',
 						]

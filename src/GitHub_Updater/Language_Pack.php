@@ -97,7 +97,8 @@ class Language_Pack {
 		}
 
 		$repos = array_filter(
-			$repos, function ( $e ) {
+			$repos,
+			function ( $e ) {
 				return isset( $e->language_packs );
 			}
 		);

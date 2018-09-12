@@ -12,14 +12,16 @@ jQuery( document ).ready(
 	function ($) {
 		// Hide non-default (Bitbucket & GitLab) settings on page load.
 		$.each(
-			['bitbucket', 'gitlab', 'gitea', 'zipfile'], function () {
+			['bitbucket', 'gitlab', 'gitea', 'zipfile'],
+			function () {
 				$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
 			}
 		);
 
 		// When the api selector changes.
 		$( 'select[ name="github_updater_api" ]' ).on(
-			'change', function () {
+			'change',
+			function () {
 
 				// create difference array.
 				var hideMe = $( ['github', 'bitbucket', 'gitlab', 'gitea', 'zipfile'] ).not( [this.value] ).get();
@@ -29,7 +31,8 @@ jQuery( document ).ready(
 				* this.value equals either 'github', 'bitbucket', or 'gitlab'.
 				*/
 				$.each(
-					hideMe, function () {
+					hideMe,
+					function () {
 						$( 'input.'.concat( this, '_setting' ) ).parents( 'tr' ).hide();
 					}
 				);

@@ -74,7 +74,8 @@ class Remote_Management {
 	private function load_hooks() {
 		add_action( 'admin_init', [ $this, 'remote_management_page_init' ] );
 		add_action(
-			'github_updater_update_settings', function ( $post_data ) {
+			'github_updater_update_settings',
+			function ( $post_data ) {
 				$this->save_settings( $post_data );
 			}
 		);
@@ -120,7 +121,8 @@ class Remote_Management {
 			update_site_option( 'github_updater_remote_management', (array) $this->sanitize( $options ) );
 
 			add_filter(
-				'github_updater_save_redirect', function ( $option_page ) {
+				'github_updater_save_redirect',
+				function ( $option_page ) {
 					return array_merge( $option_page, [ 'github_updater_remote_management' ] );
 				}
 			);
@@ -133,14 +135,18 @@ class Remote_Management {
 	public function add_settings_tabs() {
 		$install_tabs = [ 'github_updater_remote_management' => esc_html__( 'Remote Management', 'github-updater' ) ];
 		add_filter(
-			'github_updater_add_settings_tabs', function ( $tabs ) use ( $install_tabs ) {
+			'github_updater_add_settings_tabs',
+			function ( $tabs ) use ( $install_tabs ) {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
 		add_filter(
-			'github_updater_add_admin_page', function ( $tab, $action ) {
+			'github_updater_add_admin_page',
+			function ( $tab, $action ) {
 				$this->add_admin_page( $tab, $action );
-			}, 10, 2
+			},
+			10,
+			2
 		);
 	}
 
@@ -215,7 +221,8 @@ class Remote_Management {
 			[
 				'action' => 'github-updater-update',
 				'key'    => self::$api_key,
-			], admin_url( 'admin-ajax.php' )
+			],
+			admin_url( 'admin-ajax.php' )
 		);
 		?>
 		<p>
