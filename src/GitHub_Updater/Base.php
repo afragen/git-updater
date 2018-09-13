@@ -3,7 +3,6 @@
  * GitHub Updater
  *
  * @author    Andy Fragen
- * @author    Gary Jones
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
@@ -30,7 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Update a WordPress plugin or theme from a Git-based repo.
  *
  * @author  Andy Fragen
- * @author  Gary Jones
  */
 class Base {
 	use GHU_Trait, Basic_Auth_Loader;
