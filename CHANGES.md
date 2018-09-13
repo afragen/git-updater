@@ -1,4 +1,6 @@
 #### [unreleased]
+* created `class Bootstrap` to setup plugin loading
+* fixed issue with `load_plugin_textdomain()` not loading in hook causing issus, thanks @pnoeric and @garrett-eclipse
 
 #### 8.3.0 / 2018-09-12
 * test to ensure `file_put_contents()` works

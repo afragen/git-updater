@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           8.3.0
+ * Version:           8.3.0.1
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -46,34 +46,8 @@ if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
 	return false;
 }
 
-// Load textdomain.
-load_plugin_textdomain( 'github-updater' );
+define( 'GITHUB_UPDATER_FILE', __FILE__ );
+define( 'GITHUB_UPDATER_DIR', __DIR__ );
 
-// Plugin namespace root.
-$ghu['root'] = array( 'Fragen\\GitHub_Updater' => __DIR__ . '/src/GitHub_Updater' );
-
-// Add extra classes.
-$ghu['extra_classes'] = array(
-	'WordPressdotorg\Plugin_Directory\Readme\Parser' => __DIR__ . '/vendor/class-parser.php',
-	'Fragen\Singleton'                               => __DIR__ . '/src/Singleton.php',
-	'Parsedown'                                      => __DIR__ . '/vendor/parsedown/Parsedown.php',
-	'PAnD'                                           => __DIR__ . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
-);
-
-// Load Autoloader.
-require_once __DIR__ . '/src/Autoloader.php';
-$ghu['loader'] = 'Fragen\\Autoloader';
-new $ghu['loader']( $ghu['root'], $ghu['extra_classes'] );
-
-// Instantiate class GitHub_Updater.
-$ghu['instantiate'] = 'Fragen\\GitHub_Updater\\Init';
-$ghu['init']        = new $ghu['instantiate']();
-register_activation_hook( __FILE__, array( $ghu['init'], 'rename_on_activation' ) );
-$ghu['init']->run();
-
-/**
- * Initialize Persist Admin notices Dismissal.
- *
- * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
- */
-add_action( 'admin_init', array( 'PAnD', 'init' ) );
+// Setup plugin loading.
+require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
