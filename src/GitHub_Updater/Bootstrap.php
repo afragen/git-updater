@@ -33,7 +33,7 @@ class Bootstrap {
 	 */
 	public function run( $file, $dir ) {
 		add_action(
-			'plugins_loaded',
+			'init',
 			function() {
 				load_plugin_textdomain( 'github-updater' );
 			}
