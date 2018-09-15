@@ -135,9 +135,8 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
-			$arr_resp = (array) $response;
 
-			if ( ! $response || ! $arr_resp ) {
+			if ( ! $response ) {
 				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
@@ -412,7 +411,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 
@@ -427,6 +426,9 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -452,7 +454,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 

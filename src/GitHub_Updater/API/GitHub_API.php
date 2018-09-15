@@ -70,11 +70,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( ! $response ) {
 			self::$method = 'file';
 			$response     = $this->api( '/repos/:owner/:repo/contents/' . $file );
-			if ( ! isset( $response->content ) ) {
-				return false;
-			}
 
-			if ( $response ) {
+			if ( $response && isset( $response->content ) ) {
 				$contents = base64_decode( $response->content );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
@@ -263,6 +260,10 @@ class GitHub_API extends API implements API_Interface {
 			self::$method = 'branches';
 			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $branch ) {
 					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
@@ -272,10 +273,6 @@ class GitHub_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;
@@ -392,7 +389,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return \stdClass|array $arr Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 
@@ -417,6 +414,9 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -442,6 +442,9 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 

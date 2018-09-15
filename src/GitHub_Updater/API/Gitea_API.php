@@ -97,7 +97,7 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'file';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
 
-			if ( $response ) {
+			if ( $response && ! is_wp_error( $response ) ) {
 				$contents = $response;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
@@ -105,7 +105,7 @@ class Gitea_API extends API implements API_Interface {
 			}
 		}
 
-		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
+		if ( ! is_array( $response ) || ! $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -375,7 +375,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 
@@ -400,6 +400,9 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -425,7 +428,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) ) {
+		if ( isset( $response->messages ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 
