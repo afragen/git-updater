@@ -414,11 +414,21 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array|\stdClass Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || ! isset( $response->values ) ) {
 			return $response;
 		}
 
-		return array_keys( (array) $response );
+		$arr = [];
+		array_map(
+			function ( $e ) use ( &$arr ) {
+				$arr[] = $e->name;
+
+				return $arr;
+			},
+			(array) $response->values
+		);
+
+		return $arr;
 	}
 
 	/**

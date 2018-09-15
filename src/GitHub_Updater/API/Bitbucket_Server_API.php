@@ -463,31 +463,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
-	 * Parse API response call and return only array of tag numbers.
-	 *
-	 * @param \stdClass $response Response from API call.
-	 *
-	 * @return array|\stdClass Array of tag numbers, object is error.
-	 */
-	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) || ! isset( $response->values ) ) {
-			return $response;
-		}
-
-		$arr = [];
-		array_map(
-			function ( $e ) use ( &$arr ) {
-				$arr[] = $e->displayId;
-
-				return $arr;
-			},
-			(array) $response->values
-		);
-
-		return $arr;
-	}
-
-	/**
 	 * Add settings for Bitbucket Server Username and Password.
 	 *
 	 * @param array $auth_required
