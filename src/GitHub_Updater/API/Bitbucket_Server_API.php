@@ -92,7 +92,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo/tags' );
+			$response = $this->api( '/2.0/projects/:owner/repos/:repo/refs/tags' );
 
 			if ( ! $response ||
 				( isset( $response->size ) && $response->size < 1 ) ||
@@ -236,7 +236,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'meta';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo' );
+			$response     = $this->api( '/2.0/projects/:owner/repos/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
@@ -269,10 +269,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'branches';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
-			if ( $response && isset( $response->values ) ) {
-				foreach ( (array) $response->values as $value ) {
-					$branch              = $value->displayId;
+			$response     = $this->api( '/2.0/projects/:owner/repos/:repo/refs/branches' );
+			$response     = isset( $response->values ) ? $response->values : $response;
+			if ( $response ) {
+				foreach ( $response as $value ) {
+					$branch              = $value->name;
 					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;

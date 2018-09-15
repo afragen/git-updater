@@ -134,7 +134,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/tags' );
+			$response = $this->api( '/2.0/repositories/:owner/:repo/refs/tags' );
 			$arr_resp = (array) $response;
 
 			if ( ! $response || ! $arr_resp ) {
@@ -301,10 +301,12 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );
+			$response = $this->api( '/2.0/repositories/:owner/:repo/refs/branches' );
+			$response = isset( $response->values ) ? $response->values : $response;
 
 			if ( $response ) {
-				foreach ( $response as $branch => $api_response ) {
+				foreach ( $response as $value ) {
+					$branch              = $value->name;
 					$branches[ $branch ] = $this->construct_download_link( $branch );
 				}
 				$this->type->branches = $branches;
