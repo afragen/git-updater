@@ -1,4 +1,5 @@
 #### [unreleased]
+* use new constant for assets
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
