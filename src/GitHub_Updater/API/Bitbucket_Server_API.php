@@ -81,39 +81,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
-	 * Get the remote info for tags.
-	 *
-	 * @return bool
-	 */
-	public function get_remote_tag() {
-		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
-
-		if ( ! $response ) {
-			$response = $this->api( '/2.0/projects/:owner/repos/:repo/refs/tags' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No tags found';
-			}
-
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
-
-		return true;
-	}
-
-	/**
 	 * Read the remote CHANGES.md file
 	 *
 	 * @param string $changes Changelog filename.
@@ -217,73 +184,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		$this->set_readme_info( $response );
-
-		return true;
-	}
-
-	/**
-	 * Read the repository meta from API
-	 *
-	 * @return bool
-	 */
-	public function get_repo_meta() {
-		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
-
-		if ( ! $response ) {
-			self::$method = 'meta';
-			$response     = $this->api( '/2.0/projects/:owner/repos/:repo' );
-
-			if ( $response ) {
-				$response = $this->parse_meta_response( $response );
-				$this->set_repo_cache( 'meta', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
-
-		return true;
-	}
-
-	/**
-	 * Create array of branches and download links as array.
-	 *
-	 * @return bool
-	 */
-	public function get_remote_branches() {
-		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
-
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			self::$method = 'branches';
-			$response     = $this->api( '/2.0/projects/:owner/repos/:repo/refs/branches' );
-			$response     = isset( $response->values ) ? $response->values : $response;
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				foreach ( $response as $value ) {
-					$branch              = $value->name;
-					$branches[ $branch ] = $this->construct_download_link( $branch );
-				}
-				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
-
-				return true;
-			}
-		}
-
-		$this->type->branches = $response;
 
 		return true;
 	}
