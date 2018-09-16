@@ -105,8 +105,7 @@ class Bitbucket_API extends API implements API_Interface {
 			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/' . $file );
 
 			if ( $response && ! is_wp_error( $response ) ) {
-				$response            = $this->get_file_headers( $response, $this->type->type );
-				$response['dot_org'] = $this->get_dot_org_data();
+				$response = $this->get_file_headers( $response, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
@@ -116,6 +115,7 @@ class Bitbucket_API extends API implements API_Interface {
 			return false;
 		}
 
+		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 
 		return true;
