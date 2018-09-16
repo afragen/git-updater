@@ -102,11 +102,11 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $file );
+			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/' . $file );
 
-			if ( $response && isset( $response->data ) ) {
-				$contents = $response->data;
-				$response = $this->get_file_headers( $contents, $this->type->type );
+			if ( $response && ! is_wp_error( $response ) ) {
+				$response            = $this->get_file_headers( $response, $this->type->type );
+				$response['dot_org'] = $this->get_dot_org_data();
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
@@ -116,7 +116,6 @@ class Bitbucket_API extends API implements API_Interface {
 			return false;
 		}
 
-		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 
 		return true;
@@ -173,38 +172,30 @@ class Bitbucket_API extends API implements API_Interface {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, $changes );
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . $changes );
+			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/' . $changes );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
 				$response->message = 'No changelog found';
 			}
+		}
 
-			if ( $response ) {
+		if ( $response && ! isset( $this->response['changes'] ) && ! is_wp_error( $response ) ) {
 			//$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
-			}
+			$parser   = new \Parsedown();
+			$response = $parser->text( $response );
+			$this->set_repo_cache( 'changes', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( $response['changes'] );
-
-		$this->type->sections['changelog'] = $changelog;
+		$this->type->sections['changelog'] = $response;
 
 		return true;
 	}
@@ -225,17 +216,11 @@ class Bitbucket_API extends API implements API_Interface {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->data = $content;
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/readme.txt' );
+			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -243,9 +228,8 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $response && isset( $response->data ) ) {
-			$file     = $response->data;
-			$parser   = new Readme_Parser( $file );
+		if ( $response && ! isset( $this->response['readme'] ) && ! is_wp_error( $response ) ) {
+			$parser   = new Readme_Parser( $response );
 			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
 		}

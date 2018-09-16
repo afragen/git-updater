@@ -60,9 +60,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$path         = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-
-			$response = $this->api( $path );
+			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/browse/' . $file );
 
 			if ( $response ) {
 				$contents = $this->bbserver_recombine_response( $response );

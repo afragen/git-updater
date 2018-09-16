@@ -98,8 +98,8 @@ class Gitea_API extends API implements API_Interface {
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
 
 			if ( $response && ! is_wp_error( $response ) ) {
-				$contents = $response;
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response            = $this->get_file_headers( $response, $this->type->type );
+				$response['dot_org'] = $this->get_dot_org_data();
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
 			}
@@ -109,7 +109,6 @@ class Gitea_API extends API implements API_Interface {
 			return false;
 		}
 
-		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
 
 		return true;
@@ -163,34 +162,27 @@ class Gitea_API extends API implements API_Interface {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, $changes );
 		}
 
 		if ( ! $response ) {
 			self::$method = 'changes';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
 
-			if ( $response ) {
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
+		}
+
+		if ( $response && ! isset( $this->response['changes'] ) && ! is_wp_error( $response ) ) {
 			//$response = $this->parse_changelog_response( $response );
+			$parser   = new \Parsedown();
+			$response = $parser->text( base64_decode( $response ) );
+			$this->set_repo_cache( 'changes', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( base64_decode( $response['changes'] ) );
-
-		$this->type->sections['changelog'] = $changelog;
+		$this->type->sections['changelog'] = $response;
 
 		return true;
 	}
@@ -211,23 +203,22 @@ class Gitea_API extends API implements API_Interface {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->content = $content;
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}
 
 		if ( ! $response ) {
 			self::$method = 'readme';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
+
+			if ( ! $response ) {
+				$response          = new \stdClass();
+				$response->message = 'No readme found';
+			}
 		}
 
-		if ( $response && isset( $response->content ) ) {
-			$file     = base64_decode( $response->content );
-			$parser   = new Readme_Parser( $file );
+		if ( $response && ! isset( $this->response['readme'] ) && ! is_wp_error( $response ) ) {
+			$response = base64_decode( $response );
+			$parser   = new Readme_Parser( $response );
 			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
 		}
