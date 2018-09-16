@@ -180,7 +180,7 @@ class Gitea_API extends API implements API_Interface {
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
 				$this->set_repo_cache( 'changes', $response );
-			}
+			//$response = $this->parse_changelog_response( $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -429,21 +429,6 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) || is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		$arr      = [];
-		$response = [ $response ];
-
-		array_filter(
-			$response,
-			function ( $e ) use ( &$arr ) {
-				$arr['changes'] = base64_encode( $e );
-			}
-		);
-
-		return $arr;
 	}
 
 	/**

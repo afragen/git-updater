@@ -192,7 +192,7 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 
 			if ( $response ) {
-				$response = $this->parse_changelog_response( $response );
+			//$response = $this->parse_changelog_response( $response );
 				$this->set_repo_cache( 'changes', $response );
 			}
 		}
@@ -466,21 +466,6 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->message ) || is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		$arr      = [];
-		$response = [ $response ];
-
-		array_filter(
-			$response,
-			function ( $e ) use ( &$arr ) {
-				$arr['changes'] = $e->data;
-			}
-		);
-
-		return $arr;
 	}
 
 	/**
