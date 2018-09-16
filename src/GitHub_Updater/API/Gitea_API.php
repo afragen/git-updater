@@ -168,18 +168,21 @@ class Gitea_API extends API implements API_Interface {
 		if ( ! $response ) {
 			self::$method = 'changes';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
-
 		}
 
-		if ( $response && ! isset( $this->response['changes'] ) && ! is_wp_error( $response ) ) {
-			//$response = $this->parse_changelog_response( $response );
-			$parser   = new \Parsedown();
-			$response = $parser->text( base64_decode( $response ) );
-			$this->set_repo_cache( 'changes', $response );
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No changelog found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
+		}
+
+		if ( $response && ! isset( $this->response['changes'] ) ) {
+			$parser   = new \Parsedown();
+			$response = $parser->text( $response );
+			$this->set_repo_cache( 'changes', $response );
 		}
 
 		$this->type->sections['changelog'] = $response;
@@ -209,22 +212,21 @@ class Gitea_API extends API implements API_Interface {
 		if ( ! $response ) {
 			self::$method = 'readme';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No readme found';
-			}
 		}
 
-		if ( $response && ! isset( $this->response['readme'] ) && ! is_wp_error( $response ) ) {
-			$response = base64_decode( $response );
-			$parser   = new Readme_Parser( $response );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No readme found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
+		}
+
+		if ( $response && ! isset( $this->response['readme'] ) ) {
+			$parser   = new Readme_Parser( $response );
+			$response = $parser->parse_data();
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		$this->set_readme_info( $response );
@@ -367,7 +369,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) || is_wp_error( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 
@@ -392,7 +394,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 		$arr      = [];
