@@ -230,6 +230,7 @@ class GitLab_API extends API implements API_Interface {
 			self::$method = 'readme';
 			$response     = $this->api( '/projects/' . $id . '/repository/files/readme.txt' );
 		}
+
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
@@ -300,6 +301,10 @@ class GitLab_API extends API implements API_Interface {
 			self::$method = 'branches';
 			$response     = $this->api( '/projects/' . $id . '/repository/branches' );
 
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $branch ) {
 					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
@@ -309,10 +314,6 @@ class GitLab_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;

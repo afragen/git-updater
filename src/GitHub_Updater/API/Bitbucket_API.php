@@ -235,7 +235,7 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/' . 'readme.txt' );
+			$response = $this->api( '/1.0/repositories/:owner/:repo/src/:branch/readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -302,6 +302,10 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/repositories/:owner/:repo/branches' );
 
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $branch => $api_response ) {
 					$branches[ $branch ] = $this->construct_download_link( $branch );
@@ -311,10 +315,6 @@ class Bitbucket_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;

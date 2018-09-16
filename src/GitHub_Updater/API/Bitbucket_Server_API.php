@@ -267,6 +267,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( ! $response ) {
 			self::$method = 'branches';
 			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response && isset( $response->values ) ) {
 				foreach ( (array) $response->values as $value ) {
 					$branch              = $value->displayId;
@@ -277,10 +282,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;

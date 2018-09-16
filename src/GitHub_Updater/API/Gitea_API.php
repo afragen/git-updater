@@ -105,7 +105,7 @@ class Gitea_API extends API implements API_Interface {
 			}
 		}
 
-		if ( ! is_array( $response ) || ! $this->validate_response( $response ) ) {
+		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
 			return false;
 		}
 
@@ -224,6 +224,7 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'readme';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
 		}
+
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
@@ -285,6 +286,10 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'branches';
 			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $branch ) {
 					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
@@ -294,10 +299,6 @@ class Gitea_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;
