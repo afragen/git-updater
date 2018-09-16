@@ -97,7 +97,7 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'file';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
 
-			if ( $response ) {
+			if ( $response && ! is_wp_error( $response ) ) {
 				$contents = $response;
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
@@ -224,6 +224,7 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'readme';
 			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
 		}
+
 		if ( $response && isset( $response->content ) ) {
 			$file     = base64_decode( $response->content );
 			$parser   = new Readme_Parser( $file );
@@ -285,6 +286,10 @@ class Gitea_API extends API implements API_Interface {
 			self::$method = 'branches';
 			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $branch ) {
 					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
@@ -294,10 +299,6 @@ class Gitea_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;
@@ -375,7 +376,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 
@@ -400,6 +401,9 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -425,7 +429,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) ) {
+		if ( isset( $response->messages ) || is_wp_error( $response ) ) {
 			return $response;
 		}
 

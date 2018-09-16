@@ -300,7 +300,7 @@ class API {
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
-			return false;
+			return $response;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			static::$error_code = array_merge(
@@ -588,7 +588,7 @@ class API {
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {
-		return empty( $response ) || isset( $response->message );
+		return empty( $response ) || isset( $response->message ) || is_wp_error( $response );
 	}
 
 	/**

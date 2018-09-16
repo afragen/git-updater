@@ -94,10 +94,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( ! $response ) {
 			$response = $this->api( '/2.0/projects/:owner/repos/:repo/refs/tags' );
 
-			if ( ! $response ||
-				( isset( $response->size ) && $response->size < 1 ) ||
-				isset( $response->errors )
-			) {
+			if ( ! $response ) {
 				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
@@ -271,6 +268,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			self::$method = 'branches';
 			$response     = $this->api( '/2.0/projects/:owner/repos/:repo/refs/branches' );
 			$response     = isset( $response->values ) ? $response->values : $response;
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
+
 			if ( $response ) {
 				foreach ( $response as $value ) {
 					$branch              = $value->name;
@@ -281,10 +283,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;
@@ -419,6 +417,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -444,6 +445,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
 	}
 
@@ -455,6 +459,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 		$content        = $this->bbserver_recombine_response( $response );
 		$response       = new \stdClass();
 		$response->data = $content;
