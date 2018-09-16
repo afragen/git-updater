@@ -1,9 +1,11 @@
 #### [unreleased]
 * use new constant for assets
+* update error checking for `WP_Error` response from `wp_remote_get()`
+* updated to use Bitbucket API 2.0 where appropriate
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
-* fixed issue with `load_plugin_textdomain()` not loading in hook causing issus, thanks @pnoeric and @garrett-eclipse
+* fixed issue with `load_plugin_textdomain()` not loading completely (now loading in `init` hook), thanks @pnoeric and @garrett-eclipse
 
 #### 8.3.0 / 2018-09-12
 * test to ensure `file_put_contents()` works
