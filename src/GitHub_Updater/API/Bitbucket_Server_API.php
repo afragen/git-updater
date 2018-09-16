@@ -415,7 +415,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( $this->validate_response($response) ) {
 			return $response;
 		}
 		$arr      = [];
@@ -443,7 +443,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( $this->validate_response($response) ) {
 			return $response;
 		}
 		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
@@ -457,7 +457,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( $this->validate_response($response) ) {
 			return $response;
 		}
 		$content        = $this->bbserver_recombine_response( $response );
