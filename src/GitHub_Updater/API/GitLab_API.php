@@ -97,14 +97,14 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/' . $file );
+			$response     = $this->api( "/projects/{$id}/repository/files/{$file}" );
 			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
+		}
 
-			if ( $response && ! is_wp_error( $response ) ) {
-				$response = $this->get_file_headers( $response, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -172,7 +172,8 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'changes';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/' . $changes );
+			$response     = $this->api( "/projects/{$id}/repository/files/{$changes}" );
+			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
 
 		if ( ! $response && ! is_wp_error( $response ) ) {
@@ -217,7 +218,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'readme';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/readme.txt' );
+			$response     = $this->api( "/projects/{$id}/repository/files/readme.txt" );
 			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
 
@@ -293,7 +294,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'branches';
-			$response     = $this->api( '/projects/' . $id . '/repository/branches' );
+			$response     = $this->api( "/projects/{$id}/repository/branches" );
 
 			if ( $this->validate_response( $response ) ) {
 				return false;

@@ -665,16 +665,6 @@ class API {
 			$response = file_get_contents( $repo->local_path . $file );
 		}
 
-		//switch ( $repo->git ) {
-		//	case 'bitbucket':
-		//	case 'github':
-		//	case 'gitea':
-		//		break;
-		//	default:
-		//		$response = base64_encode( $response );
-		//		break;
-		//}
-
 		return $response;
 	}
 

@@ -2,6 +2,7 @@
 * use new constant for assets
 * update error checking for `WP_Error` response from `wp_remote_get()`
 * updated to use Bitbucket API 2.0 where appropriate
+* refactor API calls
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading

@@ -60,14 +60,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/browse/' . $file );
+			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
+		}
 
-			if ( $response ) {
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
 				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -315,7 +315,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
-		if ( $this->validate_response($response) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 		$arr      = [];
@@ -343,7 +343,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( $this->validate_response($response) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
@@ -357,7 +357,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
-		if ( $this->validate_response($response) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 		$content        = $this->bbserver_recombine_response( $response );

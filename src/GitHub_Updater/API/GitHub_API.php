@@ -69,14 +69,14 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response     = $this->api( '/repos/:owner/:repo/contents/' . $file );
+			$response     = $this->api( "/repos/:owner/:repo/contents/{$file}" );
+			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
+		}
 
-			if ( $response && isset( $response->content ) ) {
-				$contents = base64_decode( $response->content );
-				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -142,7 +142,7 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->api( '/repos/:owner/:repo/contents/' . $changes );
+			$response     = $this->api( "/repos/:owner/:repo/contents/{$changes}" );
 			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
 

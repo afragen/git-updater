@@ -95,13 +95,13 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
+			$response     = $this->api( "/repos/:owner/:repo/raw/:branch/{$file}" );
+		}
 
-			if ( $response && ! is_wp_error( $response ) ) {
-				$response = $this->get_file_headers( $response, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -167,7 +167,7 @@ class Gitea_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
+			$response     = $this->api( "/repos/:owner/:repo/raw/:branch/{$changes}" );
 		}
 
 		if ( ! $response && ! is_wp_error( $response ) ) {

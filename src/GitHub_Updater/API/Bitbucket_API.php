@@ -102,13 +102,13 @@ class Bitbucket_API extends API implements API_Interface {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/' . $file );
+			$response = $this->api( "/2.0/repositories/:owner/:repo/src/:branch/{$file}" );
+		}
 
-			if ( $response && ! is_wp_error( $response ) ) {
-				$response = $this->get_file_headers( $response, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -176,7 +176,7 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		if ( ! $response ) {
-			$response = $this->api( '/2.0/repositories/:owner/:repo/src/:branch/' . $changes );
+			$response = $this->api( "/2.0/repositories/:owner/:repo/src/:branch/{$changes}" );
 		}
 
 		if ( ! $response && ! is_wp_error( $response ) ) {
