@@ -30,7 +30,7 @@ class GHU_Upgrade {
 	 *
 	 * @var int
 	 */
-	private $db_version = 7400;
+	private $db_version = 8312;
 
 	/**
 	 * Run update check against db_version.
