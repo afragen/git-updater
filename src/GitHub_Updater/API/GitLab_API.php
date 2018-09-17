@@ -97,19 +97,14 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
+			$response     = $this->api( "/projects/{$id}/repository/files/{$file}" );
+			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
+		}
 
-			$response = $this->api( '/projects/' . $id . '/repository/files/' . $file );
-
-			if ( empty( $response ) || ! isset( $response->content ) ) {
-				return false;
-			}
-
-			if ( $response && isset( $response->content ) ) {
-				$contents = base64_decode( $response->content );
-				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -134,7 +129,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'tags';
-			$response     = $this->api( '/projects/' . $id . '/repository/tags' );
+			$response     = $this->api( "/projects/{$id}/repository/tags" );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -171,35 +166,32 @@ class GitLab_API extends API implements API_Interface {
 		 * Set response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, $changes );
 		}
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'changes';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/' . $changes );
+			$response     = $this->api( "/projects/{$id}/repository/files/{$changes}" );
+			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
+		}
 
-			if ( $response ) {
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
-			}
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No changelog found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( base64_decode( $response['changes'] ) );
+		if ( $response && ! isset( $this->response['changes'] ) ) {
+			$parser   = new \Parsedown();
+			$response = $parser->text( $response );
+			$this->set_repo_cache( 'changes', $response );
+		}
 
-		$this->type->sections['changelog'] = $changelog;
+		$this->type->sections['changelog'] = $response;
 
 		return true;
 	}
@@ -220,29 +212,29 @@ class GitLab_API extends API implements API_Interface {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->content = $content;
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}
 
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'readme';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/readme.txt' );
+			$response     = $this->api( "/projects/{$id}/repository/files/readme.txt" );
+			$response     = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
-		if ( $response && isset( $response->content ) ) {
-			$file     = base64_decode( $response->content );
-			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
+
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No readme found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
+		}
+
+		if ( $response && ! isset( $this->response['readme'] ) ) {
+			$parser   = new Readme_Parser( $response );
+			$response = $parser->parse_data();
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		$this->set_readme_info( $response );
@@ -302,7 +294,11 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'branches';
-			$response     = $this->api( '/projects/' . $id . '/repository/branches' );
+			$response     = $this->api( "/projects/{$id}/repository/branches" );
+
+			if ( $this->validate_response( $response ) ) {
+				return false;
+			}
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -313,10 +309,6 @@ class GitLab_API extends API implements API_Interface {
 
 				return true;
 			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		$this->type->branches = $response;
@@ -473,7 +465,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 
@@ -498,6 +490,9 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -524,7 +519,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 

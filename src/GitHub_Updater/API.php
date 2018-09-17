@@ -300,7 +300,7 @@ class API {
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
-			return false;
+			return $response;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			static::$error_code = array_merge(
@@ -323,14 +323,26 @@ class API {
 		}
 
 		// Gitea doesn't return json encoded raw file.
-		if ( $this instanceof Gitea_API ) {
+		$response = $this->convert_body_string_to_json( $response );
+
+		return json_decode( wp_remote_retrieve_body( $response ) );
+	}
+
+	/**
+	 * Convert response body to JSON.
+	 *
+	 * @param mixed $response (JSON|string)
+	 * @return mixed $response JSON encoded.
+	 */
+	private function convert_body_string_to_json( $response ) {
+		if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API ) {
 			$body = wp_remote_retrieve_body( $response );
 			if ( null === json_decode( $body ) ) {
-				return $body;
+				$response['body'] = json_encode( $body );
 			}
 		}
 
-		return json_decode( wp_remote_retrieve_body( $response ) );
+		return $response;
 	}
 
 	/**
@@ -588,7 +600,7 @@ class API {
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {
-		return empty( $response ) || isset( $response->message );
+		return empty( $response ) || isset( $response->message ) || is_wp_error( $response );
 	}
 
 	/**
@@ -651,14 +663,6 @@ class API {
 			file_exists( $repo->local_path . $file )
 		) {
 			$response = file_get_contents( $repo->local_path . $file );
-		}
-
-		switch ( $repo->git ) {
-			case 'bitbucket':
-				break;
-			default:
-				$response = base64_encode( $response );
-				break;
 		}
 
 		return $response;

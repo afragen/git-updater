@@ -60,16 +60,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$path         = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
+			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
+		}
 
-			$response = $this->api( $path );
-
-			if ( $response ) {
+		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
 				$contents = $this->bbserver_recombine_response( $response );
 				$response = $this->get_file_headers( $contents, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -78,42 +76,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-
-		return true;
-	}
-
-	/**
-	 * Get the remote info for tags.
-	 *
-	 * @return bool
-	 */
-	public function get_remote_tag() {
-		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
-
-		if ( ! $response ) {
-			$response = $this->api( '/1.0/projects/:owner/repos/:repo/tags' );
-
-			if ( ! $response ||
-				( isset( $response->size ) && $response->size < 1 ) ||
-				isset( $response->errors )
-			) {
-				$response          = new \stdClass();
-				$response->message = 'No tags found';
-			}
-
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
 
 		return true;
 	}
@@ -222,71 +184,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		$this->set_readme_info( $response );
-
-		return true;
-	}
-
-	/**
-	 * Read the repository meta from API
-	 *
-	 * @return bool
-	 */
-	public function get_repo_meta() {
-		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
-
-		if ( ! $response ) {
-			self::$method = 'meta';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo' );
-
-			if ( $response ) {
-				$response = $this->parse_meta_response( $response );
-				$this->set_repo_cache( 'meta', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
-
-		return true;
-	}
-
-	/**
-	 * Create array of branches and download links as array.
-	 *
-	 * @return bool
-	 */
-	public function get_remote_branches() {
-		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
-
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			self::$method = 'branches';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
-			if ( $response && isset( $response->values ) ) {
-				foreach ( (array) $response->values as $value ) {
-					$branch              = $value->displayId;
-					$branches[ $branch ] = $this->construct_download_link( $branch );
-				}
-				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
-
-				return true;
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->branches = $response;
 
 		return true;
 	}
@@ -418,6 +315,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -443,6 +343,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
 	}
 
@@ -454,36 +357,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$content        = $this->bbserver_recombine_response( $response );
 		$response       = new \stdClass();
 		$response->data = $content;
 
 		return $response;
-	}
-
-	/**
-	 * Parse API response call and return only array of tag numbers.
-	 *
-	 * @param \stdClass $response Response from API call.
-	 *
-	 * @return array|\stdClass Array of tag numbers, object is error.
-	 */
-	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) || ! isset( $response->values ) ) {
-			return $response;
-		}
-
-		$arr = [];
-		array_map(
-			function ( $e ) use ( &$arr ) {
-				$arr[] = $e->displayId;
-
-				return $arr;
-			},
-			(array) $response->values
-		);
-
-		return $arr;
 	}
 
 	/**
