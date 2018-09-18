@@ -20,19 +20,13 @@ class Language_Pack_API extends API {
 	use GHU_Trait;
 
 	/**
-	 * Holds loose class method name.
-	 *
-	 * @var null
-	 */
-	public static $method = 'translation';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
+		self::$method   = 'translation';
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 	}
