@@ -59,9 +59,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
-				$response = $this->get_file_headers( $response, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
+			$response = $this->get_file_headers( $response, $this->type->type );
+			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
