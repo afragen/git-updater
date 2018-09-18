@@ -55,11 +55,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( ! $response ) {
 			self::$method = 'file';
 			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
+			$response     = $this->bbserver_recombine_response( $response );
 		}
 
 		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
-				$contents = $this->bbserver_recombine_response( $response );
-				$response = $this->get_file_headers( $contents, $this->type->type );
+				$response = $this->get_file_headers( $response, $this->type->type );
 				$this->set_repo_cache( $file, $response );
 				$this->set_repo_cache( 'repo', $this->type->slug );
 		}
@@ -88,40 +88,31 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, $changes );
 		}
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->bbserver_fetch_raw_file( $changes );
+			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$changes}" );
+			$response     = $this->bbserver_recombine_response( $response );
+		}
 
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No changelog found';
-			}
-
-			if ( $response ) {
-				$response = wp_remote_retrieve_body( $response );
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
-			}
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No changelog found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( $response['changes'] );
+		if ( $response && ! isset( $this->response['changes'] ) ) {
+			$parser   = new \Parsedown();
+			$response = $parser->text( $response );
+			$this->set_repo_cache( 'changes', $response );
+		}
 
-		$this->type->sections['changelog'] = $changelog;
+		$this->type->sections['changelog'] = $response;
 
 		return true;
 	}
@@ -142,39 +133,28 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->data = $content;
-			} else {
-				$response = false;
-			}
+			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response     = $this->bbserver_fetch_raw_file( 'readme.txt' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No readme found';
-			}
-
-			if ( $response ) {
-				$response = wp_remote_retrieve_body( $response );
-				$response = $this->parse_readme_response( $response );
-			}
+			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/browse/readme.txt' );
+			$response     = $this->bbserver_recombine_response( $response );
 		}
 
-		if ( $response && isset( $response->data ) ) {
-			$file     = $response->data;
-			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No readme found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
+		}
+
+		if ( $response && ! isset( $this->response['readme'] ) ) {
+			$parser   = new Readme_Parser( $response );
+			$response = $parser->parse_data();
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		$this->set_readme_info( $response );
@@ -266,18 +246,18 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/
 	private function bbserver_fetch_raw_file( $file ) {
-		$file         = urlencode( $file );
-		$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-		$download_url = $this->add_endpoints( $this, $download_url );
-		$download_url = $this->get_api_url( $download_url );
-
-		$response = wp_safe_remote_get( $download_url );
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		return $response;
+		//$file         = urlencode( $file );
+		//$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
+		//$download_url = $this->add_endpoints( $this, $download_url );
+		//$download_url = $this->get_api_url( $download_url );
+		//
+		//$response = wp_safe_remote_get( $download_url );
+		//
+		//if ( is_wp_error( $response ) ) {
+		//	return false;
+		//}
+		//
+		//return wp_remote_retrieve_body( $response );
 	}
 
 	/**
@@ -289,6 +269,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return string Combined lines of text returned by API
 	 */
 	private function bbserver_recombine_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$remote_info_file = '';
 		$json_decoded     = is_string( $response ) ? json_decode( $response ) : '';
 		$response         = empty( $json_decoded ) ? $response : $json_decoded;
@@ -337,10 +320,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $arr Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( $this->validate_response( $response ) ) {
-			return $response;
-		}
-		return [ 'changes' => $this->bbserver_recombine_response( $response ) ];
 	}
 
 	/**
@@ -351,14 +330,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return \stdClass $response
 	 */
 	protected function parse_readme_response( $response ) {
-		if ( $this->validate_response( $response ) ) {
-			return $response;
-		}
-		$content        = $this->bbserver_recombine_response( $response );
-		$response       = new \stdClass();
-		$response->data = $content;
-
-		return $response;
 	}
 
 	/**
