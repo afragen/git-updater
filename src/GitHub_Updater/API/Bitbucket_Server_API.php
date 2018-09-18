@@ -31,12 +31,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Bjorn Wijers
  */
 class Bitbucket_Server_API extends Bitbucket_API {
-	/**
-	 * Holds loose class method name.
-	 *
-	 * @var null
-	 */
-	private static $method;
 
 	/**
 	 * Constructor.
