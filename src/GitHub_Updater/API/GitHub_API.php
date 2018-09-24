@@ -125,7 +125,8 @@ class GitHub_API extends API implements API_Interface {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			return $this->get_github_release_asset_url();
+			$release_asset = $this->get_github_release_asset_url();
+			return $this->get_aws_release_asset_url( $release_asset );
 		}
 
 		/*
@@ -317,91 +318,36 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Return the AWS download link for a GitHub release asset.
-	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 * Return the GitHub release asset URL.
 	 *
-	 * @since 6.1.0
-	 * @uses  Requests, requires WP 4.6
-	 *
-	 * @return array|bool|\stdClass
+	 * @return string|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
-		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
-			unset( $this->response['release_asset_url'] );
-		}
+		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
-		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
-
-		if ( $this->exit_no_update( $response ) ) {
+		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
+			$response = isset( $response->assets ) ? $response->assets[0]->url : $response;
+		}
 
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No release asset found';
-			}
-
-			if ( is_wp_error( $response ) ) {
-				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
-
-				return false;
-			}
-
-			if ( $response ) {
-				add_filter( 'http_request_args', [ $this, 'set_github_release_asset_header' ] );
-
-				$url          = $this->add_access_token_endpoint( $this, $response->assets[0]->url );
-				$response_new = wp_remote_get( $url );
-
-				remove_filter( 'http_request_args', [ $this, 'set_github_release_asset_header' ] );
-
-				if ( is_wp_error( $response_new ) ) {
-					Singleton::get_instance( 'Messages', $this )->create_error_message( $response_new );
-
-					return false;
-				}
-
-				if ( $response_new['http_response'] instanceof \WP_HTTP_Requests_Response ) {
-					$response_object = $response_new['http_response']->get_response_object();
-					if ( ! $response_object->success ) {
-						return false;
-					}
-					$response_headers = $response_object->history[0]->headers;
-					$download_link    = $response_headers->getValues( 'location' );
-				} else {
-					return false;
-				}
-
-				$response = $download_link[0];
-				$this->set_repo_cache( 'release_asset_url', $response );
-			}
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No release asset found';
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
+		}
+
 		return $response;
-	}
-
-	/**
-	 * Set HTTP header for following GitHub release assets.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param        $args
-	 * @param string $url
-	 *
-	 * @return mixed $args
-	 */
-	public function set_github_release_asset_header( $args, $url = '' ) {
-		$args['headers']['accept'] = 'application/octet-stream';
-
-		return $args;
 	}
 
 	/**

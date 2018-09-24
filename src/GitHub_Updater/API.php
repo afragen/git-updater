@@ -541,6 +541,8 @@ class API {
 				$token            = 'gitea_access_token';
 				$token_enterprise = 'gitea_access_token';
 				break;
+			case 'bitbucket':
+				return $endpoint;
 		}
 
 		// Add hosted access token.
@@ -748,6 +750,82 @@ class API {
 		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : null;
 
 		return true;
+	}
+
+	/**
+	 * Return the AWS download link for a release asset.
+	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 *
+	 * @since 6.1.0
+	 * @uses  Requests, requires WP 4.6
+	 *
+	 * @param string $asset Release asset URI from git host.
+	 *
+	 * @return string|bool|\stdClass Release asset URI from AWS.
+	 */
+	protected function get_aws_release_asset_url( $asset ) {
+		if ( ! $asset ) {
+			return false;
+		}
+
+		// Unset release asset url if older than 5 min to account for AWS expiration.
+		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['aws_release_asset_url'] );
+		}
+
+		$response = isset( $this->response['aws_release_asset_url'] ) ? $this->response['aws_release_asset_url'] : false;
+
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			$url      = $this->add_access_token_endpoint( $this, $asset );
+			$response = wp_remote_get( $url );
+			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+		}
+
+		if ( ! $response && ! is_wp_error( $response ) ) {
+			$response          = new \stdClass();
+			$response->message = 'No release asset found';
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		if ( isset( $response['http_response'] ) && $response['http_response'] instanceof \WP_HTTP_Requests_Response && ! isset( $this->response['aws_release_asset_url'] ) ) {
+			$response_object = $response['http_response']->get_response_object();
+			if ( ! $response_object->success ) {
+				return false;
+			}
+			$response_headers = $response_object->history[0]->headers;
+			$download_link    = $response_headers->getValues( 'location' );
+			$aws_link         = $download_link[0];
+			$this->set_repo_cache( 'aws_release_asset_url', $aws_link );
+
+			return $aws_link;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Set HTTP header for following AWS release assets.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function set_aws_release_asset_header( $args, $url = '' ) {
+		$args['headers']['accept'] = 'application/octet-stream';
+		unset( $args['headers']['Authorization'] );
+
+		return $args;
 	}
 
 }

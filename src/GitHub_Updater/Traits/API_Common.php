@@ -153,7 +153,6 @@ trait API_Common {
 			self::$method = 'changes';
 			$response     = $this->api( $request );
 			$response     = $this->decode_response( $git, $response );
-
 		}
 
 		if ( ! $response && ! is_wp_error( $response ) ) {
