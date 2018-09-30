@@ -77,7 +77,7 @@ trait API_Common {
 			$response     = $this->decode_response( $git, $response );
 		}
 
-		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
+		if ( $response && is_string( $response ) && ! is_wp_error( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
 			$this->set_repo_cache( $file, $response );
 			$this->set_repo_cache( 'repo', $this->type->slug );
