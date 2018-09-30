@@ -70,6 +70,13 @@ class API {
 	protected $response = [];
 
 	/**
+	 * Variable to hold AWS redirect URL.
+	 *
+	 * @var string|\WP_Error $redirect
+	 */
+	protected $redirect;
+
+	/**
 	 * API constructor.
 	 */
 	public function __construct() {
@@ -780,6 +787,7 @@ class API {
 		}
 
 		if ( ! $response ) {
+			add_action( 'requests-requests.before_redirect', [ $this, 'set_aws_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
 			$url      = $this->add_access_token_endpoint( $this, $asset );
 			$response = wp_remote_get( $url );
@@ -795,17 +803,10 @@ class API {
 			return false;
 		}
 
-		if ( isset( $response['http_response'] ) && $response['http_response'] instanceof \WP_HTTP_Requests_Response && ! isset( $this->response['aws_release_asset_url'] ) ) {
-			$response_object = $response['http_response']->get_response_object();
-			if ( ! $response_object->success ) {
-				return false;
-			}
-			$response_headers = $response_object->history[0]->headers;
-			$download_link    = $response_headers->getValues( 'location' );
-			$aws_link         = $download_link[0];
-			$this->set_repo_cache( 'aws_release_asset_url', $aws_link );
+		if ( ! empty( $this->redirect ) ) {
+			$this->set_repo_cache( 'aws_release_asset_url', $this->redirect );
 
-			return $aws_link;
+			return $this->redirect;
 		}
 
 		return $response;
@@ -826,6 +827,18 @@ class API {
 		unset( $args['headers']['Authorization'] );
 
 		return $args;
+	}
+
+	/**
+	 * Set AWS redirect URL from action hook.
+	 * @uses `requests-requests.before_redirect` Action hook.
+	 *
+	 * @param string $location
+	 * @return void
+	 */
+	public function set_aws_redirect( $location ) {
+		$location       = false !== strpos( $location, 's3.amazonaws.com' ) ? $location : new \WP_Error();
+		$this->redirect = $location;
 	}
 
 }
