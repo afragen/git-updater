@@ -789,18 +789,9 @@ class API {
 		if ( ! $response ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_aws_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
-			$url      = $this->add_access_token_endpoint( $this, $asset );
-			$response = wp_remote_get( $url );
+			$url = $this->add_access_token_endpoint( $this, $asset );
+			wp_remote_get( $url );
 			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
-		}
-
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No release asset found';
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
 		}
 
 		if ( ! empty( $this->redirect ) ) {
@@ -837,7 +828,7 @@ class API {
 	 * @return void
 	 */
 	public function set_aws_redirect( $location ) {
-		$location       = false !== strpos( $location, 's3.amazonaws.com' ) ? $location : new \WP_Error();
+		$location       = false !== strpos( $location, 's3.amazonaws.com' ) ? $location : false;
 		$this->redirect = $location;
 	}
 
