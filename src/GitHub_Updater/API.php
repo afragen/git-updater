@@ -828,7 +828,7 @@ class API {
 	 * @return void
 	 */
 	public function set_aws_redirect( $location ) {
-		$location       = false !== strpos( $location, 's3.amazonaws.com' ) ? $location : false;
+		//$location       = false !== strpos( $location, 's3.amazonaws.com' ) ? $location : false;
 		$this->redirect = $location;
 	}
 
