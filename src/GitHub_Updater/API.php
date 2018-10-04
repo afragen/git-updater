@@ -426,6 +426,7 @@ class API {
 				}
 				if ( $this->type->enterprise_api ) {
 					$type['base_download'] = $this->type->enterprise_api;
+					$type['base_uri']      = null;
 					if ( $download_link ) {
 						break;
 					}
