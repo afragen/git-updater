@@ -6,6 +6,7 @@
 * attempted to update `class Bitbucket_Server_API`, please let me know if I made 💩
 * refactor release asset and AWS download link code
 * use action hook `requests-requests.before_redirect` to get AWS redirect URL
+* fix for [creating proper GitHub Enterprise base URL](https://github.com/afragen/github-updater/pull/721), oops. Thanks @rlindner
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
