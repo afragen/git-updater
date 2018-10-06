@@ -783,7 +783,7 @@ class API {
 
 		$response = isset( $this->response['aws_release_asset_url'] ) ? $this->response['aws_release_asset_url'] : false;
 
-		if ( $response && $this->exit_no_update( $response ) ) {
+		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
