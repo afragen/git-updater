@@ -27,11 +27,11 @@ before_script:
     elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
       composer global require "phpunit/phpunit:^4"
     fi
-  - "$HOME/.config/composer/vendor/phpunit/phpunit/phpunit --version"
+  - $HOME/.config/composer/vendor/phpunit/phpunit/phpunit --version
 
 script:
 - phpenv config-rm xdebug.ini
-- "$HOME/.config/composer/vendor/phpunit/phpunit/phpunit"
+- $HOME/.config/composer/vendor/phpunit/phpunit/phpunit
 
 before_deploy:
   - git archive -o /tmp/github-updater.${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
