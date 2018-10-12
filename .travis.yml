@@ -19,7 +19,6 @@ env:
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-
   - |
     stable='^[0-9\.]+$'
     if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then
@@ -28,13 +27,14 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
-      composer global require "phpunit/phpunit=5.7.*"
+      composer global require "phpunit/phpunit:^6"
     elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-      composer global require "phpunit/phpunit=4.8.*"
+      composer global require "phpunit/phpunit:^4"
     fi
   - phpunit --version
+  - "$HOME/.config/composer/vendor/phpunit/phpunit/phpunit --version"
 
-script: phpunit
+script: "$HOME/.config/composer/vendor/phpunit/phpunit/phpunit"
 
 before_deploy:
   - git archive -o /tmp/github-updater.${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
