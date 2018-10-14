@@ -776,11 +776,6 @@ class API {
 			return false;
 		}
 
-		// @TODO: Need to figure out fix for getting AWS link from private Bitbucket repo.
-		if ( 'bitbucket' === $this->type->git && $this->type->is_private ) {
-			return null;
-		}
-
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
 			unset( $this->response['aws_release_asset_url'] );

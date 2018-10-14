@@ -7,7 +7,6 @@
 * refactor release asset and AWS download link code
 * use action hook `requests-requests.before_redirect` to get AWS redirect URL
 * fix for [creating proper GitHub Enterprise base URL](https://github.com/afragen/github-updater/pull/721), oops. Thanks @rlindner
-* TODO: need to figure out how to get AWS download link from private Bitbucket repo [#714](https://github.com/afragen/github-updater/issues/714)
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading

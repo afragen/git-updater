@@ -212,7 +212,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$download_link = implode(
 			'/',
 			[
-				'https://bitbucket.org',
+				'https://api.bitbucket.org/2.0/repositories',
 				$this->type->owner,
 				$this->type->slug,
 				'downloads',
