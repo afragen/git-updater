@@ -98,6 +98,7 @@ trait Basic_Auth_Loader {
 			'isset'         => false,
 			'private'       => false,
 		];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
@@ -153,7 +154,7 @@ trait Basic_Auth_Loader {
 			case 'bitbucket':
 			case $type instanceof Bitbucket_API:
 			case $type instanceof Bitbucket_Server_API:
-				$bitbucket_org = 'bitbucket.org' === $headers['host'] || 'api.bitbucket.org' === $headers['host'];
+				$bitbucket_org = in_array( $headers['host'], $hosts, true );
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 				break;
