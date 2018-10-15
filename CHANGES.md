@@ -8,6 +8,7 @@
 * use action hook `requests-requests.before_redirect` to get AWS redirect URL
 * fix for [creating proper GitHub Enterprise base URL](https://github.com/afragen/github-updater/pull/721), oops. Thanks @rlindner
 * fixed [#714](https://github.com/afragen/github-updater/issues/714), get correct Bitbucket release asset download link from AWS
+* update to `class-parser.php` r7679
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
