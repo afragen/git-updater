@@ -13,7 +13,6 @@ namespace Fragen\GitHub_Updater\API;
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\API;
 use Fragen\GitHub_Updater\Branch;
-use Fragen\GitHub_Updater\Readme_Parser;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
@@ -33,13 +32,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class Gitea_API extends API implements API_Interface {
 	use GHU_Trait;
-
-	/**
-	 * Holds loose class method name.
-	 *
-	 * @var null
-	 */
-	private static $method;
 
 	/**
 	 * Constructor.
@@ -91,28 +83,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
-
-		if ( ! $response ) {
-			self::$method = 'file';
-			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $file );
-
-			if ( $response ) {
-				$contents = $response;
-				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
-		}
-
-		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$response['dot_org'] = $this->get_dot_org_data();
-		$this->set_file_info( $response );
-
-		return true;
+		return $this->get_remote_api_info( 'gitea', $file, "/repos/:owner/:repo/raw/:branch/{$file}" );
 	}
 
 	/**
@@ -121,32 +92,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
-
-		if ( ! $response ) {
-			self::$method = 'tags';
-			$response     = $this->api( '/repos/:owner/:repo/releases' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No tags found';
-			}
-
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
-
-		return true;
+		return $this->get_remote_api_tag( 'gitea', '/repos/:owner/:repo/releases' );
 	}
 
 	/**
@@ -157,42 +103,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
-
-		/*
-		 * Set response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
-		}
-
-		if ( ! $response ) {
-			self::$method = 'changes';
-			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/' . $changes );
-
-			if ( $response ) {
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( base64_decode( $response['changes'] ) );
-
-		$this->type->sections['changelog'] = $changelog;
-
-		return true;
+		return $this->get_remote_api_changes( 'gitea', $changes, "/repos/:owner/:repo/raw/:branch/{$changes}" );
 	}
 
 	/**
@@ -201,43 +112,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
-			return false;
-		}
-
-		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
-
-		/*
-		 * Set $response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->content = $content;
-			} else {
-				$response = false;
-			}
-		}
-
-		if ( ! $response ) {
-			self::$method = 'readme';
-			$response     = $this->api( '/repos/:owner/:repo/raw/:branch/readme.txt' );
-		}
-		if ( $response && isset( $response->content ) ) {
-			$file     = base64_decode( $response->content );
-			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->set_readme_info( $response );
-
-		return true;
+		return $this->get_remote_api_readme( 'gitea', '/repos/:owner/:repo/raw/:branch/readme.txt' );
 	}
 
 	/**
@@ -246,26 +121,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
-
-		if ( ! $response ) {
-			self::$method = 'meta';
-			$response     = $this->api( '/repos/:owner/:repo' );
-
-			if ( $response ) {
-				$response = $this->parse_meta_response( $response );
-				$this->set_repo_cache( 'meta', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
-
-		return true;
+		return $this->get_remote_api_repo_meta( 'gitea', '/repos/:owner/:repo' );
 	}
 
 	/**
@@ -274,35 +130,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
-
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			self::$method = 'branches';
-			$response     = $this->api( '/repos/:owner/:repo/branches' );
-
-			if ( $response ) {
-				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
-				}
-				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
-
-				return true;
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->branches = $response;
-
-		return true;
+		return $this->get_remote_api_branches( 'gitea', '/repos/:owner/:repo/branches' );
 	}
 
 	/**
@@ -375,7 +203,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 
@@ -400,6 +228,9 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -425,21 +256,6 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) ) {
-			return $response;
-		}
-
-		$arr      = [];
-		$response = [ $response ];
-
-		array_filter(
-			$response,
-			function ( $e ) use ( &$arr ) {
-				$arr['changes'] = base64_encode( $e );
-			}
-		);
-
-		return $arr;
 	}
 
 	/**
@@ -450,7 +266,7 @@ class Gitea_API extends API implements API_Interface {
 	 *
 	 * @return array
 	 */
-	private function parse_tags( $response, $repo_type ) {
+	protected function parse_tags( $response, $repo_type ) {
 		$tags     = [];
 		$rollback = [];
 

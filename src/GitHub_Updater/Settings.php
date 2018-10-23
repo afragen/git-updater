@@ -216,7 +216,7 @@ class Settings extends Base {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
-		$logo   = plugins_url( basename( dirname( dirname( __DIR__ ) ) ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
+		$logo   = plugins_url( basename( GITHUB_UPDATER_DIR ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>

@@ -64,7 +64,9 @@ class Init extends Base {
 	 * Let's get going.
 	 */
 	public function run() {
-		$this->load_hooks();
+		if ( ! static::is_heartbeat() ) {
+			$this->load_hooks();
+		}
 
 		if ( static::is_wp_cli() ) {
 			include_once __DIR__ . '/WP_CLI/CLI.php';
@@ -128,8 +130,12 @@ class Init extends Base {
 			'options.php',
 			'settings.php',
 			'edit.php',
-			'admin-ajax.php',
 		];
+
+		// Needed for sequential shiny updating.
+		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], [ 'update-plugin', 'update-theme' ], true ) ) {
+			$admin_pages[] = 'admin-ajax.php';
+		}
 
 		/**
 		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.

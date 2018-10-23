@@ -11,6 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\API_Common;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 use Fragen\GitHub_Updater\API\GitHub_API;
@@ -30,7 +31,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class API
  */
 class API {
-	use GHU_Trait, Basic_Auth_Loader;
+	use API_Common, GHU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Holds HTTP error code from API call.
@@ -67,6 +68,13 @@ class API {
 	 * @var array
 	 */
 	protected $response = [];
+
+	/**
+	 * Variable to hold AWS redirect URL.
+	 *
+	 * @var string|\WP_Error $redirect
+	 */
+	protected $redirect;
 
 	/**
 	 * API constructor.
@@ -300,7 +308,7 @@ class API {
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
-			return false;
+			return $response;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			static::$error_code = array_merge(
@@ -323,14 +331,26 @@ class API {
 		}
 
 		// Gitea doesn't return json encoded raw file.
-		if ( $this instanceof Gitea_API ) {
+		$response = $this->convert_body_string_to_json( $response );
+
+		return json_decode( wp_remote_retrieve_body( $response ) );
+	}
+
+	/**
+	 * Convert response body to JSON.
+	 *
+	 * @param mixed $response (JSON|string)
+	 * @return mixed $response JSON encoded.
+	 */
+	private function convert_body_string_to_json( $response ) {
+		if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API ) {
 			$body = wp_remote_retrieve_body( $response );
 			if ( null === json_decode( $body ) ) {
-				return $body;
+				$response['body'] = json_encode( $body );
 			}
 		}
 
-		return json_decode( wp_remote_retrieve_body( $response ) );
+		return $response;
 	}
 
 	/**
@@ -406,6 +426,7 @@ class API {
 				}
 				if ( $this->type->enterprise_api ) {
 					$type['base_download'] = $this->type->enterprise_api;
+					$type['base_uri']      = null;
 					if ( $download_link ) {
 						break;
 					}
@@ -528,6 +549,8 @@ class API {
 				$token            = 'gitea_access_token';
 				$token_enterprise = 'gitea_access_token';
 				break;
+			case 'bitbucket':
+				return $endpoint;
 		}
 
 		// Add hosted access token.
@@ -588,7 +611,7 @@ class API {
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {
-		return empty( $response ) || isset( $response->message );
+		return empty( $response ) || isset( $response->message ) || is_wp_error( $response );
 	}
 
 	/**
@@ -651,14 +674,6 @@ class API {
 			file_exists( $repo->local_path . $file )
 		) {
 			$response = file_get_contents( $repo->local_path . $file );
-		}
-
-		switch ( $repo->git ) {
-			case 'bitbucket':
-				break;
-			default:
-				$response = base64_encode( $response );
-				break;
 		}
 
 		return $response;
@@ -744,4 +759,76 @@ class API {
 
 		return true;
 	}
+
+	/**
+	 * Return the AWS download link for a release asset.
+	 * AWS download link sets a link expiration of ONLY 5 minutes.
+	 *
+	 * @since 6.1.0
+	 * @uses  Requests, requires WP 4.6
+	 *
+	 * @param string $asset Release asset URI from git host.
+	 *
+	 * @return string|bool|\stdClass Release asset URI from AWS.
+	 */
+	protected function get_aws_release_asset_url( $asset ) {
+		if ( ! $asset ) {
+			return false;
+		}
+
+		// Unset release asset url if older than 5 min to account for AWS expiration.
+		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['aws_release_asset_url'] );
+		}
+
+		$response = isset( $this->response['aws_release_asset_url'] ) ? $this->response['aws_release_asset_url'] : false;
+
+		if ( $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			add_action( 'requests-requests.before_redirect', [ $this, 'set_aws_redirect' ], 10, 1 );
+			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			$url = $this->add_access_token_endpoint( $this, $asset );
+			wp_remote_get( $url );
+			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+		}
+
+		if ( ! empty( $this->redirect ) ) {
+			$this->set_repo_cache( 'aws_release_asset_url', $this->redirect );
+
+			return $this->redirect;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Set HTTP header for following AWS release assets.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args
+	 * @param string $url
+	 *
+	 * @return mixed $args
+	 */
+	public function set_aws_release_asset_header( $args, $url = '' ) {
+		$args['headers']['accept'] = 'application/octet-stream';
+
+		return $args;
+	}
+
+	/**
+	 * Set AWS redirect URL from action hook.
+	 * @uses `requests-requests.before_redirect` Action hook.
+	 *
+	 * @param string $location
+	 * @return void
+	 */
+	public function set_aws_redirect( $location ) {
+		$this->redirect = $location;
+	}
+
 }

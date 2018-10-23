@@ -20,19 +20,13 @@ class Language_Pack_API extends API {
 	use GHU_Trait;
 
 	/**
-	 * Holds loose class method name.
-	 *
-	 * @var null
-	 */
-	public static $method = 'translation';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param \stdClass $type
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
+		self::$method   = 'translation';
 		$this->type     = $type;
 		$this->response = $this->get_repo_cache();
 	}
@@ -88,10 +82,7 @@ class Language_Pack_API extends API {
 					: null;
 				break;
 			case 'bitbucket':
-				$response = $this->api( '/1.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
-				$response = isset( $response->data )
-					? json_decode( $response->data )
-					: null;
+				$response = $this->api( '/2.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
 				break;
 			case 'gitlab':
 				$id       = urlencode( $headers['owner'] . '/' . $headers['repo'] );

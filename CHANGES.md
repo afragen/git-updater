@@ -1,8 +1,23 @@
 #### [unreleased]
 
+#### 8.4.0 / 2018-10-23
+* use new constant for assets
+* update error checking for `WP_Error` response from `wp_remote_get()`
+* updated to use Bitbucket API 2.0 where appropriate
+* refactor API calls with new `trait API_Common`
+* attempted to update `class Bitbucket_Server_API`, please let me know if I made 💩
+* refactor release asset and AWS download link code
+* use action hook `requests-requests.before_redirect` to get AWS redirect URL
+* fix for [creating proper GitHub Enterprise base URL](https://github.com/afragen/github-updater/pull/721), oops. Thanks @rlindner
+* fixed [#714](https://github.com/afragen/github-updater/issues/714), get correct Bitbucket release asset download link from AWS
+* update to `class-parser.php` r7679
+* don't run on heartbeat API 💗
+* only run on `admin-ajax.php` when possibly attempting sequential shiny updates, fixes [#723](https://github.com/afragen/github-updater/issues/723)
+* update Persist Admin notices Dismissal library
+
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
-* fixed issue with `load_plugin_textdomain()` not loading in hook causing issus, thanks @pnoeric and @garrett-eclipse
+* fixed issue with `load_plugin_textdomain()` not loading completely (now loading in `init` hook), thanks @pnoeric and @garrett-eclipse
 
 #### 8.3.0 / 2018-09-12
 * test to ensure `file_put_contents()` works

@@ -360,18 +360,6 @@ class Parser {
 			$this->sections['faq'] = '';
 		}
 
-		// Prefix Installation Instructions as a FAQ entry
-		if ( $this->has_unique_installation_instructions() ) {
-			$this->faq = array_merge(
-				array(
-					__( 'Installation Instructions', 'wporg-plugins' ) => $this->sections['installation'],
-				),
-				$this->faq
-			);
-			// unset( $this->sections['installation'] );
-			$this->sections['faq'] = ''; // Ensure it's set as per faq section above.
-		}
-
 		// Markdownify!
 		$this->sections       = array_map( array( $this, 'parse_markdown' ), $this->sections );
 		$this->upgrade_notice = array_map( array( $this, 'parse_markdown' ), $this->upgrade_notice );

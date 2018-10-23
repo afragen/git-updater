@@ -99,6 +99,9 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
 		$hours = $this->get_class_vars( 'API', 'hours' );
 		if ( ! $repo ) {
 			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';

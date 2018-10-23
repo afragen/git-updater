@@ -344,7 +344,7 @@ class Theme extends Base {
 					esc_html__( 'View version %s details.', 'github-updater' ),
 					$response['new_version']
 				);
-				echo '</a><em>';
+				echo '</a>&nbsp;<em>';
 				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
 				echo '</em>';
 			} else {

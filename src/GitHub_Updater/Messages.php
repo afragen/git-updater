@@ -166,11 +166,8 @@ class Messages {
 	 * Generate error message for WP_Error.
 	 */
 	public function show_wp_error() {
-		if ( ! \PAnD::is_admin_notice_active( 'wp-error-1' ) ) {
-			return;
-		}
 		?>
-		<div data-dismissible="wp-error-1" class="notice-error notice is-dismissible">
+		<div class="notice-error notice">
 			<p>
 				<?php
 				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );

@@ -6,7 +6,7 @@
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
- * @uses      http://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php
+ * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme
  */
 
 namespace Fragen\GitHub_Updater;
@@ -98,7 +98,7 @@ class Readme_Parser extends Parser {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
 			$contributors[ $contributor ]['avatar']       = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
-			if ( $wp_version < '5.0-alpha-42631' ) {
+			if ( $wp_version < '5.1-alpha' ) {
 				$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 			}
 		}

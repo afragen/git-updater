@@ -13,7 +13,6 @@ namespace Fragen\GitHub_Updater\API;
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\API;
 use Fragen\GitHub_Updater\Branch;
-use Fragen\GitHub_Updater\Readme_Parser;
 
 /*
  * Exit if called directly.
@@ -30,12 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class GitLab_API extends API implements API_Interface {
-	/**
-	 * Holds loose class method name.
-	 *
-	 * @var null
-	 */
-	private static $method;
 
 	/**
 	 * Constructor.
@@ -92,34 +85,8 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
-
-		if ( ! $response ) {
-			$id           = $this->get_gitlab_id();
-			self::$method = 'file';
-
-			$response = $this->api( '/projects/' . $id . '/repository/files/' . $file );
-
-			if ( empty( $response ) || ! isset( $response->content ) ) {
-				return false;
-			}
-
-			if ( $response && isset( $response->content ) ) {
-				$contents = base64_decode( $response->content );
-				$response = $this->get_file_headers( $contents, $this->type->type );
-				$this->set_repo_cache( $file, $response );
-				$this->set_repo_cache( 'repo', $this->type->slug );
-			}
-		}
-
-		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$response['dot_org'] = $this->get_dot_org_data();
-		$this->set_file_info( $response );
-
-		return true;
+		$id = $this->get_gitlab_id();
+		return $this->get_remote_api_info( 'gitlab', $file, "/projects/{$id}/repository/files/{$file}" );
 	}
 
 	/**
@@ -128,33 +95,8 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
-
-		if ( ! $response ) {
-			$id           = $this->get_gitlab_id();
-			self::$method = 'tags';
-			$response     = $this->api( '/projects/' . $id . '/repository/tags' );
-
-			if ( ! $response ) {
-				$response          = new \stdClass();
-				$response->message = 'No tags found';
-			}
-
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
-
-		return true;
+		$id = $this->get_gitlab_id();
+		return $this->get_remote_api_tag( 'gitlab', "/projects/{$id}/repository/tags" );
 	}
 
 	/**
@@ -165,43 +107,8 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
-
-		/*
-		 * Set response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = [];
-			$content  = $this->get_local_info( $this->type, $changes );
-			if ( $content ) {
-				$response['changes'] = $content;
-				$this->set_repo_cache( 'changes', $response );
-			} else {
-				$response = false;
-			}
-		}
-
-		if ( ! $response ) {
-			$id           = $this->get_gitlab_id();
-			self::$method = 'changes';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/' . $changes );
-
-			if ( $response ) {
-				$response = $this->parse_changelog_response( $response );
-				$this->set_repo_cache( 'changes', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$parser    = new \Parsedown();
-		$changelog = $parser->text( base64_decode( $response['changes'] ) );
-
-		$this->type->sections['changelog'] = $changelog;
-
-		return true;
+		$id = $this->get_gitlab_id();
+		return $this->get_remote_api_changes( 'gitlab', $changes, "/projects/{$id}/repository/files/{$changes}" );
 	}
 
 	/**
@@ -210,44 +117,8 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
-			return false;
-		}
-
-		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
-
-		/*
-		 * Set $response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = new \stdClass();
-			$content  = $this->get_local_info( $this->type, 'readme.txt' );
-			if ( $content ) {
-				$response->content = $content;
-			} else {
-				$response = false;
-			}
-		}
-
-		if ( ! $response ) {
-			$id           = $this->get_gitlab_id();
-			self::$method = 'readme';
-			$response     = $this->api( '/projects/' . $id . '/repository/files/readme.txt' );
-		}
-		if ( $response && isset( $response->content ) ) {
-			$file     = base64_decode( $response->content );
-			$parser   = new Readme_Parser( $file );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->set_readme_info( $response );
-
-		return true;
+		$id = $this->get_gitlab_id();
+		return $this->get_remote_api_readme( 'gitlab', "/projects/{$id}/repository/files/readme.txt" );
 	}
 
 	/**
@@ -292,36 +163,8 @@ class GitLab_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
-
-		if ( $this->exit_no_update( $response, true ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$id           = $this->get_gitlab_id();
-			self::$method = 'branches';
-			$response     = $this->api( '/projects/' . $id . '/repository/branches' );
-
-			if ( $response ) {
-				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
-				}
-				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
-
-				return true;
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$this->type->branches = $response;
-
-		return true;
+		$id = $this->get_gitlab_id();
+		return $this->get_remote_api_branches( 'gitlab', "/projects/{$id}/repository/branches" );
 	}
 
 	/**
@@ -473,7 +316,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
-		if ( isset( $response->message ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 
@@ -498,6 +341,9 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array $arr Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
 		$arr      = [];
 		$response = [ $response ];
 
@@ -524,7 +370,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @return array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
-		if ( isset( $response->messages ) ) {
+		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 
@@ -549,7 +395,7 @@ class GitLab_API extends API implements API_Interface {
 	 *
 	 * @return array
 	 */
-	private function parse_tags( $response, $repo_type ) {
+	protected function parse_tags( $response, $repo_type ) {
 		$tags     = [];
 		$rollback = [];
 
