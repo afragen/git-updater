@@ -22,7 +22,7 @@
  * @author  Agbonghama Collins
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.3.2
+ * @version 1.4.0
  */
 
 /**
@@ -52,7 +52,9 @@ if ( ! class_exists( 'PAnD' ) ) {
 		 */
 		public static function load_script() {
 
-		    if(is_customize_preview()) return;
+			if ( is_customize_preview() ) {
+				return;
+			}
 
 			wp_enqueue_script(
 				'dismissible-notices',
@@ -78,17 +80,15 @@ if ( ! class_exists( 'PAnD' ) ) {
 		public static function dismiss_admin_notice() {
 			$option_name        = sanitize_text_field( $_POST['option_name'] );
 			$dismissible_length = sanitize_text_field( $_POST['dismissible_length'] );
-			$transient          = 0;
 
 			if ( 'forever' != $dismissible_length ) {
 				// If $dismissible_length is not an integer default to 1
 				$dismissible_length = ( 0 == absint( $dismissible_length ) ) ? 1 : $dismissible_length;
-				$transient          = absint( $dismissible_length ) * DAY_IN_SECONDS;
 				$dismissible_length = strtotime( absint( $dismissible_length ) . ' days' );
 			}
 
 			check_ajax_referer( 'dismissible-notice', 'nonce' );
-			set_site_transient( $option_name, $dismissible_length, $transient );
+			self::set_admin_notice_cache( $option_name, $dismissible_length );
 			wp_die();
 		}
 
@@ -103,7 +103,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 			$array       = explode( '-', $arg );
 			$length      = array_pop( $array );
 			$option_name = implode( '-', $array );
-			$db_record   = get_site_transient( $option_name );
+			$db_record   = self::get_admin_notice_cache( $option_name );
 
 			if ( 'forever' == $db_record ) {
 				return false;
@@ -112,6 +112,46 @@ if ( ! class_exists( 'PAnD' ) ) {
 			} else {
 				return true;
 			}
+		}
+
+		/**
+		 * Returns admin notice cached timeout.
+		 *
+		 * @access public
+		 *
+		 * @param string|bool $id admin notice name or false.
+		 *
+		 * @return array|bool The timeout. False if expired.
+		 */
+		public static function get_admin_notice_cache( $id = false ) {
+			if ( ! $id ) {
+				return false;
+			}
+			$cache_key = 'pand-' . md5( $id );
+			$timeout   = get_site_option( $cache_key );
+
+			if ( empty( $timeout ) || time() > $timeout ) {
+				return false;
+			}
+
+			return $timeout;
+		}
+
+		/**
+		 * Sets admin notice timeout in site option.
+		 *
+		 * @access public
+		 *
+		 * @param string      $id       Data Identifier.
+		 * @param string|bool $timeout  Timeout for admin notice.
+		 *
+		 * @return bool
+		 */
+		public static function set_admin_notice_cache( $id, $timeout ) {
+			$cache_key = 'pand-' . md5( $id );
+			update_site_option( $cache_key, $timeout );
+
+			return true;
 		}
 
 	}

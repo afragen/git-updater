@@ -11,6 +11,7 @@
 * update to `class-parser.php` r7679
 * don't run on heartbeat API 💗
 * only run on `admin-ajax.php` when possibly attempting sequential shiny updates, fixes [#723](https://github.com/afragen/github-updater/issues/723)
+* update Persist Admin notices Dismissal library
 
 #### 8.3.1 / 2018-09-13
 * created `class Bootstrap` to setup plugin loading
