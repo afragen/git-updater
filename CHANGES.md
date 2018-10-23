@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.4.0 / 2018-10-23
 * use new constant for assets
 * update error checking for `WP_Error` response from `wp_remote_get()`
 * updated to use Bitbucket API 2.0 where appropriate
