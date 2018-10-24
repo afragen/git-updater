@@ -3,7 +3,7 @@
 /**
  * Persist Admin notices Dismissal
  *
- * Copyright (C) 2016  Agbonghama Collins <http://w3guy.com>
+ * Copyright (C) 2016 Collins Agbonghama <http://w3guy.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Persist Admin notices Dismissal
- * @author  Agbonghama Collins
+ * @author  Collins Agbonghama
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.4.0
+ * @version 1.4.1
  */
 
 /**
@@ -129,6 +129,7 @@ if ( ! class_exists( 'PAnD' ) ) {
 			}
 			$cache_key = 'pand-' . md5( $id );
 			$timeout   = get_site_option( $cache_key );
+			$timeout   = 'forever' === $timeout ? time() + 60 : $timeout;
 
 			if ( empty( $timeout ) || time() > $timeout ) {
 				return false;

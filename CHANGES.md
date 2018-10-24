@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 8.4.1 / 2018-10-24
+* updated PAnD library with `forever` fix, this was my fault 💩
+
 #### 8.4.0 / 2018-10-23
 * use new constant for assets
 * update error checking for `WP_Error` response from `wp_remote_get()`
