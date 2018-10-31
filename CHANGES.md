@@ -1,4 +1,5 @@
 #### [unreleased]
+* updated password fields to not autoload saved passwords, thanks @figureone
 
 #### 8.4.1 / 2018-10-24
 * updated PAnD library with `forever` fix, this was my fault 💩
