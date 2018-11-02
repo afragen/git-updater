@@ -491,7 +491,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function bitbucket_password() {
 		?>
 		<label for="bitbucket_password">
-			<input class="bitbucket_setting" type="password" style="width:50%;" name="bitbucket_password" value="">
+			<input class="bitbucket_setting" type="password" style="width:50%;" name="bitbucket_password" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ); ?>

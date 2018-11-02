@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 8.4.2 / 2018-11-01
+* updated password fields to not autoload saved passwords, thanks @figureone
+* fixed error when saving Remote Management options
+
 #### 8.4.1 / 2018-10-24
 * updated PAnD library with `forever` fix, this was my fault 💩
 

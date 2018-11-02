@@ -24,6 +24,7 @@ class Remote_Management {
 	 * @var mixed
 	 */
 	public static $options_remote;
+
 	/**
 	 * Supported remote management services.
 	 *
@@ -35,6 +36,7 @@ class Remote_Management {
 		'managewp'     => 'ManageWP',
 		'mainwp'       => 'MainWP',
 	];
+
 	/**
 	 * Holds the value for the Remote Management API key.
 	 *
