@@ -1,4 +1,5 @@
 #### [unreleased]
+* ensure `$slug` is set in `Init->rename_on_activation()`
 
 #### 8.4.2 / 2018-11-01
 * updated password fields to not autoload saved passwords, thanks @figureone

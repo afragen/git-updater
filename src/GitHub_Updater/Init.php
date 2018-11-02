@@ -55,7 +55,7 @@ class Init extends Base {
 			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
 		}
 
-		if ( 'github-updater/github-updater.php' !== $slug ) {
+		if ( $slug && 'github-updater/github-updater.php' !== $slug ) {
 			rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'github-updater' );
 		}
 	}
