@@ -163,11 +163,11 @@ class GitHub_API extends API implements API_Interface {
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
+			case 'changes':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
 			case 'meta':
 			case 'tags':
-			case 'changes':
 			case 'download_link':
 			case 'translation':
 				break;
