@@ -10,9 +10,9 @@
 * Requires PHP: 5.6
 * Tested up to: 5.0
 * Stable tag: master
-* Donate link: <http://thefragens.com/github-updater-donate>
+* Donate link: <https://thefragens.com/github-updater-donate>
 * License: GPLv2 or later
-* License URI: <http://www.gnu.org/licenses/gpl-2.0.html>
+* License URI: <https://www.gnu.org/licenses/gpl-2.0.html>
 
 A simple plugin to enable automatic updates to your GitHub, Bitbucket, GitLab, or Gitea hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
 
