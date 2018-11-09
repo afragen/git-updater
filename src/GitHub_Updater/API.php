@@ -475,17 +475,12 @@ class API {
 
 	/**
 	 * Query wp.org for plugin/theme information.
-	 * Exit early and false for override dot org active.
 	 *
 	 * @access protected
 	 *
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		if ( $this->is_override_dot_org() ) {
-			return false;
-		}
-
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {

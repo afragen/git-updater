@@ -522,14 +522,6 @@ class Settings extends Base {
 	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
-		if ( $this->is_override_dot_org() ) {
-			echo ( wp_kses_post( __( 'Override Dot Org is <strong>active</strong>.', 'github-updater' ) ) );
-		} else {
-			echo( wp_kses_post( __( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' ) ) );
-		}
-		echo '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
-		/* translators: %s: code fragment */
-		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
 		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
 	}
 

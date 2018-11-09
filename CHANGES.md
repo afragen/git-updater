@@ -1,6 +1,7 @@
 #### [unreleased]
 * ensure `$slug` is set in `Init->rename_on_activation()`
 * specify branch for changelog
+* refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
 
 #### 8.4.2 / 2018-11-01
 * updated password fields to not autoload saved passwords, thanks @figureone
