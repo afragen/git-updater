@@ -735,7 +735,9 @@ class Settings extends Base {
 			function ( $e ) {
 				return [
 					'type'    => $e->type,
-					'repo'    => $e->slug,
+					'slug'    => $e->slug,
+					'file'    => isset( $e->file ) ? $e->file : $e->slug,
+					'branch'  => $e->branch,
 					'name'    => $e->name,
 					'private' => isset( $e->is_private ) ? $e->is_private : false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
@@ -755,7 +757,8 @@ class Settings extends Base {
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private = $data['private'] ? $lock : null;
 			$is_broken  = $data['broken'] ? $broken : null;
-			$is_dot_org = $data['dot_org'] ? $dot_org : null;
+			$override   = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org = $data['dot_org'] && ! $override ? $dot_org : null;
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . '</p>' );
 		}
 	}

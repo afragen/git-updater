@@ -234,9 +234,13 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public function override_dot_org( $type, $repo ) {
-		$transient_key  = 'plugin' === $type ? $repo->file : null;
-		$transient_key  = 'theme' === $type ? $repo->slug : $transient_key;
-		$dot_org_master = $repo->dot_org && 'master' === $repo->branch;
+		// Correctly account for dashicon in Settings page.
+		$icon           = is_array( $repo );
+		$repo           = is_array( $repo ) ? (object) $repo : $repo;
+		$dot_org_master = ! $icon ? $repo->dot_org && 'master' === $repo->branch : true;
+
+		$transient_key = 'plugin' === $type ? $repo->file : null;
+		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
 
 		/**
 		 * Filter update to override dot org.
