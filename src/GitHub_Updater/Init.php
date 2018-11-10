@@ -56,7 +56,7 @@ class Init extends Base {
 		}
 
 		if ( $slug && 'github-updater/github-updater.php' !== $slug ) {
-			rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'github-updater' );
+			@rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'github-updater' );
 		}
 	}
 
