@@ -1,5 +1,5 @@
 #### [unreleased]
-* ensure `$slug` is set in `Init->rename_on_activation()`
+* silence rename PHP warning during plugin update
 * specify branch for changelog
 * refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
 
