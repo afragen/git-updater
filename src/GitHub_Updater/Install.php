@@ -89,7 +89,7 @@ class Install {
 		add_action(
 			'admin_enqueue_scripts',
 			function () {
-				wp_register_script( 'ghu-install', plugins_url( basename( GITHUB_UPDATER_DIR ) . '/js/ghu-install.js' ), [ 'jquery' ], false, true );
+				wp_register_script( 'ghu-install', plugins_url( basename( GITHUB_UPDATER_DIR ) . '/js/ghu-install-vanilla.js' ), [], false, true );
 				wp_enqueue_script( 'ghu-install' );
 			}
 		);

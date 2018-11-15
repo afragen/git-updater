@@ -2,6 +2,7 @@
 * silence rename PHP warning during plugin update
 * specify branch for changelog
 * refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
+* now using vanilla JS for Install settings
 
 #### 8.4.2 / 2018-11-01
 * updated password fields to not autoload saved passwords, thanks @figureone
