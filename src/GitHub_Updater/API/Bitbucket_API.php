@@ -164,7 +164,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset_url = $this->make_release_asset_download_link();
+			$release_asset_url = $this->get_bitbucket_release_asset_url();
 			return $this->get_aws_release_asset_url( $release_asset_url );
 		}
 
@@ -201,26 +201,39 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Create release asset download link.
-	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 * Return the Bitbucket release asset URL.
 	 *
 	 * @access private
 	 *
 	 * @return string $download_link
 	 */
-	private function make_release_asset_download_link() {
-		$download_link = implode(
-			'/',
-			[
-				'https://api.bitbucket.org/2.0/repositories',
-				$this->type->owner,
-				$this->type->slug,
-				'downloads',
-				$this->type->slug . '-' . $this->type->newest_tag . '.zip',
-			]
-		);
+	private function get_bitbucket_release_asset_url() {
+		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
-		return $download_link;
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			$response      = $this->api( '/2.0/repositories/:owner/:repo/downloads' );
+			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads' );
+			$response      = isset( $response->values[0] ) ? $download_base . '/' . $response->values[0]->name : false;
+
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		if ( $response && ! isset( $this->response['release_asset_url'] ) ) {
+			$this->set_repo_cache( 'release_asset_url', $response );
+		}
+
+		return $response;
 	}
 
 	/**

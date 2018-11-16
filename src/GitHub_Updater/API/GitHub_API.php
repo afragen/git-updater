@@ -126,7 +126,7 @@ class GitHub_API extends API implements API_Interface {
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_github_release_asset_url();
-			return $this->get_aws_release_asset_url( $release_asset );
+			return $release_asset;
 		}
 
 		/*
@@ -323,7 +323,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string|bool|\stdClass
 	 */
 	private function get_github_release_asset_url() {
-		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -331,20 +331,20 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$response = isset( $response->assets ) ? $response->assets[0]->url : $response;
-		}
+			$response = isset( $response->assets[0] ) ? $response->assets[0]->browser_download_url : false;
 
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No release asset found';
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( $response && ! isset( $this->response['release_asset'] ) ) {
-			$this->set_repo_cache( 'release_asset', $response );
+		if ( $response && ! isset( $this->response['release_asset_url'] ) ) {
+			$this->set_repo_cache( 'release_asset_url', $response );
 		}
 
 		return $response;

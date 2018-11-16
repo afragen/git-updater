@@ -3,6 +3,8 @@
 * specify branch for changelog
 * refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
 * now using vanilla JS for Install settings
+* refactored GitHub release asset code to get direct download link
+* refactored Bitbucket release asset code to get download link for AWS
 
 #### 8.4.2 / 2018-11-01
 * updated password fields to not autoload saved passwords, thanks @figureone
