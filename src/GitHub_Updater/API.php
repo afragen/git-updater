@@ -373,7 +373,7 @@ class API {
 			case 'bitbucket':
 				$arr['git'] = 'bitbucket';
 				if ( empty( $this->type->enterprise ) ) {
-					$arr['base_uri']      = 'https://bitbucket.org/api';
+					$arr['base_uri']      = 'https://api.bitbucket.org';
 					$arr['base_download'] = 'https://bitbucket.org';
 				} else {
 					$arr['base_uri']      = $this->type->enterprise_api;
