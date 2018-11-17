@@ -213,6 +213,15 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Get GitLab release asset.
+	 *
+	 * @return bool
+	 */
+	public function get_release_asset() {
+		return $this->type->ci_job;
+	}
+
+	/**
 	 * Create release asset download link.
 	 * Filename must be `{$slug}-{$newest_tag}.zip`
 	 *

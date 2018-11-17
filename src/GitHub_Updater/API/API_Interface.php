@@ -73,6 +73,13 @@ interface API_Interface {
 	public function get_remote_branches();
 
 	/**
+	 * Get release asset URL.
+	 *
+	 * @return string|bool
+	 */
+	public function get_release_asset();
+
+	/**
 	 * Construct $this->type->download_link using Repository Contents API.
 	 *
 	 * @access public

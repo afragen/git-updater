@@ -322,7 +322,7 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @return string|bool|\stdClass
 	 */
-	private function get_github_release_asset_url() {
+	public function get_release_asset() {
 		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
