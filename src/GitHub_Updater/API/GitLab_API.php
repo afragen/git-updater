@@ -182,9 +182,8 @@ class GitLab_API extends API implements API_Interface {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$download_link_base = $this->make_release_asset_download_link();
-
-			return $this->add_access_token_endpoint( $this, $download_link_base );
+			$release_asset = $this->get_release_asset();
+			return $release_asset;
 		}
 
 		/*
@@ -213,33 +212,13 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Get GitLab release asset.
-	 *
-	 * @return bool
-	 */
-	public function get_release_asset() {
-		return $this->type->ci_job;
-	}
-
-	/**
-	 * Create release asset download link.
-	 * Filename must be `{$slug}-{$newest_tag}.zip`
-	 *
-	 * @access private
+	 * Get GitLab release asset download link.
 	 *
 	 * @return string $download_link
 	 */
-	private function make_release_asset_download_link() {
-		$download_link = implode(
-			'/',
-			[
-				'https://gitlab.com/api/v4/projects',
-				urlencode( $this->type->owner . '/' . $this->type->slug ),
-				'builds/artifacts',
-				$this->type->newest_tag,
-				'download',
-			]
-		);
+	public function get_release_asset() {
+		$download_link = $this->get_api_url( "/projects/:owner/:repo/build/artifacts/{$this->type->newest_tag}/download" );
+
 		$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
 
 		return $download_link;
