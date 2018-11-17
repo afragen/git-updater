@@ -125,7 +125,7 @@ class GitHub_API extends API implements API_Interface {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset = $this->get_github_release_asset_url();
+			$release_asset = $this->get_release_asset();
 			return $release_asset;
 		}
 
@@ -320,10 +320,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return the GitHub release asset URL.
 	 *
-	 * @return string|bool|\stdClass
+	 * @return string|bool
 	 */
 	public function get_release_asset() {
-		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
+		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;

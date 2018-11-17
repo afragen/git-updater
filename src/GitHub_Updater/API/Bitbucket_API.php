@@ -164,8 +164,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset_url = $this->get_bitbucket_release_asset_url();
-			return $this->get_aws_release_asset_url( $release_asset_url );
+			$release_asset = $this->get_release_asset();
+			return $this->get_aws_release_asset_url( $release_asset );
 		}
 
 		/*
@@ -203,12 +203,10 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Return the Bitbucket release asset URL.
 	 *
-	 * @access public
-	 *
-	 * @return string $download_link
+	 * @return string|bool $download_link
 	 */
 	public function get_release_asset() {
-		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
+		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
