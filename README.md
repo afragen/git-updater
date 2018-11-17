@@ -9,7 +9,7 @@
 * Requires at least: 4.6
 * Requires PHP: 5.6
 * Tested up to: 5.0
-* Stable tag: master
+* Stable tag: [master](https://github.com/afragen/github-updater/releases/latest)
 * Donate link: <https://thefragens.com/github-updater-donate>
 * License: GPLv2 or later
 * License URI: <https://www.gnu.org/licenses/gpl-2.0.html>
