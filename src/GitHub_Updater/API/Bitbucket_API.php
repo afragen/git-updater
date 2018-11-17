@@ -164,8 +164,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset_url = $this->get_bitbucket_release_asset_url();
-			return $this->get_aws_release_asset_url( $release_asset_url );
+			$release_asset = $this->get_release_asset();
+			return $this->get_aws_release_asset_url( $release_asset );
 		}
 
 		/*
@@ -203,12 +203,10 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Return the Bitbucket release asset URL.
 	 *
-	 * @access private
-	 *
-	 * @return string $download_link
+	 * @return string|bool $download_link
 	 */
-	private function get_bitbucket_release_asset_url() {
-		$response = isset( $this->response['release_asset_url'] ) ? $this->response['release_asset_url'] : false;
+	public function get_release_asset() {
+		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -217,7 +215,7 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$response      = $this->api( '/2.0/repositories/:owner/:repo/downloads' );
 			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads' );
-			$response      = isset( $response->values[0] ) ? $download_base . '/' . $response->values[0]->name : false;
+			$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
 				$response          = new \stdClass();
@@ -225,12 +223,12 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
-			return false;
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
 		}
 
-		if ( $response && ! isset( $this->response['release_asset_url'] ) ) {
-			$this->set_repo_cache( 'release_asset_url', $response );
+		if ( $this->validate_response( $response ) ) {
+			return false;
 		}
 
 		return $response;
