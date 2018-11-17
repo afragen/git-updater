@@ -331,7 +331,7 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$response = isset( $response->assets[0] ) ? $response->assets[0]->browser_download_url : false;
+			$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
 				$response          = new \stdClass();
@@ -339,12 +339,12 @@ class GitHub_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
-			return false;
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
 		}
 
-		if ( $response && ! isset( $this->response['release_asset_url'] ) ) {
-			$this->set_repo_cache( 'release_asset_url', $response );
+		if ( $this->validate_response( $response ) ) {
+			return false;
 		}
 
 		return $response;

@@ -217,7 +217,7 @@ class Bitbucket_API extends API implements API_Interface {
 		if ( ! $response ) {
 			$response      = $this->api( '/2.0/repositories/:owner/:repo/downloads' );
 			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads' );
-			$response      = isset( $response->values[0] ) ? $download_base . '/' . $response->values[0]->name : false;
+			$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
 				$response          = new \stdClass();
@@ -225,12 +225,12 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 		}
 
-		if ( $this->validate_response( $response ) ) {
-			return false;
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
 		}
 
-		if ( $response && ! isset( $this->response['release_asset_url'] ) ) {
-			$this->set_repo_cache( 'release_asset_url', $response );
+		if ( $this->validate_response( $response ) ) {
+			return false;
 		}
 
 		return $response;
