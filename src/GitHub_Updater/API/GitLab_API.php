@@ -183,7 +183,8 @@ class GitLab_API extends API implements API_Interface {
 		 */
 		if ( $this->type->ci_job && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
-			return $release_asset;
+			$release_asset = $this->get_release_asset_redirect( $release_asset );
+			return $this->add_access_token_endpoint( $this, $release_asset );
 		}
 
 		/*
@@ -217,11 +218,20 @@ class GitLab_API extends API implements API_Interface {
 	 * @return string $download_link
 	 */
 	public function get_release_asset() {
-		$download_link = $this->get_api_url( "/projects/:owner/:repo/build/artifacts/{$this->type->newest_tag}/download" );
+		self::$method = 'release_asset';
+		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
-		$download_link = add_query_arg( 'job', $this->type->ci_job, $download_link );
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
 
-		return $download_link;
+		if ( ! $response ) {
+			$response = $this->get_api_url( "/:owner/:repo/-/jobs/artifacts/{$this->type->newest_tag}/download", true );
+			$response = add_query_arg( 'job', $this->type->ci_job, $response );
+			$this->set_repo_cache( 'release_asset', $response );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -240,6 +250,7 @@ class GitLab_API extends API implements API_Interface {
 			case 'meta':
 			case 'tags':
 			case 'branches':
+			case 'release_asset':
 				break;
 			case 'file':
 			case 'changes':

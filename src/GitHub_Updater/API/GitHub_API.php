@@ -169,6 +169,7 @@ class GitHub_API extends API implements API_Interface {
 			case 'meta':
 			case 'tags':
 			case 'download_link':
+			case 'release_asset':
 			case 'translation':
 				break;
 			case 'branches':

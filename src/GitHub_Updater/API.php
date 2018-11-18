@@ -456,6 +456,9 @@ class API {
 
 					return $this->type->enterprise_api . $endpoint;
 				}
+				if ( $download_link ) {
+					$type['base_download'] = $type['base_uri'];
+				}
 				break;
 			case 'gitea':
 				if ( $download_link ) {
@@ -756,7 +759,7 @@ class API {
 	}
 
 	/**
-	 * Return the AWS download link for a release asset.
+	 * Return the redirect download link for a release asset.
 	 * AWS download link sets a link expiration of ONLY 5 minutes.
 	 *
 	 * @since 6.1.0
@@ -766,24 +769,24 @@ class API {
 	 *
 	 * @return string|bool|\stdClass Release asset URI from AWS.
 	 */
-	protected function get_aws_release_asset_url( $asset ) {
+	protected function get_release_asset_redirect( $asset, $aws = false ) {
 		if ( ! $asset ) {
 			return false;
 		}
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
-			unset( $this->response['aws_release_asset_url'] );
+		if ( $aws && ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['release_asset_redirect'] );
 		}
 
-		$response = isset( $this->response['aws_release_asset_url'] ) ? $this->response['aws_release_asset_url'] : false;
+		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
 		if ( $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
 		if ( ! $response ) {
-			add_action( 'requests-requests.before_redirect', [ $this, 'set_aws_redirect' ], 10, 1 );
+			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
 			$url = $this->add_access_token_endpoint( $this, $asset );
 			wp_remote_get( $url );
@@ -791,7 +794,7 @@ class API {
 		}
 
 		if ( ! empty( $this->redirect ) ) {
-			$this->set_repo_cache( 'aws_release_asset_url', $this->redirect );
+			$this->set_repo_cache( 'release_asset_redirect', $this->redirect );
 
 			return $this->redirect;
 		}
@@ -822,7 +825,7 @@ class API {
 	 * @param string $location
 	 * @return void
 	 */
-	public function set_aws_redirect( $location ) {
+	public function set_redirect( $location ) {
 		$this->redirect = $location;
 	}
 

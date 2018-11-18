@@ -165,7 +165,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
-			return $this->get_aws_release_asset_url( $release_asset );
+			return $this->get_release_asset_redirect( $release_asset, true );
 		}
 
 		/*
@@ -206,7 +206,8 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return string|bool $download_link
 	 */
 	public function get_release_asset() {
-		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+		self::$method = 'release_asset';
+		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -214,7 +215,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			$response      = $this->api( '/2.0/repositories/:owner/:repo/downloads' );
-			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads' );
+			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads', true );
 			$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
