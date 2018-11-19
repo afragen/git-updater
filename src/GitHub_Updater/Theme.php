@@ -249,6 +249,11 @@ class Theme extends Base {
 
 		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 
+		// Skip if waiting for background update.
+		if ( $this->waiting_for_background_update( $theme ) ) {
+			return $false;
+		}
+
 		// wp.org theme.
 		if ( ! $theme ) {
 			return $false;

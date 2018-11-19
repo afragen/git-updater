@@ -347,6 +347,11 @@ class Plugin extends Base {
 
 		$plugin = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 
+		// Skip if waiting for background update.
+		if ( $this->waiting_for_background_update( $plugin ) ) {
+			return $false;
+		}
+
 		// wp.org plugin.
 		if ( ! $plugin || ( $plugin->dot_org && 'master' === $plugin->branch ) ) {
 			return $false;
