@@ -456,7 +456,7 @@ class API {
 
 					return $this->type->enterprise_api . $endpoint;
 				}
-				if ( $download_link ) {
+				if ( $download_link && 'release_asset' === self::$method ) {
 					$type['base_download'] = $type['base_uri'];
 				}
 				break;
