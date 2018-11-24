@@ -324,7 +324,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string|bool
 	 */
 	public function get_release_asset() {
-		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+		self::$method = 'release_asset';
+		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
