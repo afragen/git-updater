@@ -1,3 +1,8 @@
+#### 1.4.2
+* No changes to `class PAnD`
+* updated `.gitignore` and `.gitattributes`
+* now use classmap in composer's autoloader, should be more efficient
+
 #### 1.4.1
 * fixed the `forever` setting with options
 

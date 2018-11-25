@@ -22,7 +22,7 @@
  * @author  Collins Agbonghama
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.4.1
+ * @version 1.4.2
  */
 
 /**

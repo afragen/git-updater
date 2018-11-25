@@ -39,20 +39,8 @@ class Bootstrap {
 			}
 		);
 
-		// Plugin namespace root.
-		$root = array( 'Fragen\\GitHub_Updater' => __DIR__ );
-
-		// Add extra classes.
-		$extra_classes = array(
-			'WordPressdotorg\Plugin_Directory\Readme\Parser' => $dir . '/vendor/class-parser.php',
-			'Fragen\Singleton' => $dir . '/src/Singleton.php',
-			'Parsedown'        => $dir . '/vendor/parsedown/Parsedown.php',
-			'PAnD'             => $dir . '/vendor/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
-		);
-
 		// Load Autoloader.
-		require_once $dir . '/src/Autoloader.php';
-		new \Fragen\Autoloader( $root, $extra_classes );
+		require_once $dir . '/vendor/autoload.php';
 
 		register_activation_hook( $file, array( new Init(), 'rename_on_activation' ) );
 		( new Init() )->run();

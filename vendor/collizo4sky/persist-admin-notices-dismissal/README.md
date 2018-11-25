@@ -104,14 +104,6 @@ add_action( 'admin_notices', 'sample_admin_notice__success1' );
 add_action( 'admin_notices', 'sample_admin_notice__success2' );
 ```
 
-You should be a good developer and add the following to your `uninstall.php` file so that we can clean up after ourselves and not leave unnecessary stuff in the options table.
-
-```php
-global $wpdb;
-$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-$column        = is_multisite() ? 'meta_key' : 'option_name';
-$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
-$wpdb->query( $wpdb->prepare( $delete_string, array( '%pand-%' ) ) );
-```
+Please note that if you cleanup after your plugin deletion please try to make the removal of stored options as specific as possible. Otherwise you may end up deleting the stored options from other projects.
 
 Cool beans. Isn't it?

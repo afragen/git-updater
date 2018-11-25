@@ -7,6 +7,7 @@
 * refactored Bitbucket release asset code to get redirected download link for AWS
 * refactored GitLab release asset code to get redirected download link
 * exit early if checking _View details_ but not done with background update, avoids PHP notices
+* updated to add/use composer dependencies and autoloader
 
 #### 8.4.2 / 2018-11-01
 * updated password fields to not autoload saved passwords, thanks @figureone

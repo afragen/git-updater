@@ -237,10 +237,10 @@ class Parser {
 			$this->tags = array_slice( $this->tags, 0, 5 );
 		}
 		if ( ! empty( $headers['requires'] ) ) {
-			$this->requires = $headers['requires'];
+			$this->requires = $this->sanitize_requires_version( $headers['requires'] );
 		}
 		if ( ! empty( $headers['tested'] ) ) {
-			$this->tested = $headers['tested'];
+			$this->tested = $this->sanitize_tested_version( $headers['tested'] );
 		}
 		if ( ! empty( $headers['requires_php'] ) ) {
 			$this->requires_php = $this->sanitize_requires_php( $headers['requires_php'] );
@@ -580,9 +580,84 @@ class Parser {
 
 		// x.y or x.y.z
 		if ( $version && ! preg_match( '!^\d+(\.\d+){1,2}$!', $version ) ) {
-			$this->warnings['requires_php_ignored'] = true;
+			$this->warnings['requires_php_header_ignored'] = true;
 			// Ignore the readme value.
 			$version = '';
+		}
+
+		return $version;
+	}
+
+	/**
+	 * Sanitizes the Tested header to ensure that it's a valid version header.
+	 *
+	 * @param string $version
+	 * @return string The sanitized $version
+	 */
+	protected function sanitize_tested_version( $version ) {
+		$version = trim( $version );
+
+		if ( $version ) {
+
+			// Handle the edge-case of 'WordPress 5.0' and 'WP 5.0' for historical purposes.
+			$strip_phrases = [
+				'WordPress',
+				'WP',
+			];
+			$version = trim( str_ireplace( $strip_phrases, '', $version ) );
+
+			// Strip off any -alpha, -RC, -beta suffixes, as these complicate comparisons and are rarely used.
+			list( $version, ) = explode( '-', $version );
+
+			if (
+				// x.y or x.y.z
+				! preg_match( '!^\d+\.\d(\.\d+)?$!', $version ) ||
+				// Allow plugins to mark themselves as compatible with Stable+0.1 (trunk/master) but not higher
+				defined( 'WP_CORE_STABLE_BRANCH' ) && ( (float)$version > (float)WP_CORE_STABLE_BRANCH+0.1 )
+			 ) {
+				$this->warnings['tested_header_ignored'] = true;
+				// Ignore the readme value.
+				$version = '';
+			}
+		}
+
+		return $version;
+	}
+
+	/**
+	 * Sanitizes the Requires at least header to ensure that it's a valid version header.
+	 *
+	 * @param string $version
+	 * @return string The sanitized $version
+	 */
+	protected function sanitize_requires_version( $version ) {
+		$version = trim( $version );
+
+		if ( $version ) {
+
+			// Handle the edge-case of 'WordPress 5.0' and 'WP 5.0' for historical purposes.
+			$strip_phrases = [
+				'WordPress',
+				'WP',
+				'or higher',
+				'and above',
+				'+',
+			];
+			$version = trim( str_ireplace( $strip_phrases, '', $version ) );
+
+			// Strip off any -alpha, -RC, -beta suffixes, as these complicate comparisons and are rarely used.
+			list( $version, ) = explode( '-', $version );
+
+			if (
+				// x.y or x.y.z
+				! preg_match( '!^\d+\.\d(\.\d+)?$!', $version ) ||
+				// Allow plugins to mark themselves as requireing Stable+0.1 (trunk/master) but not higher
+				defined( 'WP_CORE_STABLE_BRANCH' ) && ( (float)$version > (float)WP_CORE_STABLE_BRANCH+0.1 )
+			 ) {
+				$this->warnings['requires_header_ignored'] = true;
+				// Ignore the readme value.
+				$version = '';
+			}
 		}
 
 		return $version;
