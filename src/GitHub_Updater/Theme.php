@@ -249,6 +249,11 @@ class Theme extends Base {
 
 		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 
+		// Skip if waiting for background update.
+		if ( $this->waiting_for_background_update( $theme ) ) {
+			return $false;
+		}
+
 		// wp.org theme.
 		if ( ! $theme ) {
 			return $false;
@@ -644,15 +649,9 @@ class Theme extends Base {
 					continue;
 				}
 
-				// If branch is 'master' and repo is in wp.org repo then pull update from wp.org.
-				if ( $theme->dot_org && 'master' === $theme->branch ) {
-					$transient = empty( $transient ) ? get_site_transient( 'update_themes' ) : $transient;
-					if ( isset( $transient->response[ $theme->slug ], $transient->response[ $theme->slug ]['type'] ) ) {
-						unset( $transient->response[ $theme->slug ] );
-					}
-					if ( ! $this->tag ) {
-						continue;
-					}
+				// Pull update from dot org if not overriding.
+				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
+					continue;
 				}
 
 				$transient->response[ $theme->slug ] = $response;
@@ -660,14 +659,6 @@ class Theme extends Base {
 				if ( isset( $transient->response[ $theme->slug ] ) ) {
 					unset( $transient->response[ $theme->slug ] );
 				}
-			}
-
-			// Unset if override dot org AND same slug on dot org.
-			if ( isset( $transient->response[ $theme->slug ] ) &&
-				! isset( $transient->response[ $theme->slug ]['type'] ) &&
-				$this->is_override_dot_org()
-			) {
-				unset( $transient->response[ $theme->slug ] );
 			}
 
 			// Set transient for rollback.

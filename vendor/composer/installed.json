@@ -1,0 +1,170 @@
+[
+    {
+        "name": "afragen/singleton",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/afragen/singleton.git",
+            "reference": "e2baf7c8d070d7a575cd430561ae945463146b5e"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/afragen/singleton/zipball/e2baf7c8d070d7a575cd430561ae945463146b5e",
+            "reference": "e2baf7c8d070d7a575cd430561ae945463146b5e",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.6"
+        },
+        "time": "2018-11-25T06:11:53+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "Singleton.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Andy Fragen",
+                "email": "andy@thefragens.com",
+                "homepage": "https://github.com/afragen/singleton",
+                "role": "Developer"
+            }
+        ],
+        "description": "A singleton static proxy generator.",
+        "keywords": [
+            "singleton",
+            "wordpress"
+        ]
+    },
+    {
+        "name": "afragen/wordpress-plugin-readme-parser",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
+            "reference": "4de9307c6e56d6d578f012f82f8de84851096422"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/4de9307c6e56d6d578f012f82f8de84851096422",
+            "reference": "4de9307c6e56d6d578f012f82f8de84851096422",
+            "shasum": ""
+        },
+        "require": {
+            "erusev/parsedown": "^1.7",
+            "php": ">=5.6"
+        },
+        "time": "2018-11-25T20:45:52+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "class-parser.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "WordPress.org",
+                "homepage": "https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme"
+            }
+        ],
+        "description": "A clone of the current WordPress.org Plugin Readme Parser, class-parser.php",
+        "keywords": [
+            "parser",
+            "readme",
+            "wordpress"
+        ]
+    },
+    {
+        "name": "collizo4sky/persist-admin-notices-dismissal",
+        "version": "1.4.2",
+        "version_normalized": "1.4.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/collizo4sky/persist-admin-notices-dismissal.git",
+            "reference": "b63922b4ad023d78039cca71caf9002913058fd8"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/collizo4sky/persist-admin-notices-dismissal/zipball/b63922b4ad023d78039cca71caf9002913058fd8",
+            "reference": "b63922b4ad023d78039cca71caf9002913058fd8",
+            "shasum": ""
+        },
+        "time": "2018-11-25T07:06:31+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "persist-admin-notices-dismissal.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "authors": [
+            {
+                "name": "Collins Agbonghama",
+                "email": "me@w3guy.com"
+            }
+        ],
+        "description": "Simple library to persist dismissal of admin notices across pages in WordPress dashboard."
+    },
+    {
+        "name": "erusev/parsedown",
+        "version": "1.7.1",
+        "version_normalized": "1.7.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/erusev/parsedown.git",
+            "reference": "92e9c27ba0e74b8b028b111d1b6f956a15c01fc1"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/erusev/parsedown/zipball/92e9c27ba0e74b8b028b111d1b6f956a15c01fc1",
+            "reference": "92e9c27ba0e74b8b028b111d1b6f956a15c01fc1",
+            "shasum": ""
+        },
+        "require": {
+            "ext-mbstring": "*",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^4.8.35"
+        },
+        "time": "2018-03-08T01:11:30+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Parsedown": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Emanuil Rusev",
+                "email": "hello@erusev.com",
+                "homepage": "http://erusev.com"
+            }
+        ],
+        "description": "Parser for Markdown.",
+        "homepage": "http://parsedown.org",
+        "keywords": [
+            "markdown",
+            "parser"
+        ]
+    }
+]

@@ -1,11 +1,11 @@
 <?php
 /**
- * Singleton Factory
+ * Singleton Static Proxy
  *
  * @author    Andy Fragen
  * @license   MIT
- * @link      https://github.com/afragen/singleton-factory
- * @package   singleton-factory
+ * @link      https://github.com/afragen/singleton
+ * @package   singleton
  */
 
 namespace Fragen;

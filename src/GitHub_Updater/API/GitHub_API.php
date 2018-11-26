@@ -125,8 +125,8 @@ class GitHub_API extends API implements API_Interface {
 		 * If release asset.
 		 */
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset = $this->get_github_release_asset_url();
-			return $this->get_aws_release_asset_url( $release_asset );
+			$release_asset = $this->get_release_asset();
+			return $release_asset;
 		}
 
 		/*
@@ -163,12 +163,13 @@ class GitHub_API extends API implements API_Interface {
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
+			case 'changes':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
 			case 'meta':
 			case 'tags':
-			case 'changes':
 			case 'download_link':
+			case 'release_asset':
 			case 'translation':
 				break;
 			case 'branches':
@@ -320,10 +321,11 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return the GitHub release asset URL.
 	 *
-	 * @return string|bool|\stdClass
+	 * @return string|bool
 	 */
-	private function get_github_release_asset_url() {
-		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+	public function get_release_asset() {
+		self::$method = 'release_asset';
+		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -331,20 +333,20 @@ class GitHub_API extends API implements API_Interface {
 
 		if ( ! $response ) {
 			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$response = isset( $response->assets ) ? $response->assets[0]->url : $response;
-		}
+			$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
 
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No release asset found';
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
 			$this->set_repo_cache( 'release_asset', $response );
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
 		}
 
 		return $response;

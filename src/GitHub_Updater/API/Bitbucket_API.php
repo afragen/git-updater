@@ -164,8 +164,8 @@ class Bitbucket_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset_url = $this->make_release_asset_download_link();
-			return $this->get_aws_release_asset_url( $release_asset_url );
+			$release_asset = $this->get_release_asset();
+			return $this->get_release_asset_redirect( $release_asset, true );
 		}
 
 		/*
@@ -201,26 +201,38 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Create release asset download link.
-	 * Filename must be `{$slug}-{$newest_tag}.zip`
+	 * Return the Bitbucket release asset URL.
 	 *
-	 * @access private
-	 *
-	 * @return string $download_link
+	 * @return string|bool $download_link
 	 */
-	private function make_release_asset_download_link() {
-		$download_link = implode(
-			'/',
-			[
-				'https://api.bitbucket.org/2.0/repositories',
-				$this->type->owner,
-				$this->type->slug,
-				'downloads',
-				$this->type->slug . '-' . $this->type->newest_tag . '.zip',
-			]
-		);
+	public function get_release_asset() {
+		self::$method = 'release_asset';
+		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
 
-		return $download_link;
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			$response      = $this->api( '/2.0/repositories/:owner/:repo/downloads' );
+			$download_base = $this->get_api_url( '/2.0/repositories/:owner/:repo/downloads', true );
+			$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
+
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
+		}
+
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return $response;
 	}
 
 	/**

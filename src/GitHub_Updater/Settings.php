@@ -522,15 +522,46 @@ class Settings extends Base {
 	 * Print the GitHub Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
-		if ( $this->is_override_dot_org() ) {
-			echo ( wp_kses_post( __( 'Override Dot Org is <strong>active</strong>.', 'github-updater' ) ) );
-		} else {
-			echo( wp_kses_post( __( 'Override Dot Org is <strong>not active</strong>.', 'github-updater' ) ) );
-		}
-		echo '<br>' . esc_html__( 'Override Dot Org will skip any updates from wordpress.org for plugins with identical slugs.', 'github-updater' );
-		/* translators: %s: code fragment */
-		printf( '<br>' . esc_html__( 'Activate Override Dot Org by setting %s', 'github-updater' ), '<code>define( \'GITHUB_UPDATER_OVERRIDE_DOT_ORG\', true );</code>' );
+		$this->display_dot_org_overrides();
 		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
+	}
+
+	/**
+	 * Display plugins/themes that are overridden using the filter hook.
+	 *
+	 * @uses `github_updater_override_dot_org` filter hook
+	 * @return void
+	 */
+	private function display_dot_org_overrides() {
+		$plugins         = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes          = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$dashicon_plugin = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+		$dashicon_theme  = '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;';
+
+		/**
+		 * Filter to return array of overrides to dot org.
+		 *
+		 * @since 8.5.0
+		 * @return array
+		 */
+		$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+
+		if ( ! empty( $overrides ) ) {
+			echo '<h4>' . esc_html__( 'Overridden Plugins and Themes', 'github-updater' ) . '</h4>';
+			echo '<p>' . esc_html__( 'The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories.', 'github-updater' ) . '</p>';
+
+			foreach ( $plugins as $plugin ) {
+				if ( in_array( $plugin->file, $overrides ) ) {
+					echo '<p>' . $dashicon_plugin . $plugin->name . '</p>';
+				}
+			}
+			foreach ( $themes as $theme ) {
+				if ( in_array( $theme->slug, $overrides ) ) {
+					echo '<p>' . $dashicon_theme . $theme->name . '</p>';
+				}
+			}
+			echo '<br>';
+		}
 	}
 
 	/**
@@ -743,7 +774,9 @@ class Settings extends Base {
 			function ( $e ) {
 				return [
 					'type'    => $e->type,
-					'repo'    => $e->slug,
+					'slug'    => $e->slug,
+					'file'    => isset( $e->file ) ? $e->file : $e->slug,
+					'branch'  => $e->branch,
 					'name'    => $e->name,
 					'private' => isset( $e->is_private ) ? $e->is_private : false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
@@ -763,7 +796,8 @@ class Settings extends Base {
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private = $data['private'] ? $lock : null;
 			$is_broken  = $data['broken'] ? $broken : null;
-			$is_dot_org = $data['dot_org'] ? $dot_org : null;
+			$override   = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org = $data['dot_org'] && ! $override ? $dot_org : null;
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . '</p>' );
 		}
 	}

@@ -34,12 +34,12 @@ script:
 - $HOME/.config/composer/vendor/phpunit/phpunit/phpunit
 
 before_deploy:
-  - git archive -o /tmp/github-updater.${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
+  - git archive -o /tmp/github-updater-${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
 deploy:
   provider: releases
   skip_cleanup: true
   api_key: $GITHUB_TOKEN
-  file: /tmp/github-updater.${TRAVIS_TAG}.zip
+  file: /tmp/github-updater-${TRAVIS_TAG}.zip
   on:
     tags: true
     php: 7.2

@@ -226,13 +226,45 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Is override dot org option active?
+	 * Do we override dot org updates?
+	 *
+	 * @param string    $type (plugin|theme)
+	 * @param \stdClass $repo Repository object.
 	 *
 	 * @return bool
 	 */
-	public function is_override_dot_org() {
-		return ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) ||
-			( defined( 'GITHUB_UPDATER_EXTENDED_NAMING' ) && GITHUB_UPDATER_EXTENDED_NAMING );
+	public function override_dot_org( $type, $repo ) {
+		// Correctly account for dashicon in Settings page.
+		$icon           = is_array( $repo );
+		$repo           = is_array( $repo ) ? (object) $repo : $repo;
+		$dot_org_master = ! $icon ? $repo->dot_org && 'master' === $repo->branch : true;
+
+		$transient_key = 'plugin' === $type ? $repo->file : null;
+		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
+
+		/**
+		 * Filter update to override dot org.
+		 *
+		 * @since 8.5.0
+		 *
+		 * @return bool
+		 */
+		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
+
+		return ! $dot_org_master || $override || $this->deprecate_override_constant();
+	}
+
+	/**
+	 * Deprecated dot org override constant.
+	 *
+	 * @return bool
+	 */
+	public function deprecate_override_constant() {
+		if ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) {
+			error_log( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG constant deprecated. Use `github_updater_override_dot_org` filter hook.' );
+			return true;
+		}
+		return false;
 	}
 
 	/**

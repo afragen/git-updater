@@ -167,6 +167,15 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Get Gitea release asset.
+	 *
+	 * @return false
+	 */
+	public function get_release_asset() {
+		return false;
+	}
+
+	/**
 	 * Create Gitea API endpoints.
 	 *
 	 * @param Gitea_API|API $git
