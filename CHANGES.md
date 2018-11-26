@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.5.0 / 2018-11-26
 * silence rename PHP warning during plugin update
 * specify branch for changelog
 * refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
