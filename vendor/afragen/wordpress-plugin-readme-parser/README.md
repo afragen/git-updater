@@ -1,9 +1,10 @@
 # WordPress Plugin Readme Parser
-A scrape of the current WordPress.org Plugin Readme Parser
+
+A scrape of the current [WordPress.org Plugin Readme Parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme)
 
 In my [GitHub Updater](https://github.com/afragen/github-updater) plugin I use the WP.org Plugin Directory readme parser. I created this library to allow me to more easily include the `class-parser.php` for my project by using composer.
 
-I will try to keep this as up-to-date as possible. 
+I will try to keep this as up-to-date as possible.
 
 The `index.php` file, when run locally, will update the `class-parser.php` file with the most current version in meta.trac.wordpress.org.
 
