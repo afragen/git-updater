@@ -1,4 +1,5 @@
 #### [unreleased]
+* refactor release asset API calls to `trait API_Common`
 
 #### 8.5.0 / 2018-11-26
 * silence rename PHP warning during plugin update
