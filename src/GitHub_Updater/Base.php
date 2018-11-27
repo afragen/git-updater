@@ -764,7 +764,7 @@ class Base {
 	protected function waiting_for_background_update( $repo = null ) {
 		$caches = [];
 		if ( null !== $repo ) {
-			$cache = $this->get_repo_cache( $repo->slug );
+			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
 
 			return empty( $cache );
 		}
