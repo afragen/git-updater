@@ -109,6 +109,15 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Return the GitHub release asset URL.
+	 *
+	 * @return string|bool
+	 */
+	public function get_release_asset() {
+		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+	}
+
+	/**
 	 * Construct $this->type->download_link using Repository Contents API.
 	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
@@ -316,40 +325,6 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return [ $tags, $rollback ];
-	}
-
-	/**
-	 * Return the GitHub release asset URL.
-	 *
-	 * @return string|bool
-	 */
-	public function get_release_asset() {
-		self::$method = 'release_asset';
-		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
-
-		if ( $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
-
-			if ( ! $response && ! is_wp_error( $response ) ) {
-				$response          = new \stdClass();
-				$response->message = 'No release asset found';
-			}
-		}
-
-		if ( $response && ! isset( $this->response['release_asset'] ) ) {
-			$this->set_repo_cache( 'release_asset', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		return $response;
 	}
 
 	/**

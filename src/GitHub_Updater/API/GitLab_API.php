@@ -168,6 +168,15 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Get GitLab release asset download link.
+	 *
+	 * @return string|bool
+	 */
+	public function get_release_asset() {
+		return $this->get_api_release_asset( 'gitlab', "/:owner/:repo/-/jobs/artifacts/{$this->type->newest_tag}/download" );
+	}
+
+	/**
 	 * Construct $this->type->download_link using GitLab API.
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
@@ -210,28 +219,6 @@ class GitLab_API extends API implements API_Interface {
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
-	}
-
-	/**
-	 * Get GitLab release asset download link.
-	 *
-	 * @return string $download_link
-	 */
-	public function get_release_asset() {
-		self::$method = 'release_asset';
-		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
-
-		if ( $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$response = $this->get_api_url( "/:owner/:repo/-/jobs/artifacts/{$this->type->newest_tag}/download", true );
-			$response = add_query_arg( 'job', $this->type->ci_job, $response );
-			$this->set_repo_cache( 'release_asset', $response );
-		}
-
-		return $response;
 	}
 
 	/**

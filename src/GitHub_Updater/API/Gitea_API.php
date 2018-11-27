@@ -134,6 +134,16 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Get Gitea release asset.
+	 *
+	 * @return false
+	 */
+	public function get_release_asset() {
+		// TODO: eventually figure this out.
+		return false;
+	}
+
+	/**
 	 * Construct $this->type->download_link using Gitea API.
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
@@ -164,15 +174,6 @@ class Gitea_API extends API implements API_Interface {
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
-	}
-
-	/**
-	 * Get Gitea release asset.
-	 *
-	 * @return false
-	 */
-	public function get_release_asset() {
-		return false;
 	}
 
 	/**
