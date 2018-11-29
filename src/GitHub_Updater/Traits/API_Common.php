@@ -77,9 +77,6 @@ trait API_Common {
 				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
 				break;
 			case 'gitlab':
-				$response = $this->get_api_url( $request, true );
-				$response = add_query_arg( 'job', $this->type->ci_job, $response );
-				break;
 			case 'gitea':
 				break;
 		}
@@ -339,7 +336,7 @@ trait API_Common {
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
-			$response     = $this->api( $request );
+			$response     = 'gitlab' === $git ? $this->get_api_url( $request ) : $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
