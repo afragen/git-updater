@@ -506,15 +506,7 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 
 		if ( $bitbucket_org ) {
-			$install['download_link'] = implode(
-				'/',
-				[
-					$base,
-					$install['github_updater_repo'],
-					'get',
-					$install['github_updater_branch'] . '.zip',
-				]
-			);
+			$install['download_link'] = "{$base}/{$install['github_updater_repo']}/get/{$install['github_updater_branch']}.zip";
 			if ( isset( $install['is_private'] ) ) {
 				$install['options'][ $install['repo'] ] = 1;
 			}

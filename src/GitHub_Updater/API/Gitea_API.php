@@ -454,16 +454,7 @@ class Gitea_API extends API implements API_Interface {
 	public function remote_install( $headers, $install ) {
 		$base = $headers['base_uri'] . '/api/v1';
 
-		$install['download_link'] = implode(
-			'/',
-			[
-				$base,
-				'repos',
-				$install['github_updater_repo'],
-				'archive',
-				$install['github_updater_branch'] . '.zip',
-			]
-		);
+		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/archive/{$install['github_updater_branch']}.zip";
 
 		/*
 		 * Add/Save access token if present.

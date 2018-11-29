@@ -563,22 +563,16 @@ class GitLab_API extends API implements API_Interface {
 		$gitlab_com = true;
 
 		if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
-			$base            = 'https://gitlab.com';
+			$base            = 'https://gitlab.com/api/v4';
 			$headers['host'] = 'gitlab.com';
 		} else {
 			$base       = $headers['base_uri'];
 			$gitlab_com = false;
 		}
 
-		$install['download_link'] = implode(
-			'/',
-			[
-				$base,
-				$install['github_updater_repo'],
-				'repository/archive.zip',
-			]
-		);
-		$install['download_link'] = add_query_arg( 'ref', $install['github_updater_branch'], $install['download_link'] );
+		$id                       = urlencode( $install['github_updater_repo'] );
+		$install['download_link'] = "{$base}/projects/{$id}/repository/archive.zip";
+		$install['download_link'] = add_query_arg( 'sha', $install['github_updater_branch'], $install['download_link'] );
 
 		/*
 		 * Add/Save access token if present.
