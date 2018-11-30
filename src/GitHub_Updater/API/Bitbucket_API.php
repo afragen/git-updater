@@ -172,6 +172,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 		$endpoint           = '';
 
+		// Release asset.
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
 			return $this->get_release_asset_redirect( $release_asset, true );

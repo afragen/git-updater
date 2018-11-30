@@ -130,9 +130,7 @@ class GitHub_API extends API implements API_Interface {
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
 
-		/*
-		 * If release asset.
-		 */
+		// Release asset.
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
 			return $release_asset;
@@ -148,9 +146,7 @@ class GitHub_API extends API implements API_Interface {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		/*
-		 * Create endpoint for branch switching.
-		 */
+		// Create endpoint for branch switching.
 		if ( $branch_switch ) {
 			$endpoint = $branch_switch;
 		}

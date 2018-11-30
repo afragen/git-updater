@@ -164,9 +164,7 @@ class Gitea_API extends API implements API_Interface {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		/*
-		 * Create endpoint for branch switching.
-		 */
+		// Create endpoint for branch switching.
 		if ( $branch_switch ) {
 			$endpoint = $branch_switch . '.zip';
 		}
