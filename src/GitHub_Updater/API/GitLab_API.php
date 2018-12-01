@@ -168,70 +168,48 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Construct $this->type->download_link using GitLab API.
+	 * Get GitLab release asset download link.
+	 *
+	 * @return string|bool
+	 */
+	public function get_release_asset() {
+		return $this->get_api_release_asset( 'gitlab', "/projects/{$this->response['project_id']}/jobs/artifacts/{$this->type->newest_tag}/download" );
+	}
+
+	/**
+	 * Construct $this->type->download_link using GitLab API v4.
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $branch_switch = false ) {
-		$download_link_base = $this->get_api_url( '/:owner/:repo/repository/archive.zip', true );
-		$endpoint           = '';
+		self::$method       = 'download_link';
+		$download_link_base = $this->get_api_url( "/projects/{$this->get_gitlab_id()}/repository/archive.zip" );
+		$download_link_base = remove_query_arg( 'private_token', $download_link_base );
 
-		/*
-		 * If release asset.
-		 */
+		$endpoint = '';
+		$endpoint = add_query_arg( 'sha', $this->type->branch, $endpoint );
+
+		// If branch is master (default) and tags are used, use newest tag.
+		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
+			$endpoint = add_query_arg( 'sha', $this->type->newest_tag, $endpoint );
+		}
+
+		// Create endpoint for branch switching.
+		if ( $branch_switch ) {
+			$endpoint = add_query_arg( 'sha', $branch_switch, $endpoint );
+		}
+
+		// Release asset.
 		if ( $this->type->ci_job && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
-			$release_asset = $this->get_release_asset_redirect( $release_asset );
-			return $this->add_access_token_endpoint( $this, $release_asset );
-		}
-
-		/*
-		 * If a branch has been given, use branch.
-		 * If branch is master (default) and tags are used, use newest tag.
-		 */
-		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->newest_tag, $endpoint );
-		} elseif ( ! empty( $this->type->branch ) ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $this->type->branch, $endpoint );
-		}
-
-		/*
-		 * Create endpoint for branch switching.
-		 */
-		if ( $branch_switch ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-			$endpoint = add_query_arg( 'ref', $branch_switch, $endpoint );
+			return $release_asset;
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
-	}
-
-	/**
-	 * Get GitLab release asset download link.
-	 *
-	 * @return string $download_link
-	 */
-	public function get_release_asset() {
-		self::$method = 'release_asset';
-		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
-
-		if ( $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$response = $this->get_api_url( "/:owner/:repo/-/jobs/artifacts/{$this->type->newest_tag}/download", true );
-			$response = add_query_arg( 'job', $this->type->ci_job, $response );
-			$this->set_repo_cache( 'release_asset', $response );
-		}
-
-		return $response;
 	}
 
 	/**
@@ -250,7 +228,7 @@ class GitLab_API extends API implements API_Interface {
 			case 'meta':
 			case 'tags':
 			case 'branches':
-			case 'release_asset':
+			case 'download_link':
 				break;
 			case 'file':
 			case 'changes':
@@ -260,6 +238,8 @@ class GitLab_API extends API implements API_Interface {
 			case 'translation':
 				$endpoint = add_query_arg( 'ref', 'master', $endpoint );
 				break;
+			case 'release_asset':
+				$endpoint = add_query_arg( 'job', $git->type->ci_job, $endpoint );
 			default:
 				break;
 		}
@@ -399,16 +379,9 @@ class GitLab_API extends API implements API_Interface {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_link    = implode(
-				'/',
-				[
-					$repo_type['base_download'],
-					$this->type->owner,
-					$this->type->slug,
-					'repository/archive.zip',
-				]
-			);
-			$download_link    = add_query_arg( 'ref', $tag, $download_link );
+			$download_link    = "/projects/{$this->get_gitlab_id()}/repository/archive.zip";
+			$download_link    = $this->get_api_url( $download_link );
+			$download_link    = add_query_arg( 'sha', $tag, $download_link );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_link;
 		}
@@ -597,15 +570,9 @@ class GitLab_API extends API implements API_Interface {
 			$gitlab_com = false;
 		}
 
-		$install['download_link'] = implode(
-			'/',
-			[
-				$base,
-				$install['github_updater_repo'],
-				'repository/archive.zip',
-			]
-		);
-		$install['download_link'] = add_query_arg( 'ref', $install['github_updater_branch'], $install['download_link'] );
+		$id                       = urlencode( $install['github_updater_repo'] );
+		$install['download_link'] = "{$base}/api/v4/projects/{$id}/repository/archive.zip";
+		$install['download_link'] = add_query_arg( 'sha', $install['github_updater_branch'], $install['download_link'] );
 
 		/*
 		 * Add/Save access token if present.

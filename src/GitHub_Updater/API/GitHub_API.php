@@ -109,6 +109,15 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Return the GitHub release asset URL.
+	 *
+	 * @return string|bool
+	 */
+	public function get_release_asset() {
+		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+	}
+
+	/**
 	 * Construct $this->type->download_link using Repository Contents API.
 	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
@@ -121,9 +130,7 @@ class GitHub_API extends API implements API_Interface {
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
 
-		/*
-		 * If release asset.
-		 */
+		// Release asset.
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
 			return $release_asset;
@@ -139,9 +146,7 @@ class GitHub_API extends API implements API_Interface {
 			$endpoint .= $this->type->newest_tag;
 		}
 
-		/*
-		 * Create endpoint for branch switching.
-		 */
+		// Create endpoint for branch switching.
 		if ( $branch_switch ) {
 			$endpoint = $branch_switch;
 		}
@@ -319,40 +324,6 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Return the GitHub release asset URL.
-	 *
-	 * @return string|bool
-	 */
-	public function get_release_asset() {
-		self::$method = 'release_asset';
-		$response     = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
-
-		if ( $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
-		if ( ! $response ) {
-			$response = $this->api( '/repos/:owner/:repo/releases/latest' );
-			$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
-
-			if ( ! $response && ! is_wp_error( $response ) ) {
-				$response          = new \stdClass();
-				$response->message = 'No release asset found';
-			}
-		}
-
-		if ( $response && ! isset( $this->response['release_asset'] ) ) {
-			$this->set_repo_cache( 'release_asset', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Add settings for GitHub Personal Access Token.
 	 *
 	 * @param array $auth_required
@@ -497,16 +468,7 @@ class GitHub_API extends API implements API_Interface {
 			$github_com = false;
 		}
 
-		$install['download_link'] = implode(
-			'/',
-			[
-				$base,
-				'repos',
-				$install['github_updater_repo'],
-				'zipball',
-				$install['github_updater_branch'],
-			]
-		);
+		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/zipball/{$install['github_updater_branch']}";
 
 		// If asset is entered install it.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {

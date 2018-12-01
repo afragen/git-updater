@@ -45,7 +45,7 @@ trait API_Common {
 	/**
 	 * Parse API response that returns as stdClass.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     (github|bitbucket|gitlab|gitea)
 	 * @param mixed $response API response.
 	 * @return mixed $response
 	 */
@@ -53,6 +53,31 @@ trait API_Common {
 		switch ( $git ) {
 			case 'bitbucket':
 				$response = isset( $response->values ) ? $response->values : $response;
+				break;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Parse API response to release asset URI.
+	 *
+	 * @param string $git (github|bitbucket|gitlab|gitea)
+	 * @param string $request Query to API->api().
+	 * @param mixed $response API response.
+	 * @return string $response Release asset download link.
+	 */
+	private function parse_release_asset( $git, $request, $response ) {
+		switch ( $git ) {
+			case 'github':
+				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
+				break;
+			case 'bitbucket':
+				$download_base = $this->get_api_url( $request, true );
+				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
+				break;
+			case 'gitlab':
+			case 'gitea':
 				break;
 		}
 
@@ -293,6 +318,42 @@ trait API_Common {
 		$this->type->branches = $response;
 
 		return true;
+	}
+
+	/**
+	 * Get API release asset download link.
+	 *
+	 * @param string $git (github|bitbucket|gitlab|gitea)
+	 * @param string $request Query for API->api().
+	 * @return string $response Release asset URI.
+	 */
+	public function get_api_release_asset( $git, $request ) {
+		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			self::$method = 'release_asset';
+			$response     = 'gitlab' === $git ? $this->get_api_url( $request ) : $this->api( $request );
+			$response     = $this->parse_release_asset( $git, $request, $response );
+
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release asset found';
+			}
+		}
+
+		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->set_repo_cache( 'release_asset', $response );
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return $response;
 	}
 
 }

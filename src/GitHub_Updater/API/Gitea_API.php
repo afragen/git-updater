@@ -134,6 +134,16 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Get Gitea release asset.
+	 *
+	 * @return false
+	 */
+	public function get_release_asset() {
+		// TODO: eventually figure this out.
+		return false;
+	}
+
+	/**
 	 * Construct $this->type->download_link using Gitea API.
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
@@ -154,9 +164,7 @@ class Gitea_API extends API implements API_Interface {
 			$endpoint .= $this->type->newest_tag . '.zip';
 		}
 
-		/*
-		 * Create endpoint for branch switching.
-		 */
+		// Create endpoint for branch switching.
 		if ( $branch_switch ) {
 			$endpoint = $branch_switch . '.zip';
 		}
@@ -164,15 +172,6 @@ class Gitea_API extends API implements API_Interface {
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );
 
 		return $download_link_base . $endpoint;
-	}
-
-	/**
-	 * Get Gitea release asset.
-	 *
-	 * @return false
-	 */
-	public function get_release_asset() {
-		return false;
 	}
 
 	/**
@@ -453,16 +452,7 @@ class Gitea_API extends API implements API_Interface {
 	public function remote_install( $headers, $install ) {
 		$base = $headers['base_uri'] . '/api/v1';
 
-		$install['download_link'] = implode(
-			'/',
-			[
-				$base,
-				'repos',
-				$install['github_updater_repo'],
-				'archive',
-				$install['github_updater_branch'] . '.zip',
-			]
-		);
+		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/archive/{$install['github_updater_branch']}.zip";
 
 		/*
 		 * Add/Save access token if present.
