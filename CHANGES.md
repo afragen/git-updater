@@ -1,6 +1,8 @@
 #### [unreleased]
+
+#### 8.5.1 / 2018-11-30
 * refactor release asset API calls to `trait API_Common`
-* updated GitLab API v4 endpoints, thanks for all the notice 😩
+* updated GitLab API v4 endpoints, thanks for all the notice GitLab 😩
 
 #### 8.5.0 / 2018-11-26
 * silence rename PHP warning during plugin update
