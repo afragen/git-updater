@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed parsing of wp.org readme changelog items
 
 #### 8.5.1 / 2018-11-30
 * refactor release asset API calls to `trait API_Common`
