@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.5.2 / 2018-12-10
 * fixed parsing of wp.org readme changelog items
 
 #### 8.5.1 / 2018-11-30
