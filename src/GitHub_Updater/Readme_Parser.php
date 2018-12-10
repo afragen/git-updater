@@ -71,6 +71,7 @@ class Readme_Parser extends Parser {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
 		$data = $this->faq_as_h4( $data );
+		$data = $this->changelog_as_h4( $data );
 
 		return $data;
 	}
@@ -122,6 +123,24 @@ class Readme_Parser extends Parser {
 		foreach ( $data['faq'] as $question => $answer ) {
 			$data['sections']['faq'] .= "<h4>{$question}</h4>\n{$answer}\n";
 		}
+
+		return $data;
+	}
+
+	/**
+	 * Converts wp.org readme changelog items to h4 style.
+	 *
+	 * @param mixed $data Array of parsed readme data.
+	 * @return array $data
+	 */
+	public function changelog_as_h4( $data ) {
+		if ( empty( $data['sections']['changelog'] ) || false !== strpos( $data['sections']['changelog'], '<h4>' ) ) {
+			return $data;
+		}
+		$pattern = '~<p>=(.*)=</p>~';
+		$replace = '<h4>$1</h4>';
+
+		$data['sections']['changelog'] = preg_replace( $pattern, $replace, $data['sections']['changelog'] );
 
 		return $data;
 	}
