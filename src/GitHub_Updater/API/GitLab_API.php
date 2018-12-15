@@ -240,6 +240,7 @@ class GitLab_API extends API implements API_Interface {
 				break;
 			case 'release_asset':
 				$endpoint = add_query_arg( 'job', $git->type->ci_job, $endpoint );
+				break;
 			default:
 				break;
 		}
