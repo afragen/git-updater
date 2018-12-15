@@ -1,4 +1,5 @@
 #### [unreleased]
+* add action hook `github_updater_post_rest_process_request` for @Raruto
 
 #### 8.5.2 / 2018-12-10
 * fixed parsing of wp.org readme changelog items
