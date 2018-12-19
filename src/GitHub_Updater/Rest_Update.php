@@ -296,10 +296,10 @@ class Rest_Update extends Base {
 		/**
 		 * Action hook after processing REST process.
 		 *
-		 * @since 8.5.3
+		 * @since 8.6.0
 		 *
 		 * @param array $response
-		 * @param int $code
+		 * @param int   $code HTTP response.
 		 */
 		do_action( 'github_updater_post_rest_process_request', $response, $code );
 
