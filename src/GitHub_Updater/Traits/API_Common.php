@@ -70,11 +70,11 @@ trait API_Common {
 	private function parse_release_asset( $git, $request, $response ) {
 		switch ( $git ) {
 			case 'github':
-				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : $response;
+				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : null;
 				break;
 			case 'bitbucket':
 				$download_base = $this->get_api_url( $request, true );
-				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : $response;
+				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : null;
 				break;
 			case 'gitlab':
 			case 'gitea':
