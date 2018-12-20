@@ -11,33 +11,33 @@
 (function () {
 
 	// Hide non-default (Bitbucket & GitLab) settings on page load.
-	var nonDefault = ['bitbucket', 'gitlab', 'gitea', 'zipfile'];
+	let nonDefault = ['bitbucket', 'gitlab', 'gitea', 'zipfile'];
 
 	nonDefault.forEach(function (item) {
-		var parents = getParents(item, 'tr');
+		let parents = getParents(item, 'tr');
 		displayNone(parents);
 	});
 
 	// When the api selector changes.
-	var selects = document.querySelector('select[ name="github_updater_api" ]');
+	let selects = document.querySelector('select[ name="github_updater_api" ]');
 
 	// Only run when on proper tab.
 	if (selects !== null) {
 		selects.addEventListener('change', function () {
-			var defaults = ['github', 'bitbucket', 'gitlab', 'gitea', 'zipfile'];
+			let defaults = ['github', 'bitbucket', 'gitlab', 'gitea', 'zipfile'];
 
 			// Create difference array.
-			var hideMe = remove(defaults, this.value);
+			let hideMe = remove(defaults, this.value);
 
 			// Hide items with unselected api's classes.
 			hideMe.forEach(function (item) {
-				var parents = getParents(item, 'tr');
+				let parents = getParents(item, 'tr');
 				displayNone(parents);
 			});
 
 			// Show selected setting.
 			[this.value].forEach(function (item) {
-				var parents = getParents(item, 'tr');
+				let parents = getParents(item, 'tr');
 				display(parents);
 			});
 		});
@@ -73,7 +73,7 @@
 
 	// Vanilla JS version of jQuery `$(query).parents(selector)`.
 	function vanillaParents(element, selector) {
-		var parents = [];
+		let parents = [];
 		if (NodeList.prototype.isPrototypeOf(element)) {
 			element.forEach((item) => {
 				element = item.parentElement.closest(selector);
