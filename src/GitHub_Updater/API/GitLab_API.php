@@ -191,6 +191,13 @@ class GitLab_API extends API implements API_Interface {
 		$endpoint = '';
 		$endpoint = add_query_arg( 'sha', $this->type->branch, $endpoint );
 
+		// Release asset.
+		if ( $this->type->ci_job && '0.0.0' !== $this->type->newest_tag ) {
+			$release_asset = $this->get_release_asset();
+			$release_asset = $this->add_access_token_endpoint( $this, $release_asset );
+			return $release_asset;
+		}
+
 		// If branch is master (default) and tags are used, use newest tag.
 		if ( 'master' === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = add_query_arg( 'sha', $this->type->newest_tag, $endpoint );
@@ -199,12 +206,6 @@ class GitLab_API extends API implements API_Interface {
 		// Create endpoint for branch switching.
 		if ( $branch_switch ) {
 			$endpoint = add_query_arg( 'sha', $branch_switch, $endpoint );
-		}
-
-		// Release asset.
-		if ( $this->type->ci_job && '0.0.0' !== $this->type->newest_tag ) {
-			$release_asset = $this->get_release_asset();
-			return $release_asset;
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $this, $endpoint );

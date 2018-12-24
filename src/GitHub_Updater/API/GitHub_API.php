@@ -133,6 +133,7 @@ class GitHub_API extends API implements API_Interface {
 		// Release asset.
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
+			$release_asset = $this->add_access_token_endpoint( $this, $release_asset );
 			return $release_asset;
 		}
 

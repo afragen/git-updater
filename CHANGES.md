@@ -2,6 +2,7 @@
 * add action hook `github_updater_post_rest_process_request` for @Raruto
 * add filter hook `github_updater_set_rollback_package` for @sc0ttclark and @moderntribe
 * return false for `API_Common::parse_release_asset()` when invalid `$response`, fixes [#750](https://github.com/afragen/github-updater/issues/750)
+* add access tokens to release asset URLs, fixes [#751](https://github.com/afragen/github-updater/issues/751)
 
 #### 8.5.2 / 2018-12-10
 * fixed parsing of wp.org readme changelog items
