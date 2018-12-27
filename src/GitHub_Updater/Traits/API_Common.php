@@ -70,13 +70,18 @@ trait API_Common {
 	private function parse_release_asset( $git, $request, $response ) {
 		switch ( $git ) {
 			case 'github':
-				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : null;
+				$download_link = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : null;
+
+				// Private repo.
+				$response = ( isset( $response->assets[0] ) && ! is_wp_error( $response ) && $this->type->is_private ) ? $response->assets[0]->url : $download_link;
 				break;
 			case 'bitbucket':
 				$download_base = $this->get_api_url( $request, true );
 				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : null;
 				break;
 			case 'gitlab':
+				$response = $this->get_api_url( $request );
+				break;
 			case 'gitea':
 				break;
 		}
@@ -336,7 +341,7 @@ trait API_Common {
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
-			$response     = 'gitlab' === $git ? $this->get_api_url( $request ) : $this->api( $request );
+			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
