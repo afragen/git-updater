@@ -892,7 +892,7 @@ class Base {
 		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? [] : $this->config[ $data['slug'] ]->rollback;
 
 		printf(
-			/* translators: current branch name and link */
+			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
 			'<a href="#" onclick="jQuery(\'#' . $data['id'] . '\').toggle();return false;">',
