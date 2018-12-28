@@ -292,6 +292,17 @@ class Rest_Update extends Base {
 		$json_encode_flags = 128 | 64;
 
 		error_log( json_encode( $response, $json_encode_flags ) );
+
+		/**
+		 * Action hook after processing REST process.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param array $response
+		 * @param int   $code HTTP response.
+		 */
+		do_action( 'github_updater_post_rest_process_request', $response, $code );
+
 		unset( $response['success'] );
 		if ( 200 === $code ) {
 			wp_die( wp_send_json_success( $response, $code ) );

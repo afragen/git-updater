@@ -675,14 +675,28 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$repo_api  = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
-		$this->tag = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
-		$slug      = 'plugin' === $type ? $repo->file : $repo->slug;
-		$rollback  = [
+		$repo_api      = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
+		$this->tag     = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
+		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;
+		$download_link = $repo_api->construct_download_link( $this->tag );
+
+		/**
+		 * Filter download link so developers can point to specific ZipFile
+		 * to use as a download link during a branch switch.
+		 *
+		 * @since 8.6.0
+		 *
+		 * @param string    $download_link Download URL.
+		 * @param /stdClass $repo
+		 * @param string    $this->tag Branch or tag for rollback.
+		 */
+		$download_link = apply_filters( 'github_updater_set_rollback_package', $download_link, $repo, $this->tag );
+
+		$rollback = [
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
-			'package'     => $repo_api->construct_download_link( $this->tag ),
+			'package'     => $download_link,
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
@@ -878,7 +892,7 @@ class Base {
 		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? [] : $this->config[ $data['slug'] ]->rollback;
 
 		printf(
-			/* translators: current branch name and link */
+			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
 			$data['branch'],
 			'<a href="#" onclick="jQuery(\'#' . $data['id'] . '\').toggle();return false;">',
