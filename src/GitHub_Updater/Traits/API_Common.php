@@ -73,7 +73,7 @@ trait API_Common {
 				$download_link = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : null;
 
 				// Private repo.
-				$response = ( isset( $response->assets[0] ) && ! is_wp_error( $response ) && $this->type->is_private ) ? $response->assets[0]->url : $download_link;
+				$response = ( null !== $download_link && ( property_exists( $this->type, 'is_private' ) && $this->type->is_private ) ) ? $response->assets[0]->url : $download_link;
 				break;
 			case 'bitbucket':
 				$download_base = $this->get_api_url( $request, true );

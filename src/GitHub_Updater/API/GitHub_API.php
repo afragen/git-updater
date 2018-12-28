@@ -133,7 +133,7 @@ class GitHub_API extends API implements API_Interface {
 		// Release asset.
 		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
 			$release_asset = $this->get_release_asset();
-			if ( $this->type->is_private ) {
+			if ( property_exists( $this->type, 'is_private' ) && $this->type->is_private ) {
 				return $this->get_release_asset_redirect( $release_asset, true );
 			}
 			return $release_asset;
