@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto
 * add filter hook `github_updater_set_rollback_package` for @sc0ttclark and @moderntribe
 * return null for `API_Common::parse_release_asset()` when invalid `$response`, fixes [#750](https://github.com/afragen/github-updater/issues/750)
