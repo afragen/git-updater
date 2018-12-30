@@ -172,9 +172,7 @@ trait API_Common {
 	public function get_remote_api_changes( $git, $changes, $request ) {
 		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
 
-		/*
-		 * Set response from local file if no update available.
-		 */
+		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = $this->get_local_info( $this->type, $changes );
 		}
@@ -220,9 +218,7 @@ trait API_Common {
 
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
-		/*
-		 * Set $response from local file if no update available.
-		 */
+		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}
