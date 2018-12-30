@@ -1,4 +1,5 @@
 #### [unreleased]
+* remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
 
 #### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto
