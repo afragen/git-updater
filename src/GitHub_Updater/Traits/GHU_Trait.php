@@ -183,26 +183,9 @@ trait GHU_Trait {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
-		$this->force_run_cron_job();
+		wp_cron();
 
 		return true;
-	}
-
-	/**
-	 * Force wp-cron.php to run.
-	 */
-	public function force_run_cron_job() {
-		$doing_wp_cron = sprintf( '%.22F', microtime( true ) );
-		$cron_request  = [
-			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . $doing_wp_cron ),
-			'args' => [
-				'timeout'   => 0.01,
-				'blocking'  => false,
-				'sslverify' => apply_filters( 'https_local_ssl_verify', true ),
-			],
-		];
-
-		wp_remote_post( $cron_request['url'], $cron_request['args'] );
 	}
 
 	/**
