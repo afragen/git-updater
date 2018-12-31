@@ -12,26 +12,40 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
   - WP_VERSION=latest WP_MULTISITE=1
+  - WP_VERSION=nightly
+
+cache:
+  apt: true
+  directories:
+    - node_modules
+    - vendor
+    - $HOME/.composer/cache
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - php 7.3
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-  - export PATH="$HOME/.config/composer/vendor:$PATH"
-  - phpunit --version
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
       composer global require "phpunit/phpunit:^6"
     elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
       composer global require "phpunit/phpunit:^4"
     fi
-  - $HOME/.config/composer/vendor/phpunit/phpunit/phpunit --version
+  - $HOME/.composer/vendor/bin/phpunit --version
+  - phpunit --version
 
 script:
-- phpenv config-rm xdebug.ini
-- $HOME/.config/composer/vendor/phpunit/phpunit/phpunit
+- phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist"
+- phpunit
 
 before_deploy:
   - git archive -o /tmp/github-updater-${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
