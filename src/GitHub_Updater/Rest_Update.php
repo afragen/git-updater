@@ -53,6 +53,7 @@ class Rest_Update extends Base {
 	 * @param string $tag
 	 *
 	 * @throws \Exception
+	 * @throws \UnexpectedValueException
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
 		$plugin           = null;
@@ -111,6 +112,7 @@ class Rest_Update extends Base {
 	 * @param string $tag
 	 *
 	 * @throws \Exception
+	 * @throws \UnexpectedValueException
 	 */
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
@@ -170,6 +172,8 @@ class Rest_Update extends Base {
 	 * If the request came through a webhook, and if the branch in the
 	 * webhook matches the branch specified by the url, use the latest
 	 * update available as specified in the webhook payload.
+	 *
+	 * @throws \UnexpectedValueException
 	 */
 	public function process_request() {
 		$start = microtime( true );

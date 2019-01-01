@@ -490,8 +490,8 @@ class API {
 			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.1/";
 			$url      = add_query_arg(
 				[
-					'action'                     => "{$this->type->type}_information",
-					urlencode( 'request[slug]' ) => $this->type->slug,
+					'action'                        => "{$this->type->type}_information",
+					rawurlencode( 'request[slug]' ) => $this->type->slug,
 				],
 				$url
 			);

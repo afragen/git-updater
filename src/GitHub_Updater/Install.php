@@ -531,8 +531,8 @@ class Install {
 		$activate_link = add_query_arg(
 			[
 				'action'     => 'activate',
-				// 'template'   => urlencode( $template ),
-				'stylesheet' => urlencode( $stylesheet ),
+				// 'template'   => rawurlencode( $template ),
+				'stylesheet' => rawurlencode( $stylesheet ),
 			],
 			admin_url( 'themes.php' )
 		);
@@ -544,7 +544,7 @@ class Install {
 			$network_activate_link = add_query_arg(
 				[
 					'action' => 'enable',
-					'theme'  => urlencode( $stylesheet ),
+					'theme'  => rawurlencode( $stylesheet ),
 				],
 				network_admin_url( 'themes.php' )
 			);

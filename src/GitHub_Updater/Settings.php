@@ -551,12 +551,12 @@ class Settings extends Base {
 			echo '<p>' . esc_html__( 'The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories.', 'github-updater' ) . '</p>';
 
 			foreach ( $plugins as $plugin ) {
-				if ( in_array( $plugin->file, $overrides ) ) {
+				if ( in_array( $plugin->file, $overrides, true ) ) {
 					echo '<p>' . $dashicon_plugin . $plugin->name . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
-				if ( in_array( $theme->slug, $overrides ) ) {
+				if ( in_array( $theme->slug, $overrides, true ) ) {
 					echo '<p>' . $dashicon_theme . $theme->name . '</p>';
 				}
 			}
@@ -684,7 +684,7 @@ class Settings extends Base {
 				],
 				$redirect_url
 			);
-			wp_redirect( $location );
+			wp_safe_redirect( $location );
 			exit;
 		}
 	}

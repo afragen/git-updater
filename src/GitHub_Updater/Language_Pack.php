@@ -74,7 +74,7 @@ class Language_Pack {
 	/**
 	 * Add language translations to update_plugins or update_themes transients.
 	 *
-	 * @param $transient
+	 * @param mixed $transient pre_set_site_transient.
 	 *
 	 * @return mixed
 	 */

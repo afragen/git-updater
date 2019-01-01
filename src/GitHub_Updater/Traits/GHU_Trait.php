@@ -59,7 +59,7 @@ trait GHU_Trait {
 	 */
 	public function is_current_page( array $pages ) {
 		global $pagenow;
-		return in_array( $pagenow, $pages );
+		return in_array( $pagenow, $pages, true );
 	}
 
 	/**

@@ -906,7 +906,7 @@ class Base {
 				printf(
 					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
 					$data['nonced_update_url'],
-					'&rollback=' . urlencode( $branch ),
+					'&rollback=' . rawurlencode( $branch ),
 					esc_attr( $branch )
 				);
 			}
@@ -922,7 +922,7 @@ class Base {
 				printf(
 					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . $tag . '">%s</a></li>',
 					$data['nonced_update_url'],
-					'&rollback=' . urlencode( $tag ),
+					'&rollback=' . rawurlencode( $tag ),
 					esc_attr( $tag )
 				);
 			}
@@ -948,7 +948,7 @@ class Base {
 			add_query_arg(
 				[
 					'action' => $action,
-					$type    => urlencode( $repo_name ),
+					$type    => rawurlencode( $repo_name ),
 				],
 				self_admin_url( 'update.php' )
 			)

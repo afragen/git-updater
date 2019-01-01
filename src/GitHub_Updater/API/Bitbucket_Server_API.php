@@ -246,7 +246,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/
 	private function bbserver_fetch_raw_file( $file ) {
-		// $file         = urlencode( $file );
+		// $file         = rawurlencode( $file );
 		// $download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
 		// $download_url = $this->add_endpoints( $this, $download_url );
 		// $download_url = $this->get_api_url( $download_url );

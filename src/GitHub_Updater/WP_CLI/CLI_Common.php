@@ -10,6 +10,9 @@
 
 namespace Fragen\GitHub_Updater\WP_CLI;
 
+/**
+ * Class CLI_Common
+ */
 class CLI_Common {
 	/**
 	 * Delete all `ghu-` prefixed data from options table.

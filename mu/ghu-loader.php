@@ -35,8 +35,7 @@ if ( ! class_exists( 'Fragen\\GitHub_Updater\\Init' ) ) {
 /**
  * Deactivate if plugin in loaded not as mu-plugin.
  *
- * @param $plugin
- * @param $network_wide
+ * @param string $plugin Plugin slug.
  */
 function ghu_deactivate( $plugin, $network_wide ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
@@ -48,7 +47,7 @@ function ghu_deactivate( $plugin, $network_wide ) {
 /**
  * Label as mu-plugin in plugin view.
  *
- * @param $actions
+ * @param array $actions Link actions.
  *
  * @return array
  */
