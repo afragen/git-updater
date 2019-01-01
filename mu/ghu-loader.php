@@ -12,9 +12,9 @@
  * Plugin Name:       GitHub Updater MU loader
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to load GitHub Updater as a must-use plugin. Disables normal plugin activation and deletion.
- * Version:           1.5.2
+ * Version:           1.5.3
  * Author:            Andy Fragen
- * License:           GNU General Public License v2
+ * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
  * GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
  */
@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 /*
  * Load normal plugin.
  */
-if ( ! class_exists( 'Fragen\\GitHub_Updater\\Init' ) ) {
+if ( ! class_exists( 'Fragen\\GitHub_Updater\\Bootstrap' ) ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	require trailingslashit( WP_PLUGIN_DIR ) . $ghu_plugin_file;
 }
@@ -37,7 +37,7 @@ if ( ! class_exists( 'Fragen\\GitHub_Updater\\Init' ) ) {
  *
  * @param string $plugin Plugin slug.
  */
-function ghu_deactivate( $plugin, $network_wide ) {
+function ghu_deactivate( $plugin ) {
 	$ghu_plugin_file = 'github-updater/github-updater.php';
 	if ( $ghu_plugin_file === $plugin ) {
 		deactivate_plugins( $ghu_plugin_file );
@@ -68,7 +68,7 @@ function ghu_mu_plugin_active( $actions ) {
 /*
  * Deactivate normal plugin as it's loaded as mu-plugin.
  */
-add_action( 'activated_plugin', 'ghu_deactivate', 10, 2 );
+add_action( 'activated_plugin', 'ghu_deactivate', 10, 1 );
 
 /*
  * Remove links and checkbox from Plugins page so user can't delete main plugin.
