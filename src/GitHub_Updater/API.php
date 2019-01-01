@@ -807,7 +807,7 @@ class API {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @param array $args
+	 * @param array  $args
 	 * @param string $url
 	 *
 	 * @return mixed $args
@@ -820,6 +820,7 @@ class API {
 
 	/**
 	 * Set AWS redirect URL from action hook.
+	 *
 	 * @uses `requests-requests.before_redirect` Action hook.
 	 *
 	 * @param string $location
