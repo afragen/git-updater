@@ -39,5 +39,10 @@
     "psr-4": {
       "Fragen\\GitHub_Updater\\": "src/GitHub_Updater/"
     }
+  },
+  "scripts": {
+    "post-update-cmd": [
+      "wp i18n make-pot . languages/github-updater.pot"
+    ]
   }
 }
