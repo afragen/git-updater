@@ -17,8 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-( new Bootstrap() )->run( GITHUB_UPDATER_FILE, GITHUB_UPDATER_DIR );
-
 /**
  * Class Bootstrap
  */
@@ -38,6 +36,8 @@ class Bootstrap {
 				load_plugin_textdomain( 'github-updater' );
 			}
 		);
+
+		define( 'GITHUB_UPDATER_DIR', $dir );
 
 		// Load Autoloader.
 		require_once $dir . '/vendor/autoload.php';
