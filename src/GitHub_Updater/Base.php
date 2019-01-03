@@ -121,7 +121,6 @@ class Base {
 		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
 			self::$installed_apis['zipfile_api'] = true;
 			self::$git_servers['zipfile']        = 'Zipfile';
-
 		} else {
 			self::$installed_apis['zipfile_api'] = false;
 		}
@@ -244,7 +243,7 @@ class Base {
 	/**
 	 * Add extra headers to get_plugins() or wp_get_themes().
 	 *
-	 * @param $extra_headers
+	 * @param array $extra_headers
 	 *
 	 * @return array
 	 */
@@ -291,7 +290,7 @@ class Base {
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
 	 *
-	 * @param $repo
+	 * @param \stdClass $repo
 	 *
 	 * @return bool
 	 */
@@ -337,7 +336,7 @@ class Base {
 	/**
 	 * Set default values for plugin/theme.
 	 *
-	 * @param $type
+	 * @param string $type
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
@@ -404,7 +403,7 @@ class Base {
 	/**
 	 * Remove hooks after use.
 	 *
-	 * @param object $repo_api
+	 * @param \stdClass $repo_api
 	 */
 	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
@@ -440,8 +439,8 @@ class Base {
 	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
-	 * @param $cron
-	 * @param $timestamp
+	 * @param array $cron
+	 * @param int   $timestamp
 	 */
 	public function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
@@ -688,7 +687,7 @@ class Base {
 		 *
 		 * @param string    $download_link Download URL.
 		 * @param /stdClass $repo
-		 * @param string    $this->tag Branch or tag for rollback.
+		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
 		$download_link = apply_filters( 'github_updater_set_rollback_package', $download_link, $repo, $this->tag );
 
@@ -802,8 +801,8 @@ class Base {
 	/**
 	 * Create repo parts.
 	 *
-	 * @param $repo
-	 * @param $type
+	 * @param string $repo
+	 * @param string $type plugin|theme.
 	 *
 	 * @return mixed
 	 */
@@ -840,9 +839,9 @@ class Base {
 	/**
 	 * Return correct update row opening and closing tags for Shiny Updates.
 	 *
-	 * @param      $repo_name
-	 * @param      $type
-	 * @param bool      $branch_switcher
+	 * @param string $repo_name
+	 * @param string $type            plugin|theme.
+	 * @param bool   $branch_switcher
 	 *
 	 * @return array
 	 */

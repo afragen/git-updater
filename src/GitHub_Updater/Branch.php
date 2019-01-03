@@ -58,7 +58,7 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param $repo
+	 * @param \stdClass $repo
 	 *
 	 * @return mixed
 	 */

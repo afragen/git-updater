@@ -317,7 +317,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @param string $response Response from API call.
 	 *
-	 * @return array $arr Array of changes in base64.
+	 * @return void
 	 */
 	public function parse_changelog_response( $response ) {
 	}
@@ -327,7 +327,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @param string|\stdClass $response
 	 *
-	 * @return \stdClass $response
+	 * @return void
 	 */
 	protected function parse_readme_response( $response ) {
 	}

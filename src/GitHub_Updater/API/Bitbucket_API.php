@@ -287,8 +287,8 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param \stdClass|array $response Response from API call.
+	 * @param string          $repo_type
 	 *
 	 * @return array
 	 */

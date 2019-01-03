@@ -236,9 +236,9 @@ class Theme extends Base {
 	/**
 	 * Put changelog in themes_api, return WP.org data as appropriate.
 	 *
-	 * @param $false
-	 * @param $action
-	 * @param $response
+	 * @param bool      $false
+	 * @param string    $action
+	 * @param \stdClass $response
 	 *
 	 * @return mixed
 	 */
@@ -282,8 +282,8 @@ class Theme extends Base {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 * Display update details or rollback links for multisite installation.
 	 *
-	 * @param $theme_key
-	 * @param $theme
+	 * @param string $theme_key
+	 * @param array  $theme
 	 *
 	 * @author Seth Carstens
 	 */
@@ -321,9 +321,7 @@ class Theme extends Base {
 		);
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme' );
 
-		/*
-		 * Update transient if necessary.
-		 */
+		// Update transient if necessary.
 		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
 			$this->pre_set_site_transient_update_themes( $current );
 		}
@@ -374,8 +372,8 @@ class Theme extends Base {
 	/**
 	 * Create branch switcher row for multisite installation.
 	 *
-	 * @param $theme_key
-	 * @param $theme
+	 * @param string $theme_key
+	 * @param array  $theme
 	 *
 	 * @return bool
 	 */
@@ -420,8 +418,8 @@ class Theme extends Base {
 	 *
 	 * @author @grappler
 	 *
-	 * @param $theme_key
-	 * @param $theme
+	 * @param string $theme_key
+	 * @param array  $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
 		$themes = $this->get_theme_configs();
@@ -465,7 +463,7 @@ class Theme extends Base {
 	 *
 	 * @author Seth Carstens
 	 *
-	 * @param $prepared_themes
+	 * @param array $prepared_themes
 	 *
 	 * @return mixed
 	 */

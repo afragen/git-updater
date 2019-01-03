@@ -235,8 +235,8 @@ class Plugin extends Base {
 	/**
 	 * Add branch switch row to plugins page.
 	 *
-	 * @param $plugin_file
-	 * @param $plugin_data
+	 * @param string    $plugin_file
+	 * @param \stdClass $plugin_data
 	 *
 	 * @return bool
 	 */
@@ -285,8 +285,8 @@ class Plugin extends Base {
 	/**
 	 * Add 'View details' link to plugins page.
 	 *
-	 * @param $links
-	 * @param $file
+	 * @param array  $links
+	 * @param string $file
 	 *
 	 * @return array $links
 	 */
@@ -334,9 +334,9 @@ class Plugin extends Base {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param $false
-	 * @param $action
-	 * @param $response
+	 * @param bool      $false
+	 * @param string    $action
+	 * @param \stdClass $response
 	 *
 	 * @return mixed
 	 */
@@ -385,7 +385,7 @@ class Plugin extends Base {
 	/**
 	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param $transient
+	 * @param \stdClass $transient
 	 *
 	 * @return mixed
 	 */

@@ -2,8 +2,7 @@
 /**
  * GitHub Updater
  *
- * @author    Andy Fragen
- * @author    Mikael Lindqvist
+ * @author    Andy Fragen, Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
@@ -27,7 +26,18 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * processing, rather than printing them out.
  */
 class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
+	/**
+	 * Holds messages.
+	 *
+	 * @var array $messages
+	 */
 	public $messages = [];
+
+	/**
+	 * Boolean if errors are present.
+	 *
+	 * @var bool $error
+	 */
 	public $error;
 
 	/**
@@ -60,7 +70,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	/**
 	 * Set the error flag to true, then let the base class handle the rest.
 	 *
-	 * @param $errors
+	 * @param mixed $errors
 	 */
 	public function error( $errors ) {
 		$this->error = true;
@@ -70,7 +80,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	/**
 	 * Do nothing.
 	 *
-	 * @param $type
+	 * @param mixed $type
 	 */
 	protected function decrement_update_count( $type ) {
 	}

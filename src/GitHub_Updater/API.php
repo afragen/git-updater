@@ -50,7 +50,7 @@ class API {
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var
+	 * @var array $extra_headers
 	 */
 	protected static $extra_headers;
 
@@ -149,9 +149,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array  $fields
-	 * @param array  $repo
-	 * @param string $type
+	 * @param array $fields
+	 * @param array $repo
 	 *
 	 * @return array
 	 */
@@ -217,8 +216,8 @@ class API {
 	/**
 	 * Take remote file contents as string and parse headers.
 	 *
-	 * @param $contents
-	 * @param $type
+	 * @param string $contents
+	 * @param string $type plugin|theme.
 	 *
 	 * @return array
 	 */
@@ -576,8 +575,8 @@ class API {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param $response array|bool
-	 * @param $branch   bool
+	 * @param array|bool $response
+	 * @param bool       $branch
 	 *
 	 * @return bool
 	 */
@@ -656,8 +655,8 @@ class API {
 	/**
 	 * Get local file info if no update available. Save API calls.
 	 *
-	 * @param $repo
-	 * @param $file
+	 * @param \stdClass $repo Repo data.
+	 * @param string    $file
 	 *
 	 * @return null|string
 	 */
@@ -680,7 +679,7 @@ class API {
 	/**
 	 * Set repo object file info.
 	 *
-	 * @param $response
+	 * @param array $response Repo data.
 	 */
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
@@ -706,7 +705,7 @@ class API {
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
-	 * @param $repo_meta
+	 * @param array $repo_meta
 	 *
 	 * @return integer
 	 */

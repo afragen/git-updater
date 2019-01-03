@@ -2,8 +2,7 @@
 /**
  * GitHub Updater
  *
- * @author    Andy Fragen
- * @author    Mikael Lindqvist
+ * @author    Andy Fragen, Mikael Lindqvist
  * @license   GPL-2.0+
  * @link      https://github.com/afragen/github-updater
  * @package   github-updater
@@ -33,7 +32,7 @@ class Rest_Update extends Base {
 	/**
 	 * Holds REST Upgrader Skin.
 	 *
-	 * @var \Fragen\GitHub_Updater\Rest_Upgrader_Skin
+	 * @var Rest_Upgrader_Skin $upgrader_skin
 	 */
 	protected $upgrader_skin;
 
@@ -52,8 +51,7 @@ class Rest_Update extends Base {
 	 * @param string $plugin_slug
 	 * @param string $tag
 	 *
-	 * @throws \Exception
-	 * @throws \UnexpectedValueException
+	 * @throws \UnexpectedValueException Plugin not found or not updatable.
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
 		$plugin           = null;
@@ -111,8 +109,7 @@ class Rest_Update extends Base {
 	 * @param string $theme_slug
 	 * @param string $tag
 	 *
-	 * @throws \Exception
-	 * @throws \UnexpectedValueException
+	 * @throws \UnexpectedValueException Theme not found or not updatable.
 	 */
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
@@ -173,7 +170,7 @@ class Rest_Update extends Base {
 	 * webhook matches the branch specified by the url, use the latest
 	 * update available as specified in the webhook payload.
 	 *
-	 * @throws \UnexpectedValueException
+	 * @throws \UnexpectedValueException Under multiple bad or missing params.
 	 */
 	public function process_request() {
 		$start = microtime( true );
@@ -303,7 +300,7 @@ class Rest_Update extends Base {
 		 * @since 8.6.0
 		 *
 		 * @param array $response
-		 * @param int   $code HTTP response.
+		 * @param int   $code     HTTP response.
 		 */
 		do_action( 'github_updater_post_rest_process_request', $response, $code );
 

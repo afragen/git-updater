@@ -35,7 +35,7 @@ class Messages {
 	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
-	 * @param string
+	 * @param string $type
 	 *
 	 * @return bool
 	 */

@@ -29,7 +29,7 @@ class Zipfile_API {
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param $type
+	 * @param string $type plugin|theme.
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -59,8 +59,8 @@ class Zipfile_API {
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param $headers
-	 * @param $install
+	 * @param array $headers
+	 * @param array $install
 	 *
 	 * @return mixed $install
 	 */
