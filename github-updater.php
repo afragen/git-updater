@@ -50,4 +50,4 @@ if ( version_compare( '5.6.0', PHP_VERSION, '>=' ) ) {
 
 // Setup plugin loading.
 require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
-( new Bootstrap() )->run( __FILE__, __DIR__ );
+( new Bootstrap( __FILE__ ) )->run();
