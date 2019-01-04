@@ -1,6 +1,7 @@
 #### [unreleased]
 * remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
 * directly call `wp_cron()` after refreshing cache
+* update POT via `composer.json` and wp-cli
 
 #### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto
