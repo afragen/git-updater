@@ -2,6 +2,8 @@
 * remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
 * directly call `wp_cron()` after refreshing cache
 * update POT via `composer.json` and wp-cli
+* moved `get_file_headers()` to `trait GHU_Trait`
+* cleanup extra header key/value pairs
 
 #### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto

@@ -60,8 +60,8 @@ class Base {
 	 * @var array
 	 */
 	protected static $extra_repo_headers = [
-		'languages' => 'Languages',
-		'ci_job'    => 'CI Job',
+		'Languages' => 'Languages',
+		'CIJob'     => 'CI Job',
 	];
 
 	/**
@@ -249,22 +249,22 @@ class Base {
 	 */
 	public function add_headers( $extra_headers ) {
 		$ghu_extra_headers = [
-			'Requires WP'   => 'Requires WP',
-			'Requires PHP'  => 'Requires PHP',
-			'Release Asset' => 'Release Asset',
+			'RequiresWP'   => 'Requires WP',
+			'RequiresPHP'  => 'Requires PHP',
+			'ReleaseAsset' => 'Release Asset',
 		];
 
 		$uri_types = [
-			'plugin' => ' Plugin URI',
-			'theme'  => ' Theme URI',
+			'PluginURI' => ' Plugin URI',
+			'ThemeURI'  => ' Theme URI',
 		];
 
 		foreach ( self::$git_servers as $server ) {
-			foreach ( $uri_types as $uri_type ) {
-				$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			foreach ( $uri_types as $uri_key => $uri_value ) {
+				$ghu_extra_headers[ $server . $uri_key ] = $server . $uri_value;
 			}
-			foreach ( self::$extra_repo_headers as $header ) {
-				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			foreach ( self::$extra_repo_headers as $header_key => $header_value ) {
+				$ghu_extra_headers[ $server . $header_key ] = $server . ' ' . $header_value;
 			}
 		}
 
@@ -370,7 +370,7 @@ class Base {
 		$this->$type->watchers       = 0;
 		$this->$type->forks          = 0;
 		$this->$type->open_issues    = 0;
-		$this->$type->requires       = null;
+		$this->$type->requires       = false;
 		$this->$type->requires_php   = false;
 	}
 
@@ -1008,16 +1008,16 @@ class Base {
 				! empty( $headers[ $repo_parts[ $part ] ] )
 			) {
 				switch ( $part ) {
-					case 'languages':
+					case 'Languages':
 						$header['languages'] = $headers[ $repo_parts[ $part ] ];
 						break;
-					case 'ci_job':
+					case 'CIJob':
 						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
 						break;
 				}
 			}
 		}
-		$header['release_asset'] = ! $header['release_asset'] ? 'true' === $headers['Release Asset'] : $header['release_asset'];
+		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['Release Asset'] ) ? 'true' === $headers['Release Asset'] : $header['release_asset'];
 
 		return $header;
 	}
