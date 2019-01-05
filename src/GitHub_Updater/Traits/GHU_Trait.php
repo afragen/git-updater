@@ -319,4 +319,81 @@ trait GHU_Trait {
 
 		return $header;
 	}
+
+	/**
+	 * Take remote file contents as string or array and parse and reduce headers.
+	 *
+	 * @param string|array $contents File contents or array of file headers.
+	 * @param string       $type plugin|theme.
+	 *
+	 * @return array $all_headers Reduced array of all headers.
+	 */
+	public function get_file_headers( $contents, $type ) {
+		$all_headers            = [];
+		$default_plugin_headers = [
+			'Name'        => 'Plugin Name',
+			'PluginURI'   => 'Plugin URI',
+			'Version'     => 'Version',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+			'Network'     => 'Network',
+		];
+
+		$default_theme_headers = [
+			'Name'        => 'Theme Name',
+			'ThemeURI'    => 'Theme URI',
+			'Description' => 'Description',
+			'Author'      => 'Author',
+			'AuthorURI'   => 'Author URI',
+			'Version'     => 'Version',
+			'Template'    => 'Template',
+			'Status'      => 'Status',
+			'Tags'        => 'Tags',
+			'TextDomain'  => 'Text Domain',
+			'DomainPath'  => 'Domain Path',
+		];
+
+		if ( 'plugin' === $type ) {
+			$all_headers = $default_plugin_headers;
+		}
+		if ( 'theme' === $type ) {
+			$all_headers = $default_theme_headers;
+		}
+
+		/*
+		 * Merge extra headers and default headers.
+		 */
+		$all_headers = array_merge( self::$extra_headers, $all_headers );
+		$all_headers = array_unique( $all_headers );
+
+		/*
+		 * Make sure we catch CR-only line endings.
+		 */
+		if ( is_string( $contents ) ) {
+			$file_data = str_replace( "\r", "\n", $contents );
+
+			foreach ( $all_headers as $field => $regex ) {
+				if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
+					$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
+				} else {
+					$all_headers[ $field ] = '';
+				}
+			}
+		}
+
+		$all_headers = is_array( $contents ) ? $contents : $all_headers;
+
+		// Reduce array to only headers with data.
+		$all_headers = array_filter(
+			$all_headers,
+			function ( $e ) {
+				return ! empty( $e );
+			}
+		);
+
+		return $all_headers;
+	}
 }
