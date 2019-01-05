@@ -95,10 +95,6 @@ class Plugin extends Base {
 			foreach ( (array) static::$extra_headers as $value ) {
 				$header = null;
 
-				if ( in_array( $value, [ 'Requires PHP', 'Requires WP', 'Languages' ], true ) ) {
-					continue;
-				}
-
 				if ( empty( $headers[ $value ] ) || false === stripos( $value, 'Plugin' ) ) {
 					continue;
 				}
