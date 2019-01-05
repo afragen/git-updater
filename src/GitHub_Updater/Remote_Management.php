@@ -228,7 +228,15 @@ class Remote_Management {
 		);
 		?>
 		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
+			<?php
+			printf(
+				wp_kses_post(
+					/* translators: %s: Link to wiki */
+					__( 'Please refer to the <a href="%s">wiki</a> for complete list of attributes. RESTful endpoints begin at:', 'github-updater' )
+				),
+				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints'
+			);
+			?>
 			<br>
 			<span style="font-family:monospace;"><?php echo $api_url; ?></span>
 		<p>
