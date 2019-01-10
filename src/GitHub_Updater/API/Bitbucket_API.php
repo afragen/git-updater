@@ -109,7 +109,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( 'bitbucket', '/2.0/repositories/:owner/:repo/refs/tags' );
+		return $this->get_remote_api_tag( 'bitbucket', '/2.0/repositories/:owner/:repo/refs/tags?sort=-name' );
 	}
 
 	/**
