@@ -8,11 +8,11 @@ notifications:
     on_failure: change
 
 php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
   - 7.3
+  - 7.2
+  - 7.1
+  - 7.0
+  - 5.6
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
