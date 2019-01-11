@@ -12,16 +12,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "e2baf7c8d070d7a575cd430561ae945463146b5e"
+                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/e2baf7c8d070d7a575cd430561ae945463146b5e",
-                "reference": "e2baf7c8d070d7a575cd430561ae945463146b5e",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/75bce9e88abaefdbbf4d12bc02f71079e465326d",
+                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6"
+                "php": ">=5.4"
             },
             "type": "library",
             "autoload": {
@@ -46,7 +46,7 @@
                 "singleton",
                 "wordpress"
             ],
-            "time": "2018-11-25T06:11:53+00:00"
+            "time": "2019-01-05T16:19:38+00:00"
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
@@ -54,17 +54,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "4de9307c6e56d6d578f012f82f8de84851096422"
+                "reference": "df96450ef96aafee3db3c86c67cf7f3119519a07"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/4de9307c6e56d6d578f012f82f8de84851096422",
-                "reference": "4de9307c6e56d6d578f012f82f8de84851096422",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/df96450ef96aafee3db3c86c67cf7f3119519a07",
+                "reference": "df96450ef96aafee3db3c86c67cf7f3119519a07",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
-                "php": ">=5.6"
+                "php": ">=5.4"
             },
             "type": "library",
             "autoload": {
@@ -88,7 +88,7 @@
                 "readme",
                 "wordpress"
             ],
-            "time": "2018-11-25T20:45:52+00:00"
+            "time": "2019-01-05T16:19:09+00:00"
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",

@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.6.1 / 2019-01-11
 * remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
 * directly call `wp_cron()` after refreshing cache
 * update POT via `composer.json` and wp-cli
