@@ -385,6 +385,7 @@ class API {
 				if ( $download_link && 'release_asset' === self::$method ) {
 					$type['base_download'] = $type['base_uri'];
 				}
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitea':
 				if ( $download_link ) {

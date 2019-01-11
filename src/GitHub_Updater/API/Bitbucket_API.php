@@ -211,7 +211,7 @@ class Bitbucket_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Added due to interface contract, not used for Bitbucket.
+	 * Create Bitbucket API endpoints.
 	 *
 	 * @param Bitbucket_API|API $git
 	 * @param string            $endpoint
@@ -219,6 +219,31 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return string|void $endpoint
 	 */
 	public function add_endpoints( $git, $endpoint ) {
+		switch ( $git::$method ) {
+			case 'file':
+			case 'readme':
+			case 'meta':
+			case 'changes':
+			case 'translation':
+				break;
+			case 'tags':
+			case 'branches':
+			case 'release_asset':
+				$endpoint = add_query_arg(
+					[
+						'pagelen' => '100',
+						'sort'    => '-name',
+					],
+					$endpoint
+				);
+				break;
+			default:
+				break;
+		}
+
+		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
+
+		return $endpoint;
 	}
 
 	/**

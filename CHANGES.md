@@ -4,6 +4,7 @@
 * update POT via `composer.json` and wp-cli
 * moved `get_file_headers()` to `trait GHU_Trait`
 * cleanup extra header key/value pairs
+* add endpoint to Bitbucket to get more than default number of tags, branches, or release assets. Fixes [#752](https://github.com/afragen/github-updater/issues/752) thanks @idpaterson
 
 #### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto
