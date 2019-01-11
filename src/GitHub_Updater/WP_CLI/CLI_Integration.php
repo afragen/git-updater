@@ -205,8 +205,8 @@ class CLI_Integration extends WP_CLI_Command {
 	/**
 	 * Process WP-CLI config data.
 	 *
-	 * @param string $uri
-	 * @param array  $assoc_args
+	 * @param string $uri URI to process.
+	 * @param array  $assoc_args Args to process.
 	 *
 	 * @return array $cli_config
 	 */
@@ -243,8 +243,8 @@ class CLI_Integration extends WP_CLI_Command {
 	/**
 	 * Process branch setting for WP-CLI.
 	 *
-	 * @param array  $cli_config
-	 * @param string $slug
+	 * @param array  $cli_config Config args.
+	 * @param string $slug Repository slug.
 	 */
 	private function process_branch( $cli_config, $slug ) {
 		$branch_data['github_updater_branch'] = $cli_config['branch'];

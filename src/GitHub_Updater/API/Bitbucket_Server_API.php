@@ -246,18 +246,18 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
 	 **/
 	private function bbserver_fetch_raw_file( $file ) {
-		//$file         = urlencode( $file );
-		//$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-		//$download_url = $this->add_endpoints( $this, $download_url );
-		//$download_url = $this->get_api_url( $download_url );
+		// $file         = rawurlencode( $file );
+		// $download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
+		// $download_url = $this->add_endpoints( $this, $download_url );
+		// $download_url = $this->get_api_url( $download_url );
 		//
-		//$response = wp_safe_remote_get( $download_url );
+		// $response = wp_safe_remote_get( $download_url );
 		//
-		//if ( is_wp_error( $response ) ) {
-		//	return false;
-		//}
+		// if ( is_wp_error( $response ) ) {
+		// return false;
+		// }
 		//
-		//return wp_remote_retrieve_body( $response );
+		// return wp_remote_retrieve_body( $response );
 	}
 
 	/**
@@ -317,7 +317,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @param string $response Response from API call.
 	 *
-	 * @return array $arr Array of changes in base64.
+	 * @return void
 	 */
 	public function parse_changelog_response( $response ) {
 	}
@@ -327,7 +327,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @param string|\stdClass $response
 	 *
-	 * @return \stdClass $response
+	 * @return void
 	 */
 	protected function parse_readme_response( $response ) {
 	}

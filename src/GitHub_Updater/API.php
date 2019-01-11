@@ -50,7 +50,7 @@ class API {
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var
+	 * @var array $extra_headers
 	 */
 	protected static $extra_headers;
 
@@ -149,9 +149,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array  $fields
-	 * @param array  $repo
-	 * @param string $type
+	 * @param array $fields
+	 * @param array $repo
 	 *
 	 * @return array
 	 */
@@ -212,79 +211,6 @@ class API {
 				$git->add_install_settings_fields( $type );
 			}
 		);
-	}
-
-	/**
-	 * Take remote file contents as string and parse headers.
-	 *
-	 * @param $contents
-	 * @param $type
-	 *
-	 * @return array
-	 */
-	public function get_file_headers( $contents, $type ) {
-		$all_headers            = [];
-		$default_plugin_headers = [
-			'Name'        => 'Plugin Name',
-			'PluginURI'   => 'Plugin URI',
-			'Version'     => 'Version',
-			'Description' => 'Description',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'Author URI',
-			'TextDomain'  => 'Text Domain',
-			'DomainPath'  => 'Domain Path',
-			'Network'     => 'Network',
-		];
-
-		$default_theme_headers = [
-			'Name'        => 'Theme Name',
-			'ThemeURI'    => 'Theme URI',
-			'Description' => 'Description',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'Author URI',
-			'Version'     => 'Version',
-			'Template'    => 'Template',
-			'Status'      => 'Status',
-			'Tags'        => 'Tags',
-			'TextDomain'  => 'Text Domain',
-			'DomainPath'  => 'Domain Path',
-		];
-
-		if ( 'plugin' === $type ) {
-			$all_headers = $default_plugin_headers;
-		}
-		if ( 'theme' === $type ) {
-			$all_headers = $default_theme_headers;
-		}
-
-		/*
-		 * Make sure we catch CR-only line endings.
-		 */
-		$file_data = str_replace( "\r", "\n", $contents );
-
-		/*
-		 * Merge extra headers and default headers.
-		 */
-		$all_headers = array_merge( self::$extra_headers, $all_headers );
-		$all_headers = array_unique( $all_headers );
-
-		foreach ( $all_headers as $field => $regex ) {
-			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
-				$all_headers[ $field ] = _cleanup_header_comment( $match[1] );
-			} else {
-				$all_headers[ $field ] = '';
-			}
-		}
-
-		// Reduce array to only headers with data.
-		$all_headers = array_filter(
-			$all_headers,
-			function ( $e ) {
-				return ! empty( $e );
-			}
-		);
-
-		return $all_headers;
 	}
 
 	/**
@@ -459,6 +385,7 @@ class API {
 				if ( $download_link && 'release_asset' === self::$method ) {
 					$type['base_download'] = $type['base_uri'];
 				}
+				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'gitea':
 				if ( $download_link ) {
@@ -490,8 +417,8 @@ class API {
 			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.1/";
 			$url      = add_query_arg(
 				[
-					'action'                     => "{$this->type->type}_information",
-					urlencode( 'request[slug]' ) => $this->type->slug,
+					'action'                        => "{$this->type->type}_information",
+					rawurlencode( 'request[slug]' ) => $this->type->slug,
 				],
 				$url
 			);
@@ -576,8 +503,8 @@ class API {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param $response array|bool
-	 * @param $branch   bool
+	 * @param array|bool $response
+	 * @param bool       $branch
 	 *
 	 * @return bool
 	 */
@@ -656,8 +583,8 @@ class API {
 	/**
 	 * Get local file info if no update available. Save API calls.
 	 *
-	 * @param $repo
-	 * @param $file
+	 * @param \stdClass $repo Repo data.
+	 * @param string    $file
 	 *
 	 * @return null|string
 	 */
@@ -680,7 +607,7 @@ class API {
 	/**
 	 * Set repo object file info.
 	 *
-	 * @param $response
+	 * @param array $response Repo data.
 	 */
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
@@ -706,7 +633,7 @@ class API {
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
-	 * @param $repo_meta
+	 * @param array $repo_meta
 	 *
 	 * @return integer
 	 */
@@ -807,7 +734,7 @@ class API {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @param array $args
+	 * @param array  $args
 	 * @param string $url
 	 *
 	 * @return mixed $args
@@ -820,6 +747,7 @@ class API {
 
 	/**
 	 * Set AWS redirect URL from action hook.
+	 *
 	 * @uses `requests-requests.before_redirect` Action hook.
 	 *
 	 * @param string $location

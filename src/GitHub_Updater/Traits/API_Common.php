@@ -28,7 +28,7 @@ trait API_Common {
 	 * Decode API responses that are base64 encoded.
 	 *
 	 * @param string $git (github|bitbucket|gitlab|gitea)
-	 * @param mixed $response API response.
+	 * @param mixed  $response API response.
 	 * @return mixed $response
 	 */
 	private function decode_response( $git, $response ) {
@@ -46,7 +46,7 @@ trait API_Common {
 	 * Parse API response that returns as stdClass.
 	 *
 	 * @param string $git     (github|bitbucket|gitlab|gitea)
-	 * @param mixed $response API response.
+	 * @param mixed  $response API response.
 	 * @return mixed $response
 	 */
 	private function parse_response( $git, $response ) {
@@ -64,7 +64,7 @@ trait API_Common {
 	 *
 	 * @param string $git (github|bitbucket|gitlab|gitea)
 	 * @param string $request Query to API->api().
-	 * @param mixed $response API response.
+	 * @param mixed  $response API response.
 	 * @return string $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
@@ -172,9 +172,7 @@ trait API_Common {
 	public function get_remote_api_changes( $git, $changes, $request ) {
 		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
 
-		/*
-		 * Set response from local file if no update available.
-		 */
+		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = $this->get_local_info( $this->type, $changes );
 		}
@@ -220,9 +218,7 @@ trait API_Common {
 
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
-		/*
-		 * Set $response from local file if no update available.
-		 */
+		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
 			$response = $this->get_local_info( $this->type, 'readme.txt' );
 		}

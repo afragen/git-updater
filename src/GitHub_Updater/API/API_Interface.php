@@ -154,15 +154,15 @@ interface API_Interface {
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param $type
+	 * @param string $type plugin|theme.
 	 */
 	public function add_install_settings_fields( $type);
 
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param $headers
-	 * @param $install
+	 * @param array $headers
+	 * @param array $install
 	 *
 	 * @return mixed $install
 	 */

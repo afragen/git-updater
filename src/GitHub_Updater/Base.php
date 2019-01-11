@@ -60,8 +60,8 @@ class Base {
 	 * @var array
 	 */
 	protected static $extra_repo_headers = [
-		'languages' => 'Languages',
-		'ci_job'    => 'CI Job',
+		'Languages' => 'Languages',
+		'CIJob'     => 'CI Job',
 	];
 
 	/**
@@ -121,7 +121,6 @@ class Base {
 		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
 			self::$installed_apis['zipfile_api'] = true;
 			self::$git_servers['zipfile']        = 'Zipfile';
-
 		} else {
 			self::$installed_apis['zipfile_api'] = false;
 		}
@@ -244,28 +243,28 @@ class Base {
 	/**
 	 * Add extra headers to get_plugins() or wp_get_themes().
 	 *
-	 * @param $extra_headers
+	 * @param array $extra_headers
 	 *
 	 * @return array
 	 */
 	public function add_headers( $extra_headers ) {
 		$ghu_extra_headers = [
-			'Requires WP'   => 'Requires WP',
-			'Requires PHP'  => 'Requires PHP',
-			'Release Asset' => 'Release Asset',
+			'RequiresWP'   => 'Requires WP',
+			'RequiresPHP'  => 'Requires PHP',
+			'ReleaseAsset' => 'Release Asset',
 		];
 
 		$uri_types = [
-			'plugin' => ' Plugin URI',
-			'theme'  => ' Theme URI',
+			'PluginURI' => ' Plugin URI',
+			'ThemeURI'  => ' Theme URI',
 		];
 
 		foreach ( self::$git_servers as $server ) {
-			foreach ( $uri_types as $uri_type ) {
-				$ghu_extra_headers[ $server . $uri_type ] = $server . $uri_type;
+			foreach ( $uri_types as $uri_key => $uri_value ) {
+				$ghu_extra_headers[ $server . $uri_key ] = $server . $uri_value;
 			}
-			foreach ( self::$extra_repo_headers as $header ) {
-				$ghu_extra_headers[ $server . ' ' . $header ] = $server . ' ' . $header;
+			foreach ( self::$extra_repo_headers as $header_key => $header_value ) {
+				$ghu_extra_headers[ $server . $header_key ] = $server . ' ' . $header_value;
 			}
 		}
 
@@ -291,7 +290,7 @@ class Base {
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
 	 *
-	 * @param $repo
+	 * @param \stdClass $repo
 	 *
 	 * @return bool
 	 */
@@ -337,7 +336,7 @@ class Base {
 	/**
 	 * Set default values for plugin/theme.
 	 *
-	 * @param $type
+	 * @param string $type
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( self::$options['branch_switch'] ) ) {
@@ -371,7 +370,7 @@ class Base {
 		$this->$type->watchers       = 0;
 		$this->$type->forks          = 0;
 		$this->$type->open_issues    = 0;
-		$this->$type->requires       = null;
+		$this->$type->requires       = false;
 		$this->$type->requires_php   = false;
 	}
 
@@ -404,7 +403,7 @@ class Base {
 	/**
 	 * Remove hooks after use.
 	 *
-	 * @param object $repo_api
+	 * @param \stdClass $repo_api
 	 */
 	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
@@ -440,8 +439,8 @@ class Base {
 	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
-	 * @param $cron
-	 * @param $timestamp
+	 * @param array $cron
+	 * @param int   $timestamp
 	 */
 	public function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
@@ -688,7 +687,7 @@ class Base {
 		 *
 		 * @param string    $download_link Download URL.
 		 * @param /stdClass $repo
-		 * @param string    $this->tag Branch or tag for rollback.
+		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
 		$download_link = apply_filters( 'github_updater_set_rollback_package', $download_link, $repo, $this->tag );
 
@@ -802,8 +801,8 @@ class Base {
 	/**
 	 * Create repo parts.
 	 *
-	 * @param $repo
-	 * @param $type
+	 * @param string $repo
+	 * @param string $type plugin|theme.
 	 *
 	 * @return mixed
 	 */
@@ -840,9 +839,9 @@ class Base {
 	/**
 	 * Return correct update row opening and closing tags for Shiny Updates.
 	 *
-	 * @param      $repo_name
-	 * @param      $type
-	 * @param bool      $branch_switcher
+	 * @param string $repo_name
+	 * @param string $type            plugin|theme.
+	 * @param bool   $branch_switcher
 	 *
 	 * @return array
 	 */
@@ -906,7 +905,7 @@ class Base {
 				printf(
 					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . $branch . '">%s</a></li>',
 					$data['nonced_update_url'],
-					'&rollback=' . urlencode( $branch ),
+					'&rollback=' . rawurlencode( $branch ),
 					esc_attr( $branch )
 				);
 			}
@@ -922,7 +921,7 @@ class Base {
 				printf(
 					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . $tag . '">%s</a></li>',
 					$data['nonced_update_url'],
-					'&rollback=' . urlencode( $tag ),
+					'&rollback=' . rawurlencode( $tag ),
 					esc_attr( $tag )
 				);
 			}
@@ -948,7 +947,7 @@ class Base {
 			add_query_arg(
 				[
 					'action' => $action,
-					$type    => urlencode( $repo_name ),
+					$type    => rawurlencode( $repo_name ),
 				],
 				self_admin_url( 'update.php' )
 			)
@@ -1009,16 +1008,16 @@ class Base {
 				! empty( $headers[ $repo_parts[ $part ] ] )
 			) {
 				switch ( $part ) {
-					case 'languages':
+					case 'Languages':
 						$header['languages'] = $headers[ $repo_parts[ $part ] ];
 						break;
-					case 'ci_job':
+					case 'CIJob':
 						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
 						break;
 				}
 			}
 		}
-		$header['release_asset'] = ! $header['release_asset'] ? 'true' === $headers['Release Asset'] : $header['release_asset'];
+		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['Release Asset'] ) ? 'true' === $headers['Release Asset'] : $header['release_asset'];
 
 		return $header;
 	}

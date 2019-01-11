@@ -1,5 +1,13 @@
 #### [unreleased]
 
+#### 8.6.1 / 2019-01-11
+* remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
+* directly call `wp_cron()` after refreshing cache
+* update POT via `composer.json` and wp-cli
+* moved `get_file_headers()` to `trait GHU_Trait`
+* cleanup extra header key/value pairs
+* add endpoint to Bitbucket to get more than default number of tags, branches, or release assets. Fixes [#752](https://github.com/afragen/github-updater/issues/752) thanks @idpaterson
+
 #### 8.6.0 / 2018-12-28 🎂
 * add action hook `github_updater_post_rest_process_request` for @Raruto
 * add filter hook `github_updater_set_rollback_package` for @sc0ttclark and @moderntribe

@@ -20,6 +20,9 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * Class Init
+ */
 class Init extends Base {
 	use GHU_Trait, Basic_Auth_Loader;
 
@@ -50,7 +53,7 @@ class Init extends Base {
 		$slug       = isset( $_GET['plugin'] ) ? $_GET['plugin'] : false;
 		$exploded   = explode( '-', dirname( $slug ) );
 
-		if ( in_array( 'develop', $exploded ) ) {
+		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );
 			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
 		}

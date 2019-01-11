@@ -17,21 +17,41 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-( new Bootstrap() )->run( GITHUB_UPDATER_FILE, GITHUB_UPDATER_DIR );
-
 /**
  * Class Bootstrap
  */
 class Bootstrap {
+	/**
+	 * Holds main plugin file.
+	 *
+	 * @var $file
+	 */
+	protected $file;
+
+	/**
+	 * Holds main plugin directory.
+	 *
+	 * @var $dir
+	 */
+	protected $dir;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param  string $file Main plugin file.
+	 * @return void
+	 */
+	public function __construct( $file ) {
+		$this->file = $file;
+		$this->dir  = dirname( $file );
+	}
 
 	/**
 	 * Run the bootstrap.
 	 *
-	 * @param string $file Path to main plugin file.
-	 * @param string $dir Path to main plugin directory.
 	 * @return void
 	 */
-	public function run( $file, $dir ) {
+	public function run() {
 		add_action(
 			'init',
 			function() {
@@ -39,10 +59,12 @@ class Bootstrap {
 			}
 		);
 
-		// Load Autoloader.
-		require_once $dir . '/vendor/autoload.php';
+		define( 'GITHUB_UPDATER_DIR', $this->dir );
 
-		register_activation_hook( $file, array( new Init(), 'rename_on_activation' ) );
+		// Load Autoloader.
+		require_once $this->dir . '/vendor/autoload.php';
+
+		register_activation_hook( $this->file, array( new Init(), 'rename_on_activation' ) );
 		( new Init() )->run();
 
 		/**

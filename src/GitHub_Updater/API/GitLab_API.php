@@ -269,7 +269,7 @@ class GitLab_API extends API implements API_Interface {
 		if ( ! $response ) {
 			self::$method = 'projects';
 			$id           = implode( '/', [ $this->type->owner, $this->type->slug ] );
-			$id           = urlencode( $id );
+			$id           = rawurlencode( $id );
 			$response     = $this->api( '/projects/' . $id );
 
 			if ( $this->validate_response( $response ) ) {
@@ -370,8 +370,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param \stdClass|array $response Response from API call.
+	 * @param array           $repo_type
 	 *
 	 * @return array
 	 */
@@ -571,7 +571,7 @@ class GitLab_API extends API implements API_Interface {
 			$gitlab_com = false;
 		}
 
-		$id                       = urlencode( $install['github_updater_repo'] );
+		$id                       = rawurlencode( $install['github_updater_repo'] );
 		$install['download_link'] = "{$base}/api/v4/projects/{$id}/repository/archive.zip";
 		$install['download_link'] = add_query_arg( 'sha', $install['github_updater_branch'], $install['download_link'] );
 

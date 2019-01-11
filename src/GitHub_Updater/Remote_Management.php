@@ -21,14 +21,14 @@ class Remote_Management {
 	/**
 	 * Holds the values for remote management settings.
 	 *
-	 * @var mixed
+	 * @var array $option_remote
 	 */
 	public static $options_remote;
 
 	/**
 	 * Supported remote management services.
 	 *
-	 * @var array
+	 * @var array $remote_management
 	 */
 	public static $remote_management = [
 		'ithemes_sync' => 'iThemes Sync',
@@ -40,7 +40,7 @@ class Remote_Management {
 	/**
 	 * Holds the value for the Remote Management API key.
 	 *
-	 * @var
+	 * @var string $api_key
 	 */
 	private static $api_key;
 
@@ -66,7 +66,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( mt_rand(), true ) ) );
+			update_site_option( 'github_updater_api_key', md5( uniqid( wp_rand(), true ) ) );
 		}
 	}
 
@@ -110,7 +110,7 @@ class Remote_Management {
 	 * @uses 'github_updater_update_settings' action hook
 	 * @uses 'github_updater_save_redirect' filter hook
 	 *
-	 * @param $post_data
+	 * @param array $post_data $_POST data.
 	 */
 	public function save_settings( $post_data ) {
 		if ( isset( $post_data['option_page'] ) &&
@@ -157,8 +157,8 @@ class Remote_Management {
 	 *
 	 * @uses 'github_updater_add_admin_page' action hook
 	 *
-	 * @param $tab
-	 * @param $action
+	 * @param string $tab Tab name.
+	 * @param string $action Form action.
 	 */
 	public function add_admin_page( $tab, $action ) {
 		if ( 'github_updater_remote_management' === $tab ) {
@@ -228,7 +228,15 @@ class Remote_Management {
 		);
 		?>
 		<p>
-			<?php esc_html_e( 'Please refer to README for complete list of attributes. RESTful endpoints begin at:', 'github-updater' ); ?>
+			<?php
+			printf(
+				wp_kses_post(
+					/* translators: %s: Link to wiki */
+					__( 'Please refer to the <a href="%s">wiki</a> for complete list of attributes. RESTful endpoints begin at:', 'github-updater' )
+				),
+				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints'
+			);
+			?>
 			<br>
 			<span style="font-family:monospace;"><?php echo $api_url; ?></span>
 		<p>
@@ -241,7 +249,7 @@ class Remote_Management {
 	 * Get the settings option array and print one of its values.
 	 * For remote management settings.
 	 *
-	 * @param $args
+	 * @param array $args Checkbox args.
 	 *
 	 * @return bool|void
 	 */

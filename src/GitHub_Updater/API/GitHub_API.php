@@ -202,8 +202,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Calculate and store time until rate limit reset.
 	 *
-	 * @param $response
-	 * @param $repo
+	 * @param array  $response HTTP headers.
+	 * @param string $repo Repo name.
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
@@ -299,8 +299,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param \stdClass|array $response Response from API call.
+	 * @param array           $repo_type
 	 *
 	 * @return array
 	 */
@@ -413,7 +413,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param $type
+	 * @param string $type plugin|theme.
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -455,8 +455,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param $headers
-	 * @param $install
+	 * @param array $headers
+	 * @param array $install
 	 *
 	 * @return mixed
 	 */

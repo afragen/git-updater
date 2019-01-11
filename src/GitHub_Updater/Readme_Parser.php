@@ -73,6 +73,8 @@ class Readme_Parser extends Parser {
 		$data = $this->faq_as_h4( $data );
 		$data = $this->changelog_as_h4( $data );
 
+		@unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );
+
 		return $data;
 	}
 

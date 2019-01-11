@@ -501,9 +501,9 @@ class Install {
 	/**
 	 * Remove activation links after plugin installation as no method to get $plugin_file.
 	 *
-	 * @param $install_actions
-	 * @param $api
-	 * @param $plugin_file
+	 * @param array  $install_actions
+	 * @param mixed  $api
+	 * @param string $plugin_file
 	 *
 	 * @return mixed
 	 */
@@ -516,9 +516,9 @@ class Install {
 	/**
 	 * Fix activation links after theme installation, no method to get proper theme name.
 	 *
-	 * @param $install_actions
-	 * @param $api
-	 * @param $theme_info
+	 * @param array $install_actions
+	 * @param mixed $api
+	 * @param mixed $theme_info
 	 *
 	 * @return mixed
 	 */
@@ -531,8 +531,8 @@ class Install {
 		$activate_link = add_query_arg(
 			[
 				'action'     => 'activate',
-				// 'template'   => urlencode( $template ),
-				'stylesheet' => urlencode( $stylesheet ),
+				// 'template'   => rawurlencode( $template ),
+				'stylesheet' => rawurlencode( $stylesheet ),
 			],
 			admin_url( 'themes.php' )
 		);
@@ -544,7 +544,7 @@ class Install {
 			$network_activate_link = add_query_arg(
 				[
 					'action' => 'enable',
-					'theme'  => urlencode( $stylesheet ),
+					'theme'  => rawurlencode( $stylesheet ),
 				],
 				network_admin_url( 'themes.php' )
 			);

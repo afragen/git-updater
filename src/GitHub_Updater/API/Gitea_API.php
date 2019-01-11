@@ -100,7 +100,7 @@ class Gitea_API extends API implements API_Interface {
 	 *
 	 * @param string $changes Changelog filename.
 	 *
-	 * @return bool
+	 * @return mixed
 	 */
 	public function get_remote_changes( $changes ) {
 		return $this->get_remote_api_changes( 'gitea', $changes, "/repos/:owner/:repo/raw/:branch/{$changes}" );
@@ -109,7 +109,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Read and parse remote readme.txt.
 	 *
-	 * @return bool
+	 * @return mixed
 	 */
 	public function get_remote_readme() {
 		return $this->get_remote_api_readme( 'gitea', '/repos/:owner/:repo/raw/:branch/readme.txt' );
@@ -118,7 +118,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Read the repository meta from API.
 	 *
-	 * @return bool
+	 * @return mixed
 	 */
 	public function get_repo_meta() {
 		return $this->get_remote_api_repo_meta( 'gitea', '/repos/:owner/:repo' );
@@ -127,7 +127,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Create array of branches and download links as array.
 	 *
-	 * @return bool
+	 * @return mixed
 	 */
 	public function get_remote_branches() {
 		return $this->get_remote_api_branches( 'gitea', '/repos/:owner/:repo/branches' );
@@ -269,8 +269,8 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param $response
-	 * @param $repo_type
+	 * @param \stdClass|array $response Response from API call.
+	 * @param array           $repo_type
 	 *
 	 * @return array
 	 */
