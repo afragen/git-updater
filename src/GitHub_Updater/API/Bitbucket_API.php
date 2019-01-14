@@ -169,6 +169,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $branch_switch = false ) {
+		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 		$endpoint           = '';
 
@@ -225,10 +226,11 @@ class Bitbucket_API extends API implements API_Interface {
 			case 'meta':
 			case 'changes':
 			case 'translation':
+			case 'release_asset':
+			case 'download_link':
 				break;
 			case 'tags':
 			case 'branches':
-			case 'release_asset':
 				$endpoint = add_query_arg(
 					[
 						'pagelen' => '100',

@@ -175,10 +175,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $branch_switch = false ) {
+		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
-
-		self::$method = 'download_link';
-		$endpoint     = $this->add_endpoints( $this, '' );
+		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
 			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );

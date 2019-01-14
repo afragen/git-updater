@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix for bug with Bitbucket endpoints, fixes [#757](https://github.com/afragen/github-updater/issues/757)
 
 #### 8.6.1 / 2019-01-11
 * remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
