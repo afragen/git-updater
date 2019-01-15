@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 8.6.1\n"
+"Project-Id-Version: GitHub Updater 8.6.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-01-11T17:52:58+00:00\n"
+"POT-Creation-Date: 2019-01-15T03:44:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: github-updater\n"
@@ -237,49 +237,49 @@ msgstr ""
 msgid "Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:351
+#: src/GitHub_Updater/API/Bitbucket_API.php:353
 msgid "Bitbucket Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:358
-#: src/GitHub_Updater/API/Bitbucket_API.php:446
+#: src/GitHub_Updater/API/Bitbucket_API.php:360
+#: src/GitHub_Updater/API/Bitbucket_API.php:448
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:367
-#: src/GitHub_Updater/API/Bitbucket_API.php:454
+#: src/GitHub_Updater/API/Bitbucket_API.php:369
+#: src/GitHub_Updater/API/Bitbucket_API.php:456
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:383
+#: src/GitHub_Updater/API/Bitbucket_API.php:385
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:413
+#: src/GitHub_Updater/API/Bitbucket_API.php:415
 msgid "Bitbucket"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:422
+#: src/GitHub_Updater/API/Bitbucket_API.php:424
 msgid "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:429
+#: src/GitHub_Updater/API/Bitbucket_API.php:431
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:463
+#: src/GitHub_Updater/API/Bitbucket_API.php:465
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:479
+#: src/GitHub_Updater/API/Bitbucket_API.php:481
 msgid "Check for private Bitbucket repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:494
+#: src/GitHub_Updater/API/Bitbucket_API.php:496
 msgid "Enter Bitbucket username."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:509
+#: src/GitHub_Updater/API/Bitbucket_API.php:511
 msgid "Enter Bitbucket password."
 msgstr ""
 
@@ -291,33 +291,33 @@ msgstr ""
 msgid "Enter plugin or theme slug."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:310
-#: src/GitHub_Updater/API/Gitea_API.php:328
-#: src/GitHub_Updater/API/Gitea_API.php:390
+#: src/GitHub_Updater/API/Gitea_API.php:312
+#: src/GitHub_Updater/API/Gitea_API.php:330
+#: src/GitHub_Updater/API/Gitea_API.php:392
 msgid "Gitea Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:319
+#: src/GitHub_Updater/API/Gitea_API.php:321
 msgid "Gitea Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:363
+#: src/GitHub_Updater/API/Gitea_API.php:365
 msgid "Gitea"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:372
+#: src/GitHub_Updater/API/Gitea_API.php:374
 msgid "Enter your repository specific Gitea Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:379
+#: src/GitHub_Updater/API/Gitea_API.php:381
 msgid "Enter your Gitea Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:406
+#: src/GitHub_Updater/API/Gitea_API.php:408
 msgid "Enter Gitea Access Token for private Gitea repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:437
+#: src/GitHub_Updater/API/Gitea_API.php:439
 msgid "You must set a Gitea Access Token."
 msgstr ""
 
@@ -361,59 +361,59 @@ msgstr ""
 msgid "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:339
+#: src/GitHub_Updater/API/GitHub_API.php:340
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:346
+#: src/GitHub_Updater/API/GitHub_API.php:347
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:359
+#: src/GitHub_Updater/API/GitHub_API.php:360
 msgid "GitHub Enterprise Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:376
+#: src/GitHub_Updater/API/GitHub_API.php:377
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:403
+#: src/GitHub_Updater/API/GitHub_API.php:404
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:410
+#: src/GitHub_Updater/API/GitHub_API.php:411
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:421
+#: src/GitHub_Updater/API/GitHub_API.php:422
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:435
+#: src/GitHub_Updater/API/GitHub_API.php:436
 msgid "GitHub"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:449
+#: src/GitHub_Updater/API/GitHub_API.php:450
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:345
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:344
 msgid "Bitbucket Server Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:352
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:351
 msgid "Bitbucket Server Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:361
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:360
 msgid "Bitbucket Server Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:377
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:376
 msgid "Bitbucket Server Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:407
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:406
 msgid "Bitbucket Server"
 msgstr ""
 
