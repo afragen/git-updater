@@ -151,6 +151,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $branch_switch = false ) {
+		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/archive/', true );
 		$endpoint           = '';
 
@@ -190,6 +191,7 @@ class Gitea_API extends API implements API_Interface {
 			case 'tags':
 			case 'changes':
 			case 'translation':
+			case 'download_link':
 				break;
 			case 'branches':
 				$endpoint = add_query_arg( 'per_page', '100', $endpoint );
