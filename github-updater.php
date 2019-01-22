@@ -39,7 +39,7 @@ if ( version_compare( phpversion(), '5.6', '<=' ) ) {
 	echo '<div class="error notice is-dismissible"><p>';
 	printf(
 		/* translators: 1: minimum PHP version required, 2: Upgrade PHP URL */
-		wp_kses_post( __( 'GitHub Updater cannot run on PHP versions older than %1$s. <a href="%2$s">Learn about upgrading your PHP.</a>', 'github-updater' ) ),
+		wp_kses_post( __( 'GitHub Updater cannot run on PHP versions older than %1$s. <a href="%2$s">Learn about updating your PHP.</a>', 'github-updater' ) ),
 		'5.6',
 		esc_url( __( 'https://wordpress.org/support/update-php/' ) )
 	);
