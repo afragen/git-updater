@@ -88,6 +88,7 @@ class Settings extends Base {
 	 */
 	protected function load_hooks() {
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
+		add_action('admin_bar_menu', [ $this, 'add_quick_clear_cache_link' ], 100 );
 		add_action( 'network_admin_edit_github-updater', [ $this, 'update_settings' ] );
 
 		add_filter(
@@ -174,6 +175,20 @@ class Settings extends Base {
 			'github-updater',
 			[ $this, 'create_admin_page' ]
 		);
+	}
+
+	/**
+	 * Add Admin Bar quick clear cache link.
+	 */
+	public function add_quick_clear_cache_link($admin_bar) {
+		$admin_bar->add_menu( array(
+			'id'    => 'github-updater-quick-clear-cache',
+			'title' => 'GitHub Refresh',
+			'href'  => '/wp-admin/options.php?github_updater_refresh_transients=1',
+			'meta'  => array(
+				'title' => __('GitHub Refresh'),
+			),
+		) );
 	}
 
 	/**
