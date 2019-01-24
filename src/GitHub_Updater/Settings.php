@@ -185,7 +185,7 @@ class Settings extends Base {
 	 * @access private
 	 */
 	private function options_tabs() {
-		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
+		$current_tab = isset( $_GET['tab'] ) ? esc_attr( $_GET['tab'] ) : 'github_updater_settings';
 		echo '<h2 class="nav-tab-wrapper">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
@@ -200,7 +200,7 @@ class Settings extends Base {
 	 * @access private
 	 */
 	private function options_sub_tabs() {
-		$current_tab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
+		$current_tab = isset( $_GET['subtab'] ) ? esc_attr( $_GET['subtab'] ) : 'github_updater';
 		echo '<h3 class="nav-tab-wrapper">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
@@ -214,8 +214,8 @@ class Settings extends Base {
 	 */
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
-		$tab    = isset( $_GET['tab'] ) ? $_GET['tab'] : 'github_updater_settings';
-		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : 'github_updater';
+		$tab    = isset( $_GET['tab'] ) ? esc_attr( $_GET['tab'] ) : 'github_updater_settings';
+		$subtab = isset( $_GET['subtab'] ) ? esc_attr( $_GET['subtab'] ) : 'github_updater';
 		$logo   = plugins_url( basename( GITHUB_UPDATER_DIR ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
