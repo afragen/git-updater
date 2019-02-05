@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 8.6.3 / 2019-02-04
+* use Update PHP messaging as in WP 5.1 in version check
+
 #### 8.6.2 / 2019-01-14
 * fix for bug with Bitbucket endpoints, fixes [#757](https://github.com/afragen/github-updater/issues/757)
 
