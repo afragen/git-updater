@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `Readme_Parser` for changelog and description parsing
 
 #### 8.6.3 / 2019-02-04
 * use Update PHP messaging as in WP 5.1 in version check

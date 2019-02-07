@@ -71,7 +71,8 @@ class Readme_Parser extends Parser {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
 		$data = $this->faq_as_h4( $data );
-		$data = $this->changelog_as_h4( $data );
+		$data = $this->readme_section_as_h4( 'changelog', $data );
+		$data = $this->readme_section_as_h4( 'description', $data );
 
 		@unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );
 
@@ -130,19 +131,21 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
-	 * Converts wp.org readme changelog items to h4 style.
+	 * Converts wp.org readme section items to h4 style.
 	 *
-	 * @param mixed $data Array of parsed readme data.
+	 * @param string $section Readme section.
+	 * @param array  $data Array of parsed readme data.
+	 *
 	 * @return array $data
 	 */
-	public function changelog_as_h4( $data ) {
-		if ( empty( $data['sections']['changelog'] ) || false !== strpos( $data['sections']['changelog'], '<h4>' ) ) {
+	public function readme_section_as_h4( $section, $data ) {
+		if ( empty( $data['sections'][ $section ] ) || false !== strpos( $data['sections'][ $section ], '<h4>' ) ) {
 			return $data;
 		}
 		$pattern = '~<p>=(.*)=</p>~';
 		$replace = '<h4>$1</h4>';
 
-		$data['sections']['changelog'] = preg_replace( $pattern, $replace, $data['sections']['changelog'] );
+		$data['sections'][ $section ] = preg_replace( $pattern, $replace, $data['sections'][ $section ] );
 
 		return $data;
 	}
