@@ -27,6 +27,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Readme_Parser extends Parser {
 
 	/**
+	 * Holds absolute filepath to temp readme file.
+	 *
+	 * @var string
+	 */
+	protected $readme_path;
+
+	/**
 	 * Constructor.
 	 *
 	 * Convert file contents string to temporary file.
@@ -39,8 +46,17 @@ class Readme_Parser extends Parser {
 	 */
 	public function __construct( $file ) {
 		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
-		$file_path = file_put_contents( $file_path, $file ) ? $file_path : false;
-		parent::__construct( $file_path );
+
+		/**
+		 * Filter location of temporary readme filepath.
+		 *
+		 * @since 8.7.0
+		 *
+		 * @param string $file_path Absolute filepath to temp readme file.
+		 */
+		$this->readme_path = apply_filters( 'github_updater_temp_readme_filepath', $file_path );
+		$this->readme_path = file_put_contents( $this->readme_path, $file ) ? $this->readme_path : false;
+		parent::__construct( $this->readme_path );
 	}
 
 	/**
@@ -74,7 +90,7 @@ class Readme_Parser extends Parser {
 		$data = $this->readme_section_as_h4( 'changelog', $data );
 		$data = $this->readme_section_as_h4( 'description', $data );
 
-		@unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );
+		@unlink( $this->readme_path );
 
 		return $data;
 	}
