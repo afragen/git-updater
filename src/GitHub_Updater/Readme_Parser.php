@@ -118,7 +118,7 @@ class Readme_Parser extends Parser {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
 			$contributors[ $contributor ]['avatar']       = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
-			if ( $wp_version < '5.1-alpha' ) {
+			if ( version_compare( $wp_version, '5.1-alpha', '<' ) ) {
 				$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 			}
 		}

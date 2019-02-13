@@ -1,6 +1,7 @@
 #### [unreleased]
 * update `Readme_Parser` for changelog and description parsing
 * add filter `github_updater_temp_readme_filepath` to change default location if server has permissions issues, fixes [#766](https://github.com/afragen/github-updater/issues/766)
+* fix `Readme_Parser` to use `version_compare()` when checking compatibility with `create_contributors()`
 
 #### 8.6.3 / 2019-02-04
 * use Update PHP messaging as in WP 5.1 in version check
