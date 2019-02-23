@@ -306,9 +306,7 @@ trait API_Common {
 			}
 
 			if ( $response ) {
-				foreach ( $response as $branch ) {
-					$branches[ $branch->name ] = $this->construct_download_link( $branch->name );
-				}
+				$branches             = $this->parse_branch_response( $response );
 				$this->type->branches = $branches;
 				$this->set_repo_cache( 'branches', $branches );
 

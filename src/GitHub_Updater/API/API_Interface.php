@@ -136,6 +136,17 @@ interface API_Interface {
 	public function parse_changelog_response( $response);
 
 	/**
+	 * Parse API response and return array of branch data.
+	 *
+	 * @access public
+	 *
+	 * @param \stdClass $response API response.
+	 *
+	 * @return array Array of branch data.
+	 */
+	public function parse_branch_response( $response );
+
+	/**
 	 * Add values for individual repo add_setting_field().
 	 *
 	 * @return mixed
