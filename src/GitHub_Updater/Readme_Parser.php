@@ -27,6 +27,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Readme_Parser extends Parser {
 
 	/**
+	 * Holds absolute filepath to temp readme file.
+	 *
+	 * @var string
+	 */
+	protected $readme_path;
+
+	/**
 	 * Constructor.
 	 *
 	 * Convert file contents string to temporary file.
@@ -39,8 +46,17 @@ class Readme_Parser extends Parser {
 	 */
 	public function __construct( $file ) {
 		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
-		$file_path = file_put_contents( $file_path, $file ) ? $file_path : false;
-		parent::__construct( $file_path );
+
+		/**
+		 * Filter location of temporary readme filepath.
+		 *
+		 * @since 8.7.0
+		 *
+		 * @param string $file_path Absolute filepath to temp readme file.
+		 */
+		$this->readme_path = apply_filters( 'github_updater_temp_readme_filepath', $file_path );
+		$this->readme_path = file_put_contents( $this->readme_path, $file ) ? $this->readme_path : false;
+		parent::__construct( $this->readme_path );
 	}
 
 	/**
@@ -71,9 +87,10 @@ class Readme_Parser extends Parser {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
 		$data = $this->faq_as_h4( $data );
-		$data = $this->changelog_as_h4( $data );
+		$data = $this->readme_section_as_h4( 'changelog', $data );
+		$data = $this->readme_section_as_h4( 'description', $data );
 
-		@unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );
+		@unlink( $this->readme_path );
 
 		return $data;
 	}
@@ -101,7 +118,7 @@ class Readme_Parser extends Parser {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
 			$contributors[ $contributor ]['avatar']       = 'https://wordpress.org/grav-redirect.php?user=' . $contributor;
-			if ( $wp_version < '5.1-alpha' ) {
+			if ( version_compare( $wp_version, '5.1-alpha', '<' ) ) {
 				$contributors[ $contributor ] = '//profiles.wordpress.org/' . $contributor;
 			}
 		}
@@ -130,19 +147,21 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
-	 * Converts wp.org readme changelog items to h4 style.
+	 * Converts wp.org readme section items to h4 style.
 	 *
-	 * @param mixed $data Array of parsed readme data.
+	 * @param string $section Readme section.
+	 * @param array  $data Array of parsed readme data.
+	 *
 	 * @return array $data
 	 */
-	public function changelog_as_h4( $data ) {
-		if ( empty( $data['sections']['changelog'] ) || false !== strpos( $data['sections']['changelog'], '<h4>' ) ) {
+	public function readme_section_as_h4( $section, $data ) {
+		if ( empty( $data['sections'][ $section ] ) || false !== strpos( $data['sections'][ $section ], '<h4>' ) ) {
 			return $data;
 		}
 		$pattern = '~<p>=(.*)=</p>~';
 		$replace = '<h4>$1</h4>';
 
-		$data['sections']['changelog'] = preg_replace( $pattern, $replace, $data['sections']['changelog'] );
+		$data['sections'][ $section ] = preg_replace( $pattern, $replace, $data['sections'][ $section ] );
 
 		return $data;
 	}

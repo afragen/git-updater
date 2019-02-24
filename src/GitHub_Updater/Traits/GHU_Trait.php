@@ -156,15 +156,24 @@ trait GHU_Trait {
 	public function can_update_repo( $type ) {
 		$wp_version = get_bloginfo( 'version' );
 
-		$remote_is_newer = isset( $type->remote_version )
-			? version_compare( $type->remote_version, $type->local_version, '>' )
-			: false;
 		$wp_version_ok   = ! empty( $type->requires )
 			? version_compare( $wp_version, $type->requires, '>=' )
 			: true;
 		$php_version_ok  = ! empty( $type->requires_php )
 			? version_compare( PHP_VERSION, $type->requires_php, '>=' )
 			: true;
+		$remote_is_newer = isset( $type->remote_version )
+			? version_compare( $type->remote_version, $type->local_version, '>' )
+			: false;
+
+		/**
+		 * Filter $remote_is_newer if you use another method to test for updates.
+		 *
+		 * @since 8.7.0
+		 * @param bool      $remote_is_newer
+		 * @param \stdClass $type             Plugin/Theme data.
+		 */
+		$remote_is_newer = apply_filters( 'github_updater_remote_is_newer', $remote_is_newer, $type );
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}

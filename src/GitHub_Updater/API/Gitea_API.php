@@ -269,6 +269,26 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
+	 * Parse API response and return array of branch data.
+	 *
+	 * @param \stdClass $response API response.
+	 *
+	 * @return array Array of branch data.
+	 */
+	public function parse_branch_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
+		$branches = [];
+		foreach ( $response as $branch ) {
+			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
+			$branches[ $branch->name ]['commit_hash']      = $branch->commit->id;
+			$branches[ $branch->name ]['commit_timestamp'] = $branch->commit->timestamp;
+		}
+		return $branches;
+	}
+
+	/**
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response Response from API call.
