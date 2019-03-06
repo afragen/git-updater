@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `class Bitbucket_Server_API`, thanks @allrite for the access
 
 #### 8.7.0 / 2019-02-24
 * update `Readme_Parser` for changelog and description parsing
