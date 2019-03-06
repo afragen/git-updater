@@ -40,7 +40,6 @@ trait API_Common {
 			case 'bbserver':
 				$response = isset( $response->lines ) ? $this->bbserver_recombine_response( $response ) : $response;
 				break;
-
 		}
 
 		return $response;

@@ -70,7 +70,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		return $this->get_remote_api_readme( 'bbserver', '/1.0/projects/~:owner/repos/:repo/browse/readme.txt' );
+		return $this->get_remote_api_readme( 'bbserver', '/1.0/projects/~:owner/repos/:repo/raw/readme.txt' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/projects/~:owner/repos/:repo/browse/{$changes}" );
+		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/projects/~:owner/repos/:repo/raw/{$changes}" );
 	}
 
 	/**
