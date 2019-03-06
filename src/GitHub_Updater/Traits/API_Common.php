@@ -37,6 +37,10 @@ trait API_Common {
 			case 'gitlab':
 				$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 				break;
+			case 'bbserver':
+				$response = isset( $response->lines ) ? $this->bbserver_recombine_response( $response ) : $response;
+				break;
+
 		}
 
 		return $response;
@@ -52,6 +56,7 @@ trait API_Common {
 	private function parse_response( $git, $response ) {
 		switch ( $git ) {
 			case 'bitbucket':
+			case 'bbserver':
 				$response = isset( $response->values ) ? $response->values : $response;
 				break;
 		}
