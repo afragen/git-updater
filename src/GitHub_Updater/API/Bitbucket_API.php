@@ -344,15 +344,16 @@ class Bitbucket_API extends API implements API_Interface {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode(
-				'/',
-				[
-					$repo_type['base_download'],
-					$this->type->owner,
-					$this->type->slug,
-					'get/',
-				]
-			);
+			// $download_base    = implode(
+			// '/',
+			// [
+			// $repo_type['base_download'],
+			// $this->type->owner,
+			// $this->type->owner,
+			// 'get/',
+			// ]
+			// );
+			$download_base    = "{$repo_type['base_download']}/{$this->type->owner}/{$this->type->owner}/get/";
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag . '.zip';
 		}
