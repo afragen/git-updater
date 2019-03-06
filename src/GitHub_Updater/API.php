@@ -340,7 +340,7 @@ class API {
 		];
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
+			$endpoint = str_replace( ':' . $segment, sanitize_text_field( $value ), $endpoint );
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
