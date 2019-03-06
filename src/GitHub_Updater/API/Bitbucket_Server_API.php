@@ -410,22 +410,13 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = implode(
-				'/',
-				[
-					$base,
-					'rest/archive/1.0/projects',
-					$headers['owner'],
-					'repos',
-					$headers['repo'],
-					'archive',
-				]
-			);
+			$install['download_link'] = "{$base}/rest/api/latest/projects/~{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
 					'prefix' => $headers['repo'] . '/',
 					'at'     => $install['github_updater_branch'],
+					'format' => 'zip',
 				],
 				$install['download_link']
 			);
