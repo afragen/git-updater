@@ -103,6 +103,16 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
+	 * Return the Bitbucket Sever release asset URL.
+	 *
+	 * @return string
+	 */
+	public function get_release_asset() {
+		// TODO: make this work.
+		// return $this->get_api_release_asset( 'bbserver', '/1.0/projects/:owner/:repo/downloads' );
+	}
+
+	/**
 	 * Construct $this->type->download_link using Bitbucket Server API.
 	 *
 	 * Downloads requires the official stash-archive plugin which enables
