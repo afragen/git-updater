@@ -166,7 +166,7 @@ class GitHub_API extends API implements API_Interface {
 		 *
 		 * @param string    $download_link Download URL.
 		 * @param /stdClass $this->type    Repository object.
-		 * @param string    $this->tag     Branch or tag for rollback or branch switching.
+		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
 		 */
 		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
 	}
