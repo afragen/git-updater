@@ -1,4 +1,6 @@
 #### [unreleased]
+* add new filte rhook `github_updater_post_construct_download_link` to allow for returning your own download link
+* deprecate filter hook `github_updater_set_rollback_package` as the above replaces it
 
 #### 8.7.0 / 2019-02-24
 * update `Readme_Parser` for changelog and description parsing
