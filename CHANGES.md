@@ -1,6 +1,7 @@
 #### [unreleased]
-* add new filte rhook `github_updater_post_construct_download_link` to allow for returning your own download link
+* add new filter hook `github_updater_post_construct_download_link` to allow for returning your own download link
 * deprecate filter hook `github_updater_set_rollback_package` as the above replaces it
+* add _looser_ check of `Base::get_repo_slugs()`, thanks @sc0ttkclark
 * update `class Bitbucket_Server_API`, thanks @allrite for the access
 
 #### 8.7.0 / 2019-02-24
