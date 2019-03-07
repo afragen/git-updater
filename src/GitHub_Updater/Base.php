@@ -619,10 +619,23 @@ class Base {
 		}
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
+
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->slug || $rename === $repo->slug ) {
+			// Check repo slug or directory name for match.
+			$slug_check = [
+				$repo->slug,
+				dirname( $repo->file ),
+			];
+
+			// Exact match.
+			if ( \in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
+			}
+
+			// Soft match, there may still be an exact $slug match.
+			if ( \in_array( $rename, $slug_check, true ) ) {
+				$arr['slug'] = $repo->slug;
 			}
 		}
 
