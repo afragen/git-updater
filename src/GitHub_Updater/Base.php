@@ -689,7 +689,12 @@ class Base {
 		 * @param /stdClass $repo
 		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
-		$download_link = apply_filters( 'github_updater_set_rollback_package', $download_link, $repo, $this->tag );
+		$download_link = apply_filters_deprecated(
+			'github_updater_set_rollback_package',
+			[ $download_link, $repo, $this->tag ],
+			'8.8.0',
+			'github_updater_post_construct_download_link'
+		);
 
 		$rollback = [
 			$type         => $slug,
