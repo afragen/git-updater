@@ -37,6 +37,9 @@ trait API_Common {
 			case 'gitlab':
 				$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 				break;
+			case 'bbserver':
+				$response = isset( $response->lines ) ? $this->bbserver_recombine_response( $response ) : $response;
+				break;
 		}
 
 		return $response;
@@ -52,6 +55,7 @@ trait API_Common {
 	private function parse_response( $git, $response ) {
 		switch ( $git ) {
 			case 'bitbucket':
+			case 'bbserver':
 				$response = isset( $response->values ) ? $response->values : $response;
 				break;
 		}
@@ -78,6 +82,9 @@ trait API_Common {
 			case 'bitbucket':
 				$download_base = $this->get_api_url( $request, true );
 				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : null;
+				break;
+			case 'bbserver':
+				// TODO: make work.
 				break;
 			case 'gitlab':
 				$response = $this->get_api_url( $request );

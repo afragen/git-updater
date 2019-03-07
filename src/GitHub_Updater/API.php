@@ -340,7 +340,7 @@ class API {
 		];
 
 		foreach ( $segments as $segment => $value ) {
-			$endpoint = str_replace( '/:' . $segment, '/' . sanitize_text_field( $value ), $endpoint );
+			$endpoint = str_replace( ':' . $segment, sanitize_text_field( $value ), $endpoint );
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
@@ -376,6 +376,7 @@ class API {
 				$this->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
+						$type['base_download'] = $type['base_uri'];
 						break;
 					}
 					$endpoint = $repo_api->add_endpoints( $this, $endpoint );
