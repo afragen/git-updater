@@ -26,6 +26,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
+ * Group URI: https://bitbucket.example.com/projects/<owner>/<repo>
+ * User URI: https://bitbucket.example.com/users/<owner>/<repo>
+ *
+ * @link https://docs.atlassian.com/bitbucket-server/rest/5.3.1/bitbucket-rest.html
  *
  * @author  Andy Fragen
  * @author  Bjorn Wijers
