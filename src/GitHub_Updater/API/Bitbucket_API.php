@@ -208,7 +208,19 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 		}
 
-		return $download_link_base . $endpoint;
+		$download_link = $download_link_base . $endpoint;
+
+		/**
+		 * Filter download link so developers can point to specific ZipFile
+		 * to use as a download link during a branch switch.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param string    $download_link Download URL.
+		 * @param /stdClass $this->type    Repository object.
+		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
+		 */
+		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
 	}
 
 	/**
