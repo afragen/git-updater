@@ -109,6 +109,18 @@ trait GHU_Trait {
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
+		/**
+		 * Allow filtering of cache timeout for repo information.
+		 *
+		 * @since 8.7.1
+		 *
+		 * @param string      $timeout  Timeout value used with strtotime().
+		 * @param string      $id       Data Identifier.
+		 * @param mixed       $response Data to be stored.
+		 * @param string|bool $repo     Repo name or false.
+		 */
+		$timeout = apply_filters( 'github_updater_repo_cache_timeout', $timeout, $id, $response, $repo );
+		
 		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
