@@ -114,7 +114,7 @@ trait GHU_Trait {
 		 *
 		 * @since 8.7.1
 		 *
-		 * @param string      $timeout Timeout value used with strtotime().
+		 * @param string      $timeout  Timeout value used with strtotime().
 		 * @param string      $id       Data Identifier.
 		 * @param mixed       $response Data to be stored.
 		 * @param string|bool $repo     Repo name or false.
