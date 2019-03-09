@@ -144,6 +144,7 @@ class Theme extends Base {
 				$git_theme['enterprise_api']          = $header['enterprise_api'];
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['slug']                    = $header['repo'];
+				$git_theme['file']                    = "{$header['repo']}/style.css";
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );

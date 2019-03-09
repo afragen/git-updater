@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 8.7.1\n"
+"Project-Id-Version: GitHub Updater 8.7.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-03-09T19:26:46+00:00\n"
+"POT-Creation-Date: 2019-03-09T22:01:08+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: github-updater\n"
@@ -162,48 +162,48 @@ msgid "View details"
 msgstr ""
 
 #. translators: %s: theme name
-#: src/GitHub_Updater/Theme.php:335
-#: src/GitHub_Updater/Theme.php:531
+#: src/GitHub_Updater/Theme.php:336
+#: src/GitHub_Updater/Theme.php:532
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/GitHub_Updater/Theme.php:347
+#: src/GitHub_Updater/Theme.php:348
 msgid "View version %s details."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:351
+#: src/GitHub_Updater/Theme.php:352
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/GitHub_Updater/Theme.php:356
-#: src/GitHub_Updater/Theme.php:541
+#: src/GitHub_Updater/Theme.php:357
+#: src/GitHub_Updater/Theme.php:542
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/GitHub_Updater/Theme.php:361
-#: src/GitHub_Updater/Theme.php:546
+#: src/GitHub_Updater/Theme.php:362
+#: src/GitHub_Updater/Theme.php:547
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/GitHub_Updater/Theme.php:583
+#: src/GitHub_Updater/Theme.php:584
 #: src/GitHub_Updater/Base.php:913
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:591
+#: src/GitHub_Updater/Theme.php:592
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:609
+#: src/GitHub_Updater/Theme.php:610
 #: src/GitHub_Updater/Base.php:948
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:613
+#: src/GitHub_Updater/Theme.php:614
 msgid "Install"
 msgstr ""
 
