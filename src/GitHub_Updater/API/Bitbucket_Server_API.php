@@ -26,6 +26,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
+ * Group URI: https://bitbucket.example.com/projects/<owner>/<repo>
+ * User URI: https://bitbucket.example.com/users/<owner>/<repo>
+ *
+ * @link https://docs.atlassian.com/bitbucket-server/rest/5.3.1/bitbucket-rest.html
  *
  * @author  Andy Fragen
  * @author  Bjorn Wijers
@@ -50,28 +54,36 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
+		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/:owner/repos/:repo/browse/{$file}" );
+	}
 
-		if ( ! $response ) {
-			self::$method = 'file';
-			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
-			$response     = $this->bbserver_recombine_response( $response );
-		}
+	/**
+	 * Read the repository meta from API
+	 *
+	 * @return bool
+	 */
+	public function get_repo_meta() {
+		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/:owner/repos/:repo' );
+	}
 
-		if ( $response && ! is_array( $response ) && ! is_wp_error( $response ) ) {
-			$response = $this->get_file_headers( $response, $this->type->type );
-			$this->set_repo_cache( $file, $response );
-			$this->set_repo_cache( 'repo', $this->type->slug );
-		}
+	/**
+	 * Get the remote info for tags.
+	 *
+	 * @access public
+	 *
+	 * @return bool
+	 */
+	public function get_remote_tag() {
+		return $this->get_remote_api_tag( 'bbserver', '/1.0/:owner/repos/:repo/tags' );
+	}
 
-		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		$response['dot_org'] = $this->get_dot_org_data();
-		$this->set_file_info( $response );
-
-		return true;
+	/**
+	 * Read and parse remote readme.txt.
+	 *
+	 * @return bool
+	 */
+	public function get_remote_readme() {
+		return $this->get_remote_api_readme( 'bbserver', '/1.0/:owner/repos/:repo/raw/readme.txt' );
 	}
 
 	/**
@@ -82,84 +94,26 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
-
-		/*
-		 * Set $response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = $this->get_local_info( $this->type, $changes );
-		}
-
-		if ( ! $response ) {
-			self::$method = 'changes';
-			$response     = $this->api( "/1.0/projects/:owner/repos/:repo/browse/{$changes}" );
-			$response     = $this->bbserver_recombine_response( $response );
-		}
-
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No changelog found';
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		if ( $response && ! isset( $this->response['changes'] ) ) {
-			$parser   = new \Parsedown();
-			$response = $parser->text( $response );
-			$this->set_repo_cache( 'changes', $response );
-		}
-
-		$this->type->sections['changelog'] = $response;
-
-		return true;
+		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/:owner/repos/:repo/raw/{$changes}" );
 	}
 
 	/**
-	 * Read and parse remote readme.txt.
+	 * Create array of branches and download links as array.
 	 *
 	 * @return bool
 	 */
-	public function get_remote_readme() {
-		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
-			return false;
-		}
+	public function get_remote_branches() {
+		return $this->get_remote_api_branches( 'bbserver', '/1.0/:owner/repos/:repo/branches' );
+	}
 
-		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
-
-		/*
-		 * Set $response from local file if no update available.
-		 */
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = $this->get_local_info( $this->type, 'readme.txt' );
-		}
-
-		if ( ! $response ) {
-			self::$method = 'readme';
-			$response     = $this->api( '/1.0/projects/:owner/repos/:repo/browse/readme.txt' );
-			$response     = $this->bbserver_recombine_response( $response );
-		}
-
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No readme found';
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		if ( $response && ! isset( $this->response['readme'] ) ) {
-			$parser   = new Readme_Parser( $response );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
-		}
-
-		$this->set_readme_info( $response );
-
-		return true;
+	/**
+	 * Return the Bitbucket Sever release asset URL.
+	 *
+	 * @return string
+	 */
+	public function get_release_asset() {
+		// TODO: make this work.
+		// return $this->get_api_release_asset( 'bbserver', '/1.0/:owner/:repo/downloads' );
 	}
 
 	/**
@@ -176,7 +130,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/rest/archive/1.0/projects/:owner/repos/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/latest/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
@@ -197,7 +151,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function add_endpoints( $git, $endpoint ) {
 		switch ( self::$method ) {
 			case 'meta':
-			case 'tags':
 			case 'translation':
 			case 'branches':
 				break;
@@ -214,6 +167,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 					$endpoint
 				);
 				break;
+			case 'tags':
 			case 'download_link':
 				/*
 				 * Add a prefix query argument to create a subdirectory with the same name
@@ -223,6 +177,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$defaults = [
 					'prefix' => $git->type->slug . '/',
 					'at'     => $git->type->branch,
+					'format' => 'zip',
 				];
 				$endpoint = add_query_arg( $defaults, $endpoint );
 				if ( ! empty( $git->type->tags ) ) {
@@ -237,29 +192,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
-	 * The Bitbucket Server REST API does not support downloading files directly at the moment
-	 * therefore we'll use this to construct urls to fetch the raw files ourselves.
-	 *
-	 * @param string $file filename.
-	 *
-	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
-	 **/
-	private function bbserver_fetch_raw_file( $file ) {
-		// $file         = rawurlencode( $file );
-		// $download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-		// $download_url = $this->add_endpoints( $this, $download_url );
-		// $download_url = $this->get_api_url( $download_url );
-		//
-		// $response = wp_safe_remote_get( $download_url );
-		//
-		// if ( is_wp_error( $response ) ) {
-		// return false;
-		// }
-		//
-		// return wp_remote_retrieve_body( $response );
-	}
-
-	/**
 	 * Combines separate text lines from API response into one string with \n line endings.
 	 * Code relying on raw text can now parse it.
 	 *
@@ -267,13 +199,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
-	private function bbserver_recombine_response( $response ) {
+	protected function bbserver_recombine_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
 		$remote_info_file = '';
-		$json_decoded     = is_string( $response ) ? json_decode( $response ) : '';
-		$response         = empty( $json_decoded ) ? $response : $json_decoded;
 		if ( isset( $response->lines ) ) {
 			foreach ( (array) $response->lines as $line ) {
 				$remote_info_file .= $line->text . "\n";
@@ -329,6 +259,72 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return void
 	 */
 	protected function parse_readme_response( $response ) {
+	}
+
+	/**
+	 * Parse API response and return array of branch data.
+	 *
+	 * @param \stdClass $response API response.
+	 *
+	 * @return array Array of branch data.
+	 */
+	public function parse_branch_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return $response;
+		}
+		$branches = [];
+		foreach ( $response as $branch ) {
+			$branches[ $branch->displayId ]['download']    = $this->construct_download_link( $branch->displayId );
+			$branches[ $branch->displayId ]['commit_hash'] = $branch->latestCommit;
+		}
+		return $branches;
+	}
+
+	/**
+	 * Parse API response call and return only array of tag numbers.
+	 *
+	 * @param \stdClass $response Response from API call.
+	 *
+	 * @return array|\stdClass Array of tag numbers, object is error.
+	 */
+	public function parse_tag_response( $response ) {
+		if ( ! isset( $response->values ) || $this->validate_response( $response ) ) {
+			return $response;
+		}
+
+		$arr = [];
+		array_map(
+			function ( $e ) use ( &$arr ) {
+				$arr[] = $e->displayId;
+
+				return $arr;
+			},
+			(array) $response->values
+		);
+
+		return $arr;
+	}
+
+	/**
+	 * Parse tags and create download links.
+	 *
+	 * @param \stdClass|array $response Response from API call.
+	 * @param string          $repo_type
+	 *
+	 * @return array
+	 */
+	protected function parse_tags( $response, $repo_type ) {
+		$tags     = [];
+		$rollback = [];
+
+		foreach ( (array) $response as $tag ) {
+			$download_base    = "{$repo_type['base_uri']}/latest/{$this->type->owner}/repos/{$this->type->slug}/archive";
+			$download_base    = $this->add_endpoints( $this, $download_base );
+			$tags[]           = $tag;
+			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
+		}
+
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -428,22 +424,13 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = implode(
-				'/',
-				[
-					$base,
-					'rest/archive/1.0/projects',
-					$headers['owner'],
-					'repos',
-					$headers['repo'],
-					'archive',
-				]
-			);
+			$install['download_link'] = "{$base}/rest/api/latest/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
 					'prefix' => $headers['repo'] . '/',
 					'at'     => $install['github_updater_branch'],
+					'format' => 'zip',
 				],
 				$install['download_link']
 			);

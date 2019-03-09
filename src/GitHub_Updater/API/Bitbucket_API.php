@@ -208,7 +208,19 @@ class Bitbucket_API extends API implements API_Interface {
 			}
 		}
 
-		return $download_link_base . $endpoint;
+		$download_link = $download_link_base . $endpoint;
+
+		/**
+		 * Filter download link so developers can point to specific ZipFile
+		 * to use as a download link during a branch switch.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param string    $download_link Download URL.
+		 * @param /stdClass $this->type    Repository object.
+		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
+		 */
+		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
 	}
 
 	/**
@@ -344,15 +356,16 @@ class Bitbucket_API extends API implements API_Interface {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode(
-				'/',
-				[
-					$repo_type['base_download'],
-					$this->type->owner,
-					$this->type->slug,
-					'get/',
-				]
-			);
+			// $download_base    = implode(
+			// '/',
+			// [
+			// $repo_type['base_download'],
+			// $this->type->owner,
+			// $this->type->owner,
+			// 'get/',
+			// ]
+			// );
+			$download_base    = "{$repo_type['base_download']}/{$this->type->owner}/{$this->type->owner}/get/";
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag . '.zip';
 		}

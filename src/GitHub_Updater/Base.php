@@ -619,10 +619,23 @@ class Base {
 		}
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
+
 		foreach ( (array) $upgrader_object->config as $repo ) {
-			if ( $slug === $repo->slug || $rename === $repo->slug ) {
+			// Check repo slug or directory name for match.
+			$slug_check = [
+				$repo->slug,
+				dirname( $repo->file ),
+			];
+
+			// Exact match.
+			if ( \in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
+			}
+
+			// Soft match, there may still be an exact $slug match.
+			if ( \in_array( $rename, $slug_check, true ) ) {
+				$arr['slug'] = $repo->slug;
 			}
 		}
 
@@ -689,7 +702,12 @@ class Base {
 		 * @param /stdClass $repo
 		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
-		$download_link = apply_filters( 'github_updater_set_rollback_package', $download_link, $repo, $this->tag );
+		$download_link = apply_filters_deprecated(
+			'github_updater_set_rollback_package',
+			[ $download_link, $repo, $this->tag ],
+			'8.8.0',
+			'github_updater_post_construct_download_link'
+		);
 
 		$rollback = [
 			$type         => $slug,

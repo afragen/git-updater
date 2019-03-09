@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 8.7.1 / 2019-03-09
+* add new filter hook `github_updater_post_construct_download_link` to allow for returning your own download link
+* deprecate filter hook `github_updater_set_rollback_package` as the above replaces it
+* add _looser_ check of `Base::get_repo_slugs()`, thanks @sc0ttkclark
+* update `class Bitbucket_Server_API`, thanks @allrite for the access
+* added filter hook `github_updater_repo_cache_timeout` to change default timeout per repository, thanks @sc0ttkclark
+
 #### 8.7.0 / 2019-02-24
 * update `Readme_Parser` for changelog and description parsing
 * add filter `github_updater_temp_readme_filepath` to change default location if server has permissions issues, fixes [#766](https://github.com/afragen/github-updater/issues/766)
