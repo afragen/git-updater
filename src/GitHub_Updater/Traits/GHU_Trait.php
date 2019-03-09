@@ -120,7 +120,7 @@ trait GHU_Trait {
 		 * @param string|bool $repo     Repo name or false.
 		 */
 		$timeout = apply_filters( 'github_updater_repo_cache_timeout', $timeout, $id, $response, $repo );
-		
+
 		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
