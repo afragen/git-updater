@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 8.7.2 / 2019-03-09
+* hotfix to add parity for themes and prevent PHP warning
+
 #### 8.7.1 / 2019-03-09
 * add new filter hook `github_updater_post_construct_download_link` to allow for returning your own download link
 * deprecate filter hook `github_updater_set_rollback_package` as the above replaces it
