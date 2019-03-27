@@ -483,6 +483,8 @@ class Gitea_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
+		$options['gitea_access_token'] = isset( static::$options['gitea_access_token'] ) ? static::$options['gitea_access_token'] : null;
+
 		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/archive/{$install['github_updater_branch']}.zip";
@@ -497,7 +499,7 @@ class Gitea_API extends API implements API_Interface {
 
 		$token = ! empty( $install['options']['gitea_access_token'] )
 			? $install['options']['gitea_access_token']
-			: static::$options['gitea_access_token'];
+			: $options['gitea_access_token'];
 
 		if ( ! empty( $token ) ) {
 			$install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );

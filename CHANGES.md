@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
 * updated location of `tmp-readme.txt` file to use `get_temp_dir()`, thanks @DavidAnderson684
 
 #### 8.7.2 / 2019-03-09
