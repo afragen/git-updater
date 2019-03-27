@@ -1,4 +1,5 @@
 #### [unreleased]
+* updated location of `tmp-readme.txt` file to use `get_temp_dir()`, thanks @DavidAnderson684
 
 #### 8.7.2 / 2019-03-09
 * hotfix to add parity for themes and prevent PHP warning
