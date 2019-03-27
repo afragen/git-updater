@@ -45,7 +45,7 @@ class Readme_Parser extends Parser {
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		$file_path = WP_CONTENT_DIR . '/tmp-readme.txt';
+		$file_path = get_temp_dir() . '/' . md5( $file ) . '-tmp-readme.txt';
 
 		/**
 		 * Filter location of temporary readme filepath.
