@@ -433,7 +433,7 @@ class Gitea_API extends API implements API_Interface {
 	public function gitea_access_token() {
 		?>
 		<label for="gitea_access_token">
-			<input class="gitea_setting" type="password" style="width:50%;" name="gitea_access_token" value="" autocomplete="new-password">
+			<input class="gitea_setting" type="password" style="width:50%;" id="gitea_access_token" name="gitea_access_token" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter Gitea Access Token for private Gitea repositories.', 'github-updater' ); ?>

@@ -540,7 +540,7 @@ class GitLab_API extends API implements API_Interface {
 	public function gitlab_access_token() {
 		?>
 		<label for="gitlab_access_token">
-			<input class="gitlab_setting" type="password" style="width:50%;" name="gitlab_access_token" value="" autocomplete="new-password">
+			<input class="gitlab_setting" type="password" style="width:50%;" id="gitlab_access_token" name="gitlab_access_token" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ); ?>

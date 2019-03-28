@@ -47,7 +47,7 @@ class Zipfile_API {
 	public function zipfile_slug() {
 		?>
 		<label for="zipfile_slug">
-			<input class="zipfile_setting" type="text" style="width:50%;" name="zipfile_slug" value="" placeholder="my-repo-slug">
+			<input class="zipfile_setting" type="text" style="width:50%;" id="zipfile_slug" name="zipfile_slug" value="" placeholder="my-repo-slug">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter plugin or theme slug.', 'github-updater' ); ?>

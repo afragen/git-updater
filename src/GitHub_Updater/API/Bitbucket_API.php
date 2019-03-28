@@ -508,7 +508,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function is_private_repo() {
 		?>
 		<label for="is_private">
-			<input class="bitbucket_setting" type="checkbox" name="is_private" <?php checked( '1', false ); ?> >
+			<input class="bitbucket_setting" type="checkbox" id="is_private" name="is_private" <?php checked( '1', false ); ?> >
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ); ?>
@@ -523,7 +523,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function bitbucket_username() {
 		?>
 		<label for="bitbucket_username">
-			<input class="bitbucket_setting" type="text" style="width:50%;" name="bitbucket_username" value="">
+			<input class="bitbucket_setting" type="text" style="width:50%;" id="bitbucket_username" name="bitbucket_username" value="">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket username.', 'github-updater' ); ?>
@@ -538,7 +538,7 @@ class Bitbucket_API extends API implements API_Interface {
 	public function bitbucket_password() {
 		?>
 		<label for="bitbucket_password">
-			<input class="bitbucket_setting" type="password" style="width:50%;" name="bitbucket_password" value="" autocomplete="new-password">
+			<input class="bitbucket_setting" type="password" style="width:50%;" id="bitbucket_password" name="bitbucket_password" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ); ?>

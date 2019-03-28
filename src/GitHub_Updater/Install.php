@@ -455,7 +455,7 @@ class Install {
 	public function get_repo() {
 		?>
 		<label for="github_updater_repo">
-			<input type="text" style="width:50%;" name="github_updater_repo" value="" autofocus>
+			<input type="text" style="width:50%;" id="github_updater_repo" name="github_updater_repo" value="" autofocus>
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'URI is case sensitive.', 'github-updater' ); ?>
@@ -470,7 +470,7 @@ class Install {
 	public function branch() {
 		?>
 		<label for="github_updater_branch">
-			<input type="text" style="width:50%;" name="github_updater_branch" value="" placeholder="master">
+			<input type="text" style="width:50%;" id="github_updater_branch" name="github_updater_branch" value="" placeholder="master">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter branch name or leave empty for `master`', 'github-updater' ); ?>
@@ -485,7 +485,7 @@ class Install {
 	public function install_api() {
 		?>
 		<label for="github_updater_api">
-			<select name="github_updater_api">
+			<select id="github_updater_api" name="github_updater_api">
 				<?php foreach ( self::$git_servers as $key => $value ) : ?>
 					<?php if ( self::$installed_apis[ $key . '_api' ] ) : ?>
 						<option value="<?php esc_attr_e( $key ); ?>" <?php selected( $key ); ?> >
