@@ -204,11 +204,15 @@ class Plugin extends Base {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
+		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
+
+		if ( $schedule_event ) {
+			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
 			! apply_filters( 'github_updater_disable_wpcron', false )
-		) {
-			wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
+			) {
+				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
+			}
 		}
 
 		// Update plugin transient with rollback (branch switching) data.
