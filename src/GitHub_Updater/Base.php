@@ -408,7 +408,6 @@ class Base {
 	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
 		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-		remove_filter( 'http_request_args', [ 'Fragen\\GitHub_Updater\\API', 'http_request_args' ] );
 		remove_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ] );
 
 		if ( $repo_api instanceof Bitbucket_API ) {
