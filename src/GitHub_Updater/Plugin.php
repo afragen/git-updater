@@ -215,9 +215,6 @@ class Plugin extends Base {
 			}
 		}
 
-		// Update plugin transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', [ $this, 'set_rollback' ] );
-
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
@@ -427,8 +424,7 @@ class Plugin extends Base {
 			}
 
 			// Set transient on rollback.
-			if ( $this->tag &&
-				( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin'] )
+			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
 				$transient->response[ $plugin->file ] = $this->set_rollback_transient( 'plugin', $plugin );
 			}

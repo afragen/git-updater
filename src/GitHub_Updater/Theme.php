@@ -219,9 +219,6 @@ class Theme extends Base {
 			}
 		}
 
-		// Update theme transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', [ $this, 'set_rollback' ] );
-
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
@@ -665,8 +662,7 @@ class Theme extends Base {
 			}
 
 			// Set transient for rollback.
-			if ( $this->tag &&
-				( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme'] )
+			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
 				$transient->response[ $theme->slug ] = $this->set_rollback_transient( 'theme', $theme );
 			}

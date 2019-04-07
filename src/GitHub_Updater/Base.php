@@ -639,41 +639,6 @@ class Base {
 	}
 
 	/**
-	 * Test if rollback and then run `set_rollback_transient`.
-	 *
-	 * @uses filter hook 'wp_get_update_data'
-	 *
-	 * @param mixed $update_data
-	 *
-	 * @return mixed $update_data
-	 */
-	public function set_rollback( $update_data ) {
-		if ( empty( $_GET['rollback'] ) && ! isset( $_GET['action'] ) ) {
-			return $update_data;
-		}
-
-		if ( isset( $_GET['plugin'] ) && 'upgrade-plugin' === $_GET['action'] ) {
-			$slug = dirname( $_GET['plugin'] );
-			$type = 'plugin';
-
-			$repo = $this->get_repo_slugs( $slug );
-			$slug = ! empty( $repo ) ? $repo['slug'] : $slug;
-		}
-
-		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
-			$slug = $_GET['theme'];
-			$type = 'theme';
-		}
-
-		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
-			$repo = $this->config[ $slug ];
-			$this->set_rollback_transient( $type, $repo, true );
-		}
-
-		return $update_data;
-	}
-
-	/**
 	 * Update transient for rollback or branch switch.
 	 *
 	 * @param string    $type          plugin|theme.
@@ -718,13 +683,6 @@ class Base {
 		if ( 'plugin' === $type ) {
 			$rollback['slug'] = $repo->slug;
 			$rollback         = (object) $rollback;
-		}
-
-		if ( $set_transient ) {
-			$transient                  = 'update_' . $type . 's';
-			$current                    = get_site_transient( $transient );
-			$current->response[ $slug ] = $rollback;
-			set_site_transient( $transient, $current );
 		}
 
 		return $rollback;
