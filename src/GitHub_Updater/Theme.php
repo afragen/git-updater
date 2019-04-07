@@ -656,7 +656,14 @@ class Theme extends Base {
 
 				$transient->response[ $theme->slug ] = $response;
 			} else {
-				if ( isset( $transient->response[ $theme->slug ] ) ) {
+				/**
+				 * Filter to return array of overrides to dot org.
+				 *
+				 * @since 8.5.0
+				 * @return array
+				 */
+				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+				if ( isset( $transient->response[ $theme->slug ] ) && in_array( $theme->slug, $overrides, true ) ) {
 					unset( $transient->response[ $theme->slug ] );
 				}
 			}

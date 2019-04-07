@@ -418,7 +418,14 @@ class Plugin extends Base {
 
 				$transient->response[ $plugin->file ] = (object) $response;
 			} else {
-				if ( isset( $transient->response[ $plugin->file ] ) ) {
+				/**
+				 * Filter to return array of overrides to dot org.
+				 *
+				 * @since 8.5.0
+				 * @return array
+				 */
+				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+				if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
 					unset( $transient->response[ $plugin->file ] );
 				}
 			}
