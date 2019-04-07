@@ -152,9 +152,6 @@ class Base {
 			}
 		);
 
-		// Ensure transient updated on plugins.php and themes.php pages.
-		add_action( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
-
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
@@ -731,57 +728,6 @@ class Base {
 		}
 
 		return $rollback;
-	}
-
-	/**
-	 * Ensure update transient is update to date on admin pages.
-	 */
-	public function admin_pages_update_transient() {
-		global $pagenow;
-
-		$admin_pages   = [ 'plugins.php', 'themes.php', 'update-core.php' ];
-		$is_admin_page = in_array( $pagenow, $admin_pages, true ) ? true : false;
-		$transient     = 'update_' . rtrim( $pagenow, '.php' );
-		$transient     = 'update_update-core' === $transient ? 'update_core' : $transient;
-
-		if ( $is_admin_page ) {
-			$this->make_update_transient_current( $transient );
-		}
-
-		remove_filter( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
-	}
-
-	/**
-	 * Checks user capabilities then updates the update transient to ensure
-	 * our repositories display update notices correctly.
-	 *
-	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' ).
-	 */
-	public function make_update_transient_current( $transient ) {
-		if ( ! in_array( $transient, [ 'update_plugins', 'update_themes', 'update_core' ], true ) ) {
-			return;
-		}
-
-		if ( current_user_can( $transient ) ) {
-			$current = get_site_transient( $transient );
-			switch ( $transient ) {
-				case 'update_plugins':
-					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
-					break;
-				case 'update_themes':
-					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
-					break;
-				case 'update_core':
-					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
-					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
-					break;
-			}
-			set_site_transient( $transient, $current );
-		}
 	}
 
 	/**
