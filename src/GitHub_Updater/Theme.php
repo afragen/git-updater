@@ -235,7 +235,7 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
 		}
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
-		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
 	/**

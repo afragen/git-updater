@@ -229,7 +229,7 @@ class Plugin extends Base {
 	public function load_pre_filters() {
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
-		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
 	/**
