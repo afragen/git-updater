@@ -235,7 +235,7 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
 		}
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
-		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient_update_themes' ] );
+		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ] );
 	}
 
 	/**
@@ -624,14 +624,14 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update.
+	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
 	 * @param array $transient
 	 *
 	 * @return array|\stdClass
 	 */
-	public function pre_set_site_transient_update_themes( $transient ) {
+	public function update_site_transient( $transient ) {
 		foreach ( (array) $this->config as $theme ) {
 			if ( $this->can_update_repo( $theme ) ) {
 				$response = [

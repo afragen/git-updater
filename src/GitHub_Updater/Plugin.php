@@ -229,7 +229,7 @@ class Plugin extends Base {
 	public function load_pre_filters() {
 		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
-		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'pre_set_site_transient_update_plugins' ] );
+		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ] );
 	}
 
 	/**
@@ -383,13 +383,13 @@ class Plugin extends Base {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_plugins to update from GitHub.
+	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
 	 * @param \stdClass $transient
 	 *
 	 * @return mixed
 	 */
-	public function pre_set_site_transient_update_plugins( $transient ) {
+	public function update_site_transient( $transient ) {
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $this->can_update_repo( $plugin ) ) {
 				$response = [

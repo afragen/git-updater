@@ -767,17 +767,17 @@ class Base {
 			switch ( $transient ) {
 				case 'update_plugins':
 					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
 					break;
 				case 'update_themes':
 					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
 					break;
 				case 'update_core':
 					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
+					$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
 					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
+					$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
 					break;
 			}
 			set_site_transient( $transient, $current );
