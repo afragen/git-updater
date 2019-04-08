@@ -323,11 +323,6 @@ class Theme extends Base {
 		);
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme' );
 
-		// Update transient if necessary.
-		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
-			$this->pre_set_site_transient_update_themes( $current );
-		}
-
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$response = $current->response[ $theme_key ];
 			echo $enclosure['open'];
