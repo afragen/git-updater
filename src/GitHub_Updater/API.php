@@ -85,33 +85,6 @@ class API {
 	}
 
 	/**
-	 * Shiny updates results in the update transient being reset with only the wp.org data.
-	 * This catches the response and reloads the transients.
-	 *
-	 * @uses \Fragen\GitHub_Updater\Base::make_update_transient_current()
-	 *
-	 * @param mixed  $response HTTP server response.
-	 * @param array  $args     HTTP response arguments.
-	 * @param string $url      URL of HTTP response.
-	 *
-	 * @return mixed $response Just a pass through, no manipulation.
-	 */
-	public static function wp_update_response( $response, $args, $url ) {
-		$parsed_url = parse_url( $url );
-
-		if ( 'api.wordpress.org' === $parsed_url['host'] ) {
-			if ( isset( $args['body']['plugins'] ) ) {
-				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_plugins' );
-			}
-			if ( isset( $args['body']['themes'] ) ) {
-				Singleton::get_instance( 'Base', new self() )->make_update_transient_current( 'update_themes' );
-			}
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Adds custom user agent for GitHub Updater.
 	 *
 	 * @access public
