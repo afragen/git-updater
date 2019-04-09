@@ -200,7 +200,7 @@ class Rest_Update extends Base {
 			$current_branch = $this->get_local_branch();
 			$override       = isset( $_REQUEST['override'] );
 			if ( $tag !== $current_branch && ! $override ) {
-				throw new \UnexpectedValueException( 'Request tag and webhook are not matching. Consider using `override` query arg.' );
+				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
