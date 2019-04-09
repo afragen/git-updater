@@ -1,5 +1,13 @@
 #### [unreleased]
 
+#### 8.7.3 / 2019-04-08
+* fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
+* updated location of `tmp-readme.txt` file to use `get_temp_dir()`, thanks @DavidAnderson684
+* a11y updates for `label for=...`
+* fixed to only set cron event for main site only when `DISABLE_WP_CRON` is set, fixes [#782](https://github.com/afragen/github-updater/issues/782)
+* a11y updates for settings tabs
+* remove filter for `http_request_args` after use, fixes [#783](https://github.com/afragen/github-updater/issues/783)
+
 #### 8.7.2 / 2019-03-09
 * hotfix to add parity for themes and prevent PHP warning
 

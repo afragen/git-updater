@@ -230,6 +230,7 @@ class API {
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200, 404 ];
+		remove_filter( 'http_request_args', [ $this, 'http_request_args' ] );
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );

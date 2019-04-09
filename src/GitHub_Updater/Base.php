@@ -408,7 +408,6 @@ class Base {
 	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
 		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-		remove_filter( 'http_request_args', [ 'Fragen\\GitHub_Updater\\API', 'http_request_args' ] );
 		remove_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ] );
 
 		if ( $repo_api instanceof Bitbucket_API ) {
@@ -865,7 +864,7 @@ class Base {
 	 */
 	protected function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
-		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
 		$repo_base     = $repo_name;
 		$shiny_classes = ' notice inline notice-warning notice-alt';
 

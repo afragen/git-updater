@@ -540,7 +540,7 @@ class GitLab_API extends API implements API_Interface {
 	public function gitlab_access_token() {
 		?>
 		<label for="gitlab_access_token">
-			<input class="gitlab_setting" type="password" style="width:50%;" name="gitlab_access_token" value="" autocomplete="new-password">
+			<input class="gitlab_setting" type="password" style="width:50%;" id="gitlab_access_token" name="gitlab_access_token" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
 				<?php esc_html_e( 'Enter GitLab Access Token for private GitLab repositories.', 'github-updater' ); ?>
@@ -592,7 +592,9 @@ class GitLab_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$gitlab_com = true;
+		$gitlab_com                         = true;
+		$options['gitlab_access_token']     = isset( static::$options['gitlab_access_token'] ) ? static::$options['gitlab_access_token'] : null;
+		$options['gitlab_enterprise_token'] = isset( static::$options['gitlab_enterprise_token'] ) ? static::$options['gitlab_enterprise_token'] : null;
 
 		if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://gitlab.com';
@@ -620,11 +622,11 @@ class GitLab_API extends API implements API_Interface {
 		if ( $gitlab_com ) {
 			$token = ! empty( $install['options']['gitlab_access_token'] )
 				? $install['options']['gitlab_access_token']
-				: static::$options['gitlab_access_token'];
+				: $options['gitlab_access_token'];
 		} else {
 			$token = ! empty( $install['options']['gitlab_enterprise_token'] )
 				? $install['options']['gitlab_enterprise_token']
-				: static::$options['gitlab_enterprise_token'];
+				: $options['gitlab_enterprise_token'];
 		}
 
 		if ( ! empty( $token ) ) {
