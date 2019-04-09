@@ -152,9 +152,6 @@ class Base {
 			}
 		);
 
-		// Ensure transient updated on plugins.php and themes.php pages.
-		add_action( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
-
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
@@ -408,7 +405,6 @@ class Base {
 	public function remove_hooks( $repo_api ) {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
 		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-		remove_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ] );
 
 		if ( $repo_api instanceof Bitbucket_API ) {
 			$this->remove_authentication_hooks();
@@ -642,41 +638,6 @@ class Base {
 	}
 
 	/**
-	 * Test if rollback and then run `set_rollback_transient`.
-	 *
-	 * @uses filter hook 'wp_get_update_data'
-	 *
-	 * @param mixed $update_data
-	 *
-	 * @return mixed $update_data
-	 */
-	public function set_rollback( $update_data ) {
-		if ( empty( $_GET['rollback'] ) && ! isset( $_GET['action'] ) ) {
-			return $update_data;
-		}
-
-		if ( isset( $_GET['plugin'] ) && 'upgrade-plugin' === $_GET['action'] ) {
-			$slug = dirname( $_GET['plugin'] );
-			$type = 'plugin';
-
-			$repo = $this->get_repo_slugs( $slug );
-			$slug = ! empty( $repo ) ? $repo['slug'] : $slug;
-		}
-
-		if ( isset( $_GET['theme'] ) && 'upgrade-theme' === $_GET['action'] ) {
-			$slug = $_GET['theme'];
-			$type = 'theme';
-		}
-
-		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
-			$repo = $this->config[ $slug ];
-			$this->set_rollback_transient( $type, $repo, true );
-		}
-
-		return $update_data;
-	}
-
-	/**
 	 * Update transient for rollback or branch switch.
 	 *
 	 * @param string    $type          plugin|theme.
@@ -723,65 +684,7 @@ class Base {
 			$rollback         = (object) $rollback;
 		}
 
-		if ( $set_transient ) {
-			$transient                  = 'update_' . $type . 's';
-			$current                    = get_site_transient( $transient );
-			$current->response[ $slug ] = $rollback;
-			set_site_transient( $transient, $current );
-		}
-
 		return $rollback;
-	}
-
-	/**
-	 * Ensure update transient is update to date on admin pages.
-	 */
-	public function admin_pages_update_transient() {
-		global $pagenow;
-
-		$admin_pages   = [ 'plugins.php', 'themes.php', 'update-core.php' ];
-		$is_admin_page = in_array( $pagenow, $admin_pages, true ) ? true : false;
-		$transient     = 'update_' . rtrim( $pagenow, '.php' );
-		$transient     = 'update_update-core' === $transient ? 'update_core' : $transient;
-
-		if ( $is_admin_page ) {
-			$this->make_update_transient_current( $transient );
-		}
-
-		remove_filter( 'admin_init', [ $this, 'admin_pages_update_transient' ] );
-	}
-
-	/**
-	 * Checks user capabilities then updates the update transient to ensure
-	 * our repositories display update notices correctly.
-	 *
-	 * @param string $transient ( 'update_plugins' | 'update_themes' | 'update_core' ).
-	 */
-	public function make_update_transient_current( $transient ) {
-		if ( ! in_array( $transient, [ 'update_plugins', 'update_themes', 'update_core' ], true ) ) {
-			return;
-		}
-
-		if ( current_user_can( $transient ) ) {
-			$current = get_site_transient( $transient );
-			switch ( $transient ) {
-				case 'update_plugins':
-					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
-					break;
-				case 'update_themes':
-					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
-					break;
-				case 'update_core':
-					$this->get_meta_plugins();
-					$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
-					$this->get_meta_themes();
-					$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
-					break;
-			}
-			set_site_transient( $transient, $current );
-		}
 	}
 
 	/**

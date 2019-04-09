@@ -47,7 +47,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_plugins() {
 		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
 		$current = get_site_transient( 'update_plugins' );
-		$current = Singleton::get_instance( 'Plugin', $this )->pre_set_site_transient_update_plugins( $current );
+		$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
 		set_site_transient( 'update_plugins', $current );
 	}
 
@@ -60,7 +60,7 @@ class CLI_Integration extends WP_CLI_Command {
 	public function init_themes() {
 		Singleton::get_instance( 'Base', $this )->get_meta_themes();
 		$current = get_site_transient( 'update_themes' );
-		$current = Singleton::get_instance( 'Theme', $this )->pre_set_site_transient_update_themes( $current );
+		$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
 		set_site_transient( 'update_themes', $current );
 	}
 

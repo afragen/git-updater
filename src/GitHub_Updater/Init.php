@@ -101,9 +101,6 @@ class Init extends Base {
 		if ( ! self::is_doing_ajax() ) {
 			add_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ], 10, 3 );
 		}
-
-		// The following hook needed to ensure transient is reset correctly after shiny updates.
-		add_filter( 'http_response', [ 'Fragen\\GitHub_Updater\\API', 'wp_update_response' ], 10, 3 );
 	}
 
 	/**
