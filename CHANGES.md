@@ -1,4 +1,5 @@
 #### [unreleased]
+* switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`
 
 #### 8.7.3 / 2019-04-08
 * fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
