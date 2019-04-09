@@ -106,4 +106,23 @@ add_action( 'admin_notices', 'sample_admin_notice__success2' );
 
 Please note that if you cleanup after your plugin deletion please try to make the removal of stored options as specific as possible. Otherwise you may end up deleting the stored options from other projects.
 
+A filter hook is available to return the proper URL to the Javascript file. An example usage is as follows, especially if this is being used in a theme.
+
+```php
+add_filter( 'pand_theme_loader', '__return_true' );
+```
+
+The `pand_theme_loader` runs the following hook if `true`. You can directly change the URL to the Javascript file by using another hook in the following manner by changing the return value.
+
+```php
+add_filter(
+	'pand_dismiss_notice_js_url',
+	function( $js_url, $composer_path ) {
+		return get_stylesheet_directory_uri() . $composer_path;
+	},
+	10,
+	2
+);
+```
+
 Cool beans. Isn't it?
