@@ -864,7 +864,7 @@ class Base {
 	 */
 	protected function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
-		$wp_list_table = _get_list_table( 'WP_MS_Themes_List_Table' );
+		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
 		$repo_base     = $repo_name;
 		$shiny_classes = ' notice inline notice-warning notice-alt';
 
