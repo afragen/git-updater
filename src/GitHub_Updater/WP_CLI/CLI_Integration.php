@@ -34,34 +34,8 @@ class CLI_Integration extends WP_CLI_Command {
 	 * Off to the races.
 	 */
 	public function run() {
-		$this->init_plugins();
-		$this->init_themes();
-	}
-
-	/**
-	 * Update plugin update transient for GitHub Updater repositories.
-	 *
-	 * After running your are able to use any of the standard
-	 * `wp plugin` commands with GitHub Updater repositories.
-	 */
-	public function init_plugins() {
-		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
-		$current = get_site_transient( 'update_plugins' );
-		$current = Singleton::get_instance( 'Plugin', $this )->update_site_transient( $current );
-		set_site_transient( 'update_plugins', $current );
-	}
-
-	/**
-	 * Update theme update transient for GitHub Updater repositories.
-	 *
-	 * After running your are able to use any of the standard
-	 * `wp theme` commands with GitHub Updater repositories.
-	 */
-	public function init_themes() {
-		Singleton::get_instance( 'Base', $this )->get_meta_themes();
-		$current = get_site_transient( 'update_themes' );
-		$current = Singleton::get_instance( 'Theme', $this )->update_site_transient( $current );
-		set_site_transient( 'update_themes', $current );
+		add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
+		add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
 	}
 
 	/**
