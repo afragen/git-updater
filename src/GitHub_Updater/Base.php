@@ -164,11 +164,6 @@ class Base {
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
 
-		$remote_mgmt = new Remote_Management();
-		if ( ! empty( $remote_mgmt::$options_remote ) ) {
-			$remote_mgmt->set_update_transients_for_remote_mgmt();
-		}
-
 		return true;
 	}
 

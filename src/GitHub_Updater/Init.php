@@ -85,6 +85,7 @@ class Init extends Base {
 		add_action( 'init', [ $this, 'load' ] );
 		add_action( 'init', [ $this, 'background_update' ] );
 		add_action( 'init', [ $this, 'set_options_filter' ] );
+		add_action( 'init', [ new Remote_Management(), 'set_update_transients_for_remote_mgmt' ] );
 		add_action( 'wp_ajax_github-updater-update', [ $this, 'ajax_update' ] );
 		add_action( 'wp_ajax_nopriv_github-updater-update', [ $this, 'ajax_update' ] );
 

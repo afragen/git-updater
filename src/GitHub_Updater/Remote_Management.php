@@ -92,8 +92,17 @@ class Remote_Management {
 	 * @return void
 	 */
 	public function set_update_transients_for_remote_mgmt() {
-		add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
-		add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
+		if ( empty( self::$options_remote ) ) {
+			return;
+		}
+		$plugin = Singleton::get_instance( 'Plugin', $this );
+		$theme  = Singleton::get_instance( 'Theme', $this );
+
+		$plugin->get_meta_plugins();
+		$theme->get_meta_themes();
+
+		add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
+		add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
 
 		$current_plugins = get_site_transient( 'update_plugins' );
 		$current_themes  = get_site_transient( 'update_themes' );
