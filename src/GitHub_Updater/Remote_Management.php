@@ -84,9 +84,6 @@ class Remote_Management {
 		);
 		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
 		$this->add_settings_tabs();
-		if ( ! empty( self::$options_remote ) ) {
-			$this->set_transients();
-		}
 	}
 
 	/**
@@ -94,10 +91,7 @@ class Remote_Management {
 	 *
 	 * @return void
 	 */
-	private function set_transients() {
-		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
-		Singleton::get_instance( 'Base', $this )->get_meta_themes();
-
+	public function set_update_transients_for_remote_mgmt() {
 		add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
 		add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
 
