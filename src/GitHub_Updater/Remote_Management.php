@@ -11,6 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\Singleton;
 
 /**
  * Class Remote_Management
@@ -83,6 +84,27 @@ class Remote_Management {
 		);
 		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
 		$this->add_settings_tabs();
+		if ( ! empty( self::$options_remote ) ) {
+			$this->set_transients();
+		}
+	}
+
+	/**
+	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
+	 *
+	 * @return void
+	 */
+	private function set_transients() {
+		Singleton::get_instance( 'Base', $this )->get_meta_plugins();
+		Singleton::get_instance( 'Base', $this )->get_meta_themes();
+
+		add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
+		add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
+
+		$current_plugins = get_site_transient( 'update_plugins' );
+		$current_themes  = get_site_transient( 'update_themes' );
+		set_site_transient( 'update_plugins', $current_plugins );
+		set_site_transient( 'update_themes', $current_themes );
 	}
 
 	/**
