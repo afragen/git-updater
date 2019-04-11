@@ -51,7 +51,6 @@ class Remote_Management {
 	public function __construct() {
 		$this->load_options();
 		$this->ensure_api_key_is_set();
-		$this->load_hooks();
 	}
 
 	/**
@@ -74,7 +73,7 @@ class Remote_Management {
 	/**
 	 * Load needed action/filter hooks.
 	 */
-	private function load_hooks() {
+	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'remote_management_page_init' ] );
 		add_action(
 			'github_updater_update_settings',
