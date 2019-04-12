@@ -86,31 +86,6 @@ class Remote_Management {
 	}
 
 	/**
-	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
-	 *
-	 * @return void
-	 */
-	public function set_update_transients() {
-		if ( empty( self::$options_remote ) ) {
-			return;
-		}
-		$plugin = Singleton::get_instance( 'Plugin', $this );
-		$theme  = Singleton::get_instance( 'Theme', $this );
-
-		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
-		add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
-		add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
-
-		$plugin->get_meta_plugins();
-		$theme->get_meta_themes();
-
-		$current_plugins = get_site_transient( 'update_plugins' );
-		$current_themes  = get_site_transient( 'update_themes' );
-		set_site_transient( 'update_plugins', $current_plugins );
-		set_site_transient( 'update_themes', $current_themes );
-	}
-
-	/**
 	 * Return list of pages where GitHub Updater loads/runs.
 	 *
 	 * @param array $admin_pages Default list of pages where GitHub Updater loads.
@@ -306,5 +281,30 @@ class Remote_Management {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
+	 *
+	 * @return void
+	 */
+	public function set_update_transients() {
+		if ( empty( self::$options_remote ) ) {
+			return;
+		}
+		$plugin = Singleton::get_instance( 'Plugin', $this );
+		$theme  = Singleton::get_instance( 'Theme', $this );
+
+		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+		add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
+		add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
+
+		$plugin->get_meta_plugins();
+		$theme->get_meta_themes();
+
+		$current_plugins = get_site_transient( 'update_plugins' );
+		$current_themes  = get_site_transient( 'update_themes' );
+		set_site_transient( 'update_plugins', $current_plugins );
+		set_site_transient( 'update_themes', $current_themes );
 	}
 }
