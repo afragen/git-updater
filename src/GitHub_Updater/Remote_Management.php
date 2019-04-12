@@ -97,11 +97,12 @@ class Remote_Management {
 		$plugin = Singleton::get_instance( 'Plugin', $this );
 		$theme  = Singleton::get_instance( 'Theme', $this );
 
-		$plugin->get_meta_plugins();
-		$theme->get_meta_themes();
-
+		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
 		add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
 		add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
+
+		$plugin->get_meta_plugins();
+		$theme->get_meta_themes();
 
 		$current_plugins = get_site_transient( 'update_plugins' );
 		$current_themes  = get_site_transient( 'update_themes' );
