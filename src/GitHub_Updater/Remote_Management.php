@@ -90,7 +90,7 @@ class Remote_Management {
 	 *
 	 * @return void
 	 */
-	public function set_update_transients_for_remote_mgmt() {
+	public function set_update_transients() {
 		if ( empty( self::$options_remote ) ) {
 			return;
 		}

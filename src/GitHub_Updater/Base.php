@@ -193,7 +193,9 @@ class Base {
 	}
 
 	/**
+	 * Run background processes.
 	 * Piggyback on built-in update function to get metadata.
+	 * Set update transients for remote management.
 	 */
 	public function background_update() {
 		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
@@ -202,6 +204,7 @@ class Base {
 		add_action( 'ghu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ $this, 'get_meta_remote_management' ] );
 		add_action( 'update_option_auto_updater.lock', [ $this, 'get_meta_remote_management' ] );
+		( new Remote_Management() )->set_update_transients();
 	}
 
 	/**
