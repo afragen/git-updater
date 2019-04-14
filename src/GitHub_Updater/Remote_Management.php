@@ -306,5 +306,7 @@ class Remote_Management {
 		$current_themes  = get_site_transient( 'update_themes' );
 		set_site_transient( 'update_plugins', $current_plugins );
 		set_site_transient( 'update_themes', $current_themes );
+
+		remove_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
 	}
 }
