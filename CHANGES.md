@@ -2,6 +2,7 @@
 * switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`
 * update `Remote_Management` to work with filter change
 * update `CLI_Integration` to work with filter change
+* use `GITHUB_UPDATER_DIR` constant for all enqueuing
 
 #### 8.7.3 / 2019-04-08
 * fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
