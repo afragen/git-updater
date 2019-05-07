@@ -92,7 +92,7 @@ class Remote_Management {
 	 *
 	 * @return array $admin_pages
 	 */
-	public function extra_admin_pages( $admin_pages ) {
+	public function extra_admin_pages( $admin_pages = [] ) {
 		$extra_admin_pages = [];
 		foreach ( array_keys( self::$remote_management ) as $key ) {
 			if ( ! empty( self::$options_remote[ $key ] ) ) {
@@ -286,27 +286,34 @@ class Remote_Management {
 	/**
 	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
 	 *
+	 * Only call if any remote management options are present and only if on a page specified
+	 * to run remote management.
+	 *
 	 * @return void
 	 */
 	public function set_update_transients() {
 		if ( empty( self::$options_remote ) ) {
 			return;
 		}
-		$plugin = Singleton::get_instance( 'Plugin', $this );
-		$theme  = Singleton::get_instance( 'Theme', $this );
 
-		add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
-		add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
-		add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
+		$remote_management_pages = $this->extra_admin_pages();
+		if ( $this->is_current_page( $remote_management_pages ) ) {
+			$plugin = Singleton::get_instance( 'Plugin', $this );
+			$theme  = Singleton::get_instance( 'Theme', $this );
 
-		$plugin->get_meta_plugins();
-		$theme->get_meta_themes();
+			add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+			add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
+			add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
 
-		$current_plugins = get_site_transient( 'update_plugins' );
-		$current_themes  = get_site_transient( 'update_themes' );
-		set_site_transient( 'update_plugins', $current_plugins );
-		set_site_transient( 'update_themes', $current_themes );
+			$plugin->get_meta_plugins();
+			$theme->get_meta_themes();
 
-		remove_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+			$current_plugins = get_site_transient( 'update_plugins' );
+			$current_themes  = get_site_transient( 'update_themes' );
+			set_site_transient( 'update_plugins', $current_plugins );
+			set_site_transient( 'update_themes', $current_themes );
+
+			remove_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+		}
 	}
 }
