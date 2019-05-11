@@ -298,15 +298,11 @@ class Remote_Management {
 
 		$remote_management_pages = $this->extra_admin_pages();
 		if ( $this->is_current_page( $remote_management_pages ) ) {
-			$plugin = Singleton::get_instance( 'Plugin', $this );
-			$theme  = Singleton::get_instance( 'Theme', $this );
-
 			add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
-			add_filter( 'site_transient_update_plugins', [ $plugin, 'update_site_transient' ], 10, 1 );
-			add_filter( 'site_transient_update_themes', [ $theme, 'update_site_transient' ], 10, 1 );
+			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
+			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
 
-			$plugin->get_meta_plugins();
-			$theme->get_meta_themes();
+			Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
 
 			$current_plugins = get_site_transient( 'update_plugins' );
 			$current_themes  = get_site_transient( 'update_themes' );
