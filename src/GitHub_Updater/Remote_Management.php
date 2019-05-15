@@ -11,6 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\Singleton;
 
 /**
  * Class Remote_Management
@@ -50,7 +51,6 @@ class Remote_Management {
 	public function __construct() {
 		$this->load_options();
 		$this->ensure_api_key_is_set();
-		$this->load_hooks();
 	}
 
 	/**
@@ -66,14 +66,14 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( wp_rand(), true ) ) );
+			update_site_option( 'github_updater_api_key', md5( uniqid( \rand(), true ) ) );
 		}
 	}
 
 	/**
 	 * Load needed action/filter hooks.
 	 */
-	private function load_hooks() {
+	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'remote_management_page_init' ] );
 		add_action(
 			'github_updater_update_settings',
@@ -92,7 +92,7 @@ class Remote_Management {
 	 *
 	 * @return array $admin_pages
 	 */
-	public function extra_admin_pages( $admin_pages ) {
+	public function extra_admin_pages( $admin_pages = [] ) {
 		$extra_admin_pages = [];
 		foreach ( array_keys( self::$remote_management ) as $key ) {
 			if ( ! empty( self::$options_remote[ $key ] ) ) {
@@ -281,5 +281,35 @@ class Remote_Management {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
+	 *
+	 * Only call if any remote management options are present and only if on a page specified
+	 * to run remote management.
+	 *
+	 * @return void
+	 */
+	public function set_update_transients() {
+		if ( empty( self::$options_remote ) ) {
+			return;
+		}
+
+		$remote_management_pages = $this->extra_admin_pages();
+		if ( $this->is_current_page( $remote_management_pages ) ) {
+			add_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
+			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
+
+			Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
+
+			$current_plugins = get_site_transient( 'update_plugins' );
+			$current_themes  = get_site_transient( 'update_themes' );
+			set_site_transient( 'update_plugins', $current_plugins );
+			set_site_transient( 'update_themes', $current_themes );
+
+			remove_filter( 'github_updater_add_admin_pages', [ $this, 'extra_admin_pages' ] );
+		}
 	}
 }

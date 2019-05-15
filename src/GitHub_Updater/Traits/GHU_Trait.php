@@ -172,7 +172,7 @@ trait GHU_Trait {
 			? version_compare( $wp_version, $type->requires, '>=' )
 			: true;
 		$php_version_ok  = ! empty( $type->requires_php )
-			? version_compare( PHP_VERSION, $type->requires_php, '>=' )
+			? version_compare( phpversion(), $type->requires_php, '>=' )
 			: true;
 		$remote_is_newer = isset( $type->remote_version )
 			? version_compare( $type->remote_version, $type->local_version, '>' )

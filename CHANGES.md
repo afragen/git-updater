@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 8.8.0 / 2019-05-15
+* switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`
+* update `Remote_Management` to work with filter change
+* update `CLI_Integration` to work with filter change
+* use `GITHUB_UPDATER_DIR` constant for all enqueuing
+
 #### 8.7.3 / 2019-04-08
 * fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
 * updated location of `tmp-readme.txt` file to use `get_temp_dir()`, thanks @DavidAnderson684
@@ -262,7 +268,7 @@
 
 #### 6.3.2 / 2017-05-09
 * added _broken_ setting to repo not returning HTTP 200 for the main file
-* ~~~fixed PHP error [#549](https://github.com/afragen/github-updater/issues/549)~~~
+* ~~fixed PHP error [#549](https://github.com/afragen/github-updater/issues/549)~~
 * added div class to Settings page to create more specific CSS selectors
 
 #### 6.3.1 / 2017-05-01

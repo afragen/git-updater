@@ -219,9 +219,6 @@ class Theme extends Base {
 			}
 		}
 
-		// Update theme transient with rollback (branch switching) data.
-		add_filter( 'wp_get_update_data', [ $this, 'set_rollback' ] );
-
 		if ( ! static::is_wp_cli() ) {
 			$this->load_pre_filters();
 		}
@@ -235,7 +232,7 @@ class Theme extends Base {
 			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
 		}
 		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
-		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'pre_set_site_transient_update_themes' ] );
+		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
 	/**
@@ -325,11 +322,6 @@ class Theme extends Base {
 			'upgrade-theme_' . $theme_key
 		);
 		$enclosure         = $this->update_row_enclosure( $theme_key, 'theme' );
-
-		// Update transient if necessary.
-		if ( empty( $current->response ) && empty( $current->up_to_date ) ) {
-			$this->pre_set_site_transient_update_themes( $current );
-		}
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$response = $current->response[ $theme_key ];
@@ -624,14 +616,14 @@ class Theme extends Base {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_themes to update.
+	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
 	 * @param array $transient
 	 *
 	 * @return array|\stdClass
 	 */
-	public function pre_set_site_transient_update_themes( $transient ) {
+	public function update_site_transient( $transient ) {
 		foreach ( (array) $this->config as $theme ) {
 			if ( $this->can_update_repo( $theme ) ) {
 				$response = [
@@ -659,14 +651,20 @@ class Theme extends Base {
 
 				$transient->response[ $theme->slug ] = $response;
 			} else {
-				if ( isset( $transient->response[ $theme->slug ] ) ) {
+				/**
+				 * Filter to return array of overrides to dot org.
+				 *
+				 * @since 8.5.0
+				 * @return array
+				 */
+				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+				if ( isset( $transient->response[ $theme->slug ] ) && in_array( $theme->slug, $overrides, true ) ) {
 					unset( $transient->response[ $theme->slug ] );
 				}
 			}
 
 			// Set transient for rollback.
-			if ( $this->tag &&
-				( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme'] )
+			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
 				$transient->response[ $theme->slug ] = $this->set_rollback_transient( 'theme', $theme );
 			}

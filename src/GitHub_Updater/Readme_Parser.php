@@ -96,6 +96,8 @@ class Readme_Parser extends Parser {
 	}
 
 	/**
+	 * Sanitize contributors.
+	 *
 	 * @param array $users
 	 *
 	 * @return array
