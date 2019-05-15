@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.8.0 / 2019-05-15
 * switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`
 * update `Remote_Management` to work with filter change
 * update `CLI_Integration` to work with filter change
