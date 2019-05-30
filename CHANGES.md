@@ -1,4 +1,5 @@
 #### [unreleased]
+* set `homepage` to `PluginURI` or `ThemeURI`, fixes [#791](https://github.com/afragen/github-updater/issues/791)
 
 #### 8.8.0 / 2019-05-15
 * switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`

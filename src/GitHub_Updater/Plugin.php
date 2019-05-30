@@ -129,6 +129,7 @@ class Plugin extends Base {
 				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['file'] );
 				$git_plugin['author']                  = $plugin_data['AuthorName'];
 				$git_plugin['name']                    = $plugin_data['Name'];
+				$git_plugin['homepage']                = $plugin_data['PluginURI'];
 				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
 				$git_plugin['sections']['description'] = $plugin_data['Description'];
 				$git_plugin['languages']               = $header['languages'];
@@ -358,7 +359,7 @@ class Plugin extends Base {
 		$response->plugin_name   = $plugin->name;
 		$response->name          = $plugin->name;
 		$response->author        = $plugin->author;
-		$response->homepage      = $plugin->uri;
+		$response->homepage      = $plugin->homepage;
 		$response->donate_link   = $plugin->donate_link;
 		$response->version       = $plugin->remote_version;
 		$response->sections      = $plugin->sections;
