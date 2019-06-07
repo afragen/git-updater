@@ -573,7 +573,7 @@ class Base {
 		global $wp_filesystem;
 		if ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
 			$upgrader_object->config[ $slug ]->release_asset ) {
-			if ( ! empty( $upgrader_object->config[ $slug ]->ci_job ) ) {
+			if ( 'gitlab' === $upgrader_object->config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
 			}
