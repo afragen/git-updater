@@ -512,7 +512,7 @@ class Base {
 		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
-		$new_source = $this->fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
+		$new_source = $this->fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		$wp_filesystem->move( $source, $new_source );
 
@@ -557,8 +557,10 @@ class Base {
 	}
 
 	/**
-	 * Renaming if using a GitLab Release Asset.
-	 * It has a different download directory structure.
+	 * Fix the directory structure of certain release assests.
+	 *
+	 * GitLab release assets have a different download directory structure.
+	 * Bitbucket release assets need to be copied into a containing directory.
 	 *
 	 * @param string       $new_source
 	 * @param string       $remote_source
@@ -567,13 +569,21 @@ class Base {
 	 *
 	 * @return string $new_source
 	 */
-	private function fix_gitlab_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		if ( ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
-			$upgrader_object->config[ $slug ]->release_asset ) &&
-			! empty( $upgrader_object->config[ $slug ]->ci_job )
-		) {
-			$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-			add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
+	private function fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
+		global $wp_filesystem;
+		if ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
+			$upgrader_object->config[ $slug ]->release_asset ) {
+			if ( 'gitlab' === $upgrader_object->config[ $slug ]->git ) {
+				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
+				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
+			}
+			if ( 'bitbucket' === $upgrader_object->config[ $slug ]->git ) {
+				$temp_source = trailingslashit( dirname( $remote_source ) ) . $slug;
+				$wp_filesystem->move( $remote_source, $temp_source );
+				wp_mkdir_p( $new_source );
+				copy_dir( $temp_source, $new_source );
+				$wp_filesystem->delete( $temp_source, true );
+			}
 		}
 
 		return $new_source;

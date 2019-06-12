@@ -147,6 +147,7 @@ class Theme extends Base {
 				$git_theme['file']                    = "{$header['repo']}/style.css";
 				$git_theme['name']                    = $theme->get( 'Name' );
 				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
+				$git_theme['homepage']                = $theme->get( 'ThemeURI' );
 				$git_theme['author']                  = $theme->get( 'Author' );
 				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
 				$git_theme['sections']['description'] = $theme->get( 'Description' );
@@ -263,7 +264,7 @@ class Theme extends Base {
 
 		$response->slug         = $theme->slug;
 		$response->name         = $theme->name;
-		$response->homepage     = $theme->uri;
+		$response->homepage     = $theme->homepage;
 		$response->donate_link  = $theme->donate_link;
 		$response->version      = $theme->remote_version;
 		$response->sections     = $theme->sections;
