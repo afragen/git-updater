@@ -1,4 +1,5 @@
 #### [unreleased]
+* added check for `Basic_Auth_Loader::get_credentials()` to match `$slug` and `$git`, fixes edge case [#796](https://github.com/afragen/github-updater/issues/796)
 
 #### 8.8.1 / 2019-06-11
 * set `homepage` to `PluginURI` or `ThemeURI`, fixes [#791](https://github.com/afragen/github-updater/issues/791)

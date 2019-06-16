@@ -129,8 +129,18 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		$type = $slug &&
-				isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
+		// In case $type set from Base::$caller doesn't match.
+		if ( ! $slug ) {
+			$path_arr = explode( '/', $headers['path'] );
+			foreach ( $path_arr as $key ) {
+				if ( array_key_exists( $key, $repos ) ) {
+					$slug = $key;
+					break;
+				}
+			}
+		}
+
+		$type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
 			? $repos[ $slug ]->git
 			: $type;
 
