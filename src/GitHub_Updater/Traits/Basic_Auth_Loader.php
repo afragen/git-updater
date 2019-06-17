@@ -73,6 +73,7 @@ trait Basic_Auth_Loader {
 
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
 		return $args;
 	}
@@ -242,6 +243,7 @@ trait Basic_Auth_Loader {
 		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
 			unset( $args['headers']['Authorization'] );
 		}
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 
 		return $args;
 	}
@@ -280,6 +282,7 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
+		$this->remove_authentication_hooks();
 		remove_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ] );
 
 		return $reply;
