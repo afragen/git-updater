@@ -176,6 +176,7 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
+
 		return $slug;
 	}
 

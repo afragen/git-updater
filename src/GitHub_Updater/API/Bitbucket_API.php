@@ -282,6 +282,11 @@ class Bitbucket_API extends API implements API_Interface {
 			(array) $response->values
 		);
 
+		if ( ! $arr ) {
+			$arr          = new \stdClass();
+			$arr->message = 'No tags found';
+		}
+
 		return $arr;
 	}
 
