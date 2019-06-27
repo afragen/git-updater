@@ -139,7 +139,7 @@ trait Basic_Auth_Loader {
 	 * @param array  $repos   Array of repositories.
 	 * @param string $url     URL being called by API.
 	 *
-	 * @return string $slug
+	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url ) {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
@@ -167,7 +167,7 @@ trait Basic_Auth_Loader {
 		}
 
 		// In case $type set from Base::$caller doesn't match.
-		if ( ! $slug ) {
+		if ( ! $slug && isset( $headers['path'] ) ) {
 			$path_arr = explode( '/', $headers['path'] );
 			foreach ( $path_arr as $key ) {
 				if ( array_key_exists( $key, $repos ) ) {
