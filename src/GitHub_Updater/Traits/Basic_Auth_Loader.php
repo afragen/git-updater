@@ -73,6 +73,7 @@ trait Basic_Auth_Loader {
 
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
 		return $args;
 	}
@@ -88,7 +89,6 @@ trait Basic_Auth_Loader {
 	 */
 	private function get_credentials( $url ) {
 		$headers      = parse_url( $url );
-		$type         = $this->get_class_vars( 'Base', 'caller' );
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
@@ -105,6 +105,43 @@ trait Basic_Auth_Loader {
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
 
+		$slug = $this->get_slug_for_credentials( $headers, $repos, $url );
+		$type = $this->get_type_for_credentials( $slug, $repos, $url );
+
+		switch ( $type ) {
+			case 'bitbucket':
+			case $type instanceof Bitbucket_API:
+			case $type instanceof Bitbucket_Server_API:
+				$bitbucket_org = in_array( $headers['host'], $hosts, true );
+				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
+				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+				break;
+		}
+
+		// TODO: can use `( $this->caller )::$options` in PHP7.
+		$caller          = $this->get_class_vars( 'Base', 'caller' );
+		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
+
+		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
+			$credentials['username'] = static::$options[ $username_key ];
+			$credentials['password'] = static::$options[ $password_key ];
+			$credentials['isset']    = true;
+			$credentials['private']  = $this->is_repo_private( $url );
+		}
+
+		return $credentials;
+	}
+
+	/**
+	 * Get $slug for Basic Auth credentials.
+	 *
+	 * @param array  $headers Array of headers from parse_url().
+	 * @param array  $repos   Array of repositories.
+	 * @param string $url     URL being called by API.
+	 *
+	 * @return bool|string $slug
+	 */
+	private function get_slug_for_credentials( $headers, $repos, $url ) {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
 		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
@@ -129,8 +166,33 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		$type = $slug &&
-				isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
+		// In case $type set from Base::$caller doesn't match.
+		if ( ! $slug && isset( $headers['path'] ) ) {
+			$path_arr = explode( '/', $headers['path'] );
+			foreach ( $path_arr as $key ) {
+				if ( array_key_exists( $key, $repos ) ) {
+					$slug = $key;
+					break;
+				}
+			}
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Get repo type for Basic Auth credentials.
+	 *
+	 * @param string $slug  Repository slug.
+	 * @param array  $repos Array of repositories.
+	 * @param string $url   URL being called by API.
+	 *
+	 * @return string $slug
+	 */
+	private function get_type_for_credentials( $slug, $repos, $url ) {
+		$type = $this->get_class_vars( 'Base', 'caller' );
+
+		$type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
 			? $repos[ $slug ]->git
 			: $type;
 
@@ -150,28 +212,7 @@ trait Basic_Auth_Loader {
 			? $_POST['github_updater_api']
 			: $type;
 
-		switch ( $type ) {
-			case 'bitbucket':
-			case $type instanceof Bitbucket_API:
-			case $type instanceof Bitbucket_Server_API:
-				$bitbucket_org = in_array( $headers['host'], $hosts, true );
-				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
-				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
-				break;
-		}
-
-		// TODO: can use `( $this->caller )::$options` in PHP7.
-		$caller          = $this->get_class_vars( 'Base', 'caller' );
-		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
-
-		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
-			$credentials['username'] = static::$options[ $username_key ];
-			$credentials['password'] = static::$options[ $password_key ];
-			$credentials['isset']    = true;
-			$credentials['private']  = $this->is_repo_private( $url );
-		}
-
-		return $credentials;
+		return $type;
 	}
 
 	/**
@@ -232,6 +273,7 @@ trait Basic_Auth_Loader {
 		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
 			unset( $args['headers']['Authorization'] );
 		}
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 
 		return $args;
 	}
@@ -270,6 +312,7 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
+		$this->remove_authentication_hooks();
 		remove_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ] );
 
 		return $reply;

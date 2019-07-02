@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater\Traits;
 
+use Fragen\Singleton;
 use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
 
 /**
@@ -341,6 +342,7 @@ trait API_Common {
 		}
 
 		if ( ! $response ) {
+			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ], 15, 2 );
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
@@ -349,6 +351,7 @@ trait API_Common {
 				$response          = new \stdClass();
 				$response->message = 'No release asset found';
 			}
+			remove_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ] );
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {

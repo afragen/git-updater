@@ -328,7 +328,7 @@ class Base {
 			$language_pack->run();
 		}
 
-		$this->remove_hooks( $repo_api );
+		$this->remove_hooks();
 
 		return true;
 	}
@@ -402,16 +402,10 @@ class Base {
 
 	/**
 	 * Remove hooks after use.
-	 *
-	 * @param \stdClass $repo_api
 	 */
-	public function remove_hooks( $repo_api ) {
+	public function remove_hooks() {
 		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
 		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-
-		if ( $repo_api instanceof Bitbucket_API ) {
-			$this->remove_authentication_hooks();
-		}
 	}
 
 	/**
