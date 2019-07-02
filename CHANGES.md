@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.8.2 / 2019-07-02
 * added check for `Basic_Auth_Loader::get_credentials()` to match `$slug` and `$git`, fixes edge case [#796](https://github.com/afragen/github-updater/issues/796)
 * refactored `Basic_Auth_Loader::get_credentials()` to split out `Basic_Auth_Loader::get_slug_for_credentials()` and `Basic_Auth_Loader::get_type_for_credentials()`
 * created more precise adding and removing `Basic_Auth_Loader` hooks

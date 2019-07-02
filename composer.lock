@@ -54,12 +54,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "2ae820e44b0d53766557bb3b38f8908539799c83"
+                "reference": "ef24f2da1c30b431802b20bd235a2353e7165278"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/2ae820e44b0d53766557bb3b38f8908539799c83",
-                "reference": "2ae820e44b0d53766557bb3b38f8908539799c83",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/ef24f2da1c30b431802b20bd235a2353e7165278",
+                "reference": "ef24f2da1c30b431802b20bd235a2353e7165278",
                 "shasum": ""
             },
             "require": {
@@ -88,7 +88,7 @@
                 "readme",
                 "wordpress"
             ],
-            "time": "2019-04-11T04:09:48+00:00"
+            "time": "2019-07-01T18:48:13+00:00"
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",
