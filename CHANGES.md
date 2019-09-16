@@ -1,4 +1,5 @@
 #### [unreleased]
+* update WP-CLI integration to include new spread operator in `WP_Upgrader_Skin`, https://core.trac.wordpress.org/changeset/46125
 
 #### 8.8.2 / 2019-07-02
 * added check for `Basic_Auth_Loader::get_credentials()` to match `$slug` and `$git`, fixes edge case [#796](https://github.com/afragen/github-updater/issues/796)
