@@ -331,7 +331,7 @@ trait GHU_Trait {
 		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$header['owner']      = trim( $header_path['dirname'], '/' );
-		$header['repo']       = $header_path['filename'];
+		$header['repo']       = $header_path['basename'];
 		$header['owner_repo'] = implode( '/', [ $header['owner'], $header['repo'] ] );
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
