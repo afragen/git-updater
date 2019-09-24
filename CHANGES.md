@@ -1,5 +1,5 @@
 #### [unreleased]
-* update WP-CLI integration to include new spread operator in `WP_Upgrader_Skin`, https://core.trac.wordpress.org/changeset/46125
+* update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
 * update URI parsing to allow for `.` in repository name while still removing `.git`. Thanks @ymauray for the nudge
 
 #### 8.8.2 / 2019-07-02

@@ -45,15 +45,14 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 * Adds the feedback string to the messages array.
 	 *
 	 * @param string $string
+	 * @param array  $args
 	 */
-	public function feedback( $string ) {
+	public function feedback( $string, ...$args ) {
 		if ( isset( $this->upgrader->strings[ $string ] ) ) {
 			$string = $this->upgrader->strings[ $string ];
 		}
 
 		if ( false !== strpos( $string, '%' ) ) {
-			$args = func_get_args();
-			$args = array_splice( $args, 1 );
 			if ( $args ) {
 				$args   = array_map( 'strip_tags', $args );
 				$args   = array_map( 'esc_html', $args );
