@@ -129,6 +129,11 @@ class Remote_Management {
 				}
 			);
 		}
+		if ( isset( $_REQUEST['github_updater_make_json_file'], $_REQUEST['tab'] ) &&
+		'github_updater_remote_management' === $_REQUEST['tab']
+		) {
+			$this->make_json();
+		}
 	}
 
 	/**
@@ -175,6 +180,12 @@ class Remote_Management {
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
 				<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
+			</form>
+			<?php
+			$make_json = add_query_arg( [ 'github_updater_make_json_file' => true ], $action );
+			?>
+			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $make_json ); ?>">
+				<?php submit_button( esc_html__( 'Make JSON file', 'github-updater' ) ); ?>
 			</form>
 			<?php
 		}
@@ -281,6 +292,63 @@ class Remote_Management {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Make JSON file for Git Bulk Updater.
+	 *
+	 * @return void
+	 */
+	public function make_json() {
+		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+
+		$site                      = $_SERVER['HTTP_HOST'];
+		$_POST                     = $_REQUEST;
+		$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] :
+		"{$_SERVER['HTTP_X_FORWARDED_PROTO']}://{$site}{$_SERVER['PHP_SELF']}?{$_SERVER['QUERY_STRING']}";  $api_url = add_query_arg(
+			[
+				'action' => 'github-updater-update',
+				'key'    => self::$api_key,
+			],
+			admin_url( 'admin-ajax.php' )
+		);
+		foreach ( $ghu_tokens as $token ) {
+			$slugs[] = [
+				'slug'   => $token->slug,
+				'type'   => $token->type,
+				'branch' => $token->branch,
+			];
+		}
+		$json = [
+			'sites' => [
+				'site'          => $site,
+				'restful_start' => $api_url,
+				'slugs'         => $slugs,
+			],
+		];
+
+		$json = json_encode( $json, JSON_FORCE_OBJECT );
+
+		$file      = "{$site}.json";
+		$file_path = trailingslashit( get_temp_dir() ) . $file;
+		$file_path = WP_CONTENT_DIR . "/{$file}";
+		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
+
+		// Quick check to verify that the file exists
+		if ( ! file_exists( $file_path ) ) {
+			die( 'File not found' );
+		}
+		// Force the download
+		header( 'Content-Type: application/octet-stream;' );
+		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
+		header( 'Expires: 0' );
+		header( 'Cache-Control: must-revalidate' );
+		header( 'Pragma: public' );
+		header( 'Content-Length: ' . filesize( $file_path ) );
+		readfile( $file_path );
+		exit;
 	}
 
 	/**
