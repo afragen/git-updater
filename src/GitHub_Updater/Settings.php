@@ -100,6 +100,7 @@ class Settings extends Base {
 		if ( $this->is_current_page( [ 'options.php', 'options-general.php', 'settings.php', 'edit.php' ] ) ) {
 			add_action( 'admin_init', [ $this, 'update_settings' ] );
 			add_action( 'admin_init', [ $this, 'page_init' ] );
+			add_action( 'admin_init', [ Singleton::get_instance( 'Remote_Management', $this ), 'make_json' ] );
 		}
 	}
 

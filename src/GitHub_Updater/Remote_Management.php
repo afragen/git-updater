@@ -129,11 +129,6 @@ class Remote_Management {
 				}
 			);
 		}
-		if ( isset( $_REQUEST['github_updater_make_json_file'], $_REQUEST['tab'] ) &&
-		'github_updater_remote_management' === $_REQUEST['tab']
-		) {
-			$this->make_json();
-		}
 	}
 
 	/**
@@ -300,6 +295,10 @@ class Remote_Management {
 	 * @return void
 	 */
 	public function make_json() {
+		if ( ! isset( $_REQUEST['github_updater_make_json_file'] )
+		) {
+			return;
+		}
 		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
@@ -331,9 +330,8 @@ class Remote_Management {
 
 		$json = json_encode( $json, JSON_FORCE_OBJECT );
 
-		$file      = str_replace('.','-',$site).'.json';
-		$file_path = trailingslashit( get_temp_dir() ) . $file;
-		$file_path = WP_CONTENT_DIR . "/{$file}";
+		$file      = str_replace( '.', '-', $site ) . '.json';
+		$file_path = get_temp_dir() . "/{$file}";
 		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
 
 		// Quick check to verify that the file exists
