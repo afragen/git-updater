@@ -331,13 +331,13 @@ class Remote_Management {
 
 		$json = json_encode( $json, JSON_FORCE_OBJECT );
 
-		$file      = "{$site}.json";
+		$file      = str_replace('.','-',$site).'.json';
 		$file_path = trailingslashit( get_temp_dir() ) . $file;
 		$file_path = WP_CONTENT_DIR . "/{$file}";
 		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
 
 		// Quick check to verify that the file exists
-		if ( ! file_exists( $file_path ) ) {
+		if ( ! $file_path ) {
 			die( 'File not found' );
 		}
 		// Force the download
