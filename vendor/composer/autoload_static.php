@@ -11,12 +11,20 @@ class ComposerStaticInit2bcf1c834b610b416c039f4ec3ba2af4
         array (
             'Fragen\\GitHub_Updater\\' => 22,
         ),
+        'C' => 
+        array (
+            'Composer\\Installers\\' => 20,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'Fragen\\GitHub_Updater\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src/GitHub_Updater',
+        ),
+        'Composer\\Installers\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
         ),
     );
 
