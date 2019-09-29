@@ -232,9 +232,18 @@ class Remote_Management {
 			],
 			admin_url( 'admin-ajax.php' )
 		);
-		?>
-		<p>
-			<?php
+
+		echo '<p>';
+		printf(
+			wp_kses_post(
+				/* translators: %s: Link to Git Bulk Updater repository */
+				__( 'The <a href="%s">Git Bulk Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler.', 'github-updater' )
+			),
+			'https://github.com/afragen/git-bulk-updater'
+		);
+		echo '</p>';
+
+		echo '<p>';
 			printf(
 				wp_kses_post(
 					/* translators: %s: Link to wiki */
@@ -242,13 +251,13 @@ class Remote_Management {
 				),
 				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints'
 			);
-			?>
-			<br>
-			<span style="font-family:monospace;"><?php echo $api_url; ?></span>
-		<p>
-			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
-		</p>
-		<?php
+		echo '<br><span style="font-family:monospace;">';
+		echo $api_url;
+		echo '</span></p>';
+
+		echo '<p>';
+		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
+		echo '</p>';
 	}
 
 	/**

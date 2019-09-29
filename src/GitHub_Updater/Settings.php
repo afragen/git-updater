@@ -77,7 +77,7 @@ class Settings extends Base {
 		$this->load_hooks();
 
 		// Need to ensure these classes are activated here for hooks to fire.
-		if ( $this->is_current_page( [ 'options.php', 'options-general.php', 'settings.php' ] ) ) {
+		if ( $this->is_current_page( [ 'options.php', 'options-general.php', 'settings.php', 'edit.php' ] ) ) {
 			Singleton::get_instance( 'Install', $this )->run();
 			Singleton::get_instance( 'Remote_Management', $this )->load_hooks();
 		}
