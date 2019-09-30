@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
 * update URI parsing to allow for `.` in repository name while still removing `.git`. Thanks @ymauray for the nudge
 * make downloadable JSON config files to work with [Git Bulk Updater](https://github.com/afragen/git-bulk-updater)

@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 8.8.2.4\n"
+"Project-Id-Version: GitHub Updater 8.9.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-09-29T16:38:16+00:00\n"
+"POT-Creation-Date: 2019-09-30T17:04:58+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.3.0\n"
 "X-Domain: github-updater\n"
@@ -347,12 +347,17 @@ msgstr ""
 msgid "Make JSON file"
 msgstr ""
 
-#. translators: %s: Link to wiki
-#: src/GitHub_Updater/Remote_Management.php:241
-msgid "Please refer to the <a href=\"%s\">wiki</a> for complete list of attributes. RESTful endpoints begin at:"
+#. translators: %s: Link to Git Bulk Updater repository
+#: src/GitHub_Updater/Remote_Management.php:240
+msgid "The <a href=\"%s\">Git Bulk Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler."
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:249
+#. translators: %1$s: Link to wiki, %2$s: RESTful API URL
+#: src/GitHub_Updater/Remote_Management.php:250
+msgid "Please refer to the <a href=\"%1$s\">wiki</a> for complete list of attributes. RESTful endpoints begin at: %2$s"
+msgstr ""
+
+#: src/GitHub_Updater/Remote_Management.php:258
 msgid "Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard."
 msgstr ""
 
