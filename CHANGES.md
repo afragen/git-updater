@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 8.9.0 / 2019-09-30
+* update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
+* update URI parsing to allow for `.` in repository name while still removing `.git`. Thanks @ymauray for the nudge
+* make downloadable JSON config files to work with [Git Bulk Updater](https://github.com/afragen/git-bulk-updater)
+* fix multisite saving of Remote Management settings
+
 #### 8.8.2 / 2019-07-02
 * added check for `Basic_Auth_Loader::get_credentials()` to match `$slug` and `$git`, fixes edge case [#796](https://github.com/afragen/github-updater/issues/796)
 * refactored `Basic_Auth_Loader::get_credentials()` to split out `Basic_Auth_Loader::get_slug_for_credentials()` and `Basic_Auth_Loader::get_type_for_credentials()`

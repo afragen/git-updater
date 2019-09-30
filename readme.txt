@@ -4,7 +4,7 @@ Donate link: https://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
 Requires at least: 4.6
 Requires PHP: 5.6
-Tested up to: 5.2
+Tested up to: 5.3
 Stable tag: master
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

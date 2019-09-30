@@ -8,7 +8,7 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.6
 * Requires PHP: 5.6
-* Tested up to: 5.2
+* Tested up to: 5.3
 * Stable tag: [master](https://github.com/afragen/github-updater/releases/latest)
 * Donate link: <https://thefragens.com/github-updater-donate>
 * License: GPLv2 or later

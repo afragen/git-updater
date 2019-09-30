@@ -177,6 +177,12 @@ class Remote_Management {
 				<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
 			</form>
 			<?php
+			$make_json = add_query_arg( [ 'github_updater_make_json_file' => true ], $action );
+			?>
+			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $make_json ); ?>">
+				<?php submit_button( esc_html__( 'Make JSON file', 'github-updater' ) ); ?>
+			</form>
+			<?php
 		}
 	}
 
@@ -226,23 +232,31 @@ class Remote_Management {
 			],
 			admin_url( 'admin-ajax.php' )
 		);
-		?>
-		<p>
-			<?php
+
+		echo '<p>';
+		printf(
+			wp_kses_post(
+				/* translators: %s: Link to Git Bulk Updater repository */
+				__( 'The <a href="%s">Git Bulk Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler.', 'github-updater' )
+			),
+			'https://github.com/afragen/git-bulk-updater'
+		);
+		echo '</p>';
+
+		echo '<p>';
 			printf(
 				wp_kses_post(
-					/* translators: %s: Link to wiki */
-					__( 'Please refer to the <a href="%s">wiki</a> for complete list of attributes. RESTful endpoints begin at:', 'github-updater' )
+					/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
+					__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. RESTful endpoints begin at: %2$s', 'github-updater' )
 				),
-				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints'
+				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
+				'<br><span style="font-family:monospace;">' . $api_url . '</span>'
 			);
-			?>
-			<br>
-			<span style="font-family:monospace;"><?php echo $api_url; ?></span>
-		<p>
-			<?php esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' ); ?>
-		</p>
-		<?php
+		echo '</p>';
+
+		echo '<p>';
+		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
+		echo '</p>';
 	}
 
 	/**
@@ -281,6 +295,66 @@ class Remote_Management {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Make JSON file for Git Bulk Updater.
+	 *
+	 * @return void
+	 */
+	public function make_json() {
+		if ( ! isset( $_REQUEST['github_updater_make_json_file'] )
+		) {
+			return;
+		}
+		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+
+		$site                      = $_SERVER['HTTP_HOST'];
+		$_POST                     = $_REQUEST;
+		$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] :
+		"{$_SERVER['HTTP_X_FORWARDED_PROTO']}://{$site}{$_SERVER['PHP_SELF']}?{$_SERVER['QUERY_STRING']}";  $api_url = add_query_arg(
+			[
+				'action' => 'github-updater-update',
+				'key'    => self::$api_key,
+			],
+			admin_url( 'admin-ajax.php' )
+		);
+		foreach ( $ghu_tokens as $token ) {
+			$slugs[] = [
+				'slug'   => $token->slug,
+				'type'   => $token->type,
+				'branch' => $token->branch,
+			];
+		}
+		$json = [
+			'sites' => [
+				'site'          => $site,
+				'restful_start' => $api_url,
+				'slugs'         => $slugs,
+			],
+		];
+
+		$json = json_encode( $json, JSON_FORCE_OBJECT );
+
+		$file      = str_replace( '.', '-', $site ) . '.json';
+		$file_path = get_temp_dir() . "/{$file}";
+		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
+
+		// Quick check to verify that the file exists
+		if ( ! $file_path ) {
+			die( 'File not found' );
+		}
+		// Force the download
+		header( 'Content-Type: application/octet-stream;' );
+		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
+		header( 'Expires: 0' );
+		header( 'Cache-Control: must-revalidate' );
+		header( 'Pragma: public' );
+		header( 'Content-Length: ' . filesize( $file_path ) );
+		readfile( $file_path );
+		exit;
 	}
 
 	/**
