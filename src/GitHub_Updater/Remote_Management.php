@@ -246,14 +246,13 @@ class Remote_Management {
 		echo '<p>';
 			printf(
 				wp_kses_post(
-					/* translators: %s: Link to wiki */
-					__( 'Please refer to the <a href="%s">wiki</a> for complete list of attributes. RESTful endpoints begin at:', 'github-updater' )
+					/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
+					__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. RESTful endpoints begin at: %2$s', 'github-updater' )
 				),
-				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints'
+				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
+				'<br><span style="font-family:monospace;">' . $api_url . '</span>'
 			);
-		echo '<br><span style="font-family:monospace;">';
-		echo $api_url;
-		echo '</span></p>';
+		echo '</p>';
 
 		echo '<p>';
 		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
