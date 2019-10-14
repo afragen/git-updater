@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @author  Andy Fragen
  */
-class Settings extends Base {
+class Settings {
 	use GHU_Trait;
 
 	/**
@@ -53,10 +53,17 @@ class Settings extends Base {
 	];
 
 	/**
+	 * Holds site options.
+	 *
+	 * @var array $options
+	 */
+	protected static $options;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
+		static::$options = $this->get_class_vars( 'Base', 'options' );
 		$this->refresh_caches();
 		$this->load_options();
 	}
