@@ -277,44 +277,4 @@ trait Basic_Auth_Loader {
 
 		return $args;
 	}
-
-	/**
-	 * Loads authentication hooks when updating from update-core.php.
-	 *
-	 * @param bool                             $reply
-	 * @param string                           $package Update package URL, unused.
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $class   Upgrader object.
-	 *
-	 * @return mixed
-	 */
-	public function upgrader_pre_download( $reply, $package, $class ) {
-		if ( $class instanceof \Plugin_Upgrader &&
-			property_exists( $class->skin, 'plugin_info' )
-		) {
-			$headers = $class->skin->plugin_info;
-			foreach ( self::$basic_auth_required as $git_server ) {
-				$ghu_header = $headers[ $git_server . ' Plugin URI' ];
-				if ( ! empty( $ghu_header ) ) {
-					$this->load_authentication_hooks();
-					break;
-				}
-			}
-		}
-		if ( $class instanceof \Theme_Upgrader &&
-			property_exists( $class->skin, 'theme_info' )
-		) {
-			$theme = $class->skin->theme_info;
-			foreach ( self::$basic_auth_required as $git_server ) {
-				$ghu_header = $theme->get( $git_server . ' Theme URI' );
-				if ( ! empty( $ghu_header ) ) {
-					$this->load_authentication_hooks();
-					break;
-				}
-			}
-		}
-		$this->remove_authentication_hooks();
-		remove_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ] );
-
-		return $reply;
-	}
 }

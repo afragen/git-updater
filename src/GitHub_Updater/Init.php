@@ -104,11 +104,6 @@ class Init {
 		add_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
 		add_filter( 'extra_plugin_headers', [ $this->base, 'add_headers' ] );
 		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
-
-		// Needed for updating from update-core.php.
-		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download', [ $this->base, 'upgrader_pre_download' ], 10, 3 );
-		}
 	}
 
 	/**
