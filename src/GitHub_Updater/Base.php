@@ -186,13 +186,6 @@ class Base {
 	}
 
 	/**
-	 * AJAX endpoint for REST updates.
-	 */
-	public function ajax_update() {
-		Singleton::get_instance( 'Rest_Update', $this )->process_request();
-	}
-
-	/**
 	 * Run background processes.
 	 * Piggyback on built-in update function to get metadata.
 	 * Set update transients for remote management.
