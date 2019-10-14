@@ -11,6 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -28,7 +29,9 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * This class inherits from Base in order to be able to call the
  * set_defaults function.
  */
-class Rest_Update extends Base {
+class Rest_Update {
+	use GHU_Trait;
+
 	/**
 	 * Holds REST Upgrader Skin.
 	 *
@@ -40,7 +43,6 @@ class Rest_Update extends Base {
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
 	}
@@ -72,7 +74,7 @@ class Rest_Update extends Base {
 			$is_plugin_active = true;
 		}
 
-		$this->get_remote_repo_meta( $plugin );
+		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $plugin );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
 
 		$update = [
@@ -125,7 +127,7 @@ class Rest_Update extends Base {
 			throw new \UnexpectedValueException( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
-		$this->get_remote_repo_meta( $theme );
+		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $theme );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
 
 		$update = [
