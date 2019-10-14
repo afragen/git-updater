@@ -103,6 +103,7 @@ class Plugin {
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 		add_filter( 'extra_plugin_headers', [ $this->base, 'add_headers' ] );
 
+		\wp_clean_plugins_cache( false );
 		$plugins     = get_plugins();
 		$git_plugins = [];
 
