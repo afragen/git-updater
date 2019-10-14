@@ -1,4 +1,5 @@
 #### [unreleased]
+* more specific calling of `extra_{$context}_headers` filters
 
 #### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125

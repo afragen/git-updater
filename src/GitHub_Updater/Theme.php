@@ -81,6 +81,8 @@ class Theme extends Base {
 	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
+		add_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
+
 		$this->delete_current_theme_cache();
 		$git_themes = [];
 		$themes     = wp_get_themes( [ 'errors' => null ] );
@@ -168,6 +170,8 @@ class Theme extends Base {
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
+
+		remove_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
 
 		return $git_themes;
 	}

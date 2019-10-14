@@ -91,6 +91,7 @@ class Base {
 	 */
 	public function __construct() {
 		$this->set_installed_apis();
+		$this->add_headers( [] );
 	}
 
 	/**
@@ -321,8 +322,6 @@ class Base {
 			$language_pack->run();
 		}
 
-		$this->remove_hooks();
-
 		return true;
 	}
 
@@ -391,14 +390,6 @@ class Base {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Remove hooks after use.
-	 */
-	public function remove_hooks() {
-		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
-		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
 	}
 
 	/**

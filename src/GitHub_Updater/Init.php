@@ -101,8 +101,6 @@ class Init {
 			$this->base->load_authentication_hooks();
 		}
 
-		add_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
-		add_filter( 'extra_plugin_headers', [ $this->base, 'add_headers' ] );
 		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
 	}
 

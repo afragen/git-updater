@@ -71,6 +71,7 @@ class Plugin extends Base {
 	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
+		add_filter( 'extra_plugin_headers', [ $this->base, 'add_headers' ] );
 
 		$plugins     = get_plugins();
 		$git_plugins = [];
@@ -170,6 +171,8 @@ class Plugin extends Base {
 
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
 		}
+
+		remove_filter( 'extra_plugin_headers', [ $this->base, 'add_headers' ] );
 
 		return $git_plugins;
 	}
