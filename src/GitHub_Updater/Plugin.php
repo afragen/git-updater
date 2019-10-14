@@ -29,21 +29,51 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class Plugin extends Base {
+class Plugin {
 	use GHU_Trait;
 
 	/**
-	 * Rollback variable
+	 * Holds Class Base object.
 	 *
-	 * @var string branch
+	 * @var Base
 	 */
-	public $tag = false;
+	protected $base;
+
+	/**
+	 * Hold config array.
+	 *
+	 * @var array
+	 */
+	private $config;
+
+	/**
+	 * Holds extra headers.
+	 *
+	 * @var array
+	 */
+	private static $extra_headers;
+
+	/**
+	 * Holds options.
+	 *
+	 * @var array
+	 */
+	private static $options;
+
+	/**
+	 * Rollback variable.
+	 *
+	 * @var string|bool
+	 */
+	protected $tag = false;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
+		$this->base          = Singleton::get_instance( 'Base', $this );
+		self::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
+		self::$options       = $this->get_class_vars( 'Base', 'options' );
 		$this->load_options();
 
 		// Get details of installed git sourced plugins.
@@ -93,7 +123,7 @@ class Plugin extends Base {
 		foreach ( (array) $plugins as $plugin => $headers ) {
 			$git_plugin = [];
 
-			foreach ( (array) static::$extra_headers as $value ) {
+			foreach ( (array) self::$extra_headers as $value ) {
 				$header = null;
 
 				if ( empty( $headers[ $value ] ) || false === stripos( $value, 'Plugin' ) ) {
@@ -110,10 +140,10 @@ class Plugin extends Base {
 					}
 				}
 
-				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
+				$header         = Singleton::get_instance( 'Base', $this )->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
 				$current_branch = "current_branch_{$header['repo']}";
-				$branch         = isset( static::$options[ $current_branch ] )
-					? static::$options[ $current_branch ]
+				$branch         = isset( self::$options[ $current_branch ] )
+					? self::$options[ $current_branch ]
 					: false;
 
 				$git_plugin['type']           = 'plugin';
@@ -195,7 +225,7 @@ class Plugin extends Base {
 			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
 				|| apply_filters( 'github_updater_disable_wpcron', false )
 			) {
-				$this->get_remote_repo_meta( $plugin );
+				$this->base->get_remote_repo_meta( $plugin );
 			} else {
 				$plugins[ $plugin->slug ] = $plugin;
 			}
@@ -242,14 +272,14 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( empty( static::$options['branch_switch'] ) ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 
-		$enclosure         = $this->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
+		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ), $this );
 		$nonced_update_url = wp_nonce_url(
-			$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
+			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
 			'upgrade-plugin_' . $plugin_file
 		);
 
@@ -277,7 +307,7 @@ class Plugin extends Base {
 		 * Create after_plugin_row_
 		 */
 		echo $enclosure['open'];
-		$this->make_branch_switch_row( $branch_switch_data );
+		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
 		echo $enclosure['close'];
 
 		return true;
@@ -437,7 +467,7 @@ class Plugin extends Base {
 			// Set transient on rollback.
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
-				$transient->response[ $plugin->file ] = $this->set_rollback_transient( 'plugin', $plugin );
+				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 

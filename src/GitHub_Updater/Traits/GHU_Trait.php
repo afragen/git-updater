@@ -381,6 +381,8 @@ trait GHU_Trait {
 	 * @return mixed
 	 */
 	protected function get_repo_parts( $repo, $type ) {
+		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
+
 		$arr['bool']    = false;
 		$pattern        = '/' . strtolower( $repo ) . '_/';
 		$type           = preg_replace( $pattern, '', $type );
@@ -402,7 +404,7 @@ trait GHU_Trait {
 			$arr['git_server'] = strtolower( $repo );
 			$arr['base_uri']   = $repo_base_uris[ $repo ];
 			$arr['bool']       = true;
-			foreach ( self::$extra_repo_headers as $key => $value ) {
+			foreach ( $extra_repo_headers as $key => $value ) {
 				$arr[ $key ] = $repo . ' ' . $value;
 			}
 		}
