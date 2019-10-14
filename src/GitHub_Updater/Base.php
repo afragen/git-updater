@@ -402,41 +402,6 @@ class Base {
 	}
 
 	/**
-	 * Checks if dupicate wp-cron event exists.
-	 *
-	 * @param string $event Name of wp-cron event.
-	 *
-	 * @return bool
-	 */
-	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array();
-		foreach ( $cron as $timestamp => $cronhooks ) {
-			if ( key( $cronhooks ) === $event ) {
-				$this->is_cron_overdue( $cron, $timestamp );
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
-	 *
-	 * @param array $cron
-	 * @param int   $timestamp
-	 */
-	public function is_cron_overdue( $cron, $timestamp ) {
-		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
-		if ( $overdue ) {
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
-			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
-		}
-	}
-
-	/**
 	 * Used for renaming of sources to ensure correct directory name.
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
@@ -592,49 +557,6 @@ class Base {
 		remove_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ] );
 
 		return $result;
-	}
-
-	/**
-	 * Set array with normal repo names.
-	 * Fix name even if installed without renaming originally, eg <repo>-master
-	 *
-	 * @param string            $slug
-	 * @param Base|Plugin|Theme $upgrader_object
-	 *
-	 * @return array
-	 */
-	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
-
-		if ( null === $upgrader_object ) {
-			$upgrader_object = $this;
-		}
-
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-
-		foreach ( (array) $upgrader_object->config as $repo ) {
-			// Check repo slug or directory name for match.
-			$slug_check = [
-				$repo->slug,
-				dirname( $repo->file ),
-			];
-
-			// Exact match.
-			if ( \in_array( $slug, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
-				break;
-			}
-
-			// Soft match, there may still be an exact $slug match.
-			if ( \in_array( $rename, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
-			}
-		}
-
-		return $arr;
 	}
 
 	/**
@@ -807,69 +729,5 @@ class Base {
 		return $update_url;
 	}
 
-	/**
-	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
-	 *
-	 * @param array           $header
-	 * @param array|\WP_Theme $headers
-	 * @param array           $header_parts
-	 * @param array           $repo_parts
-	 *
-	 * @return array $header
-	 */
-	protected function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
-		$hosted_domains = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
-		$theme          = null;
 
-		$header['enterprise_uri'] = null;
-		$header['enterprise_api'] = null;
-		$header['languages']      = null;
-		$header['ci_job']         = false;
-		$header['release_asset']  = false;
-
-		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
-			$header['enterprise_uri'] = $header['base_uri'];
-			$header['enterprise_api'] = trim( $header['enterprise_uri'], '/' );
-			switch ( $header_parts[0] ) {
-				case 'GitHub':
-					$header['enterprise_api'] .= '/api/v3';
-					break;
-				case 'GitLab':
-					$header['enterprise_api'] .= '/api/v4';
-					break;
-				case 'Bitbucket':
-					$header['enterprise_api'] .= '/rest/api';
-					break;
-			}
-		}
-
-		if ( $headers instanceof \WP_Theme ) {
-			$theme                    = $headers;
-			$headers                  = [];
-			$headers['Release Asset'] = '';
-			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
-		}
-
-		$self_hosted_parts = array_keys( self::$extra_repo_headers );
-		foreach ( $self_hosted_parts as $part ) {
-			if ( $theme instanceof \WP_Theme ) {
-				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
-			}
-			if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
-				! empty( $headers[ $repo_parts[ $part ] ] )
-			) {
-				switch ( $part ) {
-					case 'Languages':
-						$header['languages'] = $headers[ $repo_parts[ $part ] ];
-						break;
-					case 'CIJob':
-						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
-						break;
-				}
-			}
-		}
-		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['Release Asset'] ) ? 'true' === $headers['Release Asset'] : $header['release_asset'];
-
-		return $header;
-	}
 }
