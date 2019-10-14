@@ -478,9 +478,10 @@ class Base {
 		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		if ( ! array_key_exists( $slug, (array) $config ) && ! isset( self::$options['remote_install'] ) ) {
-			$repo       = $this->get_repo_slugs( $slug, $upgrader_object );
-			$slug       = $slug === $repo['slug'] ? $slug : $repo['slug'];
-			$new_source = trailingslashit( $remote_source ) . $slug;
+			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
+			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
+			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			$new_source   = trailingslashit( $remote_source ) . $slug;
 		}
 
 		return $new_source;
@@ -504,8 +505,9 @@ class Base {
 		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		if ( isset( $config[ $slug ]->release_asset ) && $config[ $slug ]->release_asset ) {
-			$repo = $this->get_repo_slugs( $slug, $upgrader_object );
-			$slug = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
+			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
+			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
 			if ( 'gitlab' === $config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
