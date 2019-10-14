@@ -475,25 +475,12 @@ class Base {
 	 * @return string $new_source
 	 */
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
-			! isset( self::$options['remote_install'] )
-		) {
-			if ( $upgrader_object instanceof Plugin ) {
-				foreach ( (array) $upgrader_object->config as $plugin ) {
-					if ( $slug === $plugin->slug ) {
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
-			if ( $upgrader_object instanceof Theme ) {
-				foreach ( (array) $upgrader_object->config as $theme ) {
-					if ( $slug === $theme->slug ) {
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
+		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+
+		if ( ! array_key_exists( $slug, (array) $config ) && ! isset( self::$options['remote_install'] ) ) {
+			$repo       = $this->get_repo_slugs( $slug, $upgrader_object );
+			$slug       = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			$new_source = trailingslashit( $remote_source ) . $slug;
 		}
 
 		return $new_source;
@@ -514,13 +501,16 @@ class Base {
 	 */
 	private function fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		global $wp_filesystem;
-		if ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
-			$upgrader_object->config[ $slug ]->release_asset ) {
-			if ( 'gitlab' === $upgrader_object->config[ $slug ]->git ) {
+		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+
+		if ( isset( $config[ $slug ]->release_asset ) && $config[ $slug ]->release_asset ) {
+			$repo = $this->get_repo_slugs( $slug, $upgrader_object );
+			$slug = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			if ( 'gitlab' === $config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
 			}
-			if ( 'bitbucket' === $upgrader_object->config[ $slug ]->git ) {
+			if ( 'bitbucket' === $config[ $slug ]->git ) {
 				$temp_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				$wp_filesystem->move( $remote_source, $temp_source );
 				wp_mkdir_p( $new_source );
@@ -559,7 +549,7 @@ class Base {
 	 *
 	 * @return array $rollback Rollback transient.
 	 */
-	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
+	public function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		$repo_api      = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		$this->tag     = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
 		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;
@@ -609,7 +599,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
+	public function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
 		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
 		$repo_base     = $repo_name;
@@ -647,12 +637,13 @@ class Base {
 	/**
 	 * Make branch switch row.
 	 *
-	 * @param array $data Parameters for creating branch switching row.
+	 * @param array $data   Parameters for creating branch switching row.
+	 * @param array $config Array of repo objects.
 	 *
 	 * @return void
 	 */
-	protected function make_branch_switch_row( $data ) {
-		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? [] : $this->config[ $data['slug'] ]->rollback;
+	public function make_branch_switch_row( $data, $config ) {
+		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? [] : $config[ $data['slug'] ]->rollback;
 
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
@@ -706,7 +697,7 @@ class Base {
 	 *
 	 * @return string
 	 */
-	protected function get_update_url( $type, $action, $repo_name ) {
+	public function get_update_url( $type, $action, $repo_name ) {
 		$update_url = esc_attr(
 			add_query_arg(
 				[
