@@ -1,7 +1,8 @@
 #### [unreleased]
 * refactor to remove class extends
-* more specific calling of `extra_{$context}_headers` filters
 * update renaming functions
+* refactor to how plugin and theme meta are obtained
+* remove reliance on `extra_{$context}_filter` to add extra headers
 
 #### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
