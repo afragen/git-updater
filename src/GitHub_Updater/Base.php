@@ -91,7 +91,7 @@ class Base {
 	 */
 	public function __construct() {
 		$this->set_installed_apis();
-		$this->add_headers( [] );
+		$this->add_extra_headers();
 	}
 
 	/**
@@ -235,13 +235,11 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to get_plugins() or wp_get_themes().
-	 *
-	 * @param array $extra_headers
+	 * Make and return extra headers.
 	 *
 	 * @return array
 	 */
-	public function add_headers( $extra_headers ) {
+	public function add_extra_headers() {
 		$ghu_extra_headers = [
 			'RequiresWP'   => 'Requires WP',
 			'RequiresPHP'  => 'Requires PHP',
@@ -263,10 +261,9 @@ class Base {
 		}
 
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers       = array_merge( (array) $extra_headers, $ghu_extra_headers );
 		ksort( self::$extra_headers );
 
-		return $extra_headers;
+		return self::$extra_headers;
 	}
 
 	/**

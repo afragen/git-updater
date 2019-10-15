@@ -457,15 +457,13 @@ trait GHU_Trait {
 	}
 
 	/**
-	 * Take remote file contents as string or array and parse and reduce headers.
+	 * Get default headers plus extra headers.
 	 *
-	 * @param string|array $contents File contents or array of file headers.
-	 * @param string       $type plugin|theme.
+	 * @param string $type plugin|theme.
 	 *
-	 * @return array $all_headers Reduced array of all headers.
+	 * @return array
 	 */
-	public function get_file_headers( $contents, $type ) {
-		$all_headers            = [];
+	public function get_headers( $type ) {
 		$default_plugin_headers = [
 			'Name'        => 'Plugin Name',
 			'PluginURI'   => 'Plugin URI',
@@ -492,17 +490,22 @@ trait GHU_Trait {
 			'DomainPath'  => 'Domain Path',
 		];
 
-		if ( 'plugin' === $type ) {
-			$all_headers = $default_plugin_headers;
-		}
-		if ( 'theme' === $type ) {
-			$all_headers = $default_theme_headers;
-		}
+		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
 
-		/*
-		 * Merge extra headers and default headers.
-		 */
-		$all_headers = array_merge( self::$extra_headers, $all_headers );
+		return $all_headers;
+	}
+
+	/**
+	 * Take remote file contents as string or array and parse and reduce headers.
+	 *
+	 * @param string|array $contents File contents or array of file headers.
+	 * @param string       $type plugin|theme.
+	 *
+	 * @return array $all_headers Reduced array of all headers.
+	 */
+	public function get_file_headers( $contents, $type ) {
+		$all_headers = [];
+		$all_headers = $this->get_headers( $type );
 		$all_headers = array_unique( $all_headers );
 
 		/*
