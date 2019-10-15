@@ -44,6 +44,7 @@ if ( version_compare( phpversion(), '5.6', '<=' ) ) {
 		esc_url( __( 'https://wordpress.org/support/update-php/' ) )
 	);
 	echo '</p></div>';
+	deactivate_plugins( plugin_basename( __FILE__ ) );
 
 	return false;
 }
