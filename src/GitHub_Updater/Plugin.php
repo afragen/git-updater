@@ -154,8 +154,12 @@ class Plugin {
 					}
 				}
 			);
-			$key        = array_pop( $key );
-			$repo_uri   = $plugin[ $key ];
+
+			$key = array_pop( $key );
+			if ( null === $key ) {
+				continue;
+			}
+			$repo_uri = $plugin[ $key ];
 
 			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
 			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );

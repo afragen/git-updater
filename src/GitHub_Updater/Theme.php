@@ -108,7 +108,7 @@ class Theme {
 	}
 
 	/**
-	 * Reads in WP_Theme class of each theme.
+	 * Get details of Git-sourced themes from those that are installed.
 	 * Populates variable array.
 	 *
 	 * @return array Indexed array of associative arrays of theme details.
@@ -166,19 +166,13 @@ class Theme {
 					}
 				}
 			);
-			$key       = array_pop( $key );
-			$repo_uri  = $theme[ $key ];
-			/**
-			 * Get $repo_uri from themes added to GitHub Updater via hook.
-			 */
-			// foreach ( (array) $additions as $addition ) {
-			// if ( $theme->stylesheet === $addition['slug'] ) {
-			// if ( ! empty( $addition[ $value ] ) ) {
-			// $repo_uri = $addition[ $value ];
-			// break;
-			// }
-			// }
-			// }
+
+			$key = array_pop( $key );
+			if ( null === $key ) {
+				continue;
+			}
+			$repo_uri = $theme[ $key ];
+
 			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
 			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
 
