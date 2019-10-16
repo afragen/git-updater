@@ -108,17 +108,38 @@ class Theme {
 	}
 
 	/**
-	 * Reads in WP_Theme class of each theme.
+	 * Get details of Git-sourced themes from those that are installed.
 	 * Populates variable array.
 	 *
 	 * @return array Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
-		add_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
-
 		$this->delete_current_theme_cache();
 		$git_themes = [];
 		$themes     = wp_get_themes( [ 'errors' => null ] );
+
+		$paths = array_map(
+			function( $theme ) {
+				return "$theme->theme_root/$theme->stylesheet/style.css";
+			},
+			$themes
+		);
+
+		foreach ( $paths as $slug => $path ) {
+			$all_headers        = $this->get_headers( 'theme' );
+			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
+		}
+
+		$themes = array_filter(
+			$repos_arr,
+			function( $repo ) {
+				foreach ( $repo as $key => $value ) {
+					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
+						return $this->get_file_headers( $repo, 'theme' );
+					}
+				}
+			}
+		);
 
 		/**
 		 * Filter to add themes not containing appropriate header line.
@@ -132,79 +153,61 @@ class Theme {
 		 * @param         string        'theme'    Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
+		$themes    = array_merge( $themes, (array) $additions );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = [];
-
-			foreach ( (array) self::$extra_headers as $value ) {
-				$header   = null;
-				$repo_uri = $theme->get( $value );
-
-				/**
-				 * Get $repo_uri from themes added to GitHub Updater via hook.
-				 */
-				foreach ( (array) $additions as $addition ) {
-					if ( $theme->stylesheet === $addition['slug'] ) {
-						if ( ! empty( $addition[ $value ] ) ) {
-							$repo_uri = $addition[ $value ];
-							break;
-						}
+			$header    = null;
+			$key       = array_filter(
+				array_keys( $theme ),
+				function( $key ) use ( $theme ) {
+					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) & 'ThemeURI' !== $key ) {
+						return $key;
 					}
 				}
+			);
 
-				if ( empty( $repo_uri ) || false === stripos( $value, 'Theme' ) ) {
-					continue;
-				}
-
-				$header_parts = explode( ' ', $value );
-				$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
-
-				if ( $repo_parts['bool'] ) {
-					$header = $this->parse_header_uri( $repo_uri );
-					if ( empty( $header ) || $theme->stylesheet !== $header['repo'] ) {
-						continue;
-					}
-				}
-
-				$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
-				$current_branch = "current_branch_{$header['repo']}";
-				$branch         = isset( self::$options[ $current_branch ] )
-					? self::$options[ $current_branch ]
-					: false;
-
-				$git_theme['type']                    = 'theme';
-				$git_theme['git']                     = $repo_parts['git_server'];
-				$git_theme['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
-				$git_theme['enterprise']              = $header['enterprise_uri'];
-				$git_theme['enterprise_api']          = $header['enterprise_api'];
-				$git_theme['owner']                   = $header['owner'];
-				$git_theme['slug']                    = $header['repo'];
-				$git_theme['file']                    = "{$header['repo']}/style.css";
-				$git_theme['name']                    = $theme->get( 'Name' );
-				$git_theme['theme_uri']               = $theme->get( 'ThemeURI' );
-				$git_theme['homepage']                = $theme->get( 'ThemeURI' );
-				$git_theme['author']                  = $theme->get( 'Author' );
-				$git_theme['local_version']           = strtolower( $theme->get( 'Version' ) );
-				$git_theme['sections']['description'] = $theme->get( 'Description' );
-				$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['slug'] . '/';
-				$git_theme['branch']                  = $branch ?: 'master';
-				$git_theme['languages']               = $header['languages'];
-				$git_theme['ci_job']                  = $header['ci_job'];
-				$git_theme['release_asset']           = $header['release_asset'];
-				$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
-
-				break;
-			}
-
-			// Exit if not git hosted theme.
-			if ( empty( $git_theme ) ) {
+			$key = array_pop( $key );
+			if ( null === $key ) {
 				continue;
 			}
+			$repo_uri = $theme[ $key ];
+
+			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
+			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
+
+			if ( $repo_parts['bool'] ) {
+				$header = $this->parse_header_uri( $repo_uri );
+			}
+
+			$header                               = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+			$current_branch                       = "current_branch_{$header['repo']}";
+			$branch                               = isset( self::$options[ $current_branch ] )
+				? self::$options[ $current_branch ]
+				: false;
+			$git_theme['type']                    = 'theme';
+			$git_theme['git']                     = $repo_parts['git_server'];
+			$git_theme['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
+			$git_theme['enterprise']              = $header['enterprise_uri'];
+			$git_theme['enterprise_api']          = $header['enterprise_api'];
+			$git_theme['owner']                   = $header['owner'];
+			$git_theme['slug']                    = $header['repo'];
+			$git_theme['file']                    = "{$header['repo']}/style.css";
+			$git_theme['name']                    = $theme['Name'];
+			$git_theme['theme_uri']               = $theme['ThemeURI'];
+			$git_theme['homepage']                = $theme['ThemeURI'];
+			$git_theme['author']                  = $theme['Author'];
+			$git_theme['local_version']           = strtolower( $theme['Version'] );
+			$git_theme['sections']['description'] = $theme['Description'];
+			$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['slug'] . '/';
+			$git_theme['branch']                  = $branch ?: 'master';
+			$git_theme['languages']               = $header['languages'];
+			$git_theme['ci_job']                  = $header['ci_job'];
+			$git_theme['release_asset']           = $header['release_asset'];
+			$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
-
-		remove_filter( 'extra_theme_headers', [ $this->base, 'add_headers' ] );
 
 		return $git_themes;
 	}

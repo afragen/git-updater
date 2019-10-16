@@ -236,10 +236,10 @@ class Remote_Management {
 		echo '<p>';
 		printf(
 			wp_kses_post(
-				/* translators: %s: Link to Git Bulk Updater repository */
-				__( 'The <a href="%s">Git Bulk Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler.', 'github-updater' )
+				/* translators: %s: Link to Git Remote Updater repository */
+				__( 'The <a href="%s">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler.', 'github-updater' )
 			),
-			'https://github.com/afragen/git-bulk-updater'
+			'https://github.com/afragen/git-remote-updater'
 		);
 		echo '</p>';
 
