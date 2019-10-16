@@ -103,5 +103,7 @@ class Bootstrap {
 				}
 			}
 		);
+
+		return true;
 	}
 }
