@@ -17,6 +17,14 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// Load textdomain.
+add_action(
+	'init',
+	function() {
+		load_plugin_textdomain( 'github-updater' );
+	}
+);
+
 /**
  * Class Bootstrap
  */
@@ -52,12 +60,9 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function run() {
-		add_action(
-			'init',
-			function() {
-				load_plugin_textdomain( 'github-updater' );
-			}
-		);
+		if ( ! $this->check_requirements() ) {
+			return;
+		}
 
 		define( 'GITHUB_UPDATER_DIR', $this->dir );
 
@@ -73,5 +78,30 @@ class Bootstrap {
 		 * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
 		 */
 		add_action( 'admin_init', array( 'PAnD', 'init' ) );
+	}
+
+	/**
+	 * Check PHP requirements and deactivate plugin if not met.
+	 *
+	 * @return void|bool
+	 */
+	public function check_requirements() {
+		add_action(
+			'admin_init',
+			function() {
+				if ( version_compare( phpversion(), '5.6', '<=' ) ) {
+					echo '<div class="error notice is-dismissible"><p>';
+					printf(
+						/* translators: 1: minimum PHP version required */
+						wp_kses_post( __( 'GitHub Updater cannot run on PHP versions older than %1$s.', 'github-updater' ) ),
+						'5.6'
+					);
+					echo '</p></div>';
+					\deactivate_plugins( plugin_basename( $this->file ) );
+
+					return false;
+				}
+			}
+		);
 	}
 }
