@@ -4,6 +4,7 @@
 * refactor to how plugin and theme meta are obtained
 * remove reliance on `extra_{$context}_filter` to add extra headers
 * update for new GitHub Updater Additions
+* update `sanitize()` to use `sanitize_text_field()` if variable is a MIME type
 
 #### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
