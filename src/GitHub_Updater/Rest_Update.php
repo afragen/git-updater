@@ -207,8 +207,8 @@ class Rest_Update {
 			}
 
 			$this->get_webhook_source();
-			$current_branch = $this->get_local_branch();
 			$override       = isset( self::$request['override'] );
+			$current_branch = $this->get_local_branch();
 			$current_branch = $override ? $tag : $current_branch;
 			if ( $tag !== $current_branch && ! $override ) {
 				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
@@ -216,14 +216,8 @@ class Rest_Update {
 
 			if ( isset( self::$request['plugin'] ) ) {
 				$this->update_plugin( self::$request['plugin'], $tag );
-				if ( $override ) {
-					$this->set_repo_cache( 'current_branch', $current_branch, self::$request['plugin'] );
-				}
 			} elseif ( isset( self::$request['theme'] ) ) {
 				$this->update_theme( self::$request['theme'], $tag );
-				if ( $override ) {
-					$this->set_repo_cache( 'current_branch', $current_branch, self::$request['theme'] );
-				}
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
@@ -235,6 +229,13 @@ class Rest_Update {
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$this->log_exit( $http_response, 417 );
+		}
+
+		// Only set branch on successful update.
+		if ( ! $this->is_error() ) {
+			$slug = isset( self::$request['plugin'] ) ? self::$request['plugin'] : false;
+			$slug = isset( self::$request['theme'] ) ? self::$request['theme'] : $slug;
+			$this->set_repo_cache( 'current_branch', $current_branch, $slug );
 		}
 
 		$response = [
