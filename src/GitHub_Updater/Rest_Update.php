@@ -201,14 +201,21 @@ class Rest_Update {
 			$this->get_webhook_source();
 			$current_branch = $this->get_local_branch();
 			$override       = isset( $_REQUEST['override'] );
+			$current_branch = $override ? $tag : $current_branch;
 			if ( $tag !== $current_branch && ! $override ) {
 				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
 			}
 
 			if ( isset( $_REQUEST['plugin'] ) ) {
 				$this->update_plugin( $_REQUEST['plugin'], $tag );
+				if ( $override ) {
+					$this->set_repo_cache( 'current_branch', $current_branch, $_REQUEST['plugin'] );
+				}
 			} elseif ( isset( $_REQUEST['theme'] ) ) {
 				$this->update_theme( $_REQUEST['theme'], $tag );
+				if ( $override ) {
+					$this->set_repo_cache( 'current_branch', $current_branch, $_REQUEST['theme'] );
+				}
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
