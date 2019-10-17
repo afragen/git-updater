@@ -281,7 +281,11 @@ trait GHU_Trait {
 	public function sanitize( $input ) {
 		$new_input = [];
 		foreach ( array_keys( (array) $input ) as $id ) {
-			$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
+			if ( in_array( $id, array_keys( wp_get_mime_types() ), true ) ) {
+				$new_input[  sanitize_text_field( $id )  ] = sanitize_text_field( $input[ $id ] );
+			} else {
+				$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
+			}
 		}
 
 		return $new_input;
