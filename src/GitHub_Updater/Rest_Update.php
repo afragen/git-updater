@@ -52,7 +52,7 @@ class Rest_Update {
 	public function __construct() {
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
-		self::$request       = $this->sanitize( $_REQUEST );
+		self::$request       = $this->sanitize( $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 
 	/**
@@ -231,7 +231,7 @@ class Rest_Update {
 			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET,
+				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
 			$this->log_exit( $http_response, 417 );
@@ -240,7 +240,7 @@ class Rest_Update {
 		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
-			'webhook'      => $_GET,
+			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 		];
 
