@@ -40,11 +40,19 @@ class Rest_Update {
 	protected $upgrader_skin;
 
 	/**
+	 * Holds sanitized $_REQUEST.
+	 *
+	 * @var array
+	 */
+	protected static $request;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
+		self::$request       = $this->sanitize( $_REQUEST );
 	}
 
 	/**
@@ -177,8 +185,8 @@ class Rest_Update {
 	public function process_request() {
 		$start = microtime( true );
 		try {
-			if ( ! isset( $_REQUEST['key'] ) ||
-				get_site_option( 'github_updater_api_key' ) !== $_REQUEST['key']
+			if ( ! isset( self::$request['key'] ) ||
+				get_site_option( 'github_updater_api_key' ) !== self::$request['key']
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
@@ -192,29 +200,29 @@ class Rest_Update {
 			do_action( 'github_updater_pre_rest_process_request' );
 
 			$tag = 'master';
-			if ( isset( $_REQUEST['tag'] ) ) {
-				$tag = $_REQUEST['tag'];
-			} elseif ( isset( $_REQUEST['committish'] ) ) {
-				$tag = $_REQUEST['committish'];
+			if ( isset( self::$request['tag'] ) ) {
+				$tag = self::$request['tag'];
+			} elseif ( isset( self::$request['committish'] ) ) {
+				$tag = self::$request['committish'];
 			}
 
 			$this->get_webhook_source();
 			$current_branch = $this->get_local_branch();
-			$override       = isset( $_REQUEST['override'] );
+			$override       = isset( self::$request['override'] );
 			$current_branch = $override ? $tag : $current_branch;
 			if ( $tag !== $current_branch && ! $override ) {
 				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
 			}
 
-			if ( isset( $_REQUEST['plugin'] ) ) {
-				$this->update_plugin( $_REQUEST['plugin'], $tag );
+			if ( isset( self::$request['plugin'] ) ) {
+				$this->update_plugin( self::$request['plugin'], $tag );
 				if ( $override ) {
-					$this->set_repo_cache( 'current_branch', $current_branch, $_REQUEST['plugin'] );
+					$this->set_repo_cache( 'current_branch', $current_branch, self::$request['plugin'] );
 				}
-			} elseif ( isset( $_REQUEST['theme'] ) ) {
-				$this->update_theme( $_REQUEST['theme'], $tag );
+			} elseif ( isset( self::$request['theme'] ) ) {
+				$this->update_theme( self::$request['theme'], $tag );
 				if ( $override ) {
-					$this->set_repo_cache( 'current_branch', $current_branch, $_REQUEST['theme'] );
+					$this->set_repo_cache( 'current_branch', $current_branch, self::$request['theme'] );
 				}
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
@@ -250,13 +258,13 @@ class Rest_Update {
 	 */
 	private function get_local_branch() {
 		$repo = false;
-		if ( isset( $_REQUEST['plugin'] ) ) {
+		if ( isset( self::$request['plugin'] ) ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-			$repo  = isset( $repos[ $_REQUEST['plugin'] ] ) ? $repos[ $_REQUEST['plugin'] ] : false;
+			$repo  = isset( $repos[ self::$request['plugin'] ] ) ? $repos[ self::$request['plugin'] ] : false;
 		}
-		if ( isset( $_REQUEST['theme'] ) ) {
+		if ( isset( self::$request['theme'] ) ) {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-			$repo  = isset( $repos[ $_REQUEST['theme'] ] ) ? $repos[ $_REQUEST['theme'] ] : false;
+			$repo  = isset( $repos[ self::$request['theme'] ] ) ? $repos[ self::$request['theme'] ] : false;
 		}
 		$current_branch = $repo ?
 			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :
