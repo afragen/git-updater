@@ -47,6 +47,14 @@ class Rest_Update {
 	protected static $request;
 
 	/**
+	 * Holds regex pattern for version number.
+	 * Allows for leading 'v'.
+	 *
+	 * @var string
+	 */
+	protected static $version_number_regex = '@(?:v)?[0-9\.]+@i';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -209,8 +217,16 @@ class Rest_Update {
 			$this->get_webhook_source();
 			$override       = isset( self::$request['override'] );
 			$current_branch = $this->get_local_branch();
-			$current_branch = $override ? $tag : $current_branch;
-			if ( $tag !== $current_branch && ! $override ) {
+
+			if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
+				$remote_branch = 'master';
+			}
+			if ( isset( self::$request['branch'] ) ) {
+				$tag = $remote_branch = self::$request['branch'];
+			}
+			$remote_branch  = isset( $remote_branch ) ? $remote_branch : $tag;
+			$current_branch = $override ? $remote_branch : $current_branch;
+			if ( $remote_branch !== $current_branch && ! $override ) {
 				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
 			}
 
