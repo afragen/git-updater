@@ -249,9 +249,15 @@ class Rest_Update {
 
 		// Only set branch on successful update.
 		if ( ! $this->is_error() ) {
-			$slug = isset( self::$request['plugin'] ) ? self::$request['plugin'] : false;
-			$slug = isset( self::$request['theme'] ) ? self::$request['theme'] : $slug;
-			$this->set_repo_cache( 'current_branch', $current_branch, $slug );
+			$slug    = isset( self::$request['plugin'] ) ? self::$request['plugin'] : false;
+			$slug    = isset( self::$request['theme'] ) ? self::$request['theme'] : $slug;
+			$options = $this->get_class_vars( 'Base', 'options' );
+
+			// Set branch, delete repo cache, and spawn cron.
+			$options[ 'current_branch_' . $slug ] = $current_branch;
+			update_site_option( 'github_updater', $options );
+			delete_site_option( 'ghu-' . md5( $slug ) );
+			wp_cron();
 		}
 
 		$response = [
