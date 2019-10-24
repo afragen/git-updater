@@ -114,7 +114,7 @@ class REST_API {
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(
 			[
-				'key'    => $request->get_param( 'key' ),
+				'key' => $request->get_param( 'key' ),
 			],
 			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);

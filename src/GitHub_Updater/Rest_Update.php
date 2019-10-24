@@ -320,23 +320,16 @@ class Rest_Update {
 			 */
 			do_action( 'github_updater_pre_rest_process_request' );
 
-			// $tag = 'master';
-			// if ( isset( self::$request['tag'] ) ) {
-			// $tag = self::$request['tag'];
-			// } elseif ( isset( self::$request['committish'] ) ) {
-			// $tag = self::$request['committish'];
-			// }
-			$tag = $committish ? $committish : $tag;
-
 			$this->get_webhook_source();
-			// $override       = isset( self::$request['override'] );
+			$tag            = $committish ? $committish : $tag;
 			$current_branch = $this->get_local_branch();
 
 			if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
 				$remote_branch = 'master';
 			}
 			if ( ! empty( $branch ) ) {
-				$tag = $remote_branch = $branch;
+				$tag           = $branch;
+				$remote_branch = $branch;
 			}
 			$remote_branch  = isset( $remote_branch ) ? $remote_branch : $tag;
 			$current_branch = $override ? $remote_branch : $current_branch;
