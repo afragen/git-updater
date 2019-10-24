@@ -30,6 +30,11 @@ class REST_API {
 	 */
 	public static $namespace = 'github-updater/v1';
 
+	/**
+	 * Register REST API endpoints.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			self::$namespace,
@@ -60,18 +65,18 @@ class REST_API {
 			'update',
 			[
 				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ new REST_Update(), 'process_rest_request' ],
+				'callback' => [ new REST_Update(), 'pre_process_request' ],
 				'args'     => [
 					'key'        => [
-						'default'           => null,
+						'default'           => false,
 						'validate_callback' => 'sanitize_text_field',
 					],
 					'plugin'     => [
-						'default'           => null,
+						'default'           => false,
 						'validate_callback' => 'sanitize_text_field',
 					],
 					'theme'      => [
-						'default'           => null,
+						'default'           => false,
 						'validate_callback' => 'sanitize_text_field',
 
 					],
@@ -80,11 +85,11 @@ class REST_API {
 						'validate_callback' => 'sanitize_text_field',
 					],
 					'branch'     => [
-						'default'           => null,
+						'default'           => false,
 						'validate_callback' => 'sanitize_text_field',
 					],
 					'committish' => [
-						'default'           => null,
+						'default'           => false,
 						'validate_callback' => 'sanitize_text_field',
 					],
 					'override'   => [
@@ -102,7 +107,7 @@ class REST_API {
 	/**
 	 * Get repo data for Git Remote Updater.
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param \WP_REST_Request $request REST API response.
 	 *
 	 * @return string
 	 */
