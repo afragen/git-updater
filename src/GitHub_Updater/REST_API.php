@@ -42,7 +42,7 @@ class REST_API {
 
 		register_rest_route(
 			self::$namespace,
-			'remote',
+			'repos',
 			[
 				'methods'  => \WP_REST_Server::READABLE,
 				'callback' => [ $this, 'get_remote_repo_data' ],
@@ -114,11 +114,9 @@ class REST_API {
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(
 			[
-				'action' => 'github-updater-update',
 				'key'    => $request->get_param( 'key' ),
 			],
-			\home_url( 'wp-json/' . self::$namespace . '/update/' )
-			// admin_url( 'admin-ajax.php' )
+			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);
 		foreach ( $ghu_tokens as $token ) {
 			$slugs[] = [
@@ -134,8 +132,6 @@ class REST_API {
 				'slugs'         => $slugs,
 			],
 		];
-
-		// $json = json_encode( $json, JSON_FORCE_OBJECT );
 
 		return $json;
 	}

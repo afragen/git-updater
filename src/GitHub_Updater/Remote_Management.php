@@ -307,37 +307,17 @@ class Remote_Management {
 		) {
 			return;
 		}
-		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
-
-		$site                      = $_SERVER['HTTP_HOST'];
-		$_POST                     = $_REQUEST;
-		$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] :
-		"{$_SERVER['HTTP_X_FORWARDED_PROTO']}://{$site}{$_SERVER['PHP_SELF']}?{$_SERVER['QUERY_STRING']}";  $api_url = add_query_arg(
-			[
-				'action' => 'github-updater-update',
-				'key'    => self::$api_key,
-			],
-			admin_url( 'admin-ajax.php' )
-		);
-		foreach ( $ghu_tokens as $token ) {
-			$slugs[] = [
-				'slug'   => $token->slug,
-				'type'   => $token->type,
-				'branch' => $token->branch,
-			];
-		}
-		$json = [
-			'sites' => [
-				'site'          => $site,
-				'restful_start' => $api_url,
-				'slugs'         => $slugs,
+		$site   = $_SERVER['HTTP_HOST'];
+		$origin = $_SERVER['HTTP_ORIGIN'];
+		$json   = [
+			'site' => [
+				'host'                 => $origin,
+				'rest_namespace_route' => $this->get_class_vars( 'REST_API', 'namespace' ) . '/repos/',
+				'rest_api_key'         => self::$api_key,
 			],
 		];
 
-		$json = json_encode( $json, JSON_FORCE_OBJECT );
-
+		$json      = json_encode( $json, JSON_FORCE_OBJECT );
 		$file      = str_replace( '.', '-', $site ) . '.json';
 		$file_path = get_temp_dir() . "/{$file}";
 		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
