@@ -6,6 +6,8 @@
 * update for new GitHub Updater Additions
 * update `sanitize()` to use `sanitize_text_field()` if variable is a MIME type
 * improve branch setting for `Rest_Update`
+* added `class REST_API` to define and use the REST API instead of `admin-ajax.php`
+* updated downloadable JSON config file for Git Bulk Updater
 
 #### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125

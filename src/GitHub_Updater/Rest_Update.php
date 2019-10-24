@@ -239,6 +239,7 @@ class Rest_Update {
 			}
 		} catch ( \Exception $e ) {
 			$http_response = [
+				'deprecated'   => 'Please update to using the new REST API endpoint. This is now deprecated.',
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
@@ -265,6 +266,7 @@ class Rest_Update {
 		}
 
 		$response = [
+			'deprecated'   => 'Please update to using the new REST API endpoint. This is now deprecated.',
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification

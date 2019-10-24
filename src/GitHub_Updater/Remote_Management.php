@@ -227,10 +227,9 @@ class Remote_Management {
 		}
 		$api_url = add_query_arg(
 			[
-				'action' => 'github-updater-update',
-				'key'    => self::$api_key,
+				'key' => self::$api_key,
 			],
-			admin_url( 'admin-ajax.php' )
+			home_url( 'wp-json/' . $this->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
 		);
 
 		echo '<p>';
@@ -247,7 +246,7 @@ class Remote_Management {
 			printf(
 				wp_kses_post(
 					/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
-					__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. RESTful endpoints begin at: %2$s', 'github-updater' )
+					__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints begin at: %2$s', 'github-updater' )
 				),
 				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
 				'<br><span style="font-family:monospace;">' . $api_url . '</span>'
