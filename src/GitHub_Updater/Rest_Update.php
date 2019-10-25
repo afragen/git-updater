@@ -271,11 +271,11 @@ class Rest_Update {
 			}
 		} catch ( \Exception $e ) {
 			$http_response = [
-				'deprecated'   => $deprecated,
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+				'deprecated'   => $deprecated,
 			];
 			$this->log_exit( $http_response, 417 );
 		}
@@ -298,11 +298,11 @@ class Rest_Update {
 		}
 
 		$response = [
-			'deprecated'   => $deprecated,
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+			'deprecated'   => $deprecated,
 		];
 
 		if ( $this->is_error() ) {
