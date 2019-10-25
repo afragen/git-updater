@@ -100,8 +100,13 @@ class REST_API {
 		);
 	}
 
+	/**
+	 * Simple REST endpoint return.
+	 *
+	 * @return string
+	 */
 	public function test() {
-		return 'test!';
+		return 'Connected to GitHub Updater!';
 	}
 
 	/**
