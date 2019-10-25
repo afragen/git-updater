@@ -60,41 +60,50 @@ class REST_API {
 			]
 		);
 
+		$update_args = [
+			'key'        => [
+				'default'           => false,
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'plugin'     => [
+				'default'           => false,
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'theme'      => [
+				'default'           => false,
+				'validate_callback' => 'sanitize_text_field',
+
+			],
+			'tag'        => [
+				'default'           => 'master',
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'branch'     => [
+				'default'           => false,
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'committish' => [
+				'default'           => false,
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'override'   => [
+				'default' => false,
+			],
+		];
+
 		register_rest_route(
 			self::$namespace,
 			'update',
 			[
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ new REST_Update(), 'pre_process_request' ],
-				'args'     => [
-					'key'        => [
-						'default'           => false,
-						'validate_callback' => 'sanitize_text_field',
-					],
-					'plugin'     => [
-						'default'           => false,
-						'validate_callback' => 'sanitize_text_field',
-					],
-					'theme'      => [
-						'default'           => false,
-						'validate_callback' => 'sanitize_text_field',
-
-					],
-					'tag'        => [
-						'default'           => 'master',
-						'validate_callback' => 'sanitize_text_field',
-					],
-					'branch'     => [
-						'default'           => false,
-						'validate_callback' => 'sanitize_text_field',
-					],
-					'committish' => [
-						'default'           => false,
-						'validate_callback' => 'sanitize_text_field',
-					],
-					'override'   => [
-						'default' => false,
-					],
+				[
+					'methods'  => \WP_REST_Server::READABLE,
+					'callback' => [ new REST_Update(), 'pre_process_request' ],
+					'args'     => $update_args,
+				],
+				[
+					'methods'  => \WP_REST_Server::CREATABLE,
+					'callback' => [ new REST_Update(), 'pre_process_request' ],
+					'args'     => $update_args,
 				],
 			]
 		);
