@@ -684,11 +684,12 @@ class API {
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
 		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( $this->exit_no_update( $response ) || ! isset( $_REQUEST['override'] ) ) {
+		if ( $this->exit_no_update( $response ) && ! isset( $_REQUEST['override'] ) ) {
 			return false;
 		}
 
-		if ( ! $response ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
 			$url = $this->add_access_token_endpoint( $this, $asset );
