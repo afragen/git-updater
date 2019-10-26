@@ -38,9 +38,11 @@ before_script:
   - |
     if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then
       composer global require "phpunit/phpunit:^6"
-    elif [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+    fi
+    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
       composer global require "phpunit/phpunit:^7"
-    elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+    fi
+    if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then
       composer global require "phpunit/phpunit:^4"
     fi
   - $HOME/.composer/vendor/bin/phpunit --version
