@@ -168,7 +168,7 @@ class Plugin {
 				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			$header                                = Singleton::get_instance( 'Base', $this )->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
+			$header                                = $this->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
 			$current_branch                        = "current_branch_{$header['repo']}";
 			$branch                                = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]
