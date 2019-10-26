@@ -577,18 +577,8 @@ trait GHU_Trait {
 			}
 		}
 
-		if ( $headers instanceof \WP_Theme ) {
-			$theme                    = $headers;
-			$headers                  = [];
-			$headers['Release Asset'] = '';
-			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
-		}
-
 		$self_hosted_parts = array_keys( $extra_repo_headers );
 		foreach ( $self_hosted_parts as $part ) {
-			if ( $theme instanceof \WP_Theme ) {
-				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
-			}
 			if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
 				! empty( $headers[ $repo_parts[ $part ] ] )
 			) {
@@ -602,7 +592,7 @@ trait GHU_Trait {
 				}
 			}
 		}
-		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['Release Asset'] ) ? 'true' === $headers['Release Asset'] : $header['release_asset'];
+		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
 
 		return $header;
 	}
