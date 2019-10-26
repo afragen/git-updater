@@ -587,8 +587,8 @@ class API {
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
 		$this->type->remote_version = strtolower( $response['Version'] );
-		$this->type->requires_php   = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : false;
-		$this->type->requires       = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
+		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
+		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
 		$this->type->dot_org        = $response['dot_org'];
 	}
 
