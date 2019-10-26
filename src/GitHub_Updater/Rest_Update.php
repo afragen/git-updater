@@ -60,7 +60,9 @@ class Rest_Update {
 	public function __construct() {
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
-		self::$request       = $this->sanitize( $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification
+
+		 // phpcs:ignore WordPress.Security.NonceVerification
+		self::$request = $this->sanitize( $_REQUEST );
 	}
 
 	/**
@@ -181,40 +183,6 @@ class Rest_Update {
 	}
 
 	/**
-	 * Pre-process request data from REST API or RESTful endpoint.
-	 *
-	 * @param \WP_REST_Request|array $request Request data from update webhook.
-	 *
-	 * @return array
-	 */
-	public function pre_process_request( $request = null ) {
-		if ( $request instanceof \WP_REST_Request ) {
-			$key        = $request->get_param( 'key' );
-			$plugin     = $request->get_param( 'plugin' );
-			$theme      = $request->get_param( 'theme' );
-			$tag        = $request->get_param( 'tag' );
-			$committish = $request->get_param( 'committish' );
-			$branch     = $request->get_param( 'branch' );
-			$override   = $request->get_param( 'override' );
-			$override   = false === $override ? false : true;
-			$deprecated = false;
-		} else {
-			$key        = empty( self::$request['key'] ) ? false : self::$request['key'];
-			$plugin     = empty( self::$request['plugin'] ) ? false : self::$request['plugin'];
-			$theme      = empty( self::$request['theme'] ) ? false : self::$request['theme'];
-			$tag        = empty( self::$request['tag'] ) ? 'master' : self::$request['tag'];
-			$committish = empty( self::$request['committish'] ) ? false : self::$request['committish'];
-			$branch     = empty( self::$request['branch'] ) ? false : self::$request['branch'];
-			$override   = empty( self::$request['override'] ) ? false : self::$request['override'];
-			$override   = false === $override ? false : true;
-			$deprecated = 'Please update to using the new REST API endpoint. This is now deprecated.';
-		}
-
-		$arr = compact( 'key', 'plugin', 'theme', 'tag', 'committish', 'branch', 'override', 'deprecated' );
-		$this->process_request( $arr );
-	}
-
-	/**
 	 * Process request.
 	 *
 	 * Relies on data in $_REQUEST, prints out json and exits.
@@ -222,11 +190,12 @@ class Rest_Update {
 	 * webhook matches the branch specified by the url, use the latest
 	 * update available as specified in the webhook payload.
 	 *
-	 * @param array $args Array of request data from REST API call or deprecated RESTful endpoint.
+	 * @param \WP_REST_Request|null $request Request data from update webhook.
 	 *
 	 * @throws \UnexpectedValueException Under multiple bad or missing params.
 	 */
-	public function process_request( $args = [] ) {
+	public function process_request( $request = null ) {
+		$args = $this->process_request_data( $request );
 		extract( $args );
 
 		$start = microtime( true );
@@ -313,109 +282,34 @@ class Rest_Update {
 	}
 
 	/**
-	 * Process REST endpoint update request.
+	 * Process request data from REST API or RESTful endpoint.
 	 *
-	 * Prints out json and exits.
-	 * If the request came through a webhook, and if the branch in the
-	 * webhook matches the branch specified by the url, use the latest
-	 * update available as specified in the webhook payload.
+	 * @param \WP_REST_Request|array $request Request data from update webhook.
 	 *
-	 * @throws \UnexpectedValueException Under multiple bad or missing params.
-	 *
-	 * @param \WP_REST_Request $request WP_REST_Request from endpoint.
-	 *
-	 * @return void
+	 * @return array
 	 */
-	// public function process_rest_request( \WP_REST_Request $request ) {
-	// $key        = $request->get_param( 'key' );
-	// $plugin     = $request->get_param( 'plugin' );
-	// $theme      = $request->get_param( 'theme' );
-	// $tag        = $request->get_param( 'tag' );
-	// $committish = $request->get_param( 'committish' );
-	// $branch     = $request->get_param( 'branch' );
-	// $override   = $request->get_param( 'override' );
-	// $override   = false === $override ? false : true;
-	//
-	// $start = microtime( true );
-	// try {
-	// if ( ! $key ||
-	// get_site_option( 'github_updater_api_key' ) !== $key
-	// ) {
-	// throw new \UnexpectedValueException( 'Bad API key.' );
-	// }
-	//
-	// **
-	// * Allow access into the REST Update process.
-	// *
-	// * @since  7.6.0
-	// * @access public
-	// */
-	// do_action( 'github_updater_pre_rest_process_request' );
-	//
-	// $this->get_webhook_source();
-	// $tag            = $committish ? $committish : $tag;
-	// $current_branch = $this->get_local_branch( $plugin, $theme );
-	//
-	// if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
-	// $remote_branch = 'master';
-	// }
-	// if ( ! $branch ) {
-	// $tag           = $branch;
-	// $remote_branch = $branch;
-	// }
-	// $remote_branch  = isset( $remote_branch ) ? $remote_branch : $tag;
-	// $current_branch = $override ? $remote_branch : $current_branch;
-	// if ( $remote_branch !== $current_branch && ! $override ) {
-	// throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. //Consider using `override` query arg.' );
-	// }
-	//
-	// if ( ! $plugin ) {
-	// $this->update_plugin( $plugin, $tag );
-	// } elseif ( ! $theme ) {
-	// $this->update_theme( $theme, $tag );
-	// } else {
-	// throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
-	// }
-	// } catch ( \Exception $e ) {
-	// $http_response = [
-	// 'success'      => false,
-	// 'messages'     => $e->getMessage(),
-	// 'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
-	// 'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-	// ];
-	// $this->log_exit( $http_response, 417 );
-	// }
-	//
-	// Only set branch on successful update.
-	// if ( ! $this->is_error() ) {
-	// $slug      = ! $plugin ? $plugin : false;
-	// $slug      = ! $theme ? $theme : $slug;
-	// $file      = ! $plugin ? $plugin . '.php' : 'style.css';
-	// $options   = $this->get_class_vars( 'Base', 'options' );
-	// $cache     = $this->get_repo_cache( $slug );
-	// $cache_key = 'ghu-' . md5( $slug );
-	//
-	// $cache['current_branch'] = $current_branch;
-	// unset( $cache[ $file ] );
-	// update_site_option( $cache_key, $cache );
-	//
-	// $options[ 'current_branch_' . $slug ] = $current_branch;
-	// update_site_option( 'github_updater', $options );
-	// }
-	//
-	// $response = [
-	// 'success'      => true,
-	// 'messages'     => $this->get_messages(),
-	// 'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
-	// 'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
-	// ];
-	//
-	// if ( $this->is_error() ) {
-	// $response['success'] = false;
-	// $this->log_exit( $response, 417 );
-	// }
-	// $this->log_exit( $response, 200 );
-	// }
+	public function process_request_data( $request = null ) {
+		if ( $request instanceof \WP_REST_Request ) {
+			$params = $request->get_params();
+			extract( $params );
+			$override   = false === $override ? false : true;
+			$deprecated = false;
+		} else { // call from admin-ajax.php.
+			$key        = empty( self::$request['key'] ) ? false : self::$request['key'];
+			$plugin     = empty( self::$request['plugin'] ) ? false : self::$request['plugin'];
+			$theme      = empty( self::$request['theme'] ) ? false : self::$request['theme'];
+			$tag        = empty( self::$request['tag'] ) ? 'master' : self::$request['tag'];
+			$committish = empty( self::$request['committish'] ) ? false : self::$request['committish'];
+			$branch     = empty( self::$request['branch'] ) ? false : self::$request['branch'];
+			$override   = empty( self::$request['override'] ) ? false : self::$request['override'];
+			$override   = false === $override ? false : true;
+			$deprecated = 'Please update to using the new REST API endpoint. This is now deprecated.';
+		}
+
+		$args = compact( 'key', 'plugin', 'theme', 'tag', 'committish', 'branch', 'override', 'deprecated' );
+
+		return $args;
+	}
 
 	/**
 	 * Returns the current branch of the local repository referenced in the webhook.

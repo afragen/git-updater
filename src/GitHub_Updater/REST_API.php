@@ -97,12 +97,12 @@ class REST_API {
 			[
 				[
 					'methods'  => \WP_REST_Server::READABLE,
-					'callback' => [ new REST_Update(), 'pre_process_request' ],
+					'callback' => [ new REST_Update(), 'process_request' ],
 					'args'     => $update_args,
 				],
 				[
 					'methods'  => \WP_REST_Server::CREATABLE,
-					'callback' => [ new REST_Update(), 'pre_process_request' ],
+					'callback' => [ new REST_Update(), 'process_request' ],
 					'args'     => $update_args,
 				],
 			]
