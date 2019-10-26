@@ -439,6 +439,8 @@ class Base {
 			return $source;
 		}
 
+		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
+
 		/*
 		 * Remote install source.
 		 */
@@ -448,8 +450,6 @@ class Base {
 			$new_source                      = trailingslashit( $remote_source ) . $slug;
 			self::$options['remote_install'] = true;
 		}
-
-		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
