@@ -460,38 +460,22 @@ class Theme {
 	 * @param array  $theme
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
-		$themes      = $this->get_theme_configs();
-		$git_servers = $this->get_class_vars( 'Base', 'git_servers' );
+		$themes = $this->get_theme_configs();
 
-		foreach ( $git_servers as $server ) {
-			$repo_header = $server . ' Theme URI';
-			$repo_uri    = $theme->get( $repo_header );
+		/**
+		 * Filter to add themes not containing appropriate header line.
+		 *
+		 * @since   5.4.0
+		 * @access  public
+		 *
+		 * @param array $additions Listing of themes to add.
+		 *                         Default null.
+		 * @param array $themes    Listing of all themes.
+		 * @param         string        'theme'    Type being passed.
+		 */
+		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
+		$themes    = array_merge( $themes, (array) $additions );
 
-			/**
-			 * Filter to add themes not containing appropriate header line.
-			 *
-			 * @since   5.4.0
-			 * @access  public
-			 *
-			 * @param array $additions Listing of themes to add.
-			 *                         Default null.
-			 * @param array $themes    Listing of all themes.
-			 * @param         string        'theme'    Type being passed.
-			 */
-			$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
-			foreach ( (array) $additions as $addition ) {
-				if ( $theme_key === $addition['slug'] ) {
-					if ( ! empty( $addition[ $server . ' Theme URI' ] ) ) {
-						$repo_uri = $addition[ $server . ' Theme URI' ];
-						break;
-					}
-				}
-			}
-			if ( empty( $repo_uri ) ) {
-				continue;
-			}
-			break;
-		}
 		if ( array_key_exists( $theme_key, $themes ) ) {
 			remove_action( "after_theme_row_$theme_key", 'wp_theme_update_row' );
 		}
