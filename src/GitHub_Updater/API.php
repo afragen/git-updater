@@ -683,7 +683,8 @@ class API {
 
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( $this->exit_no_update( $response ) || ! isset( $_REQUEST['override'] ) ) {
 			return false;
 		}
 
