@@ -226,9 +226,7 @@ class Remote_Management {
 			$this->load_options();
 		}
 		$api_url = add_query_arg(
-			[
-				'key' => self::$api_key,
-			],
+			[ 'key' => self::$api_key ],
 			home_url( 'wp-json/' . $this->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
 		);
 
