@@ -579,15 +579,13 @@ trait GHU_Trait {
 
 		$self_hosted_parts = array_keys( $extra_repo_headers );
 		foreach ( $self_hosted_parts as $part ) {
-			if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
-				! empty( $headers[ $repo_parts[ $part ] ] )
-			) {
+			if ( ! empty( $headers[ $header_parts[0] . $part ] ) ) {
 				switch ( $part ) {
 					case 'Languages':
-						$header['languages'] = $headers[ $repo_parts[ $part ] ];
+						$header['languages'] = $headers[ $header_parts[0] . $part ];
 						break;
 					case 'CIJob':
-						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
+						$header['ci_job'] = $headers[ $header_parts[0] . $part ];
 						break;
 				}
 			}
