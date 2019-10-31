@@ -1,7 +1,7 @@
 #### [unreleased]
 * refactor to remove class extends
 * update renaming functions
-* refactor to how plugin and theme meta are obtained
+* refactor to how plugin and theme meta are obtained, now using `get_file_data()`
 * remove reliance on `extra_{$context}_filter` to add extra headers
 * update for new GitHub Updater Additions
 * update `sanitize()` to use `sanitize_text_field()` if variable is a MIME type
