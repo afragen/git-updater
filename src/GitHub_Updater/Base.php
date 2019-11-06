@@ -242,7 +242,6 @@ class Base {
 	public function add_extra_headers() {
 		$ghu_extra_headers = [
 			'RequiresWP'   => 'Requires WP',
-			'RequiresPHP'  => 'Requires PHP',
 			'ReleaseAsset' => 'Release Asset',
 		];
 

@@ -8,6 +8,7 @@
 * improve branch setting for `Rest_Update`
 * added `class REST_API` to define and use the REST API instead of `admin-ajax.php`
 * updated downloadable JSON config file for Git Bulk Updater
+* support WP core `Requires at least` header in favor of `Requires WP` header
 
 #### 8.9.0 / 2019-09-30
 * update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125

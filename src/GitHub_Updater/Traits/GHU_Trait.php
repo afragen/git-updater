@@ -478,6 +478,8 @@ trait GHU_Trait {
 			'TextDomain'  => 'Text Domain',
 			'DomainPath'  => 'Domain Path',
 			'Network'     => 'Network',
+			'Requires'    => 'Requires at least',
+			'RequiresPHP' => 'Requires PHP',
 		];
 
 		$default_theme_headers = [
@@ -492,6 +494,8 @@ trait GHU_Trait {
 			'Tags'        => 'Tags',
 			'TextDomain'  => 'Text Domain',
 			'DomainPath'  => 'Domain Path',
+			'Requires'    => 'Requires at least',
+			'RequiresPHP' => 'Requires PHP',
 		];
 
 		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );

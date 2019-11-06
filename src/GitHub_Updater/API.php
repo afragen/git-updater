@@ -589,6 +589,7 @@ class API {
 		$this->type->remote_version = strtolower( $response['Version'] );
 		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
 		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
+		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
 		$this->type->dot_org        = $response['dot_org'];
 	}
 
