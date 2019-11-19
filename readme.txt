@@ -1,4 +1,5 @@
 # GitHub Updater
+## ## ##
 Contributors: afragen, garyj, sethcarstens, limikael
 Donate link: https://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
