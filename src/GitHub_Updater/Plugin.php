@@ -29,21 +29,51 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Codepress
  * @link    https://github.com/codepress/github-plugin-updater
  */
-class Plugin extends Base {
+class Plugin {
 	use GHU_Trait;
 
 	/**
-	 * Rollback variable
+	 * Holds Class Base object.
 	 *
-	 * @var string branch
+	 * @var Base
 	 */
-	public $tag = false;
+	protected $base;
+
+	/**
+	 * Hold config array.
+	 *
+	 * @var array
+	 */
+	private $config;
+
+	/**
+	 * Holds extra headers.
+	 *
+	 * @var array
+	 */
+	private static $extra_headers;
+
+	/**
+	 * Holds options.
+	 *
+	 * @var array
+	 */
+	private static $options;
+
+	/**
+	 * Rollback variable.
+	 *
+	 * @var string|bool
+	 */
+	protected $tag = false;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
+		$this->base          = Singleton::get_instance( 'Base', $this );
+		self::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
+		self::$options       = $this->get_class_vars( 'Base', 'options' );
 		$this->load_options();
 
 		// Get details of installed git sourced plugins.
@@ -75,6 +105,30 @@ class Plugin extends Base {
 		$plugins     = get_plugins();
 		$git_plugins = [];
 
+		array_map(
+			function( $plugin ) use ( &$paths ) {
+				$paths[ $plugin ] = WP_PLUGIN_DIR . "/{$plugin}";
+				return $paths;
+			},
+			array_keys( $plugins )
+		);
+
+		foreach ( $paths as $slug => $path ) {
+			$all_headers        = $this->get_headers( 'plugin' );
+			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
+		}
+
+		$plugins = array_filter(
+			$repos_arr,
+			function( $repo ) {
+				foreach ( $repo as $key => $value ) {
+					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'plugin' ) && ! empty( $value ) ) {
+						return $this->get_file_headers( $repo, 'plugin' );
+					}
+				}
+			}
+		);
+
 		/**
 		 * Filter to add plugins not containing appropriate header line.
 		 *
@@ -89,83 +143,76 @@ class Plugin extends Base {
 		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
 		$plugins   = array_merge( $plugins, (array) $additions );
 
-		foreach ( (array) $plugins as $plugin => $headers ) {
+		foreach ( (array) $plugins as $slug => $plugin ) {
 			$git_plugin = [];
-
-			foreach ( (array) static::$extra_headers as $value ) {
-				$header = null;
-
-				if ( empty( $headers[ $value ] ) || false === stripos( $value, 'Plugin' ) ) {
-					continue;
-				}
-
-				$header_parts = explode( ' ', $value );
-				$repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );
-
-				if ( $repo_parts['bool'] ) {
-					$header = $this->parse_header_uri( $headers[ $value ] );
-					if ( empty( $header ) ) {
-						continue;
+			$header     = null;
+			$key        = array_filter(
+				array_keys( $plugin ),
+				function( $key ) use ( $plugin ) {
+					if ( false !== stripos( $key, 'pluginuri' ) && ! empty( $plugin[ $key ] && 'PluginURI' !== $key ) ) {
+						return $key;
 					}
 				}
+			);
 
-				$header         = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
-				$current_branch = "current_branch_{$header['repo']}";
-				$branch         = isset( static::$options[ $current_branch ] )
-					? static::$options[ $current_branch ]
-					: false;
+			$key = array_pop( $key );
+			if ( null === $key ) {
+				continue;
+			}
+			$repo_uri = $plugin[ $key ];
 
-				$git_plugin['type']           = 'plugin';
-				$git_plugin['git']            = $repo_parts['git_server'];
-				$git_plugin['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
-				$git_plugin['enterprise']     = $header['enterprise_uri'];
-				$git_plugin['enterprise_api'] = $header['enterprise_api'];
-				$git_plugin['owner']          = $header['owner'];
-				$git_plugin['slug']           = $header['repo'];
-				$git_plugin['branch']         = $branch ?: 'master';
-				$git_plugin['file']           = $plugin;
-				$git_plugin['local_path']     = WP_PLUGIN_DIR . "/{$header['repo']}/";
+			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
+			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );
 
-				$plugin_data                           = get_plugin_data( WP_PLUGIN_DIR . '/' . $git_plugin['file'] );
-				$git_plugin['author']                  = $plugin_data['AuthorName'];
-				$git_plugin['name']                    = $plugin_data['Name'];
-				$git_plugin['homepage']                = $plugin_data['PluginURI'];
-				$git_plugin['local_version']           = strtolower( $plugin_data['Version'] );
-				$git_plugin['sections']['description'] = $plugin_data['Description'];
-				$git_plugin['languages']               = $header['languages'];
-				$git_plugin['ci_job']                  = $header['ci_job'];
-				$git_plugin['release_asset']           = $header['release_asset'];
-				$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
-
-				$git_plugin['banners']['high'] =
-					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-1544x500.png" )
-						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-1544x500.png"
-						: null;
-
-				$git_plugin['banners']['low'] =
-					file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-772x250.png" )
-						? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-772x250.png"
-						: null;
-
-				$git_plugin['icons'] = [];
-				$icons               = [
-					'svg'    => 'icon.svg',
-					'1x_png' => 'icon-128x128.png',
-					'1x_jpg' => 'icon-128x128.jpg',
-					'2x_png' => 'icon-256x256.png',
-					'2x_jpg' => 'icon-256x256.jpg',
-				];
-				foreach ( $icons as $key => $filename ) {
-					$key                         = preg_replace( '/_png|_jpg/', '', $key );
-					$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-						? WP_PLUGIN_URL . "/{$git_plugin['slug']}/assets/{$filename}"
-						: null;
-				}
+			if ( $repo_parts['bool'] ) {
+				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			// Exit if not git hosted plugin.
-			if ( empty( $git_plugin ) ) {
-				continue;
+			$header                                = $this->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
+			$current_branch                        = "current_branch_{$header['repo']}";
+			$branch                                = isset( self::$options[ $current_branch ] )
+				? self::$options[ $current_branch ]
+				: false;
+			$git_plugin['type']                    = 'plugin';
+			$git_plugin['git']                     = $repo_parts['git_server'];
+			$git_plugin['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
+			$git_plugin['enterprise']              = $header['enterprise_uri'];
+			$git_plugin['enterprise_api']          = $header['enterprise_api'];
+			$git_plugin['owner']                   = $header['owner'];
+			$git_plugin['slug']                    = $header['repo'];
+			$git_plugin['branch']                  = $branch ?: 'master';
+			$git_plugin['file']                    = $slug;
+			$git_plugin['local_path']              = WP_PLUGIN_DIR . "/{$header['repo']}/";
+			$git_plugin['author']                  = $plugin['Author'];
+			$git_plugin['name']                    = $plugin['Name'];
+			$git_plugin['homepage']                = $plugin['PluginURI'];
+			$git_plugin['local_version']           = strtolower( $plugin['Version'] );
+			$git_plugin['sections']['description'] = $plugin['Description'];
+			$git_plugin['languages']               = $header['languages'];
+			$git_plugin['ci_job']                  = $header['ci_job'];
+			$git_plugin['release_asset']           = $header['release_asset'];
+			$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+			$git_plugin['banners']['high']         =
+				file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-1544x500.png" )
+					? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-1544x500.png"
+					: null;
+			$git_plugin['banners']['low']          =
+				file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-772x250.png" )
+					? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-772x250.png"
+					: null;
+			$git_plugin['icons']                   = [];
+			$icons                                 = [
+				'svg'    => 'icon.svg',
+				'1x_png' => 'icon-128x128.png',
+				'1x_jpg' => 'icon-128x128.jpg',
+				'2x_png' => 'icon-256x256.png',
+				'2x_jpg' => 'icon-256x256.jpg',
+			];
+			foreach ( $icons as $key => $filename ) {
+				$key                         = preg_replace( '/_png|_jpg/', '', $key );
+				$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
+					? WP_PLUGIN_URL . "/{$git_plugin['slug']}/assets/{$filename}"
+					: null;
 			}
 
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
@@ -192,7 +239,7 @@ class Plugin extends Base {
 			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
 				|| apply_filters( 'github_updater_disable_wpcron', false )
 			) {
-				$this->get_remote_repo_meta( $plugin );
+				$this->base->get_remote_repo_meta( $plugin );
 			} else {
 				$plugins[ $plugin->slug ] = $plugin;
 			}
@@ -239,14 +286,14 @@ class Plugin extends Base {
 	 * @return bool
 	 */
 	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( empty( static::$options['branch_switch'] ) ) {
+		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
 
-		$enclosure         = $this->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ) );
+		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
+		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ), $this );
 		$nonced_update_url = wp_nonce_url(
-			$this->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
+			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
 			'upgrade-plugin_' . $plugin_file
 		);
 
@@ -274,7 +321,7 @@ class Plugin extends Base {
 		 * Create after_plugin_row_
 		 */
 		echo $enclosure['open'];
-		$this->make_branch_switch_row( $branch_switch_data );
+		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
 		echo $enclosure['close'];
 
 		return true;
@@ -434,7 +481,7 @@ class Plugin extends Base {
 			// Set transient on rollback.
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
-				$transient->response[ $plugin->file ] = $this->set_rollback_transient( 'plugin', $plugin );
+				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 

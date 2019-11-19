@@ -91,6 +91,7 @@ class Base {
 	 */
 	public function __construct() {
 		$this->set_installed_apis();
+		$this->add_extra_headers();
 	}
 
 	/**
@@ -186,13 +187,6 @@ class Base {
 	}
 
 	/**
-	 * AJAX endpoint for REST updates.
-	 */
-	public function ajax_update() {
-		Singleton::get_instance( 'Rest_Update', $this )->process_request();
-	}
-
-	/**
 	 * Run background processes.
 	 * Piggyback on built-in update function to get metadata.
 	 * Set update transients for remote management.
@@ -241,16 +235,13 @@ class Base {
 	}
 
 	/**
-	 * Add extra headers to get_plugins() or wp_get_themes().
-	 *
-	 * @param array $extra_headers
+	 * Make and return extra headers.
 	 *
 	 * @return array
 	 */
-	public function add_headers( $extra_headers ) {
+	public function add_extra_headers() {
 		$ghu_extra_headers = [
 			'RequiresWP'   => 'Requires WP',
-			'RequiresPHP'  => 'Requires PHP',
 			'ReleaseAsset' => 'Release Asset',
 		];
 
@@ -269,10 +260,9 @@ class Base {
 		}
 
 		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
-		$extra_headers       = array_merge( (array) $extra_headers, $ghu_extra_headers );
 		ksort( self::$extra_headers );
 
-		return $extra_headers;
+		return self::$extra_headers;
 	}
 
 	/**
@@ -327,8 +317,6 @@ class Base {
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}
-
-		$this->remove_hooks();
 
 		return true;
 	}
@@ -401,49 +389,6 @@ class Base {
 	}
 
 	/**
-	 * Remove hooks after use.
-	 */
-	public function remove_hooks() {
-		remove_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
-		remove_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-	}
-
-	/**
-	 * Checks if dupicate wp-cron event exists.
-	 *
-	 * @param string $event Name of wp-cron event.
-	 *
-	 * @return bool
-	 */
-	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array();
-		foreach ( $cron as $timestamp => $cronhooks ) {
-			if ( key( $cronhooks ) === $event ) {
-				$this->is_cron_overdue( $cron, $timestamp );
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
-	 *
-	 * @param array $cron
-	 * @param int   $timestamp
-	 */
-	public function is_cron_overdue( $cron, $timestamp ) {
-		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
-		if ( $overdue ) {
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
-			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
-		}
-	}
-
-	/**
 	 * Used for renaming of sources to ensure correct directory name.
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
@@ -493,6 +438,8 @@ class Base {
 			return $source;
 		}
 
+		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
+
 		/*
 		 * Remote install source.
 		 */
@@ -502,8 +449,6 @@ class Base {
 			$new_source                      = trailingslashit( $remote_source ) . $slug;
 			self::$options['remote_install'] = true;
 		}
-
-		Singleton::get_instance( 'Branch', $this )->set_branch_on_switch( $slug );
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
@@ -526,25 +471,13 @@ class Base {
 	 * @return string $new_source
 	 */
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		if ( ! array_key_exists( $slug, (array) $upgrader_object->config ) &&
-			! isset( self::$options['remote_install'] )
-		) {
-			if ( $upgrader_object instanceof Plugin ) {
-				foreach ( (array) $upgrader_object->config as $plugin ) {
-					if ( $slug === $plugin->slug ) {
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
-			if ( $upgrader_object instanceof Theme ) {
-				foreach ( (array) $upgrader_object->config as $theme ) {
-					if ( $slug === $theme->slug ) {
-						$new_source = trailingslashit( $remote_source ) . $slug;
-						break;
-					}
-				}
-			}
+		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+
+		if ( ! array_key_exists( $slug, (array) $config ) && ! isset( self::$options['remote_install'] ) ) {
+			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
+			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
+			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			$new_source   = trailingslashit( $remote_source ) . $slug;
 		}
 
 		return $new_source;
@@ -565,13 +498,17 @@ class Base {
 	 */
 	private function fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		global $wp_filesystem;
-		if ( isset( $upgrader_object->config[ $slug ]->release_asset ) &&
-			$upgrader_object->config[ $slug ]->release_asset ) {
-			if ( 'gitlab' === $upgrader_object->config[ $slug ]->git ) {
+		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+
+		if ( isset( $config[ $slug ]->release_asset ) && $config[ $slug ]->release_asset ) {
+			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
+			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
+			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
+			if ( 'gitlab' === $config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
 			}
-			if ( 'bitbucket' === $upgrader_object->config[ $slug ]->git ) {
+			if ( 'bitbucket' === $config[ $slug ]->git ) {
 				$temp_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				$wp_filesystem->move( $remote_source, $temp_source );
 				wp_mkdir_p( $new_source );
@@ -602,49 +539,6 @@ class Base {
 	}
 
 	/**
-	 * Set array with normal repo names.
-	 * Fix name even if installed without renaming originally, eg <repo>-master
-	 *
-	 * @param string            $slug
-	 * @param Base|Plugin|Theme $upgrader_object
-	 *
-	 * @return array
-	 */
-	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
-
-		if ( null === $upgrader_object ) {
-			$upgrader_object = $this;
-		}
-
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-
-		foreach ( (array) $upgrader_object->config as $repo ) {
-			// Check repo slug or directory name for match.
-			$slug_check = [
-				$repo->slug,
-				dirname( $repo->file ),
-			];
-
-			// Exact match.
-			if ( \in_array( $slug, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
-				break;
-			}
-
-			// Soft match, there may still be an exact $slug match.
-			if ( \in_array( $rename, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
-			}
-		}
-
-		return $arr;
-	}
-
-	/**
 	 * Update transient for rollback or branch switch.
 	 *
 	 * @param string    $type          plugin|theme.
@@ -653,7 +547,7 @@ class Base {
 	 *
 	 * @return array $rollback Rollback transient.
 	 */
-	protected function set_rollback_transient( $type, $repo, $set_transient = false ) {
+	public function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		$repo_api      = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		$this->tag     = isset( $_GET['rollback'] ) ? $_GET['rollback'] : false;
 		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;
@@ -695,75 +589,6 @@ class Base {
 	}
 
 	/**
-	 * Check to see if wp-cron/background updating has finished.
-	 *
-	 * @param null $repo
-	 *
-	 * @return bool true when waiting for background job to finish.
-	 */
-	protected function waiting_for_background_update( $repo = null ) {
-		$caches = [];
-		if ( null !== $repo ) {
-			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
-
-			return empty( $cache );
-		}
-		$repos = array_merge(
-			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
-			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
-		);
-		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
-		}
-		$waiting = array_filter(
-			$caches,
-			function ( $e ) {
-				return empty( $e );
-			}
-		);
-
-		return ! empty( $waiting );
-	}
-
-	/**
-	 * Create repo parts.
-	 *
-	 * @param string $repo
-	 * @param string $type plugin|theme.
-	 *
-	 * @return mixed
-	 */
-	protected function get_repo_parts( $repo, $type ) {
-		$arr['bool']    = false;
-		$pattern        = '/' . strtolower( $repo ) . '_/';
-		$type           = preg_replace( $pattern, '', $type );
-		$repo_types     = [
-			'GitHub'    => 'github_' . $type,
-			'Bitbucket' => 'bitbucket_' . $type,
-			'GitLab'    => 'gitlab_' . $type,
-			'Gitea'     => 'gitea_' . $type,
-		];
-		$repo_base_uris = [
-			'GitHub'    => 'https://github.com/',
-			'Bitbucket' => 'https://bitbucket.org/',
-			'GitLab'    => 'https://gitlab.com/',
-			'Gitea'     => '',
-		];
-
-		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']       = $repo_types[ $repo ];
-			$arr['git_server'] = strtolower( $repo );
-			$arr['base_uri']   = $repo_base_uris[ $repo ];
-			$arr['bool']       = true;
-			foreach ( self::$extra_repo_headers as $key => $value ) {
-				$arr[ $key ] = $repo . ' ' . $value;
-			}
-		}
-
-		return $arr;
-	}
-
-	/**
 	 * Return correct update row opening and closing tags for Shiny Updates.
 	 *
 	 * @param string $repo_name
@@ -772,7 +597,7 @@ class Base {
 	 *
 	 * @return array
 	 */
-	protected function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
+	public function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
 		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
 		$repo_base     = $repo_name;
@@ -810,12 +635,13 @@ class Base {
 	/**
 	 * Make branch switch row.
 	 *
-	 * @param array $data Parameters for creating branch switching row.
+	 * @param array $data   Parameters for creating branch switching row.
+	 * @param array $config Array of repo objects.
 	 *
 	 * @return void
 	 */
-	protected function make_branch_switch_row( $data ) {
-		$rollback = empty( $this->config[ $data['slug'] ]->rollback ) ? [] : $this->config[ $data['slug'] ]->rollback;
+	public function make_branch_switch_row( $data, $config ) {
+		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? [] : $config[ $data['slug'] ]->rollback;
 
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
@@ -869,7 +695,7 @@ class Base {
 	 *
 	 * @return string
 	 */
-	protected function get_update_url( $type, $action, $repo_name ) {
+	public function get_update_url( $type, $action, $repo_name ) {
 		$update_url = esc_attr(
 			add_query_arg(
 				[
@@ -883,69 +709,5 @@ class Base {
 		return $update_url;
 	}
 
-	/**
-	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
-	 *
-	 * @param array           $header
-	 * @param array|\WP_Theme $headers
-	 * @param array           $header_parts
-	 * @param array           $repo_parts
-	 *
-	 * @return array $header
-	 */
-	protected function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
-		$hosted_domains = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
-		$theme          = null;
 
-		$header['enterprise_uri'] = null;
-		$header['enterprise_api'] = null;
-		$header['languages']      = null;
-		$header['ci_job']         = false;
-		$header['release_asset']  = false;
-
-		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
-			$header['enterprise_uri'] = $header['base_uri'];
-			$header['enterprise_api'] = trim( $header['enterprise_uri'], '/' );
-			switch ( $header_parts[0] ) {
-				case 'GitHub':
-					$header['enterprise_api'] .= '/api/v3';
-					break;
-				case 'GitLab':
-					$header['enterprise_api'] .= '/api/v4';
-					break;
-				case 'Bitbucket':
-					$header['enterprise_api'] .= '/rest/api';
-					break;
-			}
-		}
-
-		if ( $headers instanceof \WP_Theme ) {
-			$theme                    = $headers;
-			$headers                  = [];
-			$headers['Release Asset'] = '';
-			$header['release_asset']  = 'true' === $theme->get( 'Release Asset' );
-		}
-
-		$self_hosted_parts = array_keys( self::$extra_repo_headers );
-		foreach ( $self_hosted_parts as $part ) {
-			if ( $theme instanceof \WP_Theme ) {
-				$headers[ $repo_parts[ $part ] ] = $theme->get( $repo_parts[ $part ] );
-			}
-			if ( array_key_exists( $repo_parts[ $part ], $headers ) &&
-				! empty( $headers[ $repo_parts[ $part ] ] )
-			) {
-				switch ( $part ) {
-					case 'Languages':
-						$header['languages'] = $headers[ $repo_parts[ $part ] ];
-						break;
-					case 'CIJob':
-						$header['ci_job'] = $headers[ $repo_parts[ $part ] ];
-						break;
-				}
-			}
-		}
-		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['Release Asset'] ) ? 'true' === $headers['Release Asset'] : $header['release_asset'];
-
-		return $header;
-	}
 }

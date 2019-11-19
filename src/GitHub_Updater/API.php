@@ -81,7 +81,7 @@ class API {
 	 */
 	public function __construct() {
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
-		static::$extra_headers = Singleton::get_instance( 'Base', $this )->add_headers( [] );
+		static::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
 	}
 
 	/**
@@ -587,8 +587,9 @@ class API {
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
 		$this->type->remote_version = strtolower( $response['Version'] );
-		$this->type->requires_php   = ! empty( $response['Requires PHP'] ) ? $response['Requires PHP'] : false;
-		$this->type->requires       = ! empty( $response['Requires WP'] ) ? $response['Requires WP'] : null;
+		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
+		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
+		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
 		$this->type->dot_org        = $response['dot_org'];
 	}
 
@@ -683,11 +684,13 @@ class API {
 
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
-		if ( $this->exit_no_update( $response ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( $this->exit_no_update( $response ) && ! isset( $_REQUEST['override'] ) ) {
 			return false;
 		}
 
-		if ( ! $response ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
 			$url = $this->add_access_token_endpoint( $this, $asset );

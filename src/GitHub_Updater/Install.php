@@ -439,8 +439,7 @@ class Install {
 
 		// Load install settings fields for existing APIs that are not loaded.
 		$running_servers     = $this->get_running_git_servers();
-		$git_servers         = $this->get_class_vars( 'Base', 'git_servers' );
-		$servers_not_running = array_diff( array_flip( $git_servers ), $running_servers );
+		$servers_not_running = array_diff( array_flip( self::$git_servers ), $running_servers );
 		if ( ! empty( $servers_not_running ) ) {
 			foreach ( array_keys( $servers_not_running ) as $server ) {
 				$class = 'API\\' . $server . '_API';

@@ -11,6 +11,7 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /*
  * Exit if called directly.
@@ -28,7 +29,9 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * This class inherits from Base in order to be able to call the
  * set_defaults function.
  */
-class Rest_Update extends Base {
+class Rest_Update {
+	use GHU_Trait;
+
 	/**
 	 * Holds REST Upgrader Skin.
 	 *
@@ -37,12 +40,29 @@ class Rest_Update extends Base {
 	protected $upgrader_skin;
 
 	/**
+	 * Holds sanitized $_REQUEST.
+	 *
+	 * @var array
+	 */
+	protected static $request;
+
+	/**
+	 * Holds regex pattern for version number.
+	 * Allows for leading 'v'.
+	 *
+	 * @var string
+	 */
+	protected static $version_number_regex = '@(?:v)?[0-9\.]+@i';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
+
+		 // phpcs:ignore WordPress.Security.NonceVerification
+		self::$request = $this->sanitize( $_REQUEST );
 	}
 
 	/**
@@ -72,7 +92,7 @@ class Rest_Update extends Base {
 			$is_plugin_active = true;
 		}
 
-		$this->get_remote_repo_meta( $plugin );
+		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $plugin );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
 
 		$update = [
@@ -125,7 +145,7 @@ class Rest_Update extends Base {
 			throw new \UnexpectedValueException( 'Theme not found or not updatable with GitHub Updater: ' . $theme_slug );
 		}
 
-		$this->get_remote_repo_meta( $theme );
+		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $theme );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
 
 		$update = [
@@ -170,13 +190,18 @@ class Rest_Update extends Base {
 	 * webhook matches the branch specified by the url, use the latest
 	 * update available as specified in the webhook payload.
 	 *
+	 * @param \WP_REST_Request|null $request Request data from update webhook.
+	 *
 	 * @throws \UnexpectedValueException Under multiple bad or missing params.
 	 */
-	public function process_request() {
+	public function process_request( $request = null ) {
+		$args = $this->process_request_data( $request );
+		extract( $args );
+
 		$start = microtime( true );
 		try {
-			if ( ! isset( $_REQUEST['key'] ) ||
-				get_site_option( 'github_updater_api_key' ) !== $_REQUEST['key']
+			if ( ! $key ||
+				get_site_option( 'github_updater_api_key' ) !== $key
 			) {
 				throw new \UnexpectedValueException( 'Bad API key.' );
 			}
@@ -189,24 +214,27 @@ class Rest_Update extends Base {
 			 */
 			do_action( 'github_updater_pre_rest_process_request' );
 
-			$tag = 'master';
-			if ( isset( $_REQUEST['tag'] ) ) {
-				$tag = $_REQUEST['tag'];
-			} elseif ( isset( $_REQUEST['committish'] ) ) {
-				$tag = $_REQUEST['committish'];
-			}
-
 			$this->get_webhook_source();
-			$current_branch = $this->get_local_branch();
-			$override       = isset( $_REQUEST['override'] );
-			if ( $tag !== $current_branch && ! $override ) {
+			$tag            = $committish ? $committish : $tag;
+			$current_branch = $this->get_local_branch( $plugin, $theme );
+
+			if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
+				$remote_branch = 'master';
+			}
+			if ( $branch ) {
+				$tag           = $branch;
+				$remote_branch = $branch;
+			}
+			$remote_branch  = isset( $remote_branch ) ? $remote_branch : $tag;
+			$current_branch = $override ? $remote_branch : $current_branch;
+			if ( $remote_branch !== $current_branch && ! $override ) {
 				throw new \UnexpectedValueException( 'Webhook tag and current branch are not matching. Consider using `override` query arg.' );
 			}
 
-			if ( isset( $_REQUEST['plugin'] ) ) {
-				$this->update_plugin( $_REQUEST['plugin'], $tag );
-			} elseif ( isset( $_REQUEST['theme'] ) ) {
-				$this->update_theme( $_REQUEST['theme'], $tag );
+			if ( $plugin ) {
+				$this->update_plugin( $plugin, $tag );
+			} elseif ( $theme ) {
+				$this->update_theme( $theme, $tag );
 			} else {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
@@ -214,17 +242,36 @@ class Rest_Update extends Base {
 			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
-				'webhook'      => $_GET,
+				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+				'deprecated'   => $deprecated,
 			];
 			$this->log_exit( $http_response, 417 );
+		}
+
+		// Only set branch on successful update.
+		if ( ! $this->is_error() ) {
+			$slug      = $plugin ? $plugin : false;
+			$slug      = $theme ? $theme : $slug;
+			$file      = $plugin ? $plugin . '.php' : 'style.css';
+			$options   = $this->get_class_vars( 'Base', 'options' );
+			$cache     = $this->get_repo_cache( $slug );
+			$cache_key = 'ghu-' . md5( $slug );
+
+			$cache['current_branch'] = $current_branch;
+			unset( $cache[ $file ] );
+			update_site_option( $cache_key, $cache );
+
+			$options[ 'current_branch_' . $slug ] = $current_branch;
+			update_site_option( 'github_updater', $options );
 		}
 
 		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
-			'webhook'      => $_GET,
+			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
+			'deprecated'   => $deprecated,
 		];
 
 		if ( $this->is_error() ) {
@@ -235,19 +282,52 @@ class Rest_Update extends Base {
 	}
 
 	/**
+	 * Process request data from REST API or RESTful endpoint.
+	 *
+	 * @param \WP_REST_Request|array $request Request data from update webhook.
+	 *
+	 * @return array
+	 */
+	public function process_request_data( $request = null ) {
+		if ( $request instanceof \WP_REST_Request ) {
+			$params = $request->get_params();
+			extract( $params );
+			$override   = false === $override ? false : true;
+			$deprecated = false;
+		} else { // call from admin-ajax.php.
+			$key        = empty( self::$request['key'] ) ? false : self::$request['key'];
+			$plugin     = empty( self::$request['plugin'] ) ? false : self::$request['plugin'];
+			$theme      = empty( self::$request['theme'] ) ? false : self::$request['theme'];
+			$tag        = empty( self::$request['tag'] ) ? 'master' : self::$request['tag'];
+			$committish = empty( self::$request['committish'] ) ? false : self::$request['committish'];
+			$branch     = empty( self::$request['branch'] ) ? false : self::$request['branch'];
+			$override   = empty( self::$request['override'] ) ? false : self::$request['override'];
+			$override   = false === $override ? false : true;
+			$deprecated = 'Please update to using the new REST API endpoint. This is now deprecated.';
+		}
+
+		$args = compact( 'key', 'plugin', 'theme', 'tag', 'committish', 'branch', 'override', 'deprecated' );
+
+		return $args;
+	}
+
+	/**
 	 * Returns the current branch of the local repository referenced in the webhook.
+	 *
+	 * @param string|bool $plugin Plugin slug or false.
+	 * @param string|bool $themes Theme slug or false.
 	 *
 	 * @return string $current_branch Default return is 'master'.
 	 */
-	private function get_local_branch() {
+	private function get_local_branch( $plugin, $theme ) {
 		$repo = false;
-		if ( isset( $_REQUEST['plugin'] ) ) {
+		if ( $plugin ) {
 			$repos = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-			$repo  = isset( $repos[ $_REQUEST['plugin'] ] ) ? $repos[ $_REQUEST['plugin'] ] : false;
+			$repo  = isset( $repos[ $plugin ] ) ? $repos[ $plugin ] : false;
 		}
-		if ( isset( $_REQUEST['theme'] ) ) {
+		if ( $theme ) {
 			$repos = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-			$repo  = isset( $repos[ $_REQUEST['theme'] ] ) ? $repos[ $_REQUEST['theme'] ] : false;
+			$repo  = isset( $repos[ $theme ] ) ? $repos[ $theme ] : false;
 		}
 		$current_branch = $repo ?
 			Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo ) :

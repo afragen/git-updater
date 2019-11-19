@@ -8,15 +8,17 @@ notifications:
     on_failure: change
 
 php:
-  - 7.3
-  - 7.2
-  - 7.1
-  - 7.0
   - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4snapshot
+
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0
-  - WP_VERSION=latest WP_MULTISITE=1
+  # - WP_VERSION=latest WP_MULTISITE=0
+  # - WP_VERSION=latest WP_MULTISITE=1
   - WP_VERSION=nightly
 
 cache:
@@ -29,15 +31,19 @@ cache:
 matrix:
   fast_finish: true
   allow_failures:
-    - php 7.3
+    - php 7.4snapshot
 
 before_script:
-  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 $WP_VERSION
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
-    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+    if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then
       composer global require "phpunit/phpunit:^6"
-    elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+    fi
+    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
+      composer global require "phpunit/phpunit:^7"
+    fi
+    if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then
       composer global require "phpunit/phpunit:^4"
     fi
   - $HOME/.composer/vendor/bin/phpunit --version
@@ -56,4 +62,4 @@ deploy:
   file: /tmp/github-updater-${TRAVIS_TAG}.zip
   on:
     tags: true
-    php: 7.2
+    php: 7.3

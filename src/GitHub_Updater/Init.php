@@ -10,6 +10,7 @@
 
 namespace Fragen\GitHub_Updater;
 
+use Fragen\Singleton;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 
@@ -23,8 +24,15 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class Init
  */
-class Init extends Base {
+class Init {
 	use GHU_Trait, Basic_Auth_Loader;
+
+	/**
+	 * Holds Class Base object.
+	 *
+	 * @var Base $base
+	 */
+	protected $base;
 
 	/**
 	 * Constuctor.
@@ -32,8 +40,8 @@ class Init extends Base {
 	 * @return void
 	 */
 	public function __construct() {
-		parent::__construct();
 		$this->load_options();
+		$this->base = Singleton::get_instance( 'Base', $this );
 	}
 
 	/**
@@ -82,25 +90,18 @@ class Init extends Base {
 	 * Use 'init' hook for user capabilities.
 	 */
 	protected function load_hooks() {
-		add_action( 'init', [ $this, 'load' ] );
-		add_action( 'init', [ $this, 'background_update' ] );
-		add_action( 'init', [ $this, 'set_options_filter' ] );
-		add_action( 'wp_ajax_github-updater-update', [ $this, 'ajax_update' ] );
-		add_action( 'wp_ajax_nopriv_github-updater-update', [ $this, 'ajax_update' ] );
+		add_action( 'init', [ $this->base, 'load' ] );
+		add_action( 'init', [ $this->base, 'background_update' ] );
+		add_action( 'init', [ $this->base, 'set_options_filter' ] );
+		add_action( 'wp_ajax_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
+		add_action( 'wp_ajax_nopriv_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
-			$this->load_authentication_hooks();
+			$this->base->load_authentication_hooks();
 		}
 
-		add_filter( 'extra_theme_headers', [ $this, 'add_headers' ] );
-		add_filter( 'extra_plugin_headers', [ $this, 'add_headers' ] );
-		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 4 );
-
-		// Needed for updating from update-core.php.
-		if ( ! self::is_doing_ajax() ) {
-			add_filter( 'upgrader_pre_download', [ $this, 'upgrader_pre_download' ], 10, 3 );
-		}
+		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
 	}
 
 	/**
