@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.0.0 / 2019-11-19
 * refactor to remove class extends
 * update renaming functions
 * refactor to how plugin and theme meta are obtained, now using `get_file_data()`
