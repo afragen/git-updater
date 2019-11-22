@@ -147,10 +147,10 @@ class Theme {
 		 * @since   5.4.0
 		 * @access  public
 		 *
-		 * @param array $additions Listing of themes to add.
-		 *                         Default null.
-		 * @param array $themes    Listing of all themes.
-		 * @param         string        'theme'    Type being passed.
+		 * @param array  $additions Listing of themes to add.
+		 *                          Default null.
+		 * @param array  $themes    Listing of all themes.
+		 * @param string 'theme'    Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
 		$themes    = array_merge( $themes, (array) $additions );

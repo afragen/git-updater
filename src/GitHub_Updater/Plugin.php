@@ -135,10 +135,10 @@ class Plugin {
 		 * @since   5.4.0
 		 * @access  public
 		 *
-		 * @param array $additions Listing of plugins to add.
-		 *                         Default null.
-		 * @param array $plugins   Listing of all plugins.
-		 * @param         string        'plugin'    Type being passed.
+		 * @param array  $additions Listing of plugins to add.
+		 *                          Default null.
+		 * @param array  $plugins   Listing of all plugins.
+		 * @param string 'plugin'   Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
 		$plugins   = array_merge( $plugins, (array) $additions );
