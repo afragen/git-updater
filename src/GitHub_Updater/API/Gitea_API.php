@@ -228,7 +228,7 @@ class Gitea_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = [];
+		$arr = array();
 		array_map(
 			function ( $e ) use ( &$arr ) {
 				$arr[] = $e->tag_name;
@@ -252,8 +252,8 @@ class Gitea_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = [];
-		$response = [ $response ];
+		$arr      = array();
+		$response = array( $response );
 
 		array_filter(
 			$response,
@@ -290,7 +290,7 @@ class Gitea_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$branches = [];
+		$branches = array();
 		foreach ( $response as $branch ) {
 			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash']      = $branch->commit->id;
@@ -308,25 +308,25 @@ class Gitea_API extends API implements API_Interface {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = [];
-		$rollback = [];
+		$tags     = array();
+		$rollback = array();
 
 		foreach ( (array) $response as $tag ) {
 			$download_link    = implode(
 				'/',
-				[
+				array(
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
 					$this->type->slug,
 					'archive/',
-				]
+				)
 			);
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_link . $tag . '.zip';
 		}
 
-		return [ $tags, $rollback ];
+		return array( $tags, $rollback );
 	}
 
 	/**
@@ -341,7 +341,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_settings',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				[ $this, 'print_section_gitea_token' ],
+				array( $this, 'print_section_gitea_token' ),
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -350,7 +350,7 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_section(
 				'gitea_id',
 				esc_html__( 'Gitea Private Settings', 'github-updater' ),
-				[ $this, 'print_section_gitea_info' ],
+				array( $this, 'print_section_gitea_info' ),
 				'github_updater_gitea_install_settings'
 			);
 		}
@@ -359,13 +359,13 @@ class Gitea_API extends API implements API_Interface {
 			add_settings_field(
 				'gitea_access_token',
 				esc_html__( 'Gitea Access Token', 'github-updater' ),
-				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_gitea_install_settings',
 				'gitea_settings',
-				[
+				array(
 					'id'    => 'gitea_access_token',
 					'token' => true,
-				]
+				)
 			);
 		}
 	}
@@ -378,10 +378,10 @@ class Gitea_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_gitea_install_settings';
 		$setting_field['section']         = 'gitea_id';
-		$setting_field['callback_method'] = [
+		$setting_field['callback_method'] = array(
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		];
+		);
 
 		return $setting_field;
 	}
@@ -393,7 +393,7 @@ class Gitea_API extends API implements API_Interface {
 		add_filter(
 			'github_updater_add_settings_subtabs',
 			function ( $subtabs ) {
-				return array_merge( $subtabs, [ 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ] );
+				return array_merge( $subtabs, array( 'gitea' => esc_html__( 'Gitea', 'github-updater' ) ) );
 			}
 		);
 	}
@@ -421,7 +421,7 @@ class Gitea_API extends API implements API_Interface {
 		add_settings_field(
 			'gitea_access_token',
 			esc_html__( 'Gitea Access Token', 'github-updater' ),
-			[ $this, 'gitea_access_token' ],
+			array( $this, 'gitea_access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -446,7 +446,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Display Gitea error admin notices.
 	 */
 	public function gitea_error_notices() {
-		add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'gitea_error' ] );
+		add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', array( $this, 'gitea_error' ) );
 	}
 
 	/**
@@ -460,7 +460,7 @@ class Gitea_API extends API implements API_Interface {
 			empty( static::$options['gitea_access_token'] ) &&
 			$auth_required['gitea']
 		) {
-			self::$error_code['gitea'] = [ 'error' => true ];
+			self::$error_code['gitea'] = array( 'error' => true );
 			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
 				return;
 			}

@@ -38,7 +38,7 @@ class API {
 	 *
 	 * @var array ( $this->type->slug => $code )
 	 */
-	protected static $error_code = [];
+	protected static $error_code = array();
 
 	/**
 	 * Holds site options.
@@ -67,7 +67,7 @@ class API {
 	 * @access protected
 	 * @var array
 	 */
-	protected $response = [];
+	protected $response = array();
 
 	/**
 	 * Variable to hold AWS redirect URL.
@@ -98,7 +98,7 @@ class API {
 		$args['sslverify'] = true;
 		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
 			$args['user-agent']   .= '; GitHub Updater - https://github.com/afragen/github-updater';
-			$args['wp-rest-cache'] = [ 'tag' => 'github-updater' ];
+			$args['wp-rest-cache'] = array( 'tag' => 'github-updater' );
 		}
 
 		return $args;
@@ -116,7 +116,7 @@ class API {
 				$git->add_settings( $auth_required );
 			}
 		);
-		add_filter( 'github_updater_add_repo_setting_field', [ $this, 'add_setting_field' ], 10, 2 );
+		add_filter( 'github_updater_add_repo_setting_field', array( $this, 'add_setting_field' ), 10, 2 );
 	}
 
 	/**
@@ -197,13 +197,13 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-		add_filter( 'http_request_args', [ $this, 'http_request_args' ], 10, 2 );
+		add_filter( 'http_request_args', array( $this, 'http_request_args' ), 10, 2 );
 
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = [ 200, 404 ];
-		remove_filter( 'http_request_args', [ $this, 'http_request_args' ] );
+		$allowed_codes = array( 200, 404 );
+		remove_filter( 'http_request_args', array( $this, 'http_request_args' ) );
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -213,14 +213,14 @@ class API {
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 			static::$error_code = array_merge(
 				static::$error_code,
-				[
-					$this->type->slug => [
+				array(
+					$this->type->slug => array(
 						'repo' => $this->type->slug,
 						'code' => $code,
 						'name' => $this->type->name,
 						'git'  => $this->type->git,
-					],
-				]
+					),
+				)
 			);
 			if ( 'github' === $type['git'] ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->slug );
@@ -261,7 +261,7 @@ class API {
 	 * @return array
 	 */
 	protected function return_repo_type() {
-		$arr         = [];
+		$arr         = array();
 		$arr['type'] = $this->type->type;
 
 		switch ( $this->type->git ) {
@@ -307,11 +307,11 @@ class API {
 	 */
 	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
-		$segments = [
+		$segments = array(
 			'owner'  => $this->type->owner,
 			'repo'   => $this->type->slug,
 			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
-		];
+		);
 
 		foreach ( $segments as $segment => $value ) {
 			$endpoint = str_replace( ':' . $segment, sanitize_text_field( $value ), $endpoint );
@@ -391,10 +391,10 @@ class API {
 		if ( ! $response ) {
 			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.1/";
 			$url      = add_query_arg(
-				[
+				array(
 					'action'                        => "{$this->type->type}_information",
 					rawurlencode( 'request[slug]' ) => $this->type->slug,
-				],
+				),
 				$url
 			);
 			$response = wp_remote_get( $url );
@@ -650,7 +650,7 @@ class API {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
 		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
-		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
+		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : array();
 		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
@@ -691,11 +691,11 @@ class API {
 
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
-			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			add_action( 'requests-requests.before_redirect', array( $this, 'set_redirect' ), 10, 1 );
+			add_filter( 'http_request_args', array( $this, 'set_aws_release_asset_header' ) );
 			$url = $this->add_access_token_endpoint( $this, $asset );
 			wp_remote_get( $url );
-			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			remove_filter( 'http_request_args', array( $this, 'set_aws_release_asset_header' ) );
 		}
 
 		if ( ! empty( $this->redirect ) ) {

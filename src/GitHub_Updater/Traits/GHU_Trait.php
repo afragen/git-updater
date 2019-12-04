@@ -48,7 +48,7 @@ trait GHU_Trait {
 	 */
 	public function load_options() {
 		$base           = Singleton::get_instance( 'Base', $this );
-		$base::$options = get_site_option( 'github_updater', [] );
+		$base::$options = get_site_option( 'github_updater', array() );
 	}
 
 	/**
@@ -202,7 +202,7 @@ trait GHU_Trait {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
+		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
 
 		wp_cron();
 
@@ -253,7 +253,7 @@ trait GHU_Trait {
 		 *
 		 * @return bool
 		 */
-		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
+		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', array() ), true );
 
 		return ! $dot_org_master || $override || $this->deprecate_override_constant();
 	}
@@ -279,10 +279,10 @@ trait GHU_Trait {
 	 * @return array
 	 */
 	public function sanitize( $input ) {
-		$new_input = [];
+		$new_input = array();
 		foreach ( array_keys( (array) $input ) as $id ) {
 			if ( in_array( $id, array_keys( wp_get_mime_types() ), true ) ) {
-				$new_input[  sanitize_text_field( $id )  ] = sanitize_text_field( $input[ $id ] );
+				$new_input[ sanitize_text_field( $id ) ] = sanitize_text_field( $input[ $id ] );
 			} else {
 				$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
 			}
@@ -329,7 +329,7 @@ trait GHU_Trait {
 	 * @return bool true when waiting for background job to finish.
 	 */
 	protected function waiting_for_background_update( $repo = null ) {
-		$caches = [];
+		$caches = array();
 		if ( null !== $repo ) {
 			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
 
@@ -367,7 +367,7 @@ trait GHU_Trait {
 		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
 		$header['owner']      = trim( $header_path['dirname'], '/' );
 		$header['repo']       = isset( $header_path['extension'] ) && 'git' === $header_path['extension'] ? $header_path['filename'] : $header_path['basename'];
-		$header['owner_repo'] = implode( '/', [ $header['owner'], $header['repo'] ] );
+		$header['owner_repo'] = implode( '/', array( $header['owner'], $header['repo'] ) );
 		$header['base_uri']   = str_replace( $header_parts['path'], '', $repo_header );
 		$header['uri']        = isset( $header['scheme'] ) ? trim( $repo_header, '/' ) : null;
 
@@ -390,18 +390,18 @@ trait GHU_Trait {
 		$arr['bool']    = false;
 		$pattern        = '/' . strtolower( $repo ) . '_/';
 		$type           = preg_replace( $pattern, '', $type );
-		$repo_types     = [
+		$repo_types     = array(
 			'GitHub'    => 'github_' . $type,
 			'Bitbucket' => 'bitbucket_' . $type,
 			'GitLab'    => 'gitlab_' . $type,
 			'Gitea'     => 'gitea_' . $type,
-		];
-		$repo_base_uris = [
+		);
+		$repo_base_uris = array(
 			'GitHub'    => 'https://github.com/',
 			'Bitbucket' => 'https://bitbucket.org/',
 			'GitLab'    => 'https://gitlab.com/',
 			'Gitea'     => '',
-		];
+		);
 
 		if ( array_key_exists( $repo, $repo_types ) ) {
 			$arr['type']       = $repo_types[ $repo ];
@@ -426,7 +426,7 @@ trait GHU_Trait {
 	 * @return array
 	 */
 	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
+		$arr    = array();
 		$rename = explode( '-', $slug );
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
@@ -440,10 +440,10 @@ trait GHU_Trait {
 
 		foreach ( (array) $config as $repo ) {
 			// Check repo slug or directory name for match.
-			$slug_check = [
+			$slug_check = array(
 				$repo->slug,
 				dirname( $repo->file ),
-			];
+			);
 
 			// Exact match.
 			if ( \in_array( $slug, $slug_check, true ) ) {
@@ -468,7 +468,7 @@ trait GHU_Trait {
 	 * @return array
 	 */
 	public function get_headers( $type ) {
-		$default_plugin_headers = [
+		$default_plugin_headers = array(
 			'Name'        => 'Plugin Name',
 			'PluginURI'   => 'Plugin URI',
 			'Version'     => 'Version',
@@ -480,9 +480,9 @@ trait GHU_Trait {
 			'Network'     => 'Network',
 			'Requires'    => 'Requires at least',
 			'RequiresPHP' => 'Requires PHP',
-		];
+		);
 
-		$default_theme_headers = [
+		$default_theme_headers = array(
 			'Name'        => 'Theme Name',
 			'ThemeURI'    => 'Theme URI',
 			'Description' => 'Description',
@@ -496,7 +496,7 @@ trait GHU_Trait {
 			'DomainPath'  => 'Domain Path',
 			'Requires'    => 'Requires at least',
 			'RequiresPHP' => 'Requires PHP',
-		];
+		);
 
 		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
 
@@ -512,7 +512,7 @@ trait GHU_Trait {
 	 * @return array $all_headers Reduced array of all headers.
 	 */
 	public function get_file_headers( $contents, $type ) {
-		$all_headers = [];
+		$all_headers = array();
 		$all_headers = $this->get_headers( $type );
 		$all_headers = array_unique( $all_headers );
 
@@ -556,7 +556,7 @@ trait GHU_Trait {
 	 */
 	public function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
-		$hosted_domains     = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
+		$hosted_domains     = array( 'github.com', 'bitbucket.org', 'gitlab.com' );
 		$theme              = null;
 
 		$header['enterprise_uri'] = null;

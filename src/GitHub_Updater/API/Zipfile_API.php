@@ -35,7 +35,7 @@ class Zipfile_API {
 		add_settings_field(
 			'zipfile_slug',
 			esc_html__( 'Zipfile Slug', 'github-updater' ),
-			[ $this, 'zipfile_slug' ],
+			array( $this, 'zipfile_slug' ),
 			'github_updater_install_' . $type,
 			$type
 		);

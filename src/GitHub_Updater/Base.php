@@ -38,7 +38,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $extra_headers = [];
+	public static $extra_headers = array();
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
@@ -52,24 +52,24 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $git_servers = [ 'github' => 'GitHub' ];
+	public static $git_servers = array( 'github' => 'GitHub' );
 
 	/**
 	 * Holds extra repo header types.
 	 *
 	 * @var array
 	 */
-	protected static $extra_repo_headers = [
+	protected static $extra_repo_headers = array(
 		'Languages' => 'Languages',
 		'CIJob'     => 'CI Job',
-	];
+	);
 
 	/**
 	 * Holds an array of installed git APIs.
 	 *
 	 * @var array
 	 */
-	public static $installed_apis = [ 'github_api' => true ];
+	public static $installed_apis = array( 'github_api' => true );
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
@@ -192,12 +192,12 @@ class Base {
 	 * Set update transients for remote management.
 	 */
 	public function background_update() {
-		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
-		add_action( 'wp_update_themes', [ $this, 'get_meta_themes' ] );
-		add_action( 'ghu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'ghu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', [ $this, 'get_meta_remote_management' ] );
-		add_action( 'update_option_auto_updater.lock', [ $this, 'get_meta_remote_management' ] );
+		add_action( 'wp_update_plugins', array( $this, 'get_meta_plugins' ) );
+		add_action( 'wp_update_themes', array( $this, 'get_meta_themes' ) );
+		add_action( 'ghu_get_remote_plugin', array( $this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'ghu_get_remote_theme', array( $this, 'run_cron_batch' ), 10, 1 );
+		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( $this, 'get_meta_remote_management' ) );
+		add_action( 'update_option_auto_updater.lock', array( $this, 'get_meta_remote_management' ) );
 		( new Remote_Management() )->set_update_transients();
 	}
 
@@ -220,11 +220,11 @@ class Base {
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 */
 	public function set_options_filter() {
-		$config = apply_filters( 'github_updater_set_options', [] );
+		$config = apply_filters( 'github_updater_set_options', array() );
 		if ( empty( $config ) ) {
 			$config = function_exists( 'apply_filters_deprecated' )
-				? apply_filters_deprecated( 'github_updater_token_distribution', [ null ], '6.1.0', 'github_updater_set_options' )
-				: apply_filters( 'github_updater_token_distribution', [] );
+				? apply_filters_deprecated( 'github_updater_token_distribution', array( null ), '6.1.0', 'github_updater_set_options' )
+				: apply_filters( 'github_updater_token_distribution', array() );
 		}
 
 		if ( ! empty( $config ) ) {
@@ -240,15 +240,15 @@ class Base {
 	 * @return array
 	 */
 	public function add_extra_headers() {
-		$ghu_extra_headers = [
+		$ghu_extra_headers = array(
 			'RequiresWP'   => 'Requires WP',
 			'ReleaseAsset' => 'Release Asset',
-		];
+		);
 
-		$uri_types = [
+		$uri_types = array(
 			'PluginURI' => ' Plugin URI',
 			'ThemeURI'  => ' Theme URI',
-		];
+		);
 
 		foreach ( self::$git_servers as $server ) {
 			foreach ( $uri_types as $uri_key => $uri_value ) {
@@ -342,19 +342,19 @@ class Base {
 		$this->$type->remote_version = '0.0.0';
 		$this->$type->newest_tag     = '0.0.0';
 		$this->$type->download_link  = null;
-		$this->$type->tags           = [];
-		$this->$type->rollback       = [];
-		$this->$type->branches       = [];
+		$this->$type->tags           = array();
+		$this->$type->rollback       = array();
+		$this->$type->branches       = array();
 		$this->$type->requires       = null;
 		$this->$type->tested         = null;
 		$this->$type->donate_link    = null;
-		$this->$type->contributors   = [];
+		$this->$type->contributors   = array();
 		$this->$type->downloaded     = 0;
 		$this->$type->last_updated   = null;
 		$this->$type->rating         = 0;
 		$this->$type->num_ratings    = 0;
-		$this->$type->transient      = [];
-		$this->$type->repo_meta      = [];
+		$this->$type->transient      = array();
+		$this->$type->repo_meta      = array();
 		$this->$type->watchers       = 0;
 		$this->$type->forks          = 0;
 		$this->$type->open_issues    = 0;
@@ -370,7 +370,7 @@ class Base {
 	 * @return bool|string
 	 */
 	protected function get_changelog_filename( $repo ) {
-		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
+		$changelogs  = array( 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' );
 		$changes     = null;
 		$local_files = null;
 
@@ -506,7 +506,7 @@ class Base {
 			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
 			if ( 'gitlab' === $config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
+				add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 			}
 			if ( 'bitbucket' === $config[ $slug ]->git ) {
 				$temp_source = trailingslashit( dirname( $remote_source ) ) . $slug;
@@ -533,7 +533,7 @@ class Base {
 		global $wp_filesystem;
 
 		$wp_filesystem->delete( $result['source'], true );
-		remove_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ] );
+		remove_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ) );
 
 		return $result;
 	}
@@ -565,12 +565,12 @@ class Base {
 		 */
 		$download_link = apply_filters_deprecated(
 			'github_updater_set_rollback_package',
-			[ $download_link, $repo, $this->tag ],
+			array( $download_link, $repo, $this->tag ),
 			'8.8.0',
 			'github_updater_post_construct_download_link'
 		);
 
-		$rollback = [
+		$rollback = array(
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
@@ -578,7 +578,7 @@ class Base {
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
-		];
+		);
 
 		if ( 'plugin' === $type ) {
 			$rollback['slug'] = $repo->slug;
@@ -611,10 +611,10 @@ class Base {
 		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
 		<div class="update-message">';
 
-		$enclosure = [
+		$enclosure = array(
 			'open'  => $open,
 			'close' => '</div></td></tr>',
-		];
+		);
 
 		if ( version_compare( $wp_version, '4.6', '>=' ) ) {
 			$open_p  = '<p>';
@@ -623,10 +623,10 @@ class Base {
 				$open_p  = '';
 				$close_p = '';
 			}
-			$enclosure = [
+			$enclosure = array(
 				'open'  => substr_replace( $open, $shiny_classes, -2, 0 ) . $open_p,
 				'close' => $close_p . '</div></td></tr>',
-			];
+			);
 		}
 
 		return $enclosure;
@@ -641,7 +641,7 @@ class Base {
 	 * @return void
 	 */
 	public function make_branch_switch_row( $data, $config ) {
-		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? [] : $config[ $data['slug'] ]->rollback;
+		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? array() : $config[ $data['slug'] ]->rollback;
 
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
@@ -698,10 +698,10 @@ class Base {
 	public function get_update_url( $type, $action, $repo_name ) {
 		$update_url = esc_attr(
 			add_query_arg(
-				[
+				array(
 					'action' => $action,
 					$type    => rawurlencode( $repo_name ),
-				],
+				),
 				self_admin_url( 'update.php' )
 			)
 		);

@@ -297,7 +297,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_branches( $git, $request ) {
-		$branches = [];
+		$branches = array();
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -342,7 +342,7 @@ trait API_Common {
 		}
 
 		if ( ! $response ) {
-			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ], 15, 2 );
+			add_filter( 'http_request_args', array( Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ), 15, 2 );
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
@@ -351,7 +351,7 @@ trait API_Common {
 				$response          = new \stdClass();
 				$response->message = 'No release asset found';
 			}
-			remove_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ] );
+			remove_filter( 'http_request_args', array( Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ) );
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {

@@ -95,13 +95,13 @@ class Rest_Update {
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $plugin );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
 
-		$update = [
+		$update = array(
 			'slug'        => $plugin->slug,
 			'plugin'      => $plugin->file,
 			'new_version' => null,
 			'url'         => $plugin->uri,
 			'package'     => $repo_api->construct_download_link( $tag ),
-		];
+		);
 
 		add_filter(
 			'site_transient_update_plugins',
@@ -148,12 +148,12 @@ class Rest_Update {
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $theme );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
 
-		$update = [
+		$update = array(
 			'theme'       => $theme->slug,
 			'new_version' => null,
 			'url'         => $theme->uri,
 			'package'     => $repo_api->construct_download_link( $tag ),
-		];
+		);
 
 		add_filter(
 			'site_transient_update_themes',
@@ -239,13 +239,13 @@ class Rest_Update {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = [
+			$http_response = array(
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'deprecated'   => $deprecated,
-			];
+			);
 			$this->log_exit( $http_response, 417 );
 		}
 
@@ -266,13 +266,13 @@ class Rest_Update {
 			update_site_option( 'github_updater', $options );
 		}
 
-		$response = [
+		$response = array(
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			'deprecated'   => $deprecated,
-		];
+		);
 
 		if ( $this->is_error() ) {
 			$response['success'] = false;

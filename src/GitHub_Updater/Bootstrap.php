@@ -71,7 +71,7 @@ class Bootstrap {
 
 		register_activation_hook( $this->file, array( new Init(), 'rename_on_activation' ) );
 		( new Init() )->run();
-		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( new REST_API(), 'register_endpoints' ) );
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.

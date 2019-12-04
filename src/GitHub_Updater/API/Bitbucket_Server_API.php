@@ -160,10 +160,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				break;
 			case 'changes':
 				$endpoint = add_query_arg(
-					[
+					array(
 						'at'  => $git->type->branch,
 						'raw' => '',
-					],
+					),
 					$endpoint
 				);
 				break;
@@ -174,11 +174,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				 * as the repo, e.g. 'my-repo' becomes 'my-repo/'
 				 * Required for using stash-archive.
 				 */
-				$defaults = [
+				$defaults = array(
 					'prefix' => $git->type->slug . '/',
 					'at'     => $git->type->branch,
 					'format' => 'zip',
-				];
+				);
 				$endpoint = add_query_arg( $defaults, $endpoint );
 				if ( ! empty( $git->type->tags ) ) {
 					$endpoint = urldecode( add_query_arg( 'at', $git->type->newest_tag, $endpoint ) );
@@ -224,8 +224,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = [];
-		$response = [ $response ];
+		$arr      = array();
+		$response = array( $response );
 
 		array_filter(
 			$response,
@@ -272,7 +272,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$branches = [];
+		$branches = array();
 		foreach ( $response as $branch ) {
 			$branches[ $branch->displayId ]['download']    = $this->construct_download_link( $branch->displayId );
 			$branches[ $branch->displayId ]['commit_hash'] = $branch->latestCommit;
@@ -292,7 +292,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			return $response;
 		}
 
-		$arr = [];
+		$arr = array();
 		array_map(
 			function ( $e ) use ( &$arr ) {
 				$arr[] = $e->displayId;
@@ -314,8 +314,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = [];
-		$rollback = [];
+		$tags     = array();
+		$rollback = array();
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = "{$repo_type['base_uri']}/latest/{$this->type->owner}/repos/{$this->type->slug}/archive";
@@ -324,7 +324,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
 		}
 
-		return [ $tags, $rollback ];
+		return array( $tags, $rollback );
 	}
 
 	/**
@@ -338,29 +338,29 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_settings_section(
 			'bitbucket_server_user',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
-			[ $this, 'print_section_bitbucket_username' ],
+			array( $this, 'print_section_bitbucket_username' ),
 			'github_updater_bbserver_install_settings'
 		);
 
 		add_settings_field(
 			'bitbucket_server_username',
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
-			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
-			[ 'id' => 'bitbucket_server_username' ]
+			array( 'id' => 'bitbucket_server_username' )
 		);
 
 		add_settings_field(
 			'bitbucket_server_password',
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
-			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
-			[
+			array(
 				'id'    => 'bitbucket_server_password',
 				'token' => true,
-			]
+			)
 		);
 
 		/*
@@ -370,7 +370,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			add_settings_section(
 				'bitbucket_server_id',
 				esc_html__( 'Bitbucket Server Private Repositories', 'github-updater' ),
-				[ $this, 'print_section_bitbucket_info' ],
+				array( $this, 'print_section_bitbucket_info' ),
 				'github_updater_bbserver_install_settings'
 			);
 		}
@@ -384,10 +384,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_bbserver_install_settings';
 		$setting_field['section']         = 'bitbucket_server_id';
-		$setting_field['callback_method'] = [
+		$setting_field['callback_method'] = array(
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_checkbox',
-		];
+		);
 
 		return $setting_field;
 	}
@@ -399,7 +399,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		add_filter(
 			'github_updater_add_settings_subtabs',
 			function ( $subtabs ) {
-				return array_merge( $subtabs, [ 'bbserver' => esc_html__( 'Bitbucket Server', 'github-updater' ) ] );
+				return array_merge( $subtabs, array( 'bbserver' => esc_html__( 'Bitbucket Server', 'github-updater' ) ) );
 			}
 		);
 	}
@@ -427,11 +427,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			$install['download_link'] = "{$base}/rest/api/latest/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
-				[
+				array(
 					'prefix' => $headers['repo'] . '/',
 					'at'     => $install['github_updater_branch'],
 					'format' => 'zip',
-				],
+				),
 				$install['download_link']
 			);
 
