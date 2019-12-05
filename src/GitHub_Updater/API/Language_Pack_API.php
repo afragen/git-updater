@@ -119,21 +119,21 @@ class Language_Pack_API extends API {
 		$package = null;
 		switch ( $git ) {
 			case 'github':
-				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
+				$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
 				$package = implode( '/', $package ) . $locale->package;
-				$package = add_query_arg( [ 'raw' => 'true' ], $package );
+				$package = add_query_arg( array( 'raw' => 'true' ), $package );
 				break;
 			case 'bitbucket':
-				$package = [ 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' ];
+				$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitlab':
-				$package = [ 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' ];
+				$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitea':
 				// TODO: make sure this works as expected.
-				$package = [ $headers['uri'], 'raw/master' ];
+				$package = array( $headers['uri'], 'raw/master' );
 				$package = implode( '/', $package ) . $local->package;
 				break;
 		}

@@ -103,7 +103,7 @@ class Plugin {
 		include_once ABSPATH . '/wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
-		$git_plugins = [];
+		$git_plugins = array();
 
 		array_map(
 			function( $plugin ) use ( &$paths ) {
@@ -135,16 +135,16 @@ class Plugin {
 		 * @since   5.4.0
 		 * @access  public
 		 *
-		 * @param array $additions Listing of plugins to add.
-		 *                         Default null.
-		 * @param array $plugins   Listing of all plugins.
-		 * @param         string        'plugin'    Type being passed.
+		 * @param array  $additions Listing of plugins to add.
+		 *                          Default null.
+		 * @param array  $plugins   Listing of all plugins.
+		 * @param string 'plugin'   Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
 		$plugins   = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $slug => $plugin ) {
-			$git_plugin = [];
+			$git_plugin = array();
 			$header     = null;
 			$key        = array_filter(
 				array_keys( $plugin ),
@@ -200,14 +200,14 @@ class Plugin {
 				file_exists( WP_PLUGIN_DIR . "/{$header['repo']}/assets/banner-772x250.png" )
 					? WP_PLUGIN_URL . "/{$header['repo']}/assets/banner-772x250.png"
 					: null;
-			$git_plugin['icons']                   = [];
-			$icons                                 = [
+			$git_plugin['icons']                   = array();
+			$icons                                 = array(
 				'svg'    => 'icon.svg',
 				'1x_png' => 'icon-128x128.png',
 				'1x_jpg' => 'icon-128x128.jpg',
 				'2x_png' => 'icon-256x256.png',
 				'2x_jpg' => 'icon-256x256.jpg',
-			];
+			);
 			foreach ( $icons as $key => $filename ) {
 				$key                         = preg_replace( '/_png|_jpg/', '', $key );
 				$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
@@ -226,7 +226,7 @@ class Plugin {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
-		$plugins = [];
+		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
@@ -248,7 +248,7 @@ class Plugin {
 			if ( ! $plugin->release_asset && 'init' === current_filter() &&
 				( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_{$plugin->file}", array( $this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
 
@@ -259,7 +259,7 @@ class Plugin {
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
 			! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
-				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
+				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 			}
 		}
 
@@ -272,9 +272,9 @@ class Plugin {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
-		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
-		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 99, 3 );
+		add_filter( 'site_transient_update_plugins', array( $this, 'update_site_transient' ), 15, 1 );
 	}
 
 	/**
@@ -310,7 +310,7 @@ class Plugin {
 		$repo   = $this->config[ $plugin['slug'] ];
 		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
-		$branch_switch_data                      = [];
+		$branch_switch_data                      = array();
 		$branch_switch_data['slug']              = $plugin['slug'];
 		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
 		$branch_switch_data['id']                = $id;
@@ -358,13 +358,13 @@ class Plugin {
 					'<a href="%s" class="thickbox">%s</a>',
 					esc_url(
 						add_query_arg(
-							[
+							array(
 								'tab'       => 'plugin-information',
 								'plugin'    => $repo,
 								'TB_iframe' => 'true',
 								'width'     => 600,
 								'height'    => 550,
-							],
+							),
 							network_admin_url( 'plugin-install.php' )
 						)
 					),
@@ -417,7 +417,7 @@ class Plugin {
 		$response->last_updated  = $plugin->last_updated;
 		$response->download_link = $plugin->download_link;
 		$response->banners       = $plugin->banners;
-		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : [];
+		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : array();
 		$response->contributors  = $plugin->contributors;
 		if ( ! $this->is_private( $plugin ) ) {
 			$response->num_ratings = $plugin->num_ratings;
@@ -437,7 +437,7 @@ class Plugin {
 	public function update_site_transient( $transient ) {
 		foreach ( (array) $this->config as $plugin ) {
 			if ( $this->can_update_repo( $plugin ) ) {
-				$response = [
+				$response = array(
 					'slug'         => $plugin->slug,
 					'plugin'       => $plugin->file,
 					'new_version'  => $plugin->remote_version,
@@ -449,7 +449,7 @@ class Plugin {
 					'branch'       => $plugin->branch,
 					'branches'     => array_keys( $plugin->branches ),
 					'type'         => "{$plugin->git}-{$plugin->type}",
-				];
+				);
 
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'], $_GET['plugin'] ) &&
@@ -472,7 +472,7 @@ class Plugin {
 				 * @since 8.5.0
 				 * @return array
 				 */
-				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+				$overrides = apply_filters( 'github_updater_override_dot_org', array() );
 				if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
 					unset( $transient->response[ $plugin->file ] );
 				}

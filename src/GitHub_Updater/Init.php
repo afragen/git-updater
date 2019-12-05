@@ -63,7 +63,7 @@ class Init {
 
 		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
+			update_site_option( 'github_updater', array_merge( $options, array( 'current_branch_github-updater' => 'develop' ) ) );
 		}
 
 		if ( $slug && 'github-updater/github-updater.php' !== $slug ) {
@@ -90,18 +90,18 @@ class Init {
 	 * Use 'init' hook for user capabilities.
 	 */
 	protected function load_hooks() {
-		add_action( 'init', [ $this->base, 'load' ] );
-		add_action( 'init', [ $this->base, 'background_update' ] );
-		add_action( 'init', [ $this->base, 'set_options_filter' ] );
-		add_action( 'wp_ajax_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
-		add_action( 'wp_ajax_nopriv_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
+		add_action( 'init', array( $this->base, 'load' ) );
+		add_action( 'init', array( $this->base, 'background_update' ) );
+		add_action( 'init', array( $this->base, 'set_options_filter' ) );
+		add_action( 'wp_ajax_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
+		add_action( 'wp_ajax_nopriv_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
 			$this->base->load_authentication_hooks();
 		}
 
-		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
+		add_filter( 'upgrader_source_selection', array( $this->base, 'upgrader_source_selection' ), 10, 4 );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Init {
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
 		$this->load_options();
 
-		$admin_pages = [
+		$admin_pages = array(
 			'plugins.php',
 			'plugin-install.php',
 			'themes.php',
@@ -131,10 +131,10 @@ class Init {
 			'options.php',
 			'settings.php',
 			'edit.php',
-		];
+		);
 
 		// Needed for sequential shiny updating.
-		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], [ 'update-plugin', 'update-theme' ], true ) ) {
+		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], array( 'update-plugin', 'update-theme' ), true ) ) {
 			$admin_pages[] = 'admin-ajax.php';
 		}
 

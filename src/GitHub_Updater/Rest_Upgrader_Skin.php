@@ -32,7 +32,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @var array $messages
 	 */
-	public $messages = [];
+	public $messages = array();
 
 	/**
 	 * Boolean if errors are present.

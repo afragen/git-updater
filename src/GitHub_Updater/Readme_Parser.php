@@ -82,7 +82,7 @@ class Readme_Parser extends Parser {
 	 * @return array $data
 	 */
 	public function parse_data() {
-		$data = [];
+		$data = array();
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
@@ -115,7 +115,7 @@ class Readme_Parser extends Parser {
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
-		$contributors = [];
+		$contributors = array();
 		foreach ( (array) $users as $contributor ) {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;

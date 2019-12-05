@@ -223,10 +223,10 @@ class GitHub_API extends API implements API_Interface {
 			$wait                        = date( 'i', $reset - time() );
 			static::$error_code[ $repo ] = array_merge(
 				static::$error_code[ $repo ],
-				[
+				array(
 					'git'  => 'github',
 					'wait' => $wait,
-				]
+				)
 			);
 		}
 	}
@@ -243,7 +243,7 @@ class GitHub_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = [];
+		$arr = array();
 		array_map(
 			function ( $e ) use ( &$arr ) {
 				$arr[] = $e->name;
@@ -267,8 +267,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = [];
-		$response = [ $response ];
+		$arr      = array();
+		$response = array( $response );
 
 		array_filter(
 			$response,
@@ -295,8 +295,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = [];
-		$response = [ $response ];
+		$arr      = array();
+		$response = array( $response );
 
 		array_filter(
 			$response,
@@ -319,7 +319,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$branches = [];
+		$branches = array();
 		foreach ( $response as $branch ) {
 			$branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
@@ -337,25 +337,25 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = [];
-		$rollback = [];
+		$tags     = array();
+		$rollback = array();
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
 				'/',
-				[
+				array(
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
 					$this->type->slug,
 					'zipball/',
-				]
+				)
 			);
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag;
 		}
 
-		return [ $tags, $rollback ];
+		return array( $tags, $rollback );
 	}
 
 	/**
@@ -369,33 +369,33 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			[ $this, 'print_section_github_access_token' ],
+			array( $this, 'print_section_github_access_token' ),
 			'github_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 			'github_updater_github_install_settings',
 			'github_access_token',
-			[
+			array(
 				'id'    => 'github_access_token',
 				'token' => true,
-			]
+			)
 		);
 
 		if ( $auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
 				'github_updater_github_install_settings',
 				'github_access_token',
-				[
+				array(
 					'id'    => 'github_enterprise_token',
 					'token' => true,
-				]
+				)
 			);
 		}
 
@@ -406,7 +406,7 @@ class GitHub_API extends API implements API_Interface {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				[ $this, 'print_section_github_info' ],
+				array( $this, 'print_section_github_info' ),
 				'github_updater_github_install_settings'
 			);
 		}
@@ -420,10 +420,10 @@ class GitHub_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_github_install_settings';
 		$setting_field['section']         = 'github_id';
-		$setting_field['callback_method'] = [
+		$setting_field['callback_method'] = array(
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		];
+		);
 
 		return $setting_field;
 	}
@@ -451,7 +451,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			[ $this, 'github_access_token' ],
+			array( $this, 'github_access_token' ),
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -464,7 +464,7 @@ class GitHub_API extends API implements API_Interface {
 		add_filter(
 			'github_updater_add_settings_subtabs',
 			function ( $subtabs ) {
-				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'github-updater' ) ] );
+				return array_merge( $subtabs, array( 'github' => esc_html__( 'GitHub', 'github-updater' ) ) );
 			}
 		);
 	}

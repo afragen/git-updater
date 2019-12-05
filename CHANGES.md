@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 9.0.1 / 2019-12-04
+* fix PHP version check, fixes [#824](https://github.com/afragen/github-updater/issues/824)
+
 #### 9.0.0 / 2019-11-19
 * refactor to remove class extends
 * update renaming functions
