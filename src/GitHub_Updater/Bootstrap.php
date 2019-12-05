@@ -87,10 +87,10 @@ class Bootstrap {
 	 * @return void|bool
 	 */
 	public function check_requirements() {
-		add_action(
-			'admin_init',
-			function() {
-				if ( version_compare( phpversion(), '5.6', '<=' ) ) {
+		if ( version_compare( phpversion(), '5.6', '<=' ) ) {
+			add_action(
+				'admin_init',
+				function() {
 					echo '<div class="error notice is-dismissible"><p>';
 					printf(
 						/* translators: 1: minimum PHP version required */
@@ -99,11 +99,11 @@ class Bootstrap {
 					);
 					echo '</p></div>';
 					\deactivate_plugins( plugin_basename( $this->file ) );
-
-					return false;
 				}
-			}
-		);
+			);
+
+			return false;
+		}
 
 		return true;
 	}
