@@ -1,4 +1,5 @@
 #### [unreleased]
+* run GitHub Updater always but only show Settings for privileged users.
 
 #### 9.0.1 / 2019-12-04
 * fix PHP version check, fixes [#824](https://github.com/afragen/github-updater/issues/824)

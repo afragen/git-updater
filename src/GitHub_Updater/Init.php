@@ -118,7 +118,7 @@ class Init {
 		}
 
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
-		$this->load_options();
+		//$this->load_options();
 
 		$admin_pages = array(
 			'plugins.php',
@@ -142,11 +142,14 @@ class Init {
 		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
 		 *
 		 * @since 8.0.0
+		 * @deprecated 9.1.0
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
 		$admin_pages = array_unique( apply_filters( 'github_updater_add_admin_pages', $admin_pages ) );
 
-		return $can_user_update && in_array( $pagenow, $admin_pages, true );
+		return $can_user_update;
+
+		//return $can_user_update && in_array( $pagenow, $admin_pages, true );
 	}
 }

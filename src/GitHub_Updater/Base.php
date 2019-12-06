@@ -133,11 +133,10 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
+		if ( ! apply_filters( 'github_updater_hide_settings', false ) &&
+			Singleton::get_instance( 'Init', $this )->can_update()
+		) {
 			Singleton::get_instance( 'Settings', $this )->run();
-		}
-		if ( ! Singleton::get_instance( 'Init', $this )->can_update() ) {
-			return false;
 		}
 
 		// Run GitHub Updater upgrade functions.
@@ -172,18 +171,14 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function get_meta_plugins() {
-		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
-			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
-		}
+		Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
 	 */
 	public function get_meta_themes() {
-		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
-			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
-		}
+		Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
 	}
 
 	/**
