@@ -24,7 +24,7 @@ class Remote_Management {
 	 *
 	 * @var array $option_remote
 	 */
-	public static $options_remote;
+	//public static $options_remote;
 
 	/**
 	 * Supported remote management services.
@@ -57,7 +57,7 @@ class Remote_Management {
 	 * Load site options.
 	 */
 	private function load_options() {
-		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		//self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
 		self::$api_key        = get_site_option( 'github_updater_api_key' );
 	}
 
@@ -164,9 +164,9 @@ class Remote_Management {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 				<?php
-				settings_fields( 'github_updater_remote_management' );
+				//settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
-				submit_button();
+				//submit_button();
 				?>
 			</form>
 			<?php
@@ -202,19 +202,19 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
-		foreach ( self::$remote_management as $id => $name ) {
-			add_settings_field(
-				$id,
-				null,
-				array( $this, 'token_callback_checkbox_remote' ),
-				'github_updater_remote_settings',
-				'remote_management',
-				array(
-					'id'    => $id,
-					'title' => esc_html( $name ),
-				)
-			);
-		}
+		//foreach ( self::$remote_management as $id => $name ) {
+		//	add_settings_field(
+		//		$id,
+		//		null,
+		//		array( $this, 'token_callback_checkbox_remote' ),
+		//		'github_updater_remote_settings',
+		//		'remote_management',
+		//		array(
+		//			'id'    => $id,
+		//			'title' => esc_html( $name ),
+		//		)
+		//	);
+		//}
 	}
 
 	/**
@@ -251,7 +251,7 @@ class Remote_Management {
 		echo '</p>';
 
 		echo '<p>';
-		esc_html_e( 'Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard.', 'github-updater' );
+		esc_html_e( 'Use of Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
 		echo '</p>';
 	}
 
