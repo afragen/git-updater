@@ -125,7 +125,7 @@ class Init {
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
-		apply_filters_deprecated( 'github_updater_add_admin_pages', array(''), '9.1.0' );
+		apply_filters_deprecated( 'github_updater_add_admin_pages', array( null ), '9.1.0' );
 
 		return $can_user_update;
 	}
