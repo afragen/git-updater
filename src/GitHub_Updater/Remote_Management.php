@@ -229,6 +229,11 @@ class Remote_Management {
 			home_url( 'wp-json/' . $this->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
 		);
 
+
+		echo '<p>';
+		esc_html_e( 'Use of Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
+		echo '</p>';
+
 		echo '<p>';
 		printf(
 			wp_kses_post(
@@ -248,10 +253,6 @@ class Remote_Management {
 				'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
 				'<br><span style="font-family:monospace;">' . $api_url . '</span>'
 			);
-		echo '</p>';
-
-		echo '<p>';
-		esc_html_e( 'Use of Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
 		echo '</p>';
 	}
 
