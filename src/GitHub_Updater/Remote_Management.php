@@ -81,7 +81,6 @@ class Remote_Management {
 				$this->save_settings( $post_data );
 			}
 		);
-		add_filter( 'github_updater_add_admin_pages', array( $this, 'extra_admin_pages' ) );
 		$this->add_settings_tabs();
 	}
 
@@ -344,12 +343,12 @@ class Remote_Management {
 	 */
 	public function set_update_transients() {
 		if ( empty( self::$options_remote ) ) {
-			return;
+			//return;
 		}
 
-		$remote_management_pages = $this->extra_admin_pages();
-		if ( $this->is_current_page( $remote_management_pages ) ) {
-			add_filter( 'github_updater_add_admin_pages', array( $this, 'extra_admin_pages' ) );
+		//$remote_management_pages = $this->extra_admin_pages();
+		//if ( $this->is_current_page( $remote_management_pages ) ) {
+		//}
 			add_filter( 'site_transient_update_plugins', array( Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ), 10, 1 );
 			add_filter( 'site_transient_update_themes', array( Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ), 10, 1 );
 
@@ -359,8 +358,5 @@ class Remote_Management {
 			$current_themes  = get_site_transient( 'update_themes' );
 			set_site_transient( 'update_plugins', $current_plugins );
 			set_site_transient( 'update_themes', $current_themes );
-
-			remove_filter( 'github_updater_add_admin_pages', array( $this, 'extra_admin_pages' ) );
-		}
 	}
 }

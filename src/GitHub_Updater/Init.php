@@ -105,38 +105,17 @@ class Init {
 	}
 
 	/**
-	 * Checks current user capabilities and admin pages.
+	 * Checks current user capabilities.
 	 *
 	 * @return bool
 	 */
 	public function can_update() {
-		global $pagenow;
-
 		// WP-CLI access has full capabilities.
 		if ( static::is_wp_cli() ) {
 			return true;
 		}
 
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
-		//$this->load_options();
-
-		$admin_pages = array(
-			'plugins.php',
-			'plugin-install.php',
-			'themes.php',
-			'theme-install.php',
-			'update-core.php',
-			'update.php',
-			'options-general.php',
-			'options.php',
-			'settings.php',
-			'edit.php',
-		);
-
-		// Needed for sequential shiny updating.
-		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], array( 'update-plugin', 'update-theme' ), true ) ) {
-			$admin_pages[] = 'admin-ajax.php';
-		}
 
 		/**
 		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
@@ -146,10 +125,8 @@ class Init {
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
-		$admin_pages = array_unique( apply_filters( 'github_updater_add_admin_pages', $admin_pages ) );
+		apply_filters_deprecated( 'github_updater_add_admin_pages', array(''), '9.1.0' );
 
 		return $can_user_update;
-
-		//return $can_user_update && in_array( $pagenow, $admin_pages, true );
 	}
 }
