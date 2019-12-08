@@ -108,6 +108,15 @@ class Settings {
 			add_action( 'admin_init', array( $this, 'update_settings' ) );
 			add_action( 'admin_init', array( $this, 'page_init' ) );
 			add_action( 'admin_init', array( Singleton::get_instance( 'Remote_Management', $this ), 'make_json' ) );
+
+			// Load settings stylesheet.
+			add_action(
+				'admin_enqueue_scripts',
+				function () {
+					wp_register_style( 'github-updater-settings', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater-settings.css' );
+					wp_enqueue_style( 'github-updater-settings' );
+				}
+			);
 		}
 	}
 
