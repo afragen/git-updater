@@ -24,7 +24,7 @@ class Remote_Management {
 	 *
 	 * @var array $option_remote
 	 */
-	//public static $options_remote;
+	// public static $options_remote;
 
 	/**
 	 * Supported remote management services.
@@ -57,8 +57,8 @@ class Remote_Management {
 	 * Load site options.
 	 */
 	private function load_options() {
-		//self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
-		self::$api_key        = get_site_option( 'github_updater_api_key' );
+		// self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		self::$api_key = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -164,9 +164,9 @@ class Remote_Management {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 				<?php
-				//settings_fields( 'github_updater_remote_management' );
+				// settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
-				//submit_button();
+				// submit_button();
 				?>
 			</form>
 			<?php
@@ -202,19 +202,19 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
-		//foreach ( self::$remote_management as $id => $name ) {
-		//	add_settings_field(
-		//		$id,
-		//		null,
-		//		array( $this, 'token_callback_checkbox_remote' ),
-		//		'github_updater_remote_settings',
-		//		'remote_management',
-		//		array(
-		//			'id'    => $id,
-		//			'title' => esc_html( $name ),
-		//		)
-		//	);
-		//}
+		// foreach ( self::$remote_management as $id => $name ) {
+		// add_settings_field(
+		// $id,
+		// null,
+		// array( $this, 'token_callback_checkbox_remote' ),
+		// 'github_updater_remote_settings',
+		// 'remote_management',
+		// array(
+		// 'id'    => $id,
+		// 'title' => esc_html( $name ),
+		// )
+		// );
+		// }
 	}
 
 	/**
@@ -228,7 +228,6 @@ class Remote_Management {
 			array( 'key' => self::$api_key ),
 			home_url( 'wp-json/' . $this->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
 		);
-
 
 		echo '<p>';
 		esc_html_e( 'Use of Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
@@ -337,27 +336,15 @@ class Remote_Management {
 	/**
 	 * Set site transients for 'update_plugins' and 'update_themes' for remote management.
 	 *
-	 * Only call if any remote management options are present and only if on a page specified
-	 * to run remote management.
-	 *
 	 * @return void
 	 */
 	public function set_update_transients() {
-		if ( empty( self::$options_remote ) ) {
-			//return;
-		}
-
-		//$remote_management_pages = $this->extra_admin_pages();
-		//if ( $this->is_current_page( $remote_management_pages ) ) {
-		//}
-			add_filter( 'site_transient_update_plugins', array( Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ), 10, 1 );
-			add_filter( 'site_transient_update_themes', array( Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ), 10, 1 );
-
-			Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
-
-			$current_plugins = get_site_transient( 'update_plugins' );
-			$current_themes  = get_site_transient( 'update_themes' );
-			set_site_transient( 'update_plugins', $current_plugins );
-			set_site_transient( 'update_themes', $current_themes );
+		add_filter( 'site_transient_update_plugins', array( Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ), 10, 1 );
+		add_filter( 'site_transient_update_themes', array( Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ), 10, 1 );
+		Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
+		$current_plugins = get_site_transient( 'update_plugins' );
+		$current_themes  = get_site_transient( 'update_themes' );
+		set_site_transient( 'update_plugins', $current_plugins );
+		set_site_transient( 'update_themes', $current_themes );
 	}
 }

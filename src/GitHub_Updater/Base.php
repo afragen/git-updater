@@ -193,7 +193,7 @@ class Base {
 		add_action( 'ghu_get_remote_theme', array( $this, 'run_cron_batch' ), 10, 1 );
 		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( $this, 'get_meta_remote_management' ) );
 		add_action( 'update_option_auto_updater.lock', array( $this, 'get_meta_remote_management' ) );
-		( new Remote_Management() )->set_update_transients();
+		//( new Remote_Management() )->set_update_transients();
 	}
 
 	/**
