@@ -91,17 +91,17 @@ class Remote_Management {
 	 *
 	 * @return array $admin_pages
 	 */
-	public function extra_admin_pages( $admin_pages = array() ) {
-		$extra_admin_pages = array();
-		foreach ( array_keys( self::$remote_management ) as $key ) {
-			if ( ! empty( self::$options_remote[ $key ] ) ) {
-				$extra_admin_pages = array( 'index.php' );
-				break;
-			}
-		}
-
-		return array_merge( $admin_pages, $extra_admin_pages );
-	}
+	// public function extra_admin_pages( $admin_pages = array() ) {
+	// $extra_admin_pages = array();
+	// foreach ( array_keys( self::$remote_management ) as $key ) {
+	// if ( ! empty( self::$options_remote[ $key ] ) ) {
+	// $extra_admin_pages = array( 'index.php' );
+	// break;
+	// }
+	// }
+	//
+	// return array_merge( $admin_pages, $extra_admin_pages );
+	// }
 
 	/**
 	 * Save Remote Management settings.
@@ -338,13 +338,13 @@ class Remote_Management {
 	 *
 	 * @return void
 	 */
-	public function set_update_transients() {
-		add_filter( 'site_transient_update_plugins', array( Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ), 10, 1 );
-		add_filter( 'site_transient_update_themes', array( Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ), 10, 1 );
-		Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
-		$current_plugins = get_site_transient( 'update_plugins' );
-		$current_themes  = get_site_transient( 'update_themes' );
-		set_site_transient( 'update_plugins', $current_plugins );
-		set_site_transient( 'update_themes', $current_themes );
-	}
+	// public function set_update_transients() {
+	// add_filter( 'site_transient_update_plugins', array( Singleton::get_instance( 'Plugin', //$this ), 'update_site_transient' ), 10, 1 );
+	// add_filter( 'site_transient_update_themes', array( Singleton::get_instance( 'Theme', $this //), 'update_site_transient' ), 10, 1 );
+	// Singleton::get_instance( 'Base', $this )->get_meta_remote_management();
+	// $current_plugins = get_site_transient( 'update_plugins' );
+	// $current_themes  = get_site_transient( 'update_themes' );
+	// set_site_transient( 'update_plugins', $current_plugins );
+	// set_site_transient( 'update_themes', $current_themes );
+	// }
 }
