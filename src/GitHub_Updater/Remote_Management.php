@@ -22,9 +22,11 @@ class Remote_Management {
 	/**
 	 * Holds the values for remote management settings.
 	 *
+	 * @deprecated 9.1.0
+	 *
 	 * @var array $option_remote
 	 */
-	// public static $options_remote;
+	public static $options_remote;
 
 	/**
 	 * Supported remote management services.
@@ -57,8 +59,8 @@ class Remote_Management {
 	 * Load site options.
 	 */
 	private function load_options() {
-		// self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
-		self::$api_key = get_site_option( 'github_updater_api_key' );
+		self::$options_remote = get_site_option( 'github_updater_remote_management', array() );
+		self::$api_key        = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -202,6 +204,7 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
+		// @deprecated 9.1.0
 		// foreach ( self::$remote_management as $id => $name ) {
 		// add_settings_field(
 		// $id,
