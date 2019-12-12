@@ -95,6 +95,7 @@ class Init {
 		add_action( 'init', array( $this->base, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
+		add_action( 'rest_api_init', array( new REST_API(), 'register_endpoints' ) );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
