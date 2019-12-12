@@ -254,7 +254,7 @@ class Plugin {
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
-		if ( $schedule_event && ! empty ( $plugins ) ) {
+		if ( $schedule_event && ! empty( $plugins ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
 			! apply_filters( 'github_updater_disable_wpcron', false )
