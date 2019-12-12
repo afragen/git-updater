@@ -233,7 +233,7 @@ class Remote_Management {
 		);
 
 		echo '<p>';
-		esc_html_e( 'Use of Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
+		esc_html_e( 'Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'github-updater' );
 		echo '</p>';
 
 		echo '<p>';
