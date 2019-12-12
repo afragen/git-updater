@@ -251,7 +251,7 @@ class Theme {
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
-		if ( $schedule_event ) {
+		if ( $schedule_event && ! empty ( $themes ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
 			! apply_filters( 'github_updater_disable_wpcron', false )
