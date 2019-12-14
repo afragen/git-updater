@@ -193,19 +193,7 @@ class Base {
 		add_action( 'wp_update_themes', array( $this, 'get_meta_themes' ) );
 		add_action( 'ghu_get_remote_plugin', array( $this, 'run_cron_batch' ), 10, 1 );
 		add_action( 'ghu_get_remote_theme', array( $this, 'run_cron_batch' ), 10, 1 );
-		// add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( $this, 'get_meta_remote_management' ) );
-		// add_action( 'update_option_auto_updater.lock', array( $this, 'get_meta_remote_management' ) );
-		// ( new Remote_Management() )->set_update_transients();
 	}
-
-	/**
-	 * Calls $this->get_meta_plugins() and $this->get_meta_themes()
-	 * for remote management services.
-	 */
-	// public function get_meta_remote_management() {
-	// $this->get_meta_plugins();
-	// $this->get_meta_themes();
-	// }
 
 	/**
 	 * Allows developers to use 'github_updater_set_options' hook to set access tokens or other settings.
