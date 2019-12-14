@@ -282,8 +282,8 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
-		// Exit if non-privileged user and bypassing wp-cron.
-		if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
+		// Exit if frontend and bypassing wp-cron.
+		if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! is_admin() ) {
 			return;
 		}
 
