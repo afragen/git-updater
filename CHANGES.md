@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.1.0 / 2019-12-16
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
 * don't run API calls for non-privileged users when bypassing wp-cron
 * only show Settings for privileged users
