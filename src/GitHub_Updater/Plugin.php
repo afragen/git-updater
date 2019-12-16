@@ -226,6 +226,10 @@ class Plugin {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_plugin_meta() {
+		$can_add_plugin_row_action = ( 'init' === current_filter() ) && ( ! is_multisite() || is_network_admin() );
+		$github_updater_disable_wpcron = apply_filters( 'github_updater_disable_wpcron', false );
+		$is_wp_cli = static::is_wp_cli();
+
 		$plugins = array();
 		foreach ( (array) $this->config as $plugin ) {
 			/**
@@ -236,18 +240,14 @@ class Plugin {
 			 *
 			 * @param bool
 			 */
-			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
-				|| apply_filters( 'github_updater_disable_wpcron', false )
-			) {
+			if ( ! $this->waiting_for_background_update( $plugin ) || $is_wp_cli || $github_updater_disable_wpcron ) {
 				$this->base->get_remote_repo_meta( $plugin );
 			} else {
 				$plugins[ $plugin->slug ] = $plugin;
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
-			if ( ! $plugin->release_asset && 'init' === current_filter() &&
-				( ! is_multisite() || is_network_admin() )
-			) {
+			if ( ! $plugin->release_asset && $can_add_plugin_row_action ) {
 				add_action( "after_plugin_row_{$plugin->file}", array( $this, 'plugin_branch_switcher' ), 15, 3 );
 			}
 		}
@@ -257,13 +257,13 @@ class Plugin {
 		if ( $schedule_event && ! empty( $plugins ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
-			! apply_filters( 'github_updater_disable_wpcron', false )
+			! $github_updater_disable_wpcron
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', array( $plugins ) );
 			}
 		}
 
-		if ( ! static::is_wp_cli() ) {
+		if ( ! $is_wp_cli ) {
 			$this->load_pre_filters();
 		}
 	}

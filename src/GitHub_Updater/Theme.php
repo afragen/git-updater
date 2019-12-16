@@ -217,6 +217,10 @@ class Theme {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_theme_meta() {
+		$github_updater_disable_wpcron = apply_filters( 'github_updater_disable_wpcron', false );
+		$is_multisite = is_multisite();
+		$is_wp_cli = static::is_wp_cli();
+
 		$themes = array();
 		foreach ( (array) $this->config as $theme ) {
 			/**
@@ -227,9 +231,7 @@ class Theme {
 			 *
 			 * @param bool
 			 */
-			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli()
-				|| apply_filters( 'github_updater_disable_wpcron', false )
-			) {
+			if ( ! $this->waiting_for_background_update( $theme ) || $is_wp_cli || $github_updater_disable_wpcron ) {
 				$this->base->get_remote_repo_meta( $theme );
 			} else {
 				$themes[ $theme->slug ] = $theme;
@@ -238,7 +240,7 @@ class Theme {
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
-			if ( is_multisite() ) {
+			if ( $is_multisite ) {
 				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", array( $this, 'wp_theme_update_row' ), 10, 2 );
@@ -254,13 +256,13 @@ class Theme {
 		if ( $schedule_event && ! empty( $themes ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
-			! apply_filters( 'github_updater_disable_wpcron', false )
+			! $github_updater_disable_wpcron
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
 			}
 		}
 
-		if ( ! static::is_wp_cli() ) {
+		if ( ! $is_wp_cli ) {
 			$this->load_pre_filters();
 		}
 	}
