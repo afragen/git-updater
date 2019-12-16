@@ -133,25 +133,26 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! apply_filters( 'github_updater_hide_settings', false ) ) {
+		if ( ! apply_filters( 'github_updater_hide_settings', false ) &&
+			Singleton::get_instance( 'Init', $this )->can_update()
+		) {
 			Singleton::get_instance( 'Settings', $this )->run();
-		}
-		if ( ! Singleton::get_instance( 'Init', $this )->can_update() ) {
-			return false;
 		}
 
 		// Run GitHub Updater upgrade functions.
 		$upgrade = new GHU_Upgrade();
 		$upgrade->run();
 
-		// Load plugin stylesheet.
-		add_action(
-			'admin_enqueue_scripts',
-			function () {
-				wp_register_style( 'github-updater', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater.css' );
-				wp_enqueue_style( 'github-updater' );
-			}
-		);
+		if ( $this->is_current_page( array( 'themes.php' ) ) ) {
+			// Load plugin stylesheet.
+			add_action(
+				'admin_enqueue_scripts',
+				function () {
+					wp_register_style( 'github-updater', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater.css' );
+					wp_enqueue_style( 'github-updater' );
+				}
+			);
+		}
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			/**
@@ -172,18 +173,14 @@ class Base {
 	 * Performs actual plugin metadata fetching.
 	 */
 	public function get_meta_plugins() {
-		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
-			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
-		}
+		Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
 	}
 
 	/**
 	 * Performs actual theme metadata fetching.
 	 */
 	public function get_meta_themes() {
-		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
-			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
-		}
+		Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
 	}
 
 	/**
@@ -196,18 +193,6 @@ class Base {
 		add_action( 'wp_update_themes', array( $this, 'get_meta_themes' ) );
 		add_action( 'ghu_get_remote_plugin', array( $this, 'run_cron_batch' ), 10, 1 );
 		add_action( 'ghu_get_remote_theme', array( $this, 'run_cron_batch' ), 10, 1 );
-		add_action( 'wp_ajax_nopriv_ithemes_sync_request', array( $this, 'get_meta_remote_management' ) );
-		add_action( 'update_option_auto_updater.lock', array( $this, 'get_meta_remote_management' ) );
-		( new Remote_Management() )->set_update_transients();
-	}
-
-	/**
-	 * Calls $this->get_meta_plugins() and $this->get_meta_themes()
-	 * for remote management services.
-	 */
-	public function get_meta_remote_management() {
-		$this->get_meta_plugins();
-		$this->get_meta_themes();
 	}
 
 	/**
@@ -285,6 +270,11 @@ class Base {
 	 * @return bool
 	 */
 	public function get_remote_repo_meta( $repo ) {
+		// Exit if non-privileged user and bypassing wp-cron.
+		if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
+			return;
+		}
+
 		$file = 'style.css';
 		if ( false !== stripos( $repo->type, 'plugin' ) ) {
 			$file = basename( $repo->file );

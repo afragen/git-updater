@@ -1,0 +1,27 @@
+/* Position Settings input */
+input.ghu-callback-text {
+	width: 50%;
+}
+
+input.bitbucket_setting {
+	margin-top: 5px;
+}
+
+/* Position Save and Refresh buttons */
+.github-updater-settings form.settings p.submit {
+	float: left;
+	clear: right;
+	width: 40%;
+}
+
+.github-updater-settings form.settings.no-sub-tabs p.submit {
+	margin-top: 10px;
+}
+
+div.hide-github-updater-settings {
+	display: none;
+}
+
+.github-updater-settings .form-table th[scope='row']:empty {
+	display: none;
+}

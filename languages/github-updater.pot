@@ -2,22 +2,22 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.0.0\n"
+"Project-Id-Version: GitHub Updater 9.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-11-19T19:02:06+00:00\n"
+"POT-Creation-Date: 2019-12-16T18:04:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.3.0\n"
+"X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
 
 #. Plugin Name of the plugin
-#: src/GitHub_Updater/Settings.php:141
-#: src/GitHub_Updater/Settings.php:180
-#: src/GitHub_Updater/Settings.php:231
+#: src/GitHub_Updater/Settings.php:150
+#: src/GitHub_Updater/Settings.php:189
+#: src/GitHub_Updater/Settings.php:240
 msgid "GitHub Updater"
 msgstr ""
 
@@ -218,26 +218,26 @@ msgid "Enter plugin or theme slug."
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/GitHub_Updater/Base.php:648
+#: src/GitHub_Updater/Base.php:638
 #: src/GitHub_Updater/Theme.php:592
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:659
+#: src/GitHub_Updater/Base.php:649
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:675
+#: src/GitHub_Updater/Base.php:665
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:683
+#: src/GitHub_Updater/Base.php:673
 #: src/GitHub_Updater/Theme.php:618
 msgid "No previous tags to rollback to."
 msgstr ""
 
 #. translators: 1: minimum PHP version required
-#: src/GitHub_Updater/Bootstrap.php:97
+#: src/GitHub_Updater/Bootstrap.php:96
 msgid "GitHub Updater cannot run on PHP versions older than %1$s."
 msgstr ""
 
@@ -330,88 +330,88 @@ msgstr ""
 msgid "View details"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:138
-#: src/GitHub_Updater/Remote_Management.php:201
+#: src/GitHub_Updater/Remote_Management.php:122
+#: src/GitHub_Updater/Remote_Management.php:185
 msgid "Remote Management"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:177
+#: src/GitHub_Updater/Remote_Management.php:161
 msgid "Reset RESTful key"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:183
+#: src/GitHub_Updater/Remote_Management.php:167
 msgid "Make JSON file"
 msgstr ""
 
+#: src/GitHub_Updater/Remote_Management.php:219
+msgid "Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others."
+msgstr ""
+
 #. translators: %s: Link to Git Remote Updater repository
-#: src/GitHub_Updater/Remote_Management.php:237
+#: src/GitHub_Updater/Remote_Management.php:226
 msgid "The <a href=\"%s\">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler."
 msgstr ""
 
 #. translators: %1$s: Link to wiki, %2$s: RESTful API URL
-#: src/GitHub_Updater/Remote_Management.php:247
+#: src/GitHub_Updater/Remote_Management.php:236
 msgid "Please refer to the <a href=\"%1$s\">wiki</a> for complete list of attributes. REST API endpoints begin at: %2$s"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:255
-msgid "Use of Remote Management services may result increase some page load speeds only for `admin` level users in the dashboard."
-msgstr ""
-
-#: src/GitHub_Updater/Settings.php:122
-#: src/GitHub_Updater/Settings.php:727
+#: src/GitHub_Updater/Settings.php:131
+#: src/GitHub_Updater/Settings.php:736
 msgid "Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:179
-#: src/GitHub_Updater/Settings.php:318
+#: src/GitHub_Updater/Settings.php:188
+#: src/GitHub_Updater/Settings.php:327
 msgid "GitHub Updater Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:253
+#: src/GitHub_Updater/Settings.php:262
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:285
+#: src/GitHub_Updater/Settings.php:294
 msgid "Settings saved."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:287
+#: src/GitHub_Updater/Settings.php:296
 msgid "RESTful key reset."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:289
+#: src/GitHub_Updater/Settings.php:298
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:331
+#: src/GitHub_Updater/Settings.php:340
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:534
+#: src/GitHub_Updater/Settings.php:543
 msgid "Check to enable branch switching from the Plugins or Themes page."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:558
+#: src/GitHub_Updater/Settings.php:567
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:559
+#: src/GitHub_Updater/Settings.php:568
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:761
+#: src/GitHub_Updater/Settings.php:770
 msgid "This is a private repository."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:762
+#: src/GitHub_Updater/Settings.php:771
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:763
+#: src/GitHub_Updater/Settings.php:772
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:800
+#: src/GitHub_Updater/Settings.php:809
 msgid "Installed Plugins and Themes"
 msgstr ""
 

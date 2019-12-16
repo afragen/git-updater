@@ -95,6 +95,7 @@ class Init {
 		add_action( 'init', array( $this->base, 'set_options_filter' ) );
 		add_action( 'wp_ajax_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
 		add_action( 'wp_ajax_nopriv_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
+		add_action( 'rest_api_init', array( new REST_API(), 'register_endpoints' ) );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
@@ -105,48 +106,28 @@ class Init {
 	}
 
 	/**
-	 * Checks current user capabilities and admin pages.
+	 * Checks current user capabilities.
 	 *
 	 * @return bool
 	 */
 	public function can_update() {
-		global $pagenow;
-
 		// WP-CLI access has full capabilities.
 		if ( static::is_wp_cli() ) {
 			return true;
 		}
 
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
-		$this->load_options();
-
-		$admin_pages = array(
-			'plugins.php',
-			'plugin-install.php',
-			'themes.php',
-			'theme-install.php',
-			'update-core.php',
-			'update.php',
-			'options-general.php',
-			'options.php',
-			'settings.php',
-			'edit.php',
-		);
-
-		// Needed for sequential shiny updating.
-		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], array( 'update-plugin', 'update-theme' ), true ) ) {
-			$admin_pages[] = 'admin-ajax.php';
-		}
 
 		/**
 		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
 		 *
 		 * @since 8.0.0
+		 * @deprecated 9.1.0
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
-		$admin_pages = array_unique( apply_filters( 'github_updater_add_admin_pages', $admin_pages ) );
+		apply_filters_deprecated( 'github_updater_add_admin_pages', array( null ), '9.1.0' );
 
-		return $can_user_update && in_array( $pagenow, $admin_pages, true );
+		return $can_user_update;
 	}
 }
