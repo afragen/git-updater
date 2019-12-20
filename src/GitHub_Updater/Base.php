@@ -147,7 +147,7 @@ class Base {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'github-updater', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater.css' );
+					wp_register_style( 'github-updater', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'github-updater' );
 				}
 			);
