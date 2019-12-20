@@ -20,6 +20,9 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * Class REST_API
+ */
 class REST_API {
 	use GHU_Trait;
 
