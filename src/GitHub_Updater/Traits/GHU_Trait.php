@@ -636,4 +636,18 @@ trait GHU_Trait {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $error );
 		}
 	}
+
+	/**
+	 * Returns current plugin version.
+	 *
+	 * @return string GitHub Updater plugin version
+	 */
+	public static function get_plugin_version() {
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$plugin_data = \get_plugin_data( GITHUB_UPDATER_DIR . '/github-updater.php' );
+
+		return $plugin_data['Version'];
+	}
 }
