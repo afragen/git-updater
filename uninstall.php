@@ -27,7 +27,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$options = array( 'github_updater', 'github_updater_api_key', 'github_updater_remote_management' );
+$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management' ];
 foreach ( $options as $option ) {
 	delete_option( $option );
 	delete_site_option( $option );
@@ -37,6 +37,6 @@ global $wpdb;
 $table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 $column        = is_multisite() ? 'meta_key' : 'option_name';
 $delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
-$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
+$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
 @unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );

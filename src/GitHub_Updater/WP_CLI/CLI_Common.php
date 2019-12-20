@@ -26,7 +26,7 @@ class CLI_Common {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		$wpdb->query( $wpdb->prepare( $delete_string, array( '%ghu-%' ) ) );
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
 		return true;
 	}

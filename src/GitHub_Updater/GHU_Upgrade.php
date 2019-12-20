@@ -51,7 +51,7 @@ class GHU_Upgrade {
 				break;
 		}
 
-		$options = array_merge( (array) $options, array( 'db_version' => (int) $this->db_version ) );
+		$options = array_merge( (array) $options, [ 'db_version' => (int) $this->db_version ] );
 		update_site_option( 'github_updater', $options );
 	}
 

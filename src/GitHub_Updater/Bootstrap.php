@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Load textdomain.
 add_action(
 	'init',
-	function() {
+	function () {
 		load_plugin_textdomain( 'github-updater' );
 	}
 );
@@ -69,7 +69,7 @@ class Bootstrap {
 		// Load Autoloader.
 		require_once $this->dir . '/vendor/autoload.php';
 
-		register_activation_hook( $this->file, array( new Init(), 'rename_on_activation' ) );
+		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
 		( new Init() )->run();
 
 		/**
@@ -77,7 +77,7 @@ class Bootstrap {
 		 *
 		 * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
 		 */
-		add_action( 'admin_init', array( 'PAnD', 'init' ) );
+		add_action( 'admin_init', [ 'PAnD', 'init' ] );
 	}
 
 	/**
@@ -89,7 +89,7 @@ class Bootstrap {
 		if ( version_compare( phpversion(), '5.6', '<=' ) ) {
 			add_action(
 				'admin_init',
-				function() {
+				function () {
 					echo '<div class="error notice is-dismissible"><p>';
 					printf(
 						/* translators: 1: minimum PHP version required */

@@ -42,8 +42,8 @@ class Messages {
 	public function create_error_message( $type = '' ) {
 		global $pagenow;
 
-		$update_pages   = array( 'update-core.php', 'plugins.php', 'themes.php' );
-		$settings_pages = array( 'settings.php', 'options-general.php' );
+		$update_pages   = [ 'update-core.php', 'plugins.php', 'themes.php' ];
+		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if (
 			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
@@ -59,32 +59,32 @@ class Messages {
 					self::$error_message = $type->get_error_message();
 					add_action(
 						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						array(
+						[
 							$this,
 							'show_wp_error',
-						)
+						]
 					);
 					break;
 				case 'waiting':
 					if ( ! apply_filters( 'github_updater_disable_wpcron', false ) ) {
-						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', array( $this, 'waiting' ) );
+						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 					}
 					// no break.
 				case 'git':
 				default:
 					add_action(
 						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						array(
+						[
 							$this,
 							'show_403_error_message',
-						)
+						]
 					);
 					add_action(
 						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						array(
+						[
 							$this,
 							'show_401_error_message',
-						)
+						]
 					);
 			}
 		}

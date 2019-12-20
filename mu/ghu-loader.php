@@ -62,7 +62,7 @@ function ghu_mu_plugin_active( $actions ) {
 		unset( $actions['deactivate'] );
 	}
 
-	return array_merge( array( 'mu-plugin' => esc_html__( 'Activated as mu-plugin', 'github-updater' ) ), $actions );
+	return array_merge( [ 'mu-plugin' => esc_html__( 'Activated as mu-plugin', 'github-updater' ) ], $actions );
 }
 
 /*

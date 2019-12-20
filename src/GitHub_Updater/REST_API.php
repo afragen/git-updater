@@ -39,73 +39,72 @@ class REST_API {
 		register_rest_route(
 			self::$namespace,
 			'test',
-			array(
+			[
 				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'test' ),
-			)
+				'callback' => [ $this, 'test' ],
+			]
 		);
 
 		register_rest_route(
 			self::$namespace,
 			'repos',
-			array(
+			[
 				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_remote_repo_data' ),
-				'args'     => array(
-					'key' => array(
+				'callback' => [ $this, 'get_remote_repo_data' ],
+				'args'     => [
+					'key' => [
 						'default'           => null,
 						'validate_callback' => 'sanitize_text_field',
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
-		$update_args = array(
-			'key'        => array(
+		$update_args = [
+			'key'        => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'plugin'     => array(
+			],
+			'plugin'     => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'theme'      => array(
+			],
+			'theme'      => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-
-			),
-			'tag'        => array(
+			],
+			'tag'        => [
 				'default'           => 'master',
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'branch'     => array(
+			],
+			'branch'     => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'committish' => array(
+			],
+			'committish' => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'override'   => array(
+			],
+			'override'   => [
 				'default' => false,
-			),
-		);
+			],
+		];
 
 		register_rest_route(
 			self::$namespace,
 			'update',
-			array(
-				array(
+			[
+				[
 					'methods'  => \WP_REST_Server::READABLE,
-					'callback' => array( new REST_Update(), 'process_request' ),
+					'callback' => [ new REST_Update(), 'process_request' ],
 					'args'     => $update_args,
-				),
-				array(
+				],
+				[
 					'methods'  => \WP_REST_Server::CREATABLE,
-					'callback' => array( new REST_Update(), 'process_request' ),
+					'callback' => [ new REST_Update(), 'process_request' ],
 					'args'     => $update_args,
-				),
-			)
+				],
+			]
 		);
 	}
 
@@ -132,25 +131,25 @@ class REST_API {
 
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(
-			array(
+			[
 				'key' => $request->get_param( 'key' ),
-			),
+			],
 			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);
 		foreach ( $ghu_tokens as $token ) {
-			$slugs[] = array(
+			$slugs[] = [
 				'slug'   => $token->slug,
 				'type'   => $token->type,
 				'branch' => $token->branch,
-			);
+			];
 		}
-		$json = array(
-			'sites' => array(
+		$json = [
+			'sites' => [
 				'site'          => $site,
 				'restful_start' => $api_url,
 				'slugs'         => $slugs,
-			),
-		);
+			],
+		];
 
 		return $json;
 	}

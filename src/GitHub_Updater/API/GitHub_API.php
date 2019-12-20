@@ -29,7 +29,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class GitHub_API extends API implements API_Interface {
-
 	/**
 	 * Constructor.
 	 *
@@ -137,6 +136,7 @@ class GitHub_API extends API implements API_Interface {
 			if ( property_exists( $this->type, 'is_private' ) && $this->type->is_private ) {
 				return $this->get_release_asset_redirect( $release_asset, true );
 			}
+
 			return $release_asset;
 		}
 
@@ -215,7 +215,7 @@ class GitHub_API extends API implements API_Interface {
 	 * Calculate and store time until rate limit reset.
 	 *
 	 * @param array  $response HTTP headers.
-	 * @param string $repo Repo name.
+	 * @param string $repo     Repo name.
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
@@ -223,10 +223,10 @@ class GitHub_API extends API implements API_Interface {
 			$wait                        = date( 'i', $reset - time() );
 			static::$error_code[ $repo ] = array_merge(
 				static::$error_code[ $repo ],
-				array(
+				[
 					'git'  => 'github',
 					'wait' => $wait,
-				)
+				]
 			);
 		}
 	}
@@ -243,7 +243,7 @@ class GitHub_API extends API implements API_Interface {
 			return $response;
 		}
 
-		$arr = array();
+		$arr = [];
 		array_map(
 			function ( $e ) use ( &$arr ) {
 				$arr[] = $e->name;
@@ -267,8 +267,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter(
 			$response,
@@ -295,8 +295,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$arr      = array();
-		$response = array( $response );
+		$arr      = [];
+		$response = [ $response ];
 
 		array_filter(
 			$response,
@@ -319,43 +319,44 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
-		$branches = array();
+		$branches = [];
 		foreach ( $response as $branch ) {
 			$branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
 			$branches[ $branch->name ]['commit_api']  = $branch->commit->url;
 		}
+
 		return $branches;
 	}
 
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param \stdClass|array $response  Response from API call.
 	 * @param array           $repo_type
 	 *
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = array();
-		$rollback = array();
+		$tags     = [];
+		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
 			$download_base    = implode(
 				'/',
-				array(
+				[
 					$repo_type['base_uri'],
 					'repos',
 					$this->type->owner,
 					$this->type->slug,
 					'zipball/',
-				)
+				]
 			);
 			$tags[]           = $tag;
 			$rollback[ $tag ] = $download_base . $tag;
 		}
 
-		return array( $tags, $rollback );
+		return [ $tags, $rollback ];
 	}
 
 	/**
@@ -369,33 +370,33 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_section(
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
-			array( $this, 'print_section_github_access_token' ),
+			[ $this, 'print_section_github_access_token' ],
 			'github_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
-			array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_github_install_settings',
 			'github_access_token',
-			array(
+			[
 				'id'    => 'github_access_token',
 				'token' => true,
-			)
+			]
 		);
 
 		if ( $auth_required['github_enterprise'] ) {
 			add_settings_field(
 				'github_enterprise_token',
 				esc_html__( 'GitHub Enterprise Access Token', 'github-updater' ),
-				array( Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ),
+				[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 				'github_updater_github_install_settings',
 				'github_access_token',
-				array(
+				[
 					'id'    => 'github_enterprise_token',
 					'token' => true,
-				)
+				]
 			);
 		}
 
@@ -406,7 +407,7 @@ class GitHub_API extends API implements API_Interface {
 			add_settings_section(
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'github-updater' ),
-				array( $this, 'print_section_github_info' ),
+				[ $this, 'print_section_github_info' ],
 				'github_updater_github_install_settings'
 			);
 		}
@@ -420,10 +421,10 @@ class GitHub_API extends API implements API_Interface {
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'github_updater_github_install_settings';
 		$setting_field['section']         = 'github_id';
-		$setting_field['callback_method'] = array(
+		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_text',
-		);
+		];
 
 		return $setting_field;
 	}
@@ -451,7 +452,7 @@ class GitHub_API extends API implements API_Interface {
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'github-updater' ),
-			array( $this, 'github_access_token' ),
+			[ $this, 'github_access_token' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -464,7 +465,7 @@ class GitHub_API extends API implements API_Interface {
 		add_filter(
 			'github_updater_add_settings_subtabs',
 			function ( $subtabs ) {
-				return array_merge( $subtabs, array( 'github' => esc_html__( 'GitHub', 'github-updater' ) ) );
+				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'github-updater' ) ] );
 			}
 		);
 	}
