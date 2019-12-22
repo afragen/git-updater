@@ -107,7 +107,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Return the Bitbucket Sever release asset URL.
 	 *
-	 * @return string
+	 * @return void|string
 	 */
 	public function get_release_asset() {
 		// TODO: make this work.

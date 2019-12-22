@@ -78,6 +78,7 @@ class Language_Pack_API extends API {
 			case 'github':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;
@@ -88,12 +89,14 @@ class Language_Pack_API extends API {
 				$id       = rawurlencode( $headers['owner'] . '/' . $headers['repo'] );
 				$response = $this->api( '/projects/' . $id . '/repository/files/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;

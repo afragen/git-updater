@@ -196,7 +196,7 @@ class Rest_Update {
 	 */
 	public function process_request( $request = null ) {
 		$args = $this->process_request_data( $request );
-		extract( $args );
+		extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 
 		$start = microtime( true );
 		try {
@@ -291,7 +291,7 @@ class Rest_Update {
 	public function process_request_data( $request = null ) {
 		if ( $request instanceof \WP_REST_Request ) {
 			$params = $request->get_params();
-			extract( $params );
+			extract( $params ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 			$override   = false === $override ? false : true;
 			$deprecated = false;
 		} else { // call from admin-ajax.php.

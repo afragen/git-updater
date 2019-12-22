@@ -71,6 +71,7 @@ trait Basic_Auth_Loader {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );

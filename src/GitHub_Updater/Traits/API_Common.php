@@ -35,6 +35,7 @@ trait API_Common {
 		switch ( $git ) {
 			case 'github':
 			case 'gitlab':
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 				$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 				break;
 			case 'bbserver':

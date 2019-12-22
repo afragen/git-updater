@@ -274,7 +274,7 @@ class Gitea_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array|\stdClass $arr Array of changes in base64, object if error.
+	 * @return void|array|\stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
 	}
