@@ -70,6 +70,7 @@ class Bootstrap {
 		require_once $this->dir . '/vendor/autoload.php';
 
 		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
+		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 		( new Init() )->run();
 
 		/**
@@ -105,5 +106,18 @@ class Bootstrap {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Remove scheduled cron events on deactivation.
+	 *
+	 * @return void
+	 */
+	public function remove_cron_events() {
+		$crons = [ 'ghu_get_remote_plugin', 'ghu_get_remote_theme' ];
+		foreach ( $crons as $cron ) {
+			$timestamp = \wp_next_scheduled( $cron );
+			\wp_unschedule_event( $timestamp, $cron );
+		}
 	}
 }

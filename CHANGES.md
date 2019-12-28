@@ -1,5 +1,6 @@
 #### [unreleased]
 * fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
+* remove scheduled cron events on deactivation
 
 #### 9.1.0 / 2019-12-16
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
