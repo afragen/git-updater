@@ -157,7 +157,7 @@ class Remote_Management {
 			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
-				<?php submit_button( esc_html__( 'Reset RESTful key', 'github-updater' ) ); ?>
+				<?php submit_button( esc_html__( 'Reset REST API key', 'github-updater' ) ); ?>
 			</form>
 			<?php
 			$make_json = add_query_arg( [ 'github_updater_make_json_file' => true ], $action );
