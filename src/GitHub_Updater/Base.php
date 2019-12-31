@@ -453,7 +453,7 @@ class Base {
 	/**
 	 * Recursive file copy and delete.
 	 *
-	 * Hopefully this is a functional to PHP's `rename()`.
+	 * Hopefully this is a functional equivalent to PHP's `rename()`.
 	 * This is only used if `$wp_filesystem->move()` fails.
 	 * Fix for https://github.com/afragen/github-updater/issues/826,
 	 * strange failure of `rename()`.
