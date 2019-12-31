@@ -442,9 +442,43 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 		$new_source = $this->fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
-		$wp_filesystem->move( $source, $new_source );
+		if ( ! $wp_filesystem->move( $source, $new_source ) ) {
+			error_log( '$wp_filesystem->move() failed. Using Fragen\GitHub_Updater\Base->recurse_copy_delete().' );
+			$this->recurse_copy_delete( $source, $new_source );
+		}
 
 		return trailingslashit( $new_source );
+	}
+
+	/**
+	 * Recursive file copy and delete.
+	 *
+	 * Hopefully this is a functional to PHP's `rename()`.
+	 * This is only used if `$wp_filesystem->move()` fails.
+	 * Fix for https://github.com/afragen/github-updater/issues/826,
+	 * strange failure of `rename()`.
+	 *
+	 * @param string $source      Filepath of source.
+	 * @param string $destination Filepath of destination.
+	 *
+	 * @return void
+	 */
+	private function recurse_copy_delete( $source, $destination ) {
+		$dir = opendir( $source );
+		mkdir( $destination );
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		while ( false !== ( $file = readdir( $dir ) ) ) {
+			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source$file" !== $destination ) {
+				if ( is_dir( "$source/$file" ) ) {
+					$this->recurse_copy_delete( "$source/$file", "$destination/$file" );
+				} else {
+					copy( "$source/$file", "$destination/$file" );
+					unlink( "$source/$file" );
+				}
+			}
+		}
+		@rmdir( $source );
+		closedir( $dir );
 	}
 
 	/**
