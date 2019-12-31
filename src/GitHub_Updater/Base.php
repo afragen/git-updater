@@ -382,10 +382,10 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string                           $source
-	 * @param string                           $remote_source
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader
-	 * @param array                            $hook_extra
+	 * @param string                           $source        File path of $source.
+	 * @param string                           $remote_source File path of $remote_source.
+	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader      An Upgrader object.
+	 * @param array                            $hook_extra    Array of hook data.
 	 *
 	 * @return string
 	 */
@@ -453,13 +453,13 @@ class Base {
 	/**
 	 * Recursive file copy and delete.
 	 *
-	 * Hopefully this is a functional to PHP's `rename()`.
+	 * Hopefully this is a functional equivalent to PHP's `rename()`.
 	 * This is only used if `$wp_filesystem->move()` fails.
 	 * Fix for https://github.com/afragen/github-updater/issues/826,
 	 * strange failure of `rename()`.
 	 *
-	 * @param string $source      Filepath of source.
-	 * @param string $destination Filepath of destination.
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
 	 *
 	 * @return void
 	 */
@@ -486,10 +486,10 @@ class Base {
 	 * This usually occurs when initial installation not using GitHub Updater.
 	 * May cause plugin/theme deactivation.
 	 *
-	 * @param string       $new_source
-	 * @param string       $remote_source
-	 * @param Plugin|Theme $upgrader_object
-	 * @param string       $slug
+	 * @param string       $new_source      File path of $new_source.
+	 * @param string       $remote_source   File path of $remote_source.
+	 * @param Plugin|Theme $upgrader_object An Upgrader object.
+	 * @param string       $slug            Repository slug.
 	 *
 	 * @return string $new_source
 	 */
@@ -512,10 +512,10 @@ class Base {
 	 * GitLab release assets have a different download directory structure.
 	 * Bitbucket release assets need to be copied into a containing directory.
 	 *
-	 * @param string       $new_source
-	 * @param string       $remote_source
-	 * @param Plugin|Theme $upgrader_object
-	 * @param string       $slug
+	 * @param string       $new_source      File path of $new_source.
+	 * @param string       $remote_source   File path of $remote_source.
+	 * @param Plugin|Theme $upgrader_object An Upgrader object.
+	 * @param string       $slug            Repository slug.
 	 *
 	 * @return string $new_source
 	 */
