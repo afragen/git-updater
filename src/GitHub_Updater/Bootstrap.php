@@ -66,9 +66,6 @@ class Bootstrap {
 
 		define( 'GITHUB_UPDATER_DIR', $this->dir );
 
-		// Load Autoloader.
-		require_once $this->dir . '/vendor/autoload.php';
-
 		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 		( new Init() )->run();
