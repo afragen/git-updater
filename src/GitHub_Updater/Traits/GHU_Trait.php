@@ -662,7 +662,7 @@ trait GHU_Trait {
 	 * @param string $source      File path of source.
 	 * @param string $destination File path of destination.
 	 *
-	 * @return void
+	 * @return bool|void
 	 */
 	public function move( $source, $destination ) {
 		if ( @rename( $source, $destination ) ) {
