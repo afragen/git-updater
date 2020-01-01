@@ -475,7 +475,6 @@ class Base {
 	 * Fix the directory structure of certain release assests.
 	 *
 	 * GitLab release assets have a different download directory structure.
-	 * Bitbucket release assets need to be copied into a containing directory.
 	 *
 	 * @param string       $new_source      File path of $new_source.
 	 * @param string       $remote_source   File path of $remote_source.
@@ -485,7 +484,6 @@ class Base {
 	 * @return string $new_source
 	 */
 	private function fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		// global $wp_filesystem;
 		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		if ( isset( $config[ $slug ]->release_asset ) && $config[ $slug ]->release_asset ) {
@@ -495,13 +493,6 @@ class Base {
 			if ( 'gitlab' === $config[ $slug ]->git ) {
 				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
 				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
-			}
-			if ( 'bitbucket' === $config[ $slug ]->git ) {
-				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-				// $wp_filesystem->move( $remote_source, $temp_source );
-				// wp_mkdir_p( $new_source );
-				// copy_dir( $temp_source, $new_source );
-				// $wp_filesystem->delete( $temp_source, true );
 			}
 		}
 

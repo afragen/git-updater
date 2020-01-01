@@ -2,6 +2,7 @@
 * fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
 * remove scheduled cron events on deactivation
 * added function to rename or recursively copy from `$source` to `$destination` and remove files/directories after copying. Should be more versatile than `$wp_filesystem->move()`. Fixes [#826](https://github.com/afragen/github-updater/issues/826)
+* no longer any need to move Bitbucket release assets
 
 #### 9.1.0 / 2019-12-16
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
