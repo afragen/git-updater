@@ -650,4 +650,38 @@ trait GHU_Trait {
 
 		return $plugin_data['Version'];
 	}
+
+	/**
+	 * Rename or recursive file copy and delete.
+	 *
+	 * This is more versatile than `$wp_filesystem->move()`.
+	 * It moves/renames directories as well as files.
+	 * Fix for https://github.com/afragen/github-updater/issues/826,
+	 * strange failure of `rename()`.
+	 *
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
+	 *
+	 * @return void
+	 */
+	public function move( $source, $destination ) {
+		if ( @rename( $source, $destination ) ) {
+			return true;
+		}
+		$dir = opendir( $source );
+		mkdir( $destination );
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		while ( false !== ( $file = readdir( $dir ) ) ) {
+			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source$file" !== $destination ) {
+				if ( is_dir( "$source/$file" ) ) {
+					$this->move( "$source/$file", "$destination/$file" );
+				} else {
+					copy( "$source/$file", "$destination/$file" );
+					unlink( "$source/$file" );
+				}
+			}
+		}
+		@rmdir( $source );
+		closedir( $dir );
+	}
 }
