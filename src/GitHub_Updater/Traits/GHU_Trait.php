@@ -670,9 +670,10 @@ trait GHU_Trait {
 		}
 		$dir = opendir( $source );
 		mkdir( $destination );
+		$source = rtrim( $source, '/' );
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source$file" !== $destination ) {
+			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source/$file" !== $destination ) {
 				if ( is_dir( "$source/$file" ) ) {
 					$this->move( "$source/$file", "$destination/$file" );
 				} else {
