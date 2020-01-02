@@ -439,7 +439,6 @@ class Base {
 		}
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
-		$new_source = $this->fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		$this->move( $source, $new_source );
 
@@ -469,52 +468,6 @@ class Base {
 		}
 
 		return $new_source;
-	}
-
-	/**
-	 * Fix the directory structure of certain release assests.
-	 *
-	 * GitLab release assets have a different download directory structure.
-	 *
-	 * @param string       $new_source      File path of $new_source.
-	 * @param string       $remote_source   File path of $remote_source.
-	 * @param Plugin|Theme $upgrader_object An Upgrader object.
-	 * @param string       $slug            Repository slug.
-	 *
-	 * @return string $new_source
-	 */
-	private function fix_release_asset_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
-
-		if ( isset( $config[ $slug ]->release_asset ) && $config[ $slug ]->release_asset ) {
-			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
-			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
-			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
-			if ( 'gitlab' === $config[ $slug ]->git ) {
-				$new_source = trailingslashit( dirname( $remote_source ) ) . $slug;
-				add_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ], 10, 3 );
-			}
-		}
-
-		return $new_source;
-	}
-
-	/**
-	 * Delete $source when updating from GitLab Release Asset.
-	 *
-	 * @param bool  $true
-	 * @param array $hook_extra
-	 * @param array $result
-	 *
-	 * @return mixed
-	 */
-	public function upgrader_post_install( $true, $hook_extra, $result ) {
-		global $wp_filesystem;
-
-		$wp_filesystem->delete( $result['source'], true );
-		remove_filter( 'upgrader_post_install', [ $this, 'upgrader_post_install' ] );
-
-		return $result;
 	}
 
 	/**
