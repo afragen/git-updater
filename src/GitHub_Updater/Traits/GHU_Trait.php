@@ -670,7 +670,7 @@ trait GHU_Trait {
 		}
 		$dir = opendir( $source );
 		mkdir( $destination );
-		$source = rtrim( $source, '/' );
+		$source = untrailingslashit( $source );
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( false !== ( $file = readdir( $dir ) ) ) {
 			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source/$file" !== $destination ) {
