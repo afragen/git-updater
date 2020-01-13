@@ -57,6 +57,7 @@ class REST_API {
 				'args'     => [
 					'key' => [
 						'default'           => null,
+						'required'          => true,
 						'validate_callback' => 'sanitize_text_field',
 					],
 				],
@@ -66,6 +67,7 @@ class REST_API {
 		$update_args = [
 			'key'        => [
 				'default'           => false,
+				'required'          => true,
 				'validate_callback' => 'sanitize_text_field',
 			],
 			'plugin'     => [
@@ -128,6 +130,10 @@ class REST_API {
 	 * @return string
 	 */
 	public function get_remote_repo_data( \WP_REST_Request $request ) {
+		// Test for API key and exit if incorrect.
+		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+			return [ 'error' => 'Bad API key. No repo data for you.' ];
+		}
 		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
