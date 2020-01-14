@@ -52,9 +52,10 @@ class REST_API {
 			self::$namespace,
 			'repos',
 			[
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ $this, 'get_remote_repo_data' ],
-				'args'     => [
+				'show_in_index' => false,
+				'methods'       => \WP_REST_Server::READABLE,
+				'callback'      => [ $this, 'get_remote_repo_data' ],
+				'args'          => [
 					'key' => [
 						'default'           => null,
 						'required'          => true,
@@ -100,14 +101,16 @@ class REST_API {
 			'update',
 			[
 				[
-					'methods'  => \WP_REST_Server::READABLE,
-					'callback' => [ new REST_Update(), 'process_request' ],
-					'args'     => $update_args,
+					'show_in_index' => false,
+					'methods'       => \WP_REST_Server::READABLE,
+					'callback'      => [ new REST_Update(), 'process_request' ],
+					'args'          => $update_args,
 				],
 				[
-					'methods'  => \WP_REST_Server::CREATABLE,
-					'callback' => [ new REST_Update(), 'process_request' ],
-					'args'     => $update_args,
+					'show_in_index' => false,
+					'methods'       => \WP_REST_Server::CREATABLE,
+					'callback'      => [ new REST_Update(), 'process_request' ],
+					'args'          => $update_args,
 				],
 			]
 		);

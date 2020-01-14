@@ -5,6 +5,7 @@
 * no longer any need to manipulate release assets in `upgrader_source_selection`
 * test for correct REST API key for `repos` endpoint
 * add local version to `repos` REST endpoint, thanks @Raruto
+* remove `repos` and `update` REST endpoints from index, thanks @Raruto
 
 #### 9.1.0 / 2019-12-16
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
