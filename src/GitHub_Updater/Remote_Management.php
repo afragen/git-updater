@@ -163,7 +163,7 @@ class Remote_Management {
 			$make_json = add_query_arg( [ 'github_updater_make_json_file' => true ], $action );
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $make_json ); ?>">
-				<?php submit_button( esc_html__( 'Make JSON file', 'github-updater' ) ); ?>
+				<?php // submit_button( esc_html__( 'Make JSON file', 'github-updater' ) ); ?>
 			</form>
 			<?php
 		}
