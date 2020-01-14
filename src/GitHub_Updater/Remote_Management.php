@@ -229,10 +229,21 @@ class Remote_Management {
 		echo '</p>';
 
 		echo '<p>';
+		esc_html_e( 'You will need the Site and REST API key to use with Git Remote Updater.', 'github-updater' );
+
+		echo '<br>';
+		printf(
+			__( 'Site: %1$s<br> REST API key: %2$s', 'githhub-updater' ),
+			'<span style="font-family:monospace;">' . home_url() . '</span>',
+			'<span style="font-family:monospace;">' . self::$api_key . '</span>'
+		);
+		echo '</p>';
+
+		echo '<p>';
 		printf(
 			wp_kses_post(
-					/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
-				__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints begin at: %2$s', 'github-updater' )
+				/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
+				__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s', 'github-updater' )
 			),
 			'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
 			'<br><span style="font-family:monospace;">' . $api_url . '</span>'
