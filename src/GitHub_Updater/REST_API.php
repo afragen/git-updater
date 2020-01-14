@@ -147,9 +147,10 @@ class REST_API {
 		);
 		foreach ( $ghu_tokens as $token ) {
 			$slugs[] = [
-				'slug'   => $token->slug,
-				'type'   => $token->type,
-				'branch' => $token->branch,
+				'slug'    => $token->slug,
+				'type'    => $token->type,
+				'branch'  => $token->branch,
+				'version' => $token->local_version,
 			];
 		}
 		$json = [
