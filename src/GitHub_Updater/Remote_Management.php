@@ -216,7 +216,7 @@ class Remote_Management {
 		printf(
 			wp_kses_post(
 				/* translators: %s: Link to Git Remote Updater repository */
-				__( 'The <a href="%s">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler. You will need the Site and REST API key to use with Git Remote Updater settings.', 'github-updater' )
+				__( 'The <a href="%s">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings.', 'github-updater' )
 			),
 			'https://github.com/afragen/git-remote-updater'
 		);
@@ -224,7 +224,7 @@ class Remote_Management {
 
 		echo '<p>';
 		printf(
-			__( 'Site: %1$s<br> REST API key: %2$s', 'githhub-updater' ),
+			__( 'Site URL: %1$s<br> REST API key: %2$s', 'githhub-updater' ),
 			'<span style="font-family:monospace;">' . home_url() . '</span>',
 			'<span style="font-family:monospace;">' . self::$api_key . '</span>'
 		);
