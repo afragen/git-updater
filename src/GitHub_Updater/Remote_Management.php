@@ -160,12 +160,6 @@ class Remote_Management {
 				<?php submit_button( esc_html__( 'Reset REST API key', 'github-updater' ) ); ?>
 			</form>
 			<?php
-			$make_json = add_query_arg( [ 'github_updater_make_json_file' => true ], $action );
-			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $make_json ); ?>">
-				<?php // submit_button( esc_html__( 'Make JSON file', 'github-updater' ) ); ?>
-			</form>
-			<?php
 		}
 	}
 
@@ -284,45 +278,5 @@ class Remote_Management {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Make JSON file for Git Bulk Updater.
-	 *
-	 * @return void
-	 */
-	public function make_json() {
-		if ( ! isset( $_REQUEST['github_updater_make_json_file'] )
-		) {
-			return;
-		}
-		$site   = $_SERVER['HTTP_HOST'];
-		$origin = $_SERVER['HTTP_ORIGIN'];
-		$json   = [
-			'site' => [
-				'host'                 => $origin,
-				'rest_namespace_route' => $this->get_class_vars( 'REST_API', 'namespace' ) . '/repos/',
-				'rest_api_key'         => self::$api_key,
-			],
-		];
-
-		$json      = json_encode( $json, JSON_FORCE_OBJECT );
-		$file      = str_replace( '.', '-', $site ) . '.json';
-		$file_path = get_temp_dir() . "/{$file}";
-		$file_path = file_put_contents( $file_path, $json ) ? $file_path : false;
-
-		// Quick check to verify that the file exists
-		if ( ! $file_path ) {
-			die( 'File not found' );
-		}
-		// Force the download
-		header( 'Content-Type: application/octet-stream;' );
-		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
-		header( 'Expires: 0' );
-		header( 'Cache-Control: must-revalidate' );
-		header( 'Pragma: public' );
-		header( 'Content-Length: ' . filesize( $file_path ) );
-		readfile( $file_path );
-		exit;
 	}
 }
