@@ -65,10 +65,10 @@ class CLI extends WP_CLI_Command {
 		Singleton::get_instance( 'Remote_Management', $this )->ensure_api_key_is_set();
 		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg(
-			array(
+			[
 				'action' => 'github-updater-update',
 				'key'    => $api_key,
-			),
+			],
 			admin_url( 'admin-ajax.php' )
 		);
 

@@ -61,7 +61,7 @@ class Rest_Update {
 		$this->load_options();
 		$this->upgrader_skin = new Rest_Upgrader_Skin();
 
-		 // phpcs:ignore WordPress.Security.NonceVerification
+		// phpcs:ignore WordPress.Security.NonceVerification
 		self::$request = $this->sanitize( $_REQUEST );
 	}
 
@@ -95,13 +95,13 @@ class Rest_Update {
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $plugin );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
 
-		$update = array(
+		$update = [
 			'slug'        => $plugin->slug,
 			'plugin'      => $plugin->file,
 			'new_version' => null,
 			'url'         => $plugin->uri,
 			'package'     => $repo_api->construct_download_link( $tag ),
-		);
+		];
 
 		add_filter(
 			'site_transient_update_plugins',
@@ -148,12 +148,12 @@ class Rest_Update {
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $theme );
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
 
-		$update = array(
+		$update = [
 			'theme'       => $theme->slug,
 			'new_version' => null,
 			'url'         => $theme->uri,
 			'package'     => $repo_api->construct_download_link( $tag ),
-		);
+		];
 
 		add_filter(
 			'site_transient_update_themes',
@@ -196,7 +196,7 @@ class Rest_Update {
 	 */
 	public function process_request( $request = null ) {
 		$args = $this->process_request_data( $request );
-		extract( $args );
+		extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 
 		$start = microtime( true );
 		try {
@@ -239,13 +239,13 @@ class Rest_Update {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for update.' );
 			}
 		} catch ( \Exception $e ) {
-			$http_response = array(
+			$http_response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),
 				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'deprecated'   => $deprecated,
-			);
+			];
 			$this->log_exit( $http_response, 417 );
 		}
 
@@ -266,13 +266,13 @@ class Rest_Update {
 			update_site_option( 'github_updater', $options );
 		}
 
-		$response = array(
+		$response = [
 			'success'      => true,
 			'messages'     => $this->get_messages(),
 			'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 			'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			'deprecated'   => $deprecated,
-		);
+		];
 
 		if ( $this->is_error() ) {
 			$response['success'] = false;
@@ -291,7 +291,7 @@ class Rest_Update {
 	public function process_request_data( $request = null ) {
 		if ( $request instanceof \WP_REST_Request ) {
 			$params = $request->get_params();
-			extract( $params );
+			extract( $params ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 			$override   = false === $override ? false : true;
 			$deprecated = false;
 		} else { // call from admin-ajax.php.

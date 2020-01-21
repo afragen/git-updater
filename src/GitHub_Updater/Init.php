@@ -63,7 +63,7 @@ class Init {
 
 		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'github_updater', array_merge( $options, array( 'current_branch_github-updater' => 'develop' ) ) );
+			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
 		}
 
 		if ( $slug && 'github-updater/github-updater.php' !== $slug ) {
@@ -90,19 +90,19 @@ class Init {
 	 * Use 'init' hook for user capabilities.
 	 */
 	protected function load_hooks() {
-		add_action( 'init', array( $this->base, 'load' ) );
-		add_action( 'init', array( $this->base, 'background_update' ) );
-		add_action( 'init', array( $this->base, 'set_options_filter' ) );
-		add_action( 'wp_ajax_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
-		add_action( 'wp_ajax_nopriv_github-updater-update', array( Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ) );
-		add_action( 'rest_api_init', array( new REST_API(), 'register_endpoints' ) );
+		add_action( 'init', [ $this->base, 'load' ] );
+		add_action( 'init', [ $this->base, 'background_update' ] );
+		add_action( 'init', [ $this->base, 'set_options_filter' ] );
+		add_action( 'wp_ajax_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
+		add_action( 'wp_ajax_nopriv_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
+		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
 
 		// Load hook for shiny updates Basic Authentication headers.
 		if ( self::is_doing_ajax() ) {
 			$this->base->load_authentication_hooks();
 		}
 
-		add_filter( 'upgrader_source_selection', array( $this->base, 'upgrader_source_selection' ), 10, 4 );
+		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class Init {
 		 *
 		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
 		 */
-		apply_filters_deprecated( 'github_updater_add_admin_pages', array( null ), '9.1.0' );
+		apply_filters_deprecated( 'github_updater_add_admin_pages', [ null ], '9.1.0' );
 
 		return $can_user_update;
 	}

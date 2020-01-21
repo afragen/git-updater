@@ -32,7 +32,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 *
 	 * @var array $messages
 	 */
-	public $messages = array();
+	public $messages = [];
 
 	/**
 	 * Boolean if errors are present.
@@ -46,7 +46,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 * Adds the feedback string to the messages array.
 	 *
 	 * @param string $string
-	 * @param array  $args
+	 * @param array  ...$args
 	 */
 	public function feedback( $string, ...$args ) {
 		if ( isset( $this->upgrader->strings[ $string ] ) ) {

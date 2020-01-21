@@ -115,16 +115,17 @@ class Theme {
 	 */
 	protected function get_theme_meta() {
 		$this->delete_current_theme_cache();
-		$git_themes = array();
-		$themes     = wp_get_themes( array( 'errors' => null ) );
+		$git_themes = [];
+		$themes     = wp_get_themes( [ 'errors' => null ] );
 
 		$paths = array_map(
-			function( $theme ) {
+			function ( $theme ) {
 				return "$theme->theme_root/$theme->stylesheet/style.css";
 			},
 			$themes
 		);
 
+		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
 			$all_headers        = $this->get_headers( 'theme' );
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
@@ -132,7 +133,7 @@ class Theme {
 
 		$themes = array_filter(
 			$repos_arr,
-			function( $repo ) {
+			function ( $repo ) {
 				foreach ( $repo as $key => $value ) {
 					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
 						return $this->get_file_headers( $repo, 'theme' );
@@ -147,20 +148,20 @@ class Theme {
 		 * @since   5.4.0
 		 * @access  public
 		 *
-		 * @param array  $additions Listing of themes to add.
-		 *                          Default null.
-		 * @param array  $themes    Listing of all themes.
+		 * @param array $additions Listing of themes to add.
+		 *                         Default null.
+		 * @param array $themes    Listing of all themes.
 		 * @param string 'theme'    Type being passed.
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
 		$themes    = array_merge( $themes, (array) $additions );
 
 		foreach ( (array) $themes as $theme ) {
-			$git_theme = array();
+			$git_theme = [];
 			$header    = null;
 			$key       = array_filter(
 				array_keys( $theme ),
-				function( $key ) use ( $theme ) {
+				function ( $key ) use ( $theme ) {
 					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) & 'ThemeURI' !== $key ) {
 						return $key;
 					}
@@ -217,7 +218,7 @@ class Theme {
 	 * Calls to remote APIs to get data.
 	 */
 	public function get_remote_theme_meta() {
-		$themes = array();
+		$themes = [];
 		foreach ( (array) $this->config as $theme ) {
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
@@ -239,11 +240,11 @@ class Theme {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
-				add_action( 'after_theme_row', array( $this, 'remove_after_theme_row' ), 10, 2 );
+				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
-					add_action( "after_theme_row_{$theme->slug}", array( $this, 'wp_theme_update_row' ), 10, 2 );
+					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
 					if ( ! $theme->release_asset ) {
-						add_action( "after_theme_row_{$theme->slug}", array( $this, 'multisite_branch_switcher' ), 15, 2 );
+						add_action( "after_theme_row_{$theme->slug}", [ $this, 'multisite_branch_switcher' ], 15, 2 );
 					}
 				}
 			}
@@ -256,7 +257,7 @@ class Theme {
 			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
 			! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
-				wp_schedule_single_event( time(), 'ghu_get_remote_theme', array( $themes ) );
+				wp_schedule_single_event( time(), 'ghu_get_remote_theme', [ $themes ] );
 			}
 		}
 
@@ -270,10 +271,10 @@ class Theme {
 	 */
 	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
-			add_filter( 'wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
+			add_filter( 'wp_prepare_themes_for_js', [ $this, 'customize_theme_update_html' ] );
 		}
-		add_filter( 'themes_api', array( $this, 'themes_api' ), 99, 3 );
-		add_filter( 'site_transient_update_themes', array( $this, 'update_site_transient' ), 15, 1 );
+		add_filter( 'themes_api', [ $this, 'themes_api' ], 99, 3 );
+		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
 	/**
@@ -333,28 +334,28 @@ class Theme {
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
 
-		$themes_allowedtags = array(
-			'a'       => array(
-				'href'  => array(),
-				'title' => array(),
-			),
-			'abbr'    => array( 'title' => array() ),
-			'acronym' => array( 'title' => array() ),
-			'code'    => array(),
-			'em'      => array(),
-			'strong'  => array(),
-		);
+		$themes_allowedtags = [
+			'a'       => [
+				'href'  => [],
+				'title' => [],
+			],
+			'abbr'    => [ 'title' => [] ],
+			'acronym' => [ 'title' => [] ],
+			'code'    => [],
+			'em'      => [],
+			'strong'  => [],
+		];
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
 		// $wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url       = esc_attr(
 			add_query_arg(
-				array(
+				[
 					'tab'       => 'theme-information',
 					'theme'     => $theme_key,
 					'TB_iframe' => 'true',
 					'width'     => 270,
 					'height'    => 400,
-				),
+				],
 				self_admin_url( 'theme-install.php' )
 			)
 		);
@@ -434,7 +435,7 @@ class Theme {
 		$repo   = $this->config[ $theme_key ];
 		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
 
-		$branch_switch_data                      = array();
+		$branch_switch_data                      = [];
 		$branch_switch_data['slug']              = $theme_key;
 		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
 		$branch_switch_data['id']                = $id;
@@ -509,13 +510,13 @@ class Theme {
 	protected function append_theme_actions_content( $theme ) {
 		$details_url       = esc_attr(
 			add_query_arg(
-				array(
+				[
 					'tab'       => 'theme-information',
 					'theme'     => $theme->slug,
 					'TB_iframe' => 'true',
 					'width'     => 270,
 					'height'    => 400,
-				),
+				],
 				self_admin_url( 'theme-install.php' )
 			)
 		);
@@ -638,7 +639,7 @@ class Theme {
 	public function update_site_transient( $transient ) {
 		foreach ( (array) $this->config as $theme ) {
 			if ( $this->can_update_repo( $theme ) ) {
-				$response = array(
+				$response = [
 					'theme'       => $theme->slug,
 					'new_version' => $theme->remote_version,
 					'url'         => $theme->uri,
@@ -646,7 +647,7 @@ class Theme {
 					'branch'      => $theme->branch,
 					'branches'    => array_keys( $theme->branches ),
 					'type'        => "{$theme->git}-{$theme->type}",
-				);
+				];
 
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'], $_GET['theme'] ) &&
@@ -669,7 +670,7 @@ class Theme {
 				 * @since 8.5.0
 				 * @return array
 				 */
-				$overrides = apply_filters( 'github_updater_override_dot_org', array() );
+				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
 				if ( isset( $transient->response[ $theme->slug ] ) && in_array( $theme->slug, $overrides, true ) ) {
 					unset( $transient->response[ $theme->slug ] );
 				}

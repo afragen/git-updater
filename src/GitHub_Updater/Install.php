@@ -36,7 +36,7 @@ class Install {
 	 *
 	 * @var array
 	 */
-	protected static $install = array();
+	protected static $install = [];
 
 	/**
 	 * Hold local copy of GitHub Updater options.
@@ -89,7 +89,7 @@ class Install {
 		add_action(
 			'admin_enqueue_scripts',
 			function () {
-				wp_register_script( 'ghu-install', plugins_url( basename( GITHUB_UPDATER_DIR ) . '/js/ghu-install-vanilla.js' ), array(), false, true );
+				wp_register_script( 'ghu-install', plugins_url( basename( GITHUB_UPDATER_DIR ) . '/js/ghu-install-vanilla.js' ), [], $this->get_plugin_version(), true );
 				wp_enqueue_script( 'ghu-install' );
 			}
 		);
@@ -99,7 +99,7 @@ class Install {
 	 * Adds Install tabs to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = array();
+		$install_tabs = [];
 		if ( current_user_can( 'install_plugins' ) ) {
 			$install_tabs['github_updater_install_plugin'] = esc_html__( 'Install Plugin', 'github-updater' );
 		}
@@ -244,7 +244,7 @@ class Install {
 	/**
 	 * Save options set during installation.
 	 *
-	 * @param array $install_options Array of options from remote install process.
+	 * @param  array $install_options Array of options from remote install process.
 	 * @return void
 	 */
 	private function save_options_on_install( $install_options ) {
@@ -315,10 +315,10 @@ class Install {
 			$upgrader = new \Plugin_Upgrader( $skin );
 			add_filter(
 				'install_plugin_complete_actions',
-				array(
+				[
 					$this,
 					'install_plugin_complete_actions',
-				),
+				],
 				10,
 				3
 			);
@@ -334,10 +334,10 @@ class Install {
 			$upgrader = new \Theme_Upgrader( $skin );
 			add_filter(
 				'install_theme_complete_actions',
-				array(
+				[
 					$this,
 					'install_theme_complete_actions',
-				),
+				],
 				10,
 				3
 			);
@@ -392,14 +392,14 @@ class Install {
 		register_setting(
 			'github_updater_install',
 			'github_updater_install_' . $type,
-			array( $this, 'sanitize' )
+			[ $this, 'sanitize' ]
 		);
 
 		add_settings_section(
 			$type,
 			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf( esc_html__( 'GitHub Updater Install %s', 'github-updater' ), $repo_type ),
-			array(),
+			[],
 			'github_updater_install_' . $type
 		);
 
@@ -407,7 +407,7 @@ class Install {
 			$type . '_repo',
 			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf( esc_html__( '%s URI', 'github-updater' ), $repo_type ),
-			array( $this, 'get_repo' ),
+			[ $this, 'get_repo' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -415,7 +415,7 @@ class Install {
 		add_settings_field(
 			$type . '_branch',
 			esc_html__( 'Repository Branch', 'github-updater' ),
-			array( $this, 'branch' ),
+			[ $this, 'branch' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -423,7 +423,7 @@ class Install {
 		add_settings_field(
 			$type . '_api',
 			esc_html__( 'Remote Repository Host', 'github-updater' ),
-			array( $this, 'install_api' ),
+			[ $this, 'install_api' ],
 			'github_updater_install_' . $type,
 			$type
 		);
@@ -528,11 +528,11 @@ class Install {
 
 		$stylesheet    = self::$install['repo'];
 		$activate_link = add_query_arg(
-			array(
+			[
 				'action'     => 'activate',
 				// 'template'   => rawurlencode( $template ),
 				'stylesheet' => rawurlencode( $stylesheet ),
-			),
+			],
 			admin_url( 'themes.php' )
 		);
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
@@ -541,10 +541,10 @@ class Install {
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
 			$network_activate_link = add_query_arg(
-				array(
+				[
 					'action' => 'enable',
 					'theme'  => rawurlencode( $stylesheet ),
-				),
+				],
 				network_admin_url( 'themes.php' )
 			);
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );

@@ -17,7 +17,6 @@ use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
  * Trait API_Common
  */
 trait API_Common {
-
 	/**
 	 * Holds loose class method name.
 	 *
@@ -28,14 +27,15 @@ trait API_Common {
 	/**
 	 * Decode API responses that are base64 encoded.
 	 *
-	 * @param string $git (github|bitbucket|gitlab|gitea)
-	 * @param mixed  $response API response.
-	 * @return mixed $response
+	 * @param  string $git      (github|bitbucket|gitlab|gitea)
+	 * @param  mixed  $response API response.
+	 * @return mixed  $response
 	 */
 	private function decode_response( $git, $response ) {
 		switch ( $git ) {
 			case 'github':
 			case 'gitlab':
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 				$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 				break;
 			case 'bbserver':
@@ -49,9 +49,9 @@ trait API_Common {
 	/**
 	 * Parse API response that returns as stdClass.
 	 *
-	 * @param string $git     (github|bitbucket|gitlab|gitea)
-	 * @param mixed  $response API response.
-	 * @return mixed $response
+	 * @param  string $git      (github|bitbucket|gitlab|gitea)
+	 * @param  mixed  $response API response.
+	 * @return mixed  $response
 	 */
 	private function parse_response( $git, $response ) {
 		switch ( $git ) {
@@ -67,9 +67,9 @@ trait API_Common {
 	/**
 	 * Parse API response to release asset URI.
 	 *
-	 * @param string $git (github|bitbucket|gitlab|gitea)
-	 * @param string $request Query to API->api().
-	 * @param mixed  $response API response.
+	 * @param  string $git      (github|bitbucket|gitlab|gitea)
+	 * @param  string $request  Query to API->api().
+	 * @param  mixed  $response API response.
 	 * @return string $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
@@ -100,8 +100,8 @@ trait API_Common {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
-	 * @param string $file Filename.
+	 * @param string $git     github|bitbucket|gitlab|gitea)
+	 * @param string $file    Filename.
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -134,7 +134,7 @@ trait API_Common {
 	/**
 	 * Get remote info for tags.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     github|bitbucket|gitlab|gitea)
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -171,7 +171,7 @@ trait API_Common {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     github|bitbucket|gitlab|gitea)
 	 * @param string $changes Changelog filename.
 	 * @param string $request API request.
 	 *
@@ -214,7 +214,7 @@ trait API_Common {
 	/**
 	 * Read and parse remote readme.txt.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     github|bitbucket|gitlab|gitea)
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -260,7 +260,7 @@ trait API_Common {
 	/**
 	 * Read the repository meta from API.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     github|bitbucket|gitlab|gitea)
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -291,13 +291,13 @@ trait API_Common {
 	/**
 	 * Create array of branches and download links as array.
 	 *
-	 * @param string $git github|bitbucket|gitlab|gitea)
+	 * @param string $git     github|bitbucket|gitlab|gitea)
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
 	public function get_remote_api_branches( $git, $request ) {
-		$branches = array();
+		$branches = [];
 		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
@@ -330,8 +330,8 @@ trait API_Common {
 	/**
 	 * Get API release asset download link.
 	 *
-	 * @param string $git (github|bitbucket|gitlab|gitea)
-	 * @param string $request Query for API->api().
+	 * @param  string $git     (github|bitbucket|gitlab|gitea)
+	 * @param  string $request Query for API->api().
 	 * @return string $response Release asset URI.
 	 */
 	public function get_api_release_asset( $git, $request ) {
@@ -342,7 +342,7 @@ trait API_Common {
 		}
 
 		if ( ! $response ) {
-			add_filter( 'http_request_args', array( Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ), 15, 2 );
+			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ], 15, 2 );
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
@@ -351,7 +351,7 @@ trait API_Common {
 				$response          = new \stdClass();
 				$response->message = 'No release asset found';
 			}
-			remove_filter( 'http_request_args', array( Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ) );
+			remove_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ] );
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
@@ -364,5 +364,4 @@ trait API_Common {
 
 		return $response;
 	}
-
 }

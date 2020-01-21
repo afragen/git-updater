@@ -1,5 +1,14 @@
 #### [unreleased]
 
+#### 9.2.0 / 2020-01-21
+* fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
+* remove scheduled cron events on deactivation
+* added function to rename or recursively copy from `$source` to `$destination` and remove files/directories after copying. Should be more versatile than `$wp_filesystem->move()`. Fixes [#826](https://github.com/afragen/github-updater/issues/826)
+* no longer any need to manipulate release assets in `upgrader_source_selection`
+* test for correct REST API key for `repos` endpoint
+* add local version to `repos` REST endpoint, thanks @Raruto
+* remove `repos` and `update` REST endpoints from index, thanks @Raruto
+
 #### 9.1.0 / 2019-12-16
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
 * don't run API calls for non-privileged users when bypassing wp-cron

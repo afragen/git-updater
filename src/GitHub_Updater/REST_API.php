@@ -20,6 +20,9 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * Class REST_API
+ */
 class REST_API {
 	use GHU_Trait;
 
@@ -39,73 +42,77 @@ class REST_API {
 		register_rest_route(
 			self::$namespace,
 			'test',
-			array(
+			[
 				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'test' ),
-			)
+				'callback' => [ $this, 'test' ],
+			]
 		);
 
 		register_rest_route(
 			self::$namespace,
 			'repos',
-			array(
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_remote_repo_data' ),
-				'args'     => array(
-					'key' => array(
+			[
+				'show_in_index' => false,
+				'methods'       => \WP_REST_Server::READABLE,
+				'callback'      => [ $this, 'get_remote_repo_data' ],
+				'args'          => [
+					'key' => [
 						'default'           => null,
+						'required'          => true,
 						'validate_callback' => 'sanitize_text_field',
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
-		$update_args = array(
-			'key'        => array(
+		$update_args = [
+			'key'        => [
+				'default'           => false,
+				'required'          => true,
+				'validate_callback' => 'sanitize_text_field',
+			],
+			'plugin'     => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'plugin'     => array(
+			],
+			'theme'      => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'theme'      => array(
-				'default'           => false,
-				'validate_callback' => 'sanitize_text_field',
-
-			),
-			'tag'        => array(
+			],
+			'tag'        => [
 				'default'           => 'master',
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'branch'     => array(
+			],
+			'branch'     => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'committish' => array(
+			],
+			'committish' => [
 				'default'           => false,
 				'validate_callback' => 'sanitize_text_field',
-			),
-			'override'   => array(
+			],
+			'override'   => [
 				'default' => false,
-			),
-		);
+			],
+		];
 
 		register_rest_route(
 			self::$namespace,
 			'update',
-			array(
-				array(
-					'methods'  => \WP_REST_Server::READABLE,
-					'callback' => array( new REST_Update(), 'process_request' ),
-					'args'     => $update_args,
-				),
-				array(
-					'methods'  => \WP_REST_Server::CREATABLE,
-					'callback' => array( new REST_Update(), 'process_request' ),
-					'args'     => $update_args,
-				),
-			)
+			[
+				[
+					'show_in_index' => false,
+					'methods'       => \WP_REST_Server::READABLE,
+					'callback'      => [ new REST_Update(), 'process_request' ],
+					'args'          => $update_args,
+				],
+				[
+					'show_in_index' => false,
+					'methods'       => \WP_REST_Server::CREATABLE,
+					'callback'      => [ new REST_Update(), 'process_request' ],
+					'args'          => $update_args,
+				],
+			]
 		);
 	}
 
@@ -126,31 +133,36 @@ class REST_API {
 	 * @return string
 	 */
 	public function get_remote_repo_data( \WP_REST_Request $request ) {
+		// Test for API key and exit if incorrect.
+		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+			return [ 'error' => 'Bad API key. No repo data for you.' ];
+		}
 		$ghu_plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(
-			array(
+			[
 				'key' => $request->get_param( 'key' ),
-			),
+			],
 			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);
 		foreach ( $ghu_tokens as $token ) {
-			$slugs[] = array(
-				'slug'   => $token->slug,
-				'type'   => $token->type,
-				'branch' => $token->branch,
-			);
+			$slugs[] = [
+				'slug'    => $token->slug,
+				'type'    => $token->type,
+				'branch'  => $token->branch,
+				'version' => $token->local_version,
+			];
 		}
-		$json = array(
-			'sites' => array(
+		$json = [
+			'sites' => [
 				'site'          => $site,
 				'restful_start' => $api_url,
 				'slugs'         => $slugs,
-			),
-		);
+			],
+		];
 
 		return $json;
 	}

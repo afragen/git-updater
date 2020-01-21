@@ -25,7 +25,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Readme_Parser
  */
 class Readme_Parser extends Parser {
-
 	/**
 	 * Holds absolute filepath to temp readme file.
 	 *
@@ -82,7 +81,7 @@ class Readme_Parser extends Parser {
 	 * @return array $data
 	 */
 	public function parse_data() {
-		$data = array();
+		$data = [];
 		foreach ( get_object_vars( $this ) as $key => $value ) {
 			$data[ $key ] = 'contributors' === $key ? $this->create_contributors( $value ) : $value;
 		}
@@ -115,7 +114,7 @@ class Readme_Parser extends Parser {
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
-		$contributors = array();
+		$contributors = [];
 		foreach ( (array) $users as $contributor ) {
 			$contributors[ $contributor ]['display_name'] = $contributor;
 			$contributors[ $contributor ]['profile']      = '//profiles.wordpress.org/' . $contributor;
@@ -152,7 +151,7 @@ class Readme_Parser extends Parser {
 	 * Converts wp.org readme section items to h4 style.
 	 *
 	 * @param string $section Readme section.
-	 * @param array  $data Array of parsed readme data.
+	 * @param array  $data    Array of parsed readme data.
 	 *
 	 * @return array $data
 	 */

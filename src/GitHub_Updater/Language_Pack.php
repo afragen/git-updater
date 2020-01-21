@@ -67,8 +67,8 @@ class Language_Pack {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'site_transient_update_plugins', array( $this, 'update_site_transient' ) );
-		add_filter( 'site_transient_update_themes', array( $this, 'update_site_transient' ) );
+		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ] );
 	}
 
 	/**
@@ -80,8 +80,8 @@ class Language_Pack {
 	 */
 	public function update_site_transient( $transient ) {
 		$locales = get_available_languages();
-		$locales = ! empty( $locales ) ? $locales : array( get_locale() );
-		$repos   = array();
+		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
+		$repos   = [];
 
 		if ( ! isset( $transient->translations ) ) {
 			return $transient;

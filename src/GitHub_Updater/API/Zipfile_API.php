@@ -25,7 +25,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @author Andy Fragen
  */
 class Zipfile_API {
-
 	/**
 	 * Add remote install settings fields.
 	 *
@@ -35,7 +34,7 @@ class Zipfile_API {
 		add_settings_field(
 			'zipfile_slug',
 			esc_html__( 'Zipfile Slug', 'github-updater' ),
-			array( $this, 'zipfile_slug' ),
+			[ $this, 'zipfile_slug' ],
 			'github_updater_install_' . $type,
 			$type
 		);

@@ -8,7 +8,7 @@
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 4.6
 * Requires PHP: 5.6
-* Tested up to: 5.3
+* Tested up to: 5.4
 * Stable tag: [master](https://github.com/afragen/github-updater/releases/latest)
 * Donate link: <https://thefragens.com/github-updater-donate>
 * License: GPLv2 or later
@@ -34,4 +34,4 @@ or
 
 ## Slack
 
-We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#random_ channels. Please take a look at other channels too.
+We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.

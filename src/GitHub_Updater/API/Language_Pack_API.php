@@ -67,7 +67,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $git     ( github|bitbucket|gitlab|gitea ).
+	 * @param string $git      ( github|bitbucket|gitlab|gitea ).
 	 * @param array  $headers
 	 * @param mixed  $response API response.
 	 *
@@ -78,6 +78,7 @@ class Language_Pack_API extends API {
 			case 'github':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;
@@ -88,12 +89,14 @@ class Language_Pack_API extends API {
 				$id       = rawurlencode( $headers['owner'] . '/' . $headers['repo'] );
 				$response = $this->api( '/projects/' . $id . '/repository/files/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;
 			case 'gitea':
 				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
 				$response = isset( $response->content )
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					? json_decode( base64_decode( $response->content ) )
 					: null;
 				break;
@@ -109,7 +112,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $git    ( github|bitbucket|gitlab|gitea ).
+	 * @param string $git     ( github|bitbucket|gitlab|gitea ).
 	 * @param string $locale
 	 * @param array  $headers
 	 *
@@ -119,21 +122,21 @@ class Language_Pack_API extends API {
 		$package = null;
 		switch ( $git ) {
 			case 'github':
-				$package = array( 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' );
+				$package = [ 'https://github.com', $headers['owner'], $headers['repo'], 'blob/master' ];
 				$package = implode( '/', $package ) . $locale->package;
-				$package = add_query_arg( array( 'raw' => 'true' ), $package );
+				$package = add_query_arg( [ 'raw' => 'true' ], $package );
 				break;
 			case 'bitbucket':
-				$package = array( 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://bitbucket.org', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitlab':
-				$package = array( 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' );
+				$package = [ 'https://gitlab.com', $headers['owner'], $headers['repo'], 'raw/master' ];
 				$package = implode( '/', $package ) . $locale->package;
 				break;
 			case 'gitea':
 				// TODO: make sure this works as expected.
-				$package = array( $headers['uri'], 'raw/master' );
+				$package = [ $headers['uri'], 'raw/master' ];
 				$package = implode( '/', $package ) . $local->package;
 				break;
 		}

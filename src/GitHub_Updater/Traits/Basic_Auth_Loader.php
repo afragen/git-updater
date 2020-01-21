@@ -31,7 +31,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @var array
 	 */
-	private static $basic_auth_required = array( 'Bitbucket' );
+	private static $basic_auth_required = [ 'Bitbucket' ];
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
@@ -39,8 +39,8 @@ trait Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function load_authentication_hooks() {
-		add_filter( 'http_request_args', array( $this, 'maybe_basic_authenticate_http' ), 5, 2 );
-		add_filter( 'http_request_args', array( $this, 'http_release_asset_auth' ), 15, 2 );
+		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
 	/**
@@ -49,8 +49,8 @@ trait Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function remove_authentication_hooks() {
-		remove_filter( 'http_request_args', array( $this, 'maybe_basic_authenticate_http' ) );
-		remove_filter( 'http_request_args', array( $this, 'http_release_asset_auth' ) );
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
 	/**
@@ -71,9 +71,10 @@ trait Basic_Auth_Loader {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
-		remove_filter( 'http_request_args', array( $this, 'maybe_basic_authenticate_http' ) );
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
 		return $args;
 	}
@@ -91,14 +92,14 @@ trait Basic_Auth_Loader {
 		$headers      = parse_url( $url );
 		$username_key = null;
 		$password_key = null;
-		$credentials  = array(
+		$credentials  = [
 			'username'      => null,
 			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
-		);
-		$hosts        = array( 'bitbucket.org', 'api.bitbucket.org' );
+		];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
@@ -150,10 +151,10 @@ trait Basic_Auth_Loader {
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
 				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
-				: array();
+				: [];
 			$themes      = isset( $_REQUEST['themes'] )
 				? explode( ',', $_REQUEST['themes'] )
-				: array();
+				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter(
@@ -273,7 +274,7 @@ trait Basic_Auth_Loader {
 		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
 			unset( $args['headers']['Authorization'] );
 		}
-		remove_filter( 'http_request_args', array( $this, 'http_release_asset_auth' ) );
+		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 
 		return $args;
 	}
