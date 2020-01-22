@@ -185,7 +185,7 @@ class Settings {
 		add_submenu_page(
 			$parent,
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			esc_html__( 'GitHub Updater', 'github-updater' ),
+			esc_html_x( 'GitHub Updater', 'Menu item', 'github-updater' ),
 			$capability,
 			'github-updater',
 			[ $this, 'create_admin_page' ]
