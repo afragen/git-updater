@@ -117,8 +117,14 @@ class Settings {
 				}
 			);
 		}
+
 		if ( isset( self::$options['bypass_background_processing'] ) ) {
 			add_filter( 'github_updater_disable_wpcron', '__return_true' );
+		}
+
+		// Check if filter set elsewhere.
+		if ( apply_filters( 'github_updater_disable_wpcron', false ) ) {
+			self::$options['bypass_background_processing'] = '1';
 		}
 	}
 
