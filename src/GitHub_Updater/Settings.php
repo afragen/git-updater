@@ -351,7 +351,7 @@ class Settings {
 			'github_updater_settings',
 			[
 				'id'    => 'bypass_background_processing',
-				'title' => esc_html__( 'Bypass WP-Cron Background Processing', 'github-updater' ),
+				'title' => esc_html__( 'Bypass WP-Cron Background Processing for Debugging', 'github-updater' ),
 			]
 		);
 
