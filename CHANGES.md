@@ -1,4 +1,5 @@
 #### [unreleased]
+* add `Bypass WP-Cron Background Processing` setting
 
 #### 9.2.0 / 2020-01-21
 * fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
