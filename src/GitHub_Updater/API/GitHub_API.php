@@ -32,7 +32,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type plugin|theme.
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
@@ -83,7 +83,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Read and parse remote readme.txt.
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	public function get_remote_readme() {
 		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/readme.txt' );
@@ -174,8 +174,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param GitHub_API|API $git
-	 * @param string         $endpoint
+	 * @param GitHub_API|API $git Git host specific API object.
+	 * @param string         $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */
@@ -333,7 +333,7 @@ class GitHub_API extends API implements API_Interface {
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type
+	 * @param array           $repo_type Array of repo data.
 	 *
 	 * @return array
 	 */
@@ -362,7 +362,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add settings for GitHub Personal Access Token.
 	 *
-	 * @param array $auth_required
+	 * @param array $auth_required Array of authentication data.
 	 *
 	 * @return void
 	 */
@@ -488,8 +488,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return mixed
 	 */

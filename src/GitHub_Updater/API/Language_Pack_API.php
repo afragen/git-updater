@@ -22,7 +22,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type Object of repository data.
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
@@ -67,8 +67,8 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $git      ( github|bitbucket|gitlab|gitea ).
-	 * @param array  $headers
+	 * @param string $git      (github|bitbucket|gitlab|gitea).
+	 * @param array  $headers  Array of headers.
 	 * @param mixed  $response API response.
 	 *
 	 * @return array|bool|mixed
@@ -112,9 +112,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $git     ( github|bitbucket|gitlab|gitea ).
-	 * @param string $locale
-	 * @param array  $headers
+	 * @param string $git     (github|bitbucket|gitlab|gitea).
+	 * @param string $locale  Locale.
+	 * @param array  $headers Array of headers.
 	 *
 	 * @return array|null|string
 	 */

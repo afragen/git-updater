@@ -32,7 +32,7 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type plugin|theme.
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
@@ -231,8 +231,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Create GitLab API endpoints.
 	 *
-	 * @param GitLab_API|API $git
-	 * @param string         $endpoint
+	 * @param GitLab_API|API $git      Git host specific API object.
+	 * @param string         $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */
@@ -408,7 +408,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type
+	 * @param array           $repo_type Array of repo data.
 	 *
 	 * @return array
 	 */
@@ -431,7 +431,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Add settings for GitLab.com, GitLab Community Edition.
 	 * or GitLab Enterprise Access Token.
 	 *
-	 * @param array $auth_required
+	 * @param array $auth_required Array of authentication data.
 	 *
 	 * @return void
 	 */
@@ -528,7 +528,7 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param string $type
+	 * @param string $type Plugin|theme.
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -592,8 +592,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return mixed $install
 	 */

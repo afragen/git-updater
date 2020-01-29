@@ -141,8 +141,8 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string $type
-	 * @param array  $config
+	 * @param string $type   Plugin|theme.
+	 * @param array  $config Array of data.
 	 *
 	 * @return bool
 	 */
@@ -376,7 +376,7 @@ class Install {
 	/**
 	 * Add settings sections.
 	 *
-	 * @param string $type
+	 * @param string $type Plugin|theme.
 	 */
 	public function register_settings( $type ) {
 		$repo_type = null;
@@ -500,9 +500,9 @@ class Install {
 	/**
 	 * Remove activation links after plugin installation as no method to get $plugin_file.
 	 *
-	 * @param array  $install_actions
-	 * @param mixed  $api
-	 * @param string $plugin_file
+	 * @param array  $install_actions Array of plugin actions.
+	 * @param mixed  $api             Unused.
+	 * @param string $plugin_file     Plugin file/slug.
 	 *
 	 * @return mixed
 	 */
@@ -515,9 +515,9 @@ class Install {
 	/**
 	 * Fix activation links after theme installation, no method to get proper theme name.
 	 *
-	 * @param array $install_actions
-	 * @param mixed $api
-	 * @param mixed $theme_info
+	 * @param array $install_actions Array of theme actions.
+	 * @param mixed $api             Unused.
+	 * @param mixed $theme_info      Theme slug.
 	 *
 	 * @return mixed
 	 */

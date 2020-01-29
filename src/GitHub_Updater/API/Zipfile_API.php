@@ -58,8 +58,8 @@ class Zipfile_API {
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return mixed $install
 	 */

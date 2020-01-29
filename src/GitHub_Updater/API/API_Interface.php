@@ -95,8 +95,8 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API $git
-	 * @param string                                                   $endpoint
+	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API $git      Git host specific API.
+	 * @param string                                                   $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */
@@ -156,7 +156,7 @@ interface API_Interface {
 	/**
 	 * Add settings for each API.
 	 *
-	 * @param array $auth_required
+	 * @param array $auth_required Array of what needs authentication.
 	 *
 	 * @return mixed
 	 */
@@ -172,8 +172,8 @@ interface API_Interface {
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return mixed $install
 	 */
