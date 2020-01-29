@@ -147,11 +147,13 @@ class Remote_Management {
 		if ( 'github_updater_remote_management' === $tab ) {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-				<?php
+			<?php
+				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 				// settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
+				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 				// submit_button();
-				?>
+			?>
 			</form>
 			<?php
 			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );

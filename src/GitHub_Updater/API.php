@@ -122,8 +122,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array $fields
-	 * @param array $repo
+	 * @param array $fields Array of settings fields.
+	 * @param array $repo   Array of repo data.
 	 *
 	 * @return array
 	 */
@@ -139,7 +139,7 @@ class API {
 	 * Get repo's API.
 	 *
 	 * @param string         $git  (github|bitbucket|gitlab|gitea)
-	 * @param bool|\stdClass $repo
+	 * @param bool|\stdClass $repo Repository object.
 	 *
 	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
 	 *                                                   \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
@@ -478,8 +478,8 @@ class API {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param array|bool $response
-	 * @param bool       $branch
+	 * @param array|bool $response API response.
+	 * @param bool       $branch   Branch name.
 	 *
 	 * @return bool
 	 */
@@ -531,7 +531,7 @@ class API {
 	/**
 	 * Sort tags and set object data.
 	 *
-	 * @param array $parsed_tags
+	 * @param array $parsed_tags Array of tags.
 	 *
 	 * @return bool
 	 */
@@ -559,7 +559,7 @@ class API {
 	 * Get local file info if no update available. Save API calls.
 	 *
 	 * @param \stdClass $repo Repo data.
-	 * @param string    $file
+	 * @param string    $file Filename.
 	 *
 	 * @return null|string
 	 */
@@ -609,7 +609,7 @@ class API {
 	 * Create some sort of rating from 0 to 100 for use in star ratings.
 	 * I'm really just making this up, more based upon popularity.
 	 *
-	 * @param array $repo_meta
+	 * @param array $repo_meta Array of repo meta data.
 	 *
 	 * @return integer
 	 */
@@ -712,8 +712,8 @@ class API {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @param array  $args
-	 * @param string $url
+	 * @param array  $args Array of data.
+	 * @param string $url  URL.
 	 *
 	 * @return mixed $args
 	 */
@@ -728,7 +728,7 @@ class API {
 	 *
 	 * @uses `requests-requests.before_redirect` Action hook.
 	 *
-	 * @param  string $location
+	 * @param  string $location URL.
 	 * @return void
 	 */
 	public function set_redirect( $location ) {
