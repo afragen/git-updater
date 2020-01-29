@@ -2,22 +2,21 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.2.0\n"
+"Project-Id-Version: GitHub Updater 9.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-01-21T18:52:06+00:00\n"
+"POT-Creation-Date: 2020-01-29T00:03:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
 
 #. Plugin Name of the plugin
-#: src/GitHub_Updater/Settings.php:149
-#: src/GitHub_Updater/Settings.php:188
-#: src/GitHub_Updater/Settings.php:239
+#: src/GitHub_Updater/Settings.php:158
+#: src/GitHub_Updater/Settings.php:248
 msgid "GitHub Updater"
 msgstr ""
 
@@ -353,61 +352,70 @@ msgstr ""
 msgid "Please refer to the <a href=\"%1$s\">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:130
-#: src/GitHub_Updater/Settings.php:735
+#: src/GitHub_Updater/Settings.php:139
+#: src/GitHub_Updater/Settings.php:757
 msgid "Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:187
-#: src/GitHub_Updater/Settings.php:326
+#: src/GitHub_Updater/Settings.php:196
+#: src/GitHub_Updater/Settings.php:335
 msgid "GitHub Updater Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:261
+#: src/GitHub_Updater/Settings.php:197
+msgctxt "Menu item"
+msgid "GitHub Updater"
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:270
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:293
+#: src/GitHub_Updater/Settings.php:302
 msgid "Settings saved."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:295
+#: src/GitHub_Updater/Settings.php:304
 msgid "RESTful key reset."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:297
+#: src/GitHub_Updater/Settings.php:306
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:339
+#: src/GitHub_Updater/Settings.php:348
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:542
-msgid "Check to enable branch switching from the Plugins or Themes page."
+#: src/GitHub_Updater/Settings.php:360
+msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:566
+#: src/GitHub_Updater/Settings.php:564
+msgid "Check to enable branch switching from the Plugins or Themes page or to bypass WP-Cron background processing."
+msgstr ""
+
+#: src/GitHub_Updater/Settings.php:588
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:567
+#: src/GitHub_Updater/Settings.php:589
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:769
+#: src/GitHub_Updater/Settings.php:791
 msgid "This is a private repository."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:770
+#: src/GitHub_Updater/Settings.php:792
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:771
+#: src/GitHub_Updater/Settings.php:793
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:808
+#: src/GitHub_Updater/Settings.php:830
 msgid "Installed Plugins and Themes"
 msgstr ""
 
