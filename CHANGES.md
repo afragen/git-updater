@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 9.2.1 / 2020-01-28
+* add `Bypass WP-Cron Background Processing` setting
+
 #### 9.2.0 / 2020-01-21
 * fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
 * remove scheduled cron events on deactivation

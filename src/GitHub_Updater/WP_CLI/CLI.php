@@ -13,6 +13,7 @@ namespace Fragen\GitHub_Updater\WP_CLI;
 use WP_CLI;
 use WP_CLI_Command;
 use Fragen\Singleton;
+use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 // Add WP-CLI commands.
 WP_CLI::add_command( 'github-updater', 'Fragen\\GitHub_Updater\\WP_CLI\\CLI' );
@@ -23,6 +24,7 @@ WP_CLI::add_command( 'github-updater', 'Fragen\\GitHub_Updater\\WP_CLI\\CLI' );
  * Class GitHub_Updater_CLI
  */
 class CLI extends WP_CLI_Command {
+	use GHU_Trait;
 	/**
 	 * Clear GitHub Updater cache.
 	 *
@@ -65,14 +67,11 @@ class CLI extends WP_CLI_Command {
 		Singleton::get_instance( 'Remote_Management', $this )->ensure_api_key_is_set();
 		$api_key = get_site_option( 'github_updater_api_key' );
 		$api_url = add_query_arg(
-			[
-				'action' => 'github-updater-update',
-				'key'    => $api_key,
-			],
-			admin_url( 'admin-ajax.php' )
+			[ 'key' => $api_key ],
+			\home_url( home_url( 'wp-json/' . $this->get_class_vars( 'REST_API', 'namespace' ) . '/update/' ) )
 		);
 
 		WP_CLI::success( 'GitHub Updater REST API key has been reset.' );
-		WP_CLI::success( sprintf( 'The current RESTful endpoint is `%s`', $api_url ) );
+		WP_CLI::success( sprintf( 'The current REST API endpoint for updating is `%s`', $api_url ) );
 	}
 }

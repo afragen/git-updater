@@ -117,6 +117,15 @@ class Settings {
 				}
 			);
 		}
+
+		if ( isset( self::$options['bypass_background_processing'] ) ) {
+			add_filter( 'github_updater_disable_wpcron', '__return_true' );
+		}
+
+		// Check if filter set elsewhere.
+		if ( apply_filters( 'github_updater_disable_wpcron', false ) ) {
+			self::$options['bypass_background_processing'] = '1';
+		}
 	}
 
 	/**
@@ -185,7 +194,7 @@ class Settings {
 		add_submenu_page(
 			$parent,
 			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			esc_html__( 'GitHub Updater', 'github-updater' ),
+			esc_html_x( 'GitHub Updater', 'Menu item', 'github-updater' ),
 			$capability,
 			'github-updater',
 			[ $this, 'create_admin_page' ]
@@ -340,6 +349,18 @@ class Settings {
 			]
 		);
 
+		add_settings_field(
+			'bypass_background_processing',
+			null,
+			[ $this, 'token_callback_checkbox' ],
+			'github_updater_install_settings',
+			'github_updater_settings',
+			[
+				'id'    => 'bypass_background_processing',
+				'title' => esc_html__( 'Bypass WP-Cron Background Processing for Debugging', 'github-updater' ),
+			]
+		);
+
 		/**
 		 * Hook to add Git API settings.
 		 *
@@ -426,6 +447,7 @@ class Settings {
 		$always_unset    = [
 			'db_version',
 			'branch_switch',
+			'bypass_background_processing',
 			'github_access_token',
 			'github_enterprise_token',
 		];
@@ -539,7 +561,7 @@ class Settings {
 	 */
 	public function print_section_ghu_settings() {
 		$this->display_dot_org_overrides();
-		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page.', 'github-updater' ) . '</p>';
+		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page or to bypass WP-Cron background processing.', 'github-updater' ) . '</p>';
 	}
 
 	/**
@@ -644,8 +666,8 @@ class Settings {
 	private function filter_options() {
 		$options = self::$options;
 
-		// Remove checkbox options, only after background update complete.
-		if ( ! $this->waiting_for_background_update() ) {
+		// Remove checkbox options, only after background update complete or when bypassing background processing.
+		if ( ! $this->waiting_for_background_update() || isset( $options['bypass_background_processing'] ) ) {
 			$options = array_filter(
 				$options,
 				function ( $e ) {
