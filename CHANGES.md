@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.2.1 / 2020-01-28
 * add `Bypass WP-Cron Background Processing` setting
 
 #### 9.2.0 / 2020-01-21
