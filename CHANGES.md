@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix WP-CLI issue needing to add commands after class, thanks @chesio
 
 #### 9.2.1 / 2020-01-28
 * add `Bypass WP-Cron Background Processing` setting
