@@ -637,6 +637,14 @@ class Theme {
 	 * @return array|\stdClass
 	 */
 	public function update_site_transient( $transient ) {
+		// needed to fix PHP 7.4 warning.
+		if ( ! \is_object( $transient ) ) {
+			$transient           = new \stdClass();
+			$transient->response = null;
+		} elseif ( ! \property_exists( $transient, 'response' ) ) {
+			$transient->response = null;
+		}
+
 		foreach ( (array) $this->config as $theme ) {
 			if ( $this->can_update_repo( $theme ) ) {
 				$response = [

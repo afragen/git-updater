@@ -1,4 +1,5 @@
 #### [unreleased]
+* fixes for PHP 7.4
 
 #### 9.2.2 / 2020-01-29
 * fix WP-CLI issue needing to explicitly have class loaded to get class name for `add_command()`, thanks @chesio
