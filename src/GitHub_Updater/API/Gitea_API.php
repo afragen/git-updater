@@ -36,7 +36,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type plugin|theme.
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
@@ -146,7 +146,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Construct $this->type->download_link using Gitea API.
 	 *
-	 * @param boolean $branch_switch for direct branch changing.
+	 * @param boolean $branch_switch For direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
@@ -189,8 +189,8 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Create Gitea API endpoints.
 	 *
-	 * @param Gitea_API|API $git
-	 * @param string        $endpoint
+	 * @param Gitea_API|API $git      Git host API object.
+	 * @param string        $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */
@@ -304,7 +304,7 @@ class Gitea_API extends API implements API_Interface {
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type
+	 * @param array           $repo_type Array of repository data.
 	 *
 	 * @return array
 	 */
@@ -333,7 +333,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Add settings for Gitea Access Token.
 	 *
-	 * @param array $auth_required
+	 * @param array $auth_required Array of authentication data.
 	 *
 	 * @return void
 	 */
@@ -416,7 +416,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Add remote install settings fields.
 	 *
-	 * @param string $type
+	 * @param string $type Plugin|theme.
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -478,8 +478,8 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return mixed $install
 	 */

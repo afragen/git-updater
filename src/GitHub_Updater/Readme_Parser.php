@@ -39,7 +39,7 @@ class Readme_Parser extends Parser {
 	 * Pass file path into class-parser.php.
 	 * Delete temporary file when finished.
 	 *
-	 * @param string $file
+	 * @param string $file File info.
 	 *
 	 * @return void
 	 */
@@ -61,7 +61,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Parse text into markdown.
 	 *
-	 * @param string $text
+	 * @param string $text Text to process.
 	 *
 	 * @return string
 	 */
@@ -97,7 +97,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Sanitize contributors.
 	 *
-	 * @param array $users
+	 * @param array $users Array of users.
 	 *
 	 * @return array
 	 */
@@ -108,7 +108,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Create contributor data.
 	 *
-	 * @param array $users
+	 * @param array $users Array of users.
 	 *
 	 * @return array $contributors
 	 */
@@ -172,8 +172,8 @@ class Readme_Parser extends Parser {
 	 *
 	 * @access protected
 	 *
-	 * @param string $desc
-	 * @param int    $length
+	 * @param string $desc   Description.
+	 * @param int    $length Number of characters.
 	 *
 	 * @return string
 	 */

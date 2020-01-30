@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.2.2 / 2020-01-29
+* fix WP-CLI issue needing to explicitly have class loaded to get class name for `add_command()`, thanks @chesio
+* bunch of WPCS fixes and miles to go...
+
 #### 9.2.1 / 2020-01-28
 * add `Bypass WP-Cron Background Processing` setting
 

@@ -45,7 +45,7 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param null $cache
+	 * @param null $cache Data for caching.
 	 */
 	public function __construct( $cache = null ) {
 		$this->cache = $cache;
@@ -58,7 +58,7 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass $repo
+	 * @param \stdClass $repo Repository object.
 	 *
 	 * @return mixed
 	 */

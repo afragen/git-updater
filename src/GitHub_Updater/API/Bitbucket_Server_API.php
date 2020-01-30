@@ -37,7 +37,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type plugin|theme.
 	 */
 	public function __construct( $type ) {
 		parent::__construct( $type );
@@ -111,6 +111,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_release_asset() {
 		// TODO: make this work.
+		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 		// return $this->get_api_release_asset( 'bbserver', '/1.0/:owner/:repo/downloads' );
 	}
 
@@ -122,7 +123,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @link https://bitbucket.org/atlassian/stash-archive
 	 *
-	 * @param boolean $branch_switch for direct branch changing.
+	 * @param boolean $branch_switch For direct branch changing.
 	 *
 	 * @return string $endpoint
 	 */
@@ -141,8 +142,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Create Bitbucket Server API endpoints.
 	 *
-	 * @param Bitbucket_Server_API|API $git
-	 * @param string                   $endpoint
+	 * @param Bitbucket_Server_API|API $git      Git host specific API object.
+	 * @param string                   $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */
@@ -193,7 +194,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * Combines separate text lines from API response into one string with \n line endings.
 	 * Code relying on raw text can now parse it.
 	 *
-	 * @param string|\stdClass|mixed $response
+	 * @param string|\stdClass|mixed $response API response data.
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
@@ -252,7 +253,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Parse API response and return object with readme body.
 	 *
-	 * @param string|\stdClass $response
+	 * @param string|\stdClass $response API response data.
 	 *
 	 * @return void
 	 */
@@ -308,7 +309,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response  Response from API call.
-	 * @param string          $repo_type
+	 * @param string          $repo_type plugin|theme.
 	 *
 	 * @return array
 	 */
@@ -329,7 +330,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Add settings for Bitbucket Server Username and Password.
 	 *
-	 * @param array $auth_required
+	 * @param array $auth_required Array of authentication data.
 	 *
 	 * @return void
 	 */
@@ -406,8 +407,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers
-	 * @param array $install
+	 * @param array $headers Array of headers.
+	 * @param array $install Array of install data.
 	 *
 	 * @return array $install
 	 */
