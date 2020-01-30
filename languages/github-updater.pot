@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.2.1\n"
+"Project-Id-Version: GitHub Updater 9.2.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-01-29T00:03:45+00:00\n"
+"POT-Creation-Date: 2020-01-29T21:01:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -82,23 +82,23 @@ msgstr ""
 msgid "Enter Bitbucket password."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:339
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:340
 msgid "Bitbucket Server Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:346
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:347
 msgid "Bitbucket Server Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:355
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:356
 msgid "Bitbucket Server Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:371
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:372
 msgid "Bitbucket Server Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:401
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:402
 msgid "Bitbucket Server"
 msgstr ""
 
@@ -330,25 +330,25 @@ msgid "View details"
 msgstr ""
 
 #: src/GitHub_Updater/Remote_Management.php:121
-#: src/GitHub_Updater/Remote_Management.php:178
+#: src/GitHub_Updater/Remote_Management.php:180
 msgid "Remote Management"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:160
+#: src/GitHub_Updater/Remote_Management.php:162
 msgid "Reset REST API key"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:212
+#: src/GitHub_Updater/Remote_Management.php:214
 msgid "Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others."
 msgstr ""
 
 #. translators: %s: Link to Git Remote Updater repository
-#: src/GitHub_Updater/Remote_Management.php:219
+#: src/GitHub_Updater/Remote_Management.php:221
 msgid "The <a href=\"%s\">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings."
 msgstr ""
 
 #. translators: %1$s: Link to wiki, %2$s: RESTful API URL
-#: src/GitHub_Updater/Remote_Management.php:237
+#: src/GitHub_Updater/Remote_Management.php:239
 msgid "Please refer to the <a href=\"%1$s\">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s"
 msgstr ""
 
