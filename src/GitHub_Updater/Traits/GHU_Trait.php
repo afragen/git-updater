@@ -203,6 +203,7 @@ trait GHU_Trait {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
+		//phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 
 		wp_cron();
@@ -215,7 +216,7 @@ trait GHU_Trait {
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
 	 *
-	 * @param \stdClass $repo
+	 * @param \stdClass $repo Repository.
 	 *
 	 * @return bool
 	 */
@@ -233,7 +234,7 @@ trait GHU_Trait {
 	/**
 	 * Do we override dot org updates?
 	 *
-	 * @param string    $type (plugin|theme)
+	 * @param string    $type (plugin|theme).
 	 * @param \stdClass $repo Repository object.
 	 *
 	 * @return bool

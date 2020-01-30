@@ -54,6 +54,7 @@ class Readme_Parser extends Parser {
 		 * @param string $file_path Absolute filepath to temp readme file.
 		 */
 		$this->readme_path = apply_filters( 'github_updater_temp_readme_filepath', $file_path );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		$this->readme_path = file_put_contents( $this->readme_path, $file ) ? $this->readme_path : false;
 		parent::__construct( $this->readme_path );
 	}
