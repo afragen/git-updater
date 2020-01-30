@@ -141,7 +141,7 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string $type   Plugin|theme.
+	 * @param string $type   plugin|theme.
 	 * @param array  $config Array of data.
 	 *
 	 * @return bool
@@ -376,7 +376,7 @@ class Install {
 	/**
 	 * Add settings sections.
 	 *
-	 * @param string $type Plugin|theme.
+	 * @param string $type plugin|theme.
 	 */
 	public function register_settings( $type ) {
 		$repo_type = null;
