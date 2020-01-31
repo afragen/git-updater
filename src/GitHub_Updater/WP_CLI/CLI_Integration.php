@@ -237,18 +237,36 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
 class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
+
+	/** Skin feeback. */
 	public function header() {
 	}
 
+	/** Skin footer. */
 	public function footer() {
 	}
 
+	/**
+	 * Skin error.
+	 *
+	 * @param \stdClass $errors Error object.
+	 *
+	 * @return void
+	 */
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
 		}
 	}
 
+	/**
+	 * Skin feedback.
+	 *
+	 * @param string $string  Feedback message.
+	 * @param array  ...$args Feedback args.
+	 *
+	 * @return void
+	 */
 	public function feedback( $string, ...$args ) {
 	}
 }
@@ -257,18 +275,36 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
 class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
+
+	/** Skin header. */
 	public function header() {
 	}
 
+	/** Skin footer. */
 	public function footer() {
 	}
 
+	/**
+	 * Skin error.
+	 *
+	 * @param \stdClass $errors Error object.
+	 *
+	 * @return void
+	 */
 	public function error( $errors ) {
 		if ( is_wp_error( $errors ) ) {
 			WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
 		}
 	}
 
+	/**
+	 * Skin feedback.
+	 *
+	 * @param string $string  Feedback message.
+	 * @param array  ...$args Feedback args.
+	 *
+	 * @return void
+	 */
 	public function feedback( $string, ...$args ) {
 	}
 }
