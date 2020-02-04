@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 9.2.4 / 2020-02-04
+* add notice re: GitHub deprecation notice 🤬
+
 #### 9.2.3 / 2020-01-31
 * fixes for PHP 7.4 warnings
 
