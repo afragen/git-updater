@@ -106,6 +106,14 @@ class Rest_Update {
 		add_filter(
 			'site_transient_update_plugins',
 			function ( $current ) use ( $plugin, $update ) {
+				// needed to fix PHP 7.4 warning.
+				if ( ! \is_object( $current ) ) {
+					$current           = new \stdClass();
+					$current->response = null;
+				} elseif ( ! \property_exists( $current, 'response' ) ) {
+					$current->response = null;
+				}
+
 				$current->response[ $plugin->file ] = (object) $update;
 
 				return $current;
@@ -158,6 +166,14 @@ class Rest_Update {
 		add_filter(
 			'site_transient_update_themes',
 			function ( $current ) use ( $theme, $update ) {
+				// needed to fix PHP 7.4 warning.
+				if ( ! \is_object( $current ) ) {
+					$current           = new \stdClass();
+					$current->response = null;
+				} elseif ( ! \property_exists( $current, 'response' ) ) {
+					$current->response = null;
+				}
+
 				$current->response[ $theme->slug ] = $update;
 
 				return $current;
