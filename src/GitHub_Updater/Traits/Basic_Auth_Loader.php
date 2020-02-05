@@ -295,7 +295,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Removes Basic Authentication header for Bitbucket Release Assets.
+	 * Removes Basic Authentication header for Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
 	 *
 	 * @access public
@@ -307,9 +307,10 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arr_url  = parse_url( $url );
-		$aws_host = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
-		if ( $aws_host ) {
+		$arr_url         = parse_url( $url );
+		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
+		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
+		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
