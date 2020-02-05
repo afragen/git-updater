@@ -536,7 +536,7 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		if ( ! empty( $token ) ) {
-			$install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );
+			// $install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );
 		}
 
 		if ( ! empty( static::$options['github_access_token'] ) ) {

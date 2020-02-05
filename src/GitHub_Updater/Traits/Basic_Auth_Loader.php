@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\GitHub_Updater\Install;
 use Fragen\GitHub_Updater\API\Bitbucket_API;
 use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
+use Fragen\GitHub_Updater\API\GitHub_API;
 
 /*
  * Exit if called directly.
@@ -31,7 +32,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @var array
 	 */
-	private static $basic_auth_required = [ 'Bitbucket' ];
+	private static $basic_auth_required = [ 'Bitbucket', 'GitHub' ];
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
@@ -40,6 +41,7 @@ trait Basic_Auth_Loader {
 	 */
 	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'maybe_token_authenticate_http' ], 5, 2 );
 		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
@@ -50,12 +52,13 @@ trait Basic_Auth_Loader {
 	 */
 	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+		remove_filter( 'http_request_args', [ $this, 'maybe_token_authenticate_http' ] );
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private repositories only.
+	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Bitbucket private repositories only.
 	 *
 	 * @access public
 	 *
@@ -66,13 +69,31 @@ trait Basic_Auth_Loader {
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
-
-		if ( $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+		if ( 'bitbucket' === $credentials['type'] && $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
 
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+		}
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+
+		return $args;
+	}
+
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Adds `token` header for GitHub API.
+	 *
+	 * @param array  $args Args passed to the URL.
+	 * @param string $url  The URL.
+	 *
+	 * @return array $args
+	 */
+	public function maybe_token_authenticate_http( $args, $url ) {
+		$credentials = $this->get_credentials( $url );
+		if ( 'github' === $credentials['type'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+			$args['headers']['Authorization'] = 'token ' . $credentials['token'];
 		}
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
@@ -98,16 +119,17 @@ trait Basic_Auth_Loader {
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
+			'token'         => null,
+			'type'          => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com' ];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
-
-		$slug = $this->get_slug_for_credentials( $headers, $repos, $url );
-		$type = $this->get_type_for_credentials( $slug, $repos, $url );
+		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url );
+		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
 		switch ( $type ) {
 			case 'bitbucket':
@@ -116,6 +138,13 @@ trait Basic_Auth_Loader {
 				$bitbucket_org = in_array( $headers['host'], $hosts, true );
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+				$type          = 'bitbucket';
+				break;
+			case 'github':
+			case $type instanceof GitHub_API:
+				$github_com = in_array( $headers['host'], $hosts, true );
+				$token      = self::$options['github_access_token'];
+				$type       = 'github';
 				break;
 		}
 
@@ -123,11 +152,19 @@ trait Basic_Auth_Loader {
 		$caller          = $this->get_class_vars( 'Base', 'caller' );
 		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
 
-		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
+		if ( 'bitbucket' === $type && isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
 			$credentials['password'] = static::$options[ $password_key ];
 			$credentials['isset']    = true;
 			$credentials['private']  = $this->is_repo_private( $url );
+			$credentials['type']     = $type;
+		}
+
+		if ( 'github' === $type ) {
+			$credentials['isset']   = true;
+			$credentials['private'] = $this->is_repo_private( $url );
+			$credentials['type']    = $type;
+			$credentials['token']   = isset( $token ) ? $token : null;
 		}
 
 		return $credentials;
@@ -258,7 +295,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Removes Basic Authentication header for Bitbucket Release Assets.
+	 * Removes Basic Authentication header for Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
 	 *
 	 * @access public
@@ -270,8 +307,10 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arr_url = parse_url( $url );
-		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
+		$arr_url         = parse_url( $url );
+		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
+		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
+		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
