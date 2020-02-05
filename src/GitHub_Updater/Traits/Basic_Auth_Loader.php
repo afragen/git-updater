@@ -14,7 +14,7 @@ use Fragen\Singleton;
 use Fragen\GitHub_Updater\Install;
 use Fragen\GitHub_Updater\API\Bitbucket_API;
 use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
-use Fragen\GitHub_Updater\API\GitHub;
+use Fragen\GitHub_Updater\API\GitHub_API;
 
 /*
  * Exit if called directly.
@@ -57,8 +57,8 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private repositories only.
+	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Bitbucket private repositories only.
 	 *
 	 * @access public
 	 *
@@ -69,28 +69,31 @@ trait Basic_Auth_Loader {
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
-		if ( 'bitbucket' === $credentials['type'] ) {
+		if ( 'bitbucket' === $credentials['type'] && $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+			$username = $credentials['username'];
+			$password = $credentials['password'];
 
-			if ( $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
-				$username = $credentials['username'];
-				$password = $credentials['password'];
-
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-				$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-			}
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
 		return $args;
 	}
 
+	/**
+	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Adds `token` header for GitHub API.
+	 *
+	 * @param array  $args Args passed to the URL.
+	 * @param string $url  The URL.
+	 *
+	 * @return array $args
+	 */
 	public function maybe_token_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
-
-		if ( 'github' === $credentials['type'] ) {
-			if ( $credentials['isset'] && ! $credentials['api.wordpress'] ) {
-				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
-			}
+		if ( 'github' === $credentials['type'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+			$args['headers']['Authorization'] = 'token ' . $credentials['token'];
 		}
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
@@ -125,9 +128,8 @@ trait Basic_Auth_Loader {
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
-
-		$slug = $this->get_slug_for_credentials( $headers, $repos, $url );
-		$type = $this->get_type_for_credentials( $slug, $repos, $url );
+		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url );
+		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
 		switch ( $type ) {
 			case 'bitbucket':
@@ -136,11 +138,13 @@ trait Basic_Auth_Loader {
 				$bitbucket_org = in_array( $headers['host'], $hosts, true );
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+				$type          = 'bitbucket';
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
 				$github_com = in_array( $headers['host'], $hosts, true );
 				$token      = self::$options['github_access_token'];
+				$type       = 'github';
 				break;
 		}
 
@@ -303,8 +307,9 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arr_url = parse_url( $url );
-		if ( isset( $arr_url['host'] ) && 'bbuseruploads.s3.amazonaws.com' === $arr_url['host'] ) {
+		$arr_url  = parse_url( $url );
+		$aws_host = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
+		if ( $aws_host ) {
 			unset( $args['headers']['Authorization'] );
 		}
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
