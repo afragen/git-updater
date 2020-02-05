@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\GitHub_Updater\Install;
 use Fragen\GitHub_Updater\API\Bitbucket_API;
 use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
+use Fragen\GitHub_Updater\API\GitHub;
 
 /*
  * Exit if called directly.
@@ -31,7 +32,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @var array
 	 */
-	private static $basic_auth_required = [ 'Bitbucket' ];
+	private static $basic_auth_required = [ 'Bitbucket', 'GitHub' ];
 
 	/**
 	 * Load hooks for Bitbucket authentication headers.
@@ -40,6 +41,7 @@ trait Basic_Auth_Loader {
 	 */
 	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'maybe_token_authenticate_http' ], 5, 2 );
 		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
@@ -50,6 +52,7 @@ trait Basic_Auth_Loader {
 	 */
 	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+		remove_filter( 'http_request_args', [ $this, 'maybe_token_authenticate_http' ] );
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
@@ -66,13 +69,28 @@ trait Basic_Auth_Loader {
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
+		if ( 'bitbucket' === $credentials['type'] ) {
 
-		if ( $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
-			$username = $credentials['username'];
-			$password = $credentials['password'];
+			if ( $credentials['private'] && $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+				$username = $credentials['username'];
+				$password = $credentials['password'];
 
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+			}
+		}
+		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+
+		return $args;
+	}
+
+	public function maybe_token_authenticate_http( $args, $url ) {
+		$credentials = $this->get_credentials( $url );
+
+		if ( 'github' === $credentials['type'] ) {
+			if ( $credentials['isset'] && ! $credentials['api.wordpress'] ) {
+				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+			}
 		}
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
@@ -98,8 +116,10 @@ trait Basic_Auth_Loader {
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
+			'token'         => null,
+			'type'          => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com' ];
 
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
@@ -117,17 +137,30 @@ trait Basic_Auth_Loader {
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
 				break;
+			case 'github':
+			case $type instanceof GitHub_API:
+				$github_com = in_array( $headers['host'], $hosts, true );
+				$token      = self::$options['github_access_token'];
+				break;
 		}
 
 		// TODO: can use `( $this->caller )::$options` in PHP7.
 		$caller          = $this->get_class_vars( 'Base', 'caller' );
 		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
 
-		if ( isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
+		if ( 'bitbucket' === $type && isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
 			$credentials['password'] = static::$options[ $password_key ];
 			$credentials['isset']    = true;
 			$credentials['private']  = $this->is_repo_private( $url );
+			$credentials['type']     = $type;
+		}
+
+		if ( 'github' === $type ) {
+			$credentials['isset']   = true;
+			$credentials['private'] = $this->is_repo_private( $url );
+			$credentials['type']    = $type;
+			$credentials['token']   = isset( $token ) ? $token : null;
 		}
 
 		return $credentials;

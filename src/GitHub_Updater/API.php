@@ -320,6 +320,7 @@ class API {
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
 		switch ( $type['git'] ) {
 			case 'github':
+				$this->load_authentication_hooks();
 				if ( ! $this->type->enterprise && $download_link ) {
 					$type['base_download'] = $type['base_uri'];
 					break;
@@ -435,10 +436,11 @@ class API {
 
 		switch ( $git->type->git ) {
 			case 'github':
-				$key              = 'access_token';
-				$token            = 'github_access_token';
-				$token_enterprise = 'github_enterprise_token';
-				break;
+				return $endpoint;
+				// $key              = 'access_token';
+				// $token            = 'github_access_token';
+				// $token_enterprise = 'github_enterprise_token';
+				// break;
 			case 'gitlab':
 				$key              = 'private_token';
 				$token            = 'gitlab_access_token';

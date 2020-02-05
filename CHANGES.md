@@ -1,4 +1,6 @@
 #### [unreleased]
+* remove GitHub deprecation notice
+* transition from GitHub access token query arg to Basic Authentication
 
 #### 9.2.4 / 2020-02-04
 * add notice re: GitHub deprecation notice 🤬

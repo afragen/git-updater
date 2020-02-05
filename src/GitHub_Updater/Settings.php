@@ -238,7 +238,6 @@ class Settings {
 	 * Options page callback.
 	 */
 	public function create_admin_page() {
-		$this->github_token_deprecation();
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? esc_attr( $_GET['tab'] ) : 'github_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? esc_attr( $_GET['subtab'] ) : 'github_updater';
@@ -839,21 +838,5 @@ class Settings {
 			$is_dot_org = $data['dot_org'] && ! $override ? $dot_org : null;
 			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . '</p>' );
 		}
-	}
-
-	/** GitHub access token deprecation notice */
-	public function github_token_deprecation() {
-		?>
-		<div class="notice-error notice is-dismissible">
-			<p>
-				<?php
-				printf(
-					'<p>GitHub.com has recently started issuing deprecation notices for the use of access tokens with the GitHub API. This clearly affects the GitHub Updater plugin. I am sorry that you might be inundated with emails. I am working on a solution for OAuth authetication that should resolve this. Please be patient.</p><p>If you would like to help please work is being done on <a href="%s">issue #848</a></p>',
-					'https://github.com/afragen/github-updater/issues/848'
-				);
-				?>
-			</p>
-		</div>
-		<?php
 	}
 }
