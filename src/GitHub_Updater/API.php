@@ -436,11 +436,8 @@ class API {
 
 		switch ( $git->type->git ) {
 			case 'github':
+			case 'bitbucket':
 				return $endpoint;
-				// $key              = 'access_token';
-				// $token            = 'github_access_token';
-				// $token_enterprise = 'github_enterprise_token';
-				// break;
 			case 'gitlab':
 				$key              = 'private_token';
 				$token            = 'gitlab_access_token';
@@ -451,8 +448,6 @@ class API {
 				$token            = 'gitea_access_token';
 				$token_enterprise = 'gitea_access_token';
 				break;
-			case 'bitbucket':
-				return $endpoint;
 		}
 
 		// Add hosted access token.
