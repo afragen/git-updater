@@ -115,6 +115,10 @@ trait Basic_Auth_Loader {
 		];
 		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
 
+		if ( $credentials['api.wordpress'] ) {
+			return $credentials;
+		}
+
 		$repos = array_merge(
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
@@ -150,10 +154,6 @@ trait Basic_Auth_Loader {
 		// TODO: can use `( $this->caller )::$options` in PHP7.
 		$caller          = $this->get_class_vars( 'Base', 'caller' );
 		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
-
-		if ( ! $slug || $credentials['api.wordpress'] || $type !== $repos[ $slug ]->git ) {
-			return $credentials;
-		}
 
 		if ( 'bitbucket' === $type && isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
 			$credentials['username'] = static::$options[ $username_key ];
