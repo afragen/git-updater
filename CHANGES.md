@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.3.0 / 2020-02-06
 * remove GitHub deprecation notice
 * transition from GitHub access token query arg to Basic Authentication
 * fixed theme update View details display [#849](https://github.com/afragen/github-updater/issues/849)

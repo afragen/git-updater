@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.2.3\n"
+"Project-Id-Version: GitHub Updater 9.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-01-31T17:59:24+00:00\n"
+"POT-Creation-Date: 2020-02-06T18:38:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -36,49 +36,49 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:384
+#: src/GitHub_Updater/API/Bitbucket_API.php:382
 msgid "Bitbucket Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:391
-#: src/GitHub_Updater/API/Bitbucket_API.php:479
+#: src/GitHub_Updater/API/Bitbucket_API.php:389
+#: src/GitHub_Updater/API/Bitbucket_API.php:477
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:400
-#: src/GitHub_Updater/API/Bitbucket_API.php:487
+#: src/GitHub_Updater/API/Bitbucket_API.php:398
+#: src/GitHub_Updater/API/Bitbucket_API.php:485
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:416
+#: src/GitHub_Updater/API/Bitbucket_API.php:414
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:446
+#: src/GitHub_Updater/API/Bitbucket_API.php:444
 msgid "Bitbucket"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:455
+#: src/GitHub_Updater/API/Bitbucket_API.php:453
 msgid "Check box if private repository. Leave unchecked for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:462
+#: src/GitHub_Updater/API/Bitbucket_API.php:460
 msgid "Enter your personal Bitbucket username and password."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:496
+#: src/GitHub_Updater/API/Bitbucket_API.php:494
 msgid "Private Bitbucket Repository"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:512
+#: src/GitHub_Updater/API/Bitbucket_API.php:510
 msgid "Check for private Bitbucket repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:527
+#: src/GitHub_Updater/API/Bitbucket_API.php:525
 msgid "Enter Bitbucket username."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:542
+#: src/GitHub_Updater/API/Bitbucket_API.php:540
 msgid "Enter Bitbucket password."
 msgstr ""
 
@@ -102,109 +102,109 @@ msgstr ""
 msgid "Bitbucket Server"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:344
-#: src/GitHub_Updater/API/Gitea_API.php:362
-#: src/GitHub_Updater/API/Gitea_API.php:424
+#: src/GitHub_Updater/API/Gitea_API.php:341
+#: src/GitHub_Updater/API/Gitea_API.php:359
+#: src/GitHub_Updater/API/Gitea_API.php:421
 msgid "Gitea Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:353
+#: src/GitHub_Updater/API/Gitea_API.php:350
 msgid "Gitea Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:397
+#: src/GitHub_Updater/API/Gitea_API.php:394
 msgid "Gitea"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:406
+#: src/GitHub_Updater/API/Gitea_API.php:403
 msgid "Enter your repository specific Gitea Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:413
+#: src/GitHub_Updater/API/Gitea_API.php:410
 msgid "Enter your Gitea Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:440
+#: src/GitHub_Updater/API/Gitea_API.php:437
 msgid "Enter Gitea Access Token for private Gitea repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:471
+#: src/GitHub_Updater/API/Gitea_API.php:468
 msgid "You must set a Gitea Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:373
+#: src/GitHub_Updater/API/GitHub_API.php:370
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:380
+#: src/GitHub_Updater/API/GitHub_API.php:377
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:393
+#: src/GitHub_Updater/API/GitHub_API.php:390
 msgid "GitHub Enterprise Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:410
+#: src/GitHub_Updater/API/GitHub_API.php:407
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:437
+#: src/GitHub_Updater/API/GitHub_API.php:434
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:444
+#: src/GitHub_Updater/API/GitHub_API.php:441
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:455
+#: src/GitHub_Updater/API/GitHub_API.php:452
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:469
+#: src/GitHub_Updater/API/GitHub_API.php:466
 msgid "GitHub"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitHub_API.php:483
+#: src/GitHub_Updater/API/GitHub_API.php:480
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:442
+#: src/GitHub_Updater/API/GitLab_API.php:439
 msgid "GitLab Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:451
+#: src/GitHub_Updater/API/GitLab_API.php:448
 msgid "GitLab Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:460
+#: src/GitHub_Updater/API/GitLab_API.php:457
 msgid "GitLab.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:474
+#: src/GitHub_Updater/API/GitLab_API.php:471
 msgid "GitLab CE or GitLab Enterprise Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:509
+#: src/GitHub_Updater/API/GitLab_API.php:506
 msgid "GitLab"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:518
+#: src/GitHub_Updater/API/GitLab_API.php:515
 msgid "Enter your repository specific GitLab Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:525
+#: src/GitHub_Updater/API/GitLab_API.php:522
 msgid "Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:536
+#: src/GitHub_Updater/API/GitLab_API.php:533
 msgid "GitLab Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:552
+#: src/GitHub_Updater/API/GitLab_API.php:549
 msgid "Enter GitLab Access Token for private GitLab repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:585
+#: src/GitHub_Updater/API/GitLab_API.php:582
 msgid "You must set a GitLab.com, GitLab CE, or GitLab Enterprise Access Token."
 msgstr ""
 
