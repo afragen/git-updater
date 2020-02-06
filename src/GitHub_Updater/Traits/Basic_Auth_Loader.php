@@ -212,6 +212,7 @@ trait Basic_Auth_Loader {
 		if ( ! $slug && isset( $headers['path'] ) ) {
 			$path_arr = explode( '/', $headers['path'] );
 			foreach ( $path_arr as $key ) {
+				$key = basename( rawurldecode( $key ) ); // For GitLab.
 				if ( array_key_exists( $key, $repos ) ) {
 					$slug = $key;
 					break;
