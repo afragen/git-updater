@@ -212,7 +212,6 @@ class GitLab_API extends API implements API_Interface {
 			$endpoint = add_query_arg( 'sha', $branch_switch, $endpoint );
 		}
 
-		$endpoint      = $this->add_access_token_endpoint( $this, $endpoint );
 		$download_link = $download_link_base . $endpoint;
 
 		/**
@@ -261,8 +260,6 @@ class GitLab_API extends API implements API_Interface {
 				break;
 		}
 
-		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
-
 		/*
 		 * If GitLab CE/Enterprise return this endpoint.
 		 */
@@ -293,7 +290,7 @@ class GitLab_API extends API implements API_Interface {
 			}
 
 			if ( $response && $this->type->slug === $response->path ) {
-				$id = $response->id;
+				// $id = $response->id;
 				$this->set_repo_cache( 'project_id', $id );
 				$this->set_repo_cache( 'project', $response );
 			}
@@ -633,10 +630,6 @@ class GitLab_API extends API implements API_Interface {
 			$token = ! empty( $install['options']['gitlab_enterprise_token'] )
 				? $install['options']['gitlab_enterprise_token']
 				: $options['gitlab_enterprise_token'];
-		}
-
-		if ( ! empty( $token ) ) {
-			$install['download_link'] = add_query_arg( 'private_token', $token, $install['download_link'] );
 		}
 
 		if ( ! empty( static::$options['gitlab_access_token'] ) ) {

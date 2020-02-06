@@ -318,6 +318,8 @@ class API {
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
+		$this->load_authentication_hooks();
+
 		switch ( $type['git'] ) {
 			case 'github':
 				if ( ! $this->type->enterprise && $download_link ) {
@@ -347,7 +349,6 @@ class API {
 				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				$this->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						$type['base_download'] = $type['base_uri'];
@@ -412,67 +413,6 @@ class API {
 		}
 
 		return 'in dot org' === $response;
-	}
-
-	/**
-	 * Add appropriate access token to endpoint.
-	 *
-	 * @access protected
-	 *
-	 * @param GitHub_API|GitLab_API $git      Class containing the GitAPI used.
-	 * @param string                $endpoint The endpoint being accessed.
-	 *
-	 * @return string $endpoint
-	 */
-	protected function add_access_token_endpoint( $git, $endpoint ) {
-		// This will return if checking during shiny updates.
-		if ( null === static::$options ) {
-			return $endpoint;
-		}
-		$key              = null;
-		$token            = null;
-		$token_enterprise = null;
-
-		switch ( $git->type->git ) {
-			case 'github':
-				$key              = 'access_token';
-				$token            = 'github_access_token';
-				$token_enterprise = 'github_enterprise_token';
-				break;
-			case 'gitlab':
-				$key              = 'private_token';
-				$token            = 'gitlab_access_token';
-				$token_enterprise = 'gitlab_enterprise_token';
-				break;
-			case 'gitea':
-				$key              = 'access_token';
-				$token            = 'gitea_access_token';
-				$token_enterprise = 'gitea_access_token';
-				break;
-			case 'bitbucket':
-				return $endpoint;
-		}
-
-		// Add hosted access token.
-		if ( ! empty( static::$options[ $token ] ) ) {
-			$endpoint = add_query_arg( $key, static::$options[ $token ], $endpoint );
-		}
-
-		// Add Enterprise access token.
-		if ( ! empty( $git->type->enterprise ) &&
-			! empty( static::$options[ $token_enterprise ] )
-		) {
-			$endpoint = remove_query_arg( $key, $endpoint );
-			$endpoint = add_query_arg( $key, static::$options[ $token_enterprise ], $endpoint );
-		}
-
-		// Add repo access token.
-		if ( ! empty( static::$options[ $git->type->slug ] ) ) {
-			$endpoint = remove_query_arg( $key, $endpoint );
-			$endpoint = add_query_arg( $key, static::$options[ $git->type->slug ], $endpoint );
-		}
-
-		return $endpoint;
 	}
 
 	/**
@@ -693,8 +633,7 @@ class API {
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
-			$url = $this->add_access_token_endpoint( $this, $asset );
-			wp_remote_get( $url );
+			wp_remote_get( $asset );
 			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
 		}
 

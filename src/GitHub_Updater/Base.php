@@ -142,7 +142,7 @@ class Base {
 		$upgrade = new GHU_Upgrade();
 		$upgrade->run();
 
-		if ( $this->is_current_page( [ 'themes.php' ] ) ) {
+		if ( $this->is_current_page( [ 'themes.php', 'theme-install.php' ] ) ) {
 			// Load plugin stylesheet.
 			add_action(
 				'admin_enqueue_scripts',

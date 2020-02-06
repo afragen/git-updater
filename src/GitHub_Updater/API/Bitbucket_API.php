@@ -256,8 +256,6 @@ class Bitbucket_API extends API implements API_Interface {
 				break;
 		}
 
-		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
-
 		return $endpoint;
 	}
 
