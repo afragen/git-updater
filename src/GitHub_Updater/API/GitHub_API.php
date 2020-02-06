@@ -155,7 +155,6 @@ class GitHub_API extends API implements API_Interface {
 			$endpoint = $branch_switch;
 		}
 
-		$endpoint      = $this->add_access_token_endpoint( $this, $endpoint );
 		$download_link = $download_link_base . $endpoint;
 
 		/**
@@ -198,8 +197,6 @@ class GitHub_API extends API implements API_Interface {
 			default:
 				break;
 		}
-
-		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
 		 * If GitHub Enterprise return this endpoint.
@@ -533,10 +530,6 @@ class GitHub_API extends API implements API_Interface {
 			$token = ! empty( $install['options']['github_enterprise_token'] )
 				? $install['options']['github_enterprise_token']
 				: $options['github_enterprise_token'];
-		}
-
-		if ( ! empty( $token ) ) {
-			// $install['download_link'] = add_query_arg( 'access_token', $token, $install['download_link'] );
 		}
 
 		if ( ! empty( static::$options['github_access_token'] ) ) {
