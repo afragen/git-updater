@@ -318,9 +318,10 @@ class API {
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
+		$this->load_authentication_hooks();
+
 		switch ( $type['git'] ) {
 			case 'github':
-				$this->load_authentication_hooks();
 				if ( ! $this->type->enterprise && $download_link ) {
 					$type['base_download'] = $type['base_uri'];
 					break;
@@ -348,7 +349,6 @@ class API {
 				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 				break;
 			case 'bitbucket':
-				$this->load_authentication_hooks();
 				if ( $this->type->enterprise_api ) {
 					if ( $download_link ) {
 						$type['base_download'] = $type['base_uri'];

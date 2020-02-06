@@ -3,6 +3,7 @@
 * transition from GitHub access token query arg to Basic Authentication
 * fixed theme update View details display [#849](https://github.com/afragen/github-updater/issues/849)
 * more fixes PHP 7.4 warnings
+* refactor from using access token endpoints to Basic Authentication headers
 
 #### 9.2.4 / 2020-02-04
 * add notice re: GitHub deprecation notice 🤬
