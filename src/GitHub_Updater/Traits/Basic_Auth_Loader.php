@@ -101,6 +101,7 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
+		$options      = get_site_option( 'github_updater' );
 		$headers      = parse_url( $url );
 		$username_key = null;
 		$password_key = null;
@@ -123,7 +124,7 @@ trait Basic_Auth_Loader {
 			Singleton::get_instance( 'Plugin', $this )->get_plugin_configs(),
 			Singleton::get_instance( 'Theme', $this )->get_theme_configs()
 		);
-		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url );
+		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
 		switch ( $type ) {
@@ -137,27 +138,23 @@ trait Basic_Auth_Loader {
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
-				$token = ! empty( self::$options[ $slug ] ) ? self::$options[ $slug ] : self::$options['github_access_token'];
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['github_access_token'];
 				$type  = 'github';
 				break;
 			case 'gitlab':
 			case $type instanceof GitLab_API:
-				$token = ! empty( self::$options[ $slug ] ) ? self::$options[ $slug ] : self::$options['gitlab_access_token'];
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['gitlab_access_token'];
 				$type  = 'gitlab';
 				break;
 			case 'gitea':
 			case $type instanceof Gitea_API:
-				$token = ! empty( self::$options[ $slug ] ) ? self::$options[ $slug ] : self::$options['gitea_access_token'];
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['gitea_access_token'];
 				$type  = 'gitea';
 		}
 
-		// TODO: can use `( $this->caller )::$options` in PHP7.
-		$caller          = $this->get_class_vars( 'Base', 'caller' );
-		static::$options = $caller instanceof Install ? $caller::$options : static::$options;
-
-		if ( 'bitbucket' === $type && isset( static::$options[ $username_key ], static::$options[ $password_key ] ) ) {
-			$credentials['username'] = static::$options[ $username_key ];
-			$credentials['password'] = static::$options[ $password_key ];
+		if ( 'bitbucket' === $type && isset( $options[ $username_key ], $options[ $password_key ] ) ) {
+			$credentials['username'] = $options[ $username_key ];
+			$credentials['password'] = $options[ $password_key ];
 			$credentials['isset']    = true;
 			$credentials['private']  = $this->is_repo_private( $url );
 			$credentials['type']     = $type;
@@ -179,10 +176,11 @@ trait Basic_Auth_Loader {
 	 * @param array  $headers Array of headers from parse_url().
 	 * @param array  $repos   Array of repositories.
 	 * @param string $url     URL being called by API.
+	 * @param array  $options Array of site options.
 	 *
 	 * @return bool|string $slug
 	 */
-	private function get_slug_for_credentials( $headers, $repos, $url ) {
+	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
 		$slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
@@ -213,7 +211,7 @@ trait Basic_Auth_Loader {
 			$path_arr = explode( '/', $headers['path'] );
 			foreach ( $path_arr as $key ) {
 				$key = basename( rawurldecode( $key ) ); // For GitLab.
-				if ( array_key_exists( $key, $repos ) ) {
+				if ( ! empty( $options[ $key ] ) || array_key_exists( $key, $repos ) ) {
 					$slug = $key;
 					break;
 				}
