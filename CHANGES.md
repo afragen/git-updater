@@ -1,4 +1,5 @@
 #### [unreleased]
+* add `github_updater_unset_auth_header` filter to return array of URL host parts to remove Basic Auth headers
 
 #### 9.3.0 / 2020-02-06
 * remove GitHub deprecation notice
