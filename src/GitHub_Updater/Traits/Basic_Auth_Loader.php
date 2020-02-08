@@ -68,12 +68,6 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
-		$skip_urls = [ 'api.mailgun.net', 'api.eu.mailgun.net', 'app.mailgun.com' ];
-		foreach ( $skip_urls as $skip ) {
-			if ( false !== strpos( $url, $skip ) ) {
-				return $args;
-			}
-		}
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -132,6 +126,10 @@ trait Basic_Auth_Loader {
 		);
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
+
+		if ( false === $slug ) {
+			return $credentials;
+		}
 
 		switch ( $type ) {
 			case 'bitbucket':
