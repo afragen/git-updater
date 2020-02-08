@@ -68,6 +68,12 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function maybe_basic_authenticate_http( $args, $url ) {
+		$skip_urls = [ 'api.mailgun.net', 'api.eu.mailgun.net', 'app.mailgun.com' ];
+		foreach ( $skip_urls as $skip ) {
+			if ( false !== strpos( $url, $skip ) ) {
+				return $args;
+			}
+		}
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -310,18 +316,11 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$unset_header    = false;
 		$arr_url         = parse_url( $url );
 		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
 		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
 
-		$unsets = apply_filters( 'github_updater_unset_auth_header', [] );
-		foreach ( (array) $unsets as $unset ) {
-			if ( false !== strpos( $url, $unset ) ) {
-				$unset_header = true;
-			}
-		}
-		if ( $aws_host || $github_releases || $unset_header ) {
+		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
 		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
