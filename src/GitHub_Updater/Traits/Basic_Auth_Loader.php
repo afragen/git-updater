@@ -127,6 +127,10 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
+		if ( false === $slug ) {
+			return $credentials;
+		}
+
 		switch ( $type ) {
 			case 'bitbucket':
 			case $type instanceof Bitbucket_API:
@@ -313,6 +317,7 @@ trait Basic_Auth_Loader {
 		$arr_url         = parse_url( $url );
 		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
 		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
+
 		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
