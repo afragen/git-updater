@@ -79,11 +79,13 @@ trait Basic_Auth_Loader {
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
-		if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
-			$args['headers']['Authorization'] = 'token ' . $credentials['token'];
-		}
-		if ( 'gitlab' === $credentials['type'] ) {
-			$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+		if ( null !== $credentials['token'] ) {
+			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
+				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+			}
+			if ( 'gitlab' === $credentials['type'] ) {
+				$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+			}
 		}
 
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
