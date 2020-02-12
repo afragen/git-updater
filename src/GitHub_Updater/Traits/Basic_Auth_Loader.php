@@ -314,9 +314,8 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arr_url         = parse_url( $url );
-		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
-		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
+		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
+		$github_releases = false !== strpos( $url, 'releases/download' );
 
 		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
