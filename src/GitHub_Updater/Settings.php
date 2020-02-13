@@ -449,7 +449,6 @@ class Settings {
 			'branch_switch',
 			'bypass_background_processing',
 			'github_access_token',
-			'github_enterprise_token',
 		];
 
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
@@ -481,10 +480,8 @@ class Settings {
 
 		$auth_required       = static::$auth_required;
 		$auth_required_unset = [
-			'github_enterprise' => 'github_enterprise_token',
-			'gitlab'            => 'gitlab_access_token',
-			'gitlab_enterprise' => 'gitlab_enterprise_token',
-			'gitea'             => 'gitea_access_token',
+			'gitlab' => 'gitlab_access_token',
+			'gitea'  => 'gitea_access_token',
 		];
 
 		array_map(
