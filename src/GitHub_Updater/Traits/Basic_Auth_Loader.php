@@ -116,7 +116,7 @@ trait Basic_Auth_Loader {
 			'token'         => null,
 			'type'          => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com' ];
 
 		if ( $credentials['api.wordpress'] ) {
 			return $credentials;
@@ -129,7 +129,7 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-		if ( false === $slug ) {
+		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) ) {
 			return $credentials;
 		}
 
