@@ -1,6 +1,6 @@
 #### [unreleased]
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
-* allow URL against a git host API to add header to add header when installing repos
+* allow URL to a git host API to add header during installation
 * removed saving and use of Enterprise Access Tokens, must use individual repo tokens
 
 #### 9.3.1 / 2020-02-09
