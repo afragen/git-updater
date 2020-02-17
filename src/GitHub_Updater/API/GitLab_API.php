@@ -500,7 +500,7 @@ class GitLab_API extends API implements API_Interface {
 	 * Print the GitLab Access Token Settings text.
 	 */
 	public function print_section_gitlab_token() {
-		esc_html_e( 'Enter your GitLab.com, GitLab CE, or GitLab Enterprise Access Token.', 'github-updater' );
+		esc_html_e( 'Enter your GitLab.com Access Token.', 'github-updater' );
 	}
 
 	/**
