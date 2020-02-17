@@ -84,7 +84,14 @@ trait Basic_Auth_Loader {
 				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
 			}
 			if ( 'gitlab' === $credentials['type'] ) {
-				$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+				// https://gitlab.com/gitlab-org/gitlab-foss/issues/63438.
+				if ( ! $credentials['enterprise'] ) {
+					// Used in GitLab v12.2 or greater.
+					$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+				} else {
+					// Used in versions prior to GitLab v12.2.
+					$args['headers']['PRIVATE-TOKEN'] = $credentials['token'];
+				}
 			}
 		}
 
@@ -115,6 +122,7 @@ trait Basic_Auth_Loader {
 			'private'       => false,
 			'token'         => null,
 			'type'          => null,
+			'enterprise'    => null,
 		];
 		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com' ];
 
@@ -170,10 +178,11 @@ trait Basic_Auth_Loader {
 		}
 
 		if ( 'github' === $type || 'gitlab' === $type || 'gitea' === $type ) {
-			$credentials['isset']   = true;
-			$credentials['private'] = $this->is_repo_private( $url );
-			$credentials['type']    = $type;
-			$credentials['token']   = isset( $token ) ? $token : null;
+			$credentials['isset']      = true;
+			$credentials['private']    = $this->is_repo_private( $url );
+			$credentials['type']       = $type;
+			$credentials['token']      = isset( $token ) ? $token : null;
+			$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
 		}
 
 		return $credentials;
