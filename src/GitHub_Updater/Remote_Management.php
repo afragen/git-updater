@@ -226,6 +226,7 @@ class Remote_Management {
 
 		echo '<p>';
 		printf(
+			/* translators: %1: home URL, %2: REST API key */
 			__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' ),
 			'<span style="font-family:monospace;">' . home_url() . '</span>',
 			'<span style="font-family:monospace;">' . self::$api_key . '</span>'

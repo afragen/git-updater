@@ -79,11 +79,20 @@ trait Basic_Auth_Loader {
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 		}
-		if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
-			$args['headers']['Authorization'] = 'token ' . $credentials['token'];
-		}
-		if ( 'gitlab' === $credentials['type'] ) {
-			$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+		if ( null !== $credentials['token'] ) {
+			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
+				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+			}
+			if ( 'gitlab' === $credentials['type'] ) {
+				// https://gitlab.com/gitlab-org/gitlab-foss/issues/63438.
+				if ( ! $credentials['enterprise'] ) {
+					// Used in GitLab v12.2 or greater.
+					$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
+				} else {
+					// Used in versions prior to GitLab v12.2.
+					$args['headers']['PRIVATE-TOKEN'] = $credentials['token'];
+				}
+			}
 		}
 
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
@@ -113,8 +122,9 @@ trait Basic_Auth_Loader {
 			'private'       => false,
 			'token'         => null,
 			'type'          => null,
+			'enterprise'    => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org' ];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com' ];
 
 		if ( $credentials['api.wordpress'] ) {
 			return $credentials;
@@ -127,7 +137,7 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-		if ( false === $slug ) {
+		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) ) {
 			return $credentials;
 		}
 
@@ -142,17 +152,20 @@ trait Basic_Auth_Loader {
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['github_access_token'];
+				$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'github';
 				break;
 			case 'gitlab':
 			case $type instanceof GitLab_API:
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['gitlab_access_token'];
+				$token = ! empty( $options['gitlab_access_token'] ) ? $options['gitlab_access_token'] : null;
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'gitlab';
 				break;
 			case 'gitea':
 			case $type instanceof Gitea_API:
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $options['gitea_access_token'];
+				$token = ! empty( $options['gitea_access_token'] ) ? $options['gitea_access_token'] : null;
+				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'gitea';
 		}
 
@@ -165,10 +178,11 @@ trait Basic_Auth_Loader {
 		}
 
 		if ( 'github' === $type || 'gitlab' === $type || 'gitea' === $type ) {
-			$credentials['isset']   = true;
-			$credentials['private'] = $this->is_repo_private( $url );
-			$credentials['type']    = $type;
-			$credentials['token']   = isset( $token ) ? $token : null;
+			$credentials['isset']      = true;
+			$credentials['private']    = $this->is_repo_private( $url );
+			$credentials['type']       = $type;
+			$credentials['token']      = isset( $token ) ? $token : null;
+			$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
 		}
 
 		return $credentials;
@@ -314,9 +328,8 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function http_release_asset_auth( $args, $url ) {
-		$arr_url         = parse_url( $url );
-		$aws_host        = false !== strpos( $arr_url['host'], 's3.amazonaws.com' );
-		$github_releases = false !== strpos( $arr_url['path'], 'releases/download' );
+		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
+		$github_releases = false !== strpos( $url, 'releases/download' );
 
 		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );

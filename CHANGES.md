@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 9.3.2 / 2020-02-19
+* fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
+* allow URL to a git host API to add header during installation
+* removed saving and use of Enterprise Access Tokens, must use individual repo tokens
+* use `PRIVATE-TOKEN: <token>` header for authentication in GitLab < v12.2
+
 #### 9.3.1 / 2020-02-09
 * try to ensure authentication headers aren't injected where they shouldn't be, bad Andy 🤦‍♂️
 
