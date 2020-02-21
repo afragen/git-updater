@@ -28,6 +28,7 @@
     "issues": "https://github.com/afragen/github-updater/issues",
     "source": "https://github.com/afragen/github-updater"
   },
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
     "php": ">=5.6",
