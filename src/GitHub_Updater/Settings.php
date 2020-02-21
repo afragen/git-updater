@@ -47,8 +47,10 @@ class Settings {
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
 		'bitbucket_server'  => false,
+		'gitlab'            => true,
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
+		'gitea'             => true,
 		'gitea_private'     => false,
 	];
 
@@ -547,10 +549,6 @@ class Settings {
 			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
 				?: 'gitea' === $token->git;
 		}
-
-		// Always set to true.
-		static::$auth_required['gitlab'] = true;
-		static::$auth_required['gitea']  = true;
 	}
 
 	/**
