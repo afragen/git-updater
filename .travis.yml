@@ -13,7 +13,7 @@ php:
   - 7.1
   - 7.2
   - 7.3
-  - 7.4snapshot
+  - 7.4
 
 
 env:
@@ -31,7 +31,7 @@ cache:
 matrix:
   fast_finish: true
   allow_failures:
-    - php 7.4snapshot
+    - nightly
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 $WP_VERSION
