@@ -538,12 +538,7 @@ trait GHU_Trait {
 		$all_headers = is_array( $contents ) ? $contents : $all_headers;
 
 		// Reduce array to only headers with data.
-		$all_headers = array_filter(
-			$all_headers,
-			function ( $e ) {
-				return ! empty( $e );
-			}
-		);
+		$all_headers = array_filter( $all_headers );
 
 		return $all_headers;
 	}
