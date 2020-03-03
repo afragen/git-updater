@@ -201,6 +201,10 @@ trait Basic_Auth_Loader {
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
+
+		// Some installers, like TGMPA, pass an array.
+		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
+
 		$slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
 		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 
