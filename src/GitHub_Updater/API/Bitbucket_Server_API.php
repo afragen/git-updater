@@ -52,7 +52,15 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/:owner/repos/:repo/browse/{$file}" );
+
+		/**
+		* Filter to return the Bitbucket API path
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_path', '/1.0/:owner/repos/:repo/browse/' );
+		return $this->get_remote_api_info( 'bbserver', $file, $path . "{$file}" );
 	}
 
 	/**
