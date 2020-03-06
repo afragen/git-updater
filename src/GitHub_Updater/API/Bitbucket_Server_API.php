@@ -54,12 +54,12 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function get_remote_info( $file ) {
 
 		/**
-		* Filter to return the Bitbucket API path
+		* Filter to return the Bitbucket API path to browse repo
 		*
 		* @since 9.3.2.3
 		* @return string
 		*/
-		$path = apply_filters( 'github_updater_bitbucket_api_path', '/1.0/:owner/repos/:repo/browse/' );
+		$path = apply_filters( 'github_updater_bitbucket_api_path_browse', '/1.0/:owner/repos/:repo/browse/' );
 		return $this->get_remote_api_info( 'bbserver', $file, $path . "{$file}" );
 	}
 
@@ -69,7 +69,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/:owner/repos/:repo' );
+		/**
+		* Filter to return the Bitbucket API path for the repo
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_path', '/1.0/:owner/repos/:repo' );
+		return $this->get_remote_api_repo_meta( 'bbserver', $path );
 	}
 
 	/**
@@ -80,7 +87,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( 'bbserver', '/1.0/:owner/repos/:repo/tags' );
+		/**
+		* Filter to return the Bitbucket API path for the repo
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_tags', '/1.0/:owner/repos/:repo/tags' );
+		return $this->get_remote_api_tag( 'bbserver', $path );
 	}
 
 	/**
@@ -89,7 +103,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		return $this->get_remote_api_readme( 'bbserver', '/1.0/:owner/repos/:repo/raw/readme.txt' );
+		/**
+		* Filter to return the Bitbucket API path for the repo
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_readme', '/1.0/:owner/repos/:repo/raw/readme.txt' );
+		return $this->get_remote_api_readme( 'bbserver', $path );
 	}
 
 	/**
@@ -100,7 +121,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/:owner/repos/:repo/raw/{$changes}" );
+		/**
+		* Filter to return the Bitbucket API path for the repo
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_changes', '"/1.0/:owner/repos/:repo/raw/' );
+		return $this->get_remote_api_changes( 'bbserver', $changes, $path . "{$changes}" );
 	}
 
 	/**
@@ -109,7 +137,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		return $this->get_remote_api_branches( 'bbserver', '/1.0/:owner/repos/:repo/branches' );
+		/**
+		* Filter to return the Bitbucket API path for the repo
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$path = apply_filters( 'github_updater_bitbucket_api_branches', '/1.0/:owner/repos/:repo/branches' );
+		return $this->get_remote_api_branches( 'bbserver', $path );
 	}
 
 	/**
