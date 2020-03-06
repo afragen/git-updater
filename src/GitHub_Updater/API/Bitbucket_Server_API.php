@@ -172,7 +172,14 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/latest/:owner/repos/:repo/archive', true );
+		/**
+		* Filter to return the Bitbucket API path for the download link
+		*
+		* @since 9.3.2.3
+		* @return string
+		*/
+		$download_path = apply_filters( 'github_updater_bitbucket_api_download_link', '/latest/:owner/repos/:repo/archive' );
+		$download_link_base = $this->get_api_url( $download_path, true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
