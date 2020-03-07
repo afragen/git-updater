@@ -54,7 +54,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function get_remote_info( $file ) {
 
 		/**
-		* Filter to return the Bitbucket API path to browse repo
+		* Filter to return the Bitbucket API path to repo/browse endpoint
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -70,7 +70,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_repo_meta() {
 		/**
-		* Filter to return the Bitbucket API path for the repo
+		* Filter to return the Bitbucket API path for the repo endpoint
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -88,7 +88,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_tag() {
 		/**
-		* Filter to return the Bitbucket API path for the repo
+		* Filter to return the Bitbucket API path for the repo tags endpoint
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -104,7 +104,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_readme() {
 		/**
-		* Filter to return the Bitbucket API path for the repo
+		* Filter to return the Bitbucket API path for the repo readme file (raw)
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -122,7 +122,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_changes( $changes ) {
 		/**
-		* Filter to return the Bitbucket API path for the repo
+		* Filter to return the Bitbucket API path for the repo to evaluate changes (raw)
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -138,7 +138,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_remote_branches() {
 		/**
-		* Filter to return the Bitbucket API path for the repo
+		* Filter to return the Bitbucket API path for the repo branches endpoint
 		*
 		* @since 9.3.2.3
 		* @return string
@@ -173,7 +173,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
 		/**
-		* Filter to return the Bitbucket API path for the download link
+		* Filter to return the Bitbucket API path for the repo archive endpoint (download link)
 		*
 		* @since 9.3.2.3
 		* @return string
