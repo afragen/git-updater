@@ -2,6 +2,7 @@
 * set `minimum-stability: dev` in composer.json, helps with dependency loading for `dev-master`
 * fix potential PHP warning in `Basic_Auth_Loader::get_slug_for_credentials()` when installer, like TGMPA, passes as array and not string
 * define `$error_code[{git}]['git']` for certain errors to avoid PHP undefined index warning
+* update calls for Bitbucket Server REST API v7, thanks @Idealien
 
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`

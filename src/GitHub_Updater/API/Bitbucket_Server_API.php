@@ -52,7 +52,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/:owner/repos/:repo/browse/{$file}" );
+		return $this->get_remote_api_info( 'bbserver', $file, "/projects/1.0/~:owner/repos/:repo/browse/{$file}" );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/:owner/repos/:repo' );
+		return $this->get_remote_api_repo_meta( 'bbserver', '/projects/1.0/~:owner/repos/:repo' );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( 'bbserver', '/1.0/:owner/repos/:repo/tags' );
+		return $this->get_remote_api_tag( 'bbserver', '/projects/1.0/~:owner/repos/:repo/tags' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		return $this->get_remote_api_readme( 'bbserver', '/1.0/:owner/repos/:repo/raw/readme.txt' );
+		return $this->get_remote_api_readme( 'bbserver', '/projects/1.0/~:owner/repos/:repo/raw/readme.txt' );
 	}
 
 	/**
@@ -92,7 +92,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/:owner/repos/:repo/raw/{$changes}" );
+		return $this->get_remote_api_changes( 'bbserver', $changes, "/projects/1.0/~:owner/repos/:repo/raw/{$changes}" );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		return $this->get_remote_api_branches( 'bbserver', '/1.0/:owner/repos/:repo/branches' );
+		return $this->get_remote_api_branches( 'bbserver', '/projects/1.0/~:owner/repos/:repo/branches' );
 	}
 
 	/**
@@ -112,7 +112,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function get_release_asset() {
 		// TODO: make this work.
 		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
-		// return $this->get_api_release_asset( 'bbserver', '/1.0/:owner/:repo/downloads' );
+		// return $this->get_api_release_asset( 'bbserver', '/projects/1.0/~:owner/:repo/downloads' );
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/latest/:owner/repos/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/1.0/projects/~:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
