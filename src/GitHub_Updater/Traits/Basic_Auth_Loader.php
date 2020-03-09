@@ -152,20 +152,20 @@ trait Basic_Auth_Loader {
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
-				$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
+				$token = isset( $options['github_access_token'] ) && ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
+				$token = isset( $options[ $slug ] ) && ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'github';
 				break;
 			case 'gitlab':
 			case $type instanceof GitLab_API:
-				$token = ! empty( $options['gitlab_access_token'] ) ? $options['gitlab_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
+				$token = isset( $options['gitlab_access_token'] ) && ! empty( $options['gitlab_access_token'] ) ? $options['gitlab_access_token'] : null;
+				$token = isset( $options[ $slug ] ) && ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'gitlab';
 				break;
 			case 'gitea':
 			case $type instanceof Gitea_API:
-				$token = ! empty( $options['gitea_access_token'] ) ? $options['gitea_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
+				$token = isset( $options['gitea_access_token'] ) && ! empty( $options['gitea_access_token'] ) ? $options['gitea_access_token'] : null;
+				$token = isset( $options[ $slug ] ) && ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'gitea';
 		}
 
