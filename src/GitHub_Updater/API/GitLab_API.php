@@ -560,7 +560,10 @@ class GitLab_API extends API implements API_Interface {
 			( empty( static::$options['gitlab_access_token'] ) &&
 				$auth_required['gitlab'] ) )
 		) {
-			self::$error_code['gitlab'] = [ 'error' => true ];
+			self::$error_code['gitlab'] = [
+				'git'   => 'gitlab',
+				'error' => true,
+			];
 			if ( ! \PAnD::is_admin_notice_active( 'gitlab-error-1' ) ) {
 				return;
 			}
