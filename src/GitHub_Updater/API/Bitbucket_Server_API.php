@@ -313,7 +313,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = "{$repo_type['base_uri']}/latest/projects/{$this->type->owner}/repos/{$this->type->slug}/archive";
+			$download_base    = "{$repo_type['base_uri']}/projects/{$this->type->owner}/repos/{$this->type->slug}/archive";
 			$download_base    = $this->add_endpoints( $this, $download_base );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
@@ -419,7 +419,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = "{$base}/rest/api/1.0/latest/projects/{$headers['owner']}/repos/{$headers['repo']}/archive";
+			$install['download_link'] = "{$base}/rest/api/1.0/projects/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
