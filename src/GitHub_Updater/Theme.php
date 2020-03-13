@@ -120,10 +120,14 @@ class Theme {
 
 		$paths = array_map(
 			function ( $theme ) {
-				return "$theme->theme_root/$theme->stylesheet/style.css";
+				$filepath = \file_exists( "$theme->theme_root/$theme->stylesheet/style.css" )
+					? "$theme->theme_root/$theme->stylesheet/style.css"
+					: null;
+				return $filepath;
 			},
 			$themes
 		);
+		$paths = array_filter( $paths );
 
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
@@ -254,8 +258,8 @@ class Theme {
 
 		if ( $schedule_event && ! empty( $themes ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
-			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
-			! apply_filters( 'github_updater_disable_wpcron', false )
+				! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
+				! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_theme', [ $themes ] );
 			}
