@@ -108,7 +108,7 @@ class Theme {
 	}
 
 	/**
-	 * Get details of Git-sourced themes from those that are installed and have a 'style.css' file in its root.
+	 * Get details of Git-sourced themes from those that are installed.
 	 * Populates variable array.
 	 *
 	 * @return array Indexed array of associative arrays of theme details.
@@ -120,17 +120,13 @@ class Theme {
 
 		$paths = array_map(
 			function ( $theme ) {
-				$filename = "$theme->theme_root/$theme->stylesheet/style.css";
-
-				if ( file_exists( $filename ) ) {
-					return $filename;
-				} else {
-					return '';
-				}
+				$filepath = \file_exists( "$theme->theme_root/$theme->stylesheet/style.css" )
+					? "$theme->theme_root/$theme->stylesheet/style.css"
+					: null;
+				return $filepath;
 			},
 			$themes
 		);
-
 		$paths = array_filter( $paths );
 
 		$repos_arr = [];
