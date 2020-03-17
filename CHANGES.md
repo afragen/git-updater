@@ -4,6 +4,7 @@
 * define `$error_code[{git}]['git']` for certain errors to avoid PHP undefined index warning
 * update calls for Bitbucket Server REST API v7, thanks @Idealien
 * explicitly ignore themes without a root `style.css` file to avoid PHP warnings, thanks @cliffordp
+* move `Settings` action link to front
 
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
