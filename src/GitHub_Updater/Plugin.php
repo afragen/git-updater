@@ -117,7 +117,7 @@ class Plugin {
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
 			$all_headers        = $this->get_headers( 'plugin' );
-			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
+			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'plugin' );
 		}
 
 		$plugins = array_filter(

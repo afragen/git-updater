@@ -132,7 +132,7 @@ class Theme {
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
 			$all_headers        = $this->get_headers( 'theme' );
-			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
+			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'theme' );
 		}
 
 		$themes = array_filter(
