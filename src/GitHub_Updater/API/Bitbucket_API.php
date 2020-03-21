@@ -432,8 +432,9 @@ class Bitbucket_API extends API implements API_Interface {
 		$setting_field['section']         = 'bitbucket_id';
 		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
-			'token_callback_checkbox',
+			'token_callback_text',
 		];
+		$setting_field['placeholder']     = true;
 
 		return $setting_field;
 	}
@@ -454,7 +455,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Print the Bitbucket repo Settings text.
 	 */
 	public function print_section_bitbucket_info() {
-		esc_html_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+		esc_html_e( 'Enter `username:password` if private repository. Don\'t forget the colon.', 'github-updater' );
 	}
 
 	/**

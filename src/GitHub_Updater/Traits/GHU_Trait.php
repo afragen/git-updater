@@ -243,7 +243,7 @@ trait GHU_Trait {
 		// Correctly account for dashicon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
-		$dot_org_master = ! $icon ? $repo->dot_org && 'master' === $repo->branch : true;
+		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && 'master' === $repo->branch : true;
 
 		$transient_key = 'plugin' === $type ? $repo->file : null;
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;

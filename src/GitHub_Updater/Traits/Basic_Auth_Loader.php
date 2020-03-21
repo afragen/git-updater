@@ -75,9 +75,10 @@ trait Basic_Auth_Loader {
 		if ( 'bitbucket' === $credentials['type'] ) {
 			$username = $credentials['username'];
 			$password = $credentials['password'];
+			$token    = null !== $credentials['token'] ? $credentials['token'] : "{$username}:{$password}";
 
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
+			$args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );
 		}
 		if ( null !== $credentials['token'] ) {
 			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
@@ -150,6 +151,7 @@ trait Basic_Auth_Loader {
 				$bitbucket_org = in_array( $headers['host'], $hosts, true );
 				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
 				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
+				$token         = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
 				$type          = 'bitbucket';
 				break;
 			case 'github':
@@ -177,6 +179,7 @@ trait Basic_Auth_Loader {
 			$credentials['isset']    = true;
 			$credentials['private']  = $this->is_repo_private( $url );
 			$credentials['type']     = $type;
+			$credentials['token']    = $token;
 		}
 
 		if ( 'github' === $type || 'gitlab' === $type || 'gitea' === $type ) {

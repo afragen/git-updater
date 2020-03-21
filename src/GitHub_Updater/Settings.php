@@ -423,9 +423,10 @@ class Settings {
 				$setting_field['page'],
 				$setting_field['section'],
 				[
-					'id'    => $setting_field['callback'],
-					'token' => true,
-					'title' => $setting_field['title'],
+					'id'          => $setting_field['callback'],
+					'token'       => true,
+					'title'       => $setting_field['title'],
+					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
 				]
 			);
 		}
@@ -603,11 +604,12 @@ class Settings {
 	 * @param array $args
 	 */
 	public function token_callback_text( $args ) {
-		$name = isset( self::$options[ $args['id'] ] ) ? esc_attr( self::$options[ $args['id'] ] ) : '';
-		$type = isset( $args['token'] ) ? 'password' : 'text';
+		$name        = isset( self::$options[ $args['id'] ] ) ? esc_attr( self::$options[ $args['id'] ] ) : '';
+		$type        = isset( $args['token'] ) ? 'password' : 'text';
+		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
+			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
 		</label>
 		<?php
 	}
