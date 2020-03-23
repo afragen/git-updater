@@ -113,8 +113,10 @@ trait Basic_Auth_Loader {
 	private function get_credentials( $url ) {
 		$options = get_site_option( 'github_updater' );
 		$headers = parse_url( $url );
+		// TODO: remove after debugging.
 		if ( ! isset( $headers['host'] ) ) {
-			error_log( $url );}
+			error_log( $url );
+		}
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
