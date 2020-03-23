@@ -445,6 +445,7 @@ class Settings {
 	 * @param array $ghu_tokens
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
+		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
 		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
 		$always_unset    = [
@@ -455,22 +456,13 @@ class Settings {
 		];
 
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[
-					'bitbucket_username',
-					'bitbucket_password',
-				]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bitbucket_access_token' ] );
 		}
 
 		if ( in_array( 'bbserver', $running_servers, true ) ) {
 			$always_unset = array_merge(
 				$always_unset,
-				[
-					'bitbucket_server_username',
-					'bitbucket_server_password',
-				]
+				[ 'bbserver_access_token' ]
 			);
 		}
 

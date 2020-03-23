@@ -72,17 +72,13 @@ trait Basic_Auth_Loader {
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
 		}
-		if ( 'bitbucket' === $credentials['type'] ) {
-			$username = $credentials['username'];
-			$password = $credentials['password'];
-			$token    = null !== $credentials['token'] ? $credentials['token'] : "{$username}:{$password}";
-
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );
-		}
 		if ( null !== $credentials['token'] ) {
 			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+			}
+			if ( 'bitbucket' === $credentials['type'] ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				$args['headers']['Authorization'] = 'Basic ' . base64_encode( $credentials['token'] );
 			}
 			if ( 'gitlab' === $credentials['type'] ) {
 				// https://gitlab.com/gitlab-org/gitlab-foss/issues/63438.
@@ -120,8 +116,6 @@ trait Basic_Auth_Loader {
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
-			'username'      => null,
-			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
 			'private'       => false,
@@ -150,11 +144,13 @@ trait Basic_Auth_Loader {
 			case 'bitbucket':
 			case $type instanceof Bitbucket_API:
 			case $type instanceof Bitbucket_Server_API:
-				$bitbucket_org = in_array( $headers['host'], $hosts, true );
-				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
-				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
-				$token         = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
-				$type          = 'bitbucket';
+				$bitbucket_org   = in_array( $headers['host'], $hosts, true );
+				$bitbucket_token = ! empty( $options['bitbucket_access_token'] ) ? $options['bitbucket_access_token'] : null;
+				$bbserver_token  = ! empty( $options['bbserver_access_token'] ) ? $options['bbserver_access_token'] : null;
+				$token           = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
+				$token           = null === $token && $bitbucket_org ? $bitbucket_token : $token;
+				$token           = null === $token && ! $bitbucket_org ? $bbserver_token : $token;
+				$type            = 'bitbucket';
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
@@ -175,22 +171,11 @@ trait Basic_Auth_Loader {
 				$type  = 'gitea';
 		}
 
-		if ( 'bitbucket' === $type && isset( $options[ $username_key ], $options[ $password_key ] ) ) {
-			$credentials['username'] = $options[ $username_key ];
-			$credentials['password'] = $options[ $password_key ];
-			$credentials['isset']    = true;
-			$credentials['private']  = $this->is_repo_private( $url );
-			$credentials['type']     = $type;
-			$credentials['token']    = $token;
-		}
-
-		if ( 'github' === $type || 'gitlab' === $type || 'gitea' === $type ) {
-			$credentials['isset']      = true;
-			$credentials['private']    = $this->is_repo_private( $url );
-			$credentials['type']       = $type;
-			$credentials['token']      = isset( $token ) ? $token : null;
-			$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
-		}
+		$credentials['isset']      = true;
+		$credentials['private']    = $this->is_repo_private( $url );
+		$credentials['type']       = $type;
+		$credentials['token']      = isset( $token ) ? $token : null;
+		$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
 
 		return $credentials;
 	}

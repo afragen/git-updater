@@ -6,6 +6,7 @@
 * explicitly ignore themes without a root `style.css` file to avoid PHP warnings, thanks @cliffordp
 * move `Settings` action link to front
 * add Bitbucket pseudo-token, `username:password` for some private repos
+* Bitbucket credentials will automatically be converted to pseudo-tokens
 
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`

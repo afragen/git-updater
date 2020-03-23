@@ -343,7 +343,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
 			'bitbucket_server_user',
-			[ 'id' => 'bitbucket_server_username' ]
+			[
+				'id'    => 'bitbucket_server_username',
+				'class' => empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
+			]
 		);
 
 		add_settings_field(
@@ -355,6 +358,21 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			[
 				'id'    => 'bitbucket_server_password',
 				'token' => true,
+				'class' => empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
+			]
+		);
+
+		add_settings_field(
+			'bbserver_token',
+			esc_html__( 'Bitbucket Server Access Token', 'github-updater' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_user',
+			[
+				'id'          => 'bbserver_access_token',
+				'token'       => true,
+				'placeholder' => true,
+				'class'       => ! empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
 			]
 		);
 
@@ -383,6 +401,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			Singleton::get_instance( 'Settings', $this ),
 			'token_callback_checkbox',
 		];
+		$setting_field['placeholder']     = true;
 
 		return $setting_field;
 	}
@@ -430,14 +449,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$install['download_link']
 			);
 
-			if ( isset( $install['is_private'] ) ) {
-				$install['options'][ $install['repo'] ] = 1;
-			}
-			if ( ! empty( $install['bitbucket_username'] ) ) {
-				$install['options']['bitbucket_server_username'] = $install['bitbucket_username'];
-			}
-			if ( ! empty( $install['bitbucket_password'] ) ) {
-				$install['options']['bitbucket_server_password'] = $install['bitbucket_password'];
+			if ( ! empty( $install['bitbucket_username'] ) && ! empty( $install['bitbucket_password'] ) ) {
+				$install['options'][ $install['repo'] ] = "{$install['bitbucket_username']}:{$install['bitbucket_password']}";
 			}
 		}
 
