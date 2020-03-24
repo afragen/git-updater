@@ -54,7 +54,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * [--token=<access_token>]
 	 * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-	 * : Bitbucket pseudo-token in format `username:password`
+	 * Bitbucket pseudo-token in format `username:password`
 	 *
 	 * [--slug=<slug>]
 	 * : Optional string indicating the plugin slug
@@ -121,7 +121,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * [--token=<access_token>]
 	 * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-	 * : Bitbucket pseudo-token in format `username:password`
+	 * Bitbucket pseudo-token in format `username:password`
 	 *
 	 * [--slug=<slug>]
 	 * : Optional string indicating the theme slug
