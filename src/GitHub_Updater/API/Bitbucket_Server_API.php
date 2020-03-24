@@ -331,7 +331,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function add_settings( $auth_required ) {
 		add_settings_section(
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
 			[ $this, 'print_section_bitbucket_username' ],
 			'github_updater_bbserver_install_settings'
@@ -342,7 +342,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			[
 				'id'    => 'bitbucket_server_username',
 				'class' => empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
@@ -354,7 +354,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			[
 				'id'    => 'bitbucket_server_password',
 				'token' => true,
@@ -364,10 +364,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		add_settings_field(
 			'bbserver_token',
-			esc_html__( 'Bitbucket Server Access Token', 'github-updater' ),
+			esc_html__( 'Bitbucket Server Pseudo-Token', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			[
 				'id'          => 'bbserver_access_token',
 				'token'       => true,

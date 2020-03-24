@@ -361,9 +361,9 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	public function add_settings( $auth_required ) {
 		add_settings_section(
-			'bitbucket_user',
-			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			[ $this, 'print_section_bitbucket_username' ],
+			'bitbucket_token',
+			esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
+			[ $this, 'print_section_bitbucket_token' ],
 			'github_updater_bitbucket_install_settings'
 		);
 
@@ -372,7 +372,7 @@ class Bitbucket_API extends API implements API_Interface {
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
+			'bitbucket_token',
 			[
 				'id'    => 'bitbucket_username',
 				'class' => empty( static::$options['bitbucket_access_token'] ) ? '' : 'hidden',
@@ -384,7 +384,7 @@ class Bitbucket_API extends API implements API_Interface {
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
+			'bitbucket_token',
 			[
 				'id'    => 'bitbucket_password',
 				'token' => true,
@@ -394,10 +394,10 @@ class Bitbucket_API extends API implements API_Interface {
 
 		add_settings_field(
 			'bitbucket_token',
-			esc_html__( 'Bitbucket Access Token', 'github-updater' ),
+			esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
+			'bitbucket_token',
 			[
 				'id'          => 'bitbucket_access_token',
 				'token'       => true,
@@ -458,8 +458,8 @@ class Bitbucket_API extends API implements API_Interface {
 	/**
 	 * Print the Bitbucket user/pass Settings text.
 	 */
-	public function print_section_bitbucket_username() {
-		esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-access token.', 'github-updater' );
+	public function print_section_bitbucket_token() {
+		esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token.', 'github-updater' );
 	}
 
 	/**
