@@ -458,12 +458,8 @@ class Settings {
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
 			$always_unset = array_merge( $always_unset, [ 'bitbucket_access_token' ] );
 		}
-
 		if ( in_array( 'bbserver', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[ 'bbserver_access_token' ]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bbserver_access_token' ] );
 		}
 
 		array_map(
