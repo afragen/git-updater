@@ -37,7 +37,7 @@ trait Basic_Auth_Loader {
 	private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
 
 	/**
-	 * Load hooks for Bitbucket authentication headers.
+	 * Load hooks for authentication headers.
 	 *
 	 * @access public
 	 */
@@ -47,7 +47,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Remove hooks for Bitbucket authentication headers.
+	 * Remove hooks for authentication headers.
 	 *
 	 * @access public
 	 */
@@ -58,7 +58,6 @@ trait Basic_Auth_Loader {
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook.
-	 * Bitbucket private repositories only.
 	 *
 	 * @access public
 	 *
@@ -98,7 +97,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get credentials (username/password) for Basic Authentication.
+	 * Get credentials for authentication headers.
 	 *
 	 * @access private
 	 *
