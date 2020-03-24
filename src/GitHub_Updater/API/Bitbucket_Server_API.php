@@ -427,7 +427,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$bitbucket_org = true;
+		$bitbucket_org                    = true;
+		$options['bbserver_access_token'] = isset( static::$options['bbserver_access_token'] ) ? static::$options['bbserver_access_token'] : null;
 
 		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://bitbucket.org';
@@ -451,6 +452,25 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 			if ( ! empty( $install['bitbucket_username'] ) && ! empty( $install['bitbucket_password'] ) ) {
 				$install['options'][ $install['repo'] ] = "{$install['bitbucket_username']}:{$install['bitbucket_password']}";
+			}
+
+			/*
+			* Add/Save access token if present.
+			*/
+			if ( ! empty( $install['bitbucket_access_token'] ) ) {
+				$install['options'][ $install['repo'] ] = $install['bitbucket_access_token'];
+				if ( ! $bitbucket_org ) {
+					$install['options']['bitbucket_access_token'] = $install['bitbucket_access_token'];
+				}
+			}
+			if ( ! $bitbucket_org ) {
+				$token = ! empty( $install['options']['bitbucket_access_token'] )
+				? $install['options']['bitbucket_access_token']
+				: $options['bbserver_access_token'];
+			}
+
+			if ( ! empty( static::$options['bbserver_access_token'] ) ) {
+				unset( $install['options']['bitbucket_access_token'] );
 			}
 		}
 

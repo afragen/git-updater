@@ -7,6 +7,7 @@
 * move `Settings` action link to front
 * add Bitbucket pseudo-token, `username:password` for some private repos
 * Bitbucket credentials will automatically be converted to pseudo-tokens
+* update WP-CLI integration for Bitbucket pseudo-token
 
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
