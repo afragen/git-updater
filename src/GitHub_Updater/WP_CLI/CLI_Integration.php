@@ -102,7 +102,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( 'Plugin %s installed.', "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Plugin %s installed.', "'{$slug}'" ) );
 	}
 
 	/**

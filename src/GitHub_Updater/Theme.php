@@ -120,8 +120,8 @@ class Theme {
 
 		$paths = array_map(
 			function ( $theme ) {
-				$filepath = \file_exists( "$theme->theme_root/$theme->stylesheet/style.css" )
-					? "$theme->theme_root/$theme->stylesheet/style.css"
+				$filepath = \file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
+					? "{$theme->theme_root}/{$theme->stylesheet}/style.css"
 					: null;
 				return $filepath;
 			},

@@ -669,12 +669,12 @@ trait GHU_Trait {
 		$source = untrailingslashit( $source );
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source/$file" !== $destination ) {
-				if ( is_dir( "$source/$file" ) ) {
-					$this->move( "$source/$file", "$destination/$file" );
+			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
+				if ( is_dir( "{$source}/{$file}" ) ) {
+					$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
 				} else {
-					copy( "$source/$file", "$destination/$file" );
-					unlink( "$source/$file" );
+					copy( "{$source}/{$file}", "{$destination}/{$file}" );
+					unlink( "{$source}/{$file}" );
 				}
 			}
 		}
