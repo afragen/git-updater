@@ -650,6 +650,9 @@ class Theme {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
+			if ( ! property_exists( $theme, 'remote_version' ) ) {
+				continue;
+			}
 			$response = [
 				'theme'       => $theme->slug,
 				'new_version' => $theme->remote_version,
