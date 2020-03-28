@@ -429,6 +429,7 @@ class Plugin {
 
 				$transient->response[ $plugin->file ] = (object) $response;
 			} else {
+				// Add repo without update to $transient->no_update for 'View details' link.
 				if ( ! isset( $transient->no_update[ $plugin->file ] ) ) {
 					$transient->no_update[ $plugin->file ] = (object) $response;
 				}
