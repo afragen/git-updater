@@ -592,7 +592,8 @@ class Settings {
 	 * @param array $args
 	 */
 	public function token_callback_text( $args ) {
-		$name        = isset( self::$options[ $args['id'] ] ) ? esc_attr( self::$options[ $args['id'] ] ) : '';
+		$options     = $this->get_class_vars( 'Base', 'options' );
+		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
 		$type        = isset( $args['token'] ) ? 'password' : 'text';
 		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
