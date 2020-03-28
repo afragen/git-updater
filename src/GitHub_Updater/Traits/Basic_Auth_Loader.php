@@ -117,7 +117,6 @@ trait Basic_Auth_Loader {
 		$credentials  = [
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
-			'private'       => false,
 			'token'         => null,
 			'type'          => null,
 			'enterprise'    => null,
@@ -171,7 +170,6 @@ trait Basic_Auth_Loader {
 		}
 
 		$credentials['isset']      = true;
-		$credentials['private']    = $this->is_repo_private( $url );
 		$credentials['type']       = $type;
 		$credentials['token']      = isset( $token ) ? $token : null;
 		$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
@@ -267,47 +265,6 @@ trait Basic_Auth_Loader {
 			: $type;
 
 		return $type;
-	}
-
-	/**
-	 * Determine if repo is private.
-	 *
-	 * @access private
-	 *
-	 * @param string $url The URL.
-	 *
-	 * @return bool true if private
-	 */
-	private function is_repo_private( $url ) {
-		// Used when updating.
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
-
-		if ( $slug && array_key_exists( $slug, static::$options )
-			&& 1 === (int) static::$options[ $slug ]
-			&& false !== stripos( $url, $slug )
-		) {
-			return true;
-		}
-
-		// Used for remote install tab.
-		if ( isset( $_POST['option_page'], $_POST['is_private'] )
-			&& 'github_updater_install' === $_POST['option_page']
-		) {
-			return true;
-		}
-
-		// Used for refreshing cache.
-		foreach ( array_keys( static::$options ) as $option ) {
-			if ( 1 === (int) static::$options[ $option ]
-				&& false !== strpos( $url, $option )
-			) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
