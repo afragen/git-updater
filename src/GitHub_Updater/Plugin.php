@@ -274,7 +274,6 @@ class Plugin {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
 	}
@@ -327,55 +326,6 @@ class Plugin {
 		echo $enclosure['close'];
 
 		return true;
-	}
-
-	/**
-	 * Add 'View details' link to plugins page.
-	 *
-	 * @param array  $links
-	 * @param string $file
-	 *
-	 * @return array $links
-	 */
-	public function plugin_row_meta( $links, $file ) {
-		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
-		$repo          = dirname( $file );
-
-		/*
-		 * Sanity check for some commercial plugins.
-		 */
-		if ( ! isset( $links[2] ) ) {
-			return $links;
-		}
-
-		preg_match( $regex_pattern, $links[2], $matches );
-
-		/*
-		 * Remove 'Visit plugin site' link in favor or 'View details' link.
-		 */
-		if ( array_key_exists( $repo, $this->config ) ) {
-			if ( null !== $repo ) {
-				unset( $links[2] );
-				$links[] = sprintf(
-					'<a href="%s" class="thickbox">%s</a>',
-					esc_url(
-						add_query_arg(
-							[
-								'tab'       => 'plugin-information',
-								'plugin'    => $repo,
-								'TB_iframe' => 'true',
-								'width'     => 600,
-								'height'    => 550,
-							],
-							network_admin_url( 'plugin-install.php' )
-						)
-					),
-					esc_html__( 'View details', 'github-updater' )
-				);
-			}
-		}
-
-		return $links;
 	}
 
 	/**
@@ -446,20 +396,20 @@ class Plugin {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			$response = [
+				'slug'         => $plugin->slug,
+				'plugin'       => $plugin->file,
+				'new_version'  => $plugin->remote_version,
+				'url'          => $plugin->uri,
+				'package'      => $plugin->download_link,
+				'icons'        => $plugin->icons,
+				'tested'       => $plugin->tested,
+				'requires_php' => $plugin->requires_php,
+				'branch'       => $plugin->branch,
+				'branches'     => array_keys( $plugin->branches ),
+				'type'         => "{$plugin->git}-{$plugin->type}",
+			];
 			if ( $this->can_update_repo( $plugin ) ) {
-				$response = [
-					'slug'         => $plugin->slug,
-					'plugin'       => $plugin->file,
-					'new_version'  => $plugin->remote_version,
-					'url'          => $plugin->uri,
-					'package'      => $plugin->download_link,
-					'icons'        => $plugin->icons,
-					'tested'       => $plugin->tested,
-					'requires_php' => $plugin->requires_php,
-					'branch'       => $plugin->branch,
-					'branches'     => array_keys( $plugin->branches ),
-					'type'         => "{$plugin->git}-{$plugin->type}",
-				];
 
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'], $_GET['plugin'] ) &&
@@ -476,6 +426,10 @@ class Plugin {
 
 				$transient->response[ $plugin->file ] = (object) $response;
 			} else {
+				if ( ! isset( $transient->no_update[ $plugin->file ] ) ) {
+					$transient->no_update[ $plugin->file ] = (object) $response;
+				}
+
 				/**
 				 * Filter to return array of overrides to dot org.
 				 *

@@ -650,16 +650,16 @@ class Theme {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
+			$response = [
+				'theme'       => $theme->slug,
+				'new_version' => $theme->remote_version,
+				'url'         => $theme->uri,
+				'package'     => $theme->download_link,
+				'branch'      => $theme->branch,
+				'branches'    => array_keys( $theme->branches ),
+				'type'        => "{$theme->git}-{$theme->type}",
+			];
 			if ( $this->can_update_repo( $theme ) ) {
-				$response = [
-					'theme'       => $theme->slug,
-					'new_version' => $theme->remote_version,
-					'url'         => $theme->uri,
-					'package'     => $theme->download_link,
-					'branch'      => $theme->branch,
-					'branches'    => array_keys( $theme->branches ),
-					'type'        => "{$theme->git}-{$theme->type}",
-				];
 
 				// Skip on RESTful updating.
 				if ( isset( $_GET['action'], $_GET['theme'] ) &&
@@ -676,6 +676,11 @@ class Theme {
 
 				$transient->response[ $theme->slug ] = $response;
 			} else {
+				// Has no current effect, but someday maybe there will be parity.
+				if ( ! isset( $transient->no_update[ $theme->slug ] ) ) {
+					$transient->no_update[ $theme->slug ] = $response;
+				}
+
 				/**
 				 * Filter to return array of overrides to dot org.
 				 *
