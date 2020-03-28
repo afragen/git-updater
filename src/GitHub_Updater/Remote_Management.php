@@ -96,8 +96,8 @@ class Remote_Management {
 	 * @param array $post_data $_POST data.
 	 */
 	public function save_settings( $post_data ) {
-		if ( isset( $post_data['option_page'] ) &&
-			'github_updater_remote_management' === $post_data['option_page']
+		if ( isset( $post_data['option_page'] )
+			&& 'github_updater_remote_management' === $post_data['option_page']
 		) {
 			$options = isset( $post_data['github_updater_remote_management'] )
 				? $post_data['github_updater_remote_management']
@@ -270,8 +270,8 @@ class Remote_Management {
 	 * @return bool
 	 */
 	public function reset_api_key() {
-		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
-			'github_updater_remote_management' === $_REQUEST['tab']
+		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] )
+			&& 'github_updater_remote_management' === $_REQUEST['tab']
 		) {
 			$_POST                     = $_REQUEST;
 			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];

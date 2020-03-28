@@ -247,8 +247,8 @@ class Plugin {
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
-			if ( ! $plugin->release_asset && 'init' === current_filter() &&
-				( ! is_multisite() || is_network_admin() )
+			if ( ! $plugin->release_asset && 'init' === current_filter()
+				&& ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
 			}
@@ -257,9 +257,9 @@ class Plugin {
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
 		if ( $schedule_event && ! empty( $plugins ) ) {
-			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
-			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
-			! apply_filters( 'github_updater_disable_wpcron', false )
+			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' )
+			&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' )
+			&& ! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
 			}
@@ -415,9 +415,9 @@ class Plugin {
 			if ( $this->can_update_repo( $plugin ) ) {
 
 				// Skip on RESTful updating.
-				if ( isset( $_GET['action'], $_GET['plugin'] ) &&
-					'github-updater-update' === $_GET['action'] &&
-					$response['slug'] === $_GET['plugin']
+				if ( isset( $_GET['action'], $_GET['plugin'] )
+					&& 'github-updater-update' === $_GET['action']
+					&& $response['slug'] === $_GET['plugin']
 				) {
 					continue;
 				}

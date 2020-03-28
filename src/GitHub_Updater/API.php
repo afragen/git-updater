@@ -510,8 +510,8 @@ class API {
 			return $response;
 		}
 
-		if ( is_dir( $repo->local_path ) &&
-			file_exists( $repo->local_path . $file )
+		if ( is_dir( $repo->local_path )
+			&& file_exists( $repo->local_path . $file )
 		) {
 			$response = file_get_contents( $repo->local_path . $file );
 		}

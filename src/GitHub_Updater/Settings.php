@@ -625,8 +625,8 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) &&
-			'github_updater' === $_POST['option_page']
+		if ( isset( $_POST['option_page'] )
+			&& 'github_updater' === $_POST['option_page']
 		) {
 			$options = $this->filter_options();
 			update_site_option( 'github_updater', $this->sanitize( $options ) );
@@ -683,8 +683,8 @@ class Settings {
 		 */
 		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
-		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-			( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
+		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] )
+			&& ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
 		) {
 			$update = true;
 		}

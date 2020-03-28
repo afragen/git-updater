@@ -261,8 +261,8 @@ trait Basic_Auth_Loader {
 		}
 
 		// Set for Remote Install.
-		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
-				false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
+		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] )
+				&& false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
 			? $_POST['github_updater_api']
 			: $type;
 
@@ -284,24 +284,24 @@ trait Basic_Auth_Loader {
 		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
 
-		if ( $slug && array_key_exists( $slug, static::$options ) &&
-			1 === (int) static::$options[ $slug ] &&
-			false !== stripos( $url, $slug )
+		if ( $slug && array_key_exists( $slug, static::$options )
+			&& 1 === (int) static::$options[ $slug ]
+			&& false !== stripos( $url, $slug )
 		) {
 			return true;
 		}
 
 		// Used for remote install tab.
-		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-			'github_updater_install' === $_POST['option_page']
+		if ( isset( $_POST['option_page'], $_POST['is_private'] )
+			&& 'github_updater_install' === $_POST['option_page']
 		) {
 			return true;
 		}
 
 		// Used for refreshing cache.
 		foreach ( array_keys( static::$options ) as $option ) {
-			if ( 1 === (int) static::$options[ $option ] &&
-				false !== strpos( $url, $option )
+			if ( 1 === (int) static::$options[ $option ]
+				&& false !== strpos( $url, $option )
 			) {
 				return true;
 			}

@@ -132,8 +132,8 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! apply_filters( 'github_updater_hide_settings', false ) &&
-			Singleton::get_instance( 'Init', $this )->can_update()
+		if ( ! apply_filters( 'github_updater_hide_settings', false )
+			&& Singleton::get_instance( 'Init', $this )->can_update()
 		) {
 			Singleton::get_instance( 'Settings', $this )->run();
 		}
