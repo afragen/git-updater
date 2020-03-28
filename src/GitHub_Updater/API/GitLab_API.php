@@ -285,6 +285,7 @@ class GitLab_API extends API implements API_Interface {
 			}
 
 			if ( $response && $this->type->slug === $response->path ) {
+				// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 				// $id = $response->id;
 				$this->set_repo_cache( 'project_id', $id );
 				$this->set_repo_cache( 'project', $response );

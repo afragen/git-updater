@@ -228,6 +228,7 @@ class CLI_Integration extends WP_CLI_Command {
  */
 require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
+// phpcs:disable
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */

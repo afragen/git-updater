@@ -350,6 +350,7 @@ class Theme {
 			'strong'  => [],
 		];
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		// $wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url       = esc_attr(
 			add_query_arg(
@@ -408,6 +409,7 @@ class Theme {
 			}
 			echo $enclosure['close'];
 
+			// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( "in_theme_update_message-$theme_key", $theme, $response );
 		}
 	}
