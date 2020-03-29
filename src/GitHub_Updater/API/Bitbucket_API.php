@@ -570,7 +570,7 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param array $options Array of site options.
 	 * @return void
 	 */
-	public function convert_user_pass_to_token( $options = null ) {
+	private function convert_user_pass_to_token( $options = null ) {
 		$options         = null === $options ? static::$options : $options;
 		$save_options    = false;
 		$bitbucket_token = [];
