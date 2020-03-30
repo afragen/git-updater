@@ -279,7 +279,7 @@ class Install {
 				$_POST['github_access_token'] = $config['private'] ?: null;
 				break;
 			case 'bitbucket':
-				$_POST['is_private'] = $config['private'] ? '1' : null;
+				$_POST['bitbucket_access_token'] = $config['private'] ?: null;
 				break;
 			case 'gitlab':
 				$_POST['gitlab_access_token'] = $config['private'] ?: null;

@@ -46,9 +46,9 @@ class Messages {
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if (
-			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
-			in_array( $pagenow, $settings_pages, true ) ) ||
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
+			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] )
+			&& in_array( $pagenow, $settings_pages, true ) )
+			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
 		) {
 			return false;
 		}

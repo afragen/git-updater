@@ -96,8 +96,8 @@ class Remote_Management {
 	 * @param array $post_data $_POST data.
 	 */
 	public function save_settings( $post_data ) {
-		if ( isset( $post_data['option_page'] ) &&
-			'github_updater_remote_management' === $post_data['option_page']
+		if ( isset( $post_data['option_page'] )
+			&& 'github_updater_remote_management' === $post_data['option_page']
 		) {
 			$options = isset( $post_data['github_updater_remote_management'] )
 				? $post_data['github_updater_remote_management']
@@ -148,11 +148,11 @@ class Remote_Management {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 			<?php
-				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
+				// phpcs:disable
 				// settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
-				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 				// submit_button();
+				// phpcs:enable
 			?>
 			</form>
 			<?php
@@ -182,6 +182,7 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
+		// phpcs:disable
 		// @deprecated 9.1.0
 		// foreach ( self::$remote_management as $id => $name ) {
 		// add_settings_field(
@@ -196,6 +197,7 @@ class Remote_Management {
 		// )
 		// );
 		// }
+		// phpcs:enable
 	}
 
 	/**
@@ -226,8 +228,10 @@ class Remote_Management {
 
 		echo '<p>';
 		printf(
-			/* translators: %1: home URL, %2: REST API key */
-			__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' ),
+			wp_kses_post(
+				/* translators: %1: home URL, %2: REST API key */
+				__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' )
+			),
 			'<span style="font-family:monospace;">' . home_url() . '</span>',
 			'<span style="font-family:monospace;">' . self::$api_key . '</span>'
 		);
@@ -270,8 +274,8 @@ class Remote_Management {
 	 * @return bool
 	 */
 	public function reset_api_key() {
-		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
-			'github_updater_remote_management' === $_REQUEST['tab']
+		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] )
+			&& 'github_updater_remote_management' === $_REQUEST['tab']
 		) {
 			$_POST                     = $_REQUEST;
 			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];

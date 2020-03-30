@@ -120,8 +120,8 @@ class Theme {
 
 		$paths = array_map(
 			function ( $theme ) {
-				$filepath = \file_exists( "$theme->theme_root/$theme->stylesheet/style.css" )
-					? "$theme->theme_root/$theme->stylesheet/style.css"
+				$filepath = \file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
+					? "{$theme->theme_root}/{$theme->stylesheet}/style.css"
 					: null;
 				return $filepath;
 			},
@@ -257,9 +257,9 @@ class Theme {
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
 		if ( $schedule_event && ! empty( $themes ) ) {
-			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' ) &&
-				! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' ) &&
-				! apply_filters( 'github_updater_disable_wpcron', false )
+			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' )
+				&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' )
+				&& ! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_theme', [ $themes ] );
 			}
@@ -350,6 +350,7 @@ class Theme {
 			'strong'  => [],
 		];
 		$theme_name         = wp_kses( $theme['Name'], $themes_allowedtags );
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		// $wp_list_table      = _get_list_table( 'WP_MS_Themes_List_Table' );
 		$details_url       = esc_attr(
 			add_query_arg(
@@ -408,6 +409,7 @@ class Theme {
 			}
 			echo $enclosure['close'];
 
+			// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( "in_theme_update_message-$theme_key", $theme, $response );
 		}
 	}
@@ -662,9 +664,9 @@ class Theme {
 				];
 
 				// Skip on RESTful updating.
-				if ( isset( $_GET['action'], $_GET['theme'] ) &&
-					'github-updater-update' === $_GET['action'] &&
-					$response['theme'] === $_GET['theme']
+				if ( isset( $_GET['action'], $_GET['theme'] )
+					&& 'github-updater-update' === $_GET['action']
+					&& $response['theme'] === $_GET['theme']
 				) {
 					continue;
 				}

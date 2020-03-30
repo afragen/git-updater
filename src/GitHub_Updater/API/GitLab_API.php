@@ -60,9 +60,9 @@ class GitLab_API extends API implements API_Interface {
 			static::$options['gitlab_access_token'] = null;
 			$set_credentials                        = true;
 		}
-		if ( in_array( 'gitlabce', $running_servers, true ) ||
-			( empty( static::$options['gitlab_access_token'] ) &&
-			in_array( 'gitlab', $running_servers, true ) )
+		if ( in_array( 'gitlabce', $running_servers, true )
+			|| ( empty( static::$options['gitlab_access_token'] )
+			&& in_array( 'gitlab', $running_servers, true ) )
 		) {
 			$this->gitlab_error_notices();
 		}
@@ -285,6 +285,7 @@ class GitLab_API extends API implements API_Interface {
 			}
 
 			if ( $response && $this->type->slug === $response->path ) {
+				// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 				// $id = $response->id;
 				$this->set_repo_cache( 'project_id', $id );
 				$this->set_repo_cache( 'project', $response );
@@ -555,10 +556,10 @@ class GitLab_API extends API implements API_Interface {
 			}
 		}
 
-		if ( ( ! isset( $error_code['gitlab'] ) && $gitlab_error ) &&
-			( $auth_required['gitlab_enterprise'] ||
-			( empty( static::$options['gitlab_access_token'] ) &&
-				$auth_required['gitlab'] ) )
+		if ( ( ! isset( $error_code['gitlab'] ) && $gitlab_error )
+			&& ( $auth_required['gitlab_enterprise']
+			|| ( empty( static::$options['gitlab_access_token'] )
+				&& $auth_required['gitlab'] ) )
 		) {
 			self::$error_code['gitlab'] = [
 				'git'   => 'gitlab',

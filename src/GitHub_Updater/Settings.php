@@ -423,9 +423,10 @@ class Settings {
 				$setting_field['page'],
 				$setting_field['section'],
 				[
-					'id'    => $setting_field['callback'],
-					'token' => true,
-					'title' => $setting_field['title'],
+					'id'          => $setting_field['callback'],
+					'token'       => true,
+					'title'       => $setting_field['title'],
+					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
 				]
 			);
 		}
@@ -444,6 +445,7 @@ class Settings {
 	 * @param array $ghu_tokens
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
+		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
 		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
 		$always_unset    = [
@@ -454,23 +456,10 @@ class Settings {
 		];
 
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[
-					'bitbucket_username',
-					'bitbucket_password',
-				]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bitbucket_access_token' ] );
 		}
-
 		if ( in_array( 'bbserver', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[
-					'bitbucket_server_username',
-					'bitbucket_server_password',
-				]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bbserver_access_token' ] );
 		}
 
 		array_map(
@@ -603,11 +592,13 @@ class Settings {
 	 * @param array $args
 	 */
 	public function token_callback_text( $args ) {
-		$name = isset( self::$options[ $args['id'] ] ) ? esc_attr( self::$options[ $args['id'] ] ) : '';
-		$type = isset( $args['token'] ) ? 'password' : 'text';
+		$options     = $this->get_class_vars( 'Base', 'options' );
+		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
+		$type        = isset( $args['token'] ) ? 'password' : 'text';
+		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
+			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
 		</label>
 		<?php
 	}
@@ -634,8 +625,8 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) &&
-			'github_updater' === $_POST['option_page']
+		if ( isset( $_POST['option_page'] )
+			&& 'github_updater' === $_POST['option_page']
 		) {
 			$options = $this->filter_options();
 			update_site_option( 'github_updater', $this->sanitize( $options ) );
@@ -692,8 +683,8 @@ class Settings {
 		 */
 		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
-		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-			( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
+		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] )
+			&& ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
 		) {
 			$update = true;
 		}
