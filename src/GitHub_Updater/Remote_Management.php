@@ -69,7 +69,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( \rand(), true ) ) );
+			update_site_option( 'github_updater_api_key', md5( uniqid( \wp_rand(), true ) ) );
 		}
 	}
 
@@ -148,11 +148,9 @@ class Remote_Management {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 			<?php
-				// phpcs:disable
 				// settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
 				// submit_button();
-				// phpcs:enable
 			?>
 			</form>
 			<?php
@@ -182,7 +180,7 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
-		// phpcs:disable
+		// phpcs:ignore
 		// @deprecated 9.1.0
 		// foreach ( self::$remote_management as $id => $name ) {
 		// add_settings_field(
@@ -197,7 +195,6 @@ class Remote_Management {
 		// )
 		// );
 		// }
-		// phpcs:enable
 	}
 
 	/**
