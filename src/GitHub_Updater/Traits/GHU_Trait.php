@@ -204,7 +204,7 @@ trait GHU_Trait {
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
 		// phpcs:disable
-		$wpdb->query($wpdb->prepare($delete_string, [ '%ghu-%' ]));
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
 		// phpcs:enable
 
 		wp_cron();
