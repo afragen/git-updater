@@ -123,6 +123,7 @@ class Theme {
 				$filepath = \file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
 					? "{$theme->theme_root}/{$theme->stylesheet}/style.css"
 					: null;
+
 				return $filepath;
 			},
 			$themes
@@ -284,9 +285,9 @@ class Theme {
 	/**
 	 * Put changelog in themes_api, return WP.org data as appropriate.
 	 *
-	 * @param bool      $false
-	 * @param string    $action
-	 * @param \stdClass $response
+	 * @param bool      $false    Default false.
+	 * @param string    $action   The type of information being requested from the Theme Installation API.
+	 * @param \stdClass $response Theme API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -330,8 +331,8 @@ class Theme {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 * Display update details or rollback links for multisite installation.
 	 *
-	 * @param string $theme_key
-	 * @param array  $theme
+	 * @param string $theme_key Theme slug.
+	 * @param array  $theme     Array of theme data.
 	 *
 	 * @author Seth Carstens
 	 */
@@ -372,24 +373,24 @@ class Theme {
 
 		if ( isset( $current->response[ $theme_key ] ) ) {
 			$response = $current->response[ $theme_key ];
-			echo $enclosure['open'];
+			echo wp_kses_post( $enclosure['open'] );
 
 			printf(
 				/* translators: %s: theme name */
 				esc_html__( 'There is a new version of %s available.', 'github-updater' ),
-				$theme_name
+				esc_attr( $theme_name )
 			);
 			printf(
 				/* translators: %s: details URL, theme name */
 				' <a href="%s" class="thickbox" title="%s"> ',
-				$details_url,
-				$theme_name
+				esc_url( $details_url ),
+				esc_attr( $theme_name )
 			);
 			if ( empty( $response['package'] ) ) {
 				printf(
 					/* translators: %s: theme version */
 					esc_html__( 'View version %s details.', 'github-updater' ),
-					$response['new_version']
+					esc_attr( $response['new_version'] )
 				);
 				echo '</a>&nbsp;<em>';
 				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
@@ -398,16 +399,16 @@ class Theme {
 				printf(
 					/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
 					esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
-					$response['new_version'],
+					esc_attr( $response['new_version'] ),
 					'</a>',
 					sprintf(
 						/* translators: %s: theme name */
-						'<a href="' . $nonced_update_url . '" class="update-link" aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '">',
-						$theme_name
+						'<a href="' . esc_url( $nonced_update_url ) . '" class="update-link" aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '">',
+						esc_attr( $theme_name )
 					)
 				);
 			}
-			echo $enclosure['close'];
+			echo wp_kses_post( $enclosure['close'] );
 
 			// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( "in_theme_update_message-$theme_key", $theme, $response );
@@ -417,8 +418,8 @@ class Theme {
 	/**
 	 * Create branch switcher row for multisite installation.
 	 *
-	 * @param string $theme_key
-	 * @param array  $theme
+	 * @param string $theme_key Theme slug.
+	 * @param array  $theme     Array of theme data.
 	 *
 	 * @return bool
 	 */
@@ -451,9 +452,9 @@ class Theme {
 		/*
 		 * Create after_theme_row_
 		 */
-		echo $enclosure['open'];
+		echo wp_kses_post( $enclosure['open'] );
 		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-		echo $enclosure['close'];
+		echo wp_kses_post( $enclosure['close'] );
 
 		return true;
 	}
@@ -463,8 +464,8 @@ class Theme {
 	 *
 	 * @author @grappler
 	 *
-	 * @param string $theme_key
-	 * @param array  $theme
+	 * @param string $theme_key Theme slug.
+	 * @param array  $theme     Array of theme data.
 	 */
 	public function remove_after_theme_row( $theme_key, $theme ) {
 		$themes = $this->get_theme_configs();
@@ -479,7 +480,7 @@ class Theme {
 	 *
 	 * @author Seth Carstens
 	 *
-	 * @param array $prepared_themes
+	 * @param array $prepared_themes Array of prepared themes.
 	 *
 	 * @return mixed
 	 */
@@ -509,7 +510,7 @@ class Theme {
 	 *
 	 * @access protected
 	 *
-	 * @param \stdClass $theme
+	 * @param \stdClass $theme Theme object.
 	 *
 	 * @return string (content buffer)
 	 */
@@ -545,22 +546,22 @@ class Theme {
 					printf(
 						/* translators: %s: theme name */
 						esc_html__( 'There is a new version of %s available.', 'github-updater' ),
-						$theme->name
+						esc_attr( $theme->name )
 					);
 					printf(
 						' <a href="%s" class="thickbox open-plugin-details-modal" title="%s">',
-						$details_url,
+						esc_url( $details_url ),
 						esc_attr( $theme->name )
 					);
 					printf(
 						/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
 						esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
-						$theme->remote_version = isset( $theme->remote_version ) ? $theme->remote_version : null,
+						$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
 						'</a>',
 						sprintf(
 							/* translators: %s: theme name */
-							'<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . $theme->slug . '" href="' . $nonced_update_url . '">',
-							$theme->name
+							'<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . esc_attr( $theme->slug ) . '" href="' . esc_url( $nonced_update_url ) . '">',
+							esc_attr( $theme->name )
 						)
 					);
 					?>
@@ -577,7 +578,7 @@ class Theme {
 	 *
 	 * @access protected
 	 *
-	 * @param \stdClass $theme
+	 * @param \stdClass $theme Theme object.
 	 *
 	 * @return string
 	 */
@@ -597,7 +598,7 @@ class Theme {
 			printf(
 				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
-				$theme->branch,
+				esc_attr( $theme->branch ),
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 				'</a>.</p>'
 			);
@@ -608,7 +609,7 @@ class Theme {
 			<?php
 			if ( isset( $theme->branches ) ) {
 				foreach ( array_keys( $theme->branches ) as $branch ) {
-					echo '<option>' . $branch . '</option>';
+					echo '<option>' . esc_attr( $branch ) . '</option>';
 				}
 			}
 			if ( ! empty( $theme->rollback ) ) {
@@ -618,7 +619,7 @@ class Theme {
 				$rollback = array_splice( $rollback, 0, 4, true );
 				array_shift( $rollback ); // Dump current tag.
 				foreach ( $rollback as $tag ) {
-					echo '<option>' . $tag . '</option>';
+					echo '<option>' . esc_attr( $tag ) . '</option>';
 				}
 			}
 			if ( empty( $theme->rollback ) ) {
@@ -638,7 +639,7 @@ class Theme {
 	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param array $transient
+	 * @param array $transient Theme update transient.
 	 *
 	 * @return array|\stdClass
 	 */
@@ -664,12 +665,14 @@ class Theme {
 				];
 
 				// Skip on RESTful updating.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['theme'] )
 					&& 'github-updater-update' === $_GET['action']
 					&& $response['theme'] === $_GET['theme']
 				) {
 					continue;
 				}
+				// phpcs:enable
 
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
@@ -691,6 +694,7 @@ class Theme {
 			}
 
 			// Set transient for rollback.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
 				$transient->response[ $theme->slug ] = $this->base->set_rollback_transient( 'theme', $theme );

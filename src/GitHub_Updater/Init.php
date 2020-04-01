@@ -58,8 +58,9 @@ class Init {
 	 */
 	public function rename_on_activation() {
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
-		$slug       = isset( $_GET['plugin'] ) ? $_GET['plugin'] : false;
-		$exploded   = explode( '-', dirname( $slug ) );
+		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
+		$exploded = explode( '-', dirname( $slug ) );
 
 		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );

@@ -180,6 +180,8 @@ trait Basic_Auth_Loader {
 	/**
 	 * Get $slug for Basic Auth credentials.
 	 *
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
+	 *
 	 * @param array  $headers Array of headers from parse_url().
 	 * @param array  $repos   Array of repositories.
 	 * @param string $url     URL being called by API.
@@ -188,22 +190,21 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
-		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
+		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
+		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
 		// Some installers, like TGMPA, pass an array.
 		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
 
 		$slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
-		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
-				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
+				? array_map( 'dirname', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['plugins'] ) ) ) )
 				: [];
 			$themes      = isset( $_REQUEST['themes'] )
-				? explode( ',', $_REQUEST['themes'] )
+				? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['themes'] ) ) )
 				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
@@ -216,6 +217,7 @@ trait Basic_Auth_Loader {
 				$slug = array_pop( $slug );
 			}
 		}
+		// phpcs:enable
 
 		// In case $type set from Base::$caller doesn't match.
 		if ( ! $slug && isset( $headers['path'] ) ) {
@@ -259,10 +261,12 @@ trait Basic_Auth_Loader {
 		}
 
 		// Set for Remote Install.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] )
-				&& false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
-			? $_POST['github_updater_api']
+				&& false !== strpos( $url, basename( sanitize_file_name( wp_unslash( $_POST['github_updater_repo'] ) ) ) )
+			? sanitize_file_name( wp_unslash( $_POST['github_updater_api'] ) )
 			: $type;
+		// phpcs:enable
 
 		return $type;
 	}

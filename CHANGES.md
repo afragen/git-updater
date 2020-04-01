@@ -10,6 +10,7 @@
 * update WP-CLI integration for Bitbucket pseudo-token
 * add plugins without updates to `$transient->no_update` to add _View details_ link, thanks @robincornett
 * no longer need to test if private repo when sending auth headers, auth headers are always sent
+* lots of escaping/sanitization/phpcs ignoring
 
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`

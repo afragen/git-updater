@@ -281,8 +281,8 @@ class Plugin {
 	/**
 	 * Add branch switch row to plugins page.
 	 *
-	 * @param string    $plugin_file
-	 * @param \stdClass $plugin_data
+	 * @param string    $plugin_file Plugin file.
+	 * @param \stdClass $plugin_data Plugin repo data.
 	 *
 	 * @return bool
 	 */
@@ -321,9 +321,9 @@ class Plugin {
 		/*
 		 * Create after_plugin_row_
 		 */
-		echo $enclosure['open'];
+		echo wp_kses_post( $enclosure['open'] );
 		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-		echo $enclosure['close'];
+		echo wp_kses_post( $enclosure['close'] );
 
 		return true;
 	}
@@ -331,9 +331,9 @@ class Plugin {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param bool      $false
-	 * @param string    $action
-	 * @param \stdClass $response
+	 * @param bool      $false    Default false.
+	 * @param string    $action   The type of information being requested from the Plugin Installation API.
+	 * @param \stdClass $response Plugin API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -382,7 +382,7 @@ class Plugin {
 	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param \stdClass $transient
+	 * @param \stdClass $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */
@@ -413,14 +413,15 @@ class Plugin {
 				'type'         => "{$plugin->git}-{$plugin->type}",
 			];
 			if ( $this->can_update_repo( $plugin ) ) {
-
 				// Skip on RESTful updating.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['plugin'] )
 					&& 'github-updater-update' === $_GET['action']
 					&& $response['slug'] === $_GET['plugin']
 				) {
 					continue;
 				}
+				//phpcs:enable
 
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
@@ -447,6 +448,7 @@ class Plugin {
 			}
 
 			// Set transient on rollback.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
 				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );

@@ -229,8 +229,8 @@ class Remote_Management {
 				/* translators: %1: home URL, %2: REST API key */
 				__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' )
 			),
-			'<span style="font-family:monospace;">' . home_url() . '</span>',
-			'<span style="font-family:monospace;">' . self::$api_key . '</span>'
+			'<span style="font-family:monospace;">' . esc_url( home_url() ) . '</span>',
+			'<span style="font-family:monospace;">' . esc_attr( self::$api_key ) . '</span>'
 		);
 		echo '</p>';
 
@@ -241,7 +241,7 @@ class Remote_Management {
 				__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s', 'github-updater' )
 			),
 			'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
-			'<br><span style="font-family:monospace;">' . $api_url . '</span>'
+			'<br><span style="font-family:monospace;">' . esc_url( $api_url ) . '</span>'
 		);
 		echo '</p>';
 	}
@@ -259,7 +259,7 @@ class Remote_Management {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo $args['title']; ?>
+			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
 	}
@@ -268,14 +268,18 @@ class Remote_Management {
 	 * Reset RESTful API key.
 	 * Deleting site option will cause it to be re-created.
 	 *
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
+	 *
 	 * @return bool
 	 */
 	public function reset_api_key() {
 		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] )
-			&& 'github_updater_remote_management' === $_REQUEST['tab']
+			&& 'github_updater_remote_management' === sanitize_file_name( wp_unslash( $_REQUEST['tab'] ) )
 		) {
-			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
+			$_POST = $_REQUEST;
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
+			// phpcs:enable
 			delete_site_option( 'github_updater_api_key' );
 
 			return true;

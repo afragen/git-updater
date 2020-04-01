@@ -22,6 +22,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		return isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
 	}
 
