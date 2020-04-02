@@ -218,7 +218,7 @@ class Settings {
 		echo '<nav class="nav-tab-wrapper" aria-label="Secondary menu">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
-			echo '<a class="nav-tab ' . esc_attr( $active ) . '" href="?page=github-updater&tab=' . esc_attr( $key ) . '">' . esc_attr( $name ) . '</a>';
+			echo wp_kses_post( '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>' );
 		}
 		echo '</nav>';
 	}
@@ -234,7 +234,7 @@ class Settings {
 		echo '<nav class="nav-tab-wrapper" aria-label="Tertiary menu">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
-			echo '<a class="nav-tab ' . esc_attr( $active ) . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . esc_attr( $key ) . '">' . esc_attr( $name ) . '</a>';
+			echo wp_kses_post( '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>' );
 		}
 		echo '</nav>';
 	}
