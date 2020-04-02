@@ -268,11 +268,10 @@ class Remote_Management {
 	 * Reset RESTful API key.
 	 * Deleting site option will cause it to be re-created.
 	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
-	 *
 	 * @return bool
 	 */
 	public function reset_api_key() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] )
 			&& 'github_updater_remote_management' === sanitize_file_name( wp_unslash( $_REQUEST['tab'] ) )
 		) {

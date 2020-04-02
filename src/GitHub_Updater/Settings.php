@@ -296,9 +296,9 @@ class Settings {
 
 	/**
 	 * Display appropriate notice for Settings page actions.
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
 	 */
 	private function admin_page_notices() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
 				|| isset( $_GET['reset'] )
 				|| isset( $_GET['refresh_transients'] );
@@ -628,12 +628,11 @@ class Settings {
 	/**
 	 * Update settings for single site or network activated.
 	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Missing
-	 *
 	 * @link http://wordpress.stackexchange.com/questions/64968/settings-api-in-multisite-missing-update-message
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] )
 			&& 'github_updater' === $_POST['option_page']
 		) {
@@ -672,10 +671,9 @@ class Settings {
 			);
 		}
 
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		// phpcs:disable WordPress.Security.NonceVerification
-		$post_github_updater = isset( $_POST['github_updater'] ) ? $_POST['github_updater'] : [];
+		$post_github_updater = isset( $_POST['github_updater'] ) ? wp_unslash( $_POST['github_updater'] ) : [];
 		// phpcs:enable
 		$options = array_merge( $options, $post_github_updater );
 

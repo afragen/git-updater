@@ -180,8 +180,6 @@ trait Basic_Auth_Loader {
 	/**
 	 * Get $slug for Basic Auth credentials.
 	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
-	 *
 	 * @param array  $headers Array of headers from parse_url().
 	 * @param array  $repos   Array of repositories.
 	 * @param string $url     URL being called by API.
@@ -190,6 +188,7 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
