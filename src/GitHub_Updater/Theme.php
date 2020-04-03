@@ -428,6 +428,20 @@ class Theme {
 			return false;
 		}
 
+		/**
+		 * Filter to selectively turn off branch switching.
+		 * Useful for beta testing a specific branch when using release assets
+		 * for distribution.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param bool
+		 * @param string $theme_key Theme slug.
+		 */
+		if ( apply_filters( 'github_updater_hide_branch_switcher', false, $theme_key ) ) {
+			return false;
+		}
+
 		$enclosure         = $this->base->update_row_enclosure( $theme_key, 'theme', true );
 		$id                = $theme_key . '-id';
 		$branches          = isset( $this->config[ $theme_key ]->branches )
@@ -583,6 +597,20 @@ class Theme {
 	 * @return string
 	 */
 	protected function single_install_switcher( $theme ) {
+		/**
+		 * Filter to selectively turn off branch switching.
+		 * Useful for beta testing a specific branch when using release assets
+		 * for distribution.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param bool
+		 * @param string $theme->slug Theme slug.
+		 */
+		if ( apply_filters( 'github_updater_hide_branch_switcher', false, $theme->slug ) ) {
+			return false;
+		}
+
 		$nonced_update_url = wp_nonce_url(
 			$this->base->get_update_url( 'theme', 'upgrade-theme', $theme->slug ),
 			'upgrade-theme_' . $theme->slug

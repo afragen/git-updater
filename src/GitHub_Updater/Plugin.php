@@ -291,8 +291,23 @@ class Plugin {
 			return false;
 		}
 
+		$plugin = $this->get_repo_slugs( dirname( $plugin_file ), $this );
+
+		/**
+		 * Filter to selectively turn off branch switching.
+		 * Useful for beta testing a specific branch when using release assets
+		 * for distribution.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param bool
+		 * @param string $plugin['slug'] Plugin slug.
+		 */
+		if ( apply_filters( 'github_updater_hide_branch_switcher', false, $plugin['slug'] ) ) {
+			return false;
+		}
+
 		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ), $this );
 		$nonced_update_url = wp_nonce_url(
 			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
 			'upgrade-plugin_' . $plugin_file
