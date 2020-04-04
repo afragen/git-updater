@@ -35,18 +35,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Load Autoloader.
-if ( \file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
-}
-
-if ( class_exists( 'Fragen\GitHub_Updater\Bootstrap' ) ) {
-	( new Bootstrap( __FILE__ ) )->run();
-} else {
-	$message = sprintf(
-		/* translators: %s: documentation URL */
-		__( 'GitHub Updater is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'github_updater' ),
-		'https://github.com/afragen/github-updater/wiki/Installation'
-	);
-	wp_die( $message );
-}
+require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
+( new Bootstrap( __FILE__ ) )->check_dependencies();
+( new Bootstrap( __FILE__ ) )->run();
