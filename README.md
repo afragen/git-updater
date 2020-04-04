@@ -18,6 +18,8 @@ A simple plugin to enable automatic updates to your GitHub, Bitbucket, GitLab, o
 
 [Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
 
+[Install the latest version here.](https://github.com/afragen/github-updater/releases/latest)
+
 ## Description
 
 This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
