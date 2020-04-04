@@ -35,6 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// Check for autoload.php and run.
 require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
 ( new Bootstrap( __FILE__ ) )->check_dependencies();
 ( new Bootstrap( __FILE__ ) )->run();

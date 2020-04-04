@@ -56,6 +56,7 @@ class Bootstrap {
 
 	/**
 	 * Check composer dependencies.
+	 * Specifically check for composer's autoload.php.
 	 *
 	 * @return void
 	 */
