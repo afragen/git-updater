@@ -55,22 +55,21 @@ class Bootstrap {
 	}
 
 	/**
-	 * Check composer dependencies.
-	 * Specifically check for composer's autoload.php.
+	 * Deactivate plugin and die as composer autoloader not loaded.
 	 *
 	 * @return void
 	 */
-	public function check_dependencies() {
-		if ( \file_exists( $this->dir . '/vendor/autoload.php' ) ) {
-			require_once $this->dir . '/vendor/autoload.php';
-		} else {
-			$message = sprintf(
-				/* translators: %s: documentation URL */
-				__( 'GitHub Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'github_updater' ),
-				'https://github.com/afragen/github-updater/wiki/Installation'
-			);
-			wp_die( wp_kses_post( $message ) );
-		}
+	public function deactivate_die() {
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+		\deactivate_plugins( plugin_basename( $this->file ) );
+
+		$message = sprintf(
+			/* translators: %s: documentation URL */
+			__( 'GitHub Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopenernoreferer">Learn more.</a>', 'github_updater' ),
+			'https://github.com/afragen/github-updater/wiki/Installation'
+		);
+
+		wp_die( wp_kses_post( $message ) );
 	}
 
 	/**

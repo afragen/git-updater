@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/afragen/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           9.3.2.11
+ * Version:           9.3.2.12
  * Author:            Andy Fragen
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -35,7 +35,15 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Check for autoload.php and run.
-require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
-( new Bootstrap( __FILE__ ) )->check_dependencies();
+// Load the Composer autoloader.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+}
+
+// Check for composer autoloader.
+if ( ! class_exists( 'Fragen\GitHub_Updater\Bootstrap' ) ) {
+	require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
+	( new Bootstrap( __FILE__ ) )->deactivate_die();
+}
+
 ( new Bootstrap( __FILE__ ) )->run();
