@@ -51,6 +51,7 @@ before_script:
 
 script:
 - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist"
+- composer update --prefer-dist
 - phpunit
 
 before_deploy:
