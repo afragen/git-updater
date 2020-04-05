@@ -484,7 +484,7 @@ class Base {
 	public function set_rollback_transient( $type, $repo, $set_transient = false ) {
 		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->tag     = isset( $_GET['rollback'] ) ? sanitize_file_name( wp_unslash( $_GET['rollback'] ) ) : false;
+		$this->tag     = isset( $_GET['rollback'] ) ? sanitize_text_field( wp_unslash( $_GET['rollback'] ) ) : false;
 		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;
 		$download_link = $repo_api->construct_download_link( $this->tag );
 
