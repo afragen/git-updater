@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 9.4.1 / 2020-04-04 **HotFix**
+* fixed problem with sanitizing
+
 #### 9.4.0 / 2020-04-04
 * set `minimum-stability: dev` in composer.json, helps with dependency loading for `dev-master`
 * fix potential PHP warning in `Basic_Auth_Loader::get_slug_for_credentials()` when installer, like TGMPA, passes as array and not string
