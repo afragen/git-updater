@@ -54,14 +54,14 @@
 
 	// Hide element.
 	function displayNone(array) {
-		array.forEach((item) => {
+		array.forEach(function (item) {
 			item.style.display = 'none';
 		});
 	}
 
 	// Display element.
 	function display(array) {
-		array.forEach((item) => {
+		array.forEach(function (item) {
 			item.style.display = '';
 		});
 	}
@@ -75,7 +75,7 @@
 	function vanillaParents(element, selector) {
 		let parents = [];
 		if (NodeList.prototype.isPrototypeOf(element)) {
-			element.forEach((item) => {
+			element.forEach(function (item) {
 				element = item.parentElement.closest(selector);
 				parents.push(element);
 			});
