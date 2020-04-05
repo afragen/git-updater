@@ -444,6 +444,7 @@ class Plugin {
 					continue;
 				}
 
+				// Update download link for release_asset non-master branches.
 				if ( $plugin->release_asset && 'master' !== $plugin->branch ) {
 					$response['package'] = $plugin->branches[ $plugin->branch ]['download'];
 				}

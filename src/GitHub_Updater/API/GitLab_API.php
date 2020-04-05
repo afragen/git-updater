@@ -186,13 +186,11 @@ class GitLab_API extends API implements API_Interface {
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( "/projects/{$this->get_gitlab_id()}/repository/archive.zip" );
 		$download_link_base = remove_query_arg( 'private_token', $download_link_base );
-		$switch_to_branch   = $branch_switch && array_key_exists( $branch_switch, $this->type->branches );
-
-		$endpoint = '';
-		$endpoint = add_query_arg( 'sha', $this->type->branch, $endpoint );
+		$endpoint           = '';
+		$endpoint           = add_query_arg( 'sha', $this->type->branch, $endpoint );
 
 		// Release asset.
-		if ( $this->type->ci_job && '0.0.0' !== $this->type->newest_tag && ! $switch_to_branch ) {
+		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
 			return $release_asset;

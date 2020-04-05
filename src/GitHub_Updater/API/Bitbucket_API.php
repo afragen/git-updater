@@ -155,10 +155,9 @@ class Bitbucket_API extends API implements API_Interface {
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
 		$endpoint           = '';
-		$switch_to_branch   = $branch_switch && array_key_exists( $branch_switch, $this->type->branches );
 
 		// Release asset.
-		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag && ! $switch_to_branch ) {
+		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
 			return $this->get_release_asset_redirect( $release_asset, true );

@@ -682,4 +682,22 @@ trait GHU_Trait {
 		@rmdir( $source );
 		closedir( $dir );
 	}
+
+	public function use_release_asset( $branch_switch = false ) {
+		$switch_to_branch     = $branch_switch && array_key_exists( $branch_switch, $this->type->branches );
+		$use_branch_switch    = ! $switch_to_branch && ( $branch_switch && $this->type->branch !== $branch_switch );
+		$release_asset_master = $this->type->release_asset && 'master' === $branch_switch;
+		$branch_switch_tag    = $branch_switch === $this->type->newest_tag || 'master' === $branch_switch;
+		$not_master           = $this->type->release_asset && 'master' !== $this->type->branch;
+
+		$use_release_asset = ! $use_branch_switch
+		&& ! $not_master
+		&& $this->type->release_asset
+		|| $branch_switch_tag;
+
+		$old  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag && ! $switch_to_branch;
+		$diff = $old === $use_release_asset;
+
+		return $use_release_asset;
+	}
 }

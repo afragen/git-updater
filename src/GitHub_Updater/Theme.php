@@ -711,6 +711,7 @@ class Theme {
 					continue;
 				}
 
+				// Update download link for release_asset non-master branches.
 				if ( $theme->release_asset && 'master' !== $theme->branch ) {
 					$response['package'] = $theme->branches[ $theme->branch ]['download'];
 				}
