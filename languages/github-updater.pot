@@ -2,21 +2,21 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.3.2\n"
+"Project-Id-Version: GitHub Updater 9.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-02-19T18:04:54+00:00\n"
+"POT-Creation-Date: 2020-04-05T00:51:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
 
 #. Plugin Name of the plugin
-#: src/GitHub_Updater/Settings.php:158
-#: src/GitHub_Updater/Settings.php:248
+#: src/GitHub_Updater/Settings.php:161
+#: src/GitHub_Updater/Settings.php:255
 msgid "GitHub Updater"
 msgstr ""
 
@@ -36,69 +36,66 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:382
-msgid "Bitbucket Private Settings"
+#: src/GitHub_Updater/API/Bitbucket_API.php:365
+#: src/GitHub_Updater/API/Bitbucket_API.php:397
+msgid "Bitbucket Pseudo-Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:389
-#: src/GitHub_Updater/API/Bitbucket_API.php:477
+#: src/GitHub_Updater/API/Bitbucket_API.php:372
+#: src/GitHub_Updater/API/Bitbucket_API.php:473
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:398
-#: src/GitHub_Updater/API/Bitbucket_API.php:485
+#: src/GitHub_Updater/API/Bitbucket_API.php:384
+#: src/GitHub_Updater/API/Bitbucket_API.php:480
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:414
+#: src/GitHub_Updater/API/Bitbucket_API.php:415
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:444
+#: src/GitHub_Updater/API/Bitbucket_API.php:446
 msgid "Bitbucket"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:453
-msgid "Check box if private repository. Leave unchecked for public repositories."
+#: src/GitHub_Updater/API/Bitbucket_API.php:455
+msgid "Enter `username:password` if private repository. Don't forget the colon `:`."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:460
-msgid "Enter your personal Bitbucket username and password."
+#: src/GitHub_Updater/API/Bitbucket_API.php:462
+msgid "Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:494
-msgid "Private Bitbucket Repository"
-msgstr ""
-
-#: src/GitHub_Updater/API/Bitbucket_API.php:510
-msgid "Check for private Bitbucket repositories."
-msgstr ""
-
-#: src/GitHub_Updater/API/Bitbucket_API.php:525
+#: src/GitHub_Updater/API/Bitbucket_API.php:496
 msgid "Enter Bitbucket username."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:540
+#: src/GitHub_Updater/API/Bitbucket_API.php:511
 msgid "Enter Bitbucket password."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:340
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:347
 msgid "Bitbucket Server Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:347
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:354
 msgid "Bitbucket Server Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:356
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:366
 msgid "Bitbucket Server Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:372
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:379
+msgid "Bitbucket Server Pseudo-Token"
+msgstr ""
+
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:397
 msgid "Bitbucket Server Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:402
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:428
 msgid "Bitbucket Server"
 msgstr ""
 
@@ -128,7 +125,7 @@ msgstr ""
 msgid "Enter Gitea Access Token for private Gitea repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gitea_API.php:468
+#: src/GitHub_Updater/API/Gitea_API.php:471
 msgid "You must set a Gitea Access Token."
 msgstr ""
 
@@ -164,39 +161,39 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:434
+#: src/GitHub_Updater/API/GitLab_API.php:435
 msgid "GitLab Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:443
+#: src/GitHub_Updater/API/GitLab_API.php:444
 msgid "GitLab Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:452
+#: src/GitHub_Updater/API/GitLab_API.php:453
 msgid "GitLab.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:487
+#: src/GitHub_Updater/API/GitLab_API.php:488
 msgid "GitLab"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:496
+#: src/GitHub_Updater/API/GitLab_API.php:497
 msgid "Enter your repository specific GitLab Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:503
+#: src/GitHub_Updater/API/GitLab_API.php:504
 msgid "Enter your GitLab.com Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:514
+#: src/GitHub_Updater/API/GitLab_API.php:515
 msgid "GitLab Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:530
+#: src/GitHub_Updater/API/GitLab_API.php:531
 msgid "Enter GitLab Access Token for private GitLab repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:570
+#: src/GitHub_Updater/API/GitLab_API.php:574
 msgid "You must set a GitLab Access Token."
 msgstr ""
 
@@ -209,133 +206,129 @@ msgid "Enter plugin or theme slug."
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/GitHub_Updater/Base.php:582
-#: src/GitHub_Updater/Theme.php:593
+#: src/GitHub_Updater/Base.php:583
+#: src/GitHub_Updater/Theme.php:628
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:593
+#: src/GitHub_Updater/Base.php:594
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:609
+#: src/GitHub_Updater/Base.php:610
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:617
-#: src/GitHub_Updater/Theme.php:619
+#: src/GitHub_Updater/Base.php:618
+#: src/GitHub_Updater/Theme.php:654
 msgid "No previous tags to rollback to."
 msgstr ""
 
 #. translators: 1: minimum PHP version required
-#: src/GitHub_Updater/Bootstrap.php:94
+#: src/GitHub_Updater/Bootstrap.php:112
 msgid "GitHub Updater cannot run on PHP versions older than %1$s."
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:104
-#: src/GitHub_Updater/Install.php:366
+#: src/GitHub_Updater/Install.php:370
 msgid "Install Plugin"
 msgstr ""
 
 #: src/GitHub_Updater/Install.php:107
-#: src/GitHub_Updater/Install.php:369
+#: src/GitHub_Updater/Install.php:373
 msgid "Install Theme"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:160
+#: src/GitHub_Updater/Install.php:161
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:386
+#: src/GitHub_Updater/Install.php:390
 msgid "Plugin"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:389
+#: src/GitHub_Updater/Install.php:393
 msgid "Theme"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/GitHub_Updater/Install.php:401
+#: src/GitHub_Updater/Install.php:405
 msgid "GitHub Updater Install %s"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/GitHub_Updater/Install.php:409
+#: src/GitHub_Updater/Install.php:413
 msgid "%s URI"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:417
+#: src/GitHub_Updater/Install.php:421
 msgid "Repository Branch"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:425
+#: src/GitHub_Updater/Install.php:429
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:460
+#: src/GitHub_Updater/Install.php:464
 msgid "URI is case sensitive."
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:475
+#: src/GitHub_Updater/Install.php:479
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:540
+#: src/GitHub_Updater/Install.php:544
 msgid "Activate"
 msgstr ""
 
-#: src/GitHub_Updater/Install.php:552
+#: src/GitHub_Updater/Install.php:556
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:112
-#: src/GitHub_Updater/Messages.php:153
-#: src/GitHub_Updater/Messages.php:173
+#: src/GitHub_Updater/Messages.php:113
+#: src/GitHub_Updater/Messages.php:154
+#: src/GitHub_Updater/Messages.php:174
 msgid "GitHub Updater Error Code:"
 msgstr ""
 
 #. translators: %s: wait time
-#: src/GitHub_Updater/Messages.php:119
+#: src/GitHub_Updater/Messages.php:120
 msgid "GitHub API&#8217;s rate limit will reset in %s minutes."
 msgstr ""
 
 #. translators: %s: GitHub personal access token URL
-#: src/GitHub_Updater/Messages.php:125
+#: src/GitHub_Updater/Messages.php:126
 msgid "It looks like you are running into GitHub API rate limits. Be sure and configure a <a href=\"%s\">Personal Access Token</a> to avoid this issue."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:157
+#: src/GitHub_Updater/Messages.php:158
 msgid "There is probably an access token or password error on the GitHub Updater Settings page."
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:188
+#: src/GitHub_Updater/Messages.php:189
 msgid "GitHub Updater Information"
 msgstr ""
 
-#: src/GitHub_Updater/Messages.php:190
+#: src/GitHub_Updater/Messages.php:191
 msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
-#: src/GitHub_Updater/Plugin.php:373
-msgid "View details"
-msgstr ""
-
 #: src/GitHub_Updater/Remote_Management.php:121
-#: src/GitHub_Updater/Remote_Management.php:180
+#: src/GitHub_Updater/Remote_Management.php:178
 msgid "Remote Management"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:162
+#: src/GitHub_Updater/Remote_Management.php:160
 msgid "Reset REST API key"
 msgstr ""
 
-#: src/GitHub_Updater/Remote_Management.php:214
+#: src/GitHub_Updater/Remote_Management.php:213
 msgid "Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others."
 msgstr ""
 
 #. translators: %s: Link to Git Remote Updater repository
-#: src/GitHub_Updater/Remote_Management.php:221
+#: src/GitHub_Updater/Remote_Management.php:220
 msgid "The <a href=\"%s\">Git Remote Updater</a> plugin was specifically created to make the remote management of GitHub Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings."
 msgstr ""
 
@@ -345,112 +338,112 @@ msgid "Site URL: %1$s<br> REST API key: %2$s"
 msgstr ""
 
 #. translators: %1$s: Link to wiki, %2$s: RESTful API URL
-#: src/GitHub_Updater/Remote_Management.php:240
+#: src/GitHub_Updater/Remote_Management.php:241
 msgid "Please refer to the <a href=\"%1$s\">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:139
-#: src/GitHub_Updater/Settings.php:754
+#: src/GitHub_Updater/Settings.php:142
+#: src/GitHub_Updater/Settings.php:761
 msgid "Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:196
-#: src/GitHub_Updater/Settings.php:335
+#: src/GitHub_Updater/Settings.php:199
+#: src/GitHub_Updater/Settings.php:344
 msgid "GitHub Updater Settings"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:197
+#: src/GitHub_Updater/Settings.php:200
 msgctxt "Menu item"
 msgid "GitHub Updater"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:270
+#: src/GitHub_Updater/Settings.php:277
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:302
+#: src/GitHub_Updater/Settings.php:310
 msgid "Settings saved."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:304
+#: src/GitHub_Updater/Settings.php:312
 msgid "RESTful key reset."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:306
+#: src/GitHub_Updater/Settings.php:314
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:348
+#: src/GitHub_Updater/Settings.php:357
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:360
+#: src/GitHub_Updater/Settings.php:369
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:561
+#: src/GitHub_Updater/Settings.php:555
 msgid "Check to enable branch switching from the Plugins or Themes page or to bypass WP-Cron background processing."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:585
+#: src/GitHub_Updater/Settings.php:579
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:586
+#: src/GitHub_Updater/Settings.php:580
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:788
+#: src/GitHub_Updater/Settings.php:795
 msgid "This is a private repository."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:789
+#: src/GitHub_Updater/Settings.php:796
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:790
+#: src/GitHub_Updater/Settings.php:797
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/GitHub_Updater/Settings.php:827
+#: src/GitHub_Updater/Settings.php:834
 msgid "Installed Plugins and Themes"
 msgstr ""
 
 #. translators: %s: theme name
-#: src/GitHub_Updater/Theme.php:374
-#: src/GitHub_Updater/Theme.php:541
+#: src/GitHub_Updater/Theme.php:380
+#: src/GitHub_Updater/Theme.php:562
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/GitHub_Updater/Theme.php:386
+#: src/GitHub_Updater/Theme.php:392
 msgid "View version %s details."
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:390
+#: src/GitHub_Updater/Theme.php:396
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/GitHub_Updater/Theme.php:395
-#: src/GitHub_Updater/Theme.php:551
+#: src/GitHub_Updater/Theme.php:401
+#: src/GitHub_Updater/Theme.php:572
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/GitHub_Updater/Theme.php:400
-#: src/GitHub_Updater/Theme.php:556
+#: src/GitHub_Updater/Theme.php:406
+#: src/GitHub_Updater/Theme.php:577
 msgid "Update %s now"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:601
+#: src/GitHub_Updater/Theme.php:636
 msgid "Choose a Version"
 msgstr ""
 
-#: src/GitHub_Updater/Theme.php:623
+#: src/GitHub_Updater/Theme.php:658
 msgid "Install"
 msgstr ""
 
-#: src/GitHub_Updater/Traits/GHU_Trait.php:635
+#: src/GitHub_Updater/Traits/GHU_Trait.php:631
 msgid "There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue."
 msgstr ""
