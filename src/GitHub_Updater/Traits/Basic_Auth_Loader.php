@@ -37,7 +37,7 @@ trait Basic_Auth_Loader {
 	private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
 
 	/**
-	 * Load hooks for Bitbucket authentication headers.
+	 * Load hooks for authentication headers.
 	 *
 	 * @access public
 	 */
@@ -47,7 +47,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Remove hooks for Bitbucket authentication headers.
+	 * Remove hooks for authentication headers.
 	 *
 	 * @access public
 	 */
@@ -58,7 +58,6 @@ trait Basic_Auth_Loader {
 
 	/**
 	 * Add Basic Authentication $args to http_request_args filter hook.
-	 * Bitbucket private repositories only.
 	 *
 	 * @access public
 	 *
@@ -72,16 +71,13 @@ trait Basic_Auth_Loader {
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
 		}
-		if ( 'bitbucket' === $credentials['type'] ) {
-			$username = $credentials['username'];
-			$password = $credentials['password'];
-
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
 		if ( null !== $credentials['token'] ) {
 			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+			}
+			if ( 'bitbucket' === $credentials['type'] ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				$args['headers']['Authorization'] = 'Basic ' . base64_encode( $credentials['token'] );
 			}
 			if ( 'gitlab' === $credentials['type'] ) {
 				// https://gitlab.com/gitlab-org/gitlab-foss/issues/63438.
@@ -101,7 +97,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get credentials (username/password) for Basic Authentication.
+	 * Get credentials for authentication headers.
 	 *
 	 * @access private
 	 *
@@ -110,16 +106,17 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options      = get_site_option( 'github_updater' );
-		$headers      = parse_url( $url );
+		$options = get_site_option( 'github_updater' );
+		$headers = parse_url( $url );
+		// TODO: remove after debugging.
+		if ( ! isset( $headers['host'] ) ) {
+			error_log( $url );
+		}
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
-			'username'      => null,
-			'password'      => null,
 			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
 			'isset'         => false,
-			'private'       => false,
 			'token'         => null,
 			'type'          => null,
 			'enterprise'    => null,
@@ -145,10 +142,13 @@ trait Basic_Auth_Loader {
 			case 'bitbucket':
 			case $type instanceof Bitbucket_API:
 			case $type instanceof Bitbucket_Server_API:
-				$bitbucket_org = in_array( $headers['host'], $hosts, true );
-				$username_key  = $bitbucket_org ? 'bitbucket_username' : 'bitbucket_server_username';
-				$password_key  = $bitbucket_org ? 'bitbucket_password' : 'bitbucket_server_password';
-				$type          = 'bitbucket';
+				$bitbucket_org   = in_array( $headers['host'], $hosts, true );
+				$bitbucket_token = ! empty( $options['bitbucket_access_token'] ) ? $options['bitbucket_access_token'] : null;
+				$bbserver_token  = ! empty( $options['bbserver_access_token'] ) ? $options['bbserver_access_token'] : null;
+				$token           = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
+				$token           = null === $token && $bitbucket_org ? $bitbucket_token : $token;
+				$token           = null === $token && ! $bitbucket_org ? $bbserver_token : $token;
+				$type            = 'bitbucket';
 				break;
 			case 'github':
 			case $type instanceof GitHub_API:
@@ -169,21 +169,10 @@ trait Basic_Auth_Loader {
 				$type  = 'gitea';
 		}
 
-		if ( 'bitbucket' === $type && isset( $options[ $username_key ], $options[ $password_key ] ) ) {
-			$credentials['username'] = $options[ $username_key ];
-			$credentials['password'] = $options[ $password_key ];
-			$credentials['isset']    = true;
-			$credentials['private']  = $this->is_repo_private( $url );
-			$credentials['type']     = $type;
-		}
-
-		if ( 'github' === $type || 'gitlab' === $type || 'gitea' === $type ) {
-			$credentials['isset']      = true;
-			$credentials['private']    = $this->is_repo_private( $url );
-			$credentials['type']       = $type;
-			$credentials['token']      = isset( $token ) ? $token : null;
-			$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
-		}
+		$credentials['isset']      = true;
+		$credentials['type']       = $type;
+		$credentials['token']      = isset( $token ) ? $token : null;
+		$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
 
 		return $credentials;
 	}
@@ -199,18 +188,22 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : false;
-		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : $slug;
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
+		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
+
+		// Some installers, like TGMPA, pass an array.
+		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
+
 		$slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
-		$slug = ! $slug && isset( $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
-				? array_map( 'dirname', explode( ',', $_REQUEST['plugins'] ) )
+				? array_map( 'dirname', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['plugins'] ) ) ) )
 				: [];
 			$themes      = isset( $_REQUEST['themes'] )
-				? explode( ',', $_REQUEST['themes'] )
+				? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['themes'] ) ) )
 				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
@@ -223,6 +216,7 @@ trait Basic_Auth_Loader {
 				$slug = array_pop( $slug );
 			}
 		}
+		// phpcs:enable
 
 		// In case $type set from Base::$caller doesn't match.
 		if ( ! $slug && isset( $headers['path'] ) ) {
@@ -266,53 +260,14 @@ trait Basic_Auth_Loader {
 		}
 
 		// Set for Remote Install.
-		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] ) &&
-				false !== strpos( $url, basename( $_POST['github_updater_repo'] ) )
-			? $_POST['github_updater_api']
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] )
+				&& false !== strpos( $url, basename( sanitize_file_name( wp_unslash( $_POST['github_updater_repo'] ) ) ) )
+			? sanitize_file_name( wp_unslash( $_POST['github_updater_api'] ) )
 			: $type;
+		// phpcs:enable
 
 		return $type;
-	}
-
-	/**
-	 * Determine if repo is private.
-	 *
-	 * @access private
-	 *
-	 * @param string $url The URL.
-	 *
-	 * @return bool true if private
-	 */
-	private function is_repo_private( $url ) {
-		// Used when updating.
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['plugin'] ) ? dirname( $_REQUEST['plugin'] ) : false;
-		$slug = isset( $_REQUEST['rollback'], $_REQUEST['theme'] ) ? $_REQUEST['theme'] : $slug;
-		$slug = isset( $_REQUEST['slug'] ) ? $_REQUEST['slug'] : $slug;
-
-		if ( $slug && array_key_exists( $slug, static::$options ) &&
-			1 === (int) static::$options[ $slug ] &&
-			false !== stripos( $url, $slug )
-		) {
-			return true;
-		}
-
-		// Used for remote install tab.
-		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-			'github_updater_install' === $_POST['option_page']
-		) {
-			return true;
-		}
-
-		// Used for refreshing cache.
-		foreach ( array_keys( static::$options ) as $option ) {
-			if ( 1 === (int) static::$options[ $option ] &&
-				false !== strpos( $url, $option )
-			) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

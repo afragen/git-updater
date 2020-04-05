@@ -138,7 +138,7 @@ class API {
 	/**
 	 * Get repo's API.
 	 *
-	 * @param string         $git  (github|bitbucket|gitlab|gitea)
+	 * @param string         $git  (github|bitbucket|gitlab|gitea).
 	 * @param bool|\stdClass $repo Repository object.
 	 *
 	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
@@ -239,7 +239,7 @@ class API {
 	/**
 	 * Convert response body to JSON.
 	 *
-	 * @param  mixed $response (JSON|string)
+	 * @param  mixed $response (JSON|string).
 	 * @return mixed $response JSON encoded.
 	 */
 	private function convert_body_string_to_json( $response ) {
@@ -438,6 +438,7 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		return ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
@@ -506,12 +507,13 @@ class API {
 	protected function get_local_info( $repo, $file ) {
 		$response = false;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			return $response;
 		}
 
-		if ( is_dir( $repo->local_path ) &&
-			file_exists( $repo->local_path . $file )
+		if ( is_dir( $repo->local_path )
+			&& file_exists( $repo->local_path . $file )
 		) {
 			$response = file_get_contents( $repo->local_path . $file );
 		}
@@ -609,6 +611,7 @@ class API {
 	 * @uses  Requests, requires WP 4.6
 	 *
 	 * @param string $asset Release asset URI from git host.
+	 * @param bool   $aws   Release asset hosted on AWS.
 	 *
 	 * @return string|bool|\stdClass Release asset URI from AWS.
 	 */

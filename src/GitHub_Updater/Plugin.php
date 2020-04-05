@@ -117,7 +117,7 @@ class Plugin {
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
 			$all_headers        = $this->get_headers( 'plugin' );
-			$repos_arr[ $slug ] = get_file_data( $path, $all_headers );
+			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'plugin' );
 		}
 
 		$plugins = array_filter(
@@ -247,8 +247,8 @@ class Plugin {
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
-			if ( ! $plugin->release_asset && 'init' === current_filter() &&
-				( ! is_multisite() || is_network_admin() )
+			if ( ! $plugin->release_asset && 'init' === current_filter()
+				&& ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
 			}
@@ -257,9 +257,9 @@ class Plugin {
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
 		if ( $schedule_event && ! empty( $plugins ) ) {
-			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' ) &&
-			! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' ) &&
-			! apply_filters( 'github_updater_disable_wpcron', false )
+			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' )
+			&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' )
+			&& ! apply_filters( 'github_updater_disable_wpcron', false )
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
 			}
@@ -274,7 +274,6 @@ class Plugin {
 	 * Load pre-update filters.
 	 */
 	public function load_pre_filters() {
-		add_filter( 'plugin_row_meta', [ $this, 'plugin_row_meta' ], 10, 2 );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
 	}
@@ -282,8 +281,8 @@ class Plugin {
 	/**
 	 * Add branch switch row to plugins page.
 	 *
-	 * @param string    $plugin_file
-	 * @param \stdClass $plugin_data
+	 * @param string    $plugin_file Plugin file.
+	 * @param \stdClass $plugin_data Plugin repo data.
 	 *
 	 * @return bool
 	 */
@@ -292,8 +291,23 @@ class Plugin {
 			return false;
 		}
 
+		$plugin = $this->get_repo_slugs( dirname( $plugin_file ), $this );
+
+		/**
+		 * Filter to selectively turn off branch switching.
+		 * Useful for beta testing a specific branch when using release assets
+		 * for distribution.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param bool
+		 * @param string $plugin['slug'] Plugin slug.
+		 */
+		if ( apply_filters( 'github_updater_hide_branch_switcher', false, $plugin['slug'] ) ) {
+			return false;
+		}
+
 		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
-		$plugin            = $this->get_repo_slugs( dirname( $plugin_file ), $this );
 		$nonced_update_url = wp_nonce_url(
 			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
 			'upgrade-plugin_' . $plugin_file
@@ -322,68 +336,19 @@ class Plugin {
 		/*
 		 * Create after_plugin_row_
 		 */
-		echo $enclosure['open'];
+		echo wp_kses_post( $enclosure['open'] );
 		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-		echo $enclosure['close'];
+		echo wp_kses_post( $enclosure['close'] );
 
 		return true;
 	}
 
 	/**
-	 * Add 'View details' link to plugins page.
-	 *
-	 * @param array  $links
-	 * @param string $file
-	 *
-	 * @return array $links
-	 */
-	public function plugin_row_meta( $links, $file ) {
-		$regex_pattern = '/<a href="(.*)">(.*)<\/a>/';
-		$repo          = dirname( $file );
-
-		/*
-		 * Sanity check for some commercial plugins.
-		 */
-		if ( ! isset( $links[2] ) ) {
-			return $links;
-		}
-
-		preg_match( $regex_pattern, $links[2], $matches );
-
-		/*
-		 * Remove 'Visit plugin site' link in favor or 'View details' link.
-		 */
-		if ( array_key_exists( $repo, $this->config ) ) {
-			if ( null !== $repo ) {
-				unset( $links[2] );
-				$links[] = sprintf(
-					'<a href="%s" class="thickbox">%s</a>',
-					esc_url(
-						add_query_arg(
-							[
-								'tab'       => 'plugin-information',
-								'plugin'    => $repo,
-								'TB_iframe' => 'true',
-								'width'     => 600,
-								'height'    => 550,
-							],
-							network_admin_url( 'plugin-install.php' )
-						)
-					),
-					esc_html__( 'View details', 'github-updater' )
-				);
-			}
-		}
-
-		return $links;
-	}
-
-	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param bool      $false
-	 * @param string    $action
-	 * @param \stdClass $response
+	 * @param bool      $false    Default false.
+	 * @param string    $action   The type of information being requested from the Plugin Installation API.
+	 * @param \stdClass $response Plugin API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -432,7 +397,7 @@ class Plugin {
 	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param \stdClass $transient
+	 * @param \stdClass $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */
@@ -446,28 +411,32 @@ class Plugin {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
+			if ( ! property_exists( $plugin, 'remote_version' ) ) {
+				continue;
+			}
+			$response = [
+				'slug'         => $plugin->slug,
+				'plugin'       => $plugin->file,
+				'new_version'  => $plugin->remote_version,
+				'url'          => $plugin->uri,
+				'package'      => $plugin->download_link,
+				'icons'        => $plugin->icons,
+				'tested'       => $plugin->tested,
+				'requires_php' => $plugin->requires_php,
+				'branch'       => $plugin->branch,
+				'branches'     => array_keys( $plugin->branches ),
+				'type'         => "{$plugin->git}-{$plugin->type}",
+			];
 			if ( $this->can_update_repo( $plugin ) ) {
-				$response = [
-					'slug'         => $plugin->slug,
-					'plugin'       => $plugin->file,
-					'new_version'  => $plugin->remote_version,
-					'url'          => $plugin->uri,
-					'package'      => $plugin->download_link,
-					'icons'        => $plugin->icons,
-					'tested'       => $plugin->tested,
-					'requires_php' => $plugin->requires_php,
-					'branch'       => $plugin->branch,
-					'branches'     => array_keys( $plugin->branches ),
-					'type'         => "{$plugin->git}-{$plugin->type}",
-				];
-
 				// Skip on RESTful updating.
-				if ( isset( $_GET['action'], $_GET['plugin'] ) &&
-					'github-updater-update' === $_GET['action'] &&
-					$response['slug'] === $_GET['plugin']
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended
+				if ( isset( $_GET['action'], $_GET['plugin'] )
+					&& 'github-updater-update' === $_GET['action']
+					&& $response['slug'] === $_GET['plugin']
 				) {
 					continue;
 				}
+				//phpcs:enable
 
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
@@ -476,6 +445,11 @@ class Plugin {
 
 				$transient->response[ $plugin->file ] = (object) $response;
 			} else {
+				// Add repo without update to $transient->no_update for 'View details' link.
+				if ( ! isset( $transient->no_update[ $plugin->file ] ) ) {
+					$transient->no_update[ $plugin->file ] = (object) $response;
+				}
+
 				/**
 				 * Filter to return array of overrides to dot org.
 				 *
@@ -489,6 +463,7 @@ class Plugin {
 			}
 
 			// Set transient on rollback.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
 				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );

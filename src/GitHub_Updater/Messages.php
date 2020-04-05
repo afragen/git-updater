@@ -35,7 +35,7 @@ class Messages {
 	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
-	 * @param string $type
+	 * @param string|\WP_Error $type Error type.
 	 *
 	 * @return bool
 	 */
@@ -46,9 +46,10 @@ class Messages {
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if (
-			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] ) &&
-			in_array( $pagenow, $settings_pages, true ) ) ||
-			! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] )
+			&& in_array( $pagenow, $settings_pages, true ) )
+			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
 		) {
 			return false;
 		}
@@ -110,14 +111,14 @@ class Messages {
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
-						echo ' ' . $repo['code'];
+						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
 						<?php
 						printf(
 							/* translators: %s: wait time */
 							esc_html__( 'GitHub API&#8217;s rate limit will reset in %s minutes.', 'github-updater' ),
-							$repo['wait']
+							esc_attr( $repo['wait'] )
 						);
 						echo '<br>';
 						printf(
@@ -151,7 +152,7 @@ class Messages {
 					<p>
 						<?php
 						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
-						echo ' ' . $repo['code'];
+						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
 						<?php esc_html_e( 'There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater' ); ?>
@@ -171,7 +172,7 @@ class Messages {
 			<p>
 				<?php
 				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
-				echo ' ' . self::$error_message;
+				echo ' ' . esc_html( self::$error_message );
 				?>
 			</p>
 		</div>

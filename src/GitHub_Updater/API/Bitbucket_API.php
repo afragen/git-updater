@@ -46,45 +46,28 @@ class Bitbucket_API extends API implements API_Interface {
 				? $branch->cache['current_branch']
 				: $type->branch;
 		}
-		$this->set_default_credentials();
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
+		$this->set_credentials_error_message();
+		$this->convert_user_pass_to_token();
 	}
 
 	/**
-	 * Set default credentials if option not set.
+	 * Set notice if credentials not set.
 	 */
-	protected function set_default_credentials() {
-		$running_servers = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
-		$set_credentials = false;
-		if ( $this instanceof Bitbucket_API ) {
-			$username = 'bitbucket_username';
-			$password = 'bitbucket_password';
-		}
-		if ( $this instanceof Bitbucket_Server_API ) {
-			$username = 'bitbucket_server_username';
-			$password = 'bitbucket_server_password';
-		}
-		if ( ! isset( static::$options[ $username ] ) ) {
-			static::$options[ $username ] = null;
-			$set_credentials              = true;
-		}
-		if ( ! isset( static::$options[ $password ] ) ) {
-			static::$options[ $password ] = null;
-			$set_credentials              = true;
-		}
-		if ( ( empty( static::$options[ $username ] ) || empty( static::$options[ $password ] ) ) &&
-			( ( 'bitbucket_username' === $username &&
-				in_array( 'bitbucket', $running_servers, true ) ) ||
-			( 'bitbucket_server_username' === $username &&
-				in_array( 'bbserver', $running_servers, true ) ) )
-		) {
+	protected function set_credentials_error_message() {
+		$running_servers     = Singleton::get_instance( 'Base', $this )->get_running_git_servers();
+		$bitbucket_token_set = in_array( 'bitbucket', $running_servers, true ) && ! empty( static::$options['bitbucket_access_token'] );
+		$bbserver_token_set  = in_array( 'bbserver', $running_servers, true ) && ! empty( static::$options['bbserver_access_token'] );
+
+		if ( ! ( $bitbucket_token_set || $bbserver_token_set ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( 'bitbucket' );
-			static::$error_code['bitbucket'] = [ 'code' => 401 ];
-		}
-		if ( $set_credentials ) {
-			add_site_option( 'github_updater', static::$options );
+
+			static::$error_code['bitbucket'] = [
+				'git'  => 'bitbucket',
+				'code' => 401,
+			];
 		}
 	}
 
@@ -378,9 +361,9 @@ class Bitbucket_API extends API implements API_Interface {
 	 */
 	public function add_settings( $auth_required ) {
 		add_settings_section(
-			'bitbucket_user',
-			esc_html__( 'Bitbucket Private Settings', 'github-updater' ),
-			[ $this, 'print_section_bitbucket_username' ],
+			'bitbucket_token',
+			esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
+			[ $this, 'print_section_bitbucket_token' ],
 			'github_updater_bitbucket_install_settings'
 		);
 
@@ -389,8 +372,11 @@ class Bitbucket_API extends API implements API_Interface {
 			esc_html__( 'Bitbucket Username', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
-			[ 'id' => 'bitbucket_username' ]
+			'bitbucket_token',
+			[
+				'id'    => 'bitbucket_username',
+				'class' => empty( static::$options['bitbucket_access_token'] ) ? '' : 'hidden',
+			]
 		);
 
 		add_settings_field(
@@ -398,10 +384,25 @@ class Bitbucket_API extends API implements API_Interface {
 			esc_html__( 'Bitbucket Password', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bitbucket_install_settings',
-			'bitbucket_user',
+			'bitbucket_token',
 			[
 				'id'    => 'bitbucket_password',
 				'token' => true,
+				'class' => empty( static::$options['bitbucket_access_token'] ) ? '' : 'hidden',
+			]
+		);
+
+		add_settings_field(
+			'bitbucket_token',
+			esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			'github_updater_bitbucket_install_settings',
+			'bitbucket_token',
+			[
+				'id'          => 'bitbucket_access_token',
+				'token'       => true,
+				'placeholder' => true,
+				'class'       => ! empty( static::$options['bitbucket_access_token'] ) ? '' : 'hidden',
 			]
 		);
 
@@ -428,8 +429,9 @@ class Bitbucket_API extends API implements API_Interface {
 		$setting_field['section']         = 'bitbucket_id';
 		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
-			'token_callback_checkbox',
+			'token_callback_text',
 		];
+		$setting_field['placeholder']     = true;
 
 		return $setting_field;
 	}
@@ -450,14 +452,14 @@ class Bitbucket_API extends API implements API_Interface {
 	 * Print the Bitbucket repo Settings text.
 	 */
 	public function print_section_bitbucket_info() {
-		esc_html_e( 'Check box if private repository. Leave unchecked for public repositories.', 'github-updater' );
+		esc_html_e( 'Enter `username:password` if private repository. Don\'t forget the colon `:`.', 'github-updater' );
 	}
 
 	/**
 	 * Print the Bitbucket user/pass Settings text.
 	 */
-	public function print_section_bitbucket_username() {
-		esc_html_e( 'Enter your personal Bitbucket username and password.', 'github-updater' );
+	public function print_section_bitbucket_token() {
+		esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token.', 'github-updater' );
 	}
 
 	/**
@@ -466,51 +468,20 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @param string $type Plugin|theme.
 	 */
 	public function add_install_settings_fields( $type ) {
-		if ( ( empty( static::$options['bitbucket_username'] ) ||
-			empty( static::$options['bitbucket_password'] ) ) ||
-
-			( empty( static::$options['bitbucket_server_username'] ) ||
-			empty( static::$options['bitbucket_server_password'] ) )
-		) {
-			add_settings_field(
-				'bitbucket_username',
-				esc_html__( 'Bitbucket Username', 'github-updater' ),
-				[ $this, 'bitbucket_username' ],
-				'github_updater_install_' . $type,
-				$type
-			);
-
-			add_settings_field(
-				'bitbucket_password',
-				esc_html__( 'Bitbucket Password', 'github-updater' ),
-				[ $this, 'bitbucket_password' ],
-				'github_updater_install_' . $type,
-				$type
-			);
-		}
-
 		add_settings_field(
-			'is_private',
-			esc_html__( 'Private Bitbucket Repository', 'github-updater' ),
-			[ $this, 'is_private_repo' ],
+			'bitbucket_username',
+			esc_html__( 'Bitbucket Username', 'github-updater' ),
+			[ $this, 'bitbucket_username' ],
 			'github_updater_install_' . $type,
 			$type
 		);
-	}
-
-	/**
-	 * Setting for private repo for remote install.
-	 */
-	public function is_private_repo() {
-		?>
-		<label for="is_private">
-			<input class="bitbucket_setting" type="checkbox" id="is_private" name="is_private" <?php checked( '1', false ); ?> >
-			<br>
-			<span class="description">
-				<?php esc_html_e( 'Check for private Bitbucket repositories.', 'github-updater' ); ?>
-			</span>
-		</label>
-		<?php
+		add_settings_field(
+			'bitbucket_password',
+			esc_html__( 'Bitbucket Password', 'github-updater' ),
+			[ $this, 'bitbucket_password' ],
+			'github_updater_install_' . $type,
+			$type
+		);
 	}
 
 	/**
@@ -552,7 +523,8 @@ class Bitbucket_API extends API implements API_Interface {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$bitbucket_org = true;
+		$bitbucket_org                     = true;
+		$options['bitbucket_access_token'] = isset( static::$options['bitbucket_access_token'] ) ? static::$options['bitbucket_access_token'] : null;
 
 		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://bitbucket.org';
@@ -564,17 +536,63 @@ class Bitbucket_API extends API implements API_Interface {
 
 		if ( $bitbucket_org ) {
 			$install['download_link'] = "{$base}/{$install['github_updater_repo']}/get/{$install['github_updater_branch']}.zip";
-			if ( isset( $install['is_private'] ) ) {
-				$install['options'][ $install['repo'] ] = 1;
+
+			if ( ! empty( $install['bitbucket_username'] ) && ! empty( $install['bitbucket_password'] ) ) {
+				$install['options'][ $install['repo'] ] = "{$install['bitbucket_username']}:{$install['bitbucket_password']}";
 			}
-			if ( ! empty( $install['bitbucket_username'] ) ) {
-				$install['options']['bitbucket_username'] = $install['bitbucket_username'];
+
+			/*
+			* Add/Save access token if present.
+			*/
+			if ( ! empty( $install['bitbucket_access_token'] ) ) {
+				$install['options'][ $install['repo'] ] = $install['bitbucket_access_token'];
+				if ( $bitbucket_org ) {
+					$install['options']['bitbucket_access_token'] = $install['bitbucket_access_token'];
+				}
 			}
-			if ( ! empty( $install['bitbucket_password'] ) ) {
-				$install['options']['bitbucket_password'] = $install['bitbucket_password'];
+			if ( $bitbucket_org ) {
+				$token = ! empty( $install['options']['bitbucket_access_token'] )
+				? $install['options']['bitbucket_access_token']
+				: $options['bitbucket_access_token'];
+			}
+
+			if ( ! empty( static::$options['bitbucket_access_token'] ) ) {
+				unset( $install['options']['bitbucket_access_token'] );
 			}
 		}
 
 		return $install;
+	}
+
+	/**
+	 * Shim to convert existing Bitbucket/Bitbucket Server username/password to pseudo-access token.
+	 *
+	 * @param array $options Array of site options.
+	 * @return void
+	 */
+	private function convert_user_pass_to_token( $options = null ) {
+		$options         = null === $options ? static::$options : $options;
+		$save_options    = false;
+		$bitbucket_token = [];
+		$bbserver_token  = [];
+		if ( ! empty( $options['bitbucket_username'] ) && ! empty( $options['bitbucket_password'] ) ) {
+			$bitbucket_username = $options['bitbucket_username'];
+			$bitbucket_password = $options['bitbucket_password'];
+			$bitbucket_token    = [ 'bitbucket_access_token' => "{$bitbucket_username}:{$bitbucket_password}" ];
+			unset( $options['bitbucket_username'], $options['bitbucket_password'] );
+			$save_options = true;
+		}
+		if ( ! empty( $options['bitbucket_server_username'] ) && ! empty( $options['bitbucket_server_password'] ) ) {
+			$bitbucket_server_username = $options['bitbucket_server_username'];
+			$bitbucket_server_password = $options['bitbucket_server_password'];
+			$bbserver_token            = [ 'bbserver_access_token' => "{$bitbucket_server_username}:{$bitbucket_server_password}" ];
+			unset( $options['bitbucket_server_username'], $options['bitbucket_server_password'] );
+			$save_options = true;
+
+		}
+		if ( $save_options ) {
+			static::$options = array_merge( $options, $bitbucket_token, $bbserver_token );
+			update_site_option( 'github_updater', static::$options );
+		}
 	}
 }

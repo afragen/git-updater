@@ -80,13 +80,14 @@ class Branch {
 	public function set_branch_on_switch( $repo ) {
 		$this->cache = $this->get_repo_cache( $repo );
 
-		if ( isset( $_GET['action'], $_GET['rollback'], $this->cache['branches'] ) &&
-			( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['action'], $_GET['rollback'], $this->cache['branches'] )
+			&& ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
-			$current_branch = array_key_exists( $_GET['rollback'], $this->cache['branches'] )
-				? $_GET['rollback']
+			$current_branch = array_key_exists( sanitize_file_name( wp_unslash( $_GET['rollback'] ) ), $this->cache['branches'] )
+				? sanitize_file_name( wp_unslash( $_GET['rollback'] ) )
 				: 'master';
-
+			// phpcs:enable
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
 			self::$options[ 'current_branch_' . $repo ] = $current_branch;
 			update_site_option( 'github_updater', self::$options );

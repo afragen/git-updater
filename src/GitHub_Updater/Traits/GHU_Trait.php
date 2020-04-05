@@ -22,6 +22,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		return isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
 	}
 
@@ -54,7 +55,7 @@ trait GHU_Trait {
 	/**
 	 * Check current page.
 	 *
-	 * @param  array $pages
+	 * @param  array $pages Array of pages.
 	 * @return bool
 	 */
 	public function is_current_page( array $pages ) {
@@ -162,7 +163,7 @@ trait GHU_Trait {
 	/**
 	 * Function to check if plugin or theme object is able to be updated.
 	 *
-	 * @param \stdClass $type
+	 * @param \stdClass $type Repo object.
 	 *
 	 * @return bool
 	 */
@@ -203,8 +204,7 @@ trait GHU_Trait {
 		$column        = is_multisite() ? 'meta_key' : 'option_name';
 		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
-		//phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) );
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 
 		wp_cron();
 
@@ -243,7 +243,7 @@ trait GHU_Trait {
 		// Correctly account for dashicon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
-		$dot_org_master = ! $icon ? $repo->dot_org && 'master' === $repo->branch : true;
+		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && 'master' === $repo->branch : true;
 
 		$transient_key = 'plugin' === $type ? $repo->file : null;
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
@@ -267,6 +267,7 @@ trait GHU_Trait {
 	 */
 	public function deprecate_override_constant() {
 		if ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG constant deprecated. Use `github_updater_override_dot_org` filter hook.' );
 
 			return true;
@@ -328,7 +329,7 @@ trait GHU_Trait {
 	/**
 	 * Check to see if wp-cron/background updating has finished.
 	 *
-	 * @param null $repo
+	 * @param null|\stdClass $repo Repo object.
 	 *
 	 * @return bool true when waiting for background job to finish.
 	 */
@@ -359,7 +360,7 @@ trait GHU_Trait {
 	/**
 	 * Parse URI param returning array of parts.
 	 *
-	 * @param string $repo_header
+	 * @param string $repo_header Repo URL.
 	 *
 	 * @return array $header
 	 */
@@ -383,7 +384,7 @@ trait GHU_Trait {
 	/**
 	 * Create repo parts.
 	 *
-	 * @param string $repo
+	 * @param string $repo Repo type.
 	 * @param string $type plugin|theme.
 	 *
 	 * @return mixed
@@ -424,8 +425,8 @@ trait GHU_Trait {
 	 * Set array with normal repo names.
 	 * Fix name even if installed without renaming originally, eg <repo>-master
 	 *
-	 * @param string            $slug
-	 * @param Base|Plugin|Theme $upgrader_object
+	 * @param string            $slug            Repo slug.
+	 * @param Base|Plugin|Theme $upgrader_object Upgrader object.
 	 *
 	 * @return array
 	 */
@@ -538,12 +539,7 @@ trait GHU_Trait {
 		$all_headers = is_array( $contents ) ? $contents : $all_headers;
 
 		// Reduce array to only headers with data.
-		$all_headers = array_filter(
-			$all_headers,
-			function ( $e ) {
-				return ! empty( $e );
-			}
-		);
+		$all_headers = array_filter( $all_headers );
 
 		return $all_headers;
 	}
@@ -551,10 +547,10 @@ trait GHU_Trait {
 	/**
 	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
-	 * @param array           $header
-	 * @param array|\WP_Theme $headers
-	 * @param array           $header_parts
-	 * @param array           $repo_parts
+	 * @param array           $header       Array of repo headers.
+	 * @param array|\WP_Theme $headers      Array of theme headers.
+	 * @param array           $header_parts Array of header parts.
+	 * @param array           $repo_parts   Array of repo parts.
 	 *
 	 * @return array $header
 	 */
@@ -626,8 +622,8 @@ trait GHU_Trait {
 	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
-	 * @param array $cron
-	 * @param int   $timestamp
+	 * @param array $cron      Array of WP-Cron events.
+	 * @param int   $timestamp WP-Cron event timestamp.
 	 */
 	public function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
@@ -674,12 +670,12 @@ trait GHU_Trait {
 		$source = untrailingslashit( $source );
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) && "$source/$file" !== $destination ) {
-				if ( is_dir( "$source/$file" ) ) {
-					$this->move( "$source/$file", "$destination/$file" );
+			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
+				if ( is_dir( "{$source}/{$file}" ) ) {
+					$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
 				} else {
-					copy( "$source/$file", "$destination/$file" );
-					unlink( "$source/$file" );
+					copy( "{$source}/{$file}", "{$destination}/{$file}" );
+					unlink( "{$source}/{$file}" );
 				}
 			}
 		}

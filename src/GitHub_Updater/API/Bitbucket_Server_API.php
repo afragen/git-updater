@@ -52,7 +52,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/:owner/repos/:repo/browse/{$file}" );
+		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/:owner/repos/:repo' );
+		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/projects/:owner/repos/:repo' );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( 'bbserver', '/1.0/:owner/repos/:repo/tags' );
+		return $this->get_remote_api_tag( 'bbserver', '/1.0/projects/:owner/repos/:repo/tags' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		return $this->get_remote_api_readme( 'bbserver', '/1.0/:owner/repos/:repo/raw/readme.txt' );
+		return $this->get_remote_api_readme( 'bbserver', '/1.0/projects/:owner/repos/:repo/raw/readme.txt' );
 	}
 
 	/**
@@ -92,7 +92,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/:owner/repos/:repo/raw/{$changes}" );
+		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/projects/:owner/repos/:repo/raw/{$changes}" );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		return $this->get_remote_api_branches( 'bbserver', '/1.0/:owner/repos/:repo/branches' );
+		return $this->get_remote_api_branches( 'bbserver', '/1.0/projects/:owner/repos/:repo/branches' );
 	}
 
 	/**
@@ -112,16 +112,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	public function get_release_asset() {
 		// TODO: make this work.
 		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
-		// return $this->get_api_release_asset( 'bbserver', '/1.0/:owner/:repo/downloads' );
+		// return $this->get_api_release_asset( 'bbserver', '/1.0/projects/:owner/:repo/downloads' );
 	}
 
 	/**
-	 * Construct $this->type->download_link using Bitbucket Server API.
-	 *
-	 * Downloads requires the official stash-archive plugin which enables
-	 * subdirectory support using the prefix query argument.
-	 *
-	 * @link https://bitbucket.org/atlassian/stash-archive
+	 * Construct $this->type->download_link using Bitbucket Server REST API.
 	 *
 	 * @param boolean $branch_switch For direct branch changing.
 	 *
@@ -129,14 +124,26 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/latest/:owner/repos/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/1.0/projects/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
 			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
 		}
 
-		return $download_link_base . $endpoint;
+		$download_link = $download_link_base . $endpoint;
+
+		/**
+		 * Filter download link so developers can point to specific ZipFile
+		 * to use as a download link during a branch switch.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param string    $download_link Download URL.
+		 * @param /stdClass $this->type    Repository object.
+		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
+		 */
+		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
 	}
 
 	/**
@@ -318,7 +325,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = "{$repo_type['base_uri']}/latest/{$this->type->owner}/repos/{$this->type->slug}/archive";
+			$download_base    = "{$repo_type['base_uri']}/projects/{$this->type->owner}/repos/{$this->type->slug}/archive";
 			$download_base    = $this->add_endpoints( $this, $download_base );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
@@ -336,9 +343,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function add_settings( $auth_required ) {
 		add_settings_section(
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			esc_html__( 'Bitbucket Server Private Settings', 'github-updater' ),
-			[ $this, 'print_section_bitbucket_username' ],
+			[ $this, 'print_section_bitbucket_token' ],
 			'github_updater_bbserver_install_settings'
 		);
 
@@ -347,8 +354,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			esc_html__( 'Bitbucket Server Username', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
-			[ 'id' => 'bitbucket_server_username' ]
+			'bitbucket_server_token',
+			[
+				'id'    => 'bitbucket_server_username',
+				'class' => empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
+			]
 		);
 
 		add_settings_field(
@@ -356,10 +366,25 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			esc_html__( 'Bitbucket Server Password', 'github-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_bbserver_install_settings',
-			'bitbucket_server_user',
+			'bitbucket_server_token',
 			[
 				'id'    => 'bitbucket_server_password',
 				'token' => true,
+				'class' => empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
+			]
+		);
+
+		add_settings_field(
+			'bbserver_token',
+			esc_html__( 'Bitbucket Server Pseudo-Token', 'github-updater' ),
+			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+			'github_updater_bbserver_install_settings',
+			'bitbucket_server_token',
+			[
+				'id'          => 'bbserver_access_token',
+				'token'       => true,
+				'placeholder' => true,
+				'class'       => ! empty( static::$options['bbserver_access_token'] ) ? '' : 'hidden',
 			]
 		);
 
@@ -386,8 +411,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$setting_field['section']         = 'bitbucket_server_id';
 		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
-			'token_callback_checkbox',
+			'token_callback_text',
 		];
+		$setting_field['placeholder']     = true;
 
 		return $setting_field;
 	}
@@ -413,7 +439,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return array $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$bitbucket_org = true;
+		$bitbucket_org                    = true;
+		$options['bbserver_access_token'] = isset( static::$options['bbserver_access_token'] ) ? static::$options['bbserver_access_token'] : null;
 
 		if ( 'bitbucket.org' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://bitbucket.org';
@@ -424,7 +451,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = "{$base}/rest/api/latest/{$headers['owner']}/repos/{$headers['repo']}/archive";
+			$install['download_link'] = "{$base}/rest/api/1.0/projects/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
@@ -435,14 +462,27 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$install['download_link']
 			);
 
-			if ( isset( $install['is_private'] ) ) {
-				$install['options'][ $install['repo'] ] = 1;
+			if ( ! empty( $install['bitbucket_username'] ) && ! empty( $install['bitbucket_password'] ) ) {
+				$install['options'][ $install['repo'] ] = "{$install['bitbucket_username']}:{$install['bitbucket_password']}";
 			}
-			if ( ! empty( $install['bitbucket_username'] ) ) {
-				$install['options']['bitbucket_server_username'] = $install['bitbucket_username'];
+
+			/*
+			* Add/Save access token if present.
+			*/
+			if ( ! empty( $install['bitbucket_access_token'] ) ) {
+				$install['options'][ $install['repo'] ] = $install['bitbucket_access_token'];
+				if ( ! $bitbucket_org ) {
+					$install['options']['bitbucket_access_token'] = $install['bitbucket_access_token'];
+				}
 			}
-			if ( ! empty( $install['bitbucket_password'] ) ) {
-				$install['options']['bitbucket_server_password'] = $install['bitbucket_password'];
+			if ( ! $bitbucket_org ) {
+				$token = ! empty( $install['options']['bitbucket_access_token'] )
+				? $install['options']['bitbucket_access_token']
+				: $options['bbserver_access_token'];
+			}
+
+			if ( ! empty( static::$options['bbserver_access_token'] ) ) {
+				unset( $install['options']['bitbucket_access_token'] );
 			}
 		}
 

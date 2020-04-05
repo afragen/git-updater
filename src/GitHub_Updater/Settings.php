@@ -47,8 +47,10 @@ class Settings {
 		'github_enterprise' => false,
 		'bitbucket_private' => false,
 		'bitbucket_server'  => false,
+		'gitlab'            => true,
 		'gitlab_private'    => false,
 		'gitlab_enterprise' => false,
+		'gitea'             => true,
 		'gitea_private'     => false,
 	];
 
@@ -72,6 +74,7 @@ class Settings {
 	 * Check for cache refresh.
 	 */
 	protected function refresh_caches() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
 			$this->delete_all_cached_data();
 		}
@@ -189,7 +192,7 @@ class Settings {
 	 */
 	public function add_plugin_page() {
 		$parent     = is_multisite() ? 'settings.php' : 'options-general.php';
-		$capability = is_multisite() ? 'manage_network' : 'manage_options';
+		$capability = is_multisite() ? 'manage_network_options' : 'manage_options';
 
 		add_submenu_page(
 			$parent,
@@ -210,11 +213,12 @@ class Settings {
 	 * @access private
 	 */
 	private function options_tabs() {
-		$current_tab = isset( $_GET['tab'] ) ? esc_attr( $_GET['tab'] ) : 'github_updater_settings';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current_tab = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'github_updater_settings';
 		echo '<nav class="nav-tab-wrapper" aria-label="Secondary menu">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
-			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>';
+			echo wp_kses_post( '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=' . $key . '">' . $name . '</a>' );
 		}
 		echo '</nav>';
 	}
@@ -225,11 +229,12 @@ class Settings {
 	 * @access private
 	 */
 	private function options_sub_tabs() {
-		$current_tab = isset( $_GET['subtab'] ) ? esc_attr( $_GET['subtab'] ) : 'github_updater';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current_tab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'github_updater';
 		echo '<nav class="nav-tab-wrapper" aria-label="Tertiary menu">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
-			echo '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>';
+			echo wp_kses_post( '<a class="nav-tab ' . $active . '" href="?page=github-updater&tab=github_updater_settings&subtab=' . $key . '">' . $name . '</a>' );
 		}
 		echo '</nav>';
 	}
@@ -239,9 +244,11 @@ class Settings {
 	 */
 	public function create_admin_page() {
 		$action = is_multisite() ? 'edit.php?action=github-updater' : 'options.php';
-		$tab    = isset( $_GET['tab'] ) ? esc_attr( $_GET['tab'] ) : 'github_updater_settings';
-		$subtab = isset( $_GET['subtab'] ) ? esc_attr( $_GET['subtab'] ) : 'github_updater';
-		$logo   = plugins_url( basename( GITHUB_UPDATER_DIR ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'github_updater_settings';
+		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'github_updater';
+		// phpcs:enable
+		$logo = plugins_url( basename( GITHUB_UPDATER_DIR ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
@@ -291,6 +298,7 @@ class Settings {
 	 * Display appropriate notice for Settings page actions.
 	 */
 	private function admin_page_notices() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
 				|| isset( $_GET['reset'] )
 				|| isset( $_GET['refresh_transients'] );
@@ -308,6 +316,7 @@ class Settings {
 		if ( $display ) {
 			echo '</p></div>';
 		}
+		// phpcs:enable
 	}
 
 	/**
@@ -421,9 +430,10 @@ class Settings {
 				$setting_field['page'],
 				$setting_field['section'],
 				[
-					'id'    => $setting_field['callback'],
-					'token' => true,
-					'title' => $setting_field['title'],
+					'id'          => $setting_field['callback'],
+					'token'       => true,
+					'title'       => $setting_field['title'],
+					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
 				]
 			);
 		}
@@ -438,10 +448,11 @@ class Settings {
 	/**
 	 * Check current saved options and unset if repos not present.
 	 *
-	 * @param array $ghu_options_keys
-	 * @param array $ghu_tokens
+	 * @param array $ghu_options_keys Array of options keys.
+	 * @param array $ghu_tokens       Array of GitHub Updater repos.
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
+		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
 		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
 		$always_unset    = [
@@ -452,23 +463,10 @@ class Settings {
 		];
 
 		if ( in_array( 'bitbucket', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[
-					'bitbucket_username',
-					'bitbucket_password',
-				]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bitbucket_access_token' ] );
 		}
-
 		if ( in_array( 'bbserver', $running_servers, true ) ) {
-			$always_unset = array_merge(
-				$always_unset,
-				[
-					'bitbucket_server_username',
-					'bitbucket_server_password',
-				]
-			);
+			$always_unset = array_merge( $always_unset, [ 'bbserver_access_token' ] );
 		}
 
 		array_map(
@@ -547,10 +545,6 @@ class Settings {
 			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
 				?: 'gitea' === $token->git;
 		}
-
-		// Always set to true.
-		static::$auth_required['gitlab'] = true;
-		static::$auth_required['gitea']  = true;
 	}
 
 	/**
@@ -587,12 +581,12 @@ class Settings {
 
 			foreach ( $plugins as $plugin ) {
 				if ( in_array( $plugin->file, $overrides, true ) ) {
-					echo '<p>' . $dashicon_plugin . $plugin->name . '</p>';
+					echo '<p>' . wp_kses_post( $dashicon_plugin . $plugin->name ) . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
 				if ( in_array( $theme->slug, $overrides, true ) ) {
-					echo '<p>' . $dashicon_theme . $theme->name . '</p>';
+					echo '<p>' . wp_kses_post( $dashicon_theme . $theme->name ) . '</p>';
 				}
 			}
 			echo '<br>';
@@ -602,14 +596,16 @@ class Settings {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param array $args
+	 * @param array $args Callback args.
 	 */
 	public function token_callback_text( $args ) {
-		$name = isset( self::$options[ $args['id'] ] ) ? esc_attr( self::$options[ $args['id'] ] ) : '';
-		$type = isset( $args['token'] ) ? 'password' : 'text';
+		$options     = $this->get_class_vars( 'Base', 'options' );
+		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
+		$type        = isset( $args['token'] ) ? 'password' : 'text';
+		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>">
+			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
 		</label>
 		<?php
 	}
@@ -617,14 +613,14 @@ class Settings {
 	/**
 	 * Get the settings option array and print one of its values.
 	 *
-	 * @param array $args
+	 * @param array $args Callback args.
 	 */
 	public function token_callback_checkbox( $args ) {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo $args['title']; ?>
+			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
 	}
@@ -636,8 +632,9 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['option_page'] ) &&
-			'github_updater' === $_POST['option_page']
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['option_page'] )
+			&& 'github_updater' === $_POST['option_page']
 		) {
 			$options = $this->filter_options();
 			update_site_option( 'github_updater', $this->sanitize( $options ) );
@@ -649,6 +646,7 @@ class Settings {
 		 * @since 8.0.0
 		 */
 		do_action( 'github_updater_update_settings', $_POST );
+		// phpcs:enable
 
 		$this->redirect_on_save();
 	}
@@ -673,7 +671,11 @@ class Settings {
 			);
 		}
 
-		$options = array_merge( $options, $_POST['github_updater'] );
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:disable WordPress.Security.NonceVerification
+		$post_github_updater = isset( $_POST['github_updater'] ) ? wp_unslash( $_POST['github_updater'] ) : [];
+		// phpcs:enable
+		$options = array_merge( $options, $post_github_updater );
 
 		return $options;
 	}
@@ -694,16 +696,19 @@ class Settings {
 		 */
 		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
-		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) &&
-			( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] )
+			&& ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
 		) {
 			$update = true;
 		}
+		// phpcs:enable
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
 		if ( $update || $refresh_transients || $reset_api_key ) {
-			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( $_POST['_wp_http_referer'], PHP_URL_QUERY ) : null;
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'github_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'github_updater';
@@ -730,8 +735,10 @@ class Settings {
 	 * @return bool
 	 */
 	private function refresh_transients() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['github_updater_refresh_transients'] ) ) {
 			$_POST = $_REQUEST;
+			// phpcs:enable
 
 			return true;
 		}
@@ -745,7 +752,7 @@ class Settings {
 	 *
 	 * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/plugin_action_links_(plugin_file_name)
 	 *
-	 * @param array $links
+	 * @param array $links Array of plugin action links.
 	 *
 	 * @return array
 	 */
@@ -753,7 +760,7 @@ class Settings {
 		$settings_page = is_multisite() ? 'settings.php' : 'options-general.php';
 		$link          = [ '<a href="' . esc_url( network_admin_url( $settings_page ) ) . '?page=github-updater">' . esc_html__( 'Settings', 'github-updater' ) . '</a>' ];
 
-		return array_merge( $links, $link );
+		return array_merge( $link, $links );
 	}
 
 	/**
@@ -771,7 +778,7 @@ class Settings {
 			echo '</div>';
 		}
 		foreach ( $hide_tabs as $hide_tab ) {
-			echo '<div id="' . $hide_tab . '" class="hide-github-updater-settings">';
+			echo '<div id="' . esc_attr( $hide_tab ) . '" class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_' . $hide_tab . '_install_settings' );
 			echo '</div>';
 		}
@@ -782,7 +789,7 @@ class Settings {
 	 * Places a lock dashicon after the repo name if it's a private repo.
 	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *
-	 * @param string $git (github|bitbucket|bbserver|gitlab|gitea)
+	 * @param string $git (github|bitbucket|bbserver|gitlab|gitea).
 	 */
 	private function display_ghu_repos( $git ) {
 		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );
@@ -833,7 +840,7 @@ class Settings {
 			$is_broken  = $data['broken'] ? $broken : null;
 			$override   = $this->override_dot_org( $data['type'], $data );
 			$is_dot_org = $data['dot_org'] && ! $override ? $dot_org : null;
-			printf( '<p>' . $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . '</p>' );
+			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken ) . '</p>' );
 		}
 	}
 }

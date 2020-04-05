@@ -69,7 +69,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'github_updater_api_key', md5( uniqid( \rand(), true ) ) );
+			update_site_option( 'github_updater_api_key', md5( uniqid( \wp_rand(), true ) ) );
 		}
 	}
 
@@ -96,8 +96,8 @@ class Remote_Management {
 	 * @param array $post_data $_POST data.
 	 */
 	public function save_settings( $post_data ) {
-		if ( isset( $post_data['option_page'] ) &&
-			'github_updater_remote_management' === $post_data['option_page']
+		if ( isset( $post_data['option_page'] )
+			&& 'github_updater_remote_management' === $post_data['option_page']
 		) {
 			$options = isset( $post_data['github_updater_remote_management'] )
 				? $post_data['github_updater_remote_management']
@@ -148,10 +148,8 @@ class Remote_Management {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
 			<?php
-				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 				// settings_fields( 'github_updater_remote_management' );
 				do_settings_sections( 'github_updater_remote_settings' );
-				// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 				// submit_button();
 			?>
 			</form>
@@ -182,6 +180,7 @@ class Remote_Management {
 			'github_updater_remote_settings'
 		);
 
+		// phpcs:ignore
 		// @deprecated 9.1.0
 		// foreach ( self::$remote_management as $id => $name ) {
 		// add_settings_field(
@@ -226,10 +225,12 @@ class Remote_Management {
 
 		echo '<p>';
 		printf(
-			/* translators: %1: home URL, %2: REST API key */
-			__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' ),
-			'<span style="font-family:monospace;">' . home_url() . '</span>',
-			'<span style="font-family:monospace;">' . self::$api_key . '</span>'
+			wp_kses_post(
+				/* translators: %1: home URL, %2: REST API key */
+				__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' )
+			),
+			'<span style="font-family:monospace;">' . esc_url( home_url() ) . '</span>',
+			'<span style="font-family:monospace;">' . esc_attr( self::$api_key ) . '</span>'
 		);
 		echo '</p>';
 
@@ -240,7 +241,7 @@ class Remote_Management {
 				__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s', 'github-updater' )
 			),
 			'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
-			'<br><span style="font-family:monospace;">' . $api_url . '</span>'
+			'<br><span style="font-family:monospace;">' . esc_url( $api_url ) . '</span>'
 		);
 		echo '</p>';
 	}
@@ -258,7 +259,7 @@ class Remote_Management {
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo $args['title']; ?>
+			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
 	}
@@ -270,11 +271,14 @@ class Remote_Management {
 	 * @return bool
 	 */
 	public function reset_api_key() {
-		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] ) &&
-			'github_updater_remote_management' === $_REQUEST['tab']
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_REQUEST['tab'], $_REQUEST['github_updater_reset_api_key'] )
+			&& 'github_updater_remote_management' === sanitize_file_name( wp_unslash( $_REQUEST['tab'] ) )
 		) {
-			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = $_SERVER['HTTP_REFERER'];
+			$_POST = $_REQUEST;
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
+			// phpcs:enable
 			delete_site_option( 'github_updater_api_key' );
 
 			return true;

@@ -149,6 +149,7 @@ class Install {
 	public function install( $type, $config = null ) {
 		$this->set_install_post_data( $config );
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
 			if ( empty( $_POST['github_updater_branch'] ) ) {
 				$_POST['github_updater_branch'] = 'master';
@@ -164,11 +165,13 @@ class Install {
 			}
 
 			// Transform URI to owner/repo.
-			$headers                      = $this->parse_header_uri( $_POST['github_updater_repo'] );
+			$headers                      = $this->parse_header_uri( esc_url_raw( wp_unslash( $_POST['github_updater_repo'] ) ) );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
-			self::$install         = $this->sanitize( $_POST );
+			self::$install = $this->sanitize( $_POST );
+			// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 			self::$install['repo'] = self::$install['github_updater_install_repo'] = $headers['repo'];
+			// phpcs:enable
 
 			/*
 			 * Create GitHub endpoint.
@@ -279,7 +282,7 @@ class Install {
 				$_POST['github_access_token'] = $config['private'] ?: null;
 				break;
 			case 'bitbucket':
-				$_POST['is_private'] = $config['private'] ? '1' : null;
+				$_POST['bitbucket_access_token'] = $config['private'] ?: null;
 				break;
 			case 'gitlab':
 				$_POST['gitlab_access_token'] = $config['private'] ?: null;
@@ -349,10 +352,11 @@ class Install {
 	/**
 	 * Create Install Plugin or Install Theme page.
 	 *
-	 * @param string $type
+	 * @param string $type (plugin|theme).
 	 */
 	public function create_form( $type ) {
 		// Bail if installing.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
 			return;
 		}

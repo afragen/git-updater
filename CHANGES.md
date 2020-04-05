@@ -1,5 +1,21 @@
 #### [unreleased]
 
+#### 9.4.0 / 2020-04-04
+* set `minimum-stability: dev` in composer.json, helps with dependency loading for `dev-master`
+* fix potential PHP warning in `Basic_Auth_Loader::get_slug_for_credentials()` when installer, like TGMPA, passes as array and not string
+* define `$error_code[{git}]['git']` for certain errors to avoid PHP undefined index warning
+* update calls for Bitbucket Server REST API v7, thanks @Idealien
+* explicitly ignore themes without a root `style.css` file to avoid PHP warnings, thanks @cliffordp
+* move `Settings` action link to front
+* add Bitbucket pseudo-token, `username:password` for some private repos
+* Bitbucket credentials will automatically be converted to pseudo-tokens
+* update WP-CLI integration for Bitbucket pseudo-token
+* add plugins without updates to `$transient->no_update` to add _View details_ link, thanks @robincornett
+* no longer need to test if private repo when sending auth headers, auth headers are always sent
+* lots of escaping/sanitization/phpcs ignoring
+* added filter `github_updater_hide_branch_switcher` to hide branch switcher
+* added dependency check for composer's autoloader
+
 #### 9.3.2 / 2020-02-19
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
 * allow URL to a git host API to add header during installation

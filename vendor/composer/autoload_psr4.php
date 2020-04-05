@@ -7,5 +7,4 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Fragen\\GitHub_Updater\\' => array($baseDir . '/src/GitHub_Updater'),
-    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
 );

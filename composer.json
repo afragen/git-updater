@@ -28,13 +28,13 @@
     "issues": "https://github.com/afragen/github-updater/issues",
     "source": "https://github.com/afragen/github-updater"
   },
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
     "php": ">=5.6",
     "afragen/wordpress-plugin-readme-parser": "dev-master",
     "afragen/singleton": "dev-master",
-    "collizo4sky/persist-admin-notices-dismissal": "^1",
-    "composer/installers": "^1"
+    "collizo4sky/persist-admin-notices-dismissal": "^1"
   },
   "autoload": {
     "psr-4": {

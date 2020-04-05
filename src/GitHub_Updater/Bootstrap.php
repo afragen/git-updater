@@ -55,6 +55,24 @@ class Bootstrap {
 	}
 
 	/**
+	 * Deactivate plugin and die as composer autoloader not loaded.
+	 *
+	 * @return void
+	 */
+	public function deactivate_die() {
+		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+		\deactivate_plugins( plugin_basename( $this->file ) );
+
+		$message = sprintf(
+			/* translators: %s: documentation URL */
+			__( 'GitHub Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopenernoreferer">Learn more.</a>', 'github_updater' ),
+			'https://github.com/afragen/github-updater/wiki/Installation'
+		);
+
+		wp_die( wp_kses_post( $message ) );
+	}
+
+	/**
 	 * Run the bootstrap.
 	 *
 	 * @return void

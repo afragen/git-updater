@@ -64,8 +64,8 @@ class Gitea_API extends API implements API_Interface {
 			static::$options['gitea_access_token'] = null;
 			$set_credentials                       = true;
 		}
-		if ( empty( static::$options['gitea_access_token'] ) &&
-			in_array( 'gitea', $running_servers, true )
+		if ( empty( static::$options['gitea_access_token'] )
+			&& in_array( 'gitea', $running_servers, true )
 		) {
 			$this->gitea_error_notices();
 		}
@@ -454,11 +454,14 @@ class Gitea_API extends API implements API_Interface {
 		$auth_required = $this->get_class_vars( 'Settings', 'auth_required' );
 		$error_code    = $this->get_error_codes();
 
-		if ( ! isset( $error_code['gitea'] ) &&
-			empty( static::$options['gitea_access_token'] ) &&
-			$auth_required['gitea']
+		if ( ! isset( $error_code['gitea'] )
+			&& empty( static::$options['gitea_access_token'] )
+			&& $auth_required['gitea']
 		) {
-			self::$error_code['gitea'] = [ 'error' => true ];
+			self::$error_code['gitea'] = [
+				'git'   => 'gitea',
+				'error' => true,
+			];
 			if ( ! \PAnD::is_admin_notice_active( 'gitea-error-1' ) ) {
 				return;
 			}

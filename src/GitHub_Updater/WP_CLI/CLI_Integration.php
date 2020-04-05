@@ -53,10 +53,8 @@ class CLI_Integration extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--token=<access_token>]
-	 * : GitHub, GitLab, or Gitea access token if not already saved
-	 *
-	 * [--bitbucket-private]
-	 * : Indicates a private Bitbucket repository
+	 * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
+	 * Bitbucket pseudo-token in format `username:password`
 	 *
 	 * [--slug=<slug>]
 	 * : Optional string indicating the plugin slug
@@ -87,7 +85,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop --github
 	 *
-	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --bitbucket-private
+	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
 	 *
@@ -104,7 +102,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$headers = parse_url( $uri, PHP_URL_PATH );
 		$slug    = basename( $headers );
 		$this->process_branch( $cli_config, $slug );
-		WP_CLI::success( sprintf( 'Plugin %s installed.', "'$slug'" ) );
+		WP_CLI::success( sprintf( 'Plugin %s installed.', "'{$slug}'" ) );
 	}
 
 	/**
@@ -122,10 +120,8 @@ class CLI_Integration extends WP_CLI_Command {
 	 * ---
 	 *
 	 * [--token=<access_token>]
-	 * : GitHub or GitLab access token if not already saved
-	 *
-	 * [--bitbucket-private]
-	 * : Indicates a private Bitbucket repository
+	 * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
+	 * Bitbucket pseudo-token in format `username:password`
 	 *
 	 * [--slug=<slug>]
 	 * : Optional string indicating the theme slug
@@ -156,7 +152,7 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop --bitbucket
 	 *
-	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --bitbucket-private
+	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password
 	 *
 	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
 	 *
@@ -186,10 +182,9 @@ class CLI_Integration extends WP_CLI_Command {
 	 */
 	private function process_args( $uri, $assoc_args ) {
 		$token                 = isset( $assoc_args['token'] ) ? $assoc_args['token'] : false;
-		$bitbucket_private     = isset( $assoc_args['bitbucket-private'] ) ? $assoc_args['bitbucket-private'] : false;
 		$cli_config            = [];
 		$cli_config['uri']     = $uri;
-		$cli_config['private'] = $token ?: $bitbucket_private;
+		$cli_config['private'] = $token;
 		$cli_config['branch']  = isset( $assoc_args['branch'] ) ? $assoc_args['branch'] : 'master';
 		$cli_config['slug']    = isset( $assoc_args['slug'] ) ? $assoc_args['slug'] : null;
 
@@ -233,10 +228,11 @@ class CLI_Integration extends WP_CLI_Command {
  */
 require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
+
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
-class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
+class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin { // phpcs:ignore
 
 	/** Skin feeback. */
 	public function header() {
@@ -274,7 +270,7 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 /**
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
-class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
+class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin { // phpcs:ignore
 
 	/** Skin header. */
 	public function header() {
