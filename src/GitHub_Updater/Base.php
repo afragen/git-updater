@@ -588,6 +588,10 @@ class Base {
 
 		print '<ul id="' . esc_attr( $data['id'] ) . '" style="display:none; width: 100%;">';
 
+		// Disable branch switching to `master` for release assets.
+		if ( $data['release_asset'] ) {
+			unset( $data['branches']['master'] );
+		}
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
 				printf(
@@ -604,7 +608,10 @@ class Base {
 			usort( $rollback, 'version_compare' );
 			krsort( $rollback );
 			$rollback = array_splice( $rollback, 0, 4, true );
-			array_shift( $rollback ); // Dump current tag.
+			if ( $data['release_asset'] ) {
+				$rollback = array_slice( $rollback, 0, 1 );
+			}
+
 			foreach ( $rollback as $tag ) {
 				printf(
 					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . esc_attr( $tag ) . '">%s</a></li>',

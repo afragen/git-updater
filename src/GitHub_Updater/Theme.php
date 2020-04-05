@@ -248,9 +248,7 @@ class Theme {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					if ( ! $theme->release_asset ) {
-						add_action( "after_theme_row_{$theme->slug}", [ $this, 'multisite_branch_switcher' ], 15, 2 );
-					}
+					add_action( "after_theme_row_{$theme->slug}", [ $this, 'multisite_branch_switcher' ], 15, 2 );
 				}
 			}
 		}
@@ -462,6 +460,7 @@ class Theme {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
+		$branch_switch_data['release_asset']     = $repo->release_asset;
 
 		/*
 		 * Create after_theme_row_
@@ -509,9 +508,7 @@ class Theme {
 			} else {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			if ( ! $theme->release_asset ) {
-				$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
-			}
+			$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
 		}
 
 		return $prepared_themes;
@@ -635,6 +632,11 @@ class Theme {
 				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 			<?php
+
+			// Disable branch switching to `master` for release assets.
+			if ( $theme->release_asset ) {
+				unset( $theme->branches['master'] );
+			}
 			if ( isset( $theme->branches ) ) {
 				foreach ( array_keys( $theme->branches ) as $branch ) {
 					echo '<option>' . esc_attr( $branch ) . '</option>';
@@ -645,7 +647,9 @@ class Theme {
 				usort( $rollback, 'version_compare' );
 				krsort( $rollback );
 				$rollback = array_splice( $rollback, 0, 4, true );
-				array_shift( $rollback ); // Dump current tag.
+				if ( $theme->release_asset ) {
+					$rollback = array_slice( $rollback, 0, 1 );
+				}
 				foreach ( $rollback as $tag ) {
 					echo '<option>' . esc_attr( $tag ) . '</option>';
 				}
@@ -705,6 +709,10 @@ class Theme {
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
 					continue;
+				}
+
+				if ( $theme->release_asset && 'master' !== $theme->branch ) {
+					$response['package'] = $theme->branches[ $theme->branch ]['download'];
 				}
 
 				$transient->response[ $theme->slug ] = $response;

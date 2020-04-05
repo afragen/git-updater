@@ -247,7 +247,7 @@ class Plugin {
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
-			if ( ! $plugin->release_asset && 'init' === current_filter()
+			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
@@ -332,6 +332,7 @@ class Plugin {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
+		$branch_switch_data['release_asset']     = $repo->release_asset;
 
 		/*
 		 * Create after_plugin_row_
@@ -441,6 +442,10 @@ class Plugin {
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
 					continue;
+				}
+
+				if ( $plugin->release_asset && 'master' !== $plugin->branch ) {
+					$response['package'] = $plugin->branches[ $plugin->branch ]['download'];
 				}
 
 				$transient->response[ $plugin->file ] = (object) $response;
