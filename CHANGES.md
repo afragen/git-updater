@@ -2,6 +2,7 @@
 * allow for repos using release assets to have branch switcher
 * switching away from `master` or tag will use that branch for updating, not the release asset
 * update to JS to work with IE11, thanks @sharevb, arrow functions not supported in IE11
+* removed filter `github_updater_hide_branch_switcher` in favor of better branch switching
 
 #### 9.4.1 / 2020-04-04 **HotFix**
 * fixed problem with sanitizing
