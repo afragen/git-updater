@@ -683,20 +683,23 @@ trait GHU_Trait {
 		closedir( $dir );
 	}
 
+	/**
+	 * Test whether to use release asset.
+	 *
+	 * @param bool|string $branch_switch Branch to switch to or false.
+	 *
+	 * @return bool
+	 */
 	public function use_release_asset( $branch_switch = false ) {
-		$switch_to_branch     = $branch_switch && array_key_exists( $branch_switch, $this->type->branches );
-		$use_branch_switch    = ! $switch_to_branch && ( $branch_switch && $this->type->branch !== $branch_switch );
-		$release_asset_master = $this->type->release_asset && 'master' === $branch_switch;
-		$branch_switch_tag    = $branch_switch === $this->type->newest_tag || 'master' === $branch_switch;
-		$not_master           = $this->type->release_asset && 'master' !== $this->type->branch;
+		$is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
+		$not_master              = $this->type->release_asset && 'master' !== $this->type->branch;
+		$switch_master_tag       = 'master' === $branch_switch || $is_tag;
+		$current_master_noswitch = ! $not_master && ! $branch_switch;
 
-		$use_release_asset = ! $use_branch_switch
-		&& ! $not_master
-		&& $this->type->release_asset
-		|| $branch_switch_tag;
+		$need_release_asset = $switch_master_tag || $current_master_noswitch;
 
-		$old  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag && ! $switch_to_branch;
-		$diff = $old === $use_release_asset;
+		$use_release_asset = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
+			&& $need_release_asset;
 
 		return $use_release_asset;
 	}

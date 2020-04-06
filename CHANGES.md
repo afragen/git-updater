@@ -1,5 +1,6 @@
 #### [unreleased]
-* allow for repos using release assets to have branch switcher, switching away from `master` or tag will not use release asset for updating
+* allow for repos using release assets to have branch switcher
+* switching away from `master` or tag will use that branch for updating, not the release asset
 
 #### 9.4.1 / 2020-04-04 **HotFix**
 * fixed problem with sanitizing
