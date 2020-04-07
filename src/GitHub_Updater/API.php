@@ -615,9 +615,9 @@ class API {
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
-			wp_remote_get( $asset );
-			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			$auth_header     = $this->basic_authenticate_http( [],$asset );
+			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
+			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
 		}
 
 		if ( ! empty( $this->redirect ) ) {
@@ -627,22 +627,6 @@ class API {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Set HTTP header for following AWS release assets.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param array  $args Array of data.
-	 * @param string $url  URL.
-	 *
-	 * @return mixed $args
-	 */
-	public function set_aws_release_asset_header( $args, $url = '' ) {
-		$args['headers']['accept'] = 'application/octet-stream';
-
-		return $args;
 	}
 
 	/**
