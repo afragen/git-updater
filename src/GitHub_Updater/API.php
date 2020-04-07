@@ -85,26 +85,6 @@ class API {
 	}
 
 	/**
-	 * Adds custom user agent for GitHub Updater.
-	 *
-	 * @access public
-	 *
-	 * @param array  $args Existing HTTP Request arguments.
-	 * @param string $url  URL being passed.
-	 *
-	 * @return array Amended HTTP Request arguments.
-	 */
-	public static function http_request_args( $args, $url ) {
-		$args['sslverify'] = true;
-		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent']   .= '; GitHub Updater - https://github.com/afragen/github-updater';
-			$args['wp-rest-cache'] = [ 'tag' => 'github-updater' ];
-		}
-
-		return $args;
-	}
-
-	/**
 	 * Add data in Settings page.
 	 *
 	 * @param object $git Git API object.
@@ -197,13 +177,13 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-		add_filter( 'http_request_args', [ $this, 'http_request_args' ], 10, 2 );
-
+		//add_filter('http_request_args', [$this, 'download_package'],10,2);
+		$url         = $this->get_api_url( $url );
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $this->get_api_url( $url ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200, 404 ];
-		remove_filter( 'http_request_args', [ $this, 'http_request_args' ] );
+		//remove_filter('http_request_args', [$this, 'download_package']);
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
