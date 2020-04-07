@@ -43,7 +43,6 @@ trait Basic_Auth_Loader {
 	 */
 	public function load_authentication_hooks() {
 		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
-		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
 	}
 
 	/**
@@ -53,7 +52,6 @@ trait Basic_Auth_Loader {
 	 */
 	public function remove_authentication_hooks() {
 		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 	}
 
 	/**
@@ -268,29 +266,5 @@ trait Basic_Auth_Loader {
 		// phpcs:enable
 
 		return $type;
-	}
-
-	/**
-	 * Removes Basic Authentication header for Release Assets.
-	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
-	 *
-	 * @access public
-	 * @link   http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationQueryStringAuth
-	 *
-	 * @param array  $args The URL arguments passed.
-	 * @param string $url  The URL.
-	 *
-	 * @return array $args
-	 */
-	public function http_release_asset_auth( $args, $url ) {
-		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
-		$github_releases = false !== strpos( $url, 'releases/download' );
-
-		if ( $aws_host || $github_releases ) {
-			unset( $args['headers']['Authorization'] );
-		}
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
-
-		return $args;
 	}
 }
