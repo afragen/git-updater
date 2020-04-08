@@ -38,6 +38,7 @@ trait Basic_Auth_Loader {
 
 	/**
 	 * Add authentication headers for download packages.
+	 * Remove authentication headers from release assets.
 	 * Hooks into 'http_request_args' filter.
 	 *
 	 * @param array  $args HTTP GET REQUEST args.
@@ -54,7 +55,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Add authentication header to wp_remote_get().
 	 *
 	 * @access public
 	 *
@@ -169,7 +170,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get $slug for Basic Auth credentials.
+	 * Get $slug for authentication header credentials.
 	 *
 	 * @param array  $headers Array of headers from parse_url().
 	 * @param array  $repos   Array of repositories.
@@ -225,7 +226,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get repo type for Basic Auth credentials.
+	 * Get repo type for authentication header credentials.
 	 *
 	 * @param string $slug  Repository slug.
 	 * @param array  $repos Array of repositories.
@@ -262,7 +263,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Removes Basic Authentication header for Release Assets.
+	 * Removes authentication header for Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
 	 *
 	 * @access public
