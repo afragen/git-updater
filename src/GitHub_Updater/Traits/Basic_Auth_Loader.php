@@ -42,8 +42,7 @@ trait Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function load_authentication_hooks() {
-		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
-		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
+		// add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
 	}
 
 	/**
@@ -52,8 +51,23 @@ trait Basic_Auth_Loader {
 	 * @access public
 	 */
 	public function remove_authentication_hooks() {
-		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
+		// remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
+	}
+
+	/**
+	 * Add authentication headers for download packages.
+	 * Hooks into 'http_request_args' filter.
+	 *
+	 * @param array  $args HTTP GET REQUEST args.
+	 * @param string $url URL.
+	 *
+	 * @return array $args
+	 */
+	public function download_package( $args, $url ) {
+		if ( null !== $args['filename'] ) {
+			$args = array_merge( $args, $this->basic_authenticate_http( $args, $url ) );
+		}
+		return $args;
 	}
 
 	/**
@@ -113,7 +127,7 @@ trait Basic_Auth_Loader {
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
-			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
+			'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,

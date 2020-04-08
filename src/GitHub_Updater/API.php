@@ -188,14 +188,12 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-		// add_filter('http_request_args', [$this, 'download_package'],10,2);
 		$url           = $this->get_api_url( $url );
 		$auth_header   = $this->basic_authenticate_http( [], $url );
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200, 404 ];
-		// remove_filter('http_request_args', [$this, 'download_package']);
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );

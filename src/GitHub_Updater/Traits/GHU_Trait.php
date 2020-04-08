@@ -693,7 +693,7 @@ trait GHU_Trait {
 	public function use_release_asset( $branch_switch = false ) {
 		$is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
 		$switch_master_tag       = 'master' === $branch_switch || $is_tag;
-		$current_master_noswitch = 'master' === $this->type->branch && ! $branch_switch;
+		$current_master_noswitch = 'master' === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
 		$use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
