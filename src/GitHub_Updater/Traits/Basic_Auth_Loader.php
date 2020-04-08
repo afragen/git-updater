@@ -37,24 +37,6 @@ trait Basic_Auth_Loader {
 	private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
 
 	/**
-	 * Load hooks for authentication headers.
-	 *
-	 * @access public
-	 */
-	public function load_authentication_hooks() {
-		// add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
-	}
-
-	/**
-	 * Remove hooks for authentication headers.
-	 *
-	 * @access public
-	 */
-	public function remove_authentication_hooks() {
-		// remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
-	}
-
-	/**
 	 * Add authentication headers for download packages.
 	 * Hooks into 'http_request_args' filter.
 	 *
@@ -119,12 +101,8 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options = get_site_option( 'github_updater' );
-		$headers = parse_url( $url );
-		// TODO: remove after debugging.
-		if ( ! isset( $headers['host'] ) ) {
-			error_log( $url );
-		}
+		$options      = get_site_option( 'github_updater' );
+		$headers      = parse_url( $url );
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
