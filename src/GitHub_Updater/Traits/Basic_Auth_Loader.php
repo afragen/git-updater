@@ -66,6 +66,7 @@ trait Basic_Auth_Loader {
 	public function download_package( $args, $url ) {
 		if ( null !== $args['filename'] ) {
 			$args = array_merge( $args, $this->basic_authenticate_http( $args, $url ) );
+			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
 		}
 		return $args;
 	}
@@ -294,14 +295,13 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function http_release_asset_auth( $args, $url ) {
+	public function unset_release_asset_auth( $args, $url ) {
 		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
 		$github_releases = false !== strpos( $url, 'releases/download' );
 
 		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 
 		return $args;
 	}

@@ -487,7 +487,7 @@ class Base {
 		$this->tag     = isset( $_GET['rollback'] ) ? sanitize_text_field( wp_unslash( $_GET['rollback'] ) ) : false;
 		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;
 		$download_link = $repo_api->construct_download_link( $this->tag );
-		//add_filter( 'http_request_args', [$this, 'download_package'], 5, 2);
+		add_filter( 'http_request_args', [ $this, 'download_package' ], 10, 2 );
 
 		/**
 		 * Filter download link so developers can point to specific ZipFile
@@ -505,8 +505,6 @@ class Base {
 			'8.8.0',
 			'github_updater_post_construct_download_link'
 		);
-
-		//$this->basic_authenticate_http([], $download_link);
 
 		$rollback = [
 			$type         => $slug,
