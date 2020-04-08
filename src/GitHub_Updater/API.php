@@ -77,6 +77,17 @@ class API {
 	protected $redirect;
 
 	/**
+	 * Default args to pass to wp_remote_get().
+	 *
+	 * @var array
+	 */
+	protected $default_http_get_args = [
+		'sslverify'     => true,
+		'user-agent'    => 'WordPress; GitHub Updater - https://github.com/afragen/github-updater',
+		'wp-rest-cache' => [ 'tag' => 'github-updater' ],
+	];
+
+	/**
 	 * API constructor.
 	 */
 	public function __construct() {
@@ -177,13 +188,14 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-		//add_filter('http_request_args', [$this, 'download_package'],10,2);
-		$url         = $this->get_api_url( $url );
+		// add_filter('http_request_args', [$this, 'download_package'],10,2);
+		$url           = $this->get_api_url( $url );
+		$auth_header   = $this->basic_authenticate_http( [], $url );
 		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200, 404 ];
-		//remove_filter('http_request_args', [$this, 'download_package']);
+		// remove_filter('http_request_args', [$this, 'download_package']);
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -298,7 +310,6 @@ class API {
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
-		$this->load_authentication_hooks();
 
 		switch ( $type['git'] ) {
 			case 'github':
@@ -615,9 +626,10 @@ class API {
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			$auth_header     = $this->basic_authenticate_http( [],$asset );
+			$auth_header     = $this->basic_authenticate_http( [], $asset );
 			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
 			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
+			wp_remote_get( $asset, $args );
 		}
 
 		if ( ! empty( $this->redirect ) ) {

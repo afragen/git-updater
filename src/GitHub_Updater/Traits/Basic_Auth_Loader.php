@@ -64,7 +64,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function maybe_basic_authenticate_http( $args, $url ) {
+	public function basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -88,8 +88,6 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
-
-		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
 
 		return $args;
 	}
