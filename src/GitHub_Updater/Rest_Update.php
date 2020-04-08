@@ -231,7 +231,7 @@ class Rest_Update {
 			do_action( 'github_updater_pre_rest_process_request' );
 
 			// Add authentication header to download package.
-			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 10, 2 );
+			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
 
 			$this->get_webhook_source();
 			$tag            = $committish ? $committish : $tag;
