@@ -185,6 +185,7 @@ class Install {
 			/*
 			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
 			 * Save private setting if present.
+			 * Ensure authentication headers are present for download packages.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
 				add_filter( 'http_request_args', [ $this, 'download_package' ], 10, 2 );
