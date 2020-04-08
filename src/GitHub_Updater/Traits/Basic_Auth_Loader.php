@@ -42,7 +42,7 @@ trait Basic_Auth_Loader {
 	 * Hooks into 'http_request_args' filter.
 	 *
 	 * @param array  $args HTTP GET REQUEST args.
-	 * @param string $url URL.
+	 * @param string $url  URL.
 	 *
 	 * @return array $args
 	 */
@@ -51,6 +51,8 @@ trait Basic_Auth_Loader {
 			$args = array_merge( $args, $this->basic_authenticate_http( $args, $url ) );
 			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
 		}
+		remove_filter( 'http_request_args', [ $this, 'download_package' ] );
+
 		return $args;
 	}
 
