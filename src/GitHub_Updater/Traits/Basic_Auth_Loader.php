@@ -48,7 +48,7 @@ trait Basic_Auth_Loader {
 	 */
 	public function download_package( $args, $url ) {
 		if ( null !== $args['filename'] ) {
-			$args = array_merge( $args, $this->basic_authenticate_http( $args, $url ) );
+			$args = array_merge( $args, $this->add_auth_header( $args, $url ) );
 			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
 		}
 		remove_filter( 'http_request_args', [ $this, 'download_package' ] );
@@ -66,7 +66,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function basic_authenticate_http( $args, $url ) {
+	public function add_auth_header( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;

@@ -189,7 +189,7 @@ class API {
 	 */
 	protected function api( $url ) {
 		$url           = $this->get_api_url( $url );
-		$auth_header   = $this->basic_authenticate_http( [], $url );
+		$auth_header   = $this->add_auth_header( [], $url );
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
@@ -624,7 +624,7 @@ class API {
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			$auth_header     = $this->basic_authenticate_http( [], $asset );
+			$auth_header     = $this->add_auth_header( [], $asset );
 			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
 			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
 			wp_remote_get( $asset, $args );
