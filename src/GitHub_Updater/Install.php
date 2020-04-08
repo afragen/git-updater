@@ -185,10 +185,10 @@ class Install {
 			/*
 			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
 			 * Save private setting if present.
-			 * Ensures `maybe_authenticate_http()` is available.
+			 * Ensure authentication headers are present for download packages.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				$this->load_authentication_hooks();
+				add_filter( 'http_request_args', [ $this, 'download_package' ], 10, 2 );
 				if ( self::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}

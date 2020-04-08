@@ -37,27 +37,27 @@ trait Basic_Auth_Loader {
 	private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
 
 	/**
-	 * Load hooks for authentication headers.
+	 * Add authentication headers for download packages.
+	 * Remove authentication headers from release assets.
+	 * Hooks into 'http_request_args' filter.
 	 *
-	 * @access public
+	 * @param array  $args HTTP GET REQUEST args.
+	 * @param string $url  URL.
+	 *
+	 * @return array $args
 	 */
-	public function load_authentication_hooks() {
-		add_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ], 5, 2 );
-		add_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ], 15, 2 );
+	public function download_package( $args, $url ) {
+		if ( null !== $args['filename'] ) {
+			$args = array_merge( $args, $this->basic_authenticate_http( $args, $url ) );
+			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
+		}
+		remove_filter( 'http_request_args', [ $this, 'download_package' ] );
+
+		return $args;
 	}
 
 	/**
-	 * Remove hooks for authentication headers.
-	 *
-	 * @access public
-	 */
-	public function remove_authentication_hooks() {
-		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
-	}
-
-	/**
-	 * Add Basic Authentication $args to http_request_args filter hook.
+	 * Add authentication header to wp_remote_get().
 	 *
 	 * @access public
 	 *
@@ -66,7 +66,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function maybe_basic_authenticate_http( $args, $url ) {
+	public function basic_authenticate_http( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -91,8 +91,6 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		remove_filter( 'http_request_args', [ $this, 'maybe_basic_authenticate_http' ] );
-
 		return $args;
 	}
 
@@ -106,16 +104,12 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options = get_site_option( 'github_updater' );
-		$headers = parse_url( $url );
-		// TODO: remove after debugging.
-		if ( ! isset( $headers['host'] ) ) {
-			error_log( $url );
-		}
+		$options      = get_site_option( 'github_updater' );
+		$headers      = parse_url( $url );
 		$username_key = null;
 		$password_key = null;
 		$credentials  = [
-			'api.wordpress' => 'api.wordpress.org' === $headers['host'],
+			'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
@@ -178,7 +172,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get $slug for Basic Auth credentials.
+	 * Get $slug for authentication header credentials.
 	 *
 	 * @param array  $headers Array of headers from parse_url().
 	 * @param array  $repos   Array of repositories.
@@ -234,7 +228,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Get repo type for Basic Auth credentials.
+	 * Get repo type for authentication header credentials.
 	 *
 	 * @param string $slug  Repository slug.
 	 * @param array  $repos Array of repositories.
@@ -271,7 +265,7 @@ trait Basic_Auth_Loader {
 	}
 
 	/**
-	 * Removes Basic Authentication header for Release Assets.
+	 * Removes authentication header for Release Assets.
 	 * Storage in AmazonS3 buckets, uses Query String Request Authentication Alternative.
 	 *
 	 * @access public
@@ -282,14 +276,13 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function http_release_asset_auth( $args, $url ) {
+	public function unset_release_asset_auth( $args, $url ) {
 		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
 		$github_releases = false !== strpos( $url, 'releases/download' );
 
 		if ( $aws_host || $github_releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
-		remove_filter( 'http_request_args', [ $this, 'http_release_asset_auth' ] );
 
 		return $args;
 	}
