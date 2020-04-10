@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 9.4.2 / 2020-04-10 **HotFix 2**
+* fixed problem with incorrectly sanitizing remote install URI fragment
+
 #### 9.4.1 / 2020-04-04 **HotFix**
 * fixed problem with sanitizing
 
