@@ -167,7 +167,7 @@ class Install {
 			}
 
 			// Transform URI to owner/repo.
-			$headers                      = $this->parse_header_uri( esc_url_raw( wp_unslash( $_POST['github_updater_repo'] ) ) );
+			$headers                      = $this->parse_header_uri( sanitize_text_field( wp_unslash( $_POST['github_updater_repo'] ) ) );
 			$_POST['github_updater_repo'] = $headers['owner_repo'];
 
 			self::$install = $this->sanitize( $_POST );
