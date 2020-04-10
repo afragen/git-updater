@@ -147,7 +147,9 @@ class Install {
 	 * @return bool
 	 */
 	public function install( $type, $config = null ) {
-		$this->set_install_post_data( $config );
+		if ( self::is_wp_cli() ) {
+			$this->set_install_post_data( $config );
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
