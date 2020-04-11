@@ -6,10 +6,10 @@
 * direct injection of authentication headers into `wp_remote_get()`
 * filter added for adding authentication headers for downloads packages
 
-#### 9.4.2 / 2020-04-10 **HotFix 2**
+#### 9.4.2 / 2020-04-10 -HotFix 2-
 * fixed problem with incorrectly sanitizing remote install URI fragment
 
-#### 9.4.1 / 2020-04-04 **HotFix**
+#### 9.4.1 / 2020-04-04 -HotFix-
 * fixed problem with sanitizing
 
 #### 9.4.0 / 2020-04-04
