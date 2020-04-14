@@ -5,6 +5,7 @@
 * removed filter `github_updater_hide_branch_switcher` in favor of better branch switching
 * direct injection of authentication headers into `wp_remote_get()`
 * filter added for adding authentication headers for downloads packages
+* don't try to check the `is_private` status for GitHub release assets. All are stored on AWS anyway and occasionally the `is_private` status will not have been set resulting in an incorrect cached value
 
 #### 9.4.2 / 2020-04-10 -HotFix 2-
 * fixed problem with incorrectly sanitizing remote install URI fragment
