@@ -618,7 +618,7 @@ class Theme {
 				$rollback = array_keys( $theme->rollback );
 				usort( $rollback, 'version_compare' );
 				krsort( $rollback );
-				$rollback = array_splice( $rollback, 0, 4, true );
+				$rollback = array_splice( $rollback, 0, 3, true );
 				if ( $theme->release_asset ) {
 					$rollback = array_slice( $rollback, 0, 1 );
 				}

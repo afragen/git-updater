@@ -607,7 +607,7 @@ class Base {
 			$rollback = array_keys( $rollback );
 			usort( $rollback, 'version_compare' );
 			krsort( $rollback );
-			$rollback = array_splice( $rollback, 0, 4, true );
+			$rollback = array_splice( $rollback, 0, 3, true );
 			if ( $data['release_asset'] ) {
 				$rollback = array_slice( $rollback, 0, 1 );
 			}
