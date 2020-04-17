@@ -2,3 +2,4 @@
 .idea
 .vs-code
 /vendor
+composer.lock
