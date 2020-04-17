@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.5.0 / 2020-04-17
 * allow for repos using release assets to have branch switcher
 * switching away from `master` or tag will use that branch for updating, not the release asset
 * update to JS to work with IE11, thanks @sharevb, arrow functions not supported in IE11
