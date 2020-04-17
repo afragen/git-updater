@@ -1,9 +1,19 @@
 #### [unreleased]
 
-#### 9.4.2 / 2020-04-10 **HotFix 2**
+#### 9.5.0 / 2020-04-17
+* allow for repos using release assets to have branch switcher
+* switching away from `master` or tag will use that branch for updating, not the release asset
+* update to JS to work with IE11, thanks @sharevb, arrow functions not supported in IE11
+* removed filter `github_updater_hide_branch_switcher` in favor of better branch switching
+* direct injection of authentication headers into `wp_remote_get()`
+* filter added for adding authentication headers for downloads packages
+* don't try to check the `is_private` status for GitHub release assets. All are stored on AWS anyway and occasionally the `is_private` status will not have been set resulting in an incorrect cached value
+* limit rollback to current tag only, effectively a re-install of current tag
+
+#### 9.4.2 / 2020-04-10 -HotFix 2-
 * fixed problem with incorrectly sanitizing remote install URI fragment
 
-#### 9.4.1 / 2020-04-04 **HotFix**
+#### 9.4.1 / 2020-04-04 -HotFix-
 * fixed problem with sanitizing
 
 #### 9.4.0 / 2020-04-04

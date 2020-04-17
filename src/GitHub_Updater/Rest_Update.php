@@ -120,6 +120,9 @@ class Rest_Update {
 			}
 		);
 
+		// Add authentication header to download package.
+		add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
+
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->file );
 
@@ -179,6 +182,9 @@ class Rest_Update {
 				return $current;
 			}
 		);
+
+		// Add authentication header to download package.
+		add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->slug );

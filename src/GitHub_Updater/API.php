@@ -77,31 +77,22 @@ class API {
 	protected $redirect;
 
 	/**
+	 * Default args to pass to wp_remote_get().
+	 *
+	 * @var array
+	 */
+	protected $default_http_get_args = [
+		'sslverify'     => true,
+		'user-agent'    => 'WordPress; GitHub Updater - https://github.com/afragen/github-updater',
+		'wp-rest-cache' => [ 'tag' => 'github-updater' ],
+	];
+
+	/**
 	 * API constructor.
 	 */
 	public function __construct() {
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
 		static::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
-	}
-
-	/**
-	 * Adds custom user agent for GitHub Updater.
-	 *
-	 * @access public
-	 *
-	 * @param array  $args Existing HTTP Request arguments.
-	 * @param string $url  URL being passed.
-	 *
-	 * @return array Amended HTTP Request arguments.
-	 */
-	public static function http_request_args( $args, $url ) {
-		$args['sslverify'] = true;
-		if ( false === stripos( $args['user-agent'], 'GitHub Updater' ) ) {
-			$args['user-agent']   .= '; GitHub Updater - https://github.com/afragen/github-updater';
-			$args['wp-rest-cache'] = [ 'tag' => 'github-updater' ];
-		}
-
-		return $args;
 	}
 
 	/**
@@ -197,13 +188,12 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	protected function api( $url ) {
-		add_filter( 'http_request_args', [ $this, 'http_request_args' ], 10, 2 );
-
+		$url           = $this->get_api_url( $url );
+		$auth_header   = $this->add_auth_header( [], $url );
 		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $this->get_api_url( $url ) );
+		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200, 404 ];
-		remove_filter( 'http_request_args', [ $this, 'http_request_args' ] );
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -318,7 +308,6 @@ class API {
 		}
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
-		$this->load_authentication_hooks();
 
 		switch ( $type['git'] ) {
 			case 'github':
@@ -628,16 +617,17 @@ class API {
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
 		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( $this->exit_no_update( $response ) && ! isset( $_REQUEST['override'] ) ) {
+		if ( $this->exit_no_update( $response ) && ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] ) ) {
 			return false;
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			add_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
-			wp_remote_get( $asset );
-			remove_filter( 'http_request_args', [ $this, 'set_aws_release_asset_header' ] );
+			$auth_header     = $this->add_auth_header( [], $asset );
+			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
+			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
+			wp_remote_get( $asset, $args );
 		}
 
 		if ( ! empty( $this->redirect ) ) {
@@ -647,22 +637,6 @@ class API {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Set HTTP header for following AWS release assets.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param array  $args Array of data.
-	 * @param string $url  URL.
-	 *
-	 * @return mixed $args
-	 */
-	public function set_aws_release_asset_header( $args, $url = '' ) {
-		$args['headers']['accept'] = 'application/octet-stream';
-
-		return $args;
 	}
 
 	/**

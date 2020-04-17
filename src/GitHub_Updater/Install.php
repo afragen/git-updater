@@ -147,7 +147,9 @@ class Install {
 	 * @return bool
 	 */
 	public function install( $type, $config = null ) {
-		$this->set_install_post_data( $config );
+		if ( self::is_wp_cli() ) {
+			$this->set_install_post_data( $config );
+		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'github_updater_install' === $_POST['option_page'] ) {
@@ -185,10 +187,8 @@ class Install {
 			/*
 			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
 			 * Save private setting if present.
-			 * Ensures `maybe_authenticate_http()` is available.
 			 */
 			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				$this->load_authentication_hooks();
 				if ( self::$installed_apis['bitbucket_api'] ) {
 					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
 				}
@@ -232,6 +232,9 @@ class Install {
 
 			$url      = self::$install['download_link'];
 			$upgrader = $this->get_upgrader( $type, $url );
+
+			// Ensure authentication headers are present for download packages.
+			add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
 
 			// Install the repo from the $source urldecode() and save branch setting.
 			if ( $upgrader && $upgrader->install( $url ) ) {

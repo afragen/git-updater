@@ -157,7 +157,7 @@ class Bitbucket_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		// Release asset.
-		if ( $this->type->release_asset && '0.0.0' !== $this->type->newest_tag ) {
+		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
 			return $this->get_release_asset_redirect( $release_asset, true );

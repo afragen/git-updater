@@ -12,9 +12,17 @@ class RunningTest extends WP_UnitTestCase {
 			'gitea_api'            => true,
 			'zipfile_api'          => true,
 		];
+		$git_servers = [
+			'github'    => 'GitHub',
+			'bitbucket' => 'Bitbucket',
+			'gitlab'    => 'GitLab',
+			'gitea'     => 'Gitea',
+			'zipfile'   => 'Zipfile',
+		];
 
 		$base = new Base();
 		//echo "\n" . var_export($base::$installed_apis, true);
 		$this->assertEqualSets($installed_apis, $base::$installed_apis);
+		$this->assertEqualSets($git_servers, $base::$git_servers);
 	}
 }

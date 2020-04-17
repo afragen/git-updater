@@ -98,11 +98,14 @@ class Init {
 		add_action( 'wp_ajax_nopriv_github-updater-update', [ Singleton::get_instance( 'Rest_Update', $this ), 'process_request' ] );
 		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
 
-		// Load hook for shiny updates Basic Authentication headers.
-		if ( self::is_doing_ajax() ) {
-			$this->base->load_authentication_hooks();
-		}
-
+		// Load hook for adding authentication headers for download packages.
+		add_filter(
+			'upgrader_pre_download',
+			function() {
+				add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
+				return false; // upgrader_pre_download filter default return value.
+			}
+		);
 		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
 	}
 

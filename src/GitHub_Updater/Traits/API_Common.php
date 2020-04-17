@@ -75,10 +75,7 @@ trait API_Common {
 	private function parse_release_asset( $git, $request, $response ) {
 		switch ( $git ) {
 			case 'github':
-				$download_link = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->browser_download_url : null;
-
-				// Private repo.
-				$response = ( null !== $download_link && ( property_exists( $this->type, 'is_private' ) && $this->type->is_private ) ) ? $response->assets[0]->url : $download_link;
+				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->url : null;
 				break;
 			case 'bitbucket':
 				$download_base = $this->get_api_url( $request, true );
@@ -342,7 +339,6 @@ trait API_Common {
 		}
 
 		if ( ! $response ) {
-			add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ], 15, 2 );
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
@@ -351,7 +347,6 @@ trait API_Common {
 				$response          = new \stdClass();
 				$response->message = 'No release asset found';
 			}
-			remove_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'http_release_asset_auth' ] );
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {

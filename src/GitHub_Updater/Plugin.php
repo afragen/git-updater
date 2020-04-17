@@ -247,7 +247,7 @@ class Plugin {
 			}
 
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
-			if ( ! $plugin->release_asset && 'init' === current_filter()
+			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
@@ -293,20 +293,6 @@ class Plugin {
 
 		$plugin = $this->get_repo_slugs( dirname( $plugin_file ), $this );
 
-		/**
-		 * Filter to selectively turn off branch switching.
-		 * Useful for beta testing a specific branch when using release assets
-		 * for distribution.
-		 *
-		 * @since 9.4.0
-		 *
-		 * @param bool
-		 * @param string $plugin['slug'] Plugin slug.
-		 */
-		if ( apply_filters( 'github_updater_hide_branch_switcher', false, $plugin['slug'] ) ) {
-			return false;
-		}
-
 		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
 		$nonced_update_url = wp_nonce_url(
 			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
@@ -332,6 +318,7 @@ class Plugin {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
+		$branch_switch_data['release_asset']     = $repo->release_asset;
 
 		/*
 		 * Create after_plugin_row_
@@ -441,6 +428,11 @@ class Plugin {
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
 					continue;
+				}
+
+				// Update download link for release_asset non-master branches.
+				if ( $plugin->release_asset && 'master' !== $plugin->branch ) {
+					$response['package'] = $plugin->branches[ $plugin->branch ]['download'];
 				}
 
 				$transient->response[ $plugin->file ] = (object) $response;
