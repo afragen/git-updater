@@ -103,7 +103,7 @@ class Init {
 			'upgrader_pre_download',
 			function() {
 				add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
-				return false;
+				return false; // upgrader_pre_download filter default return value.
 			}
 		);
 		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
