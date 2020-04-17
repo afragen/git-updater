@@ -1,0 +1,33 @@
+{
+  "name": "afragen/wordpress-plugin-readme-parser",
+  "description": "A clone of the current WordPress.org Plugin Readme Parser, class-parser.php",
+  "type": "library",
+  "keywords": [
+    "wordpress",
+    "readme",
+    "parser"
+  ],
+  "license": "MIT",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/afragen/wordpress-plugin-reamde-parser"
+    }
+  ],
+  "authors": [
+    {
+      "name": "WordPress.org",
+      "homepage": "https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme"
+    }
+  ],
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.4",
+    "erusev/parsedown": "^1.7"
+  },
+  "autoload": {
+    "classmap": [
+      "class-parser.php"
+    ]
+  }
+}

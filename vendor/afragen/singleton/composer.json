@@ -1,0 +1,33 @@
+{
+  "name": "afragen/singleton",
+  "description": "A singleton static proxy generator.",
+  "type": "library",
+  "keywords": [
+    "wordpress",
+    "singleton"
+  ],
+  "license": "MIT",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/afragen/singleton"
+    }
+  ],
+  "authors": [
+    {
+      "name": "Andy Fragen",
+      "email": "andy@thefragens.com",
+      "homepage": "https://github.com/afragen/singleton",
+      "role": "Developer"
+    }
+  ],
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.4"
+  },
+  "autoload": {
+    "classmap": [
+      "Singleton.php"
+    ]
+  }
+}
