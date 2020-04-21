@@ -55,7 +55,7 @@ class Readme_Parser extends Parser {
 		 */
 		$this->readme_path = apply_filters( 'github_updater_temp_readme_filepath', $file_path );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-		$this->readme_path = file_put_contents( $this->readme_path, $file ) ? $this->readme_path : false;
+		$this->readme_path = is_int( file_put_contents( $this->readme_path, $file ) ) ? $this->readme_path : false;
 		parent::__construct( $this->readme_path );
 	}
 

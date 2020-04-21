@@ -1,4 +1,5 @@
 #### [unreleased]
+* test `Readme_Parser::__construct()` `file_put_contents()` with additional test for success, hopefully squashes [#704](https://github.com/afragen/github-updater/issues/704) once and for all
 
 #### 9.5.0 / 2020-04-17
 * allow for repos using release assets to have branch switcher
