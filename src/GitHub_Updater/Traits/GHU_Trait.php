@@ -32,7 +32,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_wp_cli() {
-		return defined( 'WP_CLI' ) && WP_CLI;
+		return defined( 'WP_CLI' ) && \WP_CLI;
 	}
 
 	/**
