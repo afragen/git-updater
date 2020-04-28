@@ -25,9 +25,9 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
- * Generic URI: https://bitbucket.example.com/projects/<owner>/<repo>
+ * Generic URI: https://bitbucket.example.com/<owner>/<repo>
  *
- * A group project uses the generic URI above.
+ * A group project uses the generic URI format above.
  * For a User project the <owner> must be written as `~<owner>`.
  *
  * @link https://docs.atlassian.com/bitbucket-server/rest/5.3.1/bitbucket-rest.html
@@ -113,7 +113,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_release_asset() {
 		// TODO: make this work.
-		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 		// return $this->get_api_release_asset( 'bbserver', '/1.0/projects/:owner/:repo/downloads' );
 	}
 
