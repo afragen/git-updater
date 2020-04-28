@@ -25,8 +25,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
- * Group URI: https://bitbucket.example.com/projects/<owner>/<repo>
- * User URI: https://bitbucket.example.com/users/<owner>/<repo>
+ * Generic URI: https://bitbucket.example.com/projects/<owner>/<repo>
+ *
+ * A group project uses the generic URI above.
+ * For a User project the <owner> must be written as `~<owner>`.
  *
  * @link https://docs.atlassian.com/bitbucket-server/rest/5.3.1/bitbucket-rest.html
  *
@@ -52,7 +54,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_info( $file ) {
-		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/:owner/repos/:repo/browse/{$file}" );
+		return $this->get_remote_api_info( 'bbserver', $file, "/1.0/projects/:owner/repos/:repo/browse/{$file}" );
 	}
 
 	/**
@@ -61,7 +63,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/:owner/repos/:repo' );
+		return $this->get_remote_api_repo_meta( 'bbserver', '/1.0/projects/:owner/repos/:repo' );
 	}
 
 	/**
@@ -72,7 +74,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( 'bbserver', '/1.0/:owner/repos/:repo/tags' );
+		return $this->get_remote_api_tag( 'bbserver', '/1.0/projects/:owner/repos/:repo/tags' );
 	}
 
 	/**
@@ -81,7 +83,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		return $this->get_remote_api_readme( 'bbserver', '/1.0/:owner/repos/:repo/raw/readme.txt' );
+		return $this->get_remote_api_readme( 'bbserver', '/1.0/projects/:owner/repos/:repo/raw/readme.txt' );
 	}
 
 	/**
@@ -92,7 +94,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/:owner/repos/:repo/raw/{$changes}" );
+		return $this->get_remote_api_changes( 'bbserver', $changes, "/1.0/projects/:owner/repos/:repo/raw/{$changes}" );
 	}
 
 	/**
@@ -101,7 +103,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_branches() {
-		return $this->get_remote_api_branches( 'bbserver', '/1.0/:owner/repos/:repo/branches' );
+		return $this->get_remote_api_branches( 'bbserver', '/1.0/projects/:owner/repos/:repo/branches' );
 	}
 
 	/**
@@ -124,7 +126,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/1.0/:owner/repos/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/1.0/projects/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
@@ -325,7 +327,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = "{$repo_type['base_uri']}/{$this->type->owner}/repos/{$this->type->slug}/archive";
+			$download_base    = "{$repo_type['base_uri']}/projects/{$this->type->owner}/repos/{$this->type->slug}/archive";
 			$download_base    = $this->add_endpoints( $this, $download_base );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
@@ -451,7 +453,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = "{$base}/rest/api/1.0/{$headers['owner']}/repos/{$headers['repo']}/archive";
+			$install['download_link'] = "{$base}/rest/api/1.0/projects/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
