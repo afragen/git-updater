@@ -128,10 +128,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$download_link_base = $this->get_api_url( '/1.0/projects/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
-		if ( $branch_switch ) {
-			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
-		}
-
 		/*
 		 * If a branch has been given, use branch.
 		 * If branch is master (default) and tags are used, use newest tag.
@@ -140,6 +136,11 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 		} else {
 			$endpoint = add_query_arg( 'at', $this->type->newest_tag, $endpoint );
+		}
+
+		// Create branch switch endpoint.
+		if ( $branch_switch ) {
+			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
 		}
 
 		$download_link = $download_link_base . $endpoint;
