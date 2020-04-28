@@ -124,7 +124,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
-		$download_link_base = $this->get_api_url( '/1.0/latest/:owner/repos/:repo/archive', true );
+		$download_link_base = $this->get_api_url( '/1.0/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
@@ -325,7 +325,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$rollback = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = "{$repo_type['base_uri']}/latest/{$this->type->owner}/repos/{$this->type->slug}/archive";
+			$download_base    = "{$repo_type['base_uri']}/{$this->type->owner}/repos/{$this->type->slug}/archive";
 			$download_base    = $this->add_endpoints( $this, $download_base );
 			$tags[]           = $tag;
 			$rollback[ $tag ] = add_query_arg( 'at', $tag, $download_base );
@@ -451,7 +451,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $bitbucket_org ) {
-			$install['download_link'] = "{$base}/rest/api/1.0/latest/{$headers['owner']}/repos/{$headers['repo']}/archive";
+			$install['download_link'] = "{$base}/rest/api/1.0/{$headers['owner']}/repos/{$headers['repo']}/archive";
 
 			$install['download_link'] = add_query_arg(
 				[
