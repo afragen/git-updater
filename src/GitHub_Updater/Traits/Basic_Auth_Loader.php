@@ -90,6 +90,7 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
+		$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
 
 		return $args;
 	}
