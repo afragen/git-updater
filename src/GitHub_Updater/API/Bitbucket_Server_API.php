@@ -133,6 +133,16 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
 		}
 
+		/*
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
+		 */
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+			$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
+		} else {
+			$endpoint = add_query_arg( 'at', $this->type->newest_tag, $endpoint );
+		}
+
 		$download_link = $download_link_base . $endpoint;
 
 		/**
