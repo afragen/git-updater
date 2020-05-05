@@ -44,8 +44,7 @@ class Readme_Parser extends Parser {
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		$upload_dir = wp_upload_dir()['basedir'];
-		$file_path  = trailingslashit( $upload_dir ) . md5( $file ) . '-tmp-readme.txt';
+		$file_path = trailingslashit( get_temp_dir() ) . md5( $file ) . '-tmp-readme.txt';
 
 		/**
 		 * Filter location of temporary readme filepath.
