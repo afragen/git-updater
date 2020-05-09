@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.5.2 / 2020-05-08
 * no need for using release asset with GHU
 
 #### 9.5.1 / 2020-05-08
