@@ -1,9 +1,9 @@
 #### [unreleased]
 
-#### 9.5.2 / 2020-05-08
+#### 9.5.2 / 2020-05-09
 * no need for using release asset with GHU
 
-#### 9.5.1 / 2020-05-08
+#### 9.5.1 / 2020-05-09
 * test `Readme_Parser::__construct()` `file_put_contents()` with additional test for success, hopefully squashes [#704](https://github.com/afragen/github-updater/issues/704) once and for all, actual fix is to set constant `WP_TEMP_DIR` as appropriate
 * prevent error if no credentials are set
 * un-screwup Bitbucket Server, sorry @allrite, fixes [#872](https://github.com/afragen/github-updater/issues/872)
