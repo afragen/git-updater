@@ -25,8 +25,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
- * Group URI: https://bitbucket.example.com/projects/<owner>/<repo>
- * User URI: https://bitbucket.example.com/users/<owner>/<repo>
+ * Generic URI: https://bitbucket.example.com/<owner>/<repo>
+ *
+ * A group project uses the generic URI format above.
+ * For a User project the <owner> must be written as `~<owner>`.
  *
  * @link https://docs.atlassian.com/bitbucket-server/rest/5.3.1/bitbucket-rest.html
  *
@@ -111,7 +113,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	public function get_release_asset() {
 		// TODO: make this work.
-		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
 		// return $this->get_api_release_asset( 'bbserver', '/1.0/projects/:owner/:repo/downloads' );
 	}
 
@@ -127,6 +128,17 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$download_link_base = $this->get_api_url( '/1.0/projects/:owner/repos/:repo/archive', true );
 		$endpoint           = $this->add_endpoints( $this, '' );
 
+		/*
+		 * If a branch has been given, use branch.
+		 * If branch is master (default) and tags are used, use newest tag.
+		 */
+		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+			$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
+		} else {
+			$endpoint = add_query_arg( 'at', $this->type->newest_tag, $endpoint );
+		}
+
+		// Create branch switch endpoint.
 		if ( $branch_switch ) {
 			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
 		}

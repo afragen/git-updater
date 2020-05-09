@@ -90,6 +90,7 @@ trait Basic_Auth_Loader {
 				}
 			}
 		}
+		$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
 
 		return $args;
 	}
@@ -128,7 +129,7 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) ) {
+		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) && ! $this instanceof Install ) {
 			return $credentials;
 		}
 
