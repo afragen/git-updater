@@ -21,7 +21,7 @@
  * Network:           true
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Languages:  https://github.com/afragen/github-updater-translations
- * Requires at least: 4.6
+ * Requires at least: 5.2
  * Requires PHP:      5.6
  */
 

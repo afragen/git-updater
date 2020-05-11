@@ -2,7 +2,7 @@
 Contributors: afragen, garyj, sethcarstens, limikael
 Donate link: https://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
-Requires at least: 4.6
+Requires at least: 5.2
 Requires PHP: 5.6
 Tested up to: 5.4
 Stable tag: master
