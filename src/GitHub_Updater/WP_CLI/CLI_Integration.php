@@ -18,6 +18,8 @@ use Fragen\Singleton;
 $class = new CLI_Integration();
 WP_CLI::add_command( 'plugin install-git', [ $class, 'install_plugin' ] );
 WP_CLI::add_command( 'theme install-git', [ $class, 'install_theme' ] );
+WP_CLI::add_command( 'plugin branch-switch', [ $class, 'branch_switch' ] );
+WP_CLI::add_command( 'theme branch-switch', [ $class, 'branch_switch' ] );
 
 /**
  * Class CLI_Integration
@@ -173,6 +175,67 @@ class CLI_Integration extends WP_CLI_Command {
 	}
 
 	/**
+	 * Branch switching via WP-CLI.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <slug>
+	 * : Slug of the repo being installed
+	 *
+	 * <branch_name>
+	 * : String indicating the branch name to be installed
+	 * ---
+	 * default: master
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp plugin branch-switch <slug> <branch>
+	 *
+	 *     wp theme branch-switch <slug> <branch>
+	 *
+	 * @param string $args       Repository slug.
+	 * @param array  $assoc_args Array of optional arguments.
+	 *
+	 * @subcommand branch-switch
+	 */
+	public function branch_switch( $args = null, $assoc_args ) {
+		list($slug, $branch) = $args;
+		$plugins             = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes              = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$configs             = array_merge( $plugins, $themes );
+
+		$repo = isset( $configs[ $slug ] ) ? $configs[ $slug ] : false;
+		if ( ! $repo ) {
+			WP_CLI::error( sprintf( 'There is no repository with slug: %s installed.', "'{$slug}'" ) );
+			exit;
+		}
+
+		$rest_api_key = Singleton::get_instance( 'Base', $this )->get_class_vars( 'Remote_Management', 'api_key' );
+		$api_url      = add_query_arg(
+			[
+				'key'       => $rest_api_key,
+				$repo->type => $repo->slug,
+				'branch'    => $branch,
+				'override'  => true,
+			],
+			home_url( 'wp-json/' . Singleton::get_instance( 'Base', $this )->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
+		);
+		$response     = wp_remote_get( $api_url, [ 'timeout' => 10 ] );
+
+		if ( is_wp_error( $response ) ) {
+			WP_CLI::error( $response->errors['http_request_failed'][0] );
+			exit;
+		}
+		if ( 200 === \wp_remote_retrieve_response_code( $response ) ) {
+			WP_CLI::success( $response['body'] );
+		} else {
+			WP_CLI::warning( 'Branch switching resulted in an error.' );
+			WP_CLI::warning( $response['body'] );
+		}
+	}
+
+	/**
 	 * Process WP-CLI config data.
 	 *
 	 * @param string $uri        URI to process.
@@ -228,12 +291,10 @@ class CLI_Integration extends WP_CLI_Command {
  */
 require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
-
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
 class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin { // phpcs:ignore
-
 	/** Skin feeback. */
 	public function header() {
 	}
@@ -271,7 +332,6 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin { // phpcs:ignore
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
 class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin { // phpcs:ignore
-
 	/** Skin header. */
 	public function header() {
 	}
