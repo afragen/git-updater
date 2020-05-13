@@ -41,7 +41,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public static function is_doing_ajax() {
-		return defined( 'DOING_AJAX' ) && DOING_AJAX;
+		return defined( 'DOING_AJAX' ) && \DOING_AJAX;
 	}
 
 	/**
