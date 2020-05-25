@@ -12,6 +12,7 @@ namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\GitHub_Updater\API\Gist_API;
 
 /*
  * Exit if called directly.
@@ -230,6 +231,12 @@ class Plugin {
 	public function get_remote_plugin_meta() {
 		$plugins = [];
 		foreach ( (array) $this->config as $plugin ) {
+			// Fix repository for Gist.
+			if ( 'gist' === $plugin->git ) {
+				$plugin                        = Singleton::get_instance( 'API\Gist_API', $this, $plugin )->parse_gist_meta( $plugin );
+				$this->config[ $plugin->slug ] = $plugin;
+				unset( $this->config[ $plugin->gist_id ] );
+			}
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *

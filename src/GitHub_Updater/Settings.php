@@ -52,6 +52,8 @@ class Settings {
 		'gitlab_enterprise' => false,
 		'gitea'             => true,
 		'gitea_private'     => false,
+		'gist'              => false,
+		'gist_private'      => false,
 	];
 
 	/**
@@ -544,6 +546,8 @@ class Settings {
 				?: 'gitlab' === $token->git;
 			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
 				?: 'gitea' === $token->git;
+			static::$auth_required['gist_private']      = static::$auth_required['gist_private']
+				?: 'gist' === $token->git;
 		}
 	}
 

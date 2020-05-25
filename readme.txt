@@ -48,6 +48,11 @@ The following headers are available for use depending upon your hosting source.
 * Gitea Theme URI
 * Gitea Languages
 
+### Gist
+* Gist Plugin URI
+* Gist Theme URI
+* Gist Languages
+
 ## Frequently Asked Questions
 
 #### Wiki

@@ -77,6 +77,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * : Optional switch to denote a Gitea repository
 	 * Required when installing from a Gitea installation
 	 *
+	 * [--gist]
+	 * : Optional switch to denote a GitHub Gist repository
+	 * Required when installing from a GitHub Gist installation
+	 *
 	 * [--zipfile]
 	 * : Optional switch to denote a Zipfile
 	 * Required when installing from a Zipfile
@@ -143,6 +147,10 @@ class CLI_Integration extends WP_CLI_Command {
 	 * [--gitea]
 	 * : Optional switch to denote a Gitea repository
 	 * Required when installing from a Gitea installation
+	 *
+	 * [--gist]
+	 * : Optional switch to denote a GitHub Gist repository
+	 * Required when installing from a GitHub Gist installation
 	 *
 	 * [--zipfile]
 	 * : Optional switch to denote a Zipfile
@@ -263,6 +271,9 @@ class CLI_Integration extends WP_CLI_Command {
 				break;
 			case isset( $assoc_args['gitea'] ):
 				$cli_config['git'] = 'gitea';
+				break;
+			case isset( $assoc_args['gist'] ):
+				$cli_config['git'] = 'gist';
 				break;
 			case isset( $assoc_args['zipfile'] ):
 				$cli_config['git'] = 'zipfile';
