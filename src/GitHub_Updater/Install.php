@@ -319,15 +319,6 @@ class Install {
 				? new CLI_Plugin_Installer_Skin()
 				: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
 			$upgrader = new \Plugin_Upgrader( $skin );
-			add_filter(
-				'install_plugin_complete_actions',
-				[
-					$this,
-					'install_plugin_complete_actions',
-				],
-				10,
-				3
-			);
 		}
 
 		if ( 'theme' === $type ) {
@@ -502,21 +493,6 @@ class Install {
 			</select>
 		</label>
 		<?php
-	}
-
-	/**
-	 * Remove activation links after plugin installation as no method to get $plugin_file.
-	 *
-	 * @param array  $install_actions Array of plugin actions.
-	 * @param mixed  $api             Unused.
-	 * @param string $plugin_file     Plugin file/slug.
-	 *
-	 * @return mixed
-	 */
-	public function install_plugin_complete_actions( $install_actions, $api, $plugin_file ) {
-		unset( $install_actions['activate_plugin'], $install_actions['network_activate'] );
-
-		return $install_actions;
 	}
 
 	/**

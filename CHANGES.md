@@ -1,5 +1,6 @@
 #### [unreleased]
 * add WP-CLI branch switching
+* keep _Activate Plugin_ link on remote install
 
 #### 9.5.2 / 2020-05-09
 * no need for using release asset with GHU
