@@ -11,12 +11,14 @@ class RunningTest extends WP_UnitTestCase {
 			'gitlab_api'           => true,
 			'gitea_api'            => true,
 			'zipfile_api'          => true,
+			'gist_api'             => true,
 		];
 		$git_servers = [
 			'github'    => 'GitHub',
 			'bitbucket' => 'Bitbucket',
 			'gitlab'    => 'GitLab',
 			'gitea'     => 'Gitea',
+			'gist'      => 'Gist',
 			'zipfile'   => 'Zipfile',
 		];
 
