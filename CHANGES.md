@@ -1,5 +1,6 @@
 #### [unreleased]
 * add WP-CLI branch switching
+* add `class Gist_API` to install/update GitHub Gists, themes will use hash as slug
 
 #### 9.5.2 / 2020-05-09
 * no need for using release asset with GHU

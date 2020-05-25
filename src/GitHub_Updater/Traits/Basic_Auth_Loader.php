@@ -116,7 +116,7 @@ trait Basic_Auth_Loader {
 			'type'          => null,
 			'enterprise'    => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com' ];
+		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com', 'gist.githubusercontent.com' ];
 
 		if ( $credentials['api.wordpress'] ) {
 			return $credentials;
@@ -146,7 +146,9 @@ trait Basic_Auth_Loader {
 				$type            = 'bitbucket';
 				break;
 			case 'github':
+			case 'gist':
 			case $type instanceof GitHub_API:
+			case $type instanceof Gist_API:
 				$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
 				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 				$type  = 'github';

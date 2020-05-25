@@ -226,6 +226,13 @@ class Install {
 				self::$install = Singleton::get_instance( 'API\Zipfile_API', $this )->remote_install( $headers, self::$install );
 			}
 
+			/**
+			 * Install from Gist.
+			 */
+			if ( 'gist' === self::$install['github_updater_api'] ) {
+				self::$install = Singleton::get_instance( 'API\Gist_API', $this )->remote_install( $headers, self::$install );
+			}
+
 			if ( isset( self::$install['options'] ) ) {
 				$this->save_options_on_install( self::$install['options'] );
 			}

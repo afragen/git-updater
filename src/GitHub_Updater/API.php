@@ -19,6 +19,7 @@ use Fragen\GitHub_Updater\API\Bitbucket_API;
 use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 use Fragen\GitHub_Updater\API\GitLab_API;
 use Fragen\GitHub_Updater\API\Gitea_API;
+use Fragen\GitHub_Updater\API\Gist_API;
 
 /*
  * Exit if called directly.
@@ -136,7 +137,8 @@ class API {
 	 *                                                   \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
 	 *                                                   \Fragen\GitHub_Updater\API\Gitea_API|
 	 *                                                   \Fragen\GitHub_Updater\API\GitHub_API|
-	 *                                                   \Fragen\GitHub_Updater\API\GitLab_API $repo_api
+	 *                                                   \Fragen\GitHub_Updater\API\GitLab_API|
+	 *                                                   \Fragen\GitHub_Updater\API\Gist_API $repo_api
 	 */
 	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
@@ -157,6 +159,9 @@ class API {
 				break;
 			case 'gitea':
 				$repo_api = new Gitea_API( $repo );
+				break;
+			case 'gist':
+				$repo_api = new Gist_API( $repo );
 				break;
 		}
 
@@ -212,7 +217,7 @@ class API {
 					],
 				]
 			);
-			if ( 'github' === $type['git'] ) {
+			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
 				GitHub_API::ratelimit_reset( $response, $this->type->slug );
 			}
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
@@ -233,7 +238,7 @@ class API {
 	 * @return mixed $response JSON encoded.
 	 */
 	private function convert_body_string_to_json( $response ) {
-		if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API ) {
+		if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API || $this instanceof Gist_API ) {
 			$body = wp_remote_retrieve_body( $response );
 			if ( null === json_decode( $body ) ) {
 				$response['body'] = json_encode( $body );
@@ -280,6 +285,12 @@ class API {
 				$arr['base_uri']      = $this->type->enterprise . '/api/v1';
 				$arr['base_download'] = $this->type->enterprise;
 				break;
+			case 'gist':
+				$arr['git']           = 'gist';
+				$arr['base_uri']      = 'https://api.github.com';
+				$arr['base_raw']      = 'https://gist.githubusercontent.com';
+				$arr['base_download'] = 'https://gist.github.com';
+				break;
 		}
 
 		return $arr;
@@ -298,9 +309,10 @@ class API {
 	protected function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
 		$segments = [
-			'owner'  => $this->type->owner,
-			'repo'   => $this->type->slug,
-			'branch' => empty( $this->type->branch ) ? 'master' : $this->type->branch,
+			'owner'   => $this->type->owner,
+			'repo'    => $this->type->slug,
+			'branch'  => empty( $this->type->branch ) ? 'master' : $this->type->branch,
+			'gist_id' => isset( $this->type->gist_id ) ? $this->type->gist_id : null,
 		];
 
 		foreach ( $segments as $segment => $value ) {
@@ -358,6 +370,9 @@ class API {
 					break;
 				}
 				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
+				break;
+			case 'gist':
+				$type['base_uri'] = $repo_api->add_endpoints( $this, $type );
 				break;
 			default:
 				break;
