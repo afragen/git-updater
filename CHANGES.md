@@ -2,6 +2,7 @@
 * add WP-CLI branch switching
 * keep _Activate Plugin_ link on remote install
 * add `class Gist_API` to install/update GitHub Gists, themes will use hash as slug
+* add filter `github_updater_number_rollbacks` to set the number of tagged releases (rollbacks) available in branch switching
 
 #### 9.5.2 / 2020-05-09
 * no need for using release asset with GHU
