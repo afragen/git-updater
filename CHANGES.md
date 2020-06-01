@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.6.0 / 2020-06-01
 * add WP-CLI branch switching
 * keep _Activate Plugin_ link on remote install
 * add `class Gist_API` to install/update GitHub Gists, themes will use hash as slug
