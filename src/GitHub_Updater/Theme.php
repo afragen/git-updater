@@ -618,7 +618,20 @@ class Theme {
 				$rollback = array_keys( $theme->rollback );
 				usort( $rollback, 'version_compare' );
 				krsort( $rollback );
-				$rollback = array_slice( $rollback, 0, 1 );
+
+				/**
+				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
+				 *
+				 * @since 9.6.0
+				 * @param int Number of rollbacks. Zero implies value not set.
+				 */
+				$num_rollbacks = absint( apply_filters( 'github_updater_number_rollbacks', 0 ) );
+
+				// Still only return last tag if using release assets.
+				$rollback = 0 === $num_rollbacks || $theme->release_asset
+					? array_slice( $rollback, 0, 1 )
+					: array_splice( $rollback, 0, $num_rollbacks, true );
+
 				foreach ( $rollback as $tag ) {
 					echo '<option>' . esc_attr( $tag ) . '</option>';
 				}
