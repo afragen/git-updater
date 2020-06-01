@@ -2,9 +2,9 @@
 Contributors: afragen, garyj, sethcarstens, limikael
 Donate link: https://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
-Requires at least: 4.6
+Requires at least: 5.2
 Requires PHP: 5.6
-Tested up to: 5.4
+Tested up to: 5.5
 Stable tag: master
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -47,6 +47,11 @@ The following headers are available for use depending upon your hosting source.
 * Gitea Plugin URI
 * Gitea Theme URI
 * Gitea Languages
+
+### Gist
+* Gist Plugin URI
+* Gist Theme URI
+* Gist Languages
 
 ## Frequently Asked Questions
 

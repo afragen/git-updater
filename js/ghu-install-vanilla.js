@@ -11,7 +11,7 @@
 (function () {
 
 	// Hide non-default (Bitbucket & GitLab) settings on page load.
-	let nonDefault = ['bitbucket', 'gitlab', 'gitea', 'zipfile'];
+	let nonDefault = ['bitbucket', 'gitlab', 'gitea', 'zipfile', 'gist'];
 
 	nonDefault.forEach(function (item) {
 		let parents = getParents(item, 'tr');

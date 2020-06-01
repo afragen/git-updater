@@ -6,9 +6,9 @@
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
-* Requires at least: 4.6
+* Requires at least: 5.2
 * Requires PHP: 5.6
-* Tested up to: 5.4
+* Tested up to: trunk
 * Stable tag: [master](https://github.com/afragen/github-updater/releases/latest)
 * Donate link: <https://thefragens.com/github-updater-donate>
 * License: GPLv2 or later

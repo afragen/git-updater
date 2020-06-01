@@ -39,6 +39,10 @@ class Readme_Parser extends Parser {
 	 * Pass file path into class-parser.php.
 	 * Delete temporary file when finished.
 	 *
+	 * Problems relating to not finding the `tmp` directory on the server can be fixed by directly setting this path using the `WP_TEMP_DIR` constant.
+	 *
+	 * @link https://developer.wordpress.org/reference/functions/get_temp_dir/
+	 *
 	 * @param string $file File info.
 	 *
 	 * @return void
