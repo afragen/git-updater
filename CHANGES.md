@@ -1,4 +1,5 @@
 #### [unreleased]
+* exit early from `Gist_API::construct_download_link()` if meta not present
 
 #### 9.6.0 / 2020-06-01
 * add WP-CLI branch switching

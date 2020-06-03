@@ -129,6 +129,10 @@ class Gist_API extends API implements API_Interface {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $branch_switch = false ) {
+		if ( ! isset( $this->response['meta'] ) ) {
+			return;
+		}
+
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/:owner/:gist_id/archive/', true );
 		$endpoint           = "{$this->response['meta']['current_hash']}.zip";
@@ -150,7 +154,7 @@ class Gist_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param GitHub_API|API $git Git host specific API object.
+	 * @param GitHub_API|API $git      Git host specific API object.
 	 * @param string         $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
