@@ -1,5 +1,7 @@
 language: php
 
+os: linux
+
 dist: trusty
 
 notifications:
@@ -28,7 +30,7 @@ cache:
     - vendor
     - $HOME/.composer/cache
 
-matrix:
+jobs:
   fast_finish: true
   allow_failures:
     - php: nightly
@@ -71,7 +73,7 @@ before_deploy:
 deploy:
   provider: releases
   skip_cleanup: true
-  api_key: $GITHUB_TOKEN
+  token: $GITHUB_TOKEN
   file: /tmp/github-updater-${TRAVIS_TAG}.zip
   on:
     tags: true
