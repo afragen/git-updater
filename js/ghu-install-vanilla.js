@@ -41,8 +41,8 @@
 				display(parents);
 			});
 
-			// console.log('selected', this.value);
-			// console.log('hideMe', hideMe);
+			console.log('selected', this.value);
+			console.log('hideMe', hideMe);
 		});
 	}
 
