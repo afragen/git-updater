@@ -321,6 +321,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			(array) $response->values
 		);
 
+		$arr = empty( $arr ) ? 'No tags found' : $arr;
+
 		return $arr;
 	}
 
