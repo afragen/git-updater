@@ -72,7 +72,7 @@ before_deploy:
   - git archive -o /tmp/github-updater-${TRAVIS_TAG}.zip --prefix=github-updater/ ${TRAVIS_COMMIT}
 deploy:
   provider: releases
-  skip_cleanup: true
+  cleanup: false
   token: $GITHUB_TOKEN
   file: /tmp/github-updater-${TRAVIS_TAG}.zip
   on:
