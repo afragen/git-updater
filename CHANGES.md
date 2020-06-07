@@ -1,6 +1,7 @@
 #### [unreleased]
 * exit early from `Gist_API::construct_download_link()` if meta not present
 * fix saved value when `Bitbucket_Server_API` tag response is empty
+* fix issue if Bitbucket API branch response is malformed, fixes [#875](https://github.com/afragen/github-updater/issues/875)
 
 #### 9.6.0 / 2020-06-01
 * add WP-CLI branch switching
