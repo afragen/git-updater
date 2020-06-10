@@ -609,7 +609,7 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array();
+		$cron = _get_cron_array() ?: [];
 		foreach ( $cron as $timestamp => $cronhooks ) {
 			if ( key( $cronhooks ) === $event ) {
 				$this->is_cron_overdue( $cron, $timestamp );
