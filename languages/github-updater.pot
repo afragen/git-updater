@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.6.0\n"
+"Project-Id-Version: GitHub Updater 9.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-06-01T18:15:05+00:00\n"
+"POT-Creation-Date: 2020-06-11T16:09:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -36,83 +36,83 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:365
-#: src/GitHub_Updater/API/Bitbucket_API.php:397
+#: src/GitHub_Updater/API/Bitbucket_API.php:368
+#: src/GitHub_Updater/API/Bitbucket_API.php:400
 msgid "Bitbucket Pseudo-Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:372
-#: src/GitHub_Updater/API/Bitbucket_API.php:473
+#: src/GitHub_Updater/API/Bitbucket_API.php:375
+#: src/GitHub_Updater/API/Bitbucket_API.php:476
 msgid "Bitbucket Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:384
-#: src/GitHub_Updater/API/Bitbucket_API.php:480
+#: src/GitHub_Updater/API/Bitbucket_API.php:387
+#: src/GitHub_Updater/API/Bitbucket_API.php:483
 msgid "Bitbucket Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:415
+#: src/GitHub_Updater/API/Bitbucket_API.php:418
 msgid "Bitbucket Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:446
+#: src/GitHub_Updater/API/Bitbucket_API.php:449
 msgid "Bitbucket"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:455
+#: src/GitHub_Updater/API/Bitbucket_API.php:458
 msgid "Enter `username:password` if private repository. Don't forget the colon `:`."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:462
+#: src/GitHub_Updater/API/Bitbucket_API.php:465
 msgid "Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:496
+#: src/GitHub_Updater/API/Bitbucket_API.php:499
 msgid "Enter Bitbucket username."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_API.php:511
+#: src/GitHub_Updater/API/Bitbucket_API.php:514
 msgid "Enter Bitbucket password."
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:359
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:364
 msgid "Bitbucket Server Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:366
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:371
 msgid "Bitbucket Server Username"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:378
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:383
 msgid "Bitbucket Server Password"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:391
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:396
 msgid "Bitbucket Server Pseudo-Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:409
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:414
 msgid "Bitbucket Server Private Repositories"
 msgstr ""
 
-#: src/GitHub_Updater/API/Bitbucket_Server_API.php:440
+#: src/GitHub_Updater/API/Bitbucket_Server_API.php:445
 msgid "Bitbucket Server"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gist_API.php:318
+#: src/GitHub_Updater/API/Gist_API.php:322
 msgid "GitHub Gist Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gist_API.php:329
+#: src/GitHub_Updater/API/Gist_API.php:333
 msgid "Gist Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/Gist_API.php:356
+#: src/GitHub_Updater/API/Gist_API.php:360
 #: src/GitHub_Updater/API/GitHub_API.php:417
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/Gist_API.php:374
+#: src/GitHub_Updater/API/Gist_API.php:378
 msgid "Gist"
 msgstr ""
 
