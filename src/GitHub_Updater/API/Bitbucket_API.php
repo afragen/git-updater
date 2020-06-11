@@ -323,6 +323,9 @@ class Bitbucket_API extends API implements API_Interface {
 		}
 		$branches = [];
 		foreach ( $response as $branch ) {
+			if ( ! \property_exists( $branch, 'name' ) ) {
+				continue;
+			}
 			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash']      = $branch->target->hash;
 			$branches[ $branch->name ]['commit_timestamp'] = $branch->target->date;

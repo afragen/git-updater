@@ -24,7 +24,7 @@
 	// Only run when on proper tab.
 	if (selects !== null) {
 		selects.addEventListener('change', function () {
-			let defaults = ['github', 'bitbucket', 'gitlab', 'gitea', 'zipfile'];
+			let defaults = ['github', 'bitbucket', 'gitlab', 'gitea', 'zipfile', 'gist'];
 
 			// Create difference array.
 			let hideMe = remove(defaults, this.value);
@@ -40,6 +40,9 @@
 				let parents = getParents(item, 'tr');
 				display(parents);
 			});
+
+			console.log('selected', this.value);
+			console.log('hideMe', hideMe);
 		});
 	}
 

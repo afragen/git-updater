@@ -292,6 +292,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 		$branches = [];
 		foreach ( $response as $branch ) {
+			if ( ! \property_exists( $branch, 'displayId' ) ) {
+				continue;
+			}
 			$branches[ $branch->displayId ]['download']    = $this->construct_download_link( $branch->displayId );
 			$branches[ $branch->displayId ]['commit_hash'] = $branch->latestCommit;
 		}
@@ -320,6 +323,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 			},
 			(array) $response->values
 		);
+
+		$arr = empty( $arr ) ? 'No tags found' : $arr;
 
 		return $arr;
 	}

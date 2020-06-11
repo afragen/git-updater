@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 9.6.1 / 2020-06-11
+* exit early from `Gist_API::construct_download_link()` if meta not present
+* fix saved value when `Bitbucket_Server_API` tag response is empty
+* fix issue if Bitbucket API branch response is malformed, fixes [#875](https://github.com/afragen/github-updater/issues/875)
+* fix PHP warning in `GHU_Trait::is_duplicate_wp_cron_event` when no cron events present
+
 #### 9.6.0 / 2020-06-01
 * add WP-CLI branch switching
 * keep _Activate Plugin_ link on remote install
@@ -768,9 +774,9 @@
 
 #### 4.0.0
 * changed `is_a()` to `instanceof` per <https://core.trac.wordpress.org/changeset/31188>
-* requires PHP 5.3 or greater as autoloader class requires namespacing 
+* requires PHP 5.3 or greater as autoloader class requires namespacing
 * updated all classes for namespacing
-* renamed directory and class names to allow for PSR 4 style loading 
+* renamed directory and class names to allow for PSR 4 style loading
 * clean up a number of foreach loops where I was only using either key or value, not both
 * Special thanks for all my translators, especially @grappler for adding translation key for description
 * bugfix to correctly pick CHANGES.MD or CHANGELOG.MD regardless of case
