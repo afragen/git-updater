@@ -117,7 +117,7 @@ class Settings {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'github-updater-settings', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater-settings.css', [], $this->get_plugin_version() );
+					wp_register_style( 'github-updater-settings', plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) ) . '/css/github-updater-settings.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'github-updater-settings' );
 				}
 			);
@@ -250,7 +250,7 @@ class Settings {
 		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'github_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'github_updater';
 		// phpcs:enable
-		$logo = plugins_url( basename( GITHUB_UPDATER_DIR ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
+		$logo = plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>

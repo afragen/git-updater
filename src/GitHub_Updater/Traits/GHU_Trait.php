@@ -645,7 +645,9 @@ trait GHU_Trait {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$plugin_data = \get_plugin_data( GITHUB_UPDATER_DIR . '/github-updater.php' );
+
+		$dir         = constant( str_replace( '\Traits', '', __NAMESPACE__ . '\DIR' ) );
+		$plugin_data = \get_plugin_data( $dir . '/github-updater.php' );
 
 		return $plugin_data['Version'];
 	}
