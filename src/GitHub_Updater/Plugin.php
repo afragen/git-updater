@@ -171,11 +171,18 @@ class Plugin {
 				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			$header                                = $this->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
-			$current_branch                        = "current_branch_{$header['repo']}";
+			$header         = $this->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
+			$current_branch = "current_branch_{$header['repo']}";
+
+			if ( isset( self::$options[ $current_branch ] )
+			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['release_branch'] )
+			) {
+				unset( self::$options[ $current_branch ] );
+				update_site_option( 'github_updater', self::$options );
+			}
 			$branch                                = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]
-				: false;
+				: $header['release_branch'];
 			$git_plugin['type']                    = 'plugin';
 			$git_plugin['git']                     = $repo_parts['git_server'];
 			$git_plugin['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
@@ -183,7 +190,8 @@ class Plugin {
 			$git_plugin['enterprise_api']          = $header['enterprise_api'];
 			$git_plugin['owner']                   = $header['owner'];
 			$git_plugin['slug']                    = $header['repo'];
-			$git_plugin['branch']                  = $branch ?: 'master';
+			$git_plugin['branch']                  = $branch;
+			$git_plugin['release_branch']          = $header['release_branch'];
 			$git_plugin['file']                    = $slug;
 			$git_plugin['local_path']              = WP_PLUGIN_DIR . "/{$header['repo']}/";
 			$git_plugin['author']                  = $plugin['Author'];
@@ -326,6 +334,7 @@ class Plugin {
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
 		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_branch']    = $repo->release_branch;
 
 		/*
 		 * Create after_plugin_row_
@@ -359,7 +368,7 @@ class Plugin {
 		}
 
 		// wp.org plugin.
-		if ( ! $plugin || ( $plugin->dot_org && 'master' === $plugin->branch ) ) {
+		if ( ! $plugin || ( $plugin->dot_org && $plugin->release_branch === $plugin->branch ) ) {
 			return $false;
 		}
 
@@ -438,7 +447,7 @@ class Plugin {
 				}
 
 				// Update download link for release_asset non-master branches.
-				if ( $plugin->release_asset && 'master' !== $plugin->branch ) {
+				if ( $plugin->release_asset && $plugin->release_branch !== $plugin->branch ) {
 					$response['package'] = $plugin->branches[ $plugin->branch ]['download'];
 				}
 

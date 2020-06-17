@@ -167,7 +167,7 @@ class Bitbucket_API extends API implements API_Interface {
 		 * If a branch has been given, use branch.
 		 * If branch is master (default) and tags are used, use newest tag.
 		 */
-		if ( 'master' !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( $this->type->release_branch !== $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {
 				$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 			} else {

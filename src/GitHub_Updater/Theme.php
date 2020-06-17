@@ -186,11 +186,17 @@ class Theme {
 				$header = $this->parse_header_uri( $repo_uri );
 			}
 
-			$header                               = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
-			$current_branch                       = "current_branch_{$header['repo']}";
+			$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+			$current_branch = "current_branch_{$header['repo']}";
+			if ( isset( self::$options[ $current_branch ] )
+			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['release_branch'] )
+			) {
+				unset( self::$options[ $current_branch ] );
+				update_site_option( 'github_updater', self::$options );
+			}
 			$branch                               = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]
-				: false;
+				: $header['release_branch'];
 			$git_theme['type']                    = 'theme';
 			$git_theme['git']                     = $repo_parts['git_server'];
 			$git_theme['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
@@ -206,7 +212,8 @@ class Theme {
 			$git_theme['local_version']           = strtolower( $theme['Version'] );
 			$git_theme['sections']['description'] = $theme['Description'];
 			$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['slug'] . '/';
-			$git_theme['branch']                  = $branch ?: 'master';
+			$git_theme['branch']                  = $branch;
+			$git_theme['release_branch']          = $header['release_branch'];
 			$git_theme['languages']               = $header['languages'];
 			$git_theme['ci_job']                  = $header['ci_job'];
 			$git_theme['release_asset']           = $header['release_asset'];
@@ -447,6 +454,7 @@ class Theme {
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
 		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_branch']    = $repo->release_branch;
 
 		/*
 		 * Create after_theme_row_
@@ -694,7 +702,7 @@ class Theme {
 				}
 
 				// Update download link for release_asset non-master branches.
-				if ( $theme->release_asset && 'master' !== $theme->branch ) {
+				if ( $theme->release_asset && $theme->release_branch !== $theme->branch ) {
 					$response['package'] = $theme->branches[ $theme->branch ]['download'];
 				}
 

@@ -311,7 +311,7 @@ class API {
 		$segments = [
 			'owner'   => $this->type->owner,
 			'repo'    => $this->type->slug,
-			'branch'  => empty( $this->type->branch ) ? 'master' : $this->type->branch,
+			'branch'  => empty( $this->type->branch ) ? $this->type->release_branch : $this->type->branch,
 			'gist_id' => isset( $this->type->gist_id ) ? $this->type->gist_id : null,
 		];
 
@@ -537,6 +537,7 @@ class API {
 		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
 		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
 		$this->type->dot_org        = $response['dot_org'];
+		$this->type->release_branch = ! empty( $response['ReleaseBranch'] ) ? $response['ReleaseBranch'] : $this->type->release_branch;
 	}
 
 	/**
