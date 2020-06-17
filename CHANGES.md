@@ -1,4 +1,5 @@
 #### [unreleased]
+* use _dynamic_ constant for GitHub Updater plugin directory based on namespace
 
 #### 9.6.1 / 2020-06-11
 * exit early from `Gist_API::construct_download_link()` if meta not present
