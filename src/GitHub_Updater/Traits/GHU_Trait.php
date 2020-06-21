@@ -243,7 +243,7 @@ trait GHU_Trait {
 		// Correctly account for dashicon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
-		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->release_branch === $repo->branch : true;
+		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->production_branch === $repo->branch : true;
 
 		$transient_key = 'plugin' === $type ? $repo->file : null;
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
@@ -561,12 +561,12 @@ trait GHU_Trait {
 		$hosted_domains     = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
 		$theme              = null;
 
-		$header['enterprise_uri'] = null;
-		$header['enterprise_api'] = null;
-		$header['languages']      = null;
-		$header['ci_job']         = false;
-		$header['release_asset']  = false;
-		$header['release_branch'] = false;
+		$header['enterprise_uri']    = null;
+		$header['enterprise_api']    = null;
+		$header['languages']         = null;
+		$header['ci_job']            = false;
+		$header['release_asset']     = false;
+		$header['production_branch'] = false;
 
 		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
@@ -597,8 +597,8 @@ trait GHU_Trait {
 				}
 			}
 		}
-		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
-		$header['release_branch'] = ! $header['release_branch'] && ! empty( $headers['ReleaseBranch'] ) ? $headers['ReleaseBranch'] : 'master';
+		$header['release_asset']     = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
+		$header['production_branch'] = ! $header['production_branch'] && ! empty( $headers['ProductionBranch'] ) ? $headers['ProductionBranch'] : 'master';
 
 		return $header;
 	}
@@ -698,8 +698,8 @@ trait GHU_Trait {
 	 */
 	public function use_release_asset( $branch_switch = false ) {
 		$is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
-		$switch_master_tag       = $this->type->release_branch === $branch_switch || $is_tag;
-		$current_master_noswitch = $this->type->release_branch === $this->type->branch && false === $branch_switch;
+		$switch_master_tag       = $this->type->production_branch === $branch_switch || $is_tag;
+		$current_master_noswitch = $this->type->production_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
 		$use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag

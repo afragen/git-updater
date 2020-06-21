@@ -1,5 +1,6 @@
 #### [unreleased]
 * use _dynamic_ constant for GitHub Updater plugin directory based on namespace
+* add header `Production Branch` for those devs looking to replace `master`
 
 #### 9.6.1 / 2020-06-11
 * exit early from `Gist_API::construct_download_link()` if meta not present

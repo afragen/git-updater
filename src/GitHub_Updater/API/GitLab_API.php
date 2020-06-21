@@ -196,8 +196,8 @@ class GitLab_API extends API implements API_Interface {
 			return $release_asset;
 		}
 
-		// If branch is release branch (default) and tags are used, use newest tag.
-		if ( $this->type->release_branch === $this->type->branch && ! empty( $this->type->tags ) ) {
+		// If branch is production branch (default) and tags are used, use newest tag.
+		if ( $this->type->production_branch === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = add_query_arg( 'sha', $this->type->newest_tag, $endpoint );
 		}
 
@@ -245,7 +245,7 @@ class GitLab_API extends API implements API_Interface {
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
 			case 'translation':
-				$endpoint = add_query_arg( 'ref', $git->type->release_branch, $endpoint );
+				$endpoint = add_query_arg( 'ref', $git->type->production_branch, $endpoint );
 				break;
 			case 'release_asset':
 				$endpoint = add_query_arg( 'job', $git->type->ci_job, $endpoint );
