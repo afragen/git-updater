@@ -615,7 +615,7 @@ class Theme {
 
 			// Disable branch switching to `master` for release assets.
 			if ( $theme->release_asset ) {
-				unset( $theme->branches['master'] );
+				unset( $theme->branches[ $theme->release_branch ] );
 			}
 			if ( isset( $theme->branches ) ) {
 				foreach ( array_keys( $theme->branches ) as $branch ) {
