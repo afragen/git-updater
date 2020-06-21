@@ -180,9 +180,10 @@ class Plugin {
 				unset( self::$options[ $current_branch ] );
 				update_site_option( 'github_updater', self::$options );
 			}
-			$branch                                = isset( self::$options[ $current_branch ] )
+			$branch = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]
 				: $header['release_branch'];
+
 			$git_plugin['type']                    = 'plugin';
 			$git_plugin['git']                     = $repo_parts['git_server'];
 			$git_plugin['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";

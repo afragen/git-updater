@@ -188,15 +188,17 @@ class Theme {
 
 			$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
 			$current_branch = "current_branch_{$header['repo']}";
+
 			if ( isset( self::$options[ $current_branch ] )
 			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['release_branch'] )
 			) {
 				unset( self::$options[ $current_branch ] );
 				update_site_option( 'github_updater', self::$options );
 			}
-			$branch                               = isset( self::$options[ $current_branch ] )
+			$branch = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]
 				: $header['release_branch'];
+
 			$git_theme['type']                    = 'theme';
 			$git_theme['git']                     = $repo_parts['git_server'];
 			$git_theme['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
