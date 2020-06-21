@@ -595,7 +595,7 @@ class Base {
 
 		print '<ul id="' . esc_attr( $data['id'] ) . '" style="display:none; width: 100%;">';
 
-		// Disable branch switching to `master` for release assets.
+		// Disable branch switching to release branch for release assets.
 		if ( $data['release_asset'] ) {
 			unset( $data['branches'][ $data['release_branch'] ] );
 		}

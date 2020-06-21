@@ -165,7 +165,7 @@ class Bitbucket_API extends API implements API_Interface {
 
 		/*
 		 * If a branch has been given, use branch.
-		 * If branch is master (default) and tags are used, use newest tag.
+		 * If branch is release branch (default) and tags are used, use newest tag.
 		 */
 		if ( $this->type->release_branch !== $this->type->branch || empty( $this->type->tags ) ) {
 			if ( ! empty( $this->type->enterprise_api ) ) {

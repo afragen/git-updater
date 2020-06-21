@@ -196,7 +196,7 @@ class GitLab_API extends API implements API_Interface {
 			return $release_asset;
 		}
 
-		// If branch is master (default) and tags are used, use newest tag.
+		// If branch is release branch (default) and tags are used, use newest tag.
 		if ( $this->type->release_branch === $this->type->branch && ! empty( $this->type->tags ) ) {
 			$endpoint = add_query_arg( 'sha', $this->type->newest_tag, $endpoint );
 		}

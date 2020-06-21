@@ -615,7 +615,7 @@ class Theme {
 				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
 			<?php
 
-			// Disable branch switching to `master` for release assets.
+			// Disable branch switching to release branch for release assets.
 			if ( $theme->release_asset ) {
 				unset( $theme->branches[ $theme->release_branch ] );
 			}
@@ -703,7 +703,7 @@ class Theme {
 					continue;
 				}
 
-				// Update download link for release_asset non-master branches.
+				// Update download link for release_asset non-release branches.
 				if ( $theme->release_asset && $theme->release_branch !== $theme->branch ) {
 					$response['package'] = $theme->branches[ $theme->branch ]['download'];
 				}
