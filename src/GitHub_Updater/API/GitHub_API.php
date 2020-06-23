@@ -139,9 +139,9 @@ class GitHub_API extends API implements API_Interface {
 
 		/*
 		 * If a branch has been given, use branch.
-		 * If branch is production branch (default) and tags are used, use newest tag.
+		 * If branch is primary branch (default) and tags are used, use newest tag.
 		 */
-		if ( $this->type->production_branch !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( $this->type->primary_branch !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint .= $this->type->branch;
 		} else {
 			$endpoint .= $this->type->newest_tag;

@@ -311,7 +311,7 @@ class API {
 		$segments = [
 			'owner'   => $this->type->owner,
 			'repo'    => $this->type->slug,
-			'branch'  => empty( $this->type->branch ) ? $this->type->production_branch : $this->type->branch,
+			'branch'  => empty( $this->type->branch ) ? $this->type->primary_branch : $this->type->branch,
 			'gist_id' => isset( $this->type->gist_id ) ? $this->type->gist_id : null,
 		];
 
@@ -531,13 +531,13 @@ class API {
 	 * @param array $response Repo data.
 	 */
 	protected function set_file_info( $response ) {
-		$this->type->transient         = $response;
-		$this->type->remote_version    = strtolower( $response['Version'] );
-		$this->type->requires_php      = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
-		$this->type->requires          = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
-		$this->type->requires          = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
-		$this->type->dot_org           = $response['dot_org'];
-		$this->type->production_branch = ! empty( $response['ProductionBranch'] ) ? $response['ProductionBranch'] : $this->type->production_branch;
+		$this->type->transient      = $response;
+		$this->type->remote_version = strtolower( $response['Version'] );
+		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
+		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
+		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
+		$this->type->dot_org        = $response['dot_org'];
+		$this->type->primary_branch = ! empty( $response['PrimaryBranch'] ) ? $response['PrimaryBranch'] : $this->type->primary_branch;
 	}
 
 	/**

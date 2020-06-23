@@ -130,9 +130,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		/*
 		 * If a branch has been given, use branch.
-		 * If branch is production branch (default) and tags are used, use newest tag.
+		 * If branch is primary branch (default) and tags are used, use newest tag.
 		 */
-		if ( $this->type->production_branch !== $this->type->branch || empty( $this->type->tags ) ) {
+		if ( $this->type->primary_branch !== $this->type->branch || empty( $this->type->tags ) ) {
 			$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
 		} else {
 			$endpoint = add_query_arg( 'at', $this->type->newest_tag, $endpoint );
