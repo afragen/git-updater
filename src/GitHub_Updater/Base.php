@@ -232,8 +232,9 @@ class Base {
 	 */
 	public function add_extra_headers() {
 		$ghu_extra_headers = [
-			'RequiresWP'   => 'Requires WP',
-			'ReleaseAsset' => 'Release Asset',
+			'RequiresWP'    => 'Requires WP',
+			'ReleaseAsset'  => 'Release Asset',
+			'PrimaryBranch' => 'Primary Branch',
 		];
 
 		$uri_types = [
@@ -594,9 +595,9 @@ class Base {
 
 		print '<ul id="' . esc_attr( $data['id'] ) . '" style="display:none; width: 100%;">';
 
-		// Disable branch switching to `master` for release assets.
+		// Disable branch switching to primary branch for release assets.
 		if ( $data['release_asset'] ) {
-			unset( $data['branches']['master'] );
+			unset( $data['branches'][ $data['primary_branch'] ] );
 		}
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
