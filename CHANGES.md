@@ -1,5 +1,13 @@
 #### [unreleased]
 
+#### 9.7.0 / 2020-07-09
+* use _dynamic_ constant for GitHub Updater plugin directory based on namespace
+* update to use `Languages` header as base for language pack packages, this should allow for self-hosted git servers
+* add header `Primary Branch` for those devs looking to replace `master`
+* fix PHP error when installing Gist by setting default branch to `master`
+* automatically add git host icons to plugin/theme row meta
+* update composer dependencies
+
 #### 9.6.1 / 2020-06-11
 * exit early from `Gist_API::construct_download_link()` if meta not present
 * fix saved value when `Bitbucket_Server_API` tag response is empty

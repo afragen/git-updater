@@ -153,7 +153,7 @@ class Base {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'github-updater', plugins_url( basename( GITHUB_UPDATER_DIR ) ) . '/css/github-updater.css', [], $this->get_plugin_version() );
+					wp_register_style( 'github-updater', plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) ) . '/css/github-updater.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'github-updater' );
 				}
 			);
@@ -232,8 +232,9 @@ class Base {
 	 */
 	public function add_extra_headers() {
 		$ghu_extra_headers = [
-			'RequiresWP'   => 'Requires WP',
-			'ReleaseAsset' => 'Release Asset',
+			'RequiresWP'    => 'Requires WP',
+			'ReleaseAsset'  => 'Release Asset',
+			'PrimaryBranch' => 'Primary Branch',
 		];
 
 		$uri_types = [
@@ -594,9 +595,9 @@ class Base {
 
 		print '<ul id="' . esc_attr( $data['id'] ) . '" style="display:none; width: 100%;">';
 
-		// Disable branch switching to `master` for release assets.
+		// Disable branch switching to primary branch for release assets.
 		if ( $data['release_asset'] ) {
-			unset( $data['branches']['master'] );
+			unset( $data['branches'][ $data['primary_branch'] ] );
 		}
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
@@ -664,5 +665,67 @@ class Base {
 		);
 
 		return $update_url;
+	}
+
+	/**
+	 * Add git host based icons.
+	 *
+	 * @param array  $links Row meta action links.
+	 * @param string $file  Plugin or theme file.
+	 *
+	 * @return array $links
+	 */
+	public function row_meta_icons( $links, $file ) {
+		$type     = false !== strpos( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
+		$type_cap = ucfirst( $type );
+		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
+
+		$git_headers = [
+			"GitHub{$type_cap}URI"    => "GitHub {$type_cap} URI",
+			"GitLab{$type_cap}URI"    => "GitLab {$type_cap} URI",
+			"Bitbucket{$type_cap}URI" => "Bitbucket {$type_cap} URI",
+			"Gitea{$type_cap}URI"     => "Gitea {$type_cap} URI",
+			"Gist{$type_cap}URI"      => "Gist {$type_cap} URI",
+		];
+		$git_icons   = [
+			'github'    => 'github-logo.svg',
+			'gitlab'    => 'gitlab-logo.svg',
+			'bitbucket' => 'bitbucket-logo.svg',
+			'gitea'     => 'gitea-logo.svg',
+			'gist'      => 'github-logo.svg',
+		];
+
+		// Skip on mu-plugins or drop-ins.
+		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git_headers ) : [];
+
+		/**
+		 * Insert repositories added via GitHub Updater Additions plugin.
+		 *
+		 * @see GitHub Updater's Plugin or Theme class for definition.
+		 * @link https://github.com/afragen/github-updater-additions
+		 */
+		$additions = apply_filters( 'github_updater_additions', null, [], $type );
+		foreach ( (array) $additions as $slug => $headers ) {
+			if ( $slug === $file ) {
+				$file_data = array_merge( $file_data, $headers );
+				break;
+			}
+		}
+
+		foreach ( $file_data as $key => $value ) {
+			if ( ! empty( $value ) ) {
+				$githost = str_replace( "{$type_cap}URI", '', $key );
+				$icon    = sprintf(
+					'<img src="%s" style="vertical-align:text-bottom;" height="16" width="16" alt="%s" />',
+					plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/' . $git_icons[ strtolower( $githost ) ] ),
+					$githost
+				);
+				break;
+			}
+		}
+
+		isset( $icon ) ? $links[] = $icon : null;
+
+		return $links;
 	}
 }

@@ -243,7 +243,7 @@ trait GHU_Trait {
 		// Correctly account for dashicon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
-		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && 'master' === $repo->branch : true;
+		$dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->primary_branch === $repo->branch : true;
 
 		$transient_key = 'plugin' === $type ? $repo->file : null;
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
@@ -566,6 +566,7 @@ trait GHU_Trait {
 		$header['languages']      = null;
 		$header['ci_job']         = false;
 		$header['release_asset']  = false;
+		$header['primary_branch'] = false;
 
 		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
@@ -596,7 +597,8 @@ trait GHU_Trait {
 				}
 			}
 		}
-		$header['release_asset'] = ! $header['release_asset'] && isset( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
+		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
+		$header['primary_branch'] = ! $header['primary_branch'] && ! empty( $headers['PrimaryBranch'] ) ? $headers['PrimaryBranch'] : 'master';
 
 		return $header;
 	}
@@ -645,7 +647,9 @@ trait GHU_Trait {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$plugin_data = \get_plugin_data( GITHUB_UPDATER_DIR . '/github-updater.php' );
+
+		$dir         = constant( str_replace( '\Traits', '', __NAMESPACE__ . '\DIR' ) );
+		$plugin_data = \get_plugin_data( $dir . '/github-updater.php' );
 
 		return $plugin_data['Version'];
 	}
@@ -694,8 +698,8 @@ trait GHU_Trait {
 	 */
 	public function use_release_asset( $branch_switch = false ) {
 		$is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
-		$switch_master_tag       = 'master' === $branch_switch || $is_tag;
-		$current_master_noswitch = 'master' === $this->type->branch && false === $branch_switch;
+		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
+		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
 		$use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
