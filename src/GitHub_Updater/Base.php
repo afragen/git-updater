@@ -666,4 +666,66 @@ class Base {
 
 		return $update_url;
 	}
+
+	/**
+	 * Add git host based icons.
+	 *
+	 * @param array  $links Row meta action links.
+	 * @param string $file  Plugin or theme file.
+	 *
+	 * @return array $links
+	 */
+	public function row_meta_icons( $links, $file ) {
+		$type     = false !== strpos( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
+		$type_cap = ucfirst( $type );
+		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
+
+		$git_headers = [
+			"GitHub{$type_cap}URI"    => "GitHub {$type_cap} URI",
+			"GitLab{$type_cap}URI"    => "GitLab {$type_cap} URI",
+			"Bitbucket{$type_cap}URI" => "Bitbucket {$type_cap} URI",
+			"Gitea{$type_cap}URI"     => "Gitea {$type_cap} URI",
+			"Gist{$type_cap}URI"      => "Gist {$type_cap} URI",
+		];
+		$git_icons   = [
+			'github'    => 'github-logo.svg',
+			'gitlab'    => 'gitlab-logo.svg',
+			'bitbucket' => 'bitbucket-logo.svg',
+			'gitea'     => 'gitea-logo.svg',
+			'gist'      => 'github-logo.svg',
+		];
+
+		// Skip on mu-plugins or drop-ins.
+		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git_headers ) : [];
+
+		/**
+		 * Insert repositories added via GitHub Updater Additions plugin.
+		 *
+		 * @see GitHub Updater's Plugin or Theme class for definition.
+		 * @link https://github.com/afragen/github-updater-additions
+		 */
+		$additions = apply_filters( 'github_updater_additions', null, [], $type );
+		foreach ( (array) $additions as $slug => $headers ) {
+			if ( $slug === $file ) {
+				$file_data = array_merge( $file_data, $headers );
+				break;
+			}
+		}
+
+		foreach ( $file_data as $key => $value ) {
+			if ( ! empty( $value ) ) {
+				$githost = str_replace( "{$type_cap}URI", '', $key );
+				$icon    = sprintf(
+					'<img src="%s" style="vertical-align:text-bottom;" height="16" width="16" alt="%s" />',
+					plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/' . $git_icons[ strtolower( $githost ) ] ),
+					$githost
+				);
+				break;
+			}
+		}
+
+		isset( $icon ) ? $links[] = $icon : null;
+
+		return $links;
+	}
 }

@@ -3,6 +3,7 @@
 * update to use `Languages` header as base for language pack packages, this should allow for self-hosted git servers
 * add header `Primary Branch` for those devs looking to replace `master`
 * fix PHP error when installing Gist by setting default branch to `master`
+* automatically add git host icons to plugin/theme row meta
 
 #### 9.6.1 / 2020-06-11
 * exit early from `Gist_API::construct_download_link()` if meta not present

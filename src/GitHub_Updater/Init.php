@@ -107,6 +107,10 @@ class Init {
 			}
 		);
 		add_filter( 'upgrader_source_selection', [ $this->base, 'upgrader_source_selection' ], 10, 4 );
+
+		// Add git host icons.
+		add_filter( 'plugin_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
+		add_filter( 'theme_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
 	}
 
 	/**
