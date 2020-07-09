@@ -50,19 +50,19 @@
         "source": {
             "type": "git",
             "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-            "reference": "ef24f2da1c30b431802b20bd235a2353e7165278"
+            "reference": "2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/ef24f2da1c30b431802b20bd235a2353e7165278",
-            "reference": "ef24f2da1c30b431802b20bd235a2353e7165278",
+            "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4",
+            "reference": "2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4",
             "shasum": ""
         },
         "require": {
             "erusev/parsedown": "^1.7",
             "php": ">=5.4"
         },
-        "time": "2019-07-01T18:48:13+00:00",
+        "time": "2020-07-09T18:11:02+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -93,12 +93,12 @@
         "version_normalized": "1.4.3.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/collizo4sky/persist-admin-notices-dismissal.git",
+            "url": "https://github.com/w3guy/persist-admin-notices-dismissal.git",
             "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/collizo4sky/persist-admin-notices-dismissal/zipball/2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
+            "url": "https://api.github.com/repos/w3guy/persist-admin-notices-dismissal/zipball/2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
             "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
             "shasum": ""
         },
