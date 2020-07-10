@@ -1,4 +1,5 @@
 #### [unreleased]
+* correctly set Bypass WP-Cron Background Processing checkbox if filter set elsewhere
 
 #### 9.7.0 / 2020-07-09
 * use _dynamic_ constant for GitHub Updater plugin directory based on namespace

@@ -126,11 +126,6 @@ class Settings {
 		if ( isset( self::$options['bypass_background_processing'] ) ) {
 			add_filter( 'github_updater_disable_wpcron', '__return_true' );
 		}
-
-		// Check if filter set elsewhere.
-		if ( apply_filters( 'github_updater_disable_wpcron', false ) ) {
-			self::$options['bypass_background_processing'] = '1';
-		}
 	}
 
 	/**
@@ -623,7 +618,7 @@ class Settings {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
+			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', abs( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
 			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
