@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.7.1 / 2020-07-20
 * correctly set Bypass WP-Cron Background Processing checkbox if filter set elsewhere
 
 #### 9.7.0 / 2020-07-09
