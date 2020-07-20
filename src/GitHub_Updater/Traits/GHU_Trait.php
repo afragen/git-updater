@@ -50,6 +50,7 @@ trait GHU_Trait {
 	public function load_options() {
 		$base           = Singleton::get_instance( 'Base', $this );
 		$base::$options = get_site_option( 'github_updater', [] );
+		$base::$options = $this->modify_options( $base::$options );
 	}
 
 	/**
@@ -706,5 +707,31 @@ trait GHU_Trait {
 			&& $need_release_asset;
 
 		return $use_release_asset;
+	}
+
+	/**
+	 * Modify options without saving.
+	 *
+	 * Check if a filter effecting a checkbox is set elsewhere.
+	 * Adds value '-1' without saving so that checkbox is checked and disabled.
+	 *
+	 * @param  array $options Site options.
+	 * @return array
+	 */
+	private function modify_options( $options ) {
+		// Remove any inadvertently saved options with value -1.
+		$options = array_filter(
+			$options,
+			function ( $e ) {
+				return '-1' !== $e;
+			}
+		);
+
+		// Check if filter set elsewhere.
+		if ( ! isset( $options['bypass_background_processing'] ) && apply_filters( 'github_updater_disable_wpcron', false ) ) {
+			$options['bypass_background_processing'] = '-1';
+		}
+
+		return $options;
 	}
 }
