@@ -226,7 +226,7 @@ class Remote_Management {
 		echo '<p>';
 		printf(
 			wp_kses_post(
-				/* translators: %1: home URL, %2: REST API key */
+				/* translators: 1: home URL, 2: REST API key */
 				__( 'Site URL: %1$s<br> REST API key: %2$s', 'github-updater' )
 			),
 			'<span style="font-family:monospace;">' . esc_url( home_url() ) . '</span>',
@@ -237,7 +237,7 @@ class Remote_Management {
 		echo '<p>';
 		printf(
 			wp_kses_post(
-				/* translators: %1$s: Link to wiki, %2$s: RESTful API URL */
+				/* translators: 1: Link to wiki, 2: RESTful API URL */
 				__( 'Please refer to the <a href="%1$s">wiki</a> for complete list of attributes. REST API endpoints for webhook updating begin at: %2$s', 'github-updater' )
 			),
 			'https://github.com/afragen/github-updater/wiki/Remote-Management---RESTful-Endpoints',
