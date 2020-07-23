@@ -43,8 +43,9 @@ class REST_API {
 			self::$namespace,
 			'test',
 			[
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ $this, 'test' ],
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'test' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 
@@ -52,10 +53,11 @@ class REST_API {
 			self::$namespace,
 			'repos',
 			[
-				'show_in_index' => false,
-				'methods'       => \WP_REST_Server::READABLE,
-				'callback'      => [ $this, 'get_remote_repo_data' ],
-				'args'          => [
+				'show_in_index'       => false,
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_remote_repo_data' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
 					'key' => [
 						'default'           => null,
 						'required'          => true,
@@ -101,16 +103,18 @@ class REST_API {
 			'update',
 			[
 				[
-					'show_in_index' => false,
-					'methods'       => \WP_REST_Server::READABLE,
-					'callback'      => [ new REST_Update(), 'process_request' ],
-					'args'          => $update_args,
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ new REST_Update(), 'process_request' ],
+					'permission_callback' => '__return_true',
+					'args'                => $update_args,
 				],
 				[
-					'show_in_index' => false,
-					'methods'       => \WP_REST_Server::CREATABLE,
-					'callback'      => [ new REST_Update(), 'process_request' ],
-					'args'          => $update_args,
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ new REST_Update(), 'process_request' ],
+					'permission_callback' => '__return_true',
+					'args'                => $update_args,
 				],
 			]
 		);
