@@ -672,22 +672,23 @@ trait GHU_Trait {
 		if ( @rename( $source, $destination ) ) {
 			return true;
 		}
-		$dir = opendir( $source );
-		@mkdir( $destination );
-		$source = untrailingslashit( $source );
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
-				if ( is_dir( "{$source}/{$file}" ) ) {
-					$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
-				} else {
-					copy( "{$source}/{$file}", "{$destination}/{$file}" );
-					unlink( "{$source}/{$file}" );
+		if ( $dir = opendir( $source ) ) {
+			@mkdir( $destination );
+			$source = untrailingslashit( $source );
+			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			while ( false !== ( $file = readdir( $dir ) ) ) {
+				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
+					if ( is_dir( "{$source}/{$file}" ) ) {
+						$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
+					} else {
+						copy( "{$source}/{$file}", "{$destination}/{$file}" );
+						unlink( "{$source}/{$file}" );
+					}
 				}
 			}
+			@rmdir( $source );
+			closedir( $dir );
 		}
-		@rmdir( $source );
-		closedir( $dir );
 	}
 
 	/**
