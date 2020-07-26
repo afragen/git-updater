@@ -1,6 +1,7 @@
 #### [unreleased]
 * `permission_callback` arg to `register_rest_route()` as this is now [required](https://core.trac.wordpress.org/changeset/48526)
 * fix error in `move()` if directory doesn't exist
+* revert to `$wp_filesystem->move()` when not FS_METHOD === 'direct'
 
 #### 9.7.1 / 2020-07-20
 * correctly set Bypass WP-Cron Background Processing checkbox if filter set elsewhere

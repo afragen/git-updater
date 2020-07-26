@@ -658,10 +658,12 @@ trait GHU_Trait {
 	/**
 	 * Rename or recursive file copy and delete.
 	 *
-	 * This is more versatile than `$wp_filesystem->move()`.
+	 * This is more versatile than `$wp_filesystem->move()` for FS_METHOD 'direct'.
 	 * It moves/renames directories as well as files.
 	 * Fix for https://github.com/afragen/github-updater/issues/826,
 	 * strange failure of `rename()`.
+	 *
+	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
 	 *
 	 * @param string $source      File path of source.
 	 * @param string $destination File path of destination.
@@ -669,9 +671,16 @@ trait GHU_Trait {
 	 * @return bool|void
 	 */
 	public function move( $source, $destination ) {
+		global $wp_filesystem;
+		if ( 'direct' !== $wp_filesystem->method ) {
+			if ( $wp_filesystem->move( $source, $destination ) ) {
+				return true;
+			}
+		}
 		if ( @rename( $source, $destination ) ) {
 			return true;
 		}
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( $dir = opendir( $source ) ) {
 			@mkdir( $destination );
 			$source = untrailingslashit( $source );
@@ -688,7 +697,11 @@ trait GHU_Trait {
 			}
 			@rmdir( $source );
 			closedir( $dir );
+
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
