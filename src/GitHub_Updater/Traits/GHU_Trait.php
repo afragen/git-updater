@@ -663,19 +663,14 @@ trait GHU_Trait {
 	 * Fix for https://github.com/afragen/github-updater/issues/826,
 	 * strange failure of `rename()`.
 	 *
-	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
-	 *
 	 * @param string $source      File path of source.
 	 * @param string $destination File path of destination.
 	 *
-	 * @return bool|void
+	 * @return bool True for success, false for failure.
 	 */
 	public function move( $source, $destination ) {
-		global $wp_filesystem;
-		if ( 'direct' !== $wp_filesystem->method ) {
-			if ( $wp_filesystem->move( $source, $destination ) ) {
-				return true;
-			}
+		if ( $this->filesystem_move( $source, $destination ) ) {
+			return true;
 		}
 		if ( @rename( $source, $destination ) ) {
 			return true;
@@ -699,6 +694,25 @@ trait GHU_Trait {
 			closedir( $dir );
 
 			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Non-direct filesystem move.
+	 *
+	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
+	 *
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
+	 *
+	 * @return bool|void True on success, false on failure.
+	 */
+	public function filesystem_move( $source, $destination ) {
+		global $wp_filesystem;
+		if ( 'direct' !== $wp_filesystem->method ) {
+			return $wp_filesystem->move( $source, $destination );
 		}
 
 		return false;
