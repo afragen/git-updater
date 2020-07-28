@@ -3,6 +3,7 @@
 * fix error in `move()` if directory doesn't exist
 * revert to `$wp_filesystem->move()` when not FS_METHOD === 'direct'
 * add `primary_branch` and `tag` to REST API response for repo data
+* add support for plugin/theme auto update link
 
 #### 9.7.1 / 2020-07-20
 * correctly set Bypass WP-Cron Background Processing checkbox if filter set elsewhere

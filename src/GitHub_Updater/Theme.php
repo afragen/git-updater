@@ -679,13 +679,14 @@ class Theme {
 		foreach ( (array) $this->config as $theme ) {
 			if ( $this->can_update_repo( $theme ) ) {
 				$response = [
-					'theme'       => $theme->slug,
-					'new_version' => $theme->remote_version,
-					'url'         => $theme->uri,
-					'package'     => $theme->download_link,
-					'branch'      => $theme->branch,
-					'branches'    => array_keys( $theme->branches ),
-					'type'        => "{$theme->git}-{$theme->type}",
+					'theme'            => $theme->slug,
+					'new_version'      => $theme->remote_version,
+					'url'              => $theme->uri,
+					'package'          => $theme->download_link,
+					'branch'           => $theme->branch,
+					'branches'         => array_keys( $theme->branches ),
+					'type'             => "{$theme->git}-{$theme->type}",
+					'update-supported' => true,
 				];
 
 				// Skip on RESTful updating.
