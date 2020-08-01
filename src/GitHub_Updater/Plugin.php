@@ -418,18 +418,23 @@ class Plugin {
 				continue;
 			}
 			$response = [
-				'slug'         => $plugin->slug,
-				'plugin'       => $plugin->file,
-				'new_version'  => $plugin->remote_version,
-				'url'          => $plugin->uri,
-				'package'      => $plugin->download_link,
-				'icons'        => $plugin->icons,
-				'tested'       => $plugin->tested,
-				'requires_php' => $plugin->requires_php,
-				'branch'       => $plugin->branch,
-				'branches'     => array_keys( $plugin->branches ),
-				'type'         => "{$plugin->git}-{$plugin->type}",
+				'slug'             => $plugin->slug,
+				'plugin'           => $plugin->file,
+				'new_version'      => $plugin->remote_version,
+				'url'              => $plugin->uri,
+				'package'          => $plugin->download_link,
+				'icons'            => $plugin->icons,
+				'tested'           => $plugin->tested,
+				'requires'         => $plugin->requires,
+				'requires_php'     => $plugin->requires_php,
+				'icons'            => $plugin->icons,
+				'banners'          => $plugin->banners,
+				'branch'           => $plugin->branch,
+				'branches'         => array_keys( $plugin->branches ),
+				'type'             => "{$plugin->git}-{$plugin->type}",
+				'update-supported' => true,
 			];
+
 			if ( $this->can_update_repo( $plugin ) ) {
 				// Skip on RESTful updating.
 				// phpcs:disable WordPress.Security.NonceVerification.Recommended

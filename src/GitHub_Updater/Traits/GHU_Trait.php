@@ -658,7 +658,7 @@ trait GHU_Trait {
 	/**
 	 * Rename or recursive file copy and delete.
 	 *
-	 * This is more versatile than `$wp_filesystem->move()`.
+	 * This is more versatile than `$wp_filesystem->move()` for FS_METHOD 'direct'.
 	 * It moves/renames directories as well as files.
 	 * Fix for https://github.com/afragen/github-updater/issues/826,
 	 * strange failure of `rename()`.
@@ -666,28 +666,56 @@ trait GHU_Trait {
 	 * @param string $source      File path of source.
 	 * @param string $destination File path of destination.
 	 *
-	 * @return bool|void
+	 * @return bool True for success, false for failure.
 	 */
 	public function move( $source, $destination ) {
+		if ( $this->filesystem_move( $source, $destination ) ) {
+			return true;
+		}
 		if ( @rename( $source, $destination ) ) {
 			return true;
 		}
-		$dir = opendir( $source );
-		@mkdir( $destination );
-		$source = untrailingslashit( $source );
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( false !== ( $file = readdir( $dir ) ) ) {
-			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
-				if ( is_dir( "{$source}/{$file}" ) ) {
-					$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
-				} else {
-					copy( "{$source}/{$file}", "{$destination}/{$file}" );
-					unlink( "{$source}/{$file}" );
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+		if ( $dir = opendir( $source ) ) {
+			@mkdir( $destination );
+			$source = untrailingslashit( $source );
+			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			while ( false !== ( $file = readdir( $dir ) ) ) {
+				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
+					if ( is_dir( "{$source}/{$file}" ) ) {
+						$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
+					} else {
+						copy( "{$source}/{$file}", "{$destination}/{$file}" );
+						unlink( "{$source}/{$file}" );
+					}
 				}
 			}
+			@rmdir( $source );
+			closedir( $dir );
+
+			return true;
 		}
-		@rmdir( $source );
-		closedir( $dir );
+
+		return false;
+	}
+
+	/**
+	 * Non-direct filesystem move.
+	 *
+	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
+	 *
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
+	 *
+	 * @return bool|void True on success, false on failure.
+	 */
+	public function filesystem_move( $source, $destination ) {
+		global $wp_filesystem;
+		if ( 'direct' !== $wp_filesystem->method ) {
+			return $wp_filesystem->move( $source, $destination );
+		}
+
+		return false;
 	}
 
 	/**
