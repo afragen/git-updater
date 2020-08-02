@@ -672,8 +672,6 @@ class Theme {
 		if ( ! \is_object( $transient ) ) {
 			$transient           = new \stdClass();
 			$transient->response = null;
-		} elseif ( ! \property_exists( $transient, 'response' ) ) {
-			$transient->response = null;
 		}
 
 		foreach ( (array) $this->config as $theme ) {
