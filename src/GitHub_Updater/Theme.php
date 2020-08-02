@@ -671,7 +671,7 @@ class Theme {
 		// needed to fix PHP 7.4 warning.
 		if ( ! \is_object( $transient ) ) {
 			$transient           = new \stdClass();
-			$transient->response = null;
+			//$transient->response = null;
 		}
 
 		foreach ( (array) $this->config as $theme ) {
