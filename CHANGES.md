@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.8.1 / 2020-08-06
 * update `Themes` to populate `$transient->no_update` for Auto-updates link
 
 #### 9.8.0 / 2020-08-01
