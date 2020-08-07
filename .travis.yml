@@ -1,7 +1,8 @@
 language: php
 
 os: linux
-dist: xenial
+
+dist: trusty
 
 notifications:
   email:
