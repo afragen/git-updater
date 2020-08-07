@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `Themes` to populate `$transient->no_update` for Auto-updates link
 
 #### 9.8.0 / 2020-08-01
 * `permission_callback` arg to `register_rest_route()` as this is now [required](https://core.trac.wordpress.org/changeset/48526)

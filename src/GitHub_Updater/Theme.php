@@ -670,26 +670,28 @@ class Theme {
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.
 		if ( ! \is_object( $transient ) ) {
-			$transient           = new \stdClass();
-			//$transient->response = null;
+			$transient = new \stdClass();
 		}
 
 		foreach ( (array) $this->config as $theme ) {
-			if ( $this->can_update_repo( $theme ) ) {
-				$response = [
-					'theme'            => $theme->slug,
-					'new_version'      => $theme->remote_version,
-					'url'              => $theme->uri,
-					'package'          => $theme->download_link,
-					'requires'         => $theme->requires,
-					'requires_php'     => $theme->requires_php,
-					'tested'           => $theme->tested,
-					'branch'           => $theme->branch,
-					'branches'         => array_keys( $theme->branches ),
-					'type'             => "{$theme->git}-{$theme->type}",
-					'update-supported' => true,
-				];
+			if ( ! property_exists( $theme, 'remote_version' ) ) {
+				continue;
+			}
+			$response = [
+				'theme'            => $theme->slug,
+				'new_version'      => $theme->remote_version,
+				'url'              => $theme->uri,
+				'package'          => $theme->download_link,
+				'requires'         => $theme->requires,
+				'requires_php'     => $theme->requires_php,
+				'tested'           => $theme->tested,
+				'branch'           => $theme->branch,
+				'branches'         => array_keys( $theme->branches ),
+				'type'             => "{$theme->git}-{$theme->type}",
+				'update-supported' => true,
+			];
 
+			if ( $this->can_update_repo( $theme ) ) {
 				// Skip on RESTful updating.
 				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['theme'] )
@@ -712,6 +714,11 @@ class Theme {
 
 				$transient->response[ $theme->slug ] = $response;
 			} else {
+				// Add repo without update to $transient->no_update for Auto-updates link.
+				if ( ! isset( $transient->no_update[ $theme->slug ] ) ) {
+					$transient->no_update[ $theme->slug ] = $response;
+				}
+
 				/**
 				 * Filter to return array of overrides to dot org.
 				 *
