@@ -267,6 +267,8 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Get GitLab project ID and project meta.
 	 *
+	 * @see https://docs.gitlab.com/ee/api/README.html#namespaced-path-encoding
+	 *
 	 * @return string|int
 	 */
 	public function get_gitlab_id() {
