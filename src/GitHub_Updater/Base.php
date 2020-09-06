@@ -543,15 +543,24 @@ class Base {
 		global $wp_version;
 		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
 		$repo_base     = $repo_name;
-		$shiny_classes = ' notice inline notice-warning notice-alt';
+		$shiny_classes = 'notice inline notice-warning notice-alt';
 
+		$active = '';
 		if ( 'plugin' === $type ) {
 			$repo_base = dirname( $repo_name );
+			if ( is_plugin_active( $repo_name ) ) {
+				$active = ' active';
+			}
+		} else {
+			$theme = wp_get_theme( $repo_name );
+			if ( $theme->is_allowed( 'network' ) ) {
+				$active = ' active';
+			}
 		}
 
-		$open = '<tr class="plugin-update-tr" data-slug="' . esc_attr( $repo_base ) . '" data-plugin="' . esc_attr( $repo_name ) . '">
+		$open = '<tr class="plugin-update-tr' . $active . '">
 		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
-		<div class="update-message">';
+		<div class="">';
 
 		$enclosure = [
 			'open'  => $open,
@@ -585,6 +594,27 @@ class Base {
 	public function make_branch_switch_row( $data, $config ) {
 		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? [] : $config[ $data['slug'] ]->rollback;
 
+		// Make the branch switch row visually appear as if it is contained with the plugin/theme's row.
+		// We have to use JS for this because of the way:
+		// 1) the @class of the list table row is not filterabled; and
+		// 2) the list table CSS is written.
+		$data_attr = $config[ $data['slug'] ]->type ? 'data-plugin' : 'data-slug';
+		$file      = $config[ $data['slug'] ]->type ? $config[ $data['slug'] ]->file : $config[ $data['slug'] ]->slug;
+		echo '<script>';
+		// Remove the bottom "line" for the plugin's row.
+		printf(
+			"jQuery( 'tr:not([id])[{$data_attr}=\"%s\"]' ).addClass( 'update' );",
+			$file
+		);
+		// Removes the bottom "line" for the shinny update row (if any).
+		printf(
+			"jQuery( 'tr[id][{$data_attr}=\"%s\"] td' ).css( 'box-shadow', 'none' );",
+			$file
+		);
+		echo '</script>';
+
+		echo '<p>';
+		echo $this->get_git_icon( $file, true );
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
@@ -592,6 +622,7 @@ class Base {
 			'<a href="#" onclick="jQuery(\'#' . esc_attr( $data['id'] ) . '\').toggle();return false;">',
 			'</a>.'
 		);
+		echo '</p>';
 
 		print '<ul id="' . esc_attr( $data['id'] ) . '" style="display:none; width: 100%;">';
 
@@ -676,6 +707,24 @@ class Base {
 	 * @return array $links
 	 */
 	public function row_meta_icons( $links, $file ) {
+		$icon = $this->get_git_icon( $file, false );
+		if ( ! is_null( $icon ) ) {
+			$links[] = $icon;
+		}
+
+		return $links;
+	}
+
+	/**
+	 * Get git host based icon as an HTML img element.
+	 *
+	 * @param string $file        Plugin or theme file.
+	 * @param bool   $add_padding Whether or not to adding padding to the icon.
+	 *                            When used in row meta, icon should not have padding;
+	 *                            when used in branch switching row, icon should have padding.
+	 * @return string
+	 */
+	public function get_git_icon( $file, $add_padding ) {
 		$type     = false !== strpos( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
 		$type_cap = ucfirst( $type );
 		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
@@ -715,17 +764,17 @@ class Base {
 		foreach ( $file_data as $key => $value ) {
 			if ( ! empty( $value ) ) {
 				$githost = str_replace( "{$type_cap}URI", '', $key );
+				$padding = is_rtl() ? 'padding-left: 6px;' : 'padding-right: 6px;';
 				$icon    = sprintf(
-					'<img src="%s" style="vertical-align:text-bottom;" height="16" width="16" alt="%s" />',
+					'<img src="%s" style="vertical-align:text-bottom;%s" height="16" width="16" alt="%s" />',
 					plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/' . $git_icons[ strtolower( $githost ) ] ),
+					$add_padding ? $padding : '',
 					$githost
 				);
 				break;
 			}
 		}
 
-		isset( $icon ) ? $links[] = $icon : null;
-
-		return $links;
+		return isset( $icon ) ? $icon : null;
 	}
 }
