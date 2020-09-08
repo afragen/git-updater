@@ -766,7 +766,7 @@ class Base {
 				$githost = str_replace( "{$type_cap}URI", '', $key );
 				$padding = is_rtl() ? 'padding-left: 6px;' : 'padding-right: 6px;';
 				$icon    = sprintf(
-					'<img src="%s" style="vertical-align:text-bottom;%s" height="16" width="16" alt="%s" />',
+					'<img src="%1$s" style="vertical-align:text-bottom;%2$s" height="16" width="16" alt="%3$s" />',
 					plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/' . $git_icons[ strtolower( $githost ) ] ),
 					$add_padding ? $padding : '',
 					$githost
