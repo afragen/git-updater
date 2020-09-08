@@ -159,7 +159,7 @@ class REST_API {
 				'primary_branch' => $token->primary_branch,
 				'branch'         => $token->branch,
 				'version'        => $token->local_version,
-				'tag'            => '0.0.0' !== $token->newest_tag ? $token->newest_tag : false,
+				'tag'            => isset( $token->newest_tag ) && '0.0.0' !== $token->newest_tag ? $token->newest_tag : false,
 			];
 		}
 		$json = [
