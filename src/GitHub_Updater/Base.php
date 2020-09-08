@@ -606,7 +606,7 @@ class Base {
 			"jQuery( 'tr:not([id])[{$data_attr}=\"%s\"]' ).addClass( 'update' );",
 			$file
 		);
-		// Removes the bottom "line" for the shinny update row (if any).
+		// Removes the bottom "line" for the shiny update row (if any).
 		printf(
 			"jQuery( 'tr[id][{$data_attr}=\"%s\"] td' ).css( 'box-shadow', 'none' );",
 			$file
