@@ -1,4 +1,5 @@
 #### [unreleased]
+* refactor of branch switch row by @pbiron, looks fabulous!!
 
 #### 9.8.1 / 2020-08-06
 * update `Themes` to populate `$transient->no_update` for Auto-updates link
