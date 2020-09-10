@@ -598,8 +598,8 @@ class Base {
 		// We have to use JS for this because of the way:
 		// 1) the @class of the list table row is not filterabled; and
 		// 2) the list table CSS is written.
-		$data_attr = $config[ $data['slug'] ]->type ? 'data-plugin' : 'data-slug';
-		$file      = $config[ $data['slug'] ]->type ? $config[ $data['slug'] ]->file : $config[ $data['slug'] ]->slug;
+		$data_attr = 'plugin' === $config[ $data['slug'] ]->type ? 'data-plugin' : 'data-slug';
+		$file      = 'plugin' === $config[ $data['slug'] ]->type ? $config[ $data['slug'] ]->file : $config[ $data['slug'] ]->slug;
 		echo '<script>';
 		// Remove the bottom "line" for the plugin's row.
 		printf(
