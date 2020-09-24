@@ -607,12 +607,12 @@ class Base {
 		}       echo '<script>';
 		// Remove the bottom "line" for the plugin's row.
 		printf(
-			"jQuery( 'tr:not([id])[{" . esc_attr( $data_attr ) . "}=\"%s\"]' ).addClass( 'update' );",
+			"jQuery( 'tr:not([id])[" . esc_attr( $data_attr ) . "=\"%s\"]' ).addClass( 'update' );",
 			esc_attr( $file )
 		);
 		// Removes the bottom "line" for the shiny update row (if any).
 		printf(
-			"jQuery( 'tr[id][{" . esc_attr( $data_attr ) . "}=\"%s\"] td' ).css( 'box-shadow', 'none' );",
+			"jQuery( 'tr[id][" . esc_attr( $data_attr ) . "=\"%s\"] td' ).css( 'box-shadow', 'none' );",
 			esc_attr( $file )
 		);
 		echo '</script>';
