@@ -73,13 +73,30 @@ trait API_Common {
 	 * @return string $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
 		switch ( $git ) {
 			case 'github':
-				$response = isset( $response->assets[0] ) && ! is_wp_error( $response ) ? $response->assets[0]->url : null;
+				$assets = isset( $response->assets ) ? $response->assets : [];
+				foreach ( $assets as $asset ) {
+					if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
+						$response = $asset->url;
+						break;
+					}
+				}
+				$response = is_string( $response ) ? $response : null;
 				break;
 			case 'bitbucket':
-				$download_base = $this->get_api_url( $request, true );
-				$response      = isset( $response->values[0] ) && ! is_wp_error( $response ) ? $download_base . '/' . $response->values[0]->name : null;
+				$download_base = trailingslashit( $this->get_api_url( $request, true ) );
+				$assets        = isset( $response->values ) ? $response->values : [];
+				foreach ( $assets as $asset ) {
+					if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
+						$response = $download_base . $asset->name;
+						break;
+					}
+				}
+				$response = is_string( $response ) ? $response : null;
 				break;
 			case 'bbserver':
 				// TODO: make work.
