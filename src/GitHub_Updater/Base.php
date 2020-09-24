@@ -607,18 +607,18 @@ class Base {
 		}       echo '<script>';
 		// Remove the bottom "line" for the plugin's row.
 		printf(
-			"jQuery( 'tr:not([id])[{$data_attr}=\"%s\"]' ).addClass( 'update' );",
+			"jQuery( 'tr:not([id])[{" . esc_attr( $data_attr ) . "}=\"%s\"]' ).addClass( 'update' );",
 			esc_attr( $file )
 		);
 		// Removes the bottom "line" for the shiny update row (if any).
 		printf(
-			"jQuery( 'tr[id][{$data_attr}=\"%s\"] td' ).css( 'box-shadow', 'none' );",
+			"jQuery( 'tr[id][{" . esc_attr( $data_attr ) . "}=\"%s\"] td' ).css( 'box-shadow', 'none' );",
 			esc_attr( $file )
 		);
 		echo '</script>';
 
 		echo '<p>';
-		echo $this->get_git_icon( $file, true );
+		echo wp_kses_post( $this->get_git_icon( $file, true ) );
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
