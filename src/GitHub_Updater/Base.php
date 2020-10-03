@@ -676,7 +676,7 @@ class Base {
 			}
 		}
 		if ( empty( $rollback ) ) {
-			esc_html_e( 'No previous tags to rollback to.', 'github-updater' );
+			echo '<li>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</li>';
 		}
 
 		print '</ul>';
