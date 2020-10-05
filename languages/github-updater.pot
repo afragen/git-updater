@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.8.1\n"
+"Project-Id-Version: GitHub Updater 9.9.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-08-07T03:20:00+00:00\n"
+"POT-Creation-Date: 2020-10-05T17:52:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -174,39 +174,39 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:434
+#: src/GitHub_Updater/API/GitLab_API.php:436
 msgid "GitLab Personal Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:443
+#: src/GitHub_Updater/API/GitLab_API.php:445
 msgid "GitLab Private Settings"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:452
+#: src/GitHub_Updater/API/GitLab_API.php:454
 msgid "GitLab.com Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:487
+#: src/GitHub_Updater/API/GitLab_API.php:489
 msgid "GitLab"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:496
+#: src/GitHub_Updater/API/GitLab_API.php:498
 msgid "Enter your repository specific GitLab Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:503
+#: src/GitHub_Updater/API/GitLab_API.php:505
 msgid "Enter your GitLab.com Access Token."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:514
+#: src/GitHub_Updater/API/GitLab_API.php:516
 msgid "GitLab Access Token"
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:530
+#: src/GitHub_Updater/API/GitLab_API.php:532
 msgid "Enter GitLab Access Token for private GitLab repositories."
 msgstr ""
 
-#: src/GitHub_Updater/API/GitLab_API.php:573
+#: src/GitHub_Updater/API/GitLab_API.php:575
 msgid "You must set a GitLab Access Token."
 msgstr ""
 
@@ -219,20 +219,20 @@ msgid "Enter plugin or theme slug."
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/GitHub_Updater/Base.php:590
+#: src/GitHub_Updater/Base.php:627
 #: src/GitHub_Updater/Theme.php:607
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:605
+#: src/GitHub_Updater/Base.php:643
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:633
+#: src/GitHub_Updater/Base.php:671
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:641
+#: src/GitHub_Updater/Base.php:679
 #: src/GitHub_Updater/Theme.php:650
 msgid "No previous tags to rollback to."
 msgstr ""

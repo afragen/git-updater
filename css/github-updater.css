@@ -6,3 +6,8 @@ div.install-theme-info {
 #theme-installer div.install-theme-info div.star-rating {
 	display: none;
 }
+
+/* Properly align branch switcher in mobile. */
+@media screen and (max-width: 782px) {
+	.plugins .plugin-update-tr .notice { margin-left: 0; }
+}
