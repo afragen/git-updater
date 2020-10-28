@@ -23,6 +23,7 @@
             "require": {
                 "php": ">=5.4"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -46,6 +47,10 @@
                 "singleton",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/afragen/singleton/issues",
+                "source": "https://github.com/afragen/singleton/tree/master"
+            },
             "time": "2019-01-05T16:19:38+00:00"
         },
         {
@@ -66,6 +71,7 @@
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -88,6 +94,10 @@
                 "readme",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
+                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
+            },
             "time": "2020-07-09T18:11:02+00:00"
         },
         {
@@ -118,6 +128,10 @@
                 }
             ],
             "description": "Simple library to persist dismissal of admin notices across pages in WordPress dashboard.",
+            "support": {
+                "issues": "https://github.com/w3guy/persist-admin-notices-dismissal/issues",
+                "source": "https://github.com/w3guy/persist-admin-notices-dismissal/tree/1.4.3"
+            },
             "time": "2019-03-12T05:19:51+00:00"
         },
         {
@@ -164,6 +178,10 @@
                 "markdown",
                 "parser"
             ],
+            "support": {
+                "issues": "https://github.com/erusev/parsedown/issues",
+                "source": "https://github.com/erusev/parsedown/tree/1.7.x"
+            },
             "time": "2019-12-30T22:54:17+00:00"
         }
     ],
@@ -180,5 +198,5 @@
         "php": ">=5.6"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
