@@ -35,32 +35,17 @@ class Readme_Parser extends Parser {
 	/**
 	 * Constructor.
 	 *
-	 * Convert file contents string to temporary file.
-	 * Pass file path into class-parser.php.
-	 * Delete temporary file when finished.
-	 *
-	 * Problems relating to not finding the `tmp` directory on the server can be fixed by directly setting this path using the `WP_TEMP_DIR` constant.
-	 *
-	 * @link https://developer.wordpress.org/reference/functions/get_temp_dir/
+	 * Convert file contents string to a data URL.
+	 * Pass data URL into class-parser.php.
 	 *
 	 * @param string $file File info.
 	 *
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		$file_path = trailingslashit( get_temp_dir() ) . md5( $file ) . '-tmp-readme.txt';
+		$data_url = 'data:text/plain,' . rawurlencode( $file );
 
-		/**
-		 * Filter location of temporary readme filepath.
-		 *
-		 * @since 8.7.0
-		 *
-		 * @param string $file_path Absolute filepath to temp readme file.
-		 */
-		$this->readme_path = apply_filters( 'github_updater_temp_readme_filepath', $file_path );
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
-		$this->readme_path = is_int( file_put_contents( $this->readme_path, $file ) ) ? $this->readme_path : false;
-		parent::__construct( $this->readme_path );
+		parent::__construct( $data_url );
 	}
 
 	/**
@@ -93,8 +78,6 @@ class Readme_Parser extends Parser {
 		$data = $this->faq_as_h4( $data );
 		$data = $this->readme_section_as_h4( 'changelog', $data );
 		$data = $this->readme_section_as_h4( 'description', $data );
-
-		@unlink( $this->readme_path );
 
 		return $data;
 	}

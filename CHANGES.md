@@ -1,4 +1,5 @@
 #### [unreleased]
+* use data URL in `Readme_Parser` instead of creating/deleting temp file
 
 #### 9.9.0 / 2020-10-05
 * refactor of branch switch row by @pbiron, looks fabulous!!
