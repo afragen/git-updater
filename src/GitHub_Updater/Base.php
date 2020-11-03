@@ -643,7 +643,7 @@ class Base {
 		 *
 		 * @since 9.9.1
 		 */
-		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', true ) ? [] : $data['branches'];
+		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', false ) ? [] : $data['branches'];
 
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
