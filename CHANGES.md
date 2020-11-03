@@ -1,4 +1,5 @@
 #### [unreleased]
+* add filter to modify release asset rollback, 🖕 Gutenberg
 
 #### 9.9.1 / 2020-11-03
 * use data URL in `Readme_Parser` instead of creating/deleting temp file
