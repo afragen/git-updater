@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.9.2 / 2020=11-03
 * add filter to modify release asset rollback, 🖕 Gutenberg
 * fixed logic in `github_updater_no_release_asset_branches`
 
