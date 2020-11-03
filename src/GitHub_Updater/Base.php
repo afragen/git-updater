@@ -643,7 +643,7 @@ class Base {
 		 *
 		 * @since 9.9.1
 		 */
-		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', true ) ? [] : $data['branches'];
+		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', false ) ? [] : $data['branches'];
 
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
@@ -673,6 +673,19 @@ class Base {
 			$rollback = 0 === $num_rollbacks || $data['release_asset']
 				? array_slice( $rollback, 0, 1 )
 				: array_splice( $rollback, 0, $num_rollbacks, true );
+
+			if ( $data['release_asset'] ) {
+				/**
+				 * Filter release asset rollbacks.
+				 * Must return an array.
+				 *
+				 * @since 9.9.2
+				 */
+				$release_asset_rollback = apply_filters( 'github_updater_release_asset_rollback', $rollback, $file );
+				if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
+					$rollback = $release_asset_rollback;
+				}
+			}
 
 			foreach ( $rollback as $tag ) {
 				printf(
