@@ -637,6 +637,14 @@ class Base {
 		if ( $data['release_asset'] ) {
 			unset( $data['branches'][ $data['primary_branch'] ] );
 		}
+		/**
+		 * Filter out branches for release assets if desired.
+		 * Removes all branches from the branch switcher leaving only the tags.
+		 *
+		 * @since 9.9.1
+		 */
+		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', true ) ? [] : $data['branches'];
+
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
 				printf(

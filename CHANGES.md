@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.1 / 2020-11-03
+* use data URL in `Readme_Parser` instead of creating/deleting temp file
+* add filter `github_updater_no_release_asset_branches` to remove all branches from the branch switcher for release assets leaving only the tags
+
 #### 9.9.0 / 2020-10-05
 * refactor of branch switch row by @pbiron, looks fabulous!!
 * test for existence of `$token->newest_tag` in `REST_API` or error may result

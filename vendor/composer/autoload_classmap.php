@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Fragen\\Singleton' => $vendorDir . '/afragen/singleton/Singleton.php',
     'PAnD' => $vendorDir . '/collizo4sky/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
     'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => $vendorDir . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
