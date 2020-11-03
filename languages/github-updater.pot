@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.9.0\n"
+"Project-Id-Version: GitHub Updater 9.9.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-10-28T20:22:42+00:00\n"
+"POT-Creation-Date: 2020-11-03T15:08:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -224,15 +224,15 @@ msgstr ""
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:643
+#: src/GitHub_Updater/Base.php:651
 msgid "Switch to branch "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:671
+#: src/GitHub_Updater/Base.php:679
 msgid "Switch to release "
 msgstr ""
 
-#: src/GitHub_Updater/Base.php:679
+#: src/GitHub_Updater/Base.php:687
 #: src/GitHub_Updater/Theme.php:650
 msgid "No previous tags to rollback to."
 msgstr ""
