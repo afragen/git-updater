@@ -674,15 +674,17 @@ class Base {
 				? array_slice( $rollback, 0, 1 )
 				: array_splice( $rollback, 0, $num_rollbacks, true );
 
-			/**
-			 * Filter release asset rollbacks.
-			 * Must return an array.
-			 *
-			 * @since 9.9.2
-			 */
-			$release_asset_rollback = apply_filters( 'github_updater_release_asset_rollback', $rollback, $file );
-			if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
-				$rollback = $release_asset_rollback;
+			if ( $data['release_asset'] ) {
+				/**
+				 * Filter release asset rollbacks.
+				 * Must return an array.
+				 *
+				 * @since 9.9.2
+				 */
+				$release_asset_rollback = apply_filters( 'github_updater_release_asset_rollback', $rollback, $file );
+				if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
+					$rollback = $release_asset_rollback;
+				}
 			}
 
 			foreach ( $rollback as $tag ) {
