@@ -26,27 +26,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class Readme_Parser extends Parser {
 	/**
-	 * Holds absolute filepath to temp readme file.
-	 *
-	 * @var string
-	 */
-	protected $readme_path;
-
-	/**
-	 * Constructor.
-	 *
-	 * Convert file contents string to a data URL.
-	 * Pass data URL into class-parser.php.
-	 *
-	 * @param string $file File info.
-	 *
-	 * @return void
-	 */
-	public function __construct( $file ) {
-		parent::__construct( $file );
-	}
-
-	/**
 	 * Parse text into markdown.
 	 *
 	 * @param string $text Text to process.
