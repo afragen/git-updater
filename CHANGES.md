@@ -1,6 +1,10 @@
 #### [unreleased]
 
-#### 9.9.2 / 2020=11-03
+#### 9.9.3 / 2020-11-04
+* update `class-parser.php`, now allows for sending text blob as input, thanks @dd32
+* no longer need to use data URLs as potential security risk [#909](https://github.com/afragen/github-updater/issues/909)
+
+#### 9.9.2 / 2020-11-03
 * add filter to modify release asset rollback, 🖕 Gutenberg
 * fixed logic in `github_updater_no_release_asset_branches`
 

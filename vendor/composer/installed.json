@@ -52,19 +52,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4"
+                "reference": "967272573171e071eb90b2a27ddc5424fadefbe4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4",
-                "reference": "2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/967272573171e071eb90b2a27ddc5424fadefbe4",
+                "reference": "967272573171e071eb90b2a27ddc5424fadefbe4",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "time": "2020-07-09T18:11:02+00:00",
+            "time": "2020-11-05T03:41:41+00:00",
+            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -88,6 +89,10 @@
                 "readme",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
+                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
+            },
             "install-path": "../afragen/wordpress-plugin-readme-parser"
         },
         {

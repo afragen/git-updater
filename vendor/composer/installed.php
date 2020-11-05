@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '3e91e3c52e86f8475e4b342ea3fe2c30ad20a720',
+    'reference' => '1ea12d9935c051cafb0203b535a904d7d264d17f',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '3e91e3c52e86f8475e4b342ea3fe2c30ad20a720',
+      'reference' => '1ea12d9935c051cafb0203b535a904d7d264d17f',
     ),
     'afragen/singleton' => 
     array (
@@ -38,7 +38,7 @@
       array (
         0 => '9999999-dev',
       ),
-      'reference' => '2a0ddeb693f4e74e35ef86bcdb0906aa7ccae3d4',
+      'reference' => '967272573171e071eb90b2a27ddc5424fadefbe4',
     ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
