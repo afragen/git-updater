@@ -43,9 +43,7 @@ class Readme_Parser extends Parser {
 	 * @return void
 	 */
 	public function __construct( $file ) {
-		$data_url = 'data:text/plain,' . rawurlencode( $file );
-
-		parent::__construct( $data_url );
+		parent::__construct( $file );
 	}
 
 	/**

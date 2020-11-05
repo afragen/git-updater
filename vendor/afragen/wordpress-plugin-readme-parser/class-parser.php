@@ -152,11 +152,13 @@ class Parser {
 	/**
 	 * Parser constructor.
 	 *
-	 * @param string $file_or_url
+	 * @param string $string A Filepath, URL, or contents of a readme to parse.
 	 */
-	public function __construct( $file_or_url ) {
-		if ( $file_or_url ) {
-			$this->parse_readme( $file_or_url );
+	public function __construct( $string ) {
+		if ( file_exists( $string ) || preg_match( '!^https?://!i', $string ) ) {
+			$this->parse_readme( $string );
+		} elseif ( $string ) {
+			$this->parse_readme_contents( $string );
 		}
 	}
 
@@ -173,6 +175,14 @@ class Parser {
 
 		$contents = file_get_contents( $file_or_url, false, $context );
 
+		return $this->parse_readme_contents( $contents );
+	}
+
+	/**
+	 * @param string $contents The contents of the readme to parse.
+	 * @return bool
+	 */
+	protected function parse_readme_contents( $contents ) {
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
