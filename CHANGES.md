@@ -1,4 +1,5 @@
 #### [unreleased]
+* update to latest `class-parser.php` and `Readme_Parser` cleanup
 
 #### 9.9.3 / 2020-11-04
 * update `class-parser.php`, now allows for sending text blob as input, thanks @dd32
