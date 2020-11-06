@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '754b49e4e61f8bca1988297dc3c8d3a35fb19861',
+    'reference' => '9fa38716f81eff2068c8a6df0ad2af5e77d796a6',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -31,7 +31,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '754b49e4e61f8bca1988297dc3c8d3a35fb19861',
+      'reference' => '9fa38716f81eff2068c8a6df0ad2af5e77d796a6',
     ),
     'afragen/singleton' => 
     array (
@@ -51,7 +51,7 @@ private static $installed = array (
       array (
         0 => '9999999-dev',
       ),
-      'reference' => '967272573171e071eb90b2a27ddc5424fadefbe4',
+      'reference' => '7da7e7f0e458feac79cfcc2762eb1881d080d142',
     ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
