@@ -672,12 +672,14 @@ trait GHU_Trait {
 		if ( $this->filesystem_move( $source, $destination ) ) {
 			return true;
 		}
-		if ( @rename( $source, $destination ) ) {
+		if ( is_dir( $destination ) && rename( $source, $destination ) ) {
 			return true;
 		}
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( $dir = opendir( $source ) ) {
-			@mkdir( $destination );
+			if ( ! file_exists( $destination ) ) {
+				mkdir( $destination );
+			}
 			$source = untrailingslashit( $source );
 			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			while ( false !== ( $file = readdir( $dir ) ) ) {
@@ -690,7 +692,10 @@ trait GHU_Trait {
 					}
 				}
 			}
-			@rmdir( $source );
+			$iterator = new \FilesystemIterator( $source );
+			if ( ! $iterator->valid() ) { // True if directory is empty.
+				rmdir( $source );
+			}
 			closedir( $dir );
 
 			return true;
