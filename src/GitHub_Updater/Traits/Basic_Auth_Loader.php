@@ -16,7 +16,9 @@ use Fragen\GitHub_Updater\API\Bitbucket_API;
 use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 use Fragen\GitHub_Updater\API\GitHub_API;
 use Fragen\GitHub_Updater\API\GitLab_API;
+use Fragen\GitHub_Updater\API\Gist_API;
 use Fragen\GitHub_Updater\API\Gitea_API;
+use Fragen\GitHub_Updater\API\Language_Pack_API;
 
 /*
  * Exit if called directly.
@@ -131,6 +133,11 @@ trait Basic_Auth_Loader {
 
 		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) && ! $this instanceof Install ) {
 			return $credentials;
+		}
+
+		// Set $type for Language Packs.
+		if ( $type instanceof Language_Pack_API ) {
+			$type = $type->type->git;
 		}
 
 		switch ( $type ) {
