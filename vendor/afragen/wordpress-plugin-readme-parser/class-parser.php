@@ -153,9 +153,16 @@ class Parser {
 	 * Parser constructor.
 	 *
 	 * @param string $string A Filepath, URL, or contents of a readme to parse.
+	 *
+	 * Note: data:text/plain streams are URLs and need to pass through
+	 * the parse_readme() function, not the parse_readme_contents() function, so
+	 * that they can be turned from a URL into plain text via the stream.
 	 */
 	public function __construct( $string ) {
-		if ( file_exists( $string ) || preg_match( '!^https?://!i', $string ) ) {
+		if ( file_exists( $string ) 
+			|| preg_match( '!^https?://!i', $string ) 
+			|| preg_match( '!^data:text/plain!i', $string) ) 
+		{
 			$this->parse_readme( $string );
 		} elseif ( $string ) {
 			$this->parse_readme_contents( $string );

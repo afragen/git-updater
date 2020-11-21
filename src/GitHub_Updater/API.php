@@ -222,6 +222,13 @@ class API {
 			}
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
+				$log_message   = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}) - {$response_body->message}";
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( $log_message );
+			}
+
 			return false;
 		}
 

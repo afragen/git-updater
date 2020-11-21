@@ -52,19 +52,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "967272573171e071eb90b2a27ddc5424fadefbe4"
+                "reference": "7da7e7f0e458feac79cfcc2762eb1881d080d142"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/967272573171e071eb90b2a27ddc5424fadefbe4",
-                "reference": "967272573171e071eb90b2a27ddc5424fadefbe4",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/7da7e7f0e458feac79cfcc2762eb1881d080d142",
+                "reference": "7da7e7f0e458feac79cfcc2762eb1881d080d142",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "time": "2020-11-05T03:41:41+00:00",
+            "time": "2020-11-05T20:38:03+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
@@ -178,5 +178,6 @@
             "install-path": "../erusev/parsedown"
         }
     ],
-    "dev": true
+    "dev": true,
+    "dev-package-names": []
 }

@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 9.9.4 / 2020-11-21
+* update to latest `class-parser.php` and `Readme_Parser` cleanup
+* extra testing to remove `@` ( silencing )
+* update `ghu-loader.php`
+* add API error to `debug.log` [#911](https://github.com/afragen/github-updater/issues/911)
+
 #### 9.9.3 / 2020-11-04
 * update `class-parser.php`, now allows for sending text blob as input, thanks @dd32
 * no longer need to use data URLs as potential security risk [#909](https://github.com/afragen/github-updater/issues/909)
