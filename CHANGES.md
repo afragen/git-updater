@@ -5,6 +5,7 @@
 * extra testing to remove `@` ( silencing )
 * update `ghu-loader.php`
 * add API error to `debug.log` [#911](https://github.com/afragen/github-updater/issues/911)
+* added `Gist_API` and `Language_Pack_API` to `Basic_Auth_Loader`, oops
 
 #### 9.9.3 / 2020-11-04
 * update `class-parser.php`, now allows for sending text blob as input, thanks @dd32
