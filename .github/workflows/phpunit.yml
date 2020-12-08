@@ -1,7 +1,11 @@
 name: PHPUnit Testing
 # https://pascalknecht.ch/php-matrix-testing-for-wordpress-plugins-with-github-actions/
 
-on: [push]
+on:
+  push:
+    branches:
+      - develop
+      - master
 
 jobs:
   run:
@@ -13,7 +17,7 @@ jobs:
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
