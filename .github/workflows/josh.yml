@@ -2,11 +2,7 @@
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 name: WordPress Tests
 
-on:
-  push:
-    branches:
-      - develop
-      - master
+on: [push]
 
 env:
   WP_TESTS_DIR: /github/home/wp-tests/wordpress-tests-lib
