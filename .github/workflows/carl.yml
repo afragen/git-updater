@@ -2,20 +2,20 @@ name: Continuous Integration
 on: push
 
 jobs:
-  code-quality:
-    name: Run code quality checks on PHP 7.2
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.2'
-      - name: Install dependencies
-        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist
-      - name: Run code quality checks
-        run: vendor/bin/grumphp run --testsuite=code_quality
+#  code-quality:
+#    name: Run code quality checks on PHP 7.2
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Setup PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: '7.2'
+#      - name: Install dependencies
+#        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist
+#      - name: Run code quality checks
+#        run: vendor/bin/grumphp run --testsuite=code_quality
   unit-test:
     name: Run unit tests on ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
