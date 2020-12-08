@@ -1,41 +1,41 @@
-name: PHPUnit Testing
-# https://pascalknecht.ch/php-matrix-testing-for-wordpress-plugins-with-github-actions/
+# Based on https://github.com/wp-cli/scaffold-command/blob/f9bad3dd7224d5684d950d31c486df70905e386f/templates/plugin-github.mustache
+# Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
+name: WordPress Tests
 
-on:
-  push:
-    branches:
-      - develop
-      - master
+on: [push]
+
+env:
+  WP_TESTS_DIR: /github/home/wp-tests/wordpress-tests-lib
+  WP_CORE_DIR: /github/home/wp-tests/wordpress
 
 jobs:
-  run:
-    runs-on: ${{ matrix.operating-system }}
+
+  test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        operating-system: [ubuntu-latest]
-        php-versions: ['5.6', '7.2', '7.3', '7.4']
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+        php-version: [ 7.2, 7.3, 7.4 ]
+        wordpress-version: [ latest ]
+    container:
+      image: junaidbhura/wp-tests:php-${{ matrix.php-version }}
+    services:
+      mysql:
+        image: mysql:5.7.27
+        env:
+          MYSQL_ROOT_PASSWORD: root
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v1
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        extensions: mbstring, intl #optional, setup extensions
-        ini-values: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
-        coverage: xdebug #optional, setup coverage driver
-        #tools: pecl: false #optional, setup PECL
+      - name: Install Composer dependencies
+        run: |
+          composer install --no-dev
+          composer global require "phpunit/phpunit=6.1.0"
 
-    - name: Check PHP Version
-      run: php -v
+      - name: Install WordPress test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root mysql ${{ matrix.wordpress-version }}
 
-    - name: Composer install
-      run: composer install --optimize-autoloader --prefer-dist
 
-    - name: Install WP Tests
-      run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
-
-    - name: phpunit tests
-      run: ./vendor/bin/phpunit
+      - name: Tests
+        run: $HOME/.composer/vendor/bin/phpunit --config=phpunit.xml
