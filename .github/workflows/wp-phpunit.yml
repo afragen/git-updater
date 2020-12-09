@@ -1,5 +1,6 @@
 # Based on https://github.com/wp-cli/scaffold-command/blob/f9bad3dd7224d5684d950d31c486df70905e386f/templates/plugin-github.mustache
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
+# Thanks https://github.com/shivammathur
 name: WordPress Tests
 
 on:
