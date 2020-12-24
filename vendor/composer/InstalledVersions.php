@@ -1,5 +1,15 @@
 <?php
 
+
+
+
+
+
+
+
+
+
+
 namespace Composer;
 
 use Composer\Semver\VersionParser;
@@ -19,7 +29,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '3462892c60964ee8ed31221af5e6e052711349ea',
+    'reference' => 'f948f2825001509c32400fc00d33af00d48c58d4',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -31,7 +41,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '3462892c60964ee8ed31221af5e6e052711349ea',
+      'reference' => 'f948f2825001509c32400fc00d33af00d48c58d4',
     ),
     'afragen/singleton' => 
     array (
@@ -41,7 +51,7 @@ private static $installed = array (
       array (
         0 => '9999999-dev',
       ),
-      'reference' => '75bce9e88abaefdbbf4d12bc02f71079e465326d',
+      'reference' => 'be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0',
     ),
     'afragen/wordpress-plugin-readme-parser' => 
     array (

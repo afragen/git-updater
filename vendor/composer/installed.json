@@ -7,18 +7,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d"
+                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/75bce9e88abaefdbbf4d12bc02f71079e465326d",
-                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
+                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2019-01-05T16:19:38+00:00",
+            "time": "2020-12-24T03:45:00+00:00",
+            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -43,6 +44,10 @@
                 "singleton",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/afragen/singleton/issues",
+                "source": "https://github.com/afragen/singleton/tree/master"
+            },
             "install-path": "../afragen/singleton"
         },
         {
