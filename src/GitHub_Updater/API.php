@@ -114,8 +114,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array $fields Array of settings fields.
-	 * @param array $repo   Array of repo data.
+	 * @param array     $fields Array of settings fields.
+	 * @param \stdClass $repo   Object of repo data.
 	 *
 	 * @return array
 	 */
