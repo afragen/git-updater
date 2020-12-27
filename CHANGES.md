@@ -1,5 +1,7 @@
 #### [unreleased]
 * fix odd error I see in the logs
+* use GitHub Actions for CI
+* fix some docBlock settings
 
 #### 9.9.4 / 2020-11-21
 * update to latest `class-parser.php` and `Readme_Parser` cleanup
