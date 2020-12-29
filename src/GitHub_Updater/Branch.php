@@ -83,6 +83,7 @@ class Branch {
 		$this->cache = $this->get_repo_cache( $repo );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$rollback = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
 		if ( isset( $this->cache['tags'] ) && in_array( $rollback, $this->cache['tags'], true )
 			|| ! $rollback
