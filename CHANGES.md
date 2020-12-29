@@ -2,6 +2,7 @@
 * fix odd error I see in the logs
 * use GitHub Actions for CI
 * fix some docBlock settings
+* don't set branch on rollback to tag, fixes [#921](https://github.com/afragen/github-updater/issues/921)
 
 #### 9.9.4 / 2020-11-21
 * update to latest `class-parser.php` and `Readme_Parser` cleanup
