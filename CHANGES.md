@@ -1,9 +1,12 @@
 #### [unreleased]
+
+#### 9.9.5 / 2021-01-07
 * fix odd error I see in the logs
 * use GitHub Actions for CI
 * fix some docBlock settings
 * don't set branch on rollback to tag, fixes [#921](https://github.com/afragen/github-updater/issues/921)
 * temp fix to composer resource while waiting for upstream fix [#922](https://github.com/afragen/github-updater/issues/922)
+* update some composer resources
 
 #### 9.9.4 / 2020-11-21
 * update to latest `class-parser.php` and `Readme_Parser` cleanup
