@@ -23,7 +23,6 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 	 *
 	 * A static proxy for creating Singletons from passed class names.
 	 *
-	 * @version 1.0.0
 	 */
 	final class Singleton {
 		/**
@@ -33,7 +32,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 * @param object               $caller     Originating object.
 		 * @param null|array|\stdClass $options
 		 *
-		 * @return array $instance
+		 * @return \stdClass $instance[ $class ]
 		 */
 		public static function get_instance( $class_name, $caller = null, $options = null ) {
 			static $instance = null;

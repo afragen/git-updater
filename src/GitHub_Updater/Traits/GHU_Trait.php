@@ -287,6 +287,7 @@ trait GHU_Trait {
 	public function sanitize( $input ) {
 		$new_input = [];
 		foreach ( array_keys( (array) $input ) as $id ) {
+			$id = strval( $id );
 			if ( in_array( $id, array_keys( wp_get_mime_types() ), true ) ) {
 				$new_input[ sanitize_text_field( $id ) ] = sanitize_text_field( $input[ $id ] );
 			} else {

@@ -159,9 +159,9 @@ class Parser {
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
 	public function __construct( $string ) {
-		if ( file_exists( $string ) 
-			|| preg_match( '!^https?://!i', $string ) 
-			|| preg_match( '!^data:text/plain!i', $string) ) 
+		if ( strlen($string) <= \PHP_MAXPATHLEN && file_exists( $string )
+			|| preg_match( '!^https?://!i', $string )
+			|| preg_match( '!^data:text/plain!i', $string) )
 		{
 			$this->parse_readme( $string );
 		} elseif ( $string ) {

@@ -72,20 +72,30 @@ class Branch {
 
 	/**
 	 * Set current branch on branch switch.
+	 * Exit early if rollback to tag.
 	 *
 	 * @access public
 	 *
 	 * @param string $repo Repository slug.
+	 * @return void
 	 */
 	public function set_branch_on_switch( $repo ) {
 		$this->cache = $this->get_repo_cache( $repo );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['action'], $_GET['rollback'], $this->cache['branches'] )
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$rollback = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
+		if ( isset( $this->cache['tags'] ) && in_array( $rollback, $this->cache['tags'], true )
+			|| ! $rollback
+		) {
+			return;
+		}
+
+		if ( isset( $_GET['action'], $this->cache['branches'] )
 			&& ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
-			$current_branch = array_key_exists( sanitize_text_field( wp_unslash( $_GET['rollback'] ) ), $this->cache['branches'] )
-				? sanitize_text_field( wp_unslash( $_GET['rollback'] ) )
+			$current_branch = array_key_exists( sanitize_text_field( $rollback ), $this->cache['branches'] )
+				? sanitize_text_field( $rollback )
 				: 'master';
 			// phpcs:enable
 			$this->set_repo_cache( 'current_branch', $current_branch, $repo );

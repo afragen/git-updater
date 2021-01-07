@@ -1,15 +1,15 @@
-# Copyright (C) 2020 Andy Fragen
+# Copyright (C) 2021 Andy Fragen
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: GitHub Updater 9.9.4\n"
+"Project-Id-Version: GitHub Updater 9.9.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/github-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-11-21T17:51:37+00:00\n"
+"POT-Creation-Date: 2021-01-07T20:31:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: github-updater\n"
@@ -457,6 +457,6 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
-#: src/GitHub_Updater/Traits/GHU_Trait.php:636
+#: src/GitHub_Updater/Traits/GHU_Trait.php:637
 msgid "There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue."
 msgstr ""

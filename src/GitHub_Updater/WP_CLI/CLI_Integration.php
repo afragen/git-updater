@@ -203,15 +203,14 @@ class CLI_Integration extends WP_CLI_Command {
 	 *     wp theme branch-switch <slug> <branch>
 	 *
 	 * @param string $args       Repository slug.
-	 * @param array  $assoc_args Array of optional arguments.
 	 *
 	 * @subcommand branch-switch
 	 */
-	public function branch_switch( $args = null, $assoc_args ) {
-		list($slug, $branch) = $args;
-		$plugins             = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes              = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$configs             = array_merge( $plugins, $themes );
+	public function branch_switch( $args = null ) {
+		list( $slug, $branch ) = $args;
+		$plugins               = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes                = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$configs               = array_merge( $plugins, $themes );
 
 		$repo = isset( $configs[ $slug ] ) ? $configs[ $slug ] : false;
 		if ( ! $repo ) {

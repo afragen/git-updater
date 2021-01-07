@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'aef3ca6123c8e0c04e43f508ca498c59e4c54fc2',
+    'reference' => '36363a5821b6f7e590945f2f163ae9d5a8000d12',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'aef3ca6123c8e0c04e43f508ca498c59e4c54fc2',
+      'reference' => '36363a5821b6f7e590945f2f163ae9d5a8000d12',
     ),
     'afragen/singleton' => 
     array (
@@ -28,7 +28,7 @@
       array (
         0 => '9999999-dev',
       ),
-      'reference' => '75bce9e88abaefdbbf4d12bc02f71079e465326d',
+      'reference' => 'be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0',
     ),
     'afragen/wordpress-plugin-readme-parser' => 
     array (
@@ -42,12 +42,12 @@
     ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
-      'pretty_version' => '1.4.3',
-      'version' => '1.4.3.0',
+      'pretty_version' => '1.4.4',
+      'version' => '1.4.4.0',
       'aliases' => 
       array (
       ),
-      'reference' => '2d7d8bb3cba631ad227c92296a4b675d7cbc71d7',
+      'reference' => '900739eb6b0ec0210465f5983a6d4e0e420289e4',
     ),
     'erusev/parsedown' => 
     array (

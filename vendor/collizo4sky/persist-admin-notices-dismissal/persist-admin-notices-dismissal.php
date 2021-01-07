@@ -3,7 +3,7 @@
 /**
  * Persist Admin notices Dismissal
  *
- * Copyright (C) 2016 Collins Agbonghama <http://w3guy.com>
+ * Copyright (C) 2016 Collins Agbonghama <https://w3guy.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
  * @author  Collins Agbonghama
  * @author  Andy Fragen
  * @license http://www.gnu.org/licenses GNU General Public License
- * @version 1.4.3
  */
 
 /**

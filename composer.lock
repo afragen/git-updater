@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d"
+                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/75bce9e88abaefdbbf4d12bc02f71079e465326d",
-                "reference": "75bce9e88abaefdbbf4d12bc02f71079e465326d",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
+                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "issues": "https://github.com/afragen/singleton/issues",
                 "source": "https://github.com/afragen/singleton/tree/master"
             },
-            "time": "2019-01-05T16:19:38+00:00"
+            "time": "2020-12-24T03:45:00+00:00"
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
@@ -102,17 +102,20 @@
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",
-            "version": "1.4.3",
+            "version": "1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/w3guy/persist-admin-notices-dismissal.git",
-                "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7"
+                "reference": "900739eb6b0ec0210465f5983a6d4e0e420289e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/w3guy/persist-admin-notices-dismissal/zipball/2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
-                "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
+                "url": "https://api.github.com/repos/w3guy/persist-admin-notices-dismissal/zipball/900739eb6b0ec0210465f5983a6d4e0e420289e4",
+                "reference": "900739eb6b0ec0210465f5983a6d4e0e420289e4",
                 "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
             },
             "type": "library",
             "autoload": {
@@ -121,18 +124,22 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
             "authors": [
                 {
                     "name": "Collins Agbonghama",
-                    "email": "me@w3guy.com"
+                    "email": "me@w3guy.com",
+                    "role": "developer"
                 }
             ],
             "description": "Simple library to persist dismissal of admin notices across pages in WordPress dashboard.",
             "support": {
                 "issues": "https://github.com/w3guy/persist-admin-notices-dismissal/issues",
-                "source": "https://github.com/w3guy/persist-admin-notices-dismissal/tree/1.4.3"
+                "source": "https://github.com/w3guy/persist-admin-notices-dismissal"
             },
-            "time": "2019-03-12T05:19:51+00:00"
+            "time": "2020-12-31T17:12:37+00:00"
         },
         {
             "name": "erusev/parsedown",
