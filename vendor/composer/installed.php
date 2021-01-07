@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'f948f2825001509c32400fc00d33af00d48c58d4',
+    'reference' => '37d38858855fc1f16b3dd554cc30319ba1330bc9',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'f948f2825001509c32400fc00d33af00d48c58d4',
+      'reference' => '37d38858855fc1f16b3dd554cc30319ba1330bc9',
     ),
     'afragen/singleton' => 
     array (
@@ -42,12 +42,12 @@
     ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
-      'pretty_version' => '1.4.3',
-      'version' => '1.4.3.0',
+      'pretty_version' => '1.4.4',
+      'version' => '1.4.4.0',
       'aliases' => 
       array (
       ),
-      'reference' => '2d7d8bb3cba631ad227c92296a4b675d7cbc71d7',
+      'reference' => '900739eb6b0ec0210465f5983a6d4e0e420289e4',
     ),
     'erusev/parsedown' => 
     array (

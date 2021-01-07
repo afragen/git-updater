@@ -102,17 +102,20 @@
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",
-            "version": "1.4.3",
+            "version": "1.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/w3guy/persist-admin-notices-dismissal.git",
-                "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7"
+                "reference": "900739eb6b0ec0210465f5983a6d4e0e420289e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/w3guy/persist-admin-notices-dismissal/zipball/2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
-                "reference": "2d7d8bb3cba631ad227c92296a4b675d7cbc71d7",
+                "url": "https://api.github.com/repos/w3guy/persist-admin-notices-dismissal/zipball/900739eb6b0ec0210465f5983a6d4e0e420289e4",
+                "reference": "900739eb6b0ec0210465f5983a6d4e0e420289e4",
                 "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
             },
             "type": "library",
             "autoload": {
@@ -121,18 +124,22 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
             "authors": [
                 {
                     "name": "Collins Agbonghama",
-                    "email": "me@w3guy.com"
+                    "email": "me@w3guy.com",
+                    "role": "developer"
                 }
             ],
             "description": "Simple library to persist dismissal of admin notices across pages in WordPress dashboard.",
             "support": {
                 "issues": "https://github.com/w3guy/persist-admin-notices-dismissal/issues",
-                "source": "https://github.com/w3guy/persist-admin-notices-dismissal/tree/1.4.3"
+                "source": "https://github.com/w3guy/persist-admin-notices-dismissal"
             },
-            "time": "2019-03-12T05:19:51+00:00"
+            "time": "2020-12-31T17:12:37+00:00"
         },
         {
             "name": "erusev/parsedown",
