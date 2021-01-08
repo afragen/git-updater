@@ -1,5 +1,7 @@
 #### [unreleased]
 
+* this fix for odd log errors, hopefully, doesn't create new errors
+
 #### 9.9.5 / 2021-01-07
 * fix odd error I see in the logs
 * use GitHub Actions for CI
