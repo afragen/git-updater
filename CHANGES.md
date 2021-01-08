@@ -1,5 +1,6 @@
 #### [unreleased]
 
+#### 9.9.6 / 2021-01-08
 * this fix for odd log errors, hopefully, doesn't create new errors
 
 #### 9.9.5 / 2021-01-07
