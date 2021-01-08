@@ -2,7 +2,8 @@
 
 # GitHub Updater
 
-[![Build Status](https://travis-ci.org/afragen/github-updater.svg?branch=develop)](https://travis-ci.org/afragen/github-updater)
+![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg
+)
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
