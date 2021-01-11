@@ -59,12 +59,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "7da7e7f0e458feac79cfcc2762eb1881d080d142"
+                "reference": "f878b2a815caace5f331b827b356b4eab9610561"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/7da7e7f0e458feac79cfcc2762eb1881d080d142",
-                "reference": "7da7e7f0e458feac79cfcc2762eb1881d080d142",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/f878b2a815caace5f331b827b356b4eab9610561",
+                "reference": "f878b2a815caace5f331b827b356b4eab9610561",
                 "shasum": ""
             },
             "require": {
@@ -98,7 +98,7 @@
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
-            "time": "2020-11-05T20:38:03+00:00"
+            "time": "2021-01-11T22:07:25+00:00"
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",
