@@ -159,9 +159,15 @@ class Parser {
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
 	public function __construct( $string ) {
-		if ( strlen($string) <= \PHP_MAXPATHLEN && file_exists( $string )
-			|| preg_match( '!^https?://!i', $string )
-			|| preg_match( '!^data:text/plain!i', $string) )
+		if (
+			(
+				// If it's longer than the Filesystem path limit or contains newlines, it's not worth a file_exists() check.
+				strlen( $string ) <= PHP_MAXPATHLEN
+				&& false === strpos( $string, "\n" )
+				&& file_exists( $string )
+			)
+			|| preg_match( '!^https?://!i', $string ) 
+			|| preg_match( '!^data:text/plain!i', $string) ) 
 		{
 			$this->parse_readme( $string );
 		} elseif ( $string ) {
@@ -469,12 +475,21 @@ class Parser {
 	 * @return string
 	 */
 	protected function trim_length( $desc, $length = 150 ) {
-		if ( mb_strlen( $desc ) > $length ) {
-			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
+		// Apply the length restriction without counting html entities.
+		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
 
-			// If not a full sentence, and one ends within 20% of the end, trim it to that.
-			if ( '.' !== mb_substr( $desc, -1 ) && ( $pos = mb_strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
-				$desc = mb_substr( $desc, 0, $pos + 1 );
+		if ( $str_length > $length ) {
+			$desc = mb_substr( $desc, 0, $length );
+
+			// If not a full sentence...
+			if ( '.' !== mb_substr( $desc, -1 ) ) {
+				// ..and one ends within 20% of the end, trim it to that.
+				if ( ( $pos = mb_strrpos( $desc, '.' ) ) > ( 0.8 * $length ) ) {
+					$desc = mb_substr( $desc, 0, $pos + 1 );
+				} else {
+					// ..else mark it as being trimmed.
+					$desc .= ' &hellip;';
+				}
 			}
 		}
 
