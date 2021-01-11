@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '3266659f83dea0352a9ed19a7b8626d7e153750b',
+    'reference' => '8fe3ed9e30f56a568b6ef4b0afdef4d56165cd65',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '3266659f83dea0352a9ed19a7b8626d7e153750b',
+      'reference' => '8fe3ed9e30f56a568b6ef4b0afdef4d56165cd65',
     ),
     'afragen/singleton' => 
     array (
