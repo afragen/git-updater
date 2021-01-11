@@ -82,10 +82,12 @@ class Branch {
 	public function set_branch_on_switch( $repo ) {
 		$this->cache = $this->get_repo_cache( $repo );
 
+		// Exit early if switching to tag.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$rollback = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
-		if ( isset( $this->cache['tags'] ) && in_array( $rollback, $this->cache['tags'], true )
+		$rollback  = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
+		$tag_array = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
+		if ( $tag_array && in_array( $rollback, $this->cache['tags'], true )
 			|| ! $rollback
 		) {
 			return;

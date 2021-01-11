@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix PHP8 error in `set_branch_on_switch()`, [#925](https://github.com/afragen/github-updater/issues/925)
 
 #### 9.9.6 / 2021-01-08
 * this fix for odd log errors, hopefully, doesn't create new errors
