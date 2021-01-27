@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix odd return from Gitea API branch request
 
 #### 9.9.7 / 2021-01-11
 * fix PHP8 error in `set_branch_on_switch()`, [#925](https://github.com/afragen/github-updater/issues/925)
