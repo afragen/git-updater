@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.9.8 / 2021-02-01
 * fix odd return from Gitea API branch request
 * update for new URL to GitHub release asset redirect, fixes [#929](https://github.com/afragen/github-updater/issues/929)
 
