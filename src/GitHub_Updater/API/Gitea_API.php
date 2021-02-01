@@ -287,6 +287,7 @@ class Gitea_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return $response;
 		}
+		$response = is_string( $response ) ? [] : $response;
 		$branches = [];
 		foreach ( $response as $branch ) {
 			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
