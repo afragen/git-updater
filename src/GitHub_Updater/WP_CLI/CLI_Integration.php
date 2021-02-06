@@ -304,7 +304,9 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 /**
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
-class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin { // phpcs:ignore
+// phpcs:ignore
+class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
+
 	/** Skin feeback. */
 	public function header() {
 	}
@@ -341,7 +343,8 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin { // phpcs:ignore
 /**
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
-class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin { // phpcs:ignore
+// phpcs:ignore
+class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
 	/** Skin header. */
 	public function header() {
 	}
