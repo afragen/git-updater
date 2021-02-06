@@ -7,7 +7,11 @@ div.install-theme-info {
 	display: none;
 }
 
-/* Properly align branch switcher in mobile. */
+
 @media screen and (max-width: 782px) {
+	/* Properly align branch switcher in mobile. */
 	.plugins .plugin-update-tr .notice { margin-left: 0; }
+
+	/* Fix for ::before on mobile. */
+	.github-updater.plugin-update-tr.active:before { background-color: #f0f6fc; }
 }
