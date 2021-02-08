@@ -1,5 +1,6 @@
 #### [unreleased]
 * update for WP 5.7 CSS changes
+* update for setting branch on rollback
 
 #### 9.9.8 / 2021-02-01
 * fix odd return from Gitea API branch request

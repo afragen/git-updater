@@ -72,7 +72,7 @@ class Branch {
 
 	/**
 	 * Set current branch on branch switch.
-	 * Exit early if rollback to tag.
+	 * Exit early if not a rollback.
 	 *
 	 * @access public
 	 *
@@ -82,28 +82,31 @@ class Branch {
 	public function set_branch_on_switch( $repo ) {
 		$this->cache = $this->get_repo_cache( $repo );
 
-		// Exit early if switching to tag.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$rollback  = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
-		$tag_array = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
-		if ( $tag_array && in_array( $rollback, $this->cache['tags'], true )
-			|| ! $rollback
-		) {
+		$rollback = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
+		// Exit early if not a rollback, ie normal update.
+		if ( ! $rollback ) {
 			return;
 		}
 
-		if ( isset( $_GET['action'], $this->cache['branches'] )
+		$tag_array    = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
+		$in_tag_array = $tag_array && in_array( $rollback, $this->cache['tags'], true );
+		if ( $in_tag_array ) {
+			$current_branch = isset( $this->cache['PrimaryBranch'] ) ? $this->cache['PrimaryBranch'] : 'master';
+		}
+
+		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
 			&& ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
 		) {
 			$current_branch = array_key_exists( sanitize_text_field( $rollback ), $this->cache['branches'] )
 				? sanitize_text_field( $rollback )
 				: 'master';
 			// phpcs:enable
-			$this->set_repo_cache( 'current_branch', $current_branch, $repo );
-			self::$options[ 'current_branch_' . $repo ] = $current_branch;
-			update_site_option( 'github_updater', self::$options );
 		}
+		$this->set_repo_cache( 'current_branch', $current_branch, $repo );
+		self::$options[ 'current_branch_' . $repo ] = $current_branch;
+		update_site_option( 'github_updater', self::$options );
 	}
 
 	/**
