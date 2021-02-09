@@ -13,5 +13,8 @@ div.install-theme-info {
 	.plugins .plugin-update-tr .notice { margin-left: 0; }
 
 	/* Fix for ::before on mobile. */
-	.github-updater.plugin-update-tr.active:before { background-color: #f0f6fc; }
+	.github-updater.plugin-update-tr.active:before {
+		background-color: #f0f6fc;
+		border-left: 4px solid #72aee6;
+	}
 }
