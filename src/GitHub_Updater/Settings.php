@@ -451,6 +451,7 @@ class Settings {
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
+		$reset_keys      = [];
 		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
 		$always_unset    = [
 			'db_version',
