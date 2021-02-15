@@ -2,10 +2,9 @@
 
 # GitHub Updater
 
-![Total downloads](https://img.shields.io/github/downloads/afragen/github-updater/total) ![Total downloads@latest](https://img.shields.io/github/downloads/afragen/github-updater/latest/total)
+![downloads](https://img.shields.io/github/downloads/afragen/github-updater/total) ![downloads@latest](https://img.shields.io/github/downloads/afragen/github-updater/latest/total)
 
-![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg
-)
+![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg)
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
