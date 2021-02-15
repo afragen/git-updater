@@ -2,6 +2,10 @@
 
 # GitHub Updater
 
+![Total downloads](https://img.shields.io/github/downloads/afragen/github-updater/total)
+
+![Total downloads@latest](https://img.shields.io/github/downloads/afragen/github-updater/latest/total)
+
 ![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg
 )
 
