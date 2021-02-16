@@ -258,6 +258,17 @@ trait GHU_Trait {
 		 */
 		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
 
+		// Override dot org if set in Skip Updates.
+		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
+			$skip_updates = get_site_option( 'skip_updates' );
+			foreach ( $skip_updates as $skip ) {
+				if ( $repo->file === $skip['slug'] ) {
+					$override = true;
+					break;
+				}
+			}
+		}
+
 		return ! $dot_org_master || $override || $this->deprecate_override_constant();
 	}
 

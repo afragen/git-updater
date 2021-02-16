@@ -2,6 +2,7 @@
 * update for WP 5.7 CSS changes
 * update for setting branch on rollback
 * add `shields.io` download stats to README
+* add compatibility with [Skip Updates](https://wordpress.org/plugins/skip-updates)
 
 #### 9.9.8 / 2021-02-01
 * fix odd return from Gitea API branch request
