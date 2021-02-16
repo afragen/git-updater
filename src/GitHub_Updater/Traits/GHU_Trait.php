@@ -276,6 +276,7 @@ trait GHU_Trait {
 	/**
 	 * Deprecated dot org override constant.
 	 *
+	 * @deprecated 8.5.0
 	 * @return bool
 	 */
 	public function deprecate_override_constant() {
