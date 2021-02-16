@@ -257,8 +257,9 @@ trait GHU_Trait {
 		 * @return bool
 		 */
 		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
+		$override = $override || $this->deprecate_override_constant();
 
-		// Override dot org if set in Skip Updates.
+		// Set $override if set in Skip Updates plugin.
 		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
 			$skip_updates = get_site_option( 'skip_updates' );
 			foreach ( $skip_updates as $skip ) {
@@ -269,7 +270,7 @@ trait GHU_Trait {
 			}
 		}
 
-		return ! $dot_org_master || $override || $this->deprecate_override_constant();
+		return ! $dot_org_master || $override;
 	}
 
 	/**
