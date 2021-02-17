@@ -451,6 +451,7 @@ class Settings {
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
+		$reset_keys      = [];
 		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
 		$always_unset    = [
 			'db_version',
@@ -705,7 +706,7 @@ class Settings {
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		if ( $update || $refresh_transients || $reset_api_key ) {
+		if ( ! empty( $_POST ) || $refresh_transients || $reset_api_key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );

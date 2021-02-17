@@ -257,13 +257,26 @@ trait GHU_Trait {
 		 * @return bool
 		 */
 		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
+		$override = $override || $this->deprecate_override_constant();
 
-		return ! $dot_org_master || $override || $this->deprecate_override_constant();
+		// Set $override if set in Skip Updates plugin.
+		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
+			$skip_updates = get_site_option( 'skip_updates' );
+			foreach ( $skip_updates as $skip ) {
+				if ( $repo->file === $skip['slug'] ) {
+					$override = true;
+					break;
+				}
+			}
+		}
+
+		return ! $dot_org_master || $override;
 	}
 
 	/**
 	 * Deprecated dot org override constant.
 	 *
+	 * @deprecated 8.5.0
 	 * @return bool
 	 */
 	public function deprecate_override_constant() {
