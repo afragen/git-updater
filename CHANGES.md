@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 9.9.9 / 2021-02-17
 * update for WP 5.7 CSS changes
 * update for setting branch on rollback
 * add `shields.io` download stats to README

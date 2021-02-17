@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '816909f68c5fcab44d9a06494eed398785133966',
+    'reference' => '71aeb8a8b9f21e019e8f6cfac4d62216706002b7',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -42,7 +42,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '816909f68c5fcab44d9a06494eed398785133966',
+      'reference' => '71aeb8a8b9f21e019e8f6cfac4d62216706002b7',
     ),
     'afragen/singleton' => 
     array (
