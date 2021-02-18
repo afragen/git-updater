@@ -450,7 +450,9 @@ class Plugin {
 
 				// Update download link for release_asset non-primary branches.
 				if ( $plugin->release_asset && $plugin->primary_branch !== $plugin->branch ) {
-					$response['package'] = $plugin->branches[ $plugin->branch ]['download'];
+					$response['package'] = isset( $plugin->branches[ $plugin->branch ] )
+						? $plugin->branches[ $plugin->branch ]['download']
+						: null;
 				}
 
 				$transient->response[ $plugin->file ] = (object) $response;

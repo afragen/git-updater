@@ -709,7 +709,9 @@ class Theme {
 
 				// Update download link for release_asset non-primary branches.
 				if ( $theme->release_asset && $theme->primary_branch !== $theme->branch ) {
-					$response['package'] = $theme->branches[ $theme->branch ]['download'];
+					$response['package'] = isset( $theme->branches[ $theme->branch ] )
+					? $theme->branches[ $theme->branch ]['download']
+					: null;
 				}
 
 				$transient->response[ $theme->slug ] = $response;
