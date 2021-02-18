@@ -697,7 +697,7 @@ class Settings {
 		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$is_option_page = ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) );
+		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) && $is_option_page ) {
 			$update = true;
 		}
