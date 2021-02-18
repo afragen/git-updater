@@ -97,7 +97,7 @@ class Branch {
 		}
 
 		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
-			&& ( 'upgrade-plugin' === $_GET['action'] || 'upgrade-theme' === $_GET['action'] )
+			&& in_array( $_GET['action'], [ 'upgrade-plugin', 'upgrade-theme' ], true )
 		) {
 			$current_branch = array_key_exists( sanitize_text_field( $rollback ), $this->cache['branches'] )
 				? sanitize_text_field( $rollback )
