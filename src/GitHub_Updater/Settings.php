@@ -697,16 +697,15 @@ class Settings {
 		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] )
-			&& ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) )
-		) {
+		$is_option_page = ( isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true ) );
+		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) && $is_option_page ) {
 			$update = true;
 		}
 		// phpcs:enable
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		if ( ! empty( $_POST ) || $refresh_transients || $reset_api_key ) {
+		if ( $is_option_page || $refresh_transients || $reset_api_key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
