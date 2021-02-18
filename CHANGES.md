@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.10 / 2021-02-18
+* fix change to `redirect_on_save()`
+* fix issue when more than 100 branches are present and primary branch in plugin/theme is changed and not in branches array, thanks @bph
+
 #### 9.9.9 / 2021-02-17
 * update for WP 5.7 CSS changes
 * update for setting branch on rollback
