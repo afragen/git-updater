@@ -99,10 +99,10 @@ class Branch {
 		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
 			&& in_array( $_GET['action'], [ 'upgrade-plugin', 'upgrade-theme' ], true )
 		) {
-			$current_branch = array_key_exists( sanitize_text_field( $rollback ), $this->cache['branches'] )
+			// phpcs:enable
+			$current_branch = array_key_exists( $rollback, $this->cache['branches'] )
 				? sanitize_text_field( $rollback )
 				: 'master';
-			// phpcs:enable
 		}
 		$this->set_repo_cache( 'current_branch', $current_branch, $repo );
 		self::$options[ 'current_branch_' . $repo ] = $current_branch;
