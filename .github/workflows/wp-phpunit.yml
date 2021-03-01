@@ -1,7 +1,7 @@
 # Based on https://github.com/wp-cli/scaffold-command/blob/f9bad3dd7224d5684d950d31c486df70905e386f/templates/plugin-github.mustache
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 # Thanks https://github.com/shivammathur
-name: WordPress Tests
+name: Unit Tests
 
 on:
   push:
@@ -14,23 +14,20 @@ on:
       - master
 
 jobs:
-  run:
-    runs-on: ${{ matrix.operating-system }}
+  unit-tests:
     strategy:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-18.04]
-        php-versions: ['7.2', '7.3', '7.4']
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
         phpunit-versions: ['7.5.20']
         include:
           - php-versions: '5.6'
             phpunit-versions: '5.7.27'
             operating-system: ubuntu-16.04
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+    name: PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.operating-system }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -39,17 +36,17 @@ jobs:
         extensions: mysql
         tools: wp-cli, phpunit:${{ matrix.phpunit-versions }}
 
-    - name: Check PHP Version
-      run: php -v
-
-    - name: Composer install
-      run: composer install --optimize-autoloader --prefer-dist
-
-    - name: Start Mysql
+    - name: Start MySQL service
       run: sudo service mysql start
 
-    - name: Install WP Tests
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: composer install --optimize-autoloader --prefer-dist
+
+    - name: Install WordPress Test Suite
       run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
 
-    - name: phpunit tests
-      run: phpunit --config=phpunit.xml
+    - name: Run unit tests
+      run: phpunit --verbose
