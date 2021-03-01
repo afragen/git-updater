@@ -26,7 +26,7 @@ jobs:
             phpunit-versions: '5.7.27'
             operating-system: ubuntu-16.04
           - php-versions: '8.0'
-            phpunit-versions: '9.5.2'
+            phpunit-versions: '7.5.20'
             operating-system: ubuntu-18.04
     name: PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }}
     runs-on: ${{ matrix.operating-system }}
