@@ -25,30 +25,36 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
 
+### Sponsor
+
+You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with continued development and support.
+
+### Headers
+
 The following headers are available for use depending upon your hosting source.
 
-### GitHub
+#### GitHub
 * GitHub Plugin URI
 * GitHub Theme URI
 * GitHub Languages
 
-### Bitbucket
+#### Bitbucket
 * Bitbucket Plugin URI
 * Bitbucket Theme URI
 * Bitbucket Languages
 
-### GitLab
+#### GitLab
 * GitLab Plugin URI
 * GitLab Theme URI
 * GitLab Languages
 * GitLab CI Job
 
-### Gitea
+#### Gitea
 * Gitea Plugin URI
 * Gitea Theme URI
 * Gitea Languages
 
-### Gist
+#### Gist
 * Gist Plugin URI
 * Gist Theme URI
 * Gist Languages
