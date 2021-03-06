@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'fa360203beaa5a9bbce9e52e15d397cf630966d2',
+    'reference' => '4ea84743708d009283a6c2a7224e31fc75f14120',
     'name' => 'afragen/github-updater',
   ),
   'versions' => 
@@ -42,7 +42,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'fa360203beaa5a9bbce9e52e15d397cf630966d2',
+      'reference' => '4ea84743708d009283a6c2a7224e31fc75f14120',
     ),
     'afragen/singleton' => 
     array (
@@ -305,7 +305,6 @@ self::$canGetVendors = method_exists('Composer\Autoload\ClassLoader', 'getRegist
 $installed = array();
 
 if (self::$canGetVendors) {
-
 foreach (ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
 if (isset(self::$installedByVendor[$vendorDir])) {
 $installed[] = self::$installedByVendor[$vendorDir];
