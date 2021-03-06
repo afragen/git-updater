@@ -174,7 +174,7 @@ class Theme {
 			);
 
 			$key = array_pop( $key );
-			if ( null === $key ) {
+			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
 			$repo_uri = $theme[ $key ];
