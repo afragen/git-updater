@@ -104,12 +104,7 @@ class Base {
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
-		if ( file_exists( __DIR__ . '/API/Bitbucket_API.php' ) ) {
-			self::$installed_apis['bitbucket_api'] = true;
-			self::$git_servers['bitbucket']        = 'Bitbucket';
-		} else {
-			self::$installed_apis['bitbucket_api'] = false;
-		}
+
 		/**
 		 * Filter to add active git servers.
 		 *
@@ -126,29 +121,9 @@ class Base {
 		 */
 		static::$installed_apis = \apply_filters( 'gu_installed_apis', static::$installed_apis );
 
-		if ( file_exists( __DIR__ . '/API/GitLab_API.php' ) ) {
-			self::$installed_apis['gitlab_api'] = true;
-			self::$git_servers['gitlab']        = 'GitLab';
-		} else {
-			self::$installed_apis['gitlab_api'] = false;
-		}
-		if ( file_exists( __DIR__ . '/API/Gitea_API.php' ) ) {
-			self::$installed_apis['gitea_api'] = true;
-			self::$git_servers['gitea']        = 'Gitea';
-		} else {
-			self::$installed_apis['gitea_api'] = false;
-		}
-		if ( file_exists( __DIR__ . '/API/Gist_API.php' ) ) {
-			self::$installed_apis['gist_api'] = true;
-			self::$git_servers['gist']        = 'Gist';
-		} else {
-			self::$installed_apis = false;
-		}
 		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
 			self::$installed_apis['zipfile_api'] = true;
 			self::$git_servers['zipfile']        = 'Zipfile';
-		} else {
-			self::$installed_apis['zipfile_api'] = false;
 		}
 	}
 

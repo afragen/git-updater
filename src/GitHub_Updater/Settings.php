@@ -474,10 +474,10 @@ class Settings {
 		);
 
 		$auth_required = static::$auth_required;
-		if ( in_array( 'gitlab', $running_servers ) ) {
+		if ( in_array( 'gitlab', $running_servers, true ) ) {
 			$auth_required_unset['gitlab'] = 'gitlab_access_token';
 		}
-		if ( in_array( 'gitea', $running_servers ) ) {
+		if ( in_array( 'gitea', $running_servers, true ) ) {
 			$auth_required_unset['gitea'] = 'gitea_access_token';
 		}
 
