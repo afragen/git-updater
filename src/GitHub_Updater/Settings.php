@@ -473,7 +473,8 @@ class Settings {
 			$always_unset
 		);
 
-		$auth_required = static::$auth_required;
+		$auth_required       = static::$auth_required;
+		$auth_required_unset = [];
 		if ( in_array( 'gitlab', $running_servers, true ) ) {
 			$auth_required_unset['gitlab'] = 'gitlab_access_token';
 		}
