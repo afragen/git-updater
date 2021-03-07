@@ -68,7 +68,14 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $installed_apis = [ 'github_api' => true ];
+	public static $installed_apis = [
+		'github_api'    => true,
+		'bitbucket_api' => false,
+		'gitlab_api'    => false,
+		'gitea_api'     => false,
+		'gist_api'      => false,
+		'zipfile_api'   => false,
+	];
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
