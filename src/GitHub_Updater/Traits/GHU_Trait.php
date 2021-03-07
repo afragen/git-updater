@@ -406,28 +406,27 @@ trait GHU_Trait {
 	protected function get_repo_parts( $repo, $type ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
 
-		$arr['bool']    = false;
-		$pattern        = '/' . strtolower( $repo ) . '_/';
-		$type           = preg_replace( $pattern, '', $type );
-		$repo_types     = [
-			'GitHub'    => 'github_' . $type,
-			'Bitbucket' => 'bitbucket_' . $type,
-			'GitLab'    => 'gitlab_' . $type,
-			'Gitea'     => 'gitea_' . $type,
-			'Gist'      => 'gist_' . $type,
-		];
-		$repo_base_uris = [
-			'GitHub'    => 'https://github.com/',
-			'Bitbucket' => 'https://bitbucket.org/',
-			'GitLab'    => 'https://gitlab.com/',
-			'Gitea'     => '',
-			'Gist'      => 'https://gist.github.com/',
+		$arr['bool'] = false;
+		$pattern     = '/' . strtolower( $repo ) . '_/';
+		$type        = preg_replace( $pattern, '', $type );
+
+		$repos = [
+			'types' => [ 'GitHub' => 'github_' . $type ],
+			'uris'  => [ 'GitHub' => 'https://github.com/' ],
 		];
 
-		if ( array_key_exists( $repo, $repo_types ) ) {
-			$arr['type']       = $repo_types[ $repo ];
+		/**
+		 * Filter repo parts from other git hosts.
+		 *
+		 * @since 10.0.0
+		 * @param array $repos Array of repo data.
+		 */
+		$repos = \apply_filters( 'gu_get_repo_parts', $repos, $type );
+
+		if ( array_key_exists( $repo, $repos['types'] ) ) {
+			$arr['type']       = $repos['types'][ $repo ];
 			$arr['git_server'] = strtolower( $repo );
-			$arr['base_uri']   = $repo_base_uris[ $repo ];
+			$arr['base_uri']   = $repos['uris'][ $repo ];
 			$arr['bool']       = true;
 			foreach ( $extra_repo_headers as $key => $value ) {
 				$arr[ $key ] = $repo . ' ' . $value;

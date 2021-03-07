@@ -45,15 +45,6 @@ class Settings {
 	public static $auth_required = [
 		'github_private'    => false,
 		'github_enterprise' => false,
-		'bitbucket_private' => false,
-		'bitbucket_server'  => false,
-		'gitlab'            => true,
-		'gitlab_private'    => false,
-		'gitlab_enterprise' => false,
-		'gitea'             => true,
-		'gitea_private'     => false,
-		'gist'              => false,
-		'gist_private'      => false,
 	];
 
 	/**
@@ -126,6 +117,14 @@ class Settings {
 		if ( isset( self::$options['bypass_background_processing'] ) ) {
 			add_filter( 'github_updater_disable_wpcron', '__return_true' );
 		}
+
+		/**
+		 * Filters authentication required array.
+		 *
+		 * @since 10.0.0
+		 * @param array static::$auth_required Array of authentication requirements.
+		 */
+		static::$auth_required = \apply_filters( 'gu_settings_auth_required', static::$auth_required );
 	}
 
 	/**
@@ -474,11 +473,13 @@ class Settings {
 			$always_unset
 		);
 
-		$auth_required       = static::$auth_required;
-		$auth_required_unset = [
-			'gitlab' => 'gitlab_access_token',
-			'gitea'  => 'gitea_access_token',
-		];
+		$auth_required = static::$auth_required;
+		if ( in_array( 'gitlab', $running_servers ) ) {
+			$auth_required_unset['gitlab'] = 'gitlab_access_token';
+		}
+		if ( in_array( 'gitea', $running_servers ) ) {
+			$auth_required_unset['gitea'] = 'gitea_access_token';
+		}
 
 		array_map(
 			function ( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
@@ -524,26 +525,46 @@ class Settings {
 	private function set_auth_required( $token ) {
 		// Set booleans for Enterprise repos.
 		if ( $token->enterprise ) {
-			static::$auth_required['github_enterprise'] = static::$auth_required['github_enterprise']
-				?: 'github' === $token->git;
-			static::$auth_required['gitlab_enterprise'] = static::$auth_required['gitlab_enterprise']
-				?: 'gitlab' === $token->git;
-			static::$auth_required['bitbucket_server']  = static::$auth_required['bitbucket_server']
-				?: 'bitbucket' === $token->git;
+			switch ( $token ) {
+				case array_key_exists( 'github_enterprise', static::$auth_required ):
+					static::$auth_required['github_enterprise'] = static::$auth_required['github_enterprise']
+					?: 'github' === $token->git;
+					break;
+				case array_key_exists( 'gitlab_enterprise', static::$auth_required ):
+					static::$auth_required['gitlab_enterprise'] = static::$auth_required['gitlab_enterprise']
+					?: 'gitlab' === $token->git;
+					break;
+				case array_key_exists( 'bitbucket_server', static::$auth_required ):
+					static::$auth_required['bitbucket_server'] = static::$auth_required['bitbucket_server']
+					?: 'bitbucket' === $token->git;
+					break;
+			}
 		}
 
 		// Set booleans for private repos.
 		if ( $this->is_private( $token ) ) {
-			static::$auth_required['github_private']    = static::$auth_required['github_private']
-				?: 'github' === $token->git;
-			static::$auth_required['bitbucket_private'] = static::$auth_required['bitbucket_private']
-				?: 'bitbucket' === $token->git;
-			static::$auth_required['gitlab_private']    = static::$auth_required['gitlab_private']
-				?: 'gitlab' === $token->git;
-			static::$auth_required['gitea_private']     = static::$auth_required['gitea_private']
-				?: 'gitea' === $token->git;
-			static::$auth_required['gist_private']      = static::$auth_required['gist_private']
-				?: 'gist' === $token->git;
+			switch ( $token ) {
+				case array_key_exists( 'github_private', static::$auth_required ):
+					static::$auth_required['github_private'] = static::$auth_required['github_private']
+					?: 'github' === $token->git;
+					break;
+				case array_key_exists( 'bitbucket_private', static::$auth_required ):
+					static::$auth_required['bitbucket_private'] = static::$auth_required['bitbucket_private']
+					?: 'bitbucket' === $token->git;
+					break;
+				case array_key_exists( 'gitlab_private', static::$auth_required ):
+					static::$auth_required['gitlab_private'] = static::$auth_required['gitlab_private']
+					?: 'gitlab' === $token->git;
+					break;
+				case array_key_exists( 'gitea_private', static::$auth_required ):
+					static::$auth_required['gitea_private'] = static::$auth_required['gitea_private']
+					?: 'gitea' === $token->git;
+					break;
+				case array_key_exists( 'gist_private', static::$auth_required ):
+					static::$auth_required['gist_private'] = static::$auth_required['gist_private']
+					?: 'gist' === $token->git;
+					break;
+			}
 		}
 	}
 

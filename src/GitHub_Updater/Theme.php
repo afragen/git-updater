@@ -187,7 +187,7 @@ class Theme {
 			}
 
 			$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
-			$current_branch = "current_branch_{$header['repo']}";
+			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
 
 			if ( isset( self::$options[ $current_branch ] )
 			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
