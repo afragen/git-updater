@@ -1,4 +1,5 @@
 #### [unreleased]
+* added default values in API constructors for future proofing
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`

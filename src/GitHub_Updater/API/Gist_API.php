@@ -34,7 +34,7 @@ class Gist_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass $type plugin|theme.
 	 */
-	public function __construct( $type ) {
+	public function __construct( $type = null ) {
 		parent::__construct();
 		$this->type     = null === $type ? $type : $this->parse_gist_meta( $type );
 		$this->response = $this->get_repo_cache();
