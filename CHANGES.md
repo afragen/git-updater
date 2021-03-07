@@ -1,6 +1,8 @@
 #### [unreleased]
 * added default values in API constructors for future proofing
 * correctly apply `Primary Branch` with rollback to tag
+* removed Git APIs and placed in plugins
+* added filters to added data from API plugins
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
