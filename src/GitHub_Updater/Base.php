@@ -103,8 +103,21 @@ class Base {
 		} else {
 			self::$installed_apis['bitbucket_api'] = false;
 		}
+		/**
+		 * Filter to add active git servers.
+		 *
+		 * @since 10.0.0
+		 * @param array static::$git_servers Array of git servers.
+		 */
+		static::$git_servers = \apply_filters( 'gu_git_servers', static::$git_servers );
 
-		self::$installed_apis['bitbucket_server_api'] = file_exists( __DIR__ . '/API/Bitbucket_Server_API.php' );
+		/**
+		 * Filter to add installed APIs.
+		 *
+		 * @since 10.0.0
+		 * @param array static::$installed_apis Array of installed APIs.
+		 */
+		static::$installed_apis = \apply_filters( 'gu_installed_apis', static::$installed_apis );
 
 		if ( file_exists( __DIR__ . '/API/GitLab_API.php' ) ) {
 			self::$installed_apis['gitlab_api'] = true;
