@@ -19,29 +19,6 @@ class Remote_Management {
 	use GHU_Trait;
 
 	/**
-	 * Holds the values for remote management settings.
-	 *
-	 * @deprecated 9.1.0
-	 *
-	 * @var array $option_remote
-	 */
-	public static $options_remote;
-
-	/**
-	 * Supported remote management services.
-	 *
-	 * @deprecated 9.1.0
-	 *
-	 * @var array $remote_management
-	 */
-	public static $remote_management = [
-		'ithemes_sync' => 'iThemes Sync',
-		'infinitewp'   => 'InfiniteWP',
-		'managewp'     => 'ManageWP',
-		'mainwp'       => 'MainWP',
-	];
-
-	/**
 	 * Holds the value for the Remote Management API key.
 	 *
 	 * @var string $api_key
@@ -60,8 +37,7 @@ class Remote_Management {
 	 * Load site options.
 	 */
 	private function load_options() {
-		self::$options_remote = get_site_option( 'github_updater_remote_management', [] );
-		self::$api_key        = get_site_option( 'github_updater_api_key' );
+		self::$api_key = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -147,15 +123,9 @@ class Remote_Management {
 		if ( 'github_updater_remote_management' === $tab ) {
 			$action = add_query_arg( 'tab', $tab, $action ); ?>
 			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-			<?php
-				// settings_fields( 'github_updater_remote_management' );
-				do_settings_sections( 'github_updater_remote_settings' );
-				// submit_button();
-			?>
+				<?php do_settings_sections( 'github_updater_remote_settings' ); ?>
 			</form>
-			<?php
-			$reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action );
-			?>
+			<?php $reset_api_action = add_query_arg( [ 'github_updater_reset_api_key' => true ], $action ); ?>
 			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $reset_api_action ); ?>">
 				<?php submit_button( esc_html__( 'Reset REST API key', 'github-updater' ) ); ?>
 			</form>
@@ -179,22 +149,6 @@ class Remote_Management {
 			[ $this, 'print_section_remote_management' ],
 			'github_updater_remote_settings'
 		);
-
-		// phpcs:ignore
-		// @deprecated 9.1.0
-		// foreach ( self::$remote_management as $id => $name ) {
-		// add_settings_field(
-		// $id,
-		// null,
-		// array( $this, 'token_callback_checkbox_remote' ),
-		// 'github_updater_remote_settings',
-		// 'remote_management',
-		// array(
-		// 'id'    => $id,
-		// 'title' => esc_html( $name ),
-		// )
-		// );
-		// }
 	}
 
 	/**
@@ -244,24 +198,6 @@ class Remote_Management {
 			'<br><span style="font-family:monospace;">' . esc_url( $api_url ) . '</span>'
 		);
 		echo '</p>';
-	}
-
-	/**
-	 * Get the settings option array and print one of its values.
-	 * For remote management settings.
-	 *
-	 * @param array $args Checkbox args.
-	 *
-	 * @return bool|void
-	 */
-	public function token_callback_checkbox_remote( $args ) {
-		$checked = isset( self::$options_remote[ $args['id'] ] ) ? self::$options_remote[ $args['id'] ] : null;
-		?>
-		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >
-			<?php echo esc_attr( $args['title'] ); ?>
-		</label>
-		<?php
 	}
 
 	/**
