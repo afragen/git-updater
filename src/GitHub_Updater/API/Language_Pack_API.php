@@ -136,7 +136,7 @@ class Language_Pack_API extends API {
 			case 'gitea':
 				// TODO: make sure this works as expected.
 				$package = [ $headers['uri'], 'raw/master' ];
-				$package = implode( '/', $package ) . $local->package;
+				$package = implode( '/', $package ) . $locale->package;
 				break;
 		}
 
