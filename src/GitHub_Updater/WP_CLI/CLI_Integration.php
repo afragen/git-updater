@@ -226,7 +226,7 @@ class CLI_Integration extends WP_CLI_Command {
 				'branch'    => $branch,
 				'override'  => true,
 			],
-			home_url( 'wp-json/' . Singleton::get_instance( 'Base', $this )->get_class_vars( 'REST_API', 'namespace' ) . '/update/' )
+			home_url( 'wp-json/' . Singleton::get_instance( 'Base', $this )->get_class_vars( 'REST\REST_API', 'namespace' ) . '/update/' )
 		);
 		$response     = wp_remote_get( $api_url, [ 'timeout' => 10 ] );
 

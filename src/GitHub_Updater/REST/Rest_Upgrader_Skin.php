@@ -8,7 +8,7 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\REST;
 
 /*
  * Exit if called directly.

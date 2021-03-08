@@ -105,7 +105,7 @@ trait GHU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$hours = $this->get_class_vars( 'API', 'hours' );
+		$hours = $this->get_class_vars( 'API\API', 'hours' );
 		if ( ! $repo ) {
 			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
 		}
@@ -158,7 +158,7 @@ trait GHU_Trait {
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		return $this->get_class_vars( 'API', 'error_code' );
+		return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
 	/**

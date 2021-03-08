@@ -8,7 +8,7 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\REST;
 
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
@@ -93,7 +93,7 @@ class Rest_Update {
 		}
 
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $plugin );
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $plugin->git, $plugin );
+		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $plugin->git, $plugin );
 
 		$update = [
 			'slug'        => $plugin->slug,
@@ -121,7 +121,7 @@ class Rest_Update {
 		);
 
 		// Add authentication header to download package.
-		add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
+		add_filter( 'http_request_args', [ Singleton::get_instance( 'API\API', $this ), 'download_package' ], 15, 2 );
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->file );
@@ -157,7 +157,7 @@ class Rest_Update {
 		}
 
 		Singleton::get_instance( 'Base', $this )->get_remote_repo_meta( $theme );
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $theme->git, $theme );
+		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $theme->git, $theme );
 
 		$update = [
 			'theme'       => $theme->slug,
@@ -184,7 +184,7 @@ class Rest_Update {
 		);
 
 		// Add authentication header to download package.
-		add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
+		add_filter( 'http_request_args', [ Singleton::get_instance( 'API\API', $this ), 'download_package' ], 15, 2 );
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->slug );
