@@ -131,7 +131,7 @@ trait API_Common {
 
 		if ( $response && is_string( $response ) && ! is_wp_error( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
-			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( $this->type->slug, $response );
 			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 
