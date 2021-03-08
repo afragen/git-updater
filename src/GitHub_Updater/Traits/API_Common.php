@@ -121,7 +121,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_info( $git, $file, $request ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
+		$response = isset( $this->response[ $this->type->slug ] ) ? $this->response[ $this->type->slug ] : false;
 
 		if ( ! $response ) {
 			self::$method = 'file';
