@@ -111,9 +111,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string $git     (github|bitbucket|gitlab|gitea).
-	 * @param string $locale  Locale.
-	 * @param array  $headers Array of headers.
+	 * @param string    $git     (github|bitbucket|gitlab|gitea).
+	 * @param \stdClass $locale  Locale.
+	 * @param array     $headers Array of headers.
 	 *
 	 * @return array|null|string
 	 */
