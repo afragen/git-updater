@@ -282,7 +282,7 @@ class Base {
 			$file = basename( $repo->file );
 		}
 
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
+		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
 		if ( null === $repo_api ) {
 			return false;
 		}
@@ -484,7 +484,7 @@ class Base {
 	 * @return array $rollback Rollback transient.
 	 */
 	public function set_rollback_transient( $type, $repo, $set_transient = false ) {
-		$repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
+		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->tag     = isset( $_GET['rollback'] ) ? sanitize_text_field( wp_unslash( $_GET['rollback'] ) ) : false;
 		$slug          = 'plugin' === $type ? $repo->file : $repo->slug;

@@ -8,7 +8,7 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\REST;
 
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\Singleton;

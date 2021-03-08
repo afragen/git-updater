@@ -8,18 +8,12 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\Traits\API_Common;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
-use Fragen\GitHub_Updater\API\GitHub_API;
-use Fragen\GitHub_Updater\API\Bitbucket_API;
-use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
-use Fragen\GitHub_Updater\API\GitLab_API;
-use Fragen\GitHub_Updater\API\Gitea_API;
-use Fragen\GitHub_Updater\API\Gist_API;
 
 /*
  * Exit if called directly.

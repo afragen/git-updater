@@ -10,7 +10,6 @@
 
 namespace Fragen\GitHub_Updater\API;
 
-use Fragen\GitHub_Updater\API;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 
 /**

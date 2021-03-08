@@ -11,7 +11,6 @@
 namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\API;
 use Fragen\GitHub_Updater\Branch;
 
 /*
