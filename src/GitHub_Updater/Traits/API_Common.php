@@ -121,7 +121,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_info( $git, $file, $request ) {
-		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
+		$response = isset( $this->response[ $this->type->slug ] ) ? $this->response[ $this->type->slug ] : false;
 
 		if ( ! $response ) {
 			self::$method = 'file';
@@ -131,7 +131,7 @@ trait API_Common {
 
 		if ( $response && is_string( $response ) && ! is_wp_error( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
-			$this->set_repo_cache( $file, $response );
+			$this->set_repo_cache( $this->type->slug, $response );
 			$this->set_repo_cache( 'repo', $this->type->slug );
 		}
 

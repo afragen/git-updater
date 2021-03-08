@@ -93,7 +93,7 @@ class Branch {
 		$tag_array    = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
 		$in_tag_array = $tag_array && in_array( $rollback, $this->cache['tags'], true );
 		if ( $in_tag_array ) {
-			$current_branch = isset( $this->cache['PrimaryBranch'] ) ? $this->cache['PrimaryBranch'] : 'master';
+			$current_branch = isset( $this->cache[ $repo ]['PrimaryBranch'] ) ? $this->cache[ $repo ]['PrimaryBranch'] : 'master';
 		}
 
 		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
