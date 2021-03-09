@@ -38,12 +38,12 @@ or
 
 ### API plugins
 
-API plugins for Bitbucket, GitLab, Gitea, and Gist are available. Use this plugin's **Remote Install** feature to install the plugin.
+API plugins for Bitbucket, GitLab, Gitea, and Gist are available.
 
-* [Git Updater - Bitbucket](https://github.com/afragen/git-updater-bitbucket)
-* [Git Updater - GitLab](https://github.com/afragen/git-updater-gitlab)
-* [Git Updater - Gitea](https://github.com/afragen/git-updater-gitea)
-* [Git Updater - Gist](https://github.com/afragen/git-updater-gist)
+* [Git Updater - Bitbucket](https://github.com/afragen/git-updater-bitbucket/releases/latest)
+* [Git Updater - GitLab](https://github.com/afragen/git-updater-gitlab/releases/latest)
+* [Git Updater - Gitea](https://github.com/afragen/git-updater-gitea/releases/latest)
+* [Git Updater - Gist](https://github.com/afragen/git-updater-gist/releases/latest)
 
 ### Sponsor
 
