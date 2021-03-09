@@ -16,7 +16,7 @@
 * License: GPLv2 or later
 * License URI: <https://www.gnu.org/licenses/gpl-2.0.html>
 
-A simple plugin to enable automatic updates to your GitHub, Bitbucket, GitLab, or Gitea hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes.
+A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
 
 [Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
 
@@ -35,6 +35,15 @@ or
     GitHub Theme URI: https://github.com/afragen/test-child
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
+
+### API plugins
+
+API plugins for Bitbucket, GitLab, Gitea, and Gist are available. Use this plugin's **Remote Install** feature to install the plugin.
+
+* [Git Updater - Bitbucket](https://github.com/afragen/git-updater-bitbucket)
+* [Git Updater - GitLab](https://github.com/afragen/git-updater-gitlab)
+* [Git Updater - Gitea](https://github.com/afragen/git-updater-gitea)
+* [Git Updater - Gist](https://github.com/afragen/git-updater-gist)
 
 ### Sponsor
 
