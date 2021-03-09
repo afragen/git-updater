@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Currently, plugins or themes hosted on GitHub, Bitbucket, GitLab, or Gitea are also supported. Additionally, self-hosted installations of GitHub or GitLab are supported. It also allows for remote installation of plugins or themes into WordPress.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Currently, plugins or themes hosted on  Bitbucket, GitLab, Gitea, or Gist are also supported via additional API plugins. Additionally, self-hosted git servers are supported. It also allows for remote installation of plugins or themes into WordPress.
 
 Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
@@ -25,6 +25,15 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
 
+### API plugins
+
+API plugins for Bitbucket, GitLab, Gitea, and Gist are available. Use this plugin's **Remote Install** feature to install the plugin.
+
+* [Git Updater - Bitbucket](https://github.com/afragen/git-updater-bitbucket)
+* [Git Updater - GitLab](https://github.com/afragen/git-updater-gitlab)
+* [Git Updater - Gitea](https://github.com/afragen/git-updater-gitea)
+* [Git Updater - Gist](https://github.com/afragen/git-updater-gist)
+
 ### Sponsor
 
 You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with continued development and support.
@@ -37,27 +46,6 @@ The following headers are available for use depending upon your hosting source.
 * GitHub Plugin URI
 * GitHub Theme URI
 * GitHub Languages
-
-#### Bitbucket
-* Bitbucket Plugin URI
-* Bitbucket Theme URI
-* Bitbucket Languages
-
-#### GitLab
-* GitLab Plugin URI
-* GitLab Theme URI
-* GitLab Languages
-* GitLab CI Job
-
-#### Gitea
-* Gitea Plugin URI
-* Gitea Theme URI
-* Gitea Languages
-
-#### Gist
-* Gist Plugin URI
-* Gist Theme URI
-* Gist Languages
 
 ## Frequently Asked Questions
 
