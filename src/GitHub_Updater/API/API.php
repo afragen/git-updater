@@ -266,44 +266,14 @@ class API {
 		 * Filter to add git hosts API data.
 		 *
 		 * @since 10.0.0
-		 * @param null Empty.
+		 * @param array $arr Array of base git host data.
 		 */
-		$git = \apply_filters( 'gu_api_repo_type_data', null, $this->type->git );
+		$arr = \apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
 
-		switch ( $this->type->git ) {
-			case 'github':
+		if ( 'github' === $this->type->git ) {
 				$arr['git']           = 'github';
 				$arr['base_uri']      = 'https://api.github.com';
 				$arr['base_download'] = 'https://github.com';
-				break;
-			case 'bitbucket':
-				$arr['git'] = 'bitbucket';
-				if ( empty( $this->type->enterprise ) ) {
-					$arr['base_uri']      = $git['api'];
-					$arr['base_download'] = $git['download'];
-				} else {
-					$arr['base_uri']      = $this->type->enterprise_api;
-					$arr['base_download'] = $this->type->enterprise;
-				}
-				break;
-			case 'gitlab':
-				$arr['git']           = 'gitlab';
-				$arr['base_uri']      = $git['api'];
-				$arr['base_download'] = $git['download'];
-				break;
-			case 'gitea':
-				$arr['git']      = 'gitea';
-				$arr['base_uri'] = $this->type->enterprise . '/api/v1';
-				$arr['base_uri'] = $this->type->enterprise . $git['api'];
-
-				$arr['base_download'] = $this->type->enterprise;
-				break;
-			case 'gist':
-				$arr['git']           = 'gist';
-				$arr['base_uri']      = $git['api'];
-				$arr['base_download'] = $git['download'];
-				$arr['base_raw']      = $git['raw'];
-				break;
 		}
 
 		return $arr;
