@@ -220,7 +220,7 @@ class API {
 				$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
 				if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
 					$log_message = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}) - {$response_body->message}";
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					error_log( $log_message );
 				}
 			}
@@ -271,9 +271,9 @@ class API {
 		$arr = \apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
 
 		if ( 'github' === $this->type->git ) {
-				$arr['git']           = 'github';
-				$arr['base_uri']      = 'https://api.github.com';
-				$arr['base_download'] = 'https://github.com';
+			$arr['git']           = 'github';
+			$arr['base_uri']      = 'https://api.github.com';
+			$arr['base_download'] = 'https://github.com';
 		}
 
 		return $arr;
@@ -304,64 +304,31 @@ class API {
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
 
-		switch ( $type['git'] ) {
-			case 'github':
-				if ( ! $this->type->enterprise && $download_link ) {
-					$type['base_download'] = $type['base_uri'];
-					break;
-				}
-				if ( $this->type->enterprise_api ) {
-					$type['base_download'] = $this->type->enterprise_api;
-					$type['base_uri']      = null;
-					if ( $download_link ) {
-						break;
-					}
-				}
-				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
-				break;
-			case 'gitlab':
-				if ( ! $this->type->enterprise && $download_link ) {
-					break;
-				}
-				if ( $this->type->enterprise ) {
-					$type['base_download'] = $this->type->enterprise;
-					$type['base_uri']      = null;
-					if ( $download_link ) {
-						break;
-					}
-				}
-				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
-				break;
-			case 'bitbucket':
-				if ( $this->type->enterprise_api ) {
-					if ( $download_link ) {
-						$type['base_download'] = $type['base_uri'];
-						break;
-					}
-					$endpoint = $repo_api->add_endpoints( $this, $endpoint );
+		$type['endpoint'] = false;
 
-					return $this->type->enterprise_api . $endpoint;
-				}
-				if ( $download_link && 'release_asset' === self::$method ) {
-					$type['base_download'] = $type['base_uri'];
-				}
-				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
-				break;
-			case 'gitea':
-				if ( $download_link ) {
-					$type['base_download'] = $type['base_uri'];
-					break;
-				}
-				$endpoint = $repo_api->add_endpoints( $this, $endpoint );
-				break;
-			case 'gist':
-				$type['base_uri'] = $repo_api->add_endpoints( $this, $type );
-				break;
-			default:
-				break;
+		/**
+		 * Filter API URL type for git host.
+		 *
+		 * @param array     $type          Array or git host data.
+		 * @param \stdClass $this->type    Repo object.
+		 * @param bool      $download_link Boolean is this a download link.
+		 * @param string    $endpoint      Endpoint to URL.
+		 */
+		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
+
+		if ( 'github' === $type['git'] ) {
+			$type['endpoint'] = true;
+			if ( ! $this->type->enterprise && $download_link ) {
+				$type['base_download'] = $type['base_uri'];
+			}
+			if ( $this->type->enterprise_api ) {
+				$type['base_download'] = $this->type->enterprise_api;
+				$type['base_uri']      = null;
+			}
 		}
 
-		$base = $download_link ? $type['base_download'] : $type['base_uri'];
+		$base     = $download_link ? $type['base_download'] : $type['base_uri'];
+		$endpoint = $type['endpoint'] ? $repo_api->add_endpoints( $this, $endpoint ) : $endpoint;
 
 		return $base . $endpoint;
 	}
