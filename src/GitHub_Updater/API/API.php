@@ -304,8 +304,6 @@ class API {
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
 
-		$type['endpoint'] = false;
-
 		/**
 		 * Filter API URL type for git host.
 		 *
@@ -317,7 +315,6 @@ class API {
 		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
 
 		if ( 'github' === $type['git'] ) {
-			$type['endpoint'] = true;
 			if ( ! $this->type->enterprise && $download_link ) {
 				$type['base_download'] = $type['base_uri'];
 			}
@@ -328,7 +325,7 @@ class API {
 		}
 
 		$base     = $download_link ? $type['base_download'] : $type['base_uri'];
-		$endpoint = $type['endpoint'] ? $repo_api->add_endpoints( $this, $endpoint ) : $endpoint;
+		$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 
 		return $base . $endpoint;
 	}
