@@ -4,6 +4,7 @@
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
 * remove deprecated elements of `Remote_Management`
 * fix variable type in `Language_Pack_API`
+* added filter for setting API remote install data
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
