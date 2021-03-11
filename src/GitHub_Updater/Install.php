@@ -185,41 +185,6 @@ class Install {
 			}
 
 			/*
-			 * Create Bitbucket endpoint and instantiate class Bitbucket_API.
-			 * Save private setting if present.
-			 */
-			if ( 'bitbucket' === self::$install['github_updater_api'] ) {
-				if ( self::$installed_apis['bitbucket_api'] ) {
-					self::$install = Singleton::get_instance( 'API\Bitbucket_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
-				}
-
-				if ( self::$installed_apis['bitbucket_server_api'] ) {
-					self::$install = Singleton::get_instance( 'API\Bitbucket_Server_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
-				}
-			}
-
-			/*
-			 * Create GitLab endpoint.
-			 * Save Access Token if present.
-			 * Check for GitLab Self-Hosted.
-			 */
-			if ( 'gitlab' === self::$install['github_updater_api'] ) {
-				if ( self::$installed_apis['gitlab_api'] ) {
-					self::$install = Singleton::get_instance( 'API\GitLab_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
-				}
-			}
-
-			/*
-			 * Create Gitea endpoint.
-			 * Save Access Token if present.
-			 */
-			if ( 'gitea' === self::$install['github_updater_api'] ) {
-				if ( self::$installed_apis['gitea_api'] ) {
-					self::$install = Singleton::get_instance( 'API\Gitea_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
-				}
-			}
-
-			/*
 			 * Install from Zipfile.
 			 */
 			if ( 'zipfile' === self::$install['github_updater_api'] ) {
@@ -227,11 +192,12 @@ class Install {
 			}
 
 			/**
-			 * Install from Gist.
+			 * Filter to create git host specific endpoint.
+			 *
+			 * @param array self::$install Array of installation data.
+			 * @param array $headers       Array of repo header data.
 			 */
-			if ( 'gist' === self::$install['github_updater_api'] ) {
-				self::$install = Singleton::get_instance( 'API\Gist_API', $this )->remote_install( $headers, self::$install );
-			}
+			self::$install = apply_filters( 'gu_install_remote_install', self::$install, $headers );
 
 			if ( isset( self::$install['options'] ) ) {
 				$this->save_options_on_install( self::$install['options'] );
