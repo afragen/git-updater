@@ -66,40 +66,30 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $git      (github|bitbucket|gitlab|gitea).
+	 * @param string $git      (github).
 	 * @param array  $headers  Array of headers.
 	 * @param mixed  $response API response.
 	 *
 	 * @return array|bool|mixed
 	 */
 	private function get_language_pack_json( $git, $headers, $response ) {
-		switch ( $git ) {
-			case 'github':
-				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
-				$response = isset( $response->content )
+		if ( 'github' === $git ) {
+			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+			$response = isset( $response->content )
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-					? json_decode( base64_decode( $response->content ) )
-					: null;
-				break;
-			case 'bitbucket':
-				$response = $this->api( '/2.0/repositories/' . $headers['owner'] . '/' . $headers['repo'] . '/src/master/language-pack.json' );
-				break;
-			case 'gitlab':
-				$id       = rawurlencode( $headers['owner'] . '/' . $headers['repo'] );
-				$response = $this->api( '/projects/' . $id . '/repository/files/language-pack.json' );
-				$response = isset( $response->content )
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-					? json_decode( base64_decode( $response->content ) )
-					: null;
-				break;
-			case 'gitea':
-				$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/raw/master/language-pack.json' );
-				$response = isset( $response->content )
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-					? json_decode( base64_decode( $response->content ) )
-					: null;
-				break;
+				? json_decode( base64_decode( $response->content ) )
+				: null;
 		}
+
+		/**
+		 * Filter to set API specific Language Pack response.
+		 *
+		 * @param \stdClass $response Object of Language Pack API response.
+		 * @param string    $git      Name of git host.
+		 * @param array     $headers  Array of repo headers.
+		 * @param \stdClass Current class object.
+		 */
+		$response = apply_filters( 'gu_get_language_pack_json', $response, $git, $headers, $this );
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
@@ -115,30 +105,25 @@ class Language_Pack_API extends API {
 	 * @param \stdClass $locale  Locale.
 	 * @param array     $headers Array of headers.
 	 *
-	 * @return array|null|string
+	 * @return null|string
 	 */
 	private function process_language_pack_package( $git, $locale, $headers ) {
 		$package = null;
-		switch ( $git ) {
-			case 'github':
-				$package = [ $headers['uri'], 'blob/master' ];
-				$package = implode( '/', $package ) . $locale->package;
-				$package = add_query_arg( [ 'raw' => 'true' ], $package );
-				break;
-			case 'bitbucket':
-				$package = [ $headers['uri'], 'raw/master' ];
-				$package = implode( '/', $package ) . $locale->package;
-				break;
-			case 'gitlab':
-				$package = [ $headers['uri'], 'raw/master' ];
-				$package = implode( '/', $package ) . $locale->package;
-				break;
-			case 'gitea':
-				// TODO: make sure this works as expected.
-				$package = [ $headers['uri'], 'raw/master' ];
-				$package = implode( '/', $package ) . $locale->package;
-				break;
+		if ( 'github' === $git ) {
+			$package = [ $headers['uri'], 'blob/master' ];
+			$package = implode( '/', $package ) . $locale->package;
+			$package = add_query_arg( [ 'raw' => 'true' ], $package );
 		}
+
+		/**
+		 * Filter to process API specific language pack packages.
+		 *
+		 * @param null|string $package URL to language pack.
+		 * @param string      $git     Name of git host.
+		 * @param \stdClass   $locale  Object of language pack data.
+		 * @param array       $headers Array of repository headers.
+		 */
+		$package = \apply_filters( 'gu_post_process_language_pack_package', $package, $git, $locale, $headers );
 
 		return $package;
 	}
