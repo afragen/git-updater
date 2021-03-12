@@ -262,6 +262,12 @@ class API {
 		$arr         = [];
 		$arr['type'] = $this->type->type;
 
+		if ( 'github' === $this->type->git ) {
+			$arr['git']           = 'github';
+			$arr['base_uri']      = 'https://api.github.com';
+			$arr['base_download'] = 'https://github.com';
+		}
+
 		/**
 		 * Filter to add git hosts API data.
 		 *
@@ -269,12 +275,6 @@ class API {
 		 * @param array $arr Array of base git host data.
 		 */
 		$arr = \apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
-
-		if ( 'github' === $this->type->git ) {
-			$arr['git']           = 'github';
-			$arr['base_uri']      = 'https://api.github.com';
-			$arr['base_download'] = 'https://github.com';
-		}
 
 		return $arr;
 	}
@@ -304,16 +304,6 @@ class API {
 
 		$repo_api = $this->get_repo_api( $type['git'], $this->type );
 
-		/**
-		 * Filter API URL type for git host.
-		 *
-		 * @param array     $type          Array or git host data.
-		 * @param \stdClass $this->type    Repo object.
-		 * @param bool      $download_link Boolean is this a download link.
-		 * @param string    $endpoint      Endpoint to URL.
-		 */
-		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
-
 		if ( 'github' === $type['git'] ) {
 			if ( ! $this->type->enterprise && $download_link ) {
 				$type['base_download'] = $type['base_uri'];
@@ -323,6 +313,16 @@ class API {
 				$type['base_uri']      = null;
 			}
 		}
+
+		/**
+		 * Filter API URL type for git host.
+		 *
+		 * @param array     $type          Array or git host data.
+		 * @param \stdClass $this->type    Repo object.
+		 * @param bool      $download_link Boolean is this a download link.
+		 * @param string    $endpoint      Endpoint to URL.
+		 */
+		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
 
 		$base     = $download_link ? $type['base_download'] : $type['base_uri'];
 		$endpoint = $repo_api->add_endpoints( $this, $endpoint );
