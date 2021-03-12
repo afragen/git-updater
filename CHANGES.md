@@ -8,6 +8,7 @@
 * fix variable type in `Language_Pack_API`
 * added filter for setting API URL data
 * added filter for setting API remote install data
+* added filters for setting API language pack data
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
