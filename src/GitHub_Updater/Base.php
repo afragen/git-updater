@@ -51,7 +51,10 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $git_servers = [ 'github' => 'GitHub' ];
+	public static $git_servers = [
+		'github'  => 'GitHub',
+		'zipfile' => 'Zipfile',
+	];
 
 	/**
 	 * Holds extra repo header types.
@@ -70,7 +73,7 @@ class Base {
 	 */
 	public static $installed_apis = [
 		'github_api'  => true,
-		'zipfile_api' => false,
+		'zipfile_api' => true,
 	];
 
 	/**
@@ -100,7 +103,6 @@ class Base {
 	 * Set boolean for installed API classes.
 	 */
 	protected function set_installed_apis() {
-
 		/**
 		 * Filter to add active git servers.
 		 *
@@ -116,11 +118,6 @@ class Base {
 		 * @param array static::$installed_apis Array of installed APIs.
 		 */
 		static::$installed_apis = \apply_filters( 'gu_installed_apis', static::$installed_apis );
-
-		if ( file_exists( __DIR__ . '/API/Zipfile_API.php' ) ) {
-			self::$installed_apis['zipfile_api'] = true;
-			self::$git_servers['zipfile']        = 'Zipfile';
-		}
 	}
 
 	/**
@@ -737,10 +734,10 @@ class Base {
 	/**
 	 * Get git host based icon as an HTML img element.
 	 *
-	 * @param string $file        Plugin or theme file.
-	 * @param bool   $add_padding Whether or not to adding padding to the icon.
-	 *                            When used in row meta, icon should not have padding;
-	 *                            when used in branch switching row, icon should have padding.
+	 * @param  string $file        Plugin or theme file.
+	 * @param  bool   $add_padding Whether or not to adding padding to the icon.
+	 *                             When used in row meta, icon should not have padding;
+	 *                             when used in branch switching row, icon should have padding.
 	 * @return string
 	 */
 	public function get_git_icon( $file, $add_padding ) {
