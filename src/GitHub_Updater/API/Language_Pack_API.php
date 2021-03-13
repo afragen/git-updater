@@ -84,6 +84,7 @@ class Language_Pack_API extends API {
 		/**
 		 * Filter to set API specific Language Pack response.
 		 *
+		 * @since 10.0.0
 		 * @param \stdClass $response Object of Language Pack API response.
 		 * @param string    $git      Name of git host.
 		 * @param array     $headers  Array of repo headers.
@@ -118,6 +119,7 @@ class Language_Pack_API extends API {
 		/**
 		 * Filter to process API specific language pack packages.
 		 *
+		 * @since 10.0.0
 		 * @param null|string $package URL to language pack.
 		 * @param string      $git     Name of git host.
 		 * @param \stdClass   $locale  Object of language pack data.
