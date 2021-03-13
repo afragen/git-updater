@@ -95,18 +95,16 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options      = get_site_option( 'github_updater' );
-		$headers      = parse_url( $url );
-		$username_key = null;
-		$password_key = null;
-		$credentials  = [
+		$options     = get_site_option( 'github_updater' );
+		$headers     = parse_url( $url );
+		$credentials = [
 			'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
 			'enterprise'    => null,
 		];
-		$hosts        = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com', 'gist.githubusercontent.com' ];
+		$hosts       = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com', 'gist.githubusercontent.com' ];
 
 		if ( $credentials['api.wordpress'] ) {
 			return $credentials;
@@ -128,43 +126,34 @@ trait Basic_Auth_Loader {
 			$type = $type->type->git;
 		}
 
-		switch ( $type ) {
-			case 'bitbucket':
-			case $type instanceof Bitbucket_API:
-			case $type instanceof Bitbucket_Server_API:
-				$bitbucket_org   = in_array( $headers['host'], $hosts, true );
-				$bitbucket_token = ! empty( $options['bitbucket_access_token'] ) ? $options['bitbucket_access_token'] : null;
-				$bbserver_token  = ! empty( $options['bbserver_access_token'] ) ? $options['bbserver_access_token'] : null;
-				$token           = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
-				$token           = null === $token && $bitbucket_org ? $bitbucket_token : $token;
-				$token           = null === $token && ! $bitbucket_org ? $bbserver_token : $token;
-				$type            = 'bitbucket';
-				break;
-			case 'github':
-			case 'gist':
-			case $type instanceof GitHub_API:
-			case $type instanceof Gist_API:
-				$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
-				$type  = 'github';
-				break;
-			case 'gitlab':
-			case $type instanceof GitLab_API:
-				$token = ! empty( $options['gitlab_access_token'] ) ? $options['gitlab_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
-				$type  = 'gitlab';
-				break;
-			case 'gitea':
-			case $type instanceof Gitea_API:
-				$token = ! empty( $options['gitea_access_token'] ) ? $options['gitea_access_token'] : null;
-				$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
-				$type  = 'gitea';
+		if ( 'github' === $type || $type instanceof GitHub_API ) {
+			$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
+			$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
+			$type  = 'github';
 		}
 
 		$credentials['isset']      = true;
 		$credentials['type']       = $type;
 		$credentials['token']      = isset( $token ) ? $token : null;
 		$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
+
+		// Filter hook args.
+		$args = [
+			'type'    => $type,
+			'options' => $options,
+			'headers' => $headers,
+			'hosts'   => $hosts,
+			'slug'    => $slug,
+		];
+
+		/**
+		 * Filter API credentials data.
+		 *
+		 * @since 10.0.0
+		 * @param array $credentials Array of API credentials data.
+		 * @param array $args        Array of hook args.
+		 */
+		$credentials = apply_filters( 'gu_post_get_credentials', $credentials, $args );
 
 		return $credentials;
 	}
@@ -254,7 +243,7 @@ trait Basic_Auth_Loader {
 		// Set for Remote Install.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] )
-				&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['github_updater_repo'] ) ) ) )
+			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['github_updater_repo'] ) ) ) )
 			? sanitize_text_field( wp_unslash( $_POST['github_updater_api'] ) )
 			: $type;
 		// phpcs:enable
