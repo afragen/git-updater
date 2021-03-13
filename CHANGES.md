@@ -12,6 +12,7 @@
 * remove `Settings::set_auth_required()`, now set in API plugins
 * added filter to get API object
 * added filters for Basic Auth settings
+* added filter `gu_parse_release_asset`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
