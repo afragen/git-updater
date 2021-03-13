@@ -115,12 +115,11 @@ trait API_Common {
 	 * Read the remote file and parse headers.
 	 *
 	 * @param string $git     github|bitbucket|gitlab|gitea).
-	 * @param string $file    Filename.
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_info( $git, $file, $request ) {
+	public function get_remote_api_info( $git, $request ) {
 		$response = isset( $this->response[ $this->type->slug ] ) ? $this->response[ $this->type->slug ] : false;
 
 		if ( ! $response ) {
@@ -148,12 +147,11 @@ trait API_Common {
 	/**
 	 * Get remote info for tags.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_tag( $git, $request ) {
+	public function get_remote_api_tag( $request ) {
 		$repo_type = $this->return_repo_type();
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
@@ -274,12 +272,11 @@ trait API_Common {
 	/**
 	 * Read the repository meta from API.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_repo_meta( $git, $request ) {
+	public function get_remote_api_repo_meta( $request ) {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
