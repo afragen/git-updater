@@ -32,13 +32,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 trait Basic_Auth_Loader {
 	/**
-	 * Stores array of git servers requiring Basic Authentication.
-	 *
-	 * @var array
-	 */
-	private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
-
-	/**
 	 * Add authentication headers for download packages.
 	 * Remove authentication headers from release assets.
 	 * Hooks into 'http_request_args' filter.
