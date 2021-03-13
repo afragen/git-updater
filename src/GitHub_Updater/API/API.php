@@ -272,14 +272,12 @@ class API {
 	/**
 	 * Return API url.
 	 *
-	 * @access protected
-	 *
 	 * @param string      $endpoint      The endpoint to access.
 	 * @param bool|string $download_link The plugin or theme download link. Defaults to false.
 	 *
 	 * @return string $endpoint
 	 */
-	protected function get_api_url( $endpoint, $download_link = false ) {
+	public function get_api_url( $endpoint, $download_link = false ) {
 		$type     = $this->return_repo_type();
 		$segments = [
 			'owner'   => $this->type->owner,

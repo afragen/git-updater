@@ -10,7 +10,6 @@
 
 namespace Fragen\GitHub_Updater\Traits;
 
-use Fragen\Singleton;
 use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
 
 /**
@@ -76,8 +75,8 @@ trait API_Common {
 		if ( is_wp_error( $response ) ) {
 			return null;
 		}
-		switch ( $git ) {
-			case 'github':
+		if ( 'github' === $git ) {
+			do {
 				$assets = isset( $response->assets ) ? $response->assets : [];
 				foreach ( $assets as $asset ) {
 					if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
@@ -85,28 +84,20 @@ trait API_Common {
 						break;
 					}
 				}
-				$response = is_string( $response ) ? $response : null;
-				break;
-			case 'bitbucket':
-				$download_base = trailingslashit( $this->get_api_url( $request, true ) );
-				$assets        = isset( $response->values ) ? $response->values : [];
-				foreach ( $assets as $asset ) {
-					if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
-						$response = $download_base . $asset->name;
-						break;
-					}
-				}
-				$response = is_string( $response ) ? $response : null;
-				break;
-			case 'bbserver':
-				// TODO: make work.
-				break;
-			case 'gitlab':
-				$response = $this->get_api_url( $request );
-				break;
-			case 'gitea':
-				break;
+			} while ( false );
+			$response = is_string( $response ) ? $response : null;
 		}
+
+		/**
+		 * Filter release asset response.
+		 *
+		 * @since 10.0.0
+		 * @param \stdClass $response API response.
+		 * @param string    $git      Name of git host.
+		 * @param string    $request  Schema of API REST endpoint.
+		 * @param \stdClass $this     Class object.
+		 */
+		$response = apply_filters( 'gu_parse_release_asset', $response, $git, $request, $this );
 
 		return $response;
 	}
