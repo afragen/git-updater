@@ -11,6 +11,7 @@
 * added filter to get API object
 * added filters for Basic Auth settings
 * added filter `gu_parse_release_asset`
+* added filter `gu_parse_headers_enterprise_api`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
