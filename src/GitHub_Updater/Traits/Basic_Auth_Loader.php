@@ -12,12 +12,8 @@ namespace Fragen\GitHub_Updater\Traits;
 
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\Install;
-use Fragen\GitHub_Updater\API\Bitbucket_API;
-use Fragen\GitHub_Updater\API\Bitbucket_Server_API;
 use Fragen\GitHub_Updater\API\GitHub_API;
-use Fragen\GitHub_Updater\API\GitLab_API;
 use Fragen\GitHub_Updater\API\Gist_API;
-use Fragen\GitHub_Updater\API\Gitea_API;
 use Fragen\GitHub_Updater\API\Language_Pack_API;
 
 /*
@@ -104,7 +100,6 @@ trait Basic_Auth_Loader {
 			'type'          => null,
 			'enterprise'    => null,
 		];
-		$hosts       = [ 'bitbucket.org', 'api.bitbucket.org', 'github.com', 'api.github.com', 'gitlab.com', 'gist.githubusercontent.com' ];
 
 		if ( $credentials['api.wordpress'] ) {
 			return $credentials;
@@ -117,7 +112,11 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-		if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) && ! $this instanceof Install ) {
+		if ( false === $slug
+			&& ! $this instanceof Install
+			&& ! $this instanceof Language_Pack_API
+			&& ! $this instanceof Gist_API
+		) {
 			return $credentials;
 		}
 
@@ -126,24 +125,24 @@ trait Basic_Auth_Loader {
 			$type = $type->type->git;
 		}
 
-		if ( 'github' === $type || $type instanceof GitHub_API ) {
+		if ( 'github' === $type || $this instanceof GitHub_API ) {
 			$token = ! empty( $options['github_access_token'] ) ? $options['github_access_token'] : null;
 			$token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
 			$type  = 'github';
-		}
 
-		$credentials['isset']      = true;
-		$credentials['type']       = $type;
-		$credentials['token']      = isset( $token ) ? $token : null;
-		$credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
+			$credentials['type']       = $type;
+			$credentials['isset']      = true;
+			$credentials['token']      = isset( $token ) ? $token : null;
+			$credentials['enterprise'] = ! in_array( $headers['host'], [ 'github.com', 'api.github.com' ], true );
+		}
 
 		// Filter hook args.
 		$args = [
 			'type'    => $type,
 			'options' => $options,
 			'headers' => $headers,
-			'hosts'   => $hosts,
 			'slug'    => $slug,
+			'object'  => $this,
 		];
 
 		/**
