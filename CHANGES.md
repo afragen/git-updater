@@ -12,6 +12,7 @@
 * added filters for Basic Auth settings
 * added filter `gu_parse_release_asset`
 * added filter `gu_parse_headers_enterprise_api`
+* update `Settings::unset_stale_options()`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
