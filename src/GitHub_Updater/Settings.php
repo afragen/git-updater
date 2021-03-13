@@ -452,14 +452,11 @@ class Settings {
 			'db_version',
 			'branch_switch',
 			'bypass_background_processing',
-			'github_access_token',
 		];
 
-		if ( in_array( 'bitbucket', $running_servers, true ) ) {
-			$always_unset = array_merge( $always_unset, [ 'bitbucket_access_token' ] );
-		}
-		if ( in_array( 'bbserver', $running_servers, true ) ) {
-			$always_unset = array_merge( $always_unset, [ 'bbserver_access_token' ] );
+		foreach ( $running_servers as $server ) {
+			$always_unset = array_merge( $always_unset, [ "{$server}_access_token" ] );
+			$always_unset = array_unique( $always_unset );
 		}
 
 		array_map(
@@ -467,25 +464,6 @@ class Settings {
 				unset( $ghu_unset_keys[ $e ] );
 			},
 			$always_unset
-		);
-
-		$auth_required       = static::$auth_required;
-		$auth_required_unset = [];
-		if ( in_array( 'gitlab', $running_servers, true ) ) {
-			$auth_required_unset['gitlab'] = 'gitlab_access_token';
-		}
-		if ( in_array( 'gitea', $running_servers, true ) ) {
-			$auth_required_unset['gitea'] = 'gitea_access_token';
-		}
-
-		array_map(
-			function ( $e ) use ( &$ghu_unset_keys, $auth_required, $auth_required_unset ) {
-				$key = array_search( $e, $auth_required_unset, true );
-				if ( $auth_required[ $key ] ) {
-					unset( $ghu_unset_keys[ $e ] );
-				}
-			},
-			$auth_required_unset
 		);
 
 		// Unset if current_branch AND if associated with repo.
