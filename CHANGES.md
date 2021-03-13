@@ -8,6 +8,8 @@
 * added filter for setting API remote install data
 * added filters for setting API language pack data
 * remove `Settings::set_auth_required()`, now set in API plugins
+* added filter to get API object
+* added filters for Basic Auth settings
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
