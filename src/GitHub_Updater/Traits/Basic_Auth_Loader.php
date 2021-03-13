@@ -67,23 +67,18 @@ trait Basic_Auth_Loader {
 			return $args;
 		}
 		if ( null !== $credentials['token'] ) {
-			if ( 'github' === $credentials['type'] || 'gitea' === $credentials['type'] ) {
+			if ( 'github' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
 			}
-			if ( 'bitbucket' === $credentials['type'] ) {
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-				$args['headers']['Authorization'] = 'Basic ' . base64_encode( $credentials['token'] );
-			}
-			if ( 'gitlab' === $credentials['type'] ) {
-				// https://gitlab.com/gitlab-org/gitlab-foss/issues/63438.
-				if ( ! $credentials['enterprise'] ) {
-					// Used in GitLab v12.2 or greater.
-					$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
-				} else {
-					// Used in versions prior to GitLab v12.2.
-					$args['headers']['PRIVATE-TOKEN'] = $credentials['token'];
-				}
-			}
+
+			/**
+			 * Filter Basic Authentication header.
+			 *
+			 * @since 10.0.0
+			 * @param array $args        Array of HTTP GET REQUEST headers.
+			 * @param array $credentials Array of repository credential data.
+			 */
+			$args = apply_filters( 'gu_get_auth_header', $args, $credentials );
 		}
 		$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
 
