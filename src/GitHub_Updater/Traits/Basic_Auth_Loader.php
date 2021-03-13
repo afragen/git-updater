@@ -11,9 +11,7 @@
 namespace Fragen\GitHub_Updater\Traits;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\Install;
 use Fragen\GitHub_Updater\API\GitHub_API;
-use Fragen\GitHub_Updater\API\Gist_API;
 use Fragen\GitHub_Updater\API\Language_Pack_API;
 
 /*
@@ -111,14 +109,6 @@ trait Basic_Auth_Loader {
 		);
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
-
-		if ( false === $slug
-			&& ! $this instanceof Install
-			&& ! $this instanceof Language_Pack_API
-			&& ! $this instanceof Gist_API
-		) {
-			return $credentials;
-		}
 
 		// Set $type for Language Packs.
 		if ( $type instanceof Language_Pack_API ) {
