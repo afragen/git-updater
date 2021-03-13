@@ -127,37 +127,27 @@ class API {
 	 * @param string         $git  (github|bitbucket|gitlab|gitea).
 	 * @param bool|\stdClass $repo Repository object.
 	 *
-	 * @return \Fragen\GitHub_Updater\API\Bitbucket_API|
-	 *                                                   \Fragen\GitHub_Updater\API\Bitbucket_Server_API|
-	 *                                                   \Fragen\GitHub_Updater\API\Gitea_API|
-	 *                                                   \Fragen\GitHub_Updater\API\GitHub_API|
-	 *                                                   \Fragen\GitHub_Updater\API\GitLab_API|
-	 *                                                   \Fragen\GitHub_Updater\API\Gist_API $repo_api
+	 * @return \stdClass
 	 */
 	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
 		$repo     = $repo ?: new \stdClass();
-		switch ( $git ) {
-			case 'github':
-				$repo_api = new GitHub_API( $repo );
-				break;
-			case 'bitbucket':
-				if ( ! empty( $repo->enterprise ) ) {
-					$repo_api = new Bitbucket_Server_API( $repo );
-				} else {
-					$repo_api = new Bitbucket_API( $repo );
-				}
-				break;
-			case 'gitlab':
-				$repo_api = new GitLab_API( $repo );
-				break;
-			case 'gitea':
-				$repo_api = new Gitea_API( $repo );
-				break;
-			case 'gist':
-				$repo_api = new Gist_API( $repo );
-				break;
+
+		if ( 'github' === $git ) {
+			$repo_api = new GitHub_API( $repo );
 		}
+
+		/**
+		 * Filter git host API object.
+		 *
+		 * @since 10.0.0
+		 * @param null|\stdClass $repo_api Git API object.
+		 * @param string         $git      Name of git host.
+		 * @param \stdClass      $repo     Repository object.
+		 *
+		 * @return \stdClass
+		 */
+		$repo_api = \apply_filters( 'gu_get_repo_api', $repo_api, $git, $repo );
 
 		return $repo_api;
 	}
@@ -317,6 +307,7 @@ class API {
 		/**
 		 * Filter API URL type for git host.
 		 *
+		 * @since 10.0.0
 		 * @param array     $type          Array or git host data.
 		 * @param \stdClass $this->type    Repo object.
 		 * @param bool      $download_link Boolean is this a download link.
