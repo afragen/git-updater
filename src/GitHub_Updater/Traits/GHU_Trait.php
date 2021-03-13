@@ -584,17 +584,18 @@ trait GHU_Trait {
 		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
 			$header['enterprise_uri'] = $header['base_uri'];
 			$header['enterprise_api'] = trim( $header['enterprise_uri'], '/' );
-			switch ( $header_parts[0] ) {
-				case 'GitHub':
-					$header['enterprise_api'] .= '/api/v3';
-					break;
-				case 'GitLab':
-					$header['enterprise_api'] .= '/api/v4';
-					break;
-				case 'Bitbucket':
-					$header['enterprise_api'] .= '/rest/api';
-					break;
+			if ( 'GitHub' === $header_parts[0] ) {
+				$header['enterprise_api'] .= '/api/v3';
 			}
+
+			/**
+			 * Filter REST endpoint for API.
+			 *
+			 * @since 10.0.0
+			 * @param string $header['enterprise_api'] URL for API REST endpoint.
+			 * @param string $header_parts[0]          Name of git host.
+			 */
+			$header['enterprise_api'] = apply_filters( 'gu_parse_headers_enterprise_api', $header['enterprise_api'], $header_parts[0] );
 		}
 
 		$self_hosted_parts = array_keys( $extra_repo_headers );
