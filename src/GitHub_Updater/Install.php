@@ -454,13 +454,10 @@ class Install {
 	 * API setting.
 	 */
 	public function install_api() {
-		$dropdown = self::$git_servers;
-		ksort( $dropdown);
-		$dropdown = array_merge(['github'=>'GitHub'], $dropdown);
 		?>
 		<label for="github_updater_api">
 			<select id="github_updater_api" name="github_updater_api">
-				<?php foreach ( $dropdown as $key => $value ) : ?>
+				<?php foreach ( self::$git_servers as $key => $value ) : ?>
 					<?php if ( self::$installed_apis[ $key . '_api' ] ) : ?>
 						<option value="<?php esc_attr_e( $key ); ?>" <?php selected( $key ); ?> >
 							<?php esc_html_e( $value ); ?>
