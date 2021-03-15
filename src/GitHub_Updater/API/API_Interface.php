@@ -95,8 +95,8 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API $git      Git host specific API.
-	 * @param string                                                   $endpoint Endpoint.
+	 * @param GitHub_API $git      Git host specific API.
+	 * @param string     $endpoint Endpoint.
 	 *
 	 * @return string $endpoint
 	 */

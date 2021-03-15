@@ -733,7 +733,7 @@ class Settings {
 	 * Places a lock dashicon after the repo name if it's a private repo.
 	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *
-	 * @param string $git (github|bitbucket|bbserver|gitlab|gitea).
+	 * @param string $git Name of API, eg 'github'.
 	 */
 	private function display_ghu_repos( $git ) {
 		$lock_title    = esc_html__( 'This is a private repository.', 'github-updater' );

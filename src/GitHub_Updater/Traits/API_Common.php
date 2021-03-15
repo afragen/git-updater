@@ -26,7 +26,7 @@ trait API_Common {
 	/**
 	 * Decode API responses that are base64 encoded.
 	 *
-	 * @param  string $git      (github|bitbucket|gitlab|gitea).
+	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  mixed  $response API response.
 	 * @return mixed  $response
 	 */
@@ -48,7 +48,7 @@ trait API_Common {
 	/**
 	 * Parse API response that returns as stdClass.
 	 *
-	 * @param  string $git      (github|bitbucket|gitlab|gitea).
+	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  mixed  $response API response.
 	 * @return mixed  $response
 	 */
@@ -66,7 +66,7 @@ trait API_Common {
 	/**
 	 * Parse API response to release asset URI.
 	 *
-	 * @param  string $git      (github|bitbucket|gitlab|gitea).
+	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  string $request  Query to API->api().
 	 * @param  mixed  $response API response.
 	 * @return string $response Release asset download link.
@@ -105,7 +105,7 @@ trait API_Common {
 	/**
 	 * Read the remote file and parse headers.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -174,7 +174,7 @@ trait API_Common {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $changes Changelog filename.
 	 * @param string $request API request.
 	 *
@@ -217,7 +217,7 @@ trait API_Common {
 	/**
 	 * Read and parse remote readme.txt.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -293,7 +293,7 @@ trait API_Common {
 	/**
 	 * Create array of branches and download links as array.
 	 *
-	 * @param string $git     github|bitbucket|gitlab|gitea).
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
 	 * @return bool
@@ -332,7 +332,7 @@ trait API_Common {
 	/**
 	 * Get API release asset download link.
 	 *
-	 * @param  string $git     (github|bitbucket|gitlab|gitea).
+	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
 	 * @return string $response Release asset URI.
 	 */
