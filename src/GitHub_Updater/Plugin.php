@@ -170,7 +170,7 @@ class Plugin {
 				$header = $this->parse_header_uri( $plugin[ $key ] );
 			}
 
-			$header         = $this->parse_extra_headers( $header, $plugin, $header_parts, $repo_parts );
+			$header         = $this->parse_extra_headers( $header, $plugin, $header_parts );
 			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
 
 			if ( isset( self::$options[ $current_branch ] )
