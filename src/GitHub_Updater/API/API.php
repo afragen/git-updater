@@ -124,7 +124,7 @@ class API {
 	/**
 	 * Get repo's API.
 	 *
-	 * @param string         $git  (github|bitbucket|gitlab|gitea).
+	 * @param string         $git  'github'.
 	 * @param bool|\stdClass $repo Repository object.
 	 *
 	 * @return \stdClass
@@ -218,27 +218,16 @@ class API {
 			return false;
 		}
 
-		// Gitea doesn't return json encoded raw file.
-		$response = $this->convert_body_string_to_json( $response );
+		/**
+		 * Filter HTTP GET remote response body.
+		 *
+		 * @since 10.0.0
+		 * @param string $response HTTP remote response body.
+		 * @param \stdClass $this Current API object.
+		 */
+		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
-	}
-
-	/**
-	 * Convert response body to JSON.
-	 *
-	 * @param  mixed $response (JSON|string).
-	 * @return mixed $response JSON encoded.
-	 */
-	private function convert_body_string_to_json( $response ) {
-		if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API || $this instanceof Gist_API ) {
-			$body = wp_remote_retrieve_body( $response );
-			if ( null === json_decode( $body ) ) {
-				$response['body'] = json_encode( $body );
-			}
-		}
-
-		return $response;
 	}
 
 	/**
