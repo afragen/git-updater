@@ -253,23 +253,10 @@ class Install {
 		$_POST['github_updater_branch'] = $config['branch'];
 		$_POST['github_updater_api']    = $api;
 		$_POST['option_page']           = 'github_updater_install';
+		$_POST[ "{$api}_access_token" ] = $config['private'] ?: null;
 
-		switch ( $api ) {
-			case 'github':
-				$_POST['github_access_token'] = $config['private'] ?: null;
-				break;
-			case 'bitbucket':
-				$_POST['bitbucket_access_token'] = $config['private'] ?: null;
-				break;
-			case 'gitlab':
-				$_POST['gitlab_access_token'] = $config['private'] ?: null;
-				break;
-			case 'gitea':
-				$_POST['gitea_access_token'] = $config['private'] ?: null;
-				break;
-			case 'zipfile':
-				$_POST['zipfile_slug'] = $config['slug'];
-				break;
+		if ( 'zipfile' === $config['git'] ) {
+			$_POST['zipfile_slug'] = $config['slug'];
 		}
 	}
 
