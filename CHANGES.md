@@ -13,6 +13,7 @@
 * added filter `gu_parse_release_asset`
 * added filter `gu_parse_headers_enterprise_api`
 * update `Settings::unset_stale_options()`
+* add filter `gu_get_git_icon_data`, this change requires PHP 7.0+ for `dirname( __DIR__, 2 )`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
