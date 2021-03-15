@@ -186,7 +186,7 @@ class Theme {
 				$header = $this->parse_header_uri( $repo_uri );
 			}
 
-			$header         = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
+			$header         = $this->parse_extra_headers( $header, $theme, $header_parts );
 			$current_branch = isset( $header['repo'] ) ? "current_branch_{$header['repo']}" : null;
 
 			if ( isset( self::$options[ $current_branch ] )

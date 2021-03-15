@@ -562,17 +562,14 @@ trait GHU_Trait {
 	/**
 	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
-	 * @param array           $header       Array of repo headers.
-	 * @param array|\WP_Theme $headers      Array of theme headers.
-	 * @param array           $header_parts Array of header parts.
-	 * @param array           $repo_parts   Array of repo parts.
+	 * @param array $header       Array of repo data.
+	 * @param array $headers      Array of repo header data.
+	 * @param array $header_parts Array of header parts.
 	 *
-	 * @return array $header
+	 * @return array
 	 */
-	public function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
+	public function parse_extra_headers( $header, $headers, $header_parts ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
-		$hosted_domains     = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
-		$theme              = null;
 
 		$header['enterprise_uri'] = null;
 		$header['enterprise_api'] = null;
@@ -581,10 +578,10 @@ trait GHU_Trait {
 		$header['release_asset']  = false;
 		$header['primary_branch'] = false;
 
-		if ( ! empty( $header['host'] ) && ! in_array( $header['host'], $hosted_domains, true ) ) {
-			$header['enterprise_uri'] = $header['base_uri'];
-			$header['enterprise_api'] = trim( $header['enterprise_uri'], '/' );
-			if ( 'GitHub' === $header_parts[0] ) {
+		if ( ! empty( $header['host'] ) ) {
+			if ( 'GitHub' === $header_parts[0] && false === strpos( $header['host'], 'github.com' ) ) {
+				$header['enterprise_uri']  = $header['base_uri'];
+				$header['enterprise_api']  = trim( $header['enterprise_uri'], '/' );
 				$header['enterprise_api'] .= '/api/v3';
 			}
 
@@ -592,10 +589,10 @@ trait GHU_Trait {
 			 * Filter REST endpoint for API.
 			 *
 			 * @since 10.0.0
-			 * @param string $header['enterprise_api'] URL for API REST endpoint.
-			 * @param string $header_parts[0]          Name of git host.
+			 * @param array  $header          Array or repo header data.
+			 * @param string $header_parts[0] Name of git host.
 			 */
-			$header['enterprise_api'] = apply_filters( 'gu_parse_headers_enterprise_api', $header['enterprise_api'], $header_parts[0] );
+			$header = apply_filters( 'gu_parse_enterprise_headers', $header, $header_parts[0] );
 		}
 
 		$self_hosted_parts = array_keys( $extra_repo_headers );
