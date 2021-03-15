@@ -745,23 +745,13 @@ class Base {
 		$type_cap = ucfirst( $type );
 		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
 
-		$git_headers = [
-			"GitHub{$type_cap}URI"    => "GitHub {$type_cap} URI",
-			"GitLab{$type_cap}URI"    => "GitLab {$type_cap} URI",
-			"Bitbucket{$type_cap}URI" => "Bitbucket {$type_cap} URI",
-			"Gitea{$type_cap}URI"     => "Gitea {$type_cap} URI",
-			"Gist{$type_cap}URI"      => "Gist {$type_cap} URI",
-		];
-		$git_icons   = [
-			'github'    => 'github-logo.svg',
-			'gitlab'    => 'gitlab-logo.svg',
-			'bitbucket' => 'bitbucket-logo.svg',
-			'gitea'     => 'gitea-logo.svg',
-			'gist'      => 'github-logo.svg',
-		];
+		$git['headers'] = [ "GitHub{$type_cap}URI" => "GitHub {$type_cap} URI" ];
+		$git['icons']   = [ 'github' => basename( dirname( __DIR__, 2 ) ) . '/assets/github-logo.svg' ];
+
+		$git = apply_filters( 'gu_get_git_icon_data', $git, $type_cap );
 
 		// Skip on mu-plugins or drop-ins.
-		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git_headers ) : [];
+		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git['headers'] ) : [];
 
 		/**
 		 * Insert repositories added via GitHub Updater Additions plugin.
@@ -783,7 +773,7 @@ class Base {
 				$padding = is_rtl() ? 'padding-left: 6px;' : 'padding-right: 6px;';
 				$icon    = sprintf(
 					'<img src="%1$s" style="vertical-align:text-bottom;%2$s" height="16" width="16" alt="%3$s" />',
-					plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/' . $git_icons[ strtolower( $githost ) ] ),
+					plugins_url( $git['icons'][ strtolower( $githost ) ] ),
 					$add_padding ? $padding : '',
 					$githost
 				);
