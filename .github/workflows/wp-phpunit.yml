@@ -8,6 +8,7 @@ on:
     branches:
       - develop
       - master
+      - modular-api
   pull_request:
     branches:
       - develop
@@ -19,13 +20,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-18.04]
-        php-versions: ['7.2', '7.3', '7.4']
+        operating-system: [ubuntu-20.04]
+        php-versions: ['7.0','7.2', '7.3', '7.4']
         phpunit-versions: ['7.5.20']
         include:
-          - php-versions: '5.6'
-            phpunit-versions: '5.7.27'
-            operating-system: ubuntu-16.04
+          - php-versions: '8.0'
+            phpunit-versions: '9.5.2'
+            operating-system: ubuntu-latest
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
     - name: Checkout
