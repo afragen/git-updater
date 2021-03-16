@@ -46,24 +46,6 @@ trait API_Common {
 	}
 
 	/**
-	 * Parse API response that returns as stdClass.
-	 *
-	 * @param  string $git      Name of API, eg 'github'.
-	 * @param  mixed  $response API response.
-	 * @return mixed  $response
-	 */
-	private function parse_response( $git, $response ) {
-		switch ( $git ) {
-			case 'bitbucket':
-			case 'bbserver':
-				$response = isset( $response->values ) ? $response->values : $response;
-				break;
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Parse API response to release asset URI.
 	 *
 	 * @param  string $git      Name of API, eg 'github'.
@@ -309,7 +291,15 @@ trait API_Common {
 		if ( ! $response ) {
 			self::$method = 'branches';
 			$response     = $this->api( $request );
-			$response     = $this->parse_response( $git, $response );
+
+			/**
+			 * Filter API branch response.
+			 *
+			 * @since 10.0.0
+			 * @param array|\stdClass $response
+			 * @param string          $git      Name of API, eg 'github'.
+			 */
+			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
 			if ( $this->validate_response( $response ) ) {
 				return false;
