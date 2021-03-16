@@ -740,21 +740,26 @@ class Settings {
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'github-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'github-updater' );
 
-		$plugins  = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$themes   = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$repos    = array_merge( $plugins, $themes );
-		$bbserver = [ 'bitbucket', 'bbserver' ];
+		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$repos   = array_merge( $plugins, $themes );
 
 		$type_repos = array_filter(
 			$repos,
-			function ( $e ) use ( $git, $bbserver ) {
-				if ( ! empty( $e->enterprise ) && in_array( $git, $bbserver, true ) ) {
-					return false !== stripos( $e->git, 'bitbucket' ) && 'bbserver' === $git;
-				}
-
+			function ( $e ) use ( $git ) {
 				return false !== stripos( $e->git, $git );
 			}
 		);
+
+		/**
+		 * Filter repo types to display in Settings.
+		 *
+		 * @since 10.0.0
+		 * @param array  $type_repos Array of repo objects to display.
+		 * @param array  $repos      Array of repos.
+		 * @param string $gitName    of API, eg 'github'.
+		 */
+		$type_repos = apply_filters( 'gu_display_repos', $type_repos, $repos, $git );
 
 		$display_data = array_map(
 			function ( $e ) {
