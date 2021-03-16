@@ -1,6 +1,5 @@
 #### [unreleased]
-* added default values in API constructors for future proofing
-* correctly apply `Primary Branch` with rollback to tag
+##### Requires PHP 7.0+
 * removed Git APIs and placed in plugins
 * added filters to added data from API plugins
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
