@@ -18,6 +18,7 @@
 * add filter `gu_post_api_response_body`
 * add filter `gu_get_git_icon_data`, this change requires PHP 7.0+ for `dirname( __DIR__, 2 )`
 * add filter `gu_parse_enterprise_headers`
+* add filter `gu_fix_repo_slug`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`

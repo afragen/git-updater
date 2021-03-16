@@ -239,12 +239,15 @@ class Plugin {
 	public function get_remote_plugin_meta() {
 		$plugins = [];
 		foreach ( (array) $this->config as $plugin ) {
-			// Fix repository for Gist.
-			if ( 'gist' === $plugin->git ) {
-				$plugin                        = Singleton::get_instance( 'API\Gist_API', $this, $plugin )->parse_gist_meta( $plugin );
-				$this->config[ $plugin->slug ] = $plugin;
-				unset( $this->config[ $plugin->gist_id ] );
-			}
+			/**
+			 * Filter config to fix repo slug.
+			 * Eg change Gist ID to slug.
+			 *
+			 * @since 10.0.0
+			 * @param \stdClass $this->config Configuration object.
+			 * @param \stcClass $plugin       Plugin object.
+			 */
+			$this->config = apply_filters( 'gu_fix_repo_slug', $this->config, $plugin );
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *
