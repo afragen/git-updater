@@ -323,19 +323,19 @@ trait GHU_Trait {
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map(
 			function ( $e ) {
-				if ( ! empty( $e->enterprise ) ) {
-					if ( 'bitbucket' === $e->git ) {
-						return 'bbserver';
-					}
-					if ( 'gitlab' === $e->git ) {
-						return 'gitlabce';
-					}
-				}
-
 				return $e->git;
 			},
 			$repos
 		);
+
+		/**
+		 * Filter array of repository git servers.
+		 *
+		 * @since 10.0.0
+		 * @param array $gits  Array of repository git servers.
+		 * @param array $repos Array of repository objects.
+		 */
+		$gits = apply_filters( 'gu_running_git_servers', $gits, $repos );
 
 		return array_unique( array_values( $gits ) );
 	}
