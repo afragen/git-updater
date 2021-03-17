@@ -6,8 +6,8 @@
 
 ![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg)
 
-* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
-* Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
+* Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Tags: plugin, theme, update, github, language pack, remote install
 * Requires at least: 5.2
 * Requires PHP: 7.0
 * Tested up to: trunk
