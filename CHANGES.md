@@ -19,6 +19,7 @@
 * add filter `gu_parse_enterprise_headers`
 * add filter `gu_fix_repo_slug`
 * add filter `gu_parse_api_branches`
+* add filter `gu_post_running_git_servers`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`

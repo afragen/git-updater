@@ -31,18 +31,12 @@ trait API_Common {
 	 * @return mixed  $response
 	 */
 	private function decode_response( $git, $response ) {
-		switch ( $git ) {
-			case 'github':
-			case 'gitlab':
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-				$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
-				break;
-			case 'bbserver':
-				$response = isset( $response->lines ) ? $this->bbserver_recombine_response( $response ) : $response;
-				break;
+		if ( 'github' === $git ) {
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+			$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
 
-		return $response;
+		return apply_filters( 'gu_decode_response', $response, $git );
 	}
 
 	/**
