@@ -155,11 +155,8 @@ class Settings {
 	 * @return array
 	 */
 	private function settings_sub_tabs() {
-		$subtabs = [ 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) ];
-		$gits    = $this->get_running_git_servers();
-		$gits[]  = in_array( 'gitlabce', $gits, true ) ? 'gitlab' : null;
-		$gits    = array_unique( $gits );
-
+		$subtabs     = [ 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) ];
+		$gits        = $this->get_running_git_servers();
 		$git_subtab  = [];
 		$ghu_subtabs = [];
 
