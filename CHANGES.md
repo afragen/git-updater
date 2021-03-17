@@ -1,25 +1,25 @@
 #### [unreleased]
 ##### Requires PHP 7.0+
 * removed Git APIs and placed in plugins
-* added filters to added data from API plugins
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
 * remove deprecated elements of `Remote_Management`
 * fix variable type in `Language_Pack_API`
-* added filter for setting API URL data
-* added filter for setting API remote install data
-* added filters for setting API language pack data
 * remove `Settings::set_auth_required()`, now set in API plugins
-* added filter to get API object
-* added filters for Basic Auth settings
-* added filter `gu_parse_release_asset`
-* added filter `gu_parse_headers_enterprise_api`
 * update `Settings::unset_stale_options()`
-* add filter `gu_post_api_response_body`
-* add filter `gu_get_git_icon_data`, this change requires PHP 7.0+ for `dirname( __DIR__, 2 )`
-* add filter `gu_parse_enterprise_headers`
-* add filter `gu_fix_repo_slug`
-* add filter `gu_parse_api_branches`
-* add filter `gu_post_running_git_servers`
+* added filters to added data from API plugins
+  * added filter for setting API URL data
+  * added filter for setting API remote install data
+  * added filters for setting API language pack data
+  * added filter to get API object
+  * added filters for Basic Auth settings
+  * added filter `gu_parse_release_asset`
+  * added filter `gu_parse_headers_enterprise_api`
+  * add filter `gu_post_api_response_body`
+  * add filter `gu_get_git_icon_data`, this change requires PHP 7.0+ for `dirname( __DIR__, 2 )`
+  * add filter `gu_parse_enterprise_headers`
+  * add filter `gu_fix_repo_slug`
+  * add filter `gu_parse_api_branches`
+  * add filter `gu_running_git_servers`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
