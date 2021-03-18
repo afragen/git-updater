@@ -141,8 +141,8 @@ class Base {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'github-updater', plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) ) . '/css/github-updater.css', [], $this->get_plugin_version() );
-					wp_enqueue_style( 'github-updater' );
+					wp_register_style( 'git-updater', plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) ) . '/css/git-updater.css', [], $this->get_plugin_version() );
+					wp_enqueue_style( 'git-updater' );
 				}
 			);
 		}
@@ -621,7 +621,7 @@ class Base {
 		echo wp_kses_post( $this->get_git_icon( $file, true ) );
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
+			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
 			esc_attr( $data['branch'] ),
 			'<a href="#" onclick="jQuery(\'#' . esc_attr( $data['id'] ) . '\').toggle();return false;">',
 			'</a>.'
@@ -645,7 +645,7 @@ class Base {
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
 				printf(
-					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'github-updater' ) . esc_attr( $branch ) . '">%s</a></li>',
+					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'git-updater' ) . esc_attr( $branch ) . '">%s</a></li>',
 					esc_url( $data['nonced_update_url'] ),
 					'&rollback=' . rawurlencode( $branch ),
 					esc_attr( $branch )
@@ -686,7 +686,7 @@ class Base {
 
 			foreach ( $rollback as $tag ) {
 				printf(
-					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'github-updater' ) . esc_attr( $tag ) . '">%s</a></li>',
+					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'git-updater' ) . esc_attr( $tag ) . '">%s</a></li>',
 					esc_url( $data['nonced_update_url'] ),
 					'&rollback=' . rawurlencode( $tag ),
 					esc_attr( $tag )
@@ -694,7 +694,7 @@ class Base {
 			}
 		}
 		if ( empty( $rollback ) ) {
-			echo '<li>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</li>';
+			echo '<li>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</li>';
 		}
 
 		print '</ul>';

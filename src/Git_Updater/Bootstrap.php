@@ -21,7 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
 add_action(
 	'init',
 	function () {
-		load_plugin_textdomain( 'github-updater' );
+		load_plugin_textdomain( 'git-updater' );
 	}
 );
 
@@ -109,7 +109,7 @@ class Bootstrap {
 					echo '<div class="error notice is-dismissible"><p>';
 					printf(
 						/* translators: 1: minimum PHP version required */
-						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'github-updater' ) ),
+						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'git-updater' ) ),
 						'7.0'
 					);
 					echo '</p></div>';

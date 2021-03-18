@@ -384,7 +384,7 @@ class Theme {
 
 			printf(
 				/* translators: %s: theme name */
-				esc_html__( 'There is a new version of %s available.', 'github-updater' ),
+				esc_html__( 'There is a new version of %s available.', 'git-updater' ),
 				esc_attr( $theme_name )
 			);
 			printf(
@@ -396,21 +396,21 @@ class Theme {
 			if ( empty( $response['package'] ) ) {
 				printf(
 					/* translators: %s: theme version */
-					esc_html__( 'View version %s details.', 'github-updater' ),
+					esc_html__( 'View version %s details.', 'git-updater' ),
 					esc_attr( $response['new_version'] )
 				);
 				echo '</a>&nbsp;<em>';
-				esc_html_e( 'Automatic update is unavailable for this theme.', 'github-updater' );
+				esc_html_e( 'Automatic update is unavailable for this theme.', 'git-updater' );
 				echo '</em>';
 			} else {
 				printf(
 					/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-					esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
+					esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'git-updater' ),
 					esc_attr( $response['new_version'] ),
 					'</a>',
 					sprintf(
 						/* translators: %s: theme name */
-						'<a href="' . esc_url( $nonced_update_url ) . '" class="update-link" aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '">',
+						'<a href="' . esc_url( $nonced_update_url ) . '" class="update-link" aria-label="' . esc_html__( 'Update %s now', 'git-updater' ) . '">',
 						esc_attr( $theme_name )
 					)
 				);
@@ -556,7 +556,7 @@ class Theme {
 					<?php
 					printf(
 						/* translators: %s: theme name */
-						esc_html__( 'There is a new version of %s available.', 'github-updater' ),
+						esc_html__( 'There is a new version of %s available.', 'git-updater' ),
 						esc_attr( $theme->name )
 					);
 					printf(
@@ -567,25 +567,25 @@ class Theme {
 					if ( ! empty( $current->response[ $theme->slug ]['package'] ) ) {
 						printf(
 							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-							esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
+							esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'git-updater' ),
 							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
 							'</a>',
 							sprintf(
 							/* translators: %s: theme name */
-								'<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . esc_attr( $theme->slug ) . '" href="' . esc_url( $nonced_update_url ) . '">',
+								'<a aria-label="' . esc_html__( 'Update %s now', 'git-updater' ) . '" id="update-theme" data-slug="' . esc_attr( $theme->slug ) . '" href="' . esc_url( $nonced_update_url ) . '">',
 								esc_attr( $theme->name )
 							)
 						);
 					} else {
 						printf(
 							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-							esc_html__( 'View version %1$s details%2$s.', 'github-updater' ),
+							esc_html__( 'View version %1$s details%2$s.', 'git-updater' ),
 							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
 							'</a>',
 						);
 						printf(
 							/* translators: %s: opening/closing paragraph and italic tags */
-							esc_html__( '%1$sAutomatic update is unavailable for this theme.%2$s', 'github-updater' ),
+							esc_html__( '%1$sAutomatic update is unavailable for this theme.%2$s', 'git-updater' ),
 							'<p><i>',
 							'</i></p>'
 						);
@@ -623,7 +623,7 @@ class Theme {
 		if ( '1' === self::$options['branch_switch'] ) {
 			printf(
 				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'github-updater' ),
+				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
 				esc_attr( $theme->branch ),
 				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
 				'</a>.</p>'
@@ -631,7 +631,7 @@ class Theme {
 			?>
 			<div id="ghu_versions" style="display:none; width: 100%;">
 				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
-				<option value=""><?php esc_html_e( 'Choose a Version', 'github-updater' ); ?>&#8230;</option>
+				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
 			<?php
 
 			// Disable branch switching to primary branch for release assets.
@@ -666,11 +666,11 @@ class Theme {
 				}
 			}
 			if ( empty( $theme->rollback ) ) {
-				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'github-updater' ) . '</option></select></label>';
+				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</option></select></label>';
 			}
 			?>
 					</select></label>
-				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'github-updater' ); ?></a>
+				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'git-updater' ); ?></a>
 			</div>
 			<?php
 		}
