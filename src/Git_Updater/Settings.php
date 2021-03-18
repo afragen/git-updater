@@ -541,7 +541,7 @@ class Settings {
 		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
+			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
 		</label>
 		<?php
 	}
@@ -555,7 +555,7 @@ class Settings {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', abs( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
+			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', abs( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
 			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
@@ -632,7 +632,7 @@ class Settings {
 		 * @since 8.0.0
 		 * @return array
 		 */
-		$option_page = apply_filters( 'github_updater_save_redirect', [ 'github_updater' ] );
+		$option_page = apply_filters( 'github_updater_save_redirect', [ 'git_updater' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
