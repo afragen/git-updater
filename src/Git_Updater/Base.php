@@ -500,7 +500,8 @@ class Base {
 			'github_updater_post_construct_download_link'
 		);
 
-		$rollback = [
+		$repo->download_link = $download_link;
+		$rollback            = [
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
