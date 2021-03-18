@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;

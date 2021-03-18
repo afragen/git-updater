@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;
@@ -47,7 +47,7 @@ class Init {
 	/**
 	 * Rename on activation.
 	 *
-	 * Correctly renames the slug when GitHub Updater is installed
+	 * Correctly renames the slug when Git Updater is installed
 	 * via FTP or from plugin upload.
 	 *
 	 * Set current branch to `develop` if appropriate.
@@ -119,12 +119,12 @@ class Init {
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
 
 		/**
-		 * Filter $admin_pages to be able to adjust the pages where GitHub Updater runs.
+		 * Filter $admin_pages to be able to adjust the pages where Git Updater runs.
 		 *
 		 * @since 8.0.0
 		 * @deprecated 9.1.0
 		 *
-		 * @param array $admin_pages Default array of admin pages where GitHub Updater runs.
+		 * @param array $admin_pages Default array of admin pages where Git Updater runs.
 		 */
 		apply_filters_deprecated( 'github_updater_add_admin_pages', [ null ], '9.1.0' );
 

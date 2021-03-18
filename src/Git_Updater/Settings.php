@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;
@@ -149,7 +149,7 @@ class Settings {
 	 * @return array
 	 */
 	private function settings_sub_tabs() {
-		$subtabs     = [ 'github_updater' => esc_html__( 'GitHub Updater', 'github-updater' ) ];
+		$subtabs     = [ 'github_updater' => esc_html__( 'Git Updater', 'github-updater' ) ];
 		$gits        = $this->get_running_git_servers();
 		$git_subtab  = [];
 		$ghu_subtabs = [];
@@ -184,8 +184,8 @@ class Settings {
 
 		add_submenu_page(
 			$parent,
-			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
-			esc_html_x( 'GitHub Updater', 'Menu item', 'github-updater' ),
+			esc_html__( 'Git Updater Settings', 'github-updater' ),
+			esc_html_x( 'Git Updater', 'Menu item', 'github-updater' ),
 			$capability,
 			'github-updater',
 			[ $this, 'create_admin_page' ]
@@ -239,8 +239,8 @@ class Settings {
 		$logo = plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
 		<div class="wrap github-updater-settings">
 			<h1>
-				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="GitHub Updater logo" /></a><br>
-				<?php esc_html_e( 'GitHub Updater', 'github-updater' ); ?>
+				<a href="https://github.com/afragen/github-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
+				<?php esc_html_e( 'Git Updater', 'github-updater' ); ?>
 			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php $this->admin_page_notices(); ?>
@@ -329,7 +329,7 @@ class Settings {
 		 */
 		add_settings_section(
 			'github_updater_settings',
-			esc_html__( 'GitHub Updater Settings', 'github-updater' ),
+			esc_html__( 'Git Updater Settings', 'github-updater' ),
 			[ $this, 'print_section_ghu_settings' ],
 			'github_updater_install_settings'
 		);
@@ -432,7 +432,7 @@ class Settings {
 	 * Check current saved options and unset if repos not present.
 	 *
 	 * @param array $ghu_options_keys Array of options keys.
-	 * @param array $ghu_tokens       Array of GitHub Updater repos.
+	 * @param array $ghu_tokens       Array of Git Updater repos.
 	 */
 	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
@@ -484,7 +484,7 @@ class Settings {
 	}
 
 	/**
-	 * Print the GitHub Updater Settings text.
+	 * Print the Git Updater Settings text.
 	 */
 	public function print_section_ghu_settings() {
 		$this->display_dot_org_overrides();
@@ -667,7 +667,7 @@ class Settings {
 	}
 
 	/**
-	 * Clear GitHub Updater transients.
+	 * Clear Git Updater transients.
 	 *
 	 * @return bool
 	 */
@@ -722,7 +722,7 @@ class Settings {
 	}
 
 	/**
-	 * Write out listing of installed plugins and themes using GitHub Updater.
+	 * Write out listing of installed plugins and themes using Git Updater.
 	 * Places a lock dashicon after the repo name if it's a private repo.
 	 * Places a WordPress dashicon after the repo name if it's in dot org.
 	 *

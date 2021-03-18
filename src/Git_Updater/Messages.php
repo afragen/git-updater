@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;
@@ -110,7 +110,7 @@ class Messages {
 				<div data-dismissible="403-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						esc_html_e( 'Git Updater Error Code:', 'github-updater' );
 						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
@@ -151,11 +151,11 @@ class Messages {
 				<div data-dismissible="401-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+						esc_html_e( 'Git Updater Error Code:', 'github-updater' );
 						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
-						<?php esc_html_e( 'There is probably an access token or password error on the GitHub Updater Settings page.', 'github-updater' ); ?>
+						<?php esc_html_e( 'There is probably an access token or password error on the Git Updater Settings page.', 'github-updater' ); ?>
 					</p>
 				</div>
 				<?php
@@ -171,7 +171,7 @@ class Messages {
 		<div class="notice-error notice">
 			<p>
 				<?php
-				esc_html_e( 'GitHub Updater Error Code:', 'github-updater' );
+				esc_html_e( 'Git Updater Error Code:', 'github-updater' );
 				echo ' ' . esc_html( self::$error_message );
 				?>
 			</p>
@@ -186,7 +186,7 @@ class Messages {
 		?>
 		<div class="notice-info notice is-dismissible">
 			<p>
-				<?php esc_html_e( 'GitHub Updater Information', 'github-updater' ); ?>
+				<?php esc_html_e( 'Git Updater Information', 'github-updater' ); ?>
 				<br>
 				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'github-updater' ); ?>
 			</p>
