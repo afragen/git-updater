@@ -461,9 +461,11 @@ class Theme {
 		/*
 		 * Create after_theme_row_
 		 */
-		echo wp_kses_post( $enclosure['open'] );
-		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-		echo wp_kses_post( $enclosure['close'] );
+		if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+			echo wp_kses_post( $enclosure['open'] );
+			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
+			echo wp_kses_post( $enclosure['close'] );
+		}
 
 		return true;
 	}
@@ -504,7 +506,9 @@ class Theme {
 			} else {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
+			if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+				$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
+			}
 		}
 
 		return $prepared_themes;
@@ -560,17 +564,31 @@ class Theme {
 						esc_url( $details_url ),
 						esc_attr( $theme->name )
 					);
-					printf(
-						/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-						esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
-						$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
-						'</a>',
-						sprintf(
+					if ( ! empty( $current->response[ $theme->slug ]['package'] ) ) {
+						printf(
+							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
+							esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'github-updater' ),
+							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
+							'</a>',
+							sprintf(
 							/* translators: %s: theme name */
-							'<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . esc_attr( $theme->slug ) . '" href="' . esc_url( $nonced_update_url ) . '">',
-							esc_attr( $theme->name )
-						)
-					);
+								'<a aria-label="' . esc_html__( 'Update %s now', 'github-updater' ) . '" id="update-theme" data-slug="' . esc_attr( $theme->slug ) . '" href="' . esc_url( $nonced_update_url ) . '">',
+								esc_attr( $theme->name )
+							)
+						);
+					} else {
+						printf(
+							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
+							esc_html__( 'View version %1$s details%2$s.', 'github-updater' ),
+							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
+							'</a>',
+						);
+						printf(
+							esc_html__( '%1$sAutomatic update is unavailable for this theme.%2$s', 'github-updater' ),
+							'<p><i>',
+							'</i></p>'
+						);
+					}
 					?>
 				</strong>
 			</p>
@@ -681,7 +699,7 @@ class Theme {
 				'theme'            => $theme->slug,
 				'new_version'      => $theme->remote_version,
 				'url'              => $theme->uri,
-				'package'          => $theme->download_link,
+				'package'          => null,
 				'requires'         => $theme->requires,
 				'requires_php'     => $theme->requires_php,
 				'tested'           => $theme->tested,
@@ -706,6 +724,15 @@ class Theme {
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
 					continue;
 				}
+
+				/**
+				 * Filter for Git Updater PRO to get download package.
+				 *
+				 * @since 10.0.0
+				 * @param array     $response Array or repository update transient data.
+				 * @param \stdClass $theme    Repository object.
+				 */
+				$response = apply_filters( 'gu_pro_dl_package', $response, $theme );
 
 				// Update download link for release_asset non-primary branches.
 				if ( $theme->release_asset && $theme->primary_branch !== $theme->branch ) {

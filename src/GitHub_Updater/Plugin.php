@@ -342,9 +342,11 @@ class Plugin {
 		/*
 		 * Create after_plugin_row_
 		 */
-		echo wp_kses_post( $enclosure['open'] );
-		$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-		echo wp_kses_post( $enclosure['close'] );
+		if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+			echo wp_kses_post( $enclosure['open'] );
+			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
+			echo wp_kses_post( $enclosure['close'] );
+		}
 
 		return true;
 	}
@@ -422,7 +424,7 @@ class Plugin {
 				'plugin'           => $plugin->file,
 				'new_version'      => $plugin->remote_version,
 				'url'              => $plugin->uri,
-				'package'          => $plugin->download_link,
+				'package'          => null,
 				'icons'            => $plugin->icons,
 				'tested'           => $plugin->tested,
 				'requires'         => $plugin->requires,
@@ -450,6 +452,15 @@ class Plugin {
 				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
 					continue;
 				}
+
+				/**
+				 * Filter for Git Updater PRO to get download package.
+				 *
+				 * @since 10.0.0
+				 * @param array     $response Array or repository update transient data.
+				 * @param \stdClass $plugin   Repository object.
+				 */
+				$response = apply_filters( 'gu_pro_dl_package', $response, $plugin );
 
 				// Update download link for release_asset non-primary branches.
 				if ( $plugin->release_asset && $plugin->primary_branch !== $plugin->branch ) {

@@ -11,7 +11,6 @@
 namespace Fragen\GitHub_Updater;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\REST\REST_API;
 use Fragen\GitHub_Updater\Traits\GHU_Trait;
 use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
 
@@ -80,11 +79,6 @@ class Init {
 		if ( ! static::is_heartbeat() ) {
 			$this->load_hooks();
 		}
-
-		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/WP_CLI/CLI.php';
-			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
-		}
 	}
 
 	/**
@@ -95,9 +89,6 @@ class Init {
 		add_action( 'init', [ $this->base, 'load' ] );
 		add_action( 'init', [ $this->base, 'background_update' ] );
 		add_action( 'init', [ $this->base, 'set_options_filter' ] );
-		add_action( 'wp_ajax_github-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
-		add_action( 'wp_ajax_nopriv_github-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
-		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
 
 		// Load hook for adding authentication headers for download packages.
 		add_filter(

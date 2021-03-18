@@ -426,7 +426,7 @@ class Base {
 		/*
 		 * Remote install source.
 		 */
-		$install_options = $this->get_class_vars( 'Install', 'install' );
+		$install_options = $this->get_class_vars( 'Fragen\Git_Updater\PRO\Install', 'install' );
 		if ( empty( $repo ) && isset( $install_options['github_updater_install_repo'] ) ) {
 			$slug                            = $install_options['github_updater_install_repo'];
 			$new_source                      = trailingslashit( $remote_source ) . $slug;
@@ -504,11 +504,20 @@ class Base {
 			$type         => $slug,
 			'new_version' => $this->tag,
 			'url'         => $repo->uri,
-			'package'     => $download_link,
+			'package'     => null,
 			'branch'      => $repo->branch,
 			'branches'    => $repo->branches,
 			'type'        => $repo->type,
 		];
+
+		/**
+		 * Filter for Git Updater PRO to get download package.
+		 *
+		 * @since 10.0.0
+		 * @param array     $rollback Array or repository update transient data.
+		 * @param \stdClass $repo     Repository object.
+		 */
+		$rollback = apply_filters( 'gu_pro_dl_package', $rollback, $repo );
 
 		if ( 'plugin' === $type ) {
 			$rollback['slug'] = $repo->slug;

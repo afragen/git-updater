@@ -79,12 +79,6 @@ class Settings {
 	 */
 	public function run() {
 		$this->load_hooks();
-
-		// Need to ensure these classes are activated here for hooks to fire.
-		if ( $this->is_current_page( [ 'options.php', 'options-general.php', 'settings.php', 'edit.php' ] ) ) {
-			Singleton::get_instance( 'Install', $this )->run();
-			Singleton::get_instance( 'Remote_Management', $this )->load_hooks();
-		}
 	}
 
 	/**
@@ -348,7 +342,7 @@ class Settings {
 			'github_updater_settings',
 			[
 				'id'    => 'branch_switch',
-				'title' => esc_html__( 'Enable Branch Switching', 'github-updater' ),
+				'title' => esc_html__( 'Enable Branch Switching (PRO feature)', 'github-updater' ),
 			]
 		);
 
@@ -628,8 +622,10 @@ class Settings {
 	protected function redirect_on_save() {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
-		$reset_api_key      = Singleton::get_instance( 'Remote_Management', $this )->reset_api_key();
-
+		$reset_api_key      = false;
+		if ( \class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
+		}
 		/**
 		 * Filter to add to $option_page array.
 		 *
