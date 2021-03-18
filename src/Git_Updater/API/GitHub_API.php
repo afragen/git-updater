@@ -365,14 +365,14 @@ class GitHub_API extends API implements API_Interface {
 			'github_access_token',
 			esc_html__( 'GitHub Personal Access Token', 'git-updater' ),
 			[ $this, 'print_section_github_access_token' ],
-			'github_updater_github_install_settings'
+			'git_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
 			esc_html__( 'GitHub.com Access Token', 'git-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
-			'github_updater_github_install_settings',
+			'git_updater_github_install_settings',
 			'github_access_token',
 			[
 				'id'    => 'github_access_token',
@@ -388,7 +388,7 @@ class GitHub_API extends API implements API_Interface {
 				'github_id',
 				esc_html__( 'GitHub Private Settings', 'git-updater' ),
 				[ $this, 'print_section_github_info' ],
-				'github_updater_github_install_settings'
+				'git_updater_github_install_settings'
 			);
 		}
 	}
@@ -399,7 +399,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return mixed
 	 */
 	public function add_repo_setting_field() {
-		$setting_field['page']            = 'github_updater_github_install_settings';
+		$setting_field['page']            = 'git_updater_github_install_settings';
 		$setting_field['section']         = 'github_id';
 		$setting_field['callback_method'] = [
 			Singleton::get_instance( 'Settings', $this ),
@@ -433,7 +433,7 @@ class GitHub_API extends API implements API_Interface {
 			'github_access_token',
 			esc_html__( 'GitHub Access Token', 'git-updater' ),
 			[ $this, 'github_access_token' ],
-			'github_updater_install_' . $type,
+			'git_updater_install_' . $type,
 			$type
 		);
 	}
