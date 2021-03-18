@@ -1,26 +1,25 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 /**
- * Plugin Name:       GitHub Updater MU loader
+ * Plugin Name:       Git Updater MU loader
  * Plugin URI:        https://github.com/afragen/github-updater
- * Description:       A plugin to load GitHub Updater as a must-use plugin. Disables normal plugin activation and deletion.
- * Version:           2.0.0
+ * Description:       A plugin to load Git Updater as a must-use plugin. Disables normal plugin activation and deletion.
+ * Version:           3.0.0
  * Author:            Andy Fragen
- * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
- * GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
- * Requires PHP:      5.6
+ * License:           MIT
+* GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
+ * Requires PHP:      7.0
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\Git_Updater;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {

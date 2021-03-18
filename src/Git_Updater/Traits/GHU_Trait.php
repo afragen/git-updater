@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater\Traits;
@@ -643,7 +643,7 @@ trait GHU_Trait {
 	public function is_cron_overdue( $cron, $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
-			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
+			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Fragen\Git_Updater\Messages', $this )->create_error_message( $error );
 		}
@@ -652,7 +652,7 @@ trait GHU_Trait {
 	/**
 	 * Returns current plugin version.
 	 *
-	 * @return string GitHub Updater plugin version
+	 * @return string Git Updater plugin version
 	 */
 	public static function get_plugin_version() {
 		if ( ! function_exists( 'get_plugin_data' ) ) {

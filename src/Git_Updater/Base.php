@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;
@@ -132,7 +132,7 @@ class Base {
 			Singleton::get_instance( 'Settings', $this )->run();
 		}
 
-		// Run GitHub Updater upgrade functions.
+		// Run Git Updater upgrade functions.
 		$upgrade = new GHU_Upgrade();
 		$upgrade->run();
 
@@ -415,7 +415,7 @@ class Base {
 
 		$repo = $this->get_repo_slugs( $slug, $upgrader_object );
 
-		// Not GitHub Updater plugin/theme.
+		// Not Git Updater plugin/theme.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['github_updater_repo'] ) && empty( $repo ) ) {
 			return $source;
@@ -444,7 +444,7 @@ class Base {
 
 	/**
 	 * Correctly rename an initially misnamed directory.
-	 * This usually occurs when initial installation not using GitHub Updater.
+	 * This usually occurs when initial installation not using Git Updater.
 	 * May cause plugin/theme deactivation.
 	 *
 	 * @param string       $new_source      File path of $new_source.
@@ -763,9 +763,9 @@ class Base {
 		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git['headers'] ) : [];
 
 		/**
-		 * Insert repositories added via GitHub Updater Additions plugin.
+		 * Insert repositories added via Git Updater Additions plugin.
 		 *
-		 * @see GitHub Updater's Plugin or Theme class for definition.
+		 * @see Git Updater's Plugin or Theme class for definition.
 		 * @link https://github.com/afragen/github-updater-additions
 		 */
 		$additions = apply_filters( 'github_updater_additions', null, [], $type );

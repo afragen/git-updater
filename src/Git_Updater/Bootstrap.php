@@ -1,11 +1,11 @@
 <?php
 /**
- * GitHub Updater
+ * Git Updater
  *
- * @author    Andy Fragen
- * @license   GPL-2.0+
- * @link      https://github.com/afragen/github-updater
- * @package   github-updater
+ * @author   Andy Fragen
+ * @license  MIT
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater;
@@ -65,7 +65,7 @@ class Bootstrap {
 
 		$message = sprintf(
 			/* translators: %s: documentation URL */
-			__( 'GitHub Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopenernoreferer">Learn more.</a>', 'github_updater' ),
+			__( 'Git Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopenernoreferer">Learn more.</a>', 'github_updater' ),
 			'https://github.com/afragen/github-updater/wiki/Installation'
 		);
 
@@ -109,7 +109,7 @@ class Bootstrap {
 					echo '<div class="error notice is-dismissible"><p>';
 					printf(
 						/* translators: 1: minimum PHP version required */
-						wp_kses_post( __( 'GitHub Updater cannot run on PHP versions older than %1$s.', 'github-updater' ) ),
+						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'github-updater' ) ),
 						'7.0'
 					);
 					echo '</p></div>';
