@@ -8,10 +8,10 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater\API;
+namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\Branch;
+use Fragen\Git_Updater\Branch;
 
 /*
  * Exit if called directly.

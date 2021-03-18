@@ -25,7 +25,7 @@
  * Requires PHP:      7.0
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\Git_Updater;
 
 /*
  * Exit if called directly.
@@ -41,8 +41,8 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 }
 
 // Check for composer autoloader.
-if ( ! class_exists( 'Fragen\GitHub_Updater\Bootstrap' ) ) {
-	require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
+if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
+	require_once __DIR__ . '/src/Git_Updater/Bootstrap.php';
 	( new Bootstrap( __FILE__ ) )->deactivate_die();
 }
 

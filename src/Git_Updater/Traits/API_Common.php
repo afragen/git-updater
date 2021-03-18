@@ -8,9 +8,9 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater\Traits;
+namespace Fragen\Git_Updater\Traits;
 
-use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
+use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
 
 /**
  * Trait API_Common

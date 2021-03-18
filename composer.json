@@ -38,7 +38,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Fragen\\GitHub_Updater\\": "src/GitHub_Updater/"
+      "Fragen\\Git_Updater\\": "src/Git_Updater/"
     }
   },
   "scripts": {

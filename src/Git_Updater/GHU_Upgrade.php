@@ -8,9 +8,9 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\Git_Updater;
 
-use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GHU_Trait;
 
 /**
  * Exit if called directly.

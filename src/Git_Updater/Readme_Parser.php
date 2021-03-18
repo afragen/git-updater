@@ -9,7 +9,7 @@
  * @uses      https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\Git_Updater;
 
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use Parsedown;

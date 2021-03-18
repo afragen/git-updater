@@ -8,9 +8,9 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater\API;
+namespace Fragen\Git_Updater\API;
 
-use Fragen\GitHub_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GHU_Trait;
 
 /**
  * Class Language_Pack_API
