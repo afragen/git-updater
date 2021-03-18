@@ -417,7 +417,7 @@ class Base {
 
 		// Not Git Updater plugin/theme.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST['github_updater_repo'] ) && empty( $repo ) ) {
+		if ( ! isset( $_POST['git_updater_repo'] ) && empty( $repo ) ) {
 			return $source;
 		}
 
@@ -427,8 +427,8 @@ class Base {
 		 * Remote install source.
 		 */
 		$install_options = $this->get_class_vars( 'Fragen\Git_Updater\PRO\Install', 'install' );
-		if ( empty( $repo ) && isset( $install_options['github_updater_install_repo'] ) ) {
-			$slug                            = $install_options['github_updater_install_repo'];
+		if ( empty( $repo ) && isset( $install_options['git_updater_install_repo'] ) ) {
+			$slug                            = $install_options['git_updater_install_repo'];
 			$new_source                      = trailingslashit( $remote_source ) . $slug;
 			self::$options['remote_install'] = true;
 		}
