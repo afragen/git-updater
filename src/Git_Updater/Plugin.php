@@ -226,6 +226,15 @@ class Plugin {
 					: null;
 			}
 
+			/**
+			 * Filter config to fix repo slug.
+			 * Eg change Gist ID to slug.
+			 *
+			 * @since 10.0.0
+			 * @param array $plugin Plugin meta array.
+			 */
+			$git_plugin = apply_filters( 'gu_fix_repo_slug', $git_plugin );
+
 			$git_plugins[ $git_plugin['slug'] ] = (object) $git_plugin;
 		}
 
@@ -239,15 +248,6 @@ class Plugin {
 	public function get_remote_plugin_meta() {
 		$plugins = [];
 		foreach ( (array) $this->config as $plugin ) {
-			/**
-			 * Filter config to fix repo slug.
-			 * Eg change Gist ID to slug.
-			 *
-			 * @since 10.0.0
-			 * @param \stdClass $this->config Configuration object.
-			 * @param \stcClass $plugin       Plugin object.
-			 */
-			$this->config = apply_filters( 'gu_fix_repo_slug', $this->config, $plugin );
 			/**
 			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
 			 *

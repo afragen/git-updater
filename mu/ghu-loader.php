@@ -15,7 +15,7 @@
  * Version:           3.0.0
  * Author:            Andy Fragen
  * License:           MIT
-* GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
+ * GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
  * Requires PHP:      7.0
  */
 
