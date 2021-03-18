@@ -584,6 +584,7 @@ class Theme {
 							'</a>',
 						);
 						printf(
+							/* translators: %s: opening/closing paragraph and italic tags */
 							esc_html__( '%1$sAutomatic update is unavailable for this theme.%2$s', 'github-updater' ),
 							'<p><i>',
 							'</i></p>'
