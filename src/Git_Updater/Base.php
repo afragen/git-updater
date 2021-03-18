@@ -8,12 +8,12 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater;
+namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\Traits\GHU_Trait;
-use Fragen\GitHub_Updater\Traits\Basic_Auth_Loader;
-use Fragen\GitHub_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
+use Fragen\Git_Updater\API\Language_Pack_API;
 
 /*
  * Exit if called directly.

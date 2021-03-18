@@ -8,11 +8,11 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater\Traits;
+namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
-use Fragen\GitHub_Updater\API\GitHub_API;
-use Fragen\GitHub_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\API\GitHub_API;
+use Fragen\Git_Updater\API\Language_Pack_API;
 
 /*
  * Exit if called directly.

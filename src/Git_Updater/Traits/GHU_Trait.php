@@ -8,7 +8,7 @@
  * @package   github-updater
  */
 
-namespace Fragen\GitHub_Updater\Traits;
+namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
 
@@ -48,7 +48,7 @@ trait GHU_Trait {
 	 * Load site options.
 	 */
 	public function load_options() {
-		$base           = Singleton::get_instance( 'Fragen\GitHub_Updater\Base', $this );
+		$base           = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this );
 		$base::$options = get_site_option( 'github_updater', [] );
 		$base::$options = $this->modify_options( $base::$options );
 	}
@@ -317,8 +317,8 @@ trait GHU_Trait {
 	 * @return array $gits
 	 */
 	public function get_running_git_servers() {
-		$plugins = Singleton::get_instance( 'Fragen\GitHub_Updater\Plugin', $this )->get_plugin_configs();
-		$themes  = Singleton::get_instance( 'Fragen\GitHub_Updater\Theme', $this )->get_theme_configs();
+		$plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map(
@@ -355,8 +355,8 @@ trait GHU_Trait {
 			return empty( $cache );
 		}
 		$repos = array_merge(
-			Singleton::get_instance( 'Fragen\GitHub_Updater\Plugin', $this )->get_plugin_configs(),
-			Singleton::get_instance( 'Fragen\GitHub_Updater\Theme', $this )->get_theme_configs()
+			Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs(),
+			Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
 		);
 		foreach ( $repos as $git_repo ) {
 			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
@@ -645,7 +645,7 @@ trait GHU_Trait {
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
 			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
-			Singleton::get_instance( 'Fragen\GitHub_Updater\Messages', $this )->create_error_message( $error );
+			Singleton::get_instance( 'Fragen\Git_Updater\Messages', $this )->create_error_message( $error );
 		}
 	}
 
