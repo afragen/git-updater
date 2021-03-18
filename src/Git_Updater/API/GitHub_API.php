@@ -363,14 +363,14 @@ class GitHub_API extends API implements API_Interface {
 	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'github-updater' ),
+			esc_html__( 'GitHub Personal Access Token', 'git-updater' ),
 			[ $this, 'print_section_github_access_token' ],
 			'github_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'github-updater' ),
+			esc_html__( 'GitHub.com Access Token', 'git-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'github_updater_github_install_settings',
 			'github_access_token',
@@ -386,7 +386,7 @@ class GitHub_API extends API implements API_Interface {
 		if ( $auth_required['github_private'] || $auth_required['github_enterprise'] ) {
 			add_settings_section(
 				'github_id',
-				esc_html__( 'GitHub Private Settings', 'github-updater' ),
+				esc_html__( 'GitHub Private Settings', 'git-updater' ),
 				[ $this, 'print_section_github_info' ],
 				'github_updater_github_install_settings'
 			);
@@ -413,14 +413,14 @@ class GitHub_API extends API implements API_Interface {
 	 * Print the GitHub text.
 	 */
 	public function print_section_github_info() {
-		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'github-updater' );
+		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'git-updater' );
 	}
 
 	/**
 	 * Print the GitHub Personal Access Token text.
 	 */
 	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'github-updater' );
+		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
 	}
 
 	/**
@@ -431,7 +431,7 @@ class GitHub_API extends API implements API_Interface {
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
 			'github_access_token',
-			esc_html__( 'GitHub Access Token', 'github-updater' ),
+			esc_html__( 'GitHub Access Token', 'git-updater' ),
 			[ $this, 'github_access_token' ],
 			'github_updater_install_' . $type,
 			$type
@@ -445,7 +445,7 @@ class GitHub_API extends API implements API_Interface {
 		add_filter(
 			'github_updater_add_settings_subtabs',
 			function ( $subtabs ) {
-				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'github-updater' ) ] );
+				return array_merge( $subtabs, [ 'github' => esc_html__( 'GitHub', 'git-updater' ) ] );
 			}
 		);
 	}
@@ -459,7 +459,7 @@ class GitHub_API extends API implements API_Interface {
 			<input class="github_setting" type="password" style="width:50%;" id="github_access_token" name="github_access_token" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'github-updater' ); ?>
+				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'git-updater' ); ?>
 			</span>
 		</label>
 		<?php

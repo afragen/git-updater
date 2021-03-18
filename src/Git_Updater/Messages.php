@@ -47,7 +47,7 @@ class Messages {
 
 		if (
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			( ( ! isset( $_GET['page'] ) || 'github-updater' !== $_GET['page'] )
+			( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
 			&& in_array( $pagenow, $settings_pages, true ) )
 			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
 		) {
@@ -110,20 +110,20 @@ class Messages {
 				<div data-dismissible="403-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e( 'Git Updater Error Code:', 'github-updater' );
+						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
 						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
 						<?php
 						printf(
 							/* translators: %s: wait time */
-							esc_html__( 'GitHub API&#8217;s rate limit will reset in %s minutes.', 'github-updater' ),
+							esc_html__( 'GitHub API&#8217;s rate limit will reset in %s minutes.', 'git-updater' ),
 							esc_attr( $repo['wait'] )
 						);
 						echo '<br>';
 						printf(
 							/* translators: %s: GitHub personal access token URL */
-							wp_kses_post( __( 'It looks like you are running into GitHub API rate limits. Be sure and configure a <a href="%s">Personal Access Token</a> to avoid this issue.', 'github-updater' ) ),
+							wp_kses_post( __( 'It looks like you are running into GitHub API rate limits. Be sure and configure a <a href="%s">Personal Access Token</a> to avoid this issue.', 'git-updater' ) ),
 							esc_url( 'https://help.github.com/articles/creating-an-access-token-for-command-line-use/' )
 						);
 						?>
@@ -151,11 +151,11 @@ class Messages {
 				<div data-dismissible="401-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
-						esc_html_e( 'Git Updater Error Code:', 'github-updater' );
+						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
 						echo ' ' . esc_attr( $repo['code'] );
 						?>
 						<br>
-						<?php esc_html_e( 'There is probably an access token or password error on the Git Updater Settings page.', 'github-updater' ); ?>
+						<?php esc_html_e( 'There is probably an access token or password error on the Git Updater Settings page.', 'git-updater' ); ?>
 					</p>
 				</div>
 				<?php
@@ -171,7 +171,7 @@ class Messages {
 		<div class="notice-error notice">
 			<p>
 				<?php
-				esc_html_e( 'Git Updater Error Code:', 'github-updater' );
+				esc_html_e( 'Git Updater Error Code:', 'git-updater' );
 				echo ' ' . esc_html( self::$error_message );
 				?>
 			</p>
@@ -186,9 +186,9 @@ class Messages {
 		?>
 		<div class="notice-info notice is-dismissible">
 			<p>
-				<?php esc_html_e( 'Git Updater Information', 'github-updater' ); ?>
+				<?php esc_html_e( 'Git Updater Information', 'git-updater' ); ?>
 				<br>
-				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'github-updater' ); ?>
+				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'git-updater' ); ?>
 			</p>
 		</div>
 		<?php

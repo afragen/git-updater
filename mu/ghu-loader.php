@@ -102,7 +102,7 @@ class MU_Loader {
 			unset( $actions['deactivate'] );
 		}
 
-		return array_merge( [ 'mu-plugin' => esc_html__( 'Activated as mu-plugin', 'github-updater' ) ], $actions );
+		return array_merge( [ 'mu-plugin' => esc_html__( 'Activated as mu-plugin', 'git-updater' ) ], $actions );
 	}
 }
 

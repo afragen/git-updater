@@ -441,7 +441,7 @@ class Plugin {
 				// Skip on RESTful updating.
 				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['plugin'] )
-					&& 'github-updater-update' === $_GET['action']
+					&& 'git-updater-update' === $_GET['action']
 					&& $response['slug'] === $_GET['plugin']
 				) {
 					continue;
