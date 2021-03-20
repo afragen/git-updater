@@ -126,7 +126,8 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		if ( ! apply_filters( 'github_updater_hide_settings', false )
+		apply_filters_deprecated( 'github_updater_hide_settings', [ false ], '10.0.0', 'gu_hide_settings' );
+		if ( ! apply_filters( 'gu_hide_settings', false )
 			&& Singleton::get_instance( 'Init', $this )->can_update()
 		) {
 			Singleton::get_instance( 'Settings', $this )->run();
@@ -153,8 +154,10 @@ class Base {
 			 * Fires later in cycle when Refreshing Cache.
 			 *
 			 * @since 6.0.0
+			 * @since 10.0.0
 			 */
-			do_action( 'ghu_refresh_transients' );
+			do_action_deprecated( 'ghu_refresh_transients', [], '10.0.0', 'gu_refresh_transients' );
+			do_action( 'gu_refresh_transients' );
 		}
 
 		$this->get_meta_plugins();
@@ -190,7 +193,7 @@ class Base {
 	}
 
 	/**
-	 * Allows developers to use 'github_updater_set_options' hook to set access tokens or other settings.
+	 * Allows developers to use 'gu_set_options' hook to set access tokens or other settings.
 	 * Saves results of filter hook to self::$options.
 	 * Single plugin/theme should not be using both hooks.
 	 *
@@ -199,12 +202,8 @@ class Base {
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 */
 	public function set_options_filter() {
-		$config = apply_filters( 'github_updater_set_options', [] );
-		if ( empty( $config ) ) {
-			$config = function_exists( 'apply_filters_deprecated' )
-				? apply_filters_deprecated( 'github_updater_token_distribution', [ null ], '6.1.0', 'github_updater_set_options' )
-				: apply_filters( 'github_updater_token_distribution', [] );
-		}
+		apply_filters_deprecated( 'github_updater_set_options', [ null ], '6.1.0', 'gu_set_options' );
+		$config = apply_filters( 'gu_set_options', null );
 
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
@@ -266,7 +265,10 @@ class Base {
 	 */
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
-		if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
+		apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+		if ( apply_filters( 'gu_disable_wpcron', false )
+			&& ! Singleton::get_instance( 'Init', $this )->can_update()
+		) {
 			return;
 		}
 
@@ -488,17 +490,14 @@ class Base {
 		 * to use as a download link during a branch switch.
 		 *
 		 * @since 8.6.0
+		 * @since 10.0.0
 		 *
 		 * @param string    $download_link Download URL.
 		 * @param /stdClass $repo
 		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
-		$download_link = apply_filters_deprecated(
-			'github_updater_set_rollback_package',
-			[ $download_link, $repo, $this->tag ],
-			'8.8.0',
-			'github_updater_post_construct_download_link'
-		);
+		apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $repo, $this->tag ], '10.0.0', 'gu_post_construct_download_link' );
+		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $repo, $this->tag );
 
 		$repo->download_link = $download_link;
 		$rollback            = [
@@ -640,8 +639,10 @@ class Base {
 		 * Removes all branches from the branch switcher leaving only the tags.
 		 *
 		 * @since 9.9.1
+		 * @since 10.0.0
 		 */
-		$data['branches'] = $data['release_asset'] && apply_filters( 'github_updater_no_release_asset_branches', false ) ? [] : $data['branches'];
+		apply_filters_deprecated( 'github_updater_no_release_asset_branches', [ false ], '10.0.0', 'gu_no_release_asset_branches' );
+		$data['branches'] = $data['release_asset'] && apply_filters( 'gu_no_release_asset_branches', false ) ? [] : $data['branches'];
 
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
@@ -663,9 +664,11 @@ class Base {
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 			 *
 			 * @since 9.6.0
+			 * @since 10.0.0
 			 * @param int Number of rollbacks. Zero implies value not set.
 			 */
-			$num_rollbacks = absint( apply_filters( 'github_updater_number_rollbacks', 0 ) );
+			apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' );
+			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
 			// Still only return last tag if using release assets.
 			$rollback = 0 === $num_rollbacks || $data['release_asset']
@@ -678,8 +681,10 @@ class Base {
 				 * Must return an array.
 				 *
 				 * @since 9.9.2
+				 * @since 10.0.0
 				 */
-				$release_asset_rollback = apply_filters( 'github_updater_release_asset_rollback', $rollback, $file );
+				apply_filters_deprecated( 'github_updater_release_asset_rollback', [ $rollback, $file ], '10.0.0', 'gu_release_asset_rollback' );
+				$release_asset_rollback = apply_filters( 'gu_release_asset_rollback', $rollback, $file );
 				if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
 					$rollback = $release_asset_rollback;
 				}
@@ -768,8 +773,10 @@ class Base {
 		 *
 		 * @see Git Updater's Plugin or Theme class for definition.
 		 * @link https://github.com/afragen/github-updater-additions
+		 * @since 10.0.0
 		 */
-		$additions = apply_filters( 'github_updater_additions', null, [], $type );
+		apply_filters_deprecated( 'github_updater_additions', [ null, [], $type ], '10.0.0', 'gu_additions' );
+		$additions = apply_filter( 'gu_additions', null, [], $type );
 		foreach ( (array) $additions as $slug => $headers ) {
 			if ( $slug === $file ) {
 				$file_data = array_merge( $file_data, $headers );

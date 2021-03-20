@@ -135,6 +135,7 @@ class Plugin {
 		 * Filter to add plugins not containing appropriate header line.
 		 *
 		 * @since   5.4.0
+		 * @since   10.0.0
 		 * @access  public
 		 *
 		 * @param array $additions Listing of plugins to add.
@@ -142,7 +143,8 @@ class Plugin {
 		 * @param array $plugins   Listing of all plugins.
 		 * @param string 'plugin'   Type being passed.
 		 */
-		$additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
+		apply_filters_deprecated( 'github_updater_additions', [ null, $plugins, 'plugin' ], '10.0.0', 'gu_additions' );
+		$additions = apply_filters( 'gu_additions', null, $plugins, 'plugin' );
 		$plugins   = array_merge( $plugins, (array) $additions );
 
 		foreach ( (array) $plugins as $slug => $plugin ) {
@@ -257,7 +259,8 @@ class Plugin {
 			 * @param bool
 			 */
 			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
-				|| apply_filters( 'github_updater_disable_wpcron', false )
+				|| apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' )
+				|| apply_filters( 'gu_disable_wpcron', false )
 			) {
 				$this->base->get_remote_repo_meta( $plugin );
 			} else {
@@ -277,7 +280,8 @@ class Plugin {
 		if ( $schedule_event && ! empty( $plugins ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_plugin' )
 			&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_plugin' )
-			&& ! apply_filters( 'github_updater_disable_wpcron', false )
+			&& ! apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' )
+			&& ! apply_filters( 'gu_disable_wpcron', false )
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_plugin', [ $plugins ] );
 			}
@@ -480,9 +484,11 @@ class Plugin {
 				 * Filter to return array of overrides to dot org.
 				 *
 				 * @since 8.5.0
+				 * @since 10.0.0
 				 * @return array
 				 */
-				$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+				apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' );
+				$overrides = apply_filters( 'gu_override_dot_org', [] );
 				if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
 					unset( $transient->response[ $plugin->file ] );
 				}

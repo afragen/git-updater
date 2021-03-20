@@ -97,12 +97,12 @@ class API {
 	 */
 	public function settings_hook( $git ) {
 		add_action(
-			'github_updater_add_settings',
+			'gu_add_settings',
 			function ( $auth_required ) use ( $git ) {
 				$git->add_settings( $auth_required );
 			}
 		);
-		add_filter( 'github_updater_add_repo_setting_field', [ $this, 'add_setting_field' ], 10, 2 );
+		add_filter( 'gu_add_repo_setting_field', [ $this, 'add_setting_field' ], 10, 2 );
 	}
 
 	/**
@@ -357,9 +357,11 @@ class API {
 		 * Filters the return value of exit_no_update.
 		 *
 		 * @since 6.0.0
+		 * @since 10.0.0
 		 * @return bool `true` will exit this function early, default will not.
 		 */
-		if ( apply_filters( 'ghu_always_fetch_update', false ) ) {
+		apply_filters_deprecated( 'ghu_always_fetch_update', [ false ], '10.0.0', 'gu_always_fetch_update' );
+		if ( apply_filters( 'gu_always_fetch_update', false ) ) {
 			return false;
 		}
 

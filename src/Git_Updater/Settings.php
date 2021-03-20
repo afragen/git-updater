@@ -136,10 +136,11 @@ class Settings {
 		 * Filter settings tabs.
 		 *
 		 * @since 8.0.0
-		 *
+		 * @since 10.0.0
 		 * @param array $tabs Array of default tabs.
 		 */
-		return apply_filters( 'github_updater_add_settings_tabs', $tabs );
+		apply_filters_deprecated( 'github_updater_add_settings_tabs', [ $tabs ], '10.0.0', '' );
+		return apply_filters( 'gu_add_settings_tabs', $tabs );
 	}
 
 	/**
@@ -158,12 +159,14 @@ class Settings {
 		 * Filter subtabs to be able to add subtab from git API class.
 		 *
 		 * @since 8.0.0
+		 * @since 10.0.0
 		 *
 		 * @param array $ghu_subtabs Array of added subtabs.
 		 *
 		 * @return array $subtabs Array of subtabs.
 		 */
-		$ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
+		apply_filters_deprecated( 'github_updater_add_settings_subtabs', [ $ghu_subtabs ], '10.0.0', 'gu_add_settings_subtabs' );
+		$ghu_subtabs = apply_filters( 'gu_add_settings_subtabs', $ghu_subtabs );
 
 		foreach ( $gits as $git ) {
 			if ( array_key_exists( $git, $ghu_subtabs ) ) {
@@ -271,12 +274,14 @@ class Settings {
 			 * Action hook to add admin page data to appropriate $tab.
 			 *
 			 * @since 8.0.0
+			 * @since 10.0.0
 			 *
 			 * @param string $tab    Name of tab.
 			 * @param string $action Save action for appropriate WordPress installation.
 			 *                       Single site or Multisite.
 			 */
-			do_action( 'github_updater_add_admin_page', $tab, $action );
+			do_action_deprecated( 'github_updater_add_admin_page', [ $tab, $action ], 'gu_add_admin_page' );
+			do_action( 'gu_add_admin_page', $tab, $action );
 			?>
 		</div>
 		<?php
@@ -365,7 +370,8 @@ class Settings {
 		 *
 		 * @param array $auth_required Array containing authorization needs of git APIs.
 		 */
-		do_action( 'github_updater_add_settings', static::$auth_required );
+		do_action_deprecated( 'github_updater_add_settings', [ static::$auth_required ], '10.0.0', 'gu_add_settings' );
+		do_action( 'gu_add_settings', static::$auth_required );
 	}
 
 	/**
@@ -396,7 +402,8 @@ class Settings {
 			$setting_field['id']    = $token->slug;
 			$setting_field['title'] = $type . esc_html( $token->name );
 
-			$repo_setting_field = apply_filters( 'github_updater_add_repo_setting_field', [], $token, $token->git );
+			apply_filters_deprecated( 'github_updater_add_repo_setting_field', [ [], $token, $token->git ], '10.0.0', 'gu_add_repo_setting_field' );
+			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
 
 			if ( empty( $repo_setting_field ) ) {
 				continue;
@@ -507,9 +514,11 @@ class Settings {
 		 * Filter to return array of overrides to dot org.
 		 *
 		 * @since 8.5.0
+		 * @since 10.0.0
 		 * @return array
 		 */
-		$overrides = apply_filters( 'github_updater_override_dot_org', [] );
+		apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' );
+		$overrides = apply_filters( 'gu_override_dot_org', [] );
 
 		if ( ! empty( $overrides ) ) {
 			echo '<h4>' . esc_html__( 'Overridden Plugins and Themes', 'git-updater' ) . '</h4>';
@@ -580,8 +589,10 @@ class Settings {
 		 * Save $options in add-on classes.
 		 *
 		 * @since 8.0.0
+		 * @since 10.0.0
 		 */
-		do_action( 'github_updater_update_settings', $_POST );
+		do_action_deprecated( 'github_updater_update_settings', [ $_POST ], '10.0.0', 'gu_update_settings' );
+		do_action( 'gu_update_settings', $_POST );
 		// phpcs:enable
 
 		$this->redirect_on_save();
@@ -630,9 +641,11 @@ class Settings {
 		 * Filter to add to $option_page array.
 		 *
 		 * @since 8.0.0
+		 * @since 10.0.0
 		 * @return array
 		 */
-		$option_page = apply_filters( 'github_updater_save_redirect', [ 'git_updater' ] );
+		apply_filters_deprecated( 'github_updater_save_redirect', [ [ 'git_updater' ] ], '10.0.0', 'gu_save_redirect' );
+		$option_page = apply_filters( 'gu_save_redirect', [ 'git_updater' ] );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
