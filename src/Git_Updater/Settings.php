@@ -110,7 +110,7 @@ class Settings {
 		}
 
 		if ( isset( self::$options['bypass_background_processing'] ) ) {
-			add_filter( 'github_updater_disable_wpcron', '__return_true' );
+			add_filter( 'gu_disable_wpcron', '__return_true' );
 		}
 
 		/**
