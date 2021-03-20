@@ -501,7 +501,7 @@ class Settings {
 	/**
 	 * Display plugins/themes that are overridden using the filter hook.
 	 *
-	 * @uses `github_updater_override_dot_org` filter hook
+	 * @uses `gu_override_dot_org` filter hook
 	 * @return void
 	 */
 	private function display_dot_org_overrides() {

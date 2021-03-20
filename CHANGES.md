@@ -20,6 +20,7 @@
   * add filter `gu_fix_repo_slug`
   * add filter `gu_parse_api_branches`
   * add filter `gu_running_git_servers`
+* remove deprecated override dot org constant
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
