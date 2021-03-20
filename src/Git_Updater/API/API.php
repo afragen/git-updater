@@ -159,7 +159,7 @@ class API {
 	 */
 	public function add_install_fields( $git ) {
 		add_action(
-			'github_updater_add_install_settings_fields',
+			'gu_add_install_settings_fields',
 			function ( $type ) use ( $git ) {
 				$git->add_install_settings_fields( $type );
 			}
