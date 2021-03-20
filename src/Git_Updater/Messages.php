@@ -67,7 +67,8 @@ class Messages {
 					);
 					break;
 				case 'waiting':
-					if ( ! apply_filters( 'github_updater_disable_wpcron', false ) ) {
+					apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+					if ( ! apply_filters( 'gu_disable_wpcron', false ) ) {
 						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 					}
 					// no break.

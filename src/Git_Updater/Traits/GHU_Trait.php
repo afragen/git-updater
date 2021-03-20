@@ -116,13 +116,15 @@ trait GHU_Trait {
 		 * Allow filtering of cache timeout for repo information.
 		 *
 		 * @since 8.7.1
+		 * @since 10.0.0
 		 *
 		 * @param string      $timeout  Timeout value used with strtotime().
 		 * @param string      $id       Data Identifier.
 		 * @param mixed       $response Data to be stored.
 		 * @param string|bool $repo     Repo name or false.
 		 */
-		$timeout = apply_filters( 'github_updater_repo_cache_timeout', $timeout, $id, $response, $repo );
+		apply_filters_deprecated( 'github_updater_repo_cache_timeout', [ $timeout, $id, $response, $repo ], '10.0.0', 'gu_repo_cache_timeout' );
+		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
 		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
@@ -185,10 +187,12 @@ trait GHU_Trait {
 		 * Filter $remote_is_newer if you use another method to test for updates.
 		 *
 		 * @since 8.7.0
+		 * @since 10.0.0
 		 * @param bool      $remote_is_newer
 		 * @param \stdClass $type            Plugin/Theme data.
 		 */
-		$remote_is_newer = apply_filters( 'github_updater_remote_is_newer', $remote_is_newer, $type );
+		apply_filters_deprecated( 'github_updater_remote_is_newer', [ $remote_is_newer, $type ], '10.0.0', 'gu_remote_is_newer' );
+		$remote_is_newer = apply_filters( 'gu_remote_is_newer', $remote_is_newer, $type );
 
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
@@ -253,10 +257,12 @@ trait GHU_Trait {
 		 * Filter update to override dot org.
 		 *
 		 * @since 8.5.0
+		 * @since 10.0.0
 		 *
 		 * @return bool
 		 */
-		$override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
+		apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' );
+		$override = in_array( $transient_key, apply_filters( 'gu_override_dot_org', [] ), true );
 		$override = $override || $this->deprecate_override_constant();
 
 		// Set $override if set in Skip Updates plugin.
@@ -771,7 +777,8 @@ trait GHU_Trait {
 		);
 
 		// Check if filter set elsewhere.
-		if ( ! isset( $options['bypass_background_processing'] ) && apply_filters( 'github_updater_disable_wpcron', false ) ) {
+		apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+		if ( ! isset( $options['bypass_background_processing'] ) && apply_filters( 'gu_disable_wpcron', false ) ) {
 			$options['bypass_background_processing'] = '-1';
 		}
 
