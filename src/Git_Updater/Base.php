@@ -776,7 +776,7 @@ class Base {
 		 * @since 10.0.0
 		 */
 		apply_filters_deprecated( 'github_updater_additions', [ null, [], $type ], '10.0.0', 'gu_additions' );
-		$additions = apply_filter( 'gu_additions', null, [], $type );
+		$additions = apply_filters( 'gu_additions', null, [], $type );
 		foreach ( (array) $additions as $slug => $headers ) {
 			if ( $slug === $file ) {
 				$file_data = array_merge( $file_data, $headers );

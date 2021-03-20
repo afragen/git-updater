@@ -263,7 +263,6 @@ trait GHU_Trait {
 		 */
 		apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' );
 		$override = in_array( $transient_key, apply_filters( 'gu_override_dot_org', [] ), true );
-		$override = $override || $this->deprecate_override_constant();
 
 		// Set $override if set in Skip Updates plugin.
 		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
@@ -277,23 +276,6 @@ trait GHU_Trait {
 		}
 
 		return ! $dot_org_master || $override;
-	}
-
-	/**
-	 * Deprecated dot org override constant.
-	 *
-	 * @deprecated 8.5.0
-	 * @return bool
-	 */
-	public function deprecate_override_constant() {
-		if ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG constant deprecated. Use `github_updater_override_dot_org` filter hook.' );
-
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
