@@ -776,6 +776,7 @@ class Theme {
 				$transient->response[ $theme->slug ] = $this->base->set_rollback_transient( 'theme', $theme );
 			}
 		}
+		update_site_option( 'git_updater_theme_updates', $transient->response );
 
 		return $transient;
 	}

@@ -501,6 +501,7 @@ class Plugin {
 				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
+		update_site_option( 'git_updater_plugin_updates', $transient->response );
 
 		return $transient;
 	}
