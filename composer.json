@@ -43,7 +43,7 @@
   },
   "scripts": {
     "post-update-cmd": [
-      "wp i18n make-pot . languages/github-updater.pot"
+      "wp i18n make-pot . languages/git-updater.pot"
     ]
   }
 }

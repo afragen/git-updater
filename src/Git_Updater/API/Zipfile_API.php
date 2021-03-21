@@ -64,7 +64,7 @@ class Zipfile_API {
 	 * @return mixed $install
 	 */
 	public function remote_install( $headers, $install ) {
-		$install['download_link']               = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];
+		$install['download_link']            = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];
 		$install['git_updater_install_repo'] = $install['zipfile_slug'];
 
 		return $install;
