@@ -231,9 +231,9 @@ trait Basic_Auth_Loader {
 
 		// Set for Remote Install.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$type = isset( $_POST['github_updater_api'], $_POST['github_updater_repo'] )
-			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['github_updater_repo'] ) ) ) )
-			? sanitize_text_field( wp_unslash( $_POST['github_updater_api'] ) )
+		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
+			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
+			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
 			: $type;
 		// phpcs:enable
 

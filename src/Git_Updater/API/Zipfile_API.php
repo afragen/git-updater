@@ -35,7 +35,7 @@ class Zipfile_API {
 			'zipfile_slug',
 			esc_html__( 'Zipfile Slug', 'git-updater' ),
 			[ $this, 'zipfile_slug' ],
-			'github_updater_install_' . $type,
+			'git_updater_install_' . $type,
 			$type
 		);
 	}
@@ -65,7 +65,7 @@ class Zipfile_API {
 	 */
 	public function remote_install( $headers, $install ) {
 		$install['download_link']               = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];
-		$install['github_updater_install_repo'] = $install['zipfile_slug'];
+		$install['git_updater_install_repo'] = $install['zipfile_slug'];
 
 		return $install;
 	}
