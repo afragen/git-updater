@@ -632,7 +632,7 @@ trait GHU_Trait {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
-			$error     = new \WP_Error( 'github_updater_cron_error', $error_msg );
+			$error     = new \WP_Error( 'git_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Fragen\Git_Updater\Messages', $this )->create_error_message( $error );
 		}
 	}

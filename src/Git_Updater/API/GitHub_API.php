@@ -487,7 +487,7 @@ class GitHub_API extends API implements API_Interface {
 			$github_com = false;
 		}
 
-		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/zipball/{$install['github_updater_branch']}";
+		$install['download_link'] = "{$base}/repos/{$install['git_updater_repo']}/zipball/{$install['git_updater_branch']}";
 
 		// If asset is entered install it.
 		if ( false !== stripos( $headers['uri'], 'releases/download' ) ) {
