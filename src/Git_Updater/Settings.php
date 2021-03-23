@@ -363,6 +363,19 @@ class Settings {
 			]
 		);
 
+		add_settings_field(
+			'deprecated_error_logging',
+			null,
+			[ $this, 'token_callback_checkbox' ],
+			'git_updater_install_settings',
+			'git_updater_settings',
+			[
+				'id'    => 'deprecated_error_logging',
+				'title' => esc_html__( 'Display `deprecated hook` messaging in debug.log', 'git-updater' ),
+				'class' => defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : 'hidden',
+			]
+		);
+
 		/**
 		 * Hook to add Git API settings.
 		 *
