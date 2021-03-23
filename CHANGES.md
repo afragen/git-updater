@@ -21,6 +21,8 @@
   * add filter `gu_parse_api_branches`
   * add filter `gu_running_git_servers`
 * remove deprecated override dot org constant
+* added setting to display `_deprecated_hook()` data in debug.log
+* skip `_deprecated_hook()` `trigger_error()` in development environment
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
