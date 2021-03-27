@@ -153,19 +153,10 @@ class GitHub_API extends API implements API_Interface {
 
 		$download_link = $download_link_base . $endpoint;
 
-		/**
-		 * Filter download link so developers can point to specific ZipFile
-		 * to use as a download link during a branch switch.
-		 *
-		 * @since 8.8.0
-		 * @since 10.0.0
-		 *
-		 * @param string    $download_link Download URL.
-		 * @param /stdClass $this->type    Repository object.
-		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
-		 */
-		apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $this->type, $branch_switch ], '10.0.0', 'gu_post_construct_download_link' );
-		return apply_filters( 'gu_post_construct_download_link', $download_link, $this->type, $branch_switch );
+		$download_link = apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $this->type, $branch_switch ], '10.0.0', 'gu_post_construct_download_link' );
+		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $this->type, $branch_switch );
+
+		return $download_link;
 	}
 
 	/**

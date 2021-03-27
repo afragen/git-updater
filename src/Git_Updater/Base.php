@@ -30,6 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class Base {
+
 	use GHU_Trait, Basic_Auth_Loader;
 
 	/**
@@ -126,10 +127,22 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		apply_filters_deprecated( 'github_updater_hide_settings', [ false ], '10.0.0', 'gu_hide_settings' );
-		if ( ! apply_filters( 'gu_hide_settings', false )
-			&& Singleton::get_instance( 'Init', $this )->can_update()
-		) {
+		/**
+		 * Filters whether to hide settings.
+		 *
+		 * @since 10.0.0
+		 * @return bool
+		 */
+		$hide_settings = (bool) apply_filters( 'gu_hide_settings', false );
+
+		/**
+		 * Filters whether to hide settings.
+		 *
+		 * @return bool
+		 */
+		$hide_settings = $hide_settings ?: (bool) apply_filters_deprecated( 'github_updater_hide_settings', [ false ], '10.0.0', 'gu_hide_settings' );
+
+		if ( ! $hide_settings && Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
 		}
 
@@ -154,9 +167,14 @@ class Base {
 			 * Fires later in cycle when Refreshing Cache.
 			 *
 			 * @since 6.0.0
-			 * @since 10.0.0
 			 */
 			do_action_deprecated( 'ghu_refresh_transients', [], '10.0.0', 'gu_refresh_transients' );
+
+			/**
+			 * Fires later in cycle when Refreshing Cache.
+			 *
+			 * @since 10.0.0
+			 */
 			do_action( 'gu_refresh_transients' );
 		}
 
@@ -202,8 +220,21 @@ class Base {
 	 * e.g.  array( 'repo-name' => 'access_token' );
 	 */
 	public function set_options_filter() {
-		apply_filters_deprecated( 'github_updater_set_options', [ null ], '6.1.0', 'gu_set_options' );
+		/**
+		 * Filter the plugin options.
+		 *
+		 * @since 10.0.0
+		 *
+		 * @return null|array
+		 */
 		$config = apply_filters( 'gu_set_options', null );
+
+		/**
+		 * Filter the plugin options.
+		 *
+		 * @return null|array
+		 */
+		$config = null === $config ? apply_filters_deprecated( 'github_updater_set_options', [ null ], '6.1.0', 'gu_set_options' ) : $config;
 
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
@@ -265,10 +296,24 @@ class Base {
 	 */
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
-		apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
-		if ( apply_filters( 'gu_disable_wpcron', false )
-			&& ! Singleton::get_instance( 'Init', $this )->can_update()
-		) {
+
+		/**
+		 * Exit if bypassing wp-cron.
+		 *
+		 * @since 10.0.0
+		 *
+		 * @return bool
+		 */
+		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
+
+		/**
+		 * Exit if bypassing wp-cron.
+		 *
+		 * @return bool
+		 */
+		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+
+		if ( $disable_wp_cron && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
 			return;
 		}
 
@@ -490,13 +535,23 @@ class Base {
 		 * to use as a download link during a branch switch.
 		 *
 		 * @since 8.6.0
+		 *
+		 * @param string    $download_link Download URL.
+		 * @param /stdClass $repo
+		 * @param string    $this->tag     Branch or tag for rollback.
+		 */
+		$download_link = apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $repo, $this->tag ], '10.0.0', 'gu_post_construct_download_link' );
+
+		/**
+		 * Filter download link so developers can point to specific ZipFile
+		 * to use as a download link during a branch switch.
+		 *
 		 * @since 10.0.0
 		 *
 		 * @param string    $download_link Download URL.
 		 * @param /stdClass $repo
 		 * @param string    $this->tag     Branch or tag for rollback.
 		 */
-		apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $repo, $this->tag ], '10.0.0', 'gu_post_construct_download_link' );
 		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $repo, $this->tag );
 
 		$repo->download_link = $download_link;
@@ -634,15 +689,28 @@ class Base {
 		if ( $data['release_asset'] ) {
 			unset( $data['branches'][ $data['primary_branch'] ] );
 		}
+
+		/**
+		 * Filter out branches for release assets if desired.
+		 * Removes all branches from the branch switcher leaving only the tags.
+		 *
+		 * @since 10.0.0
+		 *
+		 * @return bool
+		 */
+		$no_release_asset_branches = (bool) apply_filters( 'gu_no_release_asset_branches', false );
+
 		/**
 		 * Filter out branches for release assets if desired.
 		 * Removes all branches from the branch switcher leaving only the tags.
 		 *
 		 * @since 9.9.1
-		 * @since 10.0.0
+		 *
+		 * @return bool
 		 */
-		apply_filters_deprecated( 'github_updater_no_release_asset_branches', [ false ], '10.0.0', 'gu_no_release_asset_branches' );
-		$data['branches'] = $data['release_asset'] && apply_filters( 'gu_no_release_asset_branches', false ) ? [] : $data['branches'];
+		$no_release_asset_branches = $no_release_asset_branches ?: (bool) apply_filters_deprecated( 'github_updater_no_release_asset_branches', [ false ], '10.0.0', 'gu_no_release_asset_branches' );
+
+		$data['branches'] = $data['release_asset'] && $no_release_asset_branches ? [] : $data['branches'];
 
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
@@ -663,12 +731,18 @@ class Base {
 			/**
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 			 *
-			 * @since 9.6.0
 			 * @since 10.0.0
 			 * @param int Number of rollbacks. Zero implies value not set.
 			 */
-			apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' );
 			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
+
+			/**
+			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
+			 *
+			 * @since 9.6.0
+			 * @param int Number of rollbacks. Zero implies value not set.
+			 */
+			$num_rollbacks = 0 === $num_rollbacks ? absint( apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' ) ) : $num_rollbacks;
 
 			// Still only return last tag if using release assets.
 			$rollback = 0 === $num_rollbacks || $data['release_asset']
@@ -678,13 +752,22 @@ class Base {
 			if ( $data['release_asset'] ) {
 				/**
 				 * Filter release asset rollbacks.
-				 * Must return an array.
+				 *
+				 * @since 10.0.0
+				 *
+				 * @return array
+				 */
+				$release_asset_rollback = apply_filters( 'gu_release_asset_rollback', $rollback, $file );
+
+				/**
+				 * Filter release asset rollbacks.
 				 *
 				 * @since 9.9.2
-				 * @since 10.0.0
+				 *
+				 * @return array
 				 */
-				apply_filters_deprecated( 'github_updater_release_asset_rollback', [ $rollback, $file ], '10.0.0', 'gu_release_asset_rollback' );
-				$release_asset_rollback = apply_filters( 'gu_release_asset_rollback', $rollback, $file );
+				$release_asset_rollback = apply_filters_deprecated( 'github_updater_release_asset_rollback', [ $rollback, $file ], '10.0.0', 'gu_release_asset_rollback' );
+
 				if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
 					$rollback = $release_asset_rollback;
 				}
@@ -769,14 +852,35 @@ class Base {
 		$file_data = file_exists( $filepath ) ? get_file_data( $filepath, $git['headers'] ) : [];
 
 		/**
+		 * Filter to add plugins not containing appropriate header line.
 		 * Insert repositories added via Git Updater Additions plugin.
 		 *
-		 * @see Git Updater's Plugin or Theme class for definition.
-		 * @link https://github.com/afragen/github-updater-additions
-		 * @since 10.0.0
+		 * @since   10.0.0
+		 * @access  public
+		 * @link https://github.com/afragen/git-updater-additions
+		 *
+		 * @param array        Listing of plugins/themes to add.
+		 *                     Default null.
+		 * @param array        Listing of all plugins/themes.
+		 * @param string $type Type being passed, plugin|theme'.
 		 */
-		apply_filters_deprecated( 'github_updater_additions', [ null, [], $type ], '10.0.0', 'gu_additions' );
 		$additions = apply_filters( 'gu_additions', null, [], $type );
+
+		/**
+		 * Filter to add plugins not containing appropriate header line.
+		 * Insert repositories added via Git Updater Additions plugin.
+		 *
+		 * @since   5.4.0
+		 * @access  public
+		 * @link https://github.com/afragen/git-updater-additions
+		 *
+		 * @param array        Listing of plugins/themes to add.
+		 *                     Default null.
+		 * @param array        Listing of all plugins/themes.
+		 * @param string $type Type being passed, plugin|theme'.
+		 */
+		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, [], $type ], '10.0.0', 'gu_additions' ) : $additions;
+
 		foreach ( (array) $additions as $slug => $headers ) {
 			if ( $slug === $file ) {
 				$file_data = array_merge( $file_data, $headers );
