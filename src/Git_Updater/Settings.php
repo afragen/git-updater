@@ -559,7 +559,11 @@ class Settings {
 	 */
 	public function print_section_ghu_settings() {
 		$this->display_dot_org_overrides();
-		echo '<p>' . esc_html__( 'Check to enable branch switching from the Plugins or Themes page or to bypass WP-Cron background processing.', 'git-updater' ) . '</p>';
+		print(
+			wp_kses_post(
+				__( '<p>Check to enable branch switching from the Plugins or Themes page, to bypass WP-Cron background processing, or to log `deprecated hook` messages to the debug.log.</p><p>Checkbox settings cannot be modified while waiting for WP-Cron background updating.</p>', 'git-updater' )
+			)
+		);
 	}
 
 	/**
