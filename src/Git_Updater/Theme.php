@@ -147,21 +147,10 @@ class Theme {
 			}
 		);
 
-		/**
-		 * Filter to add themes not containing appropriate header line.
-		 *
-		 * @since   5.4.0
-		 * @since   10.0.0
-		 * @access  public
-		 *
-		 * @param array $additions Listing of themes to add.
-		 *                         Default null.
-		 * @param array $themes    Listing of all themes.
-		 * @param string 'theme'    Type being passed.
-		 */
-		apply_filters_deprecated( 'github_updater_additions', [ null, $themes, 'theme' ], '10.0.0', 'gu_additions' );
 		$additions = apply_filters( 'gu_additions', null, $themes, 'theme' );
-		$themes    = array_merge( $themes, (array) $additions );
+		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $themes, 'theme' ], '10.0.0', 'gu_additions' ) : $additions;
+
+		$themes = array_merge( $themes, (array) $additions );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = [];
@@ -236,17 +225,11 @@ class Theme {
 	public function get_remote_theme_meta() {
 		$themes = [];
 		foreach ( (array) $this->config as $theme ) {
-			/**
-			 * Filter to set if WP-Cron is disabled or if user wants to return to old way.
-			 *
-			 * @since  7.4.0
-			 * @access public
-			 *
-			 * @param bool
-			 */
-			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli()
-				|| apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' )
-				|| apply_filters( 'gu_disable_wpcron', false )
+
+			$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
+			$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+
+			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli() || $disable_wp_cron
 			) {
 				$this->base->get_remote_repo_meta( $theme );
 			} else {
@@ -267,11 +250,13 @@ class Theme {
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
+		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
+		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+
 		if ( $schedule_event && ! empty( $themes ) ) {
 			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' )
 				&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' )
-				&& ! apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' )
-				&& ! apply_filters( 'gu_disable_wpcron', false )
+				&& ! $disable_wp_cron
 			) {
 				wp_schedule_single_event( time(), 'ghu_get_remote_theme', [ $themes ] );
 			}
@@ -655,12 +640,18 @@ class Theme {
 				/**
 				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 				 *
-				 * @since 9.6.0
 				 * @since 10.0.0
 				 * @param int Number of rollbacks. Zero implies value not set.
 				 */
-				apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' );
 				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
+
+				/**
+				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
+				 *
+				 * @since 9.6.0
+				 * @param int Number of rollbacks. Zero implies value not set.
+				 */
+				$num_rollbacks = 0 === $num_rollbacks ? apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' ) : $num_rollbacks;
 
 				// Still only return last tag if using release assets.
 				$rollback = 0 === $num_rollbacks || $theme->release_asset
@@ -755,15 +746,9 @@ class Theme {
 					$transient->no_update[ $theme->slug ] = $response;
 				}
 
-				/**
-				 * Filter to return array of overrides to dot org.
-				 *
-				 * @since 8.5.0
-				 * @since 10.0.0
-				 * @return array
-				 */
-				apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' );
 				$overrides = apply_filters( 'gu_override_dot_org', [] );
+				$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
+
 				if ( isset( $transient->response[ $theme->slug ] ) && in_array( $theme->slug, $overrides, true ) ) {
 					unset( $transient->response[ $theme->slug ] );
 				}
@@ -776,7 +761,9 @@ class Theme {
 				$transient->response[ $theme->slug ] = $this->base->set_rollback_transient( 'theme', $theme );
 			}
 		}
-		update_site_option( 'git_updater_theme_updates', $transient->response );
+		if ( property_exists( $transient, 'response' ) ) {
+			update_site_option( 'git_updater_theme_updates', $transient->response );
+		}
 
 		return $transient;
 	}

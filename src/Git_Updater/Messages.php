@@ -67,8 +67,10 @@ class Messages {
 					);
 					break;
 				case 'waiting':
-					apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
-					if ( ! apply_filters( 'gu_disable_wpcron', false ) ) {
+					$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
+					$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+
+					if ( ! $disable_wp_cron ) {
 						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 					}
 					// no break.
