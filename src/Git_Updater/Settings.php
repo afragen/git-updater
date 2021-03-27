@@ -514,6 +514,7 @@ class Settings {
 			'db_version',
 			'branch_switch',
 			'bypass_background_processing',
+			'deprecated_error_logging',
 		];
 
 		foreach ( $running_servers as $server ) {
