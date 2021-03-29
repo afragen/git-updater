@@ -262,6 +262,7 @@ class Settings {
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
 			</h1>
+			<?php ( new Messages() )->show_upsell(); ?>
 			<?php $this->options_tabs(); ?>
 			<?php $this->admin_page_notices(); ?>
 			<?php if ( 'git_updater_settings' === $tab ) : ?>

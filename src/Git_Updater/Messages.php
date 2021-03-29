@@ -23,6 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Messages
  */
 class Messages {
+
 	use GHU_Trait;
 
 	/**
@@ -236,5 +237,32 @@ class Messages {
 				) . $message
 			);
 		}
+	}
+
+	/**
+	 * Git Updater PRO upsell notice.
+	 *
+	 * @return void
+	 */
+	public function show_upsell() {
+		if ( \class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+			return;
+		}
+		?>
+		<div class="notice-info notice">
+			<p>
+				<?php esc_html_e( 'Git Updater PRO', 'git-updater' ); ?>
+				<br>
+				<?php
+				printf(
+					/* translators: %1: opening href tag, %2: closing href tag */
+					esc_html__( 'Unlock PRO features like updating, installing, branch switching, REST API, WP-CLI, and more. Information at %1$sgit-updater.com%2$s.', 'git-updater' ),
+					'<a href="https://git-updater.com">',
+					'</a>'
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 }
