@@ -1,9 +1,10 @@
 #### [unreleased]
 ##### Requires PHP 7.0+
 * removed Git APIs and placed in plugins
+* move `Zipfile_API` and `Language_Pack_API` to Git Updater PRO
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
+* move REST, WP-CLI, and `Remote Management` to Git Updater PRO
 * remove deprecated elements of `Remote_Management`
-* fix variable type in `Language_Pack_API`
 * remove `Settings::set_auth_required()`, now set in API plugins
 * update `Settings::unset_stale_options()`
 * added filters to added data from API plugins
