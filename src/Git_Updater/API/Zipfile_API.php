@@ -25,6 +25,56 @@ if ( ! defined( 'WPINC' ) ) {
  * @author Andy Fragen
  */
 class Zipfile_API {
+
+	/**
+	 * Load hooks.
+	 *
+	 * @return void
+	 */
+	public function load_hooks() {
+		add_filter( 'gu_git_servers', [ $this, 'set_git_servers' ], 10, 1 );
+		add_filter( 'gu_installed_apis', [ $this, 'set_installed_apis' ], 10, 1 );
+		add_filter( 'gu_install_remote_install', [ $this, 'set_remote_install_data' ], 10, 2 );
+	}
+
+	/**
+	 * Add API as git server.
+	 *
+	 * @param array $git_servers Array of git servers.
+	 *
+	 * @return array
+	 */
+	public function set_git_servers( $git_servers ) {
+		return array_merge( $git_servers, [ 'zipfile' => 'Zipfile' ] );
+	}
+
+	/**
+	 * Add API data to $installed_apis.
+	 *
+	 * @param array $installed_apis Array of installed APIs.
+	 *
+	 * @return array
+	 */
+	public function set_installed_apis( $installed_apis ) {
+		return array_merge( $installed_apis, [ 'zipfile_api' => true ] );
+	}
+
+	/**
+	 * Set remote installation data for specific API.
+	 *
+	 * @param array $install Array of remote installation data.
+	 * @param array $headers Array of repository header data.
+	 *
+	 * @return array
+	 */
+	public function set_remote_install_data( $install, $headers ) {
+		if ( 'zipfile' === $install['git_updater_api'] ) {
+			$install = ( new Zipfile_API() )->remote_install( $headers, $install );
+		}
+
+		return $install;
+	}
+
 	/**
 	 * Add remote install settings fields.
 	 *

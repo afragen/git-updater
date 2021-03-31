@@ -52,10 +52,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $git_servers = [
-		'github'  => 'GitHub',
-		'zipfile' => 'Zipfile',
-	];
+	public static $git_servers = [ 'github' => 'GitHub' ];
 
 	/**
 	 * Holds extra repo header types.
@@ -72,10 +69,7 @@ class Base {
 	 *
 	 * @var array
 	 */
-	public static $installed_apis = [
-		'github_api'  => true,
-		'zipfile_api' => true,
-	];
+	public static $installed_apis = [ 'github_api' => true ];
 
 	/**
 	 * Stores the object calling Basic_Auth_Loader.
