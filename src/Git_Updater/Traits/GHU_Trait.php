@@ -45,6 +45,15 @@ trait GHU_Trait {
 	}
 
 	/**
+	 * Checks to see if Git Updater PRO is running.
+	 *
+	 * @return bool
+	 */
+	public function is_pro_running() {
+		return class_exists( '\Fragen\Git_Updater\PRO\Bootstrap' );
+	}
+
+	/**
 	 * Load site options.
 	 */
 	public function load_options() {

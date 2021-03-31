@@ -261,7 +261,7 @@ class Settings {
 			<h1>
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php
-				if ( \class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+				if ( $this->is_pro_running() ) {
 					esc_html_e( 'Git Updater PRO', 'git-updater' );
 				} else {
 					esc_html_e( 'Git Updater', 'git-updater' );
@@ -721,7 +721,7 @@ class Settings {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
 		$reset_api_key      = false;
-		if ( \class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+		if ( $this->is_pro_running() ) {
 			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
 		}
 

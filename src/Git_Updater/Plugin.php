@@ -330,7 +330,7 @@ class Plugin {
 		/*
 		 * Create after_plugin_row_
 		 */
-		if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+		if ( $this->is_pro_running() ) {
 			echo wp_kses_post( $enclosure['open'] );
 			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
 			echo wp_kses_post( $enclosure['close'] );

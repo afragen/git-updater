@@ -450,7 +450,7 @@ class Theme {
 		/*
 		 * Create after_theme_row_
 		 */
-		if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+		if ( $this->is_pro_running() ) {
 			echo wp_kses_post( $enclosure['open'] );
 			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
 			echo wp_kses_post( $enclosure['close'] );
@@ -495,7 +495,7 @@ class Theme {
 			} else {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			if ( class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+			if ( $this->is_pro_running() ) {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
 			}
 		}
