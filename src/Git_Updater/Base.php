@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GHU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\PRO\Language_Pack;
 
 /*
  * Exit if called directly.
@@ -340,8 +341,10 @@ class Base {
 			}
 			$repo_api->get_remote_tag();
 			$repo->download_link = $repo_api->construct_download_link();
-			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
-			$language_pack->run();
+			if ( $this->is_pro_running() ) {
+				$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+				$language_pack->run();
+			}
 		}
 
 		return true;
