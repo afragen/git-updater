@@ -23,7 +23,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Messages
  */
 class Messages {
-
 	use GHU_Trait;
 
 	/**
@@ -245,7 +244,7 @@ class Messages {
 	 * @return void
 	 */
 	public function show_upsell() {
-		if ( \class_exists( 'Fragen\Git_Updater\PRO\Bootstrap' ) ) {
+		if ( $this->is_pro_running() ) {
 			return;
 		}
 		?>
