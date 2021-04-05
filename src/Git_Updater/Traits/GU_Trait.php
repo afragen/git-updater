@@ -13,9 +13,9 @@ namespace Fragen\Git_Updater\Traits;
 use Fragen\Singleton;
 
 /**
- * Trait GHU_Trait
+ * Trait GU_Trait
  */
-trait GHU_Trait {
+trait GU_Trait {
 	/**
 	 * Checks to see if a heartbeat is resulting in activity.
 	 *
@@ -50,15 +50,16 @@ trait GHU_Trait {
 	 * @return bool
 	 */
 	public function is_pro_running() {
-		return class_exists( '\Fragen\Git_Updater\PRO\Bootstrap' );
+		return defined( 'GIT_UPDATER_PRO' ) && \GIT_UPDATER_PRO;
 	}
 
 	/**
 	 * Load site options.
 	 */
 	public function load_options() {
+		Singleton::get_instance( 'Fragen\Git_Updater\GU_Upgrade', $this )->convert_ghu_options_to_gu_options();
 		$base           = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this );
-		$base::$options = get_site_option( 'github_updater', [] );
+		$base::$options = get_site_option( 'git_updater', [] );
 		$base::$options = $this->modify_options( $base::$options );
 	}
 
@@ -666,8 +667,7 @@ trait GHU_Trait {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$dir         = constant( str_replace( '\Traits', '', __NAMESPACE__ . '\DIR' ) );
-		$plugin_data = \get_plugin_data( $dir . '/github-updater.php' );
+		$plugin_data = \get_plugin_data( dirname( __DIR__, 3 ) . '/github-updater.php' );
 
 		return $plugin_data['Version'];
 	}

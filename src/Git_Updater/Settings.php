@@ -11,7 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
  * Exit if called directly.
@@ -28,7 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  */
 class Settings {
-	use GHU_Trait;
+	use GU_Trait;
 
 	/**
 	 * Holds the plugin basename.
@@ -558,7 +558,7 @@ class Settings {
 			foreach ( $ghu_unset_keys as $key => $value ) {
 				unset( self::$options[ $key ] );
 			}
-			update_site_option( 'github_updater', self::$options );
+			update_site_option( 'git_updater', self::$options );
 		}
 	}
 
@@ -664,7 +664,7 @@ class Settings {
 			&& 'git_updater' === $_POST['option_page']
 		) {
 			$options = $this->filter_options();
-			update_site_option( 'github_updater', $this->sanitize( $options ) );
+			update_site_option( 'git_updater', $this->sanitize( $options ) );
 		}
 
 		/**

@@ -89,7 +89,7 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options     = get_site_option( 'github_updater' );
+		$options     = get_site_option( 'git_updater' );
 		$headers     = parse_url( $url );
 		$credentials = [
 			'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,

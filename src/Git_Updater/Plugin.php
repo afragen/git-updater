@@ -11,7 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
  * Exit if called directly.
@@ -30,7 +30,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @link    https://github.com/codepress/github-plugin-updater
  */
 class Plugin {
-	use GHU_Trait;
+	use GU_Trait;
 
 	/**
 	 * Holds Class Base object.
@@ -168,7 +168,7 @@ class Plugin {
 			&& ( 'master' === self::$options[ $current_branch ] && 'master' !== $header['primary_branch'] )
 			) {
 				unset( self::$options[ $current_branch ] );
-				update_site_option( 'github_updater', self::$options );
+				update_site_option( 'git_updater', self::$options );
 			}
 			$branch = isset( self::$options[ $current_branch ] )
 				? self::$options[ $current_branch ]

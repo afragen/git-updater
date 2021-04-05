@@ -10,7 +10,7 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /**
  * Exit if called directly.
@@ -20,10 +20,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class GHU_Upgrade
+ * Class GU_Upgrade
  */
-class GHU_Upgrade {
-	use GHU_Trait;
+class GU_Upgrade {
+	use GU_Trait;
 
 	/**
 	 * DB version.
@@ -52,7 +52,7 @@ class GHU_Upgrade {
 		}
 
 		$options = array_merge( (array) $options, [ 'db_version' => (int) $this->db_version ] );
-		update_site_option( 'github_updater', $options );
+		update_site_option( 'git_updater', $options );
 	}
 
 	/**
@@ -61,5 +61,20 @@ class GHU_Upgrade {
 	private function delete_flush_cache() {
 		wp_cache_flush();
 		$this->delete_all_cached_data();
+	}
+
+	/**
+	 * Convert GHU to GU options.
+	 *
+	 * @since 10.0.0
+	 *
+	 * @return void
+	 */
+	public function convert_ghu_options_to_gu_options() {
+		$ghu_options = get_site_option( 'github_updater' );
+		if ( $ghu_options ) {
+			update_site_option( 'git_updater', $ghu_options );
+			delete_site_option( 'github_updater' );
+		}
 	}
 }
