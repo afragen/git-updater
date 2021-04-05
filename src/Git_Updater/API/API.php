@@ -12,7 +12,7 @@ namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\API_Common;
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 
 /*
@@ -26,7 +26,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class API
  */
 class API {
-	use API_Common, GHU_Trait, Basic_Auth_Loader;
+	use API_Common, GU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Holds HTTP error code from API call.

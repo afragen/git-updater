@@ -11,7 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\PRO\Language_Pack;
@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class Base {
 
-	use GHU_Trait, Basic_Auth_Loader;
+	use GU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Variable for holding extra theme and plugin headers.
@@ -142,7 +142,7 @@ class Base {
 		}
 
 		// Run Git Updater upgrade functions.
-		$upgrade = new GHU_Upgrade();
+		$upgrade = new GU_Upgrade();
 		$upgrade->run();
 
 		if ( $this->is_current_page( [ 'plugins.php', 'themes.php', 'theme-install.php' ] ) ) {
