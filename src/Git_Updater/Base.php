@@ -150,7 +150,7 @@ class Base {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'git-updater', plugins_url( basename( constant( __NAMESPACE__ . '\DIR' ) ) ) . '/css/git-updater.css', [], $this->get_plugin_version() );
+					wp_register_style( 'git-updater', plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/css/git-updater.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'git-updater' );
 				}
 			);
