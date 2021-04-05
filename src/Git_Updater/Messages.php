@@ -215,26 +215,24 @@ class Messages {
 			return;
 		}
 		if ( $replacement ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log(
-				sprintf(
+			$log_message = sprintf(
 					/* translators: 1: WordPress hook name, 2: Version number, 3: Alternative hook name. */
-					__( '%1$s is **deprecated** since version %2$s! Use %3$s instead.' ),
-					$hook,
-					$version,
-					$replacement,
-				) . $message
-			);
-		} else {
+				__( '%1$s is **deprecated** since version %2$s! Use %3$s instead.' ),
+				$hook,
+				$version,
+				$replacement,
+			) . $message;
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log(
-				sprintf(
+			error_log( $log_message );
+		} else {
+			$log_message = sprintf(
 					/* translators: 1: WordPress hook name, 2: Version number. */
-					__( '%1$s is **deprecated** since version %2$s with no alternative available.' ),
-					$hook,
-					$version
-				) . $message
-			);
+				__( '%1$s is **deprecated** since version %2$s with no alternative available.' ),
+				$hook,
+				$version
+			) . $message;
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( $log_message );
 		}
 	}
 
