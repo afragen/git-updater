@@ -25,6 +25,8 @@
 * added setting to display `_deprecated_hook()` data in debug.log
 * skip `_deprecated_hook()` `trigger_error()` in development environment
 * add upsell notice
+* migrate update, install, REST API, WP-CLI, remote management code to `Git_Updater_PRO`
+* add Zipfile_API, Language_Pack, Language_Pack_API code to `Git_Updater_PRO`
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
