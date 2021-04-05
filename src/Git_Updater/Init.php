@@ -64,7 +64,7 @@ class Init {
 
 		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'github_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
+			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_github-updater' => 'develop' ] ) );
 		}
 
 		if ( $slug && 'github-updater/github-updater.php' !== $slug ) {

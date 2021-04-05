@@ -106,7 +106,7 @@ class Branch {
 		}
 		$this->set_repo_cache( 'current_branch', $current_branch, $repo );
 		self::$options[ 'current_branch_' . $repo ] = $current_branch;
-		update_site_option( 'github_updater', self::$options );
+		update_site_option( 'git_updater', self::$options );
 	}
 
 	/**
@@ -119,6 +119,6 @@ class Branch {
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['git_updater_branch'], $install['repo'] );
 		self::$options[ 'current_branch_' . $install['repo'] ] = $install['git_updater_branch'];
-		update_site_option( 'github_updater', self::$options );
+		update_site_option( 'git_updater', self::$options );
 	}
 }

@@ -233,8 +233,8 @@ class Base {
 
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
-			self::$options = array_merge( get_site_option( 'github_updater' ), $config );
-			update_site_option( 'github_updater', self::$options );
+			self::$options = array_merge( get_site_option( 'git_updater' ), $config );
+			update_site_option( 'git_updater', self::$options );
 		}
 	}
 
@@ -365,7 +365,7 @@ class Base {
 			$this->$type->slug = null;
 		} elseif ( ! isset( self::$options[ $this->$type->slug ] ) ) {
 			self::$options[ $this->$type->slug ] = null;
-			add_site_option( 'github_updater', self::$options );
+			add_site_option( 'git_updater', self::$options );
 		}
 
 		$this->$type->remote_version = '0.0.0';
