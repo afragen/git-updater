@@ -6,5 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Fragen\\Git_Updater\\PRO\\' => array($baseDir . '/src/Git_Updater_PRO'),
+    'Fragen\\Git_Updater\\API\\' => array($baseDir . '/src/Git_Updater_PRO/API'),
     'Fragen\\Git_Updater\\' => array($baseDir . '/src/Git_Updater'),
 );

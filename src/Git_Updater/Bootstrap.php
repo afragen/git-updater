@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater;
 
+use Fragen\Git_Updater\PRO\Init as Init_PRO;
+
 /*
  * Exit if called directly.
  */
@@ -82,11 +84,11 @@ class Bootstrap {
 			return;
 		}
 
-		define( __NAMESPACE__ . '\DIR', $this->dir );
+		( new Init_PRO() )->load_hooks();
+		( new Init() )->run();
 
 		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
-		( new Init() )->run();
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.
