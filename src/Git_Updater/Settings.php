@@ -260,13 +260,7 @@ class Settings {
 		<div class="wrap git-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
-				<?php
-				if ( $this->is_pro_running() ) {
-					esc_html_e( 'Git Updater PRO', 'git-updater' );
-				} else {
-					esc_html_e( 'Git Updater', 'git-updater' );
-				}
-				?>
+				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
 			</h1>
 			<?php ( new Messages() )->show_upsell(); ?>
 			<?php $this->options_tabs(); ?>
@@ -380,7 +374,7 @@ class Settings {
 			'git_updater_settings',
 			[
 				'id'    => 'branch_switch',
-				'title' => esc_html__( 'Enable Branch Switching (PRO feature)', 'git-updater' ),
+				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
 			]
 		);
 
