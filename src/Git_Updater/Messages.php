@@ -10,7 +10,7 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
  * Exit if called directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Messages
  */
 class Messages {
-	use GHU_Trait;
+	use GU_Trait;
 
 	/**
 	 * Holds WP_Error message.

@@ -11,7 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Traits\GHU_Trait;
+use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 
 /*
@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Init
  */
 class Init {
-	use GHU_Trait, Basic_Auth_Loader;
+	use GU_Trait, Basic_Auth_Loader;
 
 	/**
 	 * Holds Class Base object.
