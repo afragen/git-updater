@@ -8,7 +8,7 @@ on:
     branches:
       - develop
       - master
-      - modular-api
+      - git-updater
   pull_request:
     branches:
       - develop
