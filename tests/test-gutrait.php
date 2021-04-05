@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Test methods in GHU_Trait.
+ * Test methods in GU_Trait.
  */
-class Test_GHUTrait extends \WP_UnitTestCase {
+class Test_GUTrait extends \WP_UnitTestCase {
 
-	use Fragen\GitHub_Updater\Traits\GHU_Trait;
+	use Fragen\Git_Updater\Traits\GU_Trait;
 
 	/**
 	 * Test sanitize.

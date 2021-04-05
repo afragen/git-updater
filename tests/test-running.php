@@ -1,6 +1,6 @@
 <?php
 
-use Fragen\GitHub_Updater\Base;
+use Fragen\Git_Updater\Base;
 
 class RunningTest extends WP_UnitTestCase {
 	public function test_installed_apis() {
