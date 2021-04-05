@@ -570,7 +570,7 @@ class Theme {
 							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
 							esc_html__( 'View version %1$s details%2$s.', 'git-updater' ),
 							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
-							'</a>',
+							'</a>'
 						);
 						printf(
 							/* translators: %s: opening/closing paragraph and italic tags */
