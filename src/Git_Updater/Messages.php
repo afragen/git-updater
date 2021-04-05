@@ -221,7 +221,8 @@ class Messages {
 				$hook,
 				$version,
 				$replacement,
-			) . $message;
+			);
+			$log_message .= '&nbsp;' . $message;
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			error_log( $log_message );
 		} else {
