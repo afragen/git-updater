@@ -254,11 +254,11 @@ class Theme {
 		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		if ( $schedule_event && ! empty( $themes ) ) {
-			if ( ! wp_next_scheduled( 'ghu_get_remote_theme' )
-				&& ! $this->is_duplicate_wp_cron_event( 'ghu_get_remote_theme' )
+			if ( ! wp_next_scheduled( 'gu_get_remote_theme' )
+				&& ! $this->is_duplicate_wp_cron_event( 'gu_get_remote_theme' )
 				&& ! $disable_wp_cron
 			) {
-				wp_schedule_single_event( time(), 'ghu_get_remote_theme', [ $themes ] );
+				wp_schedule_single_event( time(), 'gu_get_remote_theme', [ $themes ] );
 			}
 		}
 
@@ -614,11 +614,11 @@ class Theme {
 				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
 				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
 				esc_attr( $theme->branch ),
-				'<a href="#" onclick="jQuery(\'#ghu_versions\').toggle();return false;">',
+				'<a href="#" onclick="jQuery(\'#gu_versions\').toggle();return false;">',
 				'</a>.</p>'
 			);
 			?>
-			<div id="ghu_versions" style="display:none; width: 100%;">
+			<div id="gu_versions" style="display:none; width: 100%;">
 				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
 				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
 			<?php

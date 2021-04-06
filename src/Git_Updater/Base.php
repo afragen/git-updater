@@ -157,7 +157,7 @@ class Base {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
+		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *
@@ -201,8 +201,8 @@ class Base {
 	public function background_update() {
 		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
 		add_action( 'wp_update_themes', [ $this, 'get_meta_themes' ] );
-		add_action( 'ghu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'ghu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
+		add_action( 'gu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
+		add_action( 'gu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
 	}
 
 	/**
@@ -244,7 +244,7 @@ class Base {
 	 * @return array
 	 */
 	public function add_extra_headers() {
-		$ghu_extra_headers = [
+		$gu_extra_headers = [
 			'RequiresWP'    => 'Requires WP',
 			'ReleaseAsset'  => 'Release Asset',
 			'PrimaryBranch' => 'Primary Branch',
@@ -257,14 +257,14 @@ class Base {
 
 		foreach ( self::$git_servers as $server ) {
 			foreach ( $uri_types as $uri_key => $uri_value ) {
-				$ghu_extra_headers[ $server . $uri_key ] = $server . $uri_value;
+				$gu_extra_headers[ $server . $uri_key ] = $server . $uri_value;
 			}
 			foreach ( self::$extra_repo_headers as $header_key => $header_value ) {
-				$ghu_extra_headers[ $server . $header_key ] = $server . ' ' . $header_value;
+				$gu_extra_headers[ $server . $header_key ] = $server . ' ' . $header_value;
 			}
 		}
 
-		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $ghu_extra_headers ) );
+		self::$extra_headers = array_unique( array_merge( self::$extra_headers, $gu_extra_headers ) );
 		ksort( self::$extra_headers );
 
 		return self::$extra_headers;
