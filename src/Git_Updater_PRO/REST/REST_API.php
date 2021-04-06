@@ -31,7 +31,7 @@ class REST_API {
 	 *
 	 * @var string
 	 */
-	public static $namespace = 'github-updater/v1';
+	public static $namespace = 'git-updater/v1';
 
 	/**
 	 * Register REST API endpoints.
@@ -118,6 +118,48 @@ class REST_API {
 				],
 			]
 		);
+
+		register_rest_route(
+			'github-updater/v1',
+			'test',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'deprecated' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+
+		register_rest_route(
+			'github-updater/v1',
+			'repos',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'deprecated' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+		register_rest_route(
+			'github-updater/v1',
+			'update',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'deprecated' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+	}
+
+	/**
+	 * Return deprecation notice.
+	 *
+	 * @return array
+	 */
+	public function deprecated() {
+		$namespace = self::$namespace;
+		return [
+			'success' => false,
+			'error'   => "The 'github-updater/v1' REST route namespace has been deprecated. Please use '{$namespace}'",
+		];
 	}
 
 	/**
@@ -134,7 +176,7 @@ class REST_API {
 	 *
 	 * @param \WP_REST_Request $request REST API response.
 	 *
-	 * @return string
+	 * @return array
 	 */
 	public function get_remote_repo_data( \WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
