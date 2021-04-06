@@ -12,7 +12,7 @@
 * Requires PHP: 7.0
 * Tested up to: trunk
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
-* Donate link: <https://thefragens.com/github-updater-donate>
+* Donate link: <https://thefragens.com/git-updater-donate>
 * License: GPLv2 or later
 * License URI: <https://www.gnu.org/licenses/gpl-2.0.html>
 

@@ -1,6 +1,6 @@
 # Git Updater
 Contributors: afragen
-Donate link: https://thefragens.com/github-updater-donate
+Donate link: https://thefragens.com/git-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
 Requires at least: 5.2
 Requires PHP: 7.0
