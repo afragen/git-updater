@@ -667,7 +667,7 @@ trait GU_Trait {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$plugin_data = \get_plugin_data( dirname( __DIR__, 3 ) . '/github-updater.php' );
+		$plugin_data = \get_plugin_data( dirname( __DIR__, 3 ) . '/git-updater.php' );
 
 		return $plugin_data['Version'];
 	}

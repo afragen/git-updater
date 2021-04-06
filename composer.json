@@ -1,5 +1,5 @@
 {
-  "name": "afragen/github-updater",
+  "name": "afragen/git-updater",
   "description": "A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.",
   "type": "wordpress-plugin",
   "keywords": [
@@ -21,12 +21,12 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/afragen/github-updater"
+      "url": "https://github.com/afragen/git-updater"
     }
   ],
   "support": {
-    "issues": "https://github.com/afragen/github-updater/issues",
-    "source": "https://github.com/afragen/github-updater"
+    "issues": "https://github.com/afragen/git-updater/issues",
+    "source": "https://github.com/afragen/git-updater"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

@@ -68,7 +68,7 @@ class Bootstrap {
 		$message = sprintf(
 			/* translators: %s: documentation URL */
 			__( 'Git Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopenernoreferer">Learn more.</a>', 'git-updater' ),
-			'https://github.com/afragen/github-updater/wiki/Installation'
+			'https://github.com/afragen/git-updater/wiki/Installation'
 		);
 
 		wp_die( wp_kses_post( $message ) );

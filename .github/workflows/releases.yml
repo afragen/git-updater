@@ -18,7 +18,7 @@ jobs:
         run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
 
       - name: Build project
-        run: git archive -o /tmp/github-updater-${{ steps.tag.outputs.tag }}.zip --prefix=github-updater/ ${{ steps.tag.outputs.tag }}
+        run: git archive -o /tmp/git-updater-${{ steps.tag.outputs.tag }}.zip --prefix=git-updater/ ${{ steps.tag.outputs.tag }}
 
       - name: Create Release
         id: create_release
@@ -37,6 +37,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /tmp/github-updater-${{ steps.tag.outputs.tag }}.zip
-          asset_name: github-updater-${{ steps.tag.outputs.tag }}.zip
+          asset_path: /tmp/git-updater-${{ steps.tag.outputs.tag }}.zip
+          asset_name: git-updater-${{ steps.tag.outputs.tag }}.zip
           asset_content_type: application/zip
