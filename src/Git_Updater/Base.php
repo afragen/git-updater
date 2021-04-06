@@ -609,7 +609,7 @@ class Base {
 
 		$multisite_theme_open = ! $branch_switcher && 'theme' === $type ? " id='{$repo_name}' data-slug='{$repo_name}'" : null;
 
-		$open = '<tr class="github-updater plugin-update-tr' . $active . '"' . $multisite_theme_open . '>
+		$open = '<tr class="git-updater plugin-update-tr' . $active . '"' . $multisite_theme_open . '>
 		<td colspan="' . $wp_list_table->get_column_count() . '" class="plugin-update colspanchange">
 		<div class="">';
 

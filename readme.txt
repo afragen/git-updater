@@ -1,4 +1,4 @@
-# GitHub Updater
+# Git Updater
 Contributors: afragen
 Donate link: https://thefragens.com/github-updater-donate
 Tags: plugin, theme, language pack, updater, remote install
@@ -15,8 +15,8 @@ This plugin was designed to simply update any GitHub hosted WordPress plugin or 
 
 Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-    GitHub Plugin URI: afragen/github-updater
-    GitHub Plugin URI: https://github.com/afragen/github-updater
+    GitHub Plugin URI: afragen/git-updater
+    GitHub Plugin URI: https://github.com/afragen/git-updater
 
 or
 
@@ -51,8 +51,8 @@ The following headers are available for use depending upon your hosting source.
 
 #### Wiki
 
-[Comprehensive information regarding GitHub Updater is available on the wiki.](https://github.com/afragen/github-updater/wiki)
+[Comprehensive information regarding Git Updater is available on the wiki.](https://github.com/afragen/git-updater/wiki)
 
 #### Slack
 
-We now have a [Slack team for GitHub Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
+We now have a [Slack team for Git Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.

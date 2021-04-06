@@ -35,7 +35,7 @@ class Settings {
 	 *
 	 * @var string
 	 */
-	private $ghu_plugin_name = 'github-updater/github-updater.php';
+	private $ghu_plugin_name = 'git-updater/git-updater.php';
 
 	/**
 	 * Holds boolean on whether or not the repo requires authentication.

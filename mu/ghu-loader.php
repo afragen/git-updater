@@ -10,12 +10,12 @@
 
 /**
  * Plugin Name:       Git Updater MU loader
- * Plugin URI:        https://github.com/afragen/github-updater
+ * Plugin URI:        https://github.com/afragen/git-updater
  * Description:       A plugin to load Git Updater as a must-use plugin. Disables normal plugin activation and deletion.
  * Version:           3.0.0
  * Author:            Andy Fragen
  * License:           MIT
- * GitHub Plugin URI: https://github.com/afragen/github-updater/tree/develop/mu
+ * GitHub Plugin URI: https://github.com/afragen/git-updater/tree/develop/mu
  * Requires PHP:      7.0
  */
 
@@ -35,7 +35,7 @@ class MU_Loader {
 	 *
 	 * @var $plugin_file
 	 */
-	private static $plugin_file = 'github-updater/github-updater.php';
+	private static $plugin_file = 'git-updater/git-updater.php';
 
 	/**
 	 * Let's get going.
@@ -67,8 +67,8 @@ class MU_Loader {
 		add_action(
 			'after_plugin_row_' . static::$plugin_file,
 			function () {
-				print '<script>jQuery(".inactive[data-plugin=\'github-updater/github-updater.php\']").attr("class", "active");</script>';
-				print '<script>jQuery(".active[data-plugin=\'github-updater/github-updater.php\'] .check-column input").remove();</script>';
+				print '<script>jQuery(".inactive[data-plugin=\'git-updater/git-updater.php\']").attr("class", "active");</script>';
+				print '<script>jQuery(".active[data-plugin=\'git-updater/git-updater.php\'] .check-column input").remove();</script>';
 			}
 		);
 	}

@@ -78,7 +78,7 @@ class API {
 	 */
 	protected $default_http_get_args = [
 		'sslverify'     => true,
-		'user-agent'    => 'WordPress; Git Updater - https://github.com/afragen/github-updater',
+		'user-agent'    => 'WordPress; Git Updater - https://github.com/afragen/git-updater',
 		'wp-rest-cache' => [ 'tag' => 'git-updater' ],
 	];
 
