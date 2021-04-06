@@ -378,7 +378,7 @@ class API {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		return ! isset( $_POST['ghu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
+		return ! isset( $_POST['gu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
 	/**
@@ -447,7 +447,7 @@ class API {
 		$response = false;
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
+		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			return $response;
 		}
 

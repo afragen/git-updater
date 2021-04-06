@@ -35,7 +35,7 @@ class Settings {
 	 *
 	 * @var string
 	 */
-	private $ghu_plugin_name = 'git-updater/git-updater.php';
+	private $gu_plugin_name = 'git-updater/git-updater.php';
 
 	/**
 	 * Holds boolean on whether or not the repo requires authentication.
@@ -69,7 +69,7 @@ class Settings {
 	 */
 	protected function refresh_caches() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['ghu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
+		if ( isset( $_POST['gu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
 			$this->delete_all_cached_data();
 		}
 	}
@@ -90,8 +90,8 @@ class Settings {
 
 		add_filter(
 			is_multisite()
-			? 'network_admin_plugin_action_links_' . $this->ghu_plugin_name
-			: 'plugin_action_links_' . $this->ghu_plugin_name,
+			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name
+			: 'plugin_action_links_' . $this->gu_plugin_name,
 			[ $this, 'plugin_action_links' ]
 		);
 
@@ -161,33 +161,33 @@ class Settings {
 		$subtabs     = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
 		$gits        = $this->get_running_git_servers();
 		$git_subtab  = [];
-		$ghu_subtabs = [];
+		$gu_subtabs = [];
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
 		 *
 		 * @since 8.0.0
 		 *
-		 * @param array $ghu_subtabs Array of added subtabs.
+		 * @param array $gu_subtabs Array of added subtabs.
 		 *
 		 * @return array $subtabs Array of subtabs.
 		 */
-		$ghu_subtabs = apply_filters_deprecated( 'github_updater_add_settings_subtabs', [ $ghu_subtabs ], '10.0.0', 'gu_add_settings_subtabs' );
+		$gu_subtabs = apply_filters_deprecated( 'github_updater_add_settings_subtabs', [ $gu_subtabs ], '10.0.0', 'gu_add_settings_subtabs' );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
 		 *
 		 * @since 10.0.0
 		 *
-		 * @param array $ghu_subtabs Array of added subtabs.
+		 * @param array $gu_subtabs Array of added subtabs.
 		 *
 		 * @return array $subtabs Array of subtabs.
 		 */
-		$ghu_subtabs = apply_filters( 'gu_add_settings_subtabs', $ghu_subtabs );
+		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
 		foreach ( $gits as $git ) {
-			if ( array_key_exists( $git, $ghu_subtabs ) ) {
-				$git_subtab[ $git ] = $ghu_subtabs[ $git ];
+			if ( array_key_exists( $git, $gu_subtabs ) ) {
+				$git_subtab[ $git ] = $gu_subtabs[ $git ];
 			}
 		}
 		$subtabs = array_merge( $subtabs, $git_subtab );
@@ -275,7 +275,7 @@ class Settings {
 						$this->add_hidden_settings_sections();
 					} else {
 						do_settings_sections( 'git_updater_' . $subtab . '_install_settings' );
-						$this->display_ghu_repos( $subtab );
+						$this->display_gu_repos( $subtab );
 						$this->add_hidden_settings_sections( $subtab );
 					}
 					submit_button();
@@ -283,7 +283,7 @@ class Settings {
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
 				<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
-					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'ghu_refresh_cache' ); ?>
+					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
 				</form>
 			<?php endif; ?>
 
@@ -354,7 +354,7 @@ class Settings {
 			[ $this, 'sanitize' ]
 		);
 
-		$this->ghu_tokens();
+		$this->gu_tokens();
 
 		/*
 		 * Add basic plugin settings.
@@ -362,7 +362,7 @@ class Settings {
 		add_settings_section(
 			'git_updater_settings',
 			esc_html__( 'Git Updater Settings', 'git-updater' ),
-			[ $this, 'print_section_ghu_settings' ],
+			[ $this, 'print_section_gu_settings' ],
 			'git_updater_install_settings'
 		);
 
@@ -425,16 +425,16 @@ class Settings {
 	/**
 	 * Create and return settings fields for private repositories.
 	 */
-	public function ghu_tokens() {
-		$ghu_options_keys = [];
-		$ghu_plugins      = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
-		$ghu_themes       = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
-		$ghu_tokens       = array_merge( $ghu_plugins, $ghu_themes );
+	public function gu_tokens() {
+		$gu_options_keys = [];
+		$gu_plugins      = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+		$gu_themes       = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+		$gu_tokens       = array_merge( $gu_plugins, $gu_themes );
 
-		foreach ( $ghu_tokens as $token ) {
+		foreach ( $gu_tokens as $token ) {
 			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
 			$setting_field                    = [];
-			$ghu_options_keys[ $token->slug ] = null;
+			$gu_options_keys[ $token->slug ] = null;
 
 			/*
 			 * Next if not a private repo or token field not empty.
@@ -494,7 +494,7 @@ class Settings {
 		}
 
 		if ( ! $this->waiting_for_background_update() ) {
-			$this->unset_stale_options( $ghu_options_keys, $ghu_tokens );
+			$this->unset_stale_options( $gu_options_keys, $gu_tokens );
 		} else {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( 'waiting' );
 		}
@@ -503,14 +503,14 @@ class Settings {
 	/**
 	 * Check current saved options and unset if repos not present.
 	 *
-	 * @param array $ghu_options_keys Array of options keys.
-	 * @param array $ghu_tokens       Array of Git Updater repos.
+	 * @param array $gu_options_keys Array of options keys.
+	 * @param array $gu_tokens       Array of Git Updater repos.
 	 */
-	public function unset_stale_options( $ghu_options_keys, $ghu_tokens ) {
+	public function unset_stale_options( $gu_options_keys, $gu_tokens ) {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
 		$reset_keys      = [];
-		$ghu_unset_keys  = array_diff_key( self::$options, $ghu_options_keys );
+		$gu_unset_keys  = array_diff_key( self::$options, $gu_options_keys );
 		$always_unset    = [
 			'db_version',
 			'branch_switch',
@@ -524,32 +524,32 @@ class Settings {
 		}
 
 		array_map(
-			function ( $e ) use ( &$ghu_unset_keys ) {
-				unset( $ghu_unset_keys[ $e ] );
+			function ( $e ) use ( &$gu_unset_keys ) {
+				unset( $gu_unset_keys[ $e ] );
 			},
 			$always_unset
 		);
 
 		// Unset if current_branch AND if associated with repo.
 		array_map(
-			function ( $e ) use ( &$ghu_unset_keys, $ghu_tokens, &$reset_keys ) {
-				$key  = array_search( $e, $ghu_unset_keys, true );
+			function ( $e ) use ( &$gu_unset_keys, $gu_tokens, &$reset_keys ) {
+				$key  = array_search( $e, $gu_unset_keys, true );
 				$repo = str_replace( 'current_branch_', '', $key );
-				if ( array_key_exists( $key, $ghu_unset_keys )
+				if ( array_key_exists( $key, $gu_unset_keys )
 				&& false !== strpos( $key, 'current_branch' )
 				) {
-					unset( $ghu_unset_keys[ $key ] );
+					unset( $gu_unset_keys[ $key ] );
 				}
-				if ( ! array_key_exists( $repo, $ghu_tokens ) ) {
+				if ( ! array_key_exists( $repo, $gu_tokens ) ) {
 					$reset_keys[ $key ] = $e;
 				}
 			},
-			$ghu_unset_keys
+			$gu_unset_keys
 		);
-		$ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
+		$gu_unset_keys = array_merge( $gu_unset_keys, (array) $reset_keys );
 
-		if ( ! empty( $ghu_unset_keys ) ) {
-			foreach ( $ghu_unset_keys as $key => $value ) {
+		if ( ! empty( $gu_unset_keys ) ) {
+			foreach ( $gu_unset_keys as $key => $value ) {
 				unset( self::$options[ $key ] );
 			}
 			update_site_option( 'git_updater', self::$options );
@@ -559,7 +559,7 @@ class Settings {
 	/**
 	 * Print the Git Updater Settings text.
 	 */
-	public function print_section_ghu_settings() {
+	public function print_section_gu_settings() {
 		$this->display_dot_org_overrides();
 		print(
 			wp_kses_post(
@@ -829,7 +829,7 @@ class Settings {
 	 *
 	 * @param string $git Name of API, eg 'github'.
 	 */
-	private function display_ghu_repos( $git ) {
+	private function display_gu_repos( $git ) {
 		$lock_title    = esc_html__( 'This is a private repository.', 'git-updater' );
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'git-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'git-updater' );

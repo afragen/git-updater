@@ -183,9 +183,9 @@ class REST_API {
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
-		$ghu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
-		$ghu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
-		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
+		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
 
 		$plugin_updates = get_site_option( 'git_updater_plugin_updates' );
 		$theme_updates  = get_site_option( 'git_updater_theme_updates' );
@@ -197,7 +197,7 @@ class REST_API {
 			],
 			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);
-		foreach ( $ghu_tokens as $token ) {
+		foreach ( $gu_tokens as $token ) {
 			$update_package = false;
 			if ( 'plugin' === $token->type && array_key_exists( $token->file, (array) $plugin_updates ) ) {
 				$update_package = $plugin_updates[ $token->file ];
