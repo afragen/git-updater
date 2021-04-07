@@ -375,6 +375,7 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
+				'class' => $this->is_pro_running() ? '' : 'hidden',
 			]
 		);
 

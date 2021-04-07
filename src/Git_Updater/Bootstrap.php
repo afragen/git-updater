@@ -84,7 +84,6 @@ class Bootstrap {
 			return;
 		}
 
-		( new Init_PRO() )->load_hooks();
 		( new Init() )->run();
 
 		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
