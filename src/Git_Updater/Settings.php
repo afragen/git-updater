@@ -158,9 +158,9 @@ class Settings {
 	 * @return array
 	 */
 	private function settings_sub_tabs() {
-		$subtabs     = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
-		$gits        = $this->get_running_git_servers();
-		$git_subtab  = [];
+		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
+		$gits       = $this->get_running_git_servers();
+		$git_subtab = [];
 		$gu_subtabs = [];
 
 		/**
@@ -432,8 +432,8 @@ class Settings {
 		$gu_tokens       = array_merge( $gu_plugins, $gu_themes );
 
 		foreach ( $gu_tokens as $token ) {
-			$type                             = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
-			$setting_field                    = [];
+			$type                            = '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;';
+			$setting_field                   = [];
 			$gu_options_keys[ $token->slug ] = null;
 
 			/*
@@ -510,7 +510,7 @@ class Settings {
 		self::$options   = $this->get_class_vars( 'Base', 'options' );
 		$running_servers = $this->get_running_git_servers();
 		$reset_keys      = [];
-		$gu_unset_keys  = array_diff_key( self::$options, $gu_options_keys );
+		$gu_unset_keys   = array_diff_key( self::$options, $gu_options_keys );
 		$always_unset    = [
 			'db_version',
 			'branch_switch',
