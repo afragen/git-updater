@@ -6,8 +6,7 @@ Requires at least: 5.2
 Requires PHP: 7.0
 Tested up to: 5.7
 Stable tag: master
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: MIT
 
 ## Description
 
@@ -55,4 +54,4 @@ The following headers are available for use depending upon your hosting source.
 
 #### Slack
 
-We now have a [Slack team for Git Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
+We now have a [Slack team for Git Updater](https://git-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
