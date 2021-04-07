@@ -13,8 +13,7 @@
 * Tested up to: trunk
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>
-* License: GPLv2 or later
-* License URI: <https://www.gnu.org/licenses/gpl-2.0.html>
+* License: MIT
 
 A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
 
@@ -51,4 +50,4 @@ You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with
 
 ## Slack
 
-We now have a [Slack team for Git Updater](https://github-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
+We now have a [Slack team for Git Updater](https://git-updater.slack.com). Please [click here for an invite](https://github-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
