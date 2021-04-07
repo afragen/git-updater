@@ -12,6 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\PRO\Branch_Switcher;
 
 /*
  * Exit if called directly.
@@ -252,8 +253,9 @@ class Plugin {
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
 			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
+				&& $this->is_pro_running()
 			) {
-				add_action( "after_plugin_row_{$plugin->file}", [ $this, 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_{$plugin->file}", [ new Branch_Switcher(), 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
@@ -282,61 +284,6 @@ class Plugin {
 	public function load_pre_filters() {
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
-	}
-
-	/**
-	 * Add branch switch row to plugins page.
-	 *
-	 * @param string    $plugin_file Plugin file.
-	 * @param \stdClass $plugin_data Plugin repo data.
-	 *
-	 * @return bool
-	 */
-	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
-			return false;
-		}
-
-		$plugin = $this->get_repo_slugs( dirname( $plugin_file ), $this );
-
-		$enclosure         = $this->base->update_row_enclosure( $plugin_file, 'plugin', true );
-		$nonced_update_url = wp_nonce_url(
-			$this->base->get_update_url( 'plugin', 'upgrade-plugin', $plugin_file ),
-			'upgrade-plugin_' . $plugin_file
-		);
-
-		if ( ! empty( $plugin ) ) {
-			$id       = $plugin['slug'] . '-id';
-			$branches = isset( $this->config[ $plugin['slug'] ]->branches )
-				? $this->config[ $plugin['slug'] ]->branches
-				: null;
-		} else {
-			return false;
-		}
-
-		// Get current branch.
-		$repo   = $this->config[ $plugin['slug'] ];
-		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
-
-		$branch_switch_data                      = [];
-		$branch_switch_data['slug']              = $plugin['slug'];
-		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
-		$branch_switch_data['id']                = $id;
-		$branch_switch_data['branch']            = $branch;
-		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
-		$branch_switch_data['primary_branch']    = $repo->primary_branch;
-
-		/*
-		 * Create after_plugin_row_
-		 */
-		if ( $this->is_pro_running() ) {
-			echo wp_kses_post( $enclosure['open'] );
-			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-			echo wp_kses_post( $enclosure['close'] );
-		}
-
-		return true;
 	}
 
 	/**
@@ -412,7 +359,7 @@ class Plugin {
 				'plugin'           => $plugin->file,
 				'new_version'      => $plugin->remote_version,
 				'url'              => $plugin->uri,
-				'package'          => null,
+				'package'          => $plugin->download_link,
 				'icons'            => $plugin->icons,
 				'tested'           => $plugin->tested,
 				'requires'         => $plugin->requires,
@@ -441,15 +388,6 @@ class Plugin {
 					continue;
 				}
 
-				/**
-				 * Filter for Git Updater PRO to get download package.
-				 *
-				 * @since 10.0.0
-				 * @param array     $response Array or repository update transient data.
-				 * @param \stdClass $plugin   Repository object.
-				 */
-				$response = apply_filters( 'gu_pro_dl_package', $response, $plugin );
-
 				// Update download link for release_asset non-primary branches.
 				if ( $plugin->release_asset && $plugin->primary_branch !== $plugin->branch ) {
 					$response['package'] = isset( $plugin->branches[ $plugin->branch ] )
@@ -476,7 +414,7 @@ class Plugin {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
-				$transient->response[ $plugin->file ] = $this->base->set_rollback_transient( 'plugin', $plugin );
+				$transient->response[ $plugin->file ] = ( new Branch_Switcher() )->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 		if ( property_exists( $transient, 'response' ) ) {

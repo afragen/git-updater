@@ -12,6 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\PRO\Branch_Switcher;
 
 /*
  * Exit if called directly.
@@ -243,7 +244,9 @@ class Theme {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					add_action( "after_theme_row_{$theme->slug}", [ $this, 'multisite_branch_switcher' ], 15, 2 );
+					if ( $this->is_pro_running() ) {
+						add_action( "after_theme_row_{$theme->slug}", [ new Branch_Switcher(), 'multisite_branch_switcher' ], 15, 2 );
+					}
 				}
 			}
 		}
@@ -411,53 +414,6 @@ class Theme {
 		}
 	}
 
-	/**
-	 * Create branch switcher row for multisite installation.
-	 *
-	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
-	 *
-	 * @return bool
-	 */
-	public function multisite_branch_switcher( $theme_key, $theme ) {
-		if ( empty( self::$options['branch_switch'] ) ) {
-			return false;
-		}
-
-		$enclosure         = $this->base->update_row_enclosure( $theme_key, 'theme', true );
-		$id                = $theme_key . '-id';
-		$branches          = isset( $this->config[ $theme_key ]->branches )
-			? $this->config[ $theme_key ]->branches
-			: null;
-		$nonced_update_url = wp_nonce_url(
-			$this->base->get_update_url( 'theme', 'upgrade-theme', $theme_key ),
-			'upgrade-theme_' . $theme_key
-		);
-
-		// Get current branch.
-		$repo   = $this->config[ $theme_key ];
-		$branch = Singleton::get_instance( 'Branch', $this )->get_current_branch( $repo );
-
-		$branch_switch_data                      = [];
-		$branch_switch_data['slug']              = $theme_key;
-		$branch_switch_data['nonced_update_url'] = $nonced_update_url;
-		$branch_switch_data['id']                = $id;
-		$branch_switch_data['branch']            = $branch;
-		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
-		$branch_switch_data['primary_branch']    = $repo->primary_branch;
-
-		/*
-		 * Create after_theme_row_
-		 */
-		if ( $this->is_pro_running() ) {
-			echo wp_kses_post( $enclosure['open'] );
-			$this->base->make_branch_switch_row( $branch_switch_data, $this->config );
-			echo wp_kses_post( $enclosure['close'] );
-		}
-
-		return true;
-	}
 
 	/**
 	 * Remove default after_theme_row_$stylesheet.
@@ -697,7 +653,7 @@ class Theme {
 				'theme'            => $theme->slug,
 				'new_version'      => $theme->remote_version,
 				'url'              => $theme->uri,
-				'package'          => null,
+				'package'          => $theme->download_link,
 				'requires'         => $theme->requires,
 				'requires_php'     => $theme->requires_php,
 				'tested'           => $theme->tested,
@@ -722,15 +678,6 @@ class Theme {
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
 					continue;
 				}
-
-				/**
-				 * Filter for Git Updater PRO to get download package.
-				 *
-				 * @since 10.0.0
-				 * @param array     $response Array or repository update transient data.
-				 * @param \stdClass $theme    Repository object.
-				 */
-				$response = apply_filters( 'gu_pro_dl_package', $response, $theme );
 
 				// Update download link for release_asset non-primary branches.
 				if ( $theme->release_asset && $theme->primary_branch !== $theme->branch ) {
@@ -758,7 +705,7 @@ class Theme {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
-				$transient->response[ $theme->slug ] = $this->base->set_rollback_transient( 'theme', $theme );
+				$transient->response[ $theme->slug ] = ( new Branch_Switcher() )->set_rollback_transient( 'theme', $theme );
 			}
 		}
 		if ( property_exists( $transient, 'response' ) ) {
