@@ -260,7 +260,11 @@ class Settings {
 		<div class="wrap git-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
-				<?php esc_html_e( 'Git Updater', 'git-updater' ); ?>
+				<?php if ( $this->is_pro_running() ) {
+					esc_html_e( 'Git Updater PRO', 'git-updater' );
+				} else {
+					esc_html_e( 'Git Updater', 'git-updater' );
+				} ?>
 			</h1>
 			<?php ( new Messages() )->show_upsell(); ?>
 			<?php $this->options_tabs(); ?>
