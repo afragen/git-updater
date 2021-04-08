@@ -452,7 +452,7 @@ class Theme {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 			if ( $this->is_pro_running() ) {
-				$prepared_themes[ $theme->slug ]['description'] .= $this->single_install_switcher( $theme );
+				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch_Switcher() )->single_install_switcher( $theme );
 			}
 		}
 
@@ -538,93 +538,6 @@ class Theme {
 					?>
 				</strong>
 			</p>
-			<?php
-		}
-
-		return trim( ob_get_clean(), '1' );
-	}
-
-	/**
-	 * Display rollback/branch switcher for single site installation.
-	 *
-	 * @access protected
-	 *
-	 * @param \stdClass $theme Theme object.
-	 *
-	 * @return string
-	 */
-	protected function single_install_switcher( $theme ) {
-		$nonced_update_url = wp_nonce_url(
-			$this->base->get_update_url( 'theme', 'upgrade-theme', $theme->slug ),
-			'upgrade-theme_' . $theme->slug
-		);
-		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
-
-		if ( ! isset( self::$options['branch_switch'] ) ) {
-			return;
-		}
-
-		ob_start();
-		if ( '1' === self::$options['branch_switch'] ) {
-			printf(
-				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
-				esc_attr( $theme->branch ),
-				'<a href="#" onclick="jQuery(\'#gu_versions\').toggle();return false;">',
-				'</a>.</p>'
-			);
-			?>
-			<div id="gu_versions" style="display:none; width: 100%;">
-				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
-				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
-			<?php
-
-			// Disable branch switching to primary branch for release assets.
-			if ( $theme->release_asset ) {
-				unset( $theme->branches[ $theme->primary_branch ] );
-			}
-			if ( isset( $theme->branches ) ) {
-				foreach ( array_keys( $theme->branches ) as $branch ) {
-					echo '<option>' . esc_attr( $branch ) . '</option>';
-				}
-			}
-			if ( ! empty( $theme->rollback ) ) {
-				$rollback = array_keys( $theme->rollback );
-				usort( $rollback, 'version_compare' );
-				krsort( $rollback );
-
-				/**
-				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
-				 *
-				 * @since 10.0.0
-				 * @param int Number of rollbacks. Zero implies value not set.
-				 */
-				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
-
-				/**
-				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
-				 *
-				 * @since 9.6.0
-				 * @param int Number of rollbacks. Zero implies value not set.
-				 */
-				$num_rollbacks = 0 === $num_rollbacks ? apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' ) : $num_rollbacks;
-
-				// Still only return last tag if using release assets.
-				$rollback = 0 === $num_rollbacks || $theme->release_asset
-					? array_slice( $rollback, 0, 1 )
-					: array_splice( $rollback, 0, $num_rollbacks, true );
-
-				foreach ( $rollback as $tag ) {
-					echo '<option>' . esc_attr( $tag ) . '</option>';
-				}
-			}
-			if ( empty( $theme->rollback ) ) {
-				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</option></select></label>';
-			}
-			?>
-					</select></label>
-				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'git-updater' ); ?></a>
-			</div>
 			<?php
 		}
 
