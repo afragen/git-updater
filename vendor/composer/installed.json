@@ -194,6 +194,6 @@
             "install-path": "../erusev/parsedown"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }
