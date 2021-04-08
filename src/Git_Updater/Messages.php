@@ -253,7 +253,7 @@ class Messages {
 				<?php
 				printf(
 					/* translators: %1: opening href tag, %2: closing href tag */
-					esc_html__( 'Unlock PRO features like updating, installing, branch switching, REST API, WP-CLI, and more. Information at %1$sgit-updater.com%2$s.', 'git-updater' ),
+					esc_html__( 'Unlock PRO features like remote installation, branch switching, REST API, WP-CLI, and more. Information at %1$sgit-updater.com%2$s.', 'git-updater' ),
 					'<a href="https://git-updater.com">',
 					'</a>'
 				);
