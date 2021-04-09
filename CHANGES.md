@@ -25,7 +25,7 @@
 * added setting to display `_deprecated_hook()` data in debug.log
 * skip `_deprecated_hook()` `trigger_error()` in development environment
 * add upsell notice
-* add/move branch switching to Git Updater PRO
+* add/move `Branch` switching to Git Updater PRO
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
