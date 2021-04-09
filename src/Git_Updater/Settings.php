@@ -256,17 +256,13 @@ class Settings {
 		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		// phpcs:enable
-		$logo = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitHub_Updater_logo_small.png' ); ?>
+		$logo  = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitHub_Updater_logo_small.png' );
+		$label = $this->is_pro_running() ? __( 'Git Updater PRO', 'git-updater' ) : __( 'Git Updater', 'git-updater' );
+		?>
 		<div class="wrap git-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
-				<?php
-				if ( $this->is_pro_running() ) {
-					esc_html_e( 'Git Updater PRO', 'git-updater' );
-				} else {
-					esc_html_e( 'Git Updater', 'git-updater' );
-				}
-				?>
+				<?php echo esc_html( $label ); ?>
 			</h1>
 			<?php ( new Messages() )->show_upsell(); ?>
 			<?php $this->options_tabs(); ?>
@@ -543,7 +539,7 @@ class Settings {
 				$key  = array_search( $e, $gu_unset_keys, true );
 				$repo = str_replace( 'current_branch_', '', $key );
 				if ( array_key_exists( $key, $gu_unset_keys )
-				&& false !== strpos( $key, 'current_branch' )
+					&& false !== strpos( $key, 'current_branch' )
 				) {
 					unset( $gu_unset_keys[ $key ] );
 				}

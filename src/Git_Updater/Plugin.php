@@ -12,7 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
-use Fragen\Git_Updater\PRO\Branch_Switcher;
+use Fragen\Git_Updater\PRO\Branch;
 
 /*
  * Exit if called directly.
@@ -255,7 +255,7 @@ class Plugin {
 				&& ( ! is_multisite() || is_network_admin() )
 				&& $this->is_pro_running()
 			) {
-				add_action( "after_plugin_row_{$plugin->file}", [ new Branch_Switcher(), 'plugin_branch_switcher' ], 15, 3 );
+				add_action( "after_plugin_row_{$plugin->file}", [ new Branch(), 'plugin_branch_switcher' ], 15, 3 );
 			}
 		}
 
@@ -414,7 +414,7 @@ class Plugin {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 			) {
-				$transient->response[ $plugin->file ] = ( new Branch_Switcher() )->set_rollback_transient( 'plugin', $plugin );
+				$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
 			}
 		}
 		if ( property_exists( $transient, 'response' ) ) {

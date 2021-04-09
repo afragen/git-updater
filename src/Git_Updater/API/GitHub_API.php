@@ -11,7 +11,6 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Branch;
 
 /*
  * Exit if called directly.
