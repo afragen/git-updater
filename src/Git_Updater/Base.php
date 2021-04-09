@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\PRO\Branch;
 use Fragen\Git_Updater\PRO\Language_Pack;
 
 /*
@@ -466,7 +467,7 @@ class Base {
 		}
 
 		if ( $this->is_pro_running() ) {
-			Singleton::get_instance( 'Fragen\Git_Updater\PRO\Branch_Switcher', $this )->set_branch_on_switch( $slug );
+			( new Branch() )->set_branch_on_switch( $slug );
 
 			/*
 			* Remote install source.

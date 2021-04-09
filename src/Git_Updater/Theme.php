@@ -12,7 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
-use Fragen\Git_Updater\PRO\Branch_Switcher;
+use Fragen\Git_Updater\PRO\Branch;
 
 /*
  * Exit if called directly.
@@ -245,7 +245,7 @@ class Theme {
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
 					if ( $this->is_pro_running() ) {
-						add_action( "after_theme_row_{$theme->slug}", [ new Branch_Switcher(), 'multisite_branch_switcher' ], 15, 2 );
+						add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 2 );
 					}
 				}
 			}
@@ -452,7 +452,7 @@ class Theme {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 			if ( $this->is_pro_running() ) {
-				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch_Switcher() )->single_install_switcher( $theme );
+				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
 		}
 
@@ -618,7 +618,7 @@ class Theme {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
-				$transient->response[ $theme->slug ] = ( new Branch_Switcher() )->set_rollback_transient( 'theme', $theme );
+				$transient->response[ $theme->slug ] = ( new Branch() )->set_rollback_transient( 'theme', $theme );
 			}
 		}
 		if ( property_exists( $transient, 'response' ) ) {
