@@ -2,21 +2,21 @@
 # This file is distributed under the same license as the Git Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 9.9.11.32\n"
+"Project-Id-Version: Git Updater 9.9.11.33\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-04-08T00:24:51+00:00\n"
+"POT-Creation-Date: 2021-04-10T02:40:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
 #: src/Git_Updater/Settings.php:161
-#: src/Git_Updater/Settings.php:267
+#: src/Git_Updater/Settings.php:260
 msgid "Git Updater"
 msgstr ""
 
@@ -36,35 +36,35 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:359
+#: src/Git_Updater/API/GitHub_API.php:352
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:366
+#: src/Git_Updater/API/GitHub_API.php:359
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:382
+#: src/Git_Updater/API/GitHub_API.php:375
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:409
+#: src/Git_Updater/API/GitHub_API.php:402
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:416
+#: src/Git_Updater/API/GitHub_API.php:409
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:427
+#: src/Git_Updater/API/GitHub_API.php:420
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:441
+#: src/Git_Updater/API/GitHub_API.php:434
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:455
+#: src/Git_Updater/API/GitHub_API.php:448
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -107,7 +107,7 @@ msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
 #: src/Git_Updater/Messages.php:251
-#: src/Git_Updater/Settings.php:265
+#: src/Git_Updater/Settings.php:260
 msgid "Git Updater PRO"
 msgstr ""
 
@@ -117,12 +117,12 @@ msgid "Unlock PRO features like remote installation, branch switching, REST API,
 msgstr ""
 
 #: src/Git_Updater/Settings.php:133
-#: src/Git_Updater/Settings.php:806
+#: src/Git_Updater/Settings.php:795
 msgid "Settings"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:207
-#: src/Git_Updater/Settings.php:370
+#: src/Git_Updater/Settings.php:366
 msgid "Git Updater Settings"
 msgstr ""
 
@@ -131,59 +131,59 @@ msgctxt "Menu item"
 msgid "Git Updater"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:292
+#: src/Git_Updater/Settings.php:288
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:336
+#: src/Git_Updater/Settings.php:332
 msgid "Settings saved."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:338
+#: src/Git_Updater/Settings.php:334
 msgid "RESTful key reset."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:340
+#: src/Git_Updater/Settings.php:336
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:383
+#: src/Git_Updater/Settings.php:379
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:396
+#: src/Git_Updater/Settings.php:392
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:408
+#: src/Git_Updater/Settings.php:404
 msgid "Display `deprecated hook` messaging in debug.log"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:573
-msgid "<p>Check to enable branch switching from the Plugins or Themes page, to bypass WP-Cron background processing, or to log `deprecated hook` messages to the debug.log.</p><p>Checkbox settings cannot be modified while waiting for WP-Cron background updating.</p>"
+#: src/Git_Updater/Settings.php:567
+msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:607
+#: src/Git_Updater/Settings.php:599
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:608
+#: src/Git_Updater/Settings.php:600
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:840
+#: src/Git_Updater/Settings.php:829
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:841
+#: src/Git_Updater/Settings.php:830
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:842
+#: src/Git_Updater/Settings.php:831
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:884
+#: src/Git_Updater/Settings.php:873
 msgid "Installed Plugins and Themes"
 msgstr ""
 
