@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-04-10T02:40:44+00:00\n"
+"POT-Creation-Date: 2021-04-10T03:05:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: git-updater\n"
@@ -117,12 +117,12 @@ msgid "Unlock PRO features like remote installation, branch switching, REST API,
 msgstr ""
 
 #: src/Git_Updater/Settings.php:133
-#: src/Git_Updater/Settings.php:795
+#: src/Git_Updater/Settings.php:792
 msgid "Settings"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:207
-#: src/Git_Updater/Settings.php:366
+#: src/Git_Updater/Settings.php:363
 msgid "Git Updater Settings"
 msgstr ""
 
@@ -135,55 +135,51 @@ msgstr ""
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:332
+#: src/Git_Updater/Settings.php:331
 msgid "Settings saved."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:334
-msgid "RESTful key reset."
-msgstr ""
-
-#: src/Git_Updater/Settings.php:336
+#: src/Git_Updater/Settings.php:333
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:379
+#: src/Git_Updater/Settings.php:376
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:392
+#: src/Git_Updater/Settings.php:389
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:404
+#: src/Git_Updater/Settings.php:401
 msgid "Display `deprecated hook` messaging in debug.log"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:567
+#: src/Git_Updater/Settings.php:564
 msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:599
+#: src/Git_Updater/Settings.php:596
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:600
+#: src/Git_Updater/Settings.php:597
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:829
+#: src/Git_Updater/Settings.php:826
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:830
+#: src/Git_Updater/Settings.php:827
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:831
+#: src/Git_Updater/Settings.php:828
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:873
+#: src/Git_Updater/Settings.php:870
 msgid "Installed Plugins and Themes"
 msgstr ""
 
