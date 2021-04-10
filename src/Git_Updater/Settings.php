@@ -564,11 +564,7 @@ class Settings {
 	 */
 	public function print_section_gu_settings() {
 		$this->display_dot_org_overrides();
-		print(
-			wp_kses_post(
-				__( '<p>Check to enable branch switching from the Plugins or Themes page, to bypass WP-Cron background processing, or to log `deprecated hook` messages to the debug.log.</p><p>Checkbox settings cannot be modified while waiting for WP-Cron background updating.</p>', 'git-updater' )
-			)
-		);
+		print( wp_kses_post( __( 'Check to enable.', 'git-updater' ) ) );
 	}
 
 	/**
@@ -692,15 +688,12 @@ class Settings {
 	private function filter_options() {
 		$options = self::$options;
 
-		// Remove checkbox options, only after background update complete or when bypassing background processing.
-		if ( ! $this->waiting_for_background_update() || isset( $options['bypass_background_processing'] ) ) {
-			$options = array_filter(
-				$options,
-				function ( $e ) {
-					return '1' !== $e;
-				}
-			);
-		}
+		$options = array_filter(
+			$options,
+			function ( $e ) {
+				return '1' !== $e;
+			}
+		);
 
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		// phpcs:disable WordPress.Security.NonceVerification
