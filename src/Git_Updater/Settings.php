@@ -322,16 +322,13 @@ class Settings {
 	private function admin_page_notices() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
-				|| isset( $_GET['reset'] )
-				|| isset( $_GET['refresh_transients'] );
+			|| isset( $_GET['refresh_transients'] );
 
 		if ( $display ) {
 			echo '<div class="updated"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
 			esc_html_e( 'Settings saved.', 'git-updater' );
-		} elseif ( isset( $_GET['reset'] ) && '1' === $_GET['reset'] ) {
-			esc_html_e( 'RESTful key reset.', 'git-updater' );
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
 		}
