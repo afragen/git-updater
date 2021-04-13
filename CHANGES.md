@@ -1,7 +1,8 @@
 #### [unreleased]
 ##### Requires PHP 7.0+
 * removed Git APIs and placed in plugins
-* move `Zipfile_API` and `Language_Pack_API` to Git Updater PRO
+* move `Zipfile_API` to Git Updater PRO
+* move `Branch` to Git Updater PRO
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
 * move REST, WP-CLI, and `Remote Management` to Git Updater PRO
 * remove deprecated elements of `Remote_Management`
@@ -25,7 +26,6 @@
 * added setting to display `_deprecated_hook()` data in debug.log
 * skip `_deprecated_hook()` `trigger_error()` in development environment
 * add upsell notice
-* add/move `Branch` switching to Git Updater PRO
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
