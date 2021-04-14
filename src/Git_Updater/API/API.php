@@ -578,7 +578,12 @@ class API {
 			$auth_header     = $this->add_auth_header( [], $asset );
 			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
 			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
-			wp_remote_get( $asset, $args );
+			$redirect        = wp_remote_get( $asset, $args );
+
+			// If $redirect not retrieved zero out value of release_asset in cache.
+			if ( ! is_wp_error( $redirect ) && 200 !== \wp_remote_retrieve_response_code( $redirect ) ) {
+				$this->set_repo_cache( 'release_asset', false );
+			}
 		}
 
 		if ( ! empty( $this->redirect ) ) {
