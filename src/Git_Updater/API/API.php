@@ -581,7 +581,7 @@ class API {
 			$redirect        = wp_remote_get( $asset, $args );
 
 			// If $redirect not retrieved zero out value of release_asset in cache.
-			if ( ! is_wp_error( $redirect ) && 200 !== \wp_remote_retrieve_response_code( $redirect ) ) {
+			if ( 200 !== wp_remote_retrieve_response_code( $redirect ) ) {
 				$this->set_repo_cache( 'release_asset', false );
 			}
 		}
