@@ -1,6 +1,32 @@
 #### [unreleased]
-* added default values in API constructors for future proofing
-* correctly apply `Primary Branch` with rollback to tag
+##### Requires PHP 7.0+
+* removed Git APIs and placed in plugins
+* move `Zipfile_API` to Git Updater PRO
+* move `Branch` to Git Updater PRO
+* restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
+* move REST, WP-CLI, and `Remote Management` to Git Updater PRO
+* remove deprecated elements of `Remote_Management`
+* remove `Settings::set_auth_required()`, now set in API plugins
+* update `Settings::unset_stale_options()`
+* added filters to added data from API plugins
+  * added filter for setting API URL data
+  * added filter for setting API remote install data
+  * added filters for setting API language pack data
+  * added filter to get API object
+  * added filters for Basic Auth settings
+  * added filter `gu_parse_release_asset`
+  * added filter `gu_parse_headers_enterprise_api`
+  * add filter `gu_post_api_response_body`
+  * add filter `gu_get_git_icon_data`, this change requires PHP 7.0+ for `dirname( __DIR__, 2 )`
+  * add filter `gu_parse_enterprise_headers`
+  * add filter `gu_fix_repo_slug`
+  * add filter `gu_parse_api_branches`
+  * add filter `gu_running_git_servers`
+* remove deprecated override dot org constant
+* added setting to display `_deprecated_hook()` data in debug.log
+* skip `_deprecated_hook()` `trigger_error()` in development environment
+* add upsell notice
+* zero value of repo cache release asset `$url` if `wp_remote_get( $url )` not HTTP code 200 when checking release asset redirect
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
