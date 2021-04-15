@@ -1,5 +1,7 @@
 #### [unreleased]
 ##### Requires PHP 7.0+
+* added default values in API constructors for future proofing
+* correctly apply `Primary Branch` with rollback to tag
 * removed Git APIs and placed in plugins
 * move `Zipfile_API` to Git Updater PRO
 * move `Branch` to Git Updater PRO
