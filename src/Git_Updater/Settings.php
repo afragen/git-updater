@@ -256,15 +256,13 @@ class Settings {
 		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		// phpcs:enable
-		$logo  = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitHub_Updater_logo_small.png' );
-		$label = $this->is_pro_running() ? __( 'Git Updater PRO', 'git-updater' ) : __( 'Git Updater', 'git-updater' );
+		$logo = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitHub_Updater_logo_small.png' );
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
 				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
-				<?php echo esc_html( $label ); ?>
+				<?php esc_html_e( __( 'Git Updater', 'git-updater' ) ); ?>
 			</h1>
-			<?php ( new Messages() )->show_upsell(); ?>
 			<?php $this->options_tabs(); ?>
 			<?php $this->admin_page_notices(); ?>
 			<?php if ( 'git_updater_settings' === $tab ) : ?>

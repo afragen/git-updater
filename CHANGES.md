@@ -3,10 +3,10 @@
 * added default values in API constructors for future proofing
 * correctly apply `Primary Branch` with rollback to tag
 * removed Git APIs and placed in plugins
-* move `Zipfile_API` to Git Updater PRO
-* move `Branch` to Git Updater PRO
+* move `Zipfile_API` to PRO
+* move `Branch` to PRO
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
-* move REST, WP-CLI, and `Remote Management` to Git Updater PRO
+* move REST, WP-CLI, and `Remote Management` to  PRO
 * remove deprecated elements of `Remote_Management`
 * remove `Settings::set_auth_required()`, now set in API plugins
 * update `Settings::unset_stale_options()`
