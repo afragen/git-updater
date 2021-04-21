@@ -182,7 +182,7 @@ class API {
 		$type          = $this->return_repo_type();
 		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 		$code          = (int) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = [ 200, 404 ];
+		$allowed_codes = [ 200 ];
 
 		if ( is_wp_error( $response ) ) {
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -209,7 +209,7 @@ class API {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
 				if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
-					$log_message = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}) - {$response_body->message}";
+					$log_message = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					error_log( $log_message );
 				}
