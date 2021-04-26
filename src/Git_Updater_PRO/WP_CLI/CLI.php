@@ -16,7 +16,7 @@ use Fragen\Singleton;
 
 // Add WP-CLI commands.
 $cli = new CLI();
-WP_CLI::add_command( 'gi-updater', get_class( $cli ) );
+WP_CLI::add_command( 'git-updater', get_class( $cli ) );
 
 /**
  * Manage Git Updater PRO commands.
