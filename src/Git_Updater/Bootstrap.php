@@ -90,7 +90,6 @@ class Bootstrap {
 		}
 		( new Init() )->run();
 
-		register_activation_hook( $this->file, [ new Init(), 'rename_on_activation' ] );
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 
 		/**
