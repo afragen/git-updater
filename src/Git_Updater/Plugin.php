@@ -253,7 +253,7 @@ class Plugin {
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
 			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
-				&& $this->is_pro_running()
+				&& gu_fs()->is__premium_only()
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ new Branch(), 'plugin_branch_switcher' ], 15, 3 );
 			}

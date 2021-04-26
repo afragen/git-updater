@@ -33,13 +33,18 @@
     "php": ">=7.0",
     "afragen/wordpress-plugin-readme-parser": "dev-master",
     "afragen/singleton": "dev-master",
-    "collizo4sky/persist-admin-notices-dismissal": "^1"
+    "collizo4sky/persist-admin-notices-dismissal": "^1",
+    "freemius/wordpress-sdk": "*"
   },
   "autoload": {
     "psr-4": {
       "Fragen\\Git_Updater\\": "src/Git_Updater/",
       "Fragen\\Git_Updater\\PRO\\": "src/Git_Updater_PRO/",
       "Fragen\\Git_Updater\\API\\": "src/Git_Updater_PRO/API"
+    },
+    "files": [
+      "./vendor/freemius/wordpress-sdk/start.php"
+    ]
   },
   "scripts": {
     "post-update-cmd": [

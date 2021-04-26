@@ -372,7 +372,7 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
-				'class' => $this->is_pro_running() ? '' : 'hidden',
+				'class' => gu_fs()->is__premium_only() ? '' : 'hidden',
 			]
 		);
 
@@ -706,7 +706,7 @@ class Settings {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
 		$reset_api_key      = false;
-		if ( $this->is_pro_running() ) {
+		if ( gu_fs()->is__premium_only() ) {
 			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
 		}
 

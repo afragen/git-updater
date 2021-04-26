@@ -29,6 +29,7 @@
 * skip `_deprecated_hook()` `trigger_error()` in development environment
 * add upsell notice
 * zero value of repo cache release asset `$url` if `wp_remote_get( $url )` not HTTP code 200 when checking release asset redirect
+* integrate with Freemius
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
