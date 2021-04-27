@@ -1,11 +1,13 @@
 <?php
 /**
- * Git Updater PRO
+ * Git Updater
+ *
+ * Only active with license.
  *
  * @author   Andy Fragen
  * @license  MIT
- * @link     https://github.com/afragen/git-updater-pro
- * @package  git-updater-pro
+ * @link     https://github.com/afragen/git-updater
+ * @package  git-updater
  */
 
 namespace Fragen\Git_Updater\API;

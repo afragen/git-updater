@@ -372,7 +372,7 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
-				'class' => gu_fs()->is__premium_only() ? '' : 'hidden',
+				'class' => function_exists( 'Fragen\Git_Updater\gu_fs' ) && gu_fs()->is__premium_only() ? '' : 'hidden',
 			]
 		);
 
