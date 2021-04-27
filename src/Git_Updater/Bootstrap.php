@@ -84,8 +84,7 @@ class Bootstrap {
 			return;
 		}
 
-		$this->freemius();
-		$this->allow_self_update();
+		//$this->allow_self_update();
 		if ( gu_fs()->is__premium_only() ) {
 			( new Bootstrap_PRO() )->run();
 		}
