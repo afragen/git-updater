@@ -22,6 +22,8 @@
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.2
  * Requires PHP:      7.0
+ *
+ * @fs_premium_only /src/Git_Updater_PRO
  */
 
 namespace Fragen\Git_Updater;
