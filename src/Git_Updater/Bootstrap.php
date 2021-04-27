@@ -201,21 +201,23 @@ class Bootstrap {
 
 					$gu_fs = fs_dynamic_init(
 						[
-							'id'               => '8195',
-							'slug'             => 'git-updater',
-							'premium_slug'     => 'git-updater',
-							'type'             => 'plugin',
-							'public_key'       => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
-							'is_premium'       => true,
-							'is_premium_only'  => true,
-							'has_addons'       => true,
-							'has_paid_plans'   => true,
-							'is_org_compliant' => false,
-							'trial'            => [
+							'id'                  => '8195',
+							'slug'                => 'git-updater',
+							'premium_slug'        => 'git-updater',
+							'type'                => 'plugin',
+							'public_key'          => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
+							'is_premium'          => true,
+							'premium_suffix'      => 'PRO',
+							// If your plugin is a serviceware, set this option to false.
+							'has_premium_version' => true,
+							'has_addons'          => true,
+							'has_paid_plans'      => true,
+							'is_org_compliant'    => false,
+							'trial'               => [
 								'days'               => 14,
 								'is_require_payment' => false,
 							],
-							'menu'             => [
+							'menu'                => [
 								'slug'    => 'git-updater',
 								'contact' => false,
 								'support' => false,
