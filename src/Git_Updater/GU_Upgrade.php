@@ -76,5 +76,6 @@ class GU_Upgrade {
 			update_site_option( 'git_updater', $ghu_options );
 			delete_site_option( 'github_updater' );
 		}
+		deactivate_plugins( 'github-updater/git-updater.php' );
 	}
 }
