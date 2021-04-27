@@ -92,6 +92,7 @@ class Bootstrap {
 		( new Init() )->run();
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
+		gu_fs()->add_action( 'after_uninstall', [ $this, 'gu_fs_uninstall_cleanup' ] );
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.
@@ -154,6 +155,26 @@ class Bootstrap {
 				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
 			}
 		);
+	}
+
+	/**
+	 * Freemius uninstall cleanup.
+	 *
+	 * @return void
+	 */
+	private function gu_fs_uninstall_cleanup() {
+		$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
+		foreach ( $options as $option ) {
+			delete_option( $option );
+			delete_site_option( $option );
+		}
+
+		global $wpdb;
+		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column        = is_multisite() ? 'meta_key' : 'option_name';
+		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
+
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 	}
 
 	/**
