@@ -85,6 +85,7 @@ class Bootstrap {
 		}
 
 		$this->freemius();
+		$this->allow_self_update();
 		if ( gu_fs()->is__premium_only() ) {
 			( new Bootstrap_PRO() )->run();
 		}
@@ -138,6 +139,21 @@ class Bootstrap {
 			$timestamp = \wp_next_scheduled( $cron );
 			\wp_unschedule_event( $timestamp, $cron );
 		}
+	}
+
+	/**
+	 * Remove Freemius dashboard update overrides.
+	 *
+	 * @return void
+	 */
+	private function allow_self_update() {
+		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
+		add_action(
+			'admin_init',
+			function() {
+				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
+			}
+		);
 	}
 
 	/**
