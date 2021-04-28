@@ -84,7 +84,9 @@ class Bootstrap {
 			return;
 		}
 
-		//$this->allow_self_update();
+		if ( ! gu_fs()->can_use_premium_code() ) {
+			$this->allow_self_update();
+		}
 		if ( gu_fs()->is__premium_only() ) {
 			( new Bootstrap_PRO() )->run();
 		}
@@ -206,7 +208,7 @@ class Bootstrap {
 							'type'                => 'plugin',
 							'public_key'          => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
 							'is_premium'          => true,
-							'premium_suffix'      => 'PRO',
+							'premium_suffix'      => '',
 							// If your plugin is a serviceware, set this option to false.
 							'has_premium_version' => true,
 							'has_addons'          => true,
@@ -214,7 +216,7 @@ class Bootstrap {
 							'is_org_compliant'    => false,
 							'trial'               => [
 								'days'               => 14,
-								'is_require_payment' => false,
+								'is_require_payment' => true,
 							],
 							'menu'                => [
 								'slug'    => 'git-updater',
