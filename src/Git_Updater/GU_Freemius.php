@@ -26,36 +26,6 @@ class GU_Freemius {
 	use GU_Trait;
 
 	/**
-	 * Remove Freemius dashboard update overrides.
-	 *
-	 * @return void
-	 */
-	public function allow_self_update() {
-		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
-		add_action(
-			'admin_init',
-			function() {
-				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
-			}
-		);
-	}
-
-	/**
-	 * Freemius uninstall cleanup.
-	 *
-	 * @return void
-	 */
-	public function gu_fs_uninstall_cleanup() {
-		$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
-		foreach ( $options as $option ) {
-			delete_option( $option );
-			delete_site_option( $option );
-		}
-
-		$this->delete_all_cached_data();
-	}
-
-	/**
 	 * Freemius integration.
 	 *
 	 * @return array|void
@@ -79,21 +49,23 @@ class GU_Freemius {
 
 					$gu_fs = fs_dynamic_init(
 						[
-							'id'               => '8195',
-							'slug'             => 'git-updater',
-							'premium_slug'     => 'git-updater',
-							'type'             => 'plugin',
-							'public_key'       => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
-							'is_premium'       => true,
-							'is_premium_only'  => true,
-							'has_addons'       => true,
-							'has_paid_plans'   => true,
-							'is_org_compliant' => false,
-							'trial'            => [
+							'id'                  => '8195',
+							'slug'                => 'git-updater-free',
+							'premium_slug'        => 'git-updater',
+							'type'                => 'plugin',
+							'public_key'          => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
+							'is_premium'          => true,
+							'premium_suffix'      => 'PRO',
+							// If your plugin is a serviceware, set this option to false.
+							'has_premium_version' => true,
+							'has_addons'          => true,
+							'has_paid_plans'      => true,
+							'is_org_compliant'    => false,
+							'trial'               => [
 								'days'               => 14,
 								'is_require_payment' => true,
 							],
-							'menu'             => [
+							'menu'                => [
 								'slug'    => 'git-updater',
 								'contact' => false,
 								'support' => false,
@@ -117,5 +89,37 @@ class GU_Freemius {
 			// Signal that SDK was initiated.
 			do_action( 'gu_fs_loaded' );
 		}
+	}
+
+	/**
+	 * Remove Freemius dashboard update overrides.
+	 *
+	 * @return void
+	 */
+	public function allow_self_update() {
+		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
+		remove_all_filters( 'after_plugin_row_git-updater-free/git-updater.php' );
+
+		add_action(
+			'admin_init',
+			function() {
+				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
+			}
+		);
+	}
+
+	/**
+	 * Freemius uninstall cleanup.
+	 *
+	 * @return void
+	 */
+	public function gu_fs_uninstall_cleanup() {
+		$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
+		foreach ( $options as $option ) {
+			delete_option( $option );
+			delete_site_option( $option );
+		}
+
+		$this->delete_all_cached_data();
 	}
 }
