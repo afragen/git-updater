@@ -57,7 +57,7 @@ class Init {
 	 * @return void
 	 */
 	public function rename_on_activation() {
-		$slugs      = [ 'git-updater/git-updater.php', 'git-updater-free/git-updater.php' ];
+		$slugs      = [ 'git-updater/git-updater.php', 'git-updater-pro/git-updater.php' ];
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
 		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
@@ -69,7 +69,7 @@ class Init {
 		}
 
 		if ( $slug && ! in_array( $slug, $slugs, true ) ) {
-			$new_dir = in_array( 'free', $exploded, true ) ? 'git-updater-free' : 'git-updater';
+			$new_dir = in_array( 'pro', $exploded, true ) ? 'git-updater-pro' : 'git-updater';
 			@rename( $plugin_dir . dirname( $slug ), $plugin_dir . $new_dir );
 		}
 	}

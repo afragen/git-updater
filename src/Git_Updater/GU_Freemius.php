@@ -96,7 +96,7 @@ class GU_Freemius {
 	 */
 	public function allow_self_update() {
 		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
-		remove_all_filters( 'after_plugin_row_git-updater-free/git-updater.php' );
+		remove_all_filters( 'after_plugin_row_git-updater-pro/git-updater.php' );
 
 		add_action(
 			'admin_init',
