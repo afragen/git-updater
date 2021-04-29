@@ -84,16 +84,16 @@ class Bootstrap {
 			return;
 		}
 
-		if ( ! gu_fs()->can_use_premium_code() ) {
-			( new GU_Freemius() )->allow_self_update();
-		}
-		if ( gu_fs()->is__premium_only() ) {
-			( new Bootstrap_PRO() )->run();
-		}
+		//if ( ! gu_fs()->can_use_premium_code() ) {
+		//	( new GU_Freemius() )->allow_self_update();
+		//}
+		//if ( gu_fs()->is__premium_only() ) {
+		//	( new Bootstrap_PRO() )->run();
+		//}
 		( new Init() )->run();
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
-		gu_fs()->add_action( 'after_uninstall', [ new GU_Freemius(), 'gu_fs_uninstall_cleanup' ] );
+		//gu_fs()->add_action( 'after_uninstall', [ new GU_Freemius(), 'gu_fs_uninstall_cleanup' ] );
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.
