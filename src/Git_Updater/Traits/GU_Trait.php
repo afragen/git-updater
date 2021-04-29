@@ -45,15 +45,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks to see if Git Updater PRO is running.
-	 *
-	 * @return bool
-	 */
-	public function is_pro_running() {
-		return defined( 'GIT_UPDATER_PRO' ) && \GIT_UPDATER_PRO;
-	}
-
-	/**
 	 * Load site options.
 	 */
 	public function load_options() {

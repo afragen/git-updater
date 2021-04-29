@@ -463,7 +463,7 @@ class Base {
 			return $source;
 		}
 
-		if ( $this->is_pro_running() ) {
+		if ( gu_fs()->is__premium_only() ) {
 			( new Branch() )->set_branch_on_switch( $slug );
 
 			/*

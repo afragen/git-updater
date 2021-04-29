@@ -244,7 +244,7 @@ class Theme {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					if ( $this->is_pro_running() ) {
+					if ( gu_fs()->is__premium_only() ) {
 						add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 2 );
 					}
 				}
@@ -451,7 +451,7 @@ class Theme {
 			} else {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			if ( $this->is_pro_running() ) {
+			if ( gu_fs()->is__premium_only() ) {
 				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
 		}

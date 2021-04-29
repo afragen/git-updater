@@ -71,10 +71,12 @@ class GU_Upgrade {
 	 * @return void
 	 */
 	public function convert_ghu_options_to_gu_options() {
+		$gu_slugs    = [ 'github-updater/git-updater.php', 'github-updater-pro/git-updater.php' ];
 		$ghu_options = get_site_option( 'github_updater' );
 		if ( $ghu_options ) {
 			update_site_option( 'git_updater', $ghu_options );
 			delete_site_option( 'github_updater' );
 		}
+		deactivate_plugins( $gu_slugs );
 	}
 }
