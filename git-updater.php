@@ -50,7 +50,7 @@ if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
 }
 
 ( new Zipfile_API() )->load_hooks();
-( new Bootstrap( __FILE__ ) )->freemius();
+( new GU_Freemius() )->init();
 add_action(
 	'plugins_loaded',
 	function() {

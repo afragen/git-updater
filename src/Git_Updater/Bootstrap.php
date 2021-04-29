@@ -93,7 +93,7 @@ class Bootstrap {
 		( new Init() )->run();
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
-		gu_fs()->add_action( 'after_uninstall', [ $this, 'gu_fs_uninstall_cleanup' ] );
+		gu_fs()->add_action( 'after_uninstall', [ new GU_Freemius(), 'gu_fs_uninstall_cleanup' ] );
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.
@@ -140,105 +140,6 @@ class Bootstrap {
 		foreach ( $crons as $cron ) {
 			$timestamp = \wp_next_scheduled( $cron );
 			\wp_unschedule_event( $timestamp, $cron );
-		}
-	}
-
-	/**
-	 * Remove Freemius dashboard update overrides.
-	 *
-	 * @return void
-	 */
-	private function allow_self_update() {
-		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
-		add_action(
-			'admin_init',
-			function() {
-				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
-			}
-		);
-	}
-
-	/**
-	 * Freemius uninstall cleanup.
-	 *
-	 * @return void
-	 */
-	private function gu_fs_uninstall_cleanup() {
-		$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
-		foreach ( $options as $option ) {
-			delete_option( $option );
-			delete_site_option( $option );
-		}
-
-		global $wpdb;
-		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
-		$column        = is_multisite() ? 'meta_key' : 'option_name';
-		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
-
-		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
-	}
-
-	/**
-	 * Freemius integration.
-	 *
-	 * @return array|void
-	 */
-	public function freemius() {
-		if ( ! function_exists( 'gu_fs' ) ) {
-
-			/**
-			 * Create a helper function for easy SDK access.
-			 *
-			 * @return \stdClass
-			 */
-			function gu_fs() {
-				global $gu_fs;
-
-				if ( ! isset( $gu_fs ) ) {
-					// Activate multisite network integration.
-					if ( ! defined( 'WP_FS__PRODUCT_8195_MULTISITE' ) ) {
-						define( 'WP_FS__PRODUCT_8195_MULTISITE', true );
-					}
-
-					$gu_fs = fs_dynamic_init(
-						[
-							'id'               => '8195',
-							'slug'             => 'git-updater',
-							'premium_slug'     => 'git-updater',
-							'type'             => 'plugin',
-							'public_key'       => 'pk_2cf29ecaf78f5e10f5543c71f7f8b',
-							'is_premium'       => true,
-							'is_premium_only'  => true,
-							'has_addons'       => true,
-							'has_paid_plans'   => true,
-							'is_org_compliant' => false,
-							'trial'            => [
-								'days'               => 14,
-								'is_require_payment' => true,
-							],
-							'menu'             => [
-								'slug'    => 'git-updater',
-								'contact' => false,
-								'support' => false,
-								'network' => true,
-								'parent'  => [
-									'slug' => 'options-general.php',
-							],
-							],
-							// Set the SDK to work in a sandbox mode (for development & testing).
-							// IMPORTANT: MAKE SURE TO REMOVE SECRET KEY BEFORE DEPLOYMENT.
-							'secret_key'       => '',
-						]
-					);
-				}
-
-				return $gu_fs;
-			}
-
-			// Init Freemius.
-			gu_fs();
-			// Signal that SDK was initiated.
-			do_action( 'gu_fs_loaded' );
 		}
 	}
 }
