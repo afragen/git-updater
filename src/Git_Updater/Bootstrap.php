@@ -84,16 +84,9 @@ class Bootstrap {
 			return;
 		}
 
-		//if ( ! gu_fs()->can_use_premium_code() ) {
-		//	( new GU_Freemius() )->allow_self_update();
-		//}
-		//if ( gu_fs()->is__premium_only() ) {
-		//	( new Bootstrap_PRO() )->run();
-		//}
-		( new Init() )->run();
-
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
-		//gu_fs()->add_action( 'after_uninstall', [ new GU_Freemius(), 'gu_fs_uninstall_cleanup' ] );
+
+		( new Init() )->run();
 
 		/**
 		 * Initialize Persist Admin notices Dismissal.
@@ -140,6 +133,34 @@ class Bootstrap {
 		foreach ( $crons as $cron ) {
 			$timestamp = \wp_next_scheduled( $cron );
 			\wp_unschedule_event( $timestamp, $cron );
+		}
+	}
+
+		/**
+		 * Rename on activation.
+		 *
+		 * Correctly renames the slug when Git Updater is installed
+		 * via FTP or from plugin upload.
+		 *
+		 * Set current branch to `develop` if appropriate.
+		 *
+		 * `rename()` causes activation to fail.
+		 *
+		 * @return void
+		 */
+	public function rename_on_activation() {
+		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
+		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
+		$exploded = explode( '-', dirname( $slug ) );
+
+		if ( in_array( 'develop', $exploded, true ) ) {
+			$options = $this->get_class_vars( 'Base', 'options' );
+			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
+		}
+
+		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
+			@rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
 		}
 	}
 }

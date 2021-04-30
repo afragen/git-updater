@@ -142,8 +142,7 @@ class Base {
 		}
 
 		// Run Git Updater upgrade functions.
-		$upgrade = new GU_Upgrade();
-		$upgrade->run();
+		( new GU_Upgrade() )->run();
 
 		if ( $this->is_current_page( [ 'plugins.php', 'themes.php', 'theme-install.php' ] ) ) {
 			// Load plugin stylesheet.
@@ -463,7 +462,7 @@ class Base {
 			return $source;
 		}
 
-		if ( gu_fs()->is__premium_only() ) {
+		if ( $this->is_premium_only() ) {
 			( new Branch() )->set_branch_on_switch( $slug );
 
 			/*

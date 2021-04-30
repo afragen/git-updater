@@ -1,14 +1,9 @@
 {
-    "_readme": [
-        "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
-        "This file is @generated automatically"
-    ],
-    "content-hash": "1dfa29e0ce72097e5dbded0f798b3609",
     "packages": [
         {
             "name": "afragen/singleton",
             "version": "dev-master",
+            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
@@ -23,8 +18,10 @@
             "require": {
                 "php": ">=5.4"
             },
+            "time": "2020-12-24T03:45:00+00:00",
             "default-branch": true,
             "type": "library",
+            "installation-source": "dist",
             "autoload": {
                 "classmap": [
                     "Singleton.php"
@@ -51,11 +48,12 @@
                 "issues": "https://github.com/afragen/singleton/issues",
                 "source": "https://github.com/afragen/singleton/tree/master"
             },
-            "time": "2020-12-24T03:45:00+00:00"
+            "install-path": "../afragen/singleton"
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
             "version": "dev-master",
+            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
@@ -71,8 +69,10 @@
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
+            "time": "2021-01-11T22:07:25+00:00",
             "default-branch": true,
             "type": "library",
+            "installation-source": "dist",
             "autoload": {
                 "classmap": [
                     "class-parser.php"
@@ -98,11 +98,12 @@
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
-            "time": "2021-01-11T22:07:25+00:00"
+            "install-path": "../afragen/wordpress-plugin-readme-parser"
         },
         {
             "name": "afragen/wp-dependency-installer",
             "version": "3.1.0",
+            "version_normalized": "3.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dependency-installer.git",
@@ -118,7 +119,9 @@
                 "collizo4sky/persist-admin-notices-dismissal": "^1",
                 "php": ">=5.6"
             },
+            "time": "2020-11-10T23:03:42+00:00",
             "type": "library",
+            "installation-source": "dist",
             "autoload": {
                 "classmap": [
                     "wp-dependency-installer.php"
@@ -151,11 +154,12 @@
                 "issues": "https://github.com/afragen/wp-dependency-installer/issues",
                 "source": "https://github.com/afragen/wp-dependency-installer"
             },
-            "time": "2020-11-10T23:03:42+00:00"
+            "install-path": "../afragen/wp-dependency-installer"
         },
         {
             "name": "collizo4sky/persist-admin-notices-dismissal",
             "version": "1.4.4",
+            "version_normalized": "1.4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/w3guy/persist-admin-notices-dismissal.git",
@@ -170,7 +174,9 @@
             "require": {
                 "php": ">=5.4"
             },
+            "time": "2020-12-31T17:12:37+00:00",
             "type": "library",
+            "installation-source": "dist",
             "autoload": {
                 "classmap": [
                     "persist-admin-notices-dismissal.php"
@@ -192,11 +198,12 @@
                 "issues": "https://github.com/w3guy/persist-admin-notices-dismissal/issues",
                 "source": "https://github.com/w3guy/persist-admin-notices-dismissal"
             },
-            "time": "2020-12-31T17:12:37+00:00"
+            "install-path": "../collizo4sky/persist-admin-notices-dismissal"
         },
         {
             "name": "erusev/parsedown",
             "version": "1.7.4",
+            "version_normalized": "1.7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/erusev/parsedown.git",
@@ -215,7 +222,9 @@
             "require-dev": {
                 "phpunit/phpunit": "^4.8.35"
             },
+            "time": "2019-12-30T22:54:17+00:00",
             "type": "library",
+            "installation-source": "dist",
             "autoload": {
                 "psr-0": {
                     "Parsedown": ""
@@ -242,21 +251,9 @@
                 "issues": "https://github.com/erusev/parsedown/issues",
                 "source": "https://github.com/erusev/parsedown/tree/1.7.x"
             },
-            "time": "2019-12-30T22:54:17+00:00"
+            "install-path": "../erusev/parsedown"
         }
     ],
-    "packages-dev": [],
-    "aliases": [],
-    "minimum-stability": "dev",
-    "stability-flags": {
-        "afragen/wordpress-plugin-readme-parser": 20,
-        "afragen/singleton": 20
-    },
-    "prefer-stable": true,
-    "prefer-lowest": false,
-    "platform": {
-        "php": ">=7.0"
-    },
-    "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "dev": true,
+    "dev-package-names": []
 }

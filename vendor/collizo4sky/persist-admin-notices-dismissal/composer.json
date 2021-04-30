@@ -1,0 +1,27 @@
+{
+    "name": "collizo4sky/persist-admin-notices-dismissal",
+    "description": "Simple library to persist dismissal of admin notices across pages in WordPress dashboard.",
+    "version": "1.4.4",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Collins Agbonghama",
+            "email": "me@w3guy.com",
+            "role": "developer"
+        }
+    ],
+    "prefer-stable": true,
+    "require": {
+        "php": ">=5.4"
+    },
+    "support": {
+        "issues": "https://github.com/w3guy/persist-admin-notices-dismissal/issues",
+        "source": "https://github.com/w3guy/persist-admin-notices-dismissal"
+    },
+    "autoload": {
+        "classmap": [
+            "persist-admin-notices-dismissal.php"
+        ]
+    }
+}

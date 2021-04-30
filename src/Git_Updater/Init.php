@@ -45,36 +45,6 @@ class Init {
 	}
 
 	/**
-	 * Rename on activation.
-	 *
-	 * Correctly renames the slug when Git Updater is installed
-	 * via FTP or from plugin upload.
-	 *
-	 * Set current branch to `develop` if appropriate.
-	 *
-	 * `rename()` causes activation to fail.
-	 *
-	 * @return void
-	 */
-	public function rename_on_activation() {
-		$slugs      = [ 'git-updater/git-updater.php', 'git-updater-pro/git-updater.php' ];
-		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
-		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
-		$exploded = explode( '-', dirname( $slug ) );
-
-		if ( in_array( 'develop', $exploded, true ) ) {
-			$options = $this->get_class_vars( 'Base', 'options' );
-			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
-		}
-
-		if ( $slug && ! in_array( $slug, $slugs, true ) ) {
-			$new_dir = in_array( 'pro', $exploded, true ) ? 'git-updater-pro' : 'git-updater';
-			@rename( $plugin_dir . dirname( $slug ), $plugin_dir . $new_dir );
-		}
-	}
-
-	/**
 	 * Let's get going.
 	 */
 	public function run() {
