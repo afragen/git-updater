@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\PRO\Add_Ons;
 use Fragen\Git_Updater\PRO\Branch;
 
 /*
@@ -139,6 +140,7 @@ class Base {
 
 		if ( ! $hide_settings && Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
+			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
 		}
 
 		// Run Git Updater upgrade functions.
