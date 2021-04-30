@@ -25,3 +25,11 @@ div.hide-git-updater-settings {
 .git-updater-settings .form-table th[scope='row']:empty {
 	display: none;
 }
+
+@media screen and (max-width: 1100px) and (min-width: 782px), (max-width: 480px) {
+		.git-updater.plugin-card .action-links {
+		float: left;
+		margin-left:0;
+		margin-top:50px;
+	}
+}
