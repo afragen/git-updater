@@ -188,10 +188,12 @@ class Add_Ons {
 	 * @return void
 	 */
 	public function insert_cards( $action ) {
+		echo '<div class="wp-list-table widefat plugin-install">';
 		foreach ( $this->config as $addon ) {
 			$addon = \array_pop( $addon );
 			$this->make_card( $addon, $action );
 		}
+		echo '</div>';
 	}
 
 	/**
