@@ -25,3 +25,7 @@ div.hide-git-updater-settings {
 .git-updater-settings .form-table th[scope='row']:empty {
 	display: none;
 }
+
+.git-updater-settings .git-updater.plugin-card form.settings p.submit {
+	float: none;
+}
