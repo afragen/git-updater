@@ -159,7 +159,7 @@ class Add_Ons {
 						'slug'     => 'git-updater-gist/git-updater-gist.php',
 						'uri'      => 'afragen/git-updater-gist',
 						'branch'   => 'main',
-						'required' => false,
+						'required' => true,
 					],
 				];
 				\WP_Dependency_Installer::instance( __DIR__ )->register( $gist_api )->run()->admin_init();
