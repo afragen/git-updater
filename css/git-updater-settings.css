@@ -27,7 +27,7 @@ div.hide-git-updater-settings {
 }
 
 @media screen and (max-width: 1100px) and (min-width: 782px), (max-width: 480px) {
-		.git-updater.plugin-card .action-links {
+	.git-updater.plugin-card .action-links {
 		float: left;
 		margin-left:0;
 		margin-top:50px;

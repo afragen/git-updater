@@ -204,12 +204,12 @@ class Add_Ons {
 	public function install_api_plugin() {
 		$config = false;
 		// phpcs:disable WordPress.Security.NonceVerification
-		if ( isset( $_POST['install_api_plugin'] ) ) {
+		if ( isset( $_GET['install_api_plugin'] ) ) {
 			$_POST = $_REQUEST;
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
-			switch ( $_POST['install_api_plugin'] ) {
+			switch ( $_GET['install_api_plugin'] ) {
 				case 'gist':
 					$config = $this->config['gist'];
 					break;
@@ -272,7 +272,7 @@ class Add_Ons {
 					</div>
 					<div class="action-links">
 					<?php $install_api = add_query_arg( [ 'install_api_plugin' => $config['api'] ], $action ); ?>
-					<?php if ( \is_plugin_active( $config ) ?: 'disabled' ) : ?>
+					<?php if ( \is_plugin_active( $config['slug'] ) ) : ?>
 						<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ), 'disabled' ); ?>
 					<?php else : ?>
 						<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $install_api ); ?>">
