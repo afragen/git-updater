@@ -711,6 +711,13 @@ class Settings {
 			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
 		}
 
+		// Go to Freemius purchase link.
+		if ( isset( $_GET['purchase_premium_addon'] ) && check_admin_referer( 'gu-freemius-premium-addon' ) ) {
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+			wp_redirect( wp_unslash( $_GET['purchase_premium_addon'] ) );
+			exit;
+		}
+
 		/**
 		 * Filter to add to $option_page array.
 		 *

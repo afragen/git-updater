@@ -20,17 +20,32 @@ class Add_Ons {
 	use GU_Trait;
 
 	/**
-	 * Holds Add-on config data.
+	 * Holds free add-on config data.
 	 *
 	 * @var array
 	 */
-	protected $config;
+	protected $addon;
+
+	/**
+	 * Holds premium add-on config data.
+	 *
+	 * @var array
+	 */
+	protected $premium_addon;
+
+	/**
+	 *  Holds URL for form action.
+	 *
+	 * @var string
+	 */
+	protected $action;
 
 	/**
 	 * Add_Ons constructor.
 	 */
 	public function __construct() {
-		$this->config = $this->load_addon_config();
+		$this->addon   = $this->load_addon_config();
+		$this->premium = $this->load_premium_config();
 	}
 
 	/**
@@ -90,6 +105,28 @@ class Add_Ons {
 	}
 
 	/**
+	 * Load premium add-on data.
+	 *
+	 * @return array
+	 */
+	protected function load_premium_config() {
+		$config = [
+			[
+				'pro' => [
+					'repo'        => 'git-updater-pro',
+					'slug'        => 'git-updater-pro/git-updater-pro.php',
+					'name'        => 'Git Updater PRO',
+					'description' => 'My super awesome plugin.',
+					'author'      => 'Andy Fragen',
+					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
+				],
+			],
+		];
+
+		return $config;
+	}
+
+	/**
 	 * Load needed action/filter hooks.
 	 */
 	public function load_hooks() {
@@ -129,13 +166,9 @@ class Add_Ons {
 	 */
 	public function add_admin_page( $tab, $action ) {
 		if ( 'git_updater_addons' === $tab ) {
-			$action = add_query_arg( 'tab', $tab, $action );
-			$this->admin_page_notices(); ?>
-			<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
-				<?php do_settings_sections( 'git_updater_addons_settings' ); ?>
-			</form>
-			<?php
-			$this->insert_cards( $action );
+			$this->action = add_query_arg( 'tab', $tab, $action );
+			$this->admin_page_notices();
+			do_settings_sections( 'git_updater_addons_settings' );
 		}
 	}
 
@@ -165,33 +198,48 @@ class Add_Ons {
 		add_settings_section(
 			'addons',
 			esc_html__( 'Add-Ons', 'git-updater' ),
-			[ $this, 'print_section_addons' ],
+			[ $this, 'insert_cards' ],
+			'git_updater_addons_settings'
+		);
+
+		add_settings_section(
+			'premium_addons',
+			esc_html__( 'Premium Add-Ons', 'git-updater' ),
+			[ $this, 'insert_premium_cards' ],
 			'git_updater_addons_settings'
 		);
 	}
 
 	/**
-	 * Print the Add Ons text.
+	 * Some method to insert cards for API plugin installation.
 	 *
 	 * @return void
 	 */
-	public function print_section_addons() {
+	public function insert_cards() {
 		echo '<p>';
 		esc_html_e( 'Install additional API plugins.', 'git-updater' );
 		echo '</p>';
+		echo '<div class="wp-list-table widefat plugin-install">';
+		foreach ( $this->addon as $addon ) {
+			$addon = \array_pop( $addon );
+			$this->make_card( 'free', $addon );
+		}
+		echo '</div>';
 	}
 
 	/**
-	 * Some method to insert cards for API plugin installation.
+	 * Some method to insert cards for premium plugin purchase.
 	 *
-	 * @param string $action URL for form action.
 	 * @return void
 	 */
-	public function insert_cards( $action ) {
+	public function insert_premium_cards() {
+		echo '<p>';
+		esc_html_e( 'Install premium plugins.', 'git-updater' );
+		echo '</p>';
 		echo '<div class="wp-list-table widefat plugin-install">';
-		foreach ( $this->config as $addon ) {
-			$addon = \array_pop( $addon );
-			$this->make_card( $addon, $action );
+		foreach ( $this->premium as $addon ) {
+			$addon = array_pop( $addon );
+			$this->make_card( 'premium', $addon );
 		}
 		echo '</div>';
 	}
@@ -205,27 +253,27 @@ class Add_Ons {
 	 */
 	public function install_api_plugin() {
 		$config = false;
-		// phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['install_api_plugin'] ) ) {
 			$_POST = $_REQUEST;
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
 			switch ( $_GET['install_api_plugin'] ) {
+			// phpcs:enable
 				case 'gist':
-					$config = $this->config['gist'];
+					$config = $this->addon['gist'];
 					break;
 				case 'bitbucket':
-					$config = $this->config['bitbucket'];
+					$config = $this->addon['bitbucket'];
 					break;
 				case 'gitlab':
-					$config = $this->config['gitlab'];
+					$config = $this->addon['gitlab'];
 					break;
 				case 'gitea':
-					$config = $this->config['gitea'];
+					$config = $this->addon['gitea'];
 					break;
 			}
-			// phpcs:enable
 
 			if ( $config ) {
 				\WP_Dependency_Installer::instance( __DIR__ )->register( $config )->run()->admin_init();
@@ -239,55 +287,101 @@ class Add_Ons {
 	/**
 	 * Create Add-on card.
 	 *
+	 * @param string $type   Type of addon, free|premium.
 	 * @param array  $config Array of add-on config data.
-	 * @param string $action URL for form action.
 	 *
 	 * @return void
 	 */
-	public function make_card( $config, $action ) {
-		$config['repo']                 = basename( $config['uri'] );
-		$config['owner']                = dirname( $config['uri'] );
-		$repo_api                       = Singleton::get_instance( 'API\API', $this )->get_repo_api( 'github' );
-		$repo_api->type->owner          = $config['owner'];
-		$repo_api->type->slug           = $config['repo'];
-		$repo_api->type->branch         = $config['branch'];
-		$repo_api->type->type           = 'plugin';
-		$repo_api->type->git            = 'github';
-		$repo_api->type->enterprise     = false;
-		$repo_api->type->enterprise_api = false;
+	public function make_card( $type, $config ) {
+		if ( 'free' === $type ) {
+			$config['repo']                 = basename( $config['uri'] );
+			$config['owner']                = dirname( $config['uri'] );
+			$repo_api                       = Singleton::get_instance( 'API\API', $this )->get_repo_api( 'github' );
+			$repo_api->type->owner          = $config['owner'];
+			$repo_api->type->slug           = $config['repo'];
+			$repo_api->type->branch         = $config['branch'];
+			$repo_api->type->type           = 'plugin';
+			$repo_api->type->git            = 'github';
+			$repo_api->type->enterprise     = false;
+			$repo_api->type->enterprise_api = false;
 
-		$plugin_icon_url = \plugin_dir_url( dirname( __DIR__ ) ) . 'assets/icon.svg';
-		$cache           = $this->get_repo_cache( $config['repo'] );
-		if ( ! $cache ) {
-			$repo_api->get_remote_info( basename( $config['slug'] ) );
 			$cache = $this->get_repo_cache( $config['repo'] );
+			if ( ! $cache ) {
+				$repo_api->get_remote_info( basename( $config['slug'] ) );
+				$cache = $this->get_repo_cache( $config['repo'] );
+			}
+			$config['description'] = $cache[ $config['repo'] ]['Description'];
+			$config['author']      = $cache[ $config['repo'] ]['Author'];
 		}
 
+		$plugin_icon_url = \plugin_dir_url( dirname( __DIR__ ) ) . 'assets/icon.svg';
+
 		?>
-			<div class="git-updater plugin-card plugin-card-<?php echo sanitize_html_class( $config['repo'] ); ?>">
-				<div class="plugin-card-top">
-					<div class="name column-name">
-						<h3>
-						<?php echo esc_html( $config['name'] ); ?>
-						<img src="<?php echo esc_attr( $plugin_icon_url ); ?>" class="plugin-icon" alt="" />
-						</h3>
-					</div>
-					<div class="action-links">
-					<?php $install_api = add_query_arg( [ 'install_api_plugin' => $config['api'] ], $action ); ?>
-					<?php if ( \is_plugin_active( $config['slug'] ) ) : ?>
-						<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ), 'disabled' ); ?>
-					<?php else : ?>
-						<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $install_api ); ?>">
-							<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
-						</form>
-					<?php endif; ?>
-					</div>
-					<div class="desc column-description">
-						<p><?php echo esc_html( $cache[ $config['repo'] ]['Description'] ); ?></p>
-						<p class="authors"><?php echo esc_html( $cache[ $config['repo'] ]['Author'] ); ?></p>
-					</div>
+		<div class="git-updater plugin-card plugin-card-<?php echo sanitize_html_class( $config['repo'] ); ?>">
+			<div class="plugin-card-top">
+				<div class="name column-name">
+					<h3>
+					<?php echo esc_html( $config['name'] ); ?>
+					<img src="<?php echo esc_attr( $plugin_icon_url ); ?>" class="plugin-icon" alt="" />
+					</h3>
+				</div>
+				<div class="action-links">
+					<?php
+					if ( 'free' === $type ) {
+						$this->free_button( $config );
+					}
+					if ( 'premium' === $type ) {
+						$this->premium_button( $config );
+					}
+					?>
+				</div>
+				<div class="desc column-description">
+					<p><?php echo esc_html( $config['description'] ); ?></p>
+					<p class="authors"><?php echo esc_html( $config['author'] ); ?></p>
 				</div>
 			</div>
+		</div>
 		<?php
+	}
+
+	/**
+	 * Get button for free add-on card.
+	 *
+	 * @param array $config Array of plugin data.
+	 *
+	 * @return void
+	 */
+	private function free_button( $config ) {
+		$install_api = add_query_arg( [ 'install_api_plugin' => $config['api'] ], $this->action );
+		if ( \is_plugin_active( $config['slug'] ) ) {
+			submit_button( esc_html__( 'Install & Activate', 'git-updater' ), 'disabled' );
+		} else {
+			wp_create_nonce( $config['api'] );
+			?>
+			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $install_api ); ?>">
+				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
+			</form>
+			<?php
+		}
+	}
+
+	/**
+	 * Get button for premium add-on card.
+	 *
+	 * @param array $config Array of plugin data.
+	 *
+	 * @return void
+	 */
+	private function premium_button( $config ) {
+		$purchase_addon = add_query_arg( [ 'purchase_premium_addon' => esc_url( wp_nonce_url( $config['link'], 'gu-freemius-premium-addon' ) ) ], $this->action );
+		if ( \is_plugin_active( $config['slug'] ) ) {
+			submit_button( esc_html__( 'Free Trial', 'git-updater' ), 'disabled' );
+		} else {
+			?>
+			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $purchase_addon ); ?>">
+				<?php submit_button( esc_html__( 'Free Trial', 'git-updater' ) ); ?>
+			</form>
+			<?php
+		}
 	}
 }
