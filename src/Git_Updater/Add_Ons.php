@@ -116,7 +116,7 @@ class Add_Ons {
 					'repo'        => 'git-updater-pro',
 					'slug'        => 'git-updater-pro/git-updater-pro.php',
 					'name'        => 'Git Updater PRO',
-					'description' => 'My super awesome plugin.',
+					'description' => 'A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more.',
 					'author'      => 'Andy Fragen',
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
 				],
