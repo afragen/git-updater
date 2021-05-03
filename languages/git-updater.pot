@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Git Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 9.9.12.4\n"
+"Project-Id-Version: Git Updater 9.9.12.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-04-30T02:37:32+00:00\n"
+"POT-Creation-Date: 2021-05-03T17:29:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: git-updater\n"
@@ -36,17 +36,35 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:41
-#: src/Git_Updater/Add_Ons.php:102
-msgid "Add Ons"
+#: src/Git_Updater/Add_Ons.php:163
+#: src/Git_Updater/Add_Ons.php:221
+msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:85
-msgid "I did something."
+#: src/Git_Updater/Add_Ons.php:204
+msgid "Git Updater API plugin installed."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:121
+#: src/Git_Updater/Add_Ons.php:228
+msgid "Premium Add-Ons"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:241
 msgid "Install additional API plugins."
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:258
+msgid "Install premium plugins."
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:380
+#: src/Git_Updater/Add_Ons.php:385
+msgid "Install & Activate"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:401
+#: src/Git_Updater/Add_Ons.php:405
+msgid "Free Trial"
 msgstr ""
 
 #: src/Git_Updater/API/GitHub_API.php:352
@@ -87,7 +105,7 @@ msgid "Git Updater is missing required composer dependencies. <a href=\"%s\" tar
 msgstr ""
 
 #. translators: 1: minimum PHP version required
-#: src/Git_Updater/Bootstrap.php:113
+#: src/Git_Updater/Bootstrap.php:112
 msgid "Git Updater cannot run on PHP versions older than %1$s."
 msgstr ""
 
@@ -120,7 +138,7 @@ msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
 #: src/Git_Updater/Settings.php:133
-#: src/Git_Updater/Settings.php:790
+#: src/Git_Updater/Settings.php:799
 msgid "Settings"
 msgstr ""
 
@@ -170,19 +188,19 @@ msgstr ""
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:824
+#: src/Git_Updater/Settings.php:833
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:825
+#: src/Git_Updater/Settings.php:834
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:826
+#: src/Git_Updater/Settings.php:835
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:868
+#: src/Git_Updater/Settings.php:877
 msgid "Installed Plugins and Themes"
 msgstr ""
 

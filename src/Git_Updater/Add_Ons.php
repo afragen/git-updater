@@ -111,7 +111,7 @@ class Add_Ons {
 	 */
 	protected function load_premium_config() {
 		$config = [
-			'pro'       => [
+			'pro'            => [
 				[
 					'repo'        => 'git-updater-pro',
 					'slug'        => 'git-updater-pro/git-updater-pro.php',
@@ -121,7 +121,7 @@ class Add_Ons {
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
 				],
 			],
-			'additions' => [
+			'additions'      => [
 				[
 					'repo'        => 'git-updater-additions',
 					'slug'        => 'git-updater-additions/git-updater-additions.php',
@@ -131,7 +131,7 @@ class Add_Ons {
 					'link'        => null,
 				],
 			],
-					'remote-updater' => [
+			'remote-updater' => [
 				[
 					'repo'        => 'git-remote-updater',
 					'slug'        => 'git-remote-updater/git-remote-updater.php',

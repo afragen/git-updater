@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '610d74273d1097453ba7d1530516a734321443b8',
+    'reference' => '7008847d2c5342fd45dd70faf708f0b2e3253bdb',
     'name' => 'afragen/git-updater',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '610d74273d1097453ba7d1530516a734321443b8',
+      'reference' => '7008847d2c5342fd45dd70faf708f0b2e3253bdb',
     ),
     'afragen/singleton' => 
     array (
@@ -66,6 +66,15 @@
       array (
       ),
       'reference' => 'cb17b6477dfff935958ba01325f2e8a2bfa6dab3',
+    ),
+    'freemius/wordpress-sdk' => 
+    array (
+      'pretty_version' => '2.4.2',
+      'version' => '2.4.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '84a9be4717effd7697a217e0d931f48ae0d2ecc6',
     ),
   ),
 );

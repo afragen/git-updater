@@ -10,8 +10,6 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\PRO\Bootstrap as Bootstrap_PRO;
-
 /*
  * Exit if called directly.
  */
