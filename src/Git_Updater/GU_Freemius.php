@@ -69,21 +69,4 @@ class GU_Freemius {
 			do_action( 'gu_fs_loaded' );
 		}
 	}
-
-	/**
-	 * Remove Freemius dashboard update overrides.
-	 *
-	 * @return void
-	 */
-	public function allow_self_update() {
-		remove_all_filters( 'after_plugin_row_git-updater/git-updater.php' );
-		remove_all_filters( 'after_plugin_row_git-updater-pro/git-updater.php' );
-
-		add_action(
-			'admin_init',
-			function() {
-				remove_action( 'admin_footer', [ gu_fs(), '_add_premium_version_upgrade_selection_dialog_box' ] );
-			}
-		);
-	}
 }
