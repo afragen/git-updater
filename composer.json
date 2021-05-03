@@ -34,12 +34,16 @@
     "afragen/wordpress-plugin-readme-parser": "dev-master",
     "afragen/singleton": "dev-master",
     "afragen/wp-dependency-installer": "*",
-    "collizo4sky/persist-admin-notices-dismissal": "^1"
+    "collizo4sky/persist-admin-notices-dismissal": "^1",
+    "freemius/wordpress-sdk": "*"
   },
   "autoload": {
     "psr-4": {
       "Fragen\\Git_Updater\\": "src/Git_Updater/"
-    }
+    },
+    "files": [
+      "./vendor/freemius/wordpress-sdk/start.php"
+    ]
   },
   "scripts": {
     "post-update-cmd": [
