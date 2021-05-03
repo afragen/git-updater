@@ -1,6 +1,6 @@
 <?php
 /**
- * Git Updater PRO
+ * Git Updater
  *
  * @author   Andy Fragen
  * @license  MIT

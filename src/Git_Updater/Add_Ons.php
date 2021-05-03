@@ -128,7 +128,7 @@ class Add_Ons {
 					'name'        => 'Git Updater Addtions',
 					'description' => 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.',
 					'author'      => 'Andy Fragen',
-					'link'        => null,
+					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8313/plan/13771/?trial=paid',
 				],
 			],
 			'remote-updater' => [
@@ -138,7 +138,7 @@ class Add_Ons {
 					'name'        => 'Git Remote Updater',
 					'description' => 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.',
 					'author'      => 'Andy Fragen',
-					'link'        => null,
+					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8312/plan/13768/?trial=paid',
 				],
 			],
 
