@@ -125,7 +125,7 @@ class Add_Ons {
 				[
 					'repo'        => 'git-updater-additions',
 					'slug'        => 'git-updater-additions/git-updater-additions.php',
-					'name'        => 'Git Updater Addtions',
+					'name'        => 'Git Updater Additions',
 					'description' => 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.',
 					'author'      => 'Andy Fragen',
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8313/plan/13771/?trial=paid',
