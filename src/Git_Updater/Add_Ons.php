@@ -111,8 +111,8 @@ class Add_Ons {
 	 */
 	protected function load_premium_config() {
 		$config = [
-			[
-				'pro' => [
+			'pro'       => [
+				[
 					'repo'        => 'git-updater-pro',
 					'slug'        => 'git-updater-pro/git-updater-pro.php',
 					'name'        => 'Git Updater PRO',
@@ -121,6 +121,27 @@ class Add_Ons {
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
 				],
 			],
+			'additions' => [
+				[
+					'repo'        => 'git-updater-additions',
+					'slug'        => 'git-updater-additions/git-updater-additions.php',
+					'name'        => 'Git Updater Addtions',
+					'description' => 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.',
+					'author'      => 'Andy Fragen',
+					'link'        => null,
+				],
+			],
+					'remote-updater' => [
+				[
+					'repo'        => 'git-remote-updater',
+					'slug'        => 'git-remote-updater/git-remote-updater.php',
+					'name'        => 'Git Remote Updater',
+					'description' => 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.',
+					'author'      => 'Andy Fragen',
+					'link'        => null,
+				],
+			],
+
 		];
 
 		return $config;
@@ -255,6 +276,8 @@ class Add_Ons {
 		$config = false;
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['install_api_plugin'] ) ) {
+
+			// Redirect back to the Add-Ons.
 			$_POST = $_REQUEST;
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
