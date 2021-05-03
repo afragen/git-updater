@@ -19,6 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Freemius integration.
+ * Freemius 'start.php' autoloaded via composer.
  */
 class GU_Freemius {
 
@@ -39,11 +40,6 @@ class GU_Freemius {
 				global $gu_fs;
 
 				if ( ! isset( $gu_fs ) ) {
-					// Activate multisite network integration.
-					if ( ! defined( 'WP_FS__PRODUCT_8311_MULTISITE' ) ) {
-						define( 'WP_FS__PRODUCT_8311_MULTISITE', true );
-					}
-
 					$gu_fs = fs_dynamic_init(
 						[
 							'id'               => '8311',
@@ -55,14 +51,10 @@ class GU_Freemius {
 							'has_paid_plans'   => false,
 							'is_org_compliant' => false,
 							'menu'             => [
-								'slug'    => 'git-updater',
-								'account' => false,
-								'contact' => false,
-								'support' => false,
-								'network' => true,
-								'parent'  => [
-									'slug' => 'options-general.php',
-								],
+								'first-path' => 'plugins.php',
+								'account'    => false,
+								'contact'    => false,
+								'support'    => false,
 							],
 						]
 					);
