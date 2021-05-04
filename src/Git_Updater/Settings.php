@@ -372,7 +372,7 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
-				'class' => $this->is_pro_running() ? '' : 'hidden',
+				'class' => $this->is_premium_only() ? '' : 'hidden',
 			]
 		);
 
@@ -705,9 +705,17 @@ class Settings {
 	protected function redirect_on_save() {
 		$update             = false;
 		$refresh_transients = $this->refresh_transients();
+		$install_api_plugin = Singleton::get_instance( 'Add_Ons', $this )->install_api_plugin();
 		$reset_api_key      = false;
-		if ( $this->is_pro_running() ) {
+		if ( $this->is_premium_only() ) {
 			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
+		}
+
+		// Go to Freemius purchase link.
+		if ( isset( $_GET['purchase_premium_addon'] ) && check_admin_referer( 'gu-freemius-premium-addon' ) ) {
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+			wp_redirect( wp_unslash( $_GET['purchase_premium_addon'] ) );
+			exit;
 		}
 
 		/**
@@ -735,7 +743,7 @@ class Settings {
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
-		if ( $is_option_page || $refresh_transients || $reset_api_key ) {
+		if ( $is_option_page || $refresh_transients || $reset_api_key || $install_api_plugin ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
@@ -750,6 +758,7 @@ class Settings {
 					'refresh_transients' => $refresh_transients,
 					'reset'              => $reset_api_key,
 					'updated'            => $update,
+					'install_api_plugin' => $install_api_plugin,
 				],
 				$redirect_url
 			);

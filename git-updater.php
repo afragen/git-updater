@@ -12,7 +12,7 @@
  * Plugin Name:       Git Updater
  * Plugin URI:        https://github.com/afragen/git-updater
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           9.9.12.1
+ * Version:           9.9.12.9
  * Author:            Andy Fragen
  * License:           MIT
  * Domain Path:       /languages
@@ -22,9 +22,13 @@
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.2
  * Requires PHP:      7.0
+ *
+ * @fs_premium_only /src/Git_Updater_PRO
  */
 
 namespace Fragen\Git_Updater;
+
+use Fragen\Git_Updater\API\Zipfile_API;
 
 /*
  * Exit if called directly.
@@ -44,6 +48,11 @@ if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
 	require_once __DIR__ . '/src/Git_Updater/Bootstrap.php';
 	( new Bootstrap( __FILE__ ) )->deactivate_die();
 }
+
+register_activation_hook( __FILE__, [ new Bootstrap( __FILE__ ), 'rename_on_activation' ] );
+
+( new Zipfile_API() )->load_hooks();
+( new GU_Freemius() )->init();
 
 add_action(
 	'plugins_loaded',

@@ -20,6 +20,8 @@ use Composer\Semver\VersionParser;
 
 
 
+
+
 class InstalledVersions
 {
 private static $installed = array (
@@ -30,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'ab997d994c8cedab1e381becf546ce6c1b359b6e',
+    'reference' => '7008847d2c5342fd45dd70faf708f0b2e3253bdb',
     'name' => 'afragen/git-updater',
   ),
   'versions' => 
@@ -42,7 +44,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'ab997d994c8cedab1e381becf546ce6c1b359b6e',
+      'reference' => '7008847d2c5342fd45dd70faf708f0b2e3253bdb',
     ),
     'afragen/singleton' => 
     array (
@@ -64,6 +66,15 @@ private static $installed = array (
       ),
       'reference' => 'f878b2a815caace5f331b827b356b4eab9610561',
     ),
+    'afragen/wp-dependency-installer' => 
+    array (
+      'pretty_version' => '3.1.0',
+      'version' => '3.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '65570a1eb966bb9adfc9d9e521357da080fbdc5a',
+    ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
       'pretty_version' => '1.4.4',
@@ -82,6 +93,15 @@ private static $installed = array (
       ),
       'reference' => 'cb17b6477dfff935958ba01325f2e8a2bfa6dab3',
     ),
+    'freemius/wordpress-sdk' => 
+    array (
+      'pretty_version' => '2.4.2',
+      'version' => '2.4.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '84a9be4717effd7697a217e0d931f48ae0d2ecc6',
+    ),
   ),
 );
 private static $canGetVendors;
@@ -99,7 +119,6 @@ $packages = array();
 foreach (self::getInstalled() as $installed) {
 $packages[] = array_keys($installed['versions']);
 }
-
 
 if (1 === \count($packages)) {
 return $packages[0];
@@ -292,6 +311,7 @@ public static function reload($data)
 self::$installed = $data;
 self::$installedByVendor = array();
 }
+
 
 
 

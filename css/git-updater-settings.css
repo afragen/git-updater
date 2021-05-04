@@ -25,3 +25,12 @@ div.hide-git-updater-settings {
 .git-updater-settings .form-table th[scope='row']:empty {
 	display: none;
 }
+
+.git-updater-settings .git-updater.plugin-card form.settings p.submit {
+	float: none;
+}
+
+.git-updater.plugin-card.plugin-card-git-updater-pro .name h3::after {
+	content: "♥♥♥";
+	color:red;
+}

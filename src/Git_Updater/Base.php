@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
+use Fragen\Git_Updater\PRO\Add_Ons;
 use Fragen\Git_Updater\PRO\Branch;
 
 /*
@@ -139,11 +140,11 @@ class Base {
 
 		if ( ! $hide_settings && Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
+			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
 		}
 
 		// Run Git Updater upgrade functions.
-		$upgrade = new GU_Upgrade();
-		$upgrade->run();
+		( new GU_Upgrade() )->run();
 
 		if ( $this->is_current_page( [ 'plugins.php', 'themes.php', 'theme-install.php' ] ) ) {
 			// Load plugin stylesheet.
@@ -463,7 +464,7 @@ class Base {
 			return $source;
 		}
 
-		if ( $this->is_pro_running() ) {
+		if ( $this->is_premium_only() ) {
 			( new Branch() )->set_branch_on_switch( $slug );
 
 			/*

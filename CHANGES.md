@@ -3,10 +3,9 @@
 * added default values in API constructors for future proofing
 * correctly apply `Primary Branch` with rollback to tag
 * removed Git APIs and placed in plugins
-* move `Zipfile_API` to PRO
-* move `Branch` to PRO
+* move `Branch` to Git Updater PRO
 * restructure for `API\API.php` and `REST\REST_API`, `REST\Rest_Update`, and `REST\Rest_Upgrader_Skin`
-* move REST, WP-CLI, and `Remote Management` to  PRO
+* move REST, WP-CLI, and `Remote Management` to  Git Updater PRO
 * remove deprecated elements of `Remote_Management`
 * remove `Settings::set_auth_required()`, now set in API plugins
 * update `Settings::unset_stale_options()`
@@ -27,8 +26,9 @@
 * remove deprecated override dot org constant
 * added setting to display `_deprecated_hook()` data in debug.log
 * skip `_deprecated_hook()` `trigger_error()` in development environment
-* add upsell notice
 * zero value of repo cache release asset `$url` if `wp_remote_get( $url )` not HTTP code 200 when checking release asset redirect
+* add **Add-Ons** tab for installing API plugins
+* add Freemius integration for analytics
 
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
