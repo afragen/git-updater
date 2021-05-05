@@ -299,7 +299,7 @@ class Add_Ons {
 			}
 
 			if ( $config ) {
-				\WP_Dependency_Installer::instance( __DIR__ )->register( $config )->run()->admin_init();
+				\WP_Dependency_Installer::instance( __DIR__ )->register( $config )->admin_init();
 				return true;
 			}
 		}
