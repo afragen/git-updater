@@ -92,6 +92,7 @@ class Base {
 	 * Constructor.
 	 */
 	public function __construct() {
+		static::$options = get_site_option( 'git_updater', [] );
 		$this->set_installed_apis();
 		$this->add_extra_headers();
 	}
