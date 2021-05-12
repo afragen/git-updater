@@ -256,7 +256,7 @@ class Settings {
 		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		// phpcs:enable
-		$logo = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitHub_Updater_logo_small.png' );
+		$logo = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>

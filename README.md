@@ -1,4 +1,4 @@
-![Git Updater](./assets/GitHub_Updater_logo_small.png)
+![Git Updater](./assets/GitUpdater_Logo.png)
 
 # Git Updater
 

@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Git Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 9.9.12.8\n"
+"Project-Id-Version: Git Updater 9.9.12.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-05-03T17:29:22+00:00\n"
+"POT-Creation-Date: 2021-05-12T03:39:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: git-updater\n"
@@ -100,12 +100,12 @@ msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
 #. translators: %s: documentation URL
-#: src/Git_Updater/Bootstrap.php:70
+#: src/Git_Updater/Bootstrap.php:68
 msgid "Git Updater is missing required composer dependencies. <a href=\"%s\" target=\"_blank\" rel=\"noopenernoreferer\">Learn more.</a>"
 msgstr ""
 
 #. translators: 1: minimum PHP version required
-#: src/Git_Updater/Bootstrap.php:112
+#: src/Git_Updater/Bootstrap.php:110
 msgid "Git Updater cannot run on PHP versions older than %1$s."
 msgstr ""
 
