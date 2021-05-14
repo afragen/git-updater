@@ -26,7 +26,7 @@ or
 
 ### API plugins
 
-API plugins for Bitbucket, GitLab, Gitea, and Gist are available.
+API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins are available for a one-click install from the **Add-Ons** tab.
 
 * [Git Updater - Bitbucket](https://github.com/afragen/git-updater-bitbucket/releases/latest)
 * [Git Updater - GitLab](https://github.com/afragen/git-updater-gitlab/releases/latest)
