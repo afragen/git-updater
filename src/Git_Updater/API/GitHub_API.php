@@ -487,11 +487,6 @@ class GitHub_API extends API implements API_Interface {
 				$install['options']['github_access_token'] = $install['github_access_token'];
 			}
 		}
-		if ( $github_com ) {
-			$token = ! empty( $install['options']['github_access_token'] )
-				? $install['options']['github_access_token']
-				: $options['github_access_token'];
-		}
 
 		if ( ! empty( static::$options['github_access_token'] ) ) {
 			unset( $install['options']['github_access_token'] );
