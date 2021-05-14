@@ -26,11 +26,17 @@ div.hide-git-updater-settings {
 	display: none;
 }
 
-.git-updater-settings .git-updater.plugin-card form.settings p.submit {
-	float: none;
-}
-
+/* Add-Ons */
 .git-updater.plugin-card.plugin-card-git-updater-pro .name h3::after {
 	content: "♥♥♥";
 	color:red;
+}
+
+.git-updater.plugin-card .plugin-card-bottom .submit {
+	margin-top: 0;
+	padding: 0;
+}
+
+.git-updater.plugin-card .desc {
+	margin-right: 0;
 }

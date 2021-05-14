@@ -217,16 +217,16 @@ class Add_Ons {
 		);
 
 		add_settings_section(
-			'addons',
-			esc_html__( 'Add-Ons', 'git-updater' ),
-			[ $this, 'insert_cards' ],
+			'premium_addons',
+			esc_html__( 'Premium Add-Ons', 'git-updater' ),
+			[ $this, 'insert_premium_cards' ],
 			'git_updater_addons_settings'
 		);
 
 		add_settings_section(
-			'premium_addons',
-			esc_html__( 'Premium Add-Ons', 'git-updater' ),
-			[ $this, 'insert_premium_cards' ],
+			'addons',
+			esc_html__( 'API Add-Ons', 'git-updater' ),
+			[ $this, 'insert_cards' ],
 			'git_updater_addons_settings'
 		);
 	}
@@ -246,6 +246,7 @@ class Add_Ons {
 			$this->make_card( 'free', $addon );
 		}
 		echo '</div>';
+		echo '<div style="clear:both;"></div>';
 	}
 
 	/**
@@ -263,6 +264,7 @@ class Add_Ons {
 			$this->make_card( 'premium', $addon );
 		}
 		echo '</div>';
+		echo '<div style="clear:both;"></div>';
 	}
 
 	/**
@@ -348,20 +350,20 @@ class Add_Ons {
 					<img src="<?php echo esc_attr( $plugin_icon_url ); ?>" class="plugin-icon" alt="" />
 					</h3>
 				</div>
-				<div class="action-links">
-					<?php
-					if ( 'free' === $type ) {
-						$this->free_button( $config );
-					}
-					if ( 'premium' === $type ) {
-						$this->premium_button( $config );
-					}
-					?>
-				</div>
 				<div class="desc column-description">
 					<p><?php echo esc_html( $config['description'] ); ?></p>
 					<p class="authors"><?php echo esc_html( $config['author'] ); ?></p>
 				</div>
+			</div>
+			<div class="plugin-card-bottom">
+				<?php
+				if ( 'free' === $type ) {
+					$this->free_button( $config );
+				}
+				if ( 'premium' === $type ) {
+					$this->premium_button( $config );
+				}
+				?>
 			</div>
 		</div>
 		<?php
