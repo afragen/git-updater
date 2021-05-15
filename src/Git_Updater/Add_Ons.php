@@ -57,7 +57,7 @@ class Add_Ons {
 		$config = [
 			'gist'      => [
 				[
-					'name'     => 'Git Updater - Gist',
+					'name'     => __( 'Git Updater - Gist', 'git-updater' ),
 					'host'     => 'github',
 					'slug'     => 'git-updater-gist/git-updater-gist.php',
 					'uri'      => 'afragen/git-updater-gist',
@@ -68,7 +68,7 @@ class Add_Ons {
 			],
 			'bitbucket' => [
 				[
-					'name'     => 'Git Updater - Bitbucket',
+					'name'     => __( 'Git Updater - Bitbucket', 'git-updater' ),
 					'host'     => 'github',
 					'slug'     => 'git-updater-bitbucket/git-updater-bitbucket.php',
 					'uri'      => 'afragen/git-updater-bitbucket',
@@ -79,7 +79,7 @@ class Add_Ons {
 			],
 			'gitlab'    => [
 				[
-					'name'     => 'Git Updater - GitLab',
+					'name'     => __( 'Git Updater - GitLab', 'git-updater' ),
 					'host'     => 'github',
 					'slug'     => 'git-updater-gitlab/git-updater-gitlab.php',
 					'uri'      => 'afragen/git-updater-gitlab',
@@ -90,7 +90,7 @@ class Add_Ons {
 			],
 			'gitea'     => [
 				[
-					'name'     => 'Git Updater - Gitea',
+					'name'     => __( 'Git Updater - Gitea', 'git-updater' ),
 					'host'     => 'github',
 					'slug'     => 'git-updater-gitea/git-updater-gitea.php',
 					'uri'      => 'afragen/git-updater-gitea',
@@ -115,8 +115,8 @@ class Add_Ons {
 				[
 					'repo'        => 'git-updater-pro',
 					'slug'        => 'git-updater-pro/git-updater-pro.php',
-					'name'        => 'Git Updater PRO',
-					'description' => 'A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more.',
+					'name'        => __( 'Git Updater PRO', 'git-updater' ),
+					'description' => __( 'A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more.', 'git-updater' ),
 					'author'      => 'Andy Fragen',
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
 				],
@@ -125,8 +125,8 @@ class Add_Ons {
 				[
 					'repo'        => 'git-updater-additions',
 					'slug'        => 'git-updater-additions/git-updater-additions.php',
-					'name'        => 'Git Updater Additions',
-					'description' => 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.',
+					'name'        => __( 'Git Updater Additions', 'git-updater' ),
+					'description' => __( 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.', 'git-updater' ),
 					'author'      => 'Andy Fragen',
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8313/plan/13771/?trial=paid',
 				],
@@ -135,8 +135,8 @@ class Add_Ons {
 				[
 					'repo'        => 'git-remote-updater',
 					'slug'        => 'git-remote-updater/git-remote-updater.php',
-					'name'        => 'Git Remote Updater',
-					'description' => 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.',
+					'name'        => __( 'Git Remote Updater', 'git-updater' ),
+					'description' => __( 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.', 'git-updater' ),
 					'author'      => 'Andy Fragen',
 					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8312/plan/13768/?trial=paid',
 				],
@@ -301,13 +301,12 @@ class Add_Ons {
 			}
 
 			if ( $config ) {
-				\WP_Dependency_Installer::instance( __DIR__ )->register( $config )->admin_init();
+				\WP_Dependency_Installer::instance()->register( $config )->admin_init();
 				return true;
 			}
 		}
 		return false;
 	}
-
 
 	/**
 	 * Create Add-on card.
