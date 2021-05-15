@@ -17,7 +17,7 @@
 
 A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
 
-[Comprehensive information regarding Git Updater is available on the wiki.](https://github.com/afragen/git-updater/wiki)
+[Comprehensive information regarding Git Updater is available in the Knowledge Base.](https://git-updater.com/knowledge-base)
 
 [Install the latest version here.](https://github.com/afragen/git-updater/releases/latest)
 
