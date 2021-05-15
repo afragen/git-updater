@@ -10,7 +10,7 @@ License: MIT
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Currently, plugins or themes hosted on  Bitbucket, GitLab, Gitea, or Gist are also supported via additional API plugins. Additionally, self-hosted git servers are supported. It also allows for remote installation of plugins or themes into WordPress.
+This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Currently, plugins or themes hosted on  Bitbucket, GitLab, Gitea, or Gist are also supported via additional API plugins. Additionally, self-hosted git servers are supported.
 
 Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
@@ -24,7 +24,7 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **must not** include any extensions like `.git`.
 
-### API plugins
+### API Plugins
 
 API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins are available for a one-click install from the **Add-Ons** tab.
 

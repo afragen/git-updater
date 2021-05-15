@@ -15,7 +15,7 @@
 * Donate link: <https://thefragens.com/git-updater-donate>
 * License: MIT
 
-A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. It also allows for the remote installation of plugins or themes. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
+A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
 
 [Comprehensive information regarding Git Updater is available in the Knowledge Base.](https://git-updater.com/knowledge-base)
 
@@ -35,7 +35,7 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
 
-### API plugins
+### API Plugins
 
 API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins are available for a one-click install from the **Add-Ons** tab.
 
