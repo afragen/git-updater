@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Git Updater plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 9.9.12.9\n"
+"Project-Id-Version: Git Updater 9.9.12.12\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-05-12T03:39:30+00:00\n"
+"POT-Creation-Date: 2021-05-16T03:51:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: git-updater\n"
@@ -21,7 +21,7 @@ msgid "Git Updater"
 msgstr ""
 
 #. Plugin URI of the plugin
-msgid "https://github.com/afragen/git-updater"
+msgid "https://git-updater.com"
 msgstr ""
 
 #. Description of the plugin
@@ -36,8 +36,47 @@ msgstr ""
 msgid "Activated as mu-plugin"
 msgstr ""
 
+#: src/Git_Updater/Add_Ons.php:60
+msgid "Git Updater - Gist"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:71
+msgid "Git Updater - Bitbucket"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:82
+msgid "Git Updater - GitLab"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:93
+msgid "Git Updater - Gitea"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:118
+msgid "Git Updater PRO"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:119
+msgid "A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more."
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:128
+msgid "Git Updater Additions"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:129
+msgid "A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository."
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:138
+msgid "Git Remote Updater"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:139
+msgid "A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO."
+msgstr ""
+
 #: src/Git_Updater/Add_Ons.php:163
-#: src/Git_Updater/Add_Ons.php:221
 msgid "Add-Ons"
 msgstr ""
 
@@ -45,25 +84,29 @@ msgstr ""
 msgid "Git Updater API plugin installed."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:228
+#: src/Git_Updater/Add_Ons.php:221
 msgid "Premium Add-Ons"
+msgstr ""
+
+#: src/Git_Updater/Add_Ons.php:228
+msgid "API Add-Ons"
 msgstr ""
 
 #: src/Git_Updater/Add_Ons.php:241
 msgid "Install additional API plugins."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:258
+#: src/Git_Updater/Add_Ons.php:259
 msgid "Install premium plugins."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:380
-#: src/Git_Updater/Add_Ons.php:385
+#: src/Git_Updater/Add_Ons.php:381
+#: src/Git_Updater/Add_Ons.php:386
 msgid "Install & Activate"
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:401
-#: src/Git_Updater/Add_Ons.php:405
+#: src/Git_Updater/Add_Ons.php:402
+#: src/Git_Updater/Add_Ons.php:406
 msgid "Free Trial"
 msgstr ""
 
