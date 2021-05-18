@@ -20,6 +20,8 @@ use Composer\Semver\VersionParser;
 
 
 
+
+
 class InstalledVersions
 {
 private static $installed = array (
@@ -30,19 +32,19 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'e03aeba7d40d42ffd11766707df79bb0284ee518',
-    'name' => 'afragen/github-updater',
+    'reference' => 'e74daec780c120ee47d87d73f48ace60aa8c1be7',
+    'name' => 'afragen/git-updater',
   ),
   'versions' => 
   array (
-    'afragen/github-updater' => 
+    'afragen/git-updater' => 
     array (
       'pretty_version' => 'dev-master',
       'version' => 'dev-master',
       'aliases' => 
       array (
       ),
-      'reference' => 'e03aeba7d40d42ffd11766707df79bb0284ee518',
+      'reference' => 'fa360203beaa5a9bbce9e52e15d397cf630966d2',
     ),
     'afragen/singleton' => 
     array (
@@ -64,6 +66,15 @@ private static $installed = array (
       ),
       'reference' => 'f878b2a815caace5f331b827b356b4eab9610561',
     ),
+    'afragen/wp-dependency-installer' => 
+    array (
+      'pretty_version' => '3.1.0',
+      'version' => '3.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '65570a1eb966bb9adfc9d9e521357da080fbdc5a',
+    ),
     'collizo4sky/persist-admin-notices-dismissal' => 
     array (
       'pretty_version' => '1.4.4',
@@ -82,6 +93,15 @@ private static $installed = array (
       ),
       'reference' => 'cb17b6477dfff935958ba01325f2e8a2bfa6dab3',
     ),
+    'freemius/wordpress-sdk' => 
+    array (
+      'pretty_version' => '2.4.2',
+      'version' => '2.4.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '84a9be4717effd7697a217e0d931f48ae0d2ecc6',
+    ),
   ),
 );
 private static $canGetVendors;
@@ -99,7 +119,6 @@ $packages = array();
 foreach (self::getInstalled() as $installed) {
 $packages[] = array_keys($installed['versions']);
 }
-
 
 if (1 === \count($packages)) {
 return $packages[0];
@@ -296,6 +315,7 @@ self::$installedByVendor = array();
 
 
 
+
 private static function getInstalled()
 {
 if (null === self::$canGetVendors) {
@@ -305,7 +325,6 @@ self::$canGetVendors = method_exists('Composer\Autoload\ClassLoader', 'getRegist
 $installed = array();
 
 if (self::$canGetVendors) {
-
 foreach (ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
 if (isset(self::$installedByVendor[$vendorDir])) {
 $installed[] = self::$installedByVendor[$vendorDir];

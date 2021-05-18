@@ -1,0 +1,39 @@
+{
+  "name": "afragen/wp-dependency-installer",
+  "description": "Library that helps WordPress plugin dependency management.",
+  "version": "3.1.0",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andy Fragen",
+      "email": "andy@thefragens.com",
+      "homepage": "https://thefragens.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Matt Gibbs",
+      "homepage": "https://facetwp.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Raruto",
+      "homepage": "https://raruto.github.io",
+      "role": "Developer"
+    }
+  ],
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.6",
+    "collizo4sky/persist-admin-notices-dismissal": "^1"
+  },
+  "support": {
+    "issues": "https://github.com/afragen/wp-dependency-installer/issues",
+    "source": "https://github.com/afragen/wp-dependency-installer"
+  },
+  "autoload": {
+    "classmap": [
+      "wp-dependency-installer.php"
+    ]
+  }
+}

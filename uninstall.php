@@ -18,8 +18,8 @@
  * For more information, see the following discussion:
  * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
  *
- * @link    https://github.com/afragen/github-updater
- * @package github-updater
+ * @link    https://github.com/afragen/git-updater
+ * @package git-updater
  */
 
 // If uninstall not called from WordPress, then exit.
@@ -27,7 +27,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management' ];
+$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
 foreach ( $options as $option ) {
 	delete_option( $option );
 	delete_site_option( $option );
@@ -39,5 +39,3 @@ $column        = is_multisite() ? 'meta_key' : 'option_name';
 $delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 
 $wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
-
-@unlink( WP_CONTENT_DIR . '/tmp-readme.txt' );

@@ -1,6 +1,6 @@
 <?php
 
-use Fragen\GitHub_Updater;
+use Fragen\Git_Updater\Base;
 
 
 class Test_Base extends \WP_UnitTestCase {

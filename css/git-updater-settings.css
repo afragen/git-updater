@@ -1,0 +1,42 @@
+/* Position Settings input */
+input.ghu-callback-text {
+	width: 50%;
+}
+
+input.bitbucket_setting {
+	margin-top: 5px;
+}
+
+/* Position Save and Refresh buttons */
+.git-updater-settings form.settings p.submit {
+	float: left;
+	clear: right;
+	width: 40%;
+}
+
+.git-updater-settings form.settings.no-sub-tabs p.submit {
+	margin-top: 10px;
+}
+
+div.hide-git-updater-settings {
+	display: none;
+}
+
+.git-updater-settings .form-table th[scope='row']:empty {
+	display: none;
+}
+
+/* Add-Ons */
+.git-updater.plugin-card.plugin-card-git-updater-pro .name h3::after {
+	content: "♥♥♥";
+	color:red;
+}
+
+.git-updater.plugin-card .plugin-card-bottom .submit {
+	margin-top: 0;
+	padding: 0;
+}
+
+.git-updater.plugin-card .desc {
+	margin-right: 0;
+}

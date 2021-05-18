@@ -4,19 +4,23 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e
+class ComposerStaticInitab5aa99e983331e4fb191664237a6ba3
 {
+    public static $files = array (
+        'a80dab40a30760cb3978d020dc92e2ef' => __DIR__ . '/..' . '/freemius/wordpress-sdk/start.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'F' => 
         array (
-            'Fragen\\GitHub_Updater\\' => 22,
+            'Fragen\\Git_Updater\\' => 19,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Fragen\\GitHub_Updater\\' => 
+        'Fragen\\Git_Updater\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src/GitHub_Updater',
+            0 => __DIR__ . '/../..' . '/src/Git_Updater',
         ),
     );
 
@@ -34,16 +38,18 @@ class ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Fragen\\Singleton' => __DIR__ . '/..' . '/afragen/singleton/Singleton.php',
         'PAnD' => __DIR__ . '/..' . '/collizo4sky/persist-admin-notices-dismissal/persist-admin-notices-dismissal.php',
+        'WPDI_Plugin_Installer_Skin' => __DIR__ . '/..' . '/afragen/wp-dependency-installer/wp-dependency-installer.php',
+        'WP_Dependency_Installer' => __DIR__ . '/..' . '/afragen/wp-dependency-installer/wp-dependency-installer.php',
         'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => __DIR__ . '/..' . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitab7f12ab487d7150c70bc487a05dcf0e::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitab5aa99e983331e4fb191664237a6ba3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitab5aa99e983331e4fb191664237a6ba3::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitab5aa99e983331e4fb191664237a6ba3::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitab5aa99e983331e4fb191664237a6ba3::$classMap;
 
         }, null, ClassLoader::class);
     }
