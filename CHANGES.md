@@ -1,4 +1,5 @@
 #### [unreleased]
+* update error log message branding
 
 #### 10.0.0 / 2021-05-17
 ##### Requires PHP 7.0+
