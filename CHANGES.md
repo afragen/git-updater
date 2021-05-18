@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.0.0 / 2021-05-17
 ##### Requires PHP 7.0+
 * added default values in API constructors for future proofing
 * correctly apply `Primary Branch` with rollback to tag
