@@ -7,7 +7,7 @@
 ![WordPress Tests](https://github.com/afragen/git-updater/workflows/WordPress%20Tests/badge.svg)
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/git-updater/graphs/contributors)
-* Tags: plugin, theme, update, github, language pack, remote install
+* Tags: plugin, theme, update, github, language pack
 * Requires at least: 5.2
 * Requires PHP: 7.0
 * Tested up to: trunk
