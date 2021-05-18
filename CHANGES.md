@@ -1,5 +1,8 @@
 #### [unreleased]
+
+#### 10.0.1 / 2021-05-18
 * update error log message branding
+* ensure custom icon shows in update notice from Freemius
 
 #### 10.0.0 / 2021-05-17
 ##### Requires PHP 7.0+
