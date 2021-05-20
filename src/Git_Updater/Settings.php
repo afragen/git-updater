@@ -186,6 +186,7 @@ class Settings {
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
 		foreach ( $gits as $git ) {
+			$git = ! in_array( 'gitlab', $gits, true ) && 'gitlabce' === $git ? 'gitlab' : $git;
 			if ( array_key_exists( $git, $gu_subtabs ) ) {
 				$git_subtab[ $git ] = $gu_subtabs[ $git ];
 			}
