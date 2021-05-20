@@ -1,5 +1,6 @@
 #### [unreleased]
 
+* fix to use `intval()` as `abs()` more type specific in PHP8, fixes [#952](https://github.com/afragen/git-updater/issues/952)
 #### 10.0.1 / 2021-05-18
 * update error log message branding
 * ensure custom icon shows in update notice from Freemius

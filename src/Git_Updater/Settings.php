@@ -634,7 +634,7 @@ class Settings {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', abs( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
+			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
 			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
