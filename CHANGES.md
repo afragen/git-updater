@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 10.0.2 / 2021-05-18
+* fix to use `intval()` as `abs()` more type specific in PHP8, fixes [#952](https://github.com/afragen/git-updater/issues/952)
+* fix to display **GitLab** subtab when only using GitLab CE, fixes [#949](https://github.com/afragen/git-updater/issues/949) thanks @AMCodeHub and @kmitch-duke-edu
+
 #### 10.0.1 / 2021-05-18
 * update error log message branding
 * ensure custom icon shows in update notice from Freemius

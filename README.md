@@ -1,3 +1,11 @@
+# Transition from GitHub Updater 9.x to Git Updater 10.x
+
+Due to the renaming of the plugin folders and files, after the initial update, the plugin will be deactivated. This is a normal WordPress response to renaming a plugin folder and/or main file name. In this case, I'm doing both of these things. The plugin is designed to rename itself to the correct name. In this case the new correct name is `git-updater/git-updater.php`.
+
+This renaming process makes automated updates, just for this time, fail as the update will result in the plugin being deactivated. The deactivate/re-activate cycle must be allowed to complete for proper function. I believe this is 2-3 cycles. If you update from the plugins.php page be sure to reload the page after the initial update.
+
+[More transition information](https://git-updater.com/knowledge-base/updating-from-github-updater-to-git-updater/)
+
 ![Git Updater](./assets/GitUpdater_Logo.png)
 
 # Git Updater

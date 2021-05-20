@@ -186,6 +186,7 @@ class Settings {
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
 		foreach ( $gits as $git ) {
+			$git = ! in_array( 'gitlab', $gits, true ) && 'gitlabce' === $git ? 'gitlab' : $git;
 			if ( array_key_exists( $git, $gu_subtabs ) ) {
 				$git_subtab[ $git ] = $gu_subtabs[ $git ];
 			}
@@ -634,7 +635,7 @@ class Settings {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', abs( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
+			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
 			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php
