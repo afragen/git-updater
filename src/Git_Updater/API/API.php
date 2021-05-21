@@ -467,7 +467,7 @@ class API {
 	 */
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
-		$this->type->remote_version = strtolower( $response['Version'] );
+		$this->type->remote_version = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
 		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
 		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
 		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
