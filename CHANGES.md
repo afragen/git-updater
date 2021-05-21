@@ -1,4 +1,5 @@
 #### [unreleased]
+* cache GitHub API response failures to avoid hammering the API
 * add constant `GU_MU_Loader` to aid in mu-plugin loading of Git Updater PRO
 
 #### 10.0.2 / 2021-05-18

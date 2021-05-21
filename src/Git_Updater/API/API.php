@@ -177,10 +177,17 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	public function api( $url ) {
-		$url           = $this->get_api_url( $url );
-		$auth_header   = $this->add_auth_header( [], $url );
-		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+		$url         = $this->get_api_url( $url );
+		$auth_header = $this->add_auth_header( [], $url );
+		$type        = $this->return_repo_type();
+
+		// Use cached API failure data to avoid hammering the GitHub API.
+		$response = $this->get_repo_cache( md5( $url ) );
+		$response = $response ? $response['error_cache'] : $response;
+		$response = ! $response
+			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
+			: $response;
+
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200 ];
 
@@ -190,6 +197,20 @@ class API {
 			return $response;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
+
+			// Cache GitHub API failure data.
+			$wait = 0;
+			if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
+				$reset = (int) $response['headers']['x-ratelimit-reset'];
+				//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				$wait = date( 'i', $reset - time() );
+			}
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$timeout = isset( $_GET['git_updater_refresh_transients'] )
+				|| ! empty( static::$options['github_access_token'] )
+				? 0 : $wait;
+			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
+
 			static::$error_code = array_merge(
 				static::$error_code,
 				[
