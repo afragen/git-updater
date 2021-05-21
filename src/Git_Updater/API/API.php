@@ -206,7 +206,7 @@ class API {
 				$wait = date( 'i', $reset - time() );
 			}
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$timeout = isset( $_GET['git_updater_refresh_transients'] )
+			$timeout = get_site_transient( 'gu_refresh_cache' )
 				|| ! empty( static::$options['github_access_token'] )
 				? 0 : $wait;
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
