@@ -1,4 +1,5 @@
 #### [unreleased]
+* add constant `GU_MU_Loader` to aid in mu-plugin loading of Git Updater PRO
 
 #### 10.0.2 / 2021-05-18
 * fix to use `intval()` as `abs()` more type specific in PHP8, fixes [#952](https://github.com/afragen/git-updater/issues/952)
