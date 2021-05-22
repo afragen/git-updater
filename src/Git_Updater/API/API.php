@@ -199,32 +199,24 @@ class API {
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 
 			// Cache GitHub API failure data.
-			$wait = 0;
-			if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-				$reset = (int) $response['headers']['x-ratelimit-reset'];
-				//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-				$wait = date( 'i', $reset - time() );
-			}
+			$wait = in_array( $type['git'], [ 'github', 'gist' ], true )
+				? GitHub_API::ratelimit_reset( $response, $this->type->slug )
+				: 0;
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$timeout = get_site_transient( 'gu_refresh_cache' )
 				|| ! empty( static::$options['github_access_token'] )
 				? 0 : $wait;
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
 
-			static::$error_code = array_merge(
-				static::$error_code,
+			static::$error_code[ $this->type->slug ] = array_merge(
+				static::$error_code[ $this->type->slug ],
 				[
-					$this->type->slug => [
-						'repo' => $this->type->slug,
-						'code' => $code,
-						'name' => $this->type->name,
-						'git'  => $this->type->git,
-					],
+					'repo' => $this->type->slug,
+					'code' => $code,
+					'name' => $this->type->name,
+					'git'  => $this->type->git,
 				]
 			);
-			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
-				GitHub_API::ratelimit_reset( $response, $this->type->slug );
-			}
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {

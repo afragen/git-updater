@@ -201,13 +201,10 @@ class GitHub_API extends API implements API_Interface {
 			$reset = (int) $response['headers']['x-ratelimit-reset'];
 			//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			$wait                        = date( 'i', $reset - time() );
-			static::$error_code[ $repo ] = array_merge(
-				static::$error_code[ $repo ],
-				[
-					'git'  => 'github',
-					'wait' => $wait,
-				]
-			);
+			static::$error_code[ $repo ] = isset( static::$error_code[ $repo ] ) ? static::$error_code[ $repo ] : [];
+			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], [ 'wait' => $wait ] );
+
+			return $wait;
 		}
 	}
 
