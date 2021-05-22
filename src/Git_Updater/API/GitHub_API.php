@@ -195,6 +195,8 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @param array  $response HTTP headers.
 	 * @param string $repo     Repo name.
+	 *
+	 * @return void|int
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
