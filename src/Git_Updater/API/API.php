@@ -204,7 +204,7 @@ class API {
 				: 0;
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$timeout = get_site_transient( 'gu_refresh_cache' )
-				|| ! empty( static::$options['github_access_token'] )
+				|| ( ! empty( static::$options['github_access_token'] ) && ! in_array( $code, [ 403, 404 ], true ) )
 				? 0 : $wait;
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
 

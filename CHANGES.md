@@ -1,6 +1,7 @@
 #### [unreleased]
 * cache GitHub API response failures to avoid hammering the API
 * add constant `GU_MU_Loader` to aid in mu-plugin loading of Git Updater PRO
+* catch API errors when GitHub personal access token is set, fixes [#947](https://github.com/afragen/git-updater/issues/947)
 
 #### 10.0.2 / 2021-05-18
 * fix to use `intval()` as `abs()` more type specific in PHP8, fixes [#952](https://github.com/afragen/git-updater/issues/952)
