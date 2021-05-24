@@ -1,5 +1,5 @@
 #### [unreleased]
-* cache GitHub API response failures to avoid hammering the API
+* cache GitHub API response failures for rate limit timeout to avoid hammering the API
 * add constant `GU_MU_LOADER` to aid in mu-plugin loading of Git Updater PRO
 * catch API errors when GitHub personal access token is set, fixes [#947](https://github.com/afragen/git-updater/issues/947)
 
