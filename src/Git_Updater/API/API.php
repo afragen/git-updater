@@ -208,6 +208,7 @@ class API {
 				? 0 : $wait;
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
 
+			static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
 			static::$error_code[ $this->type->slug ] = array_merge(
 				static::$error_code[ $this->type->slug ],
 				[

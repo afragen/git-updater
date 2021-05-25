@@ -104,7 +104,7 @@ class Messages {
 		$_ratelimit = false;
 		$error_code = $this->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
-			if ( ( ! $_ratelimit && isset( $repo['code'], $repo['git'] ) )
+			if ( ( ! $_ratelimit && isset( $repo['code'], $repo['git'], $repo['wait'] ) )
 				&& in_array( $repo['code'], [ 403, 404 ], true )
 			) {
 				$_ratelimit = true;
