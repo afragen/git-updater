@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater;
 
+use Fragen\Git_Updater\Traits\GU_Trait;
+
 /*
  * Exit if called directly.
  */
@@ -29,6 +31,8 @@ add_action(
  * Class Bootstrap
  */
 class Bootstrap {
+	use GU_Trait;
+
 	/**
 	 * Holds main plugin file.
 	 *
