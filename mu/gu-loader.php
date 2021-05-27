@@ -44,6 +44,7 @@ class MU_Loader {
 	 * @return void
 	 */
 	public function run() {
+		define( 'GU_MU_LOADER', true );
 		if ( ! class_exists( 'Bootstrap' ) ) {
 			require trailingslashit( WP_PLUGIN_DIR ) . self::$plugin_file;
 		}

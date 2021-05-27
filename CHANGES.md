@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 10.1.0 / 2021-05-27
+* cache GitHub API response failures for rate limit timeout to avoid hammering the API
+* add constant `GU_MU_LOADER` to aid in mu-plugin loading of Git Updater PRO
+* catch API errors when GitHub personal access token is set, fixes [#947](https://github.com/afragen/git-updater/issues/947)
+* improved error messaging
+* oops, forgot to load `GU_Trait` for renaming from `develop` branch installation
+
 #### 10.0.2 / 2021-05-18
 * fix to use `intval()` as `abs()` more type specific in PHP8, fixes [#952](https://github.com/afragen/git-updater/issues/952)
 * fix to display **GitLab** subtab when only using GitLab CE, fixes [#949](https://github.com/afragen/git-updater/issues/949) thanks @AMCodeHub and @kmitch-duke-edu

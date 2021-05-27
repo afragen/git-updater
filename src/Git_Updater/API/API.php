@@ -177,10 +177,17 @@ class API {
 	 * @return boolean|\stdClass
 	 */
 	public function api( $url ) {
-		$url           = $this->get_api_url( $url );
-		$auth_header   = $this->add_auth_header( [], $url );
-		$type          = $this->return_repo_type();
-		$response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+		$url         = $this->get_api_url( $url );
+		$auth_header = $this->add_auth_header( [], $url );
+		$type        = $this->return_repo_type();
+
+		// Use cached API failure data to avoid hammering the GitHub API.
+		$response = $this->get_repo_cache( md5( $url ) );
+		$response = $response ? $response['error_cache'] : $response;
+		$response = ! $response
+			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
+			: $response;
+
 		$code          = (int) wp_remote_retrieve_response_code( $response );
 		$allowed_codes = [ 200 ];
 
@@ -190,20 +197,27 @@ class API {
 			return $response;
 		}
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
-			static::$error_code = array_merge(
-				static::$error_code,
+
+			// Cache GitHub API failure data.
+			$wait = in_array( $type['git'], [ 'github', 'gist' ], true )
+				? GitHub_API::ratelimit_reset( $response, $this->type->slug )
+				: 0;
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$timeout = get_site_transient( 'gu_refresh_cache' )
+				|| ( ! empty( static::$options['github_access_token'] ) && 403 !== $code )
+				? 0 : $wait;
+			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
+
+			static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
+			static::$error_code[ $this->type->slug ] = array_merge(
+				static::$error_code[ $this->type->slug ],
 				[
-					$this->type->slug => [
-						'repo' => $this->type->slug,
-						'code' => $code,
-						'name' => $this->type->name,
-						'git'  => $this->type->git,
-					],
+					'repo' => $this->type->slug,
+					'code' => $code,
+					'name' => $this->type->name,
+					'git'  => $this->type->git,
 				]
 			);
-			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
-				GitHub_API::ratelimit_reset( $response, $this->type->slug );
-			}
 			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -467,7 +481,7 @@ class API {
 	 */
 	protected function set_file_info( $response ) {
 		$this->type->transient      = $response;
-		$this->type->remote_version = strtolower( $response['Version'] );
+		$this->type->remote_version = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
 		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
 		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
 		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;

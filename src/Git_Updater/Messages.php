@@ -80,14 +80,14 @@ class Messages {
 						is_multisite() ? 'network_admin_notices' : 'admin_notices',
 						[
 							$this,
-							'show_403_error_message',
+							'show_ratelimit_error_message',
 						]
 					);
 					add_action(
 						is_multisite() ? 'network_admin_notices' : 'admin_notices',
 						[
 							$this,
-							'show_401_error_message',
+							'show_authentication_error_message',
 						]
 					);
 			}
@@ -98,19 +98,21 @@ class Messages {
 
 	/**
 	 * Create error message for 403 error.
-	 * Usually 403 as API rate limit max out.
+	 * GitHub uses 403 error as API rate limit max out.
 	 */
-	public function show_403_error_message() {
-		$_403       = false;
+	public function show_ratelimit_error_message() {
+		$_ratelimit = false;
 		$error_code = $this->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
-			if ( ( ! $_403 && isset( $repo['code'], $repo['git'] ) )
-				&& 403 === $repo['code'] && 'github' === $repo['git'] ) {
-				$_403 = true;
-				if ( ! \PAnD::is_admin_notice_active( '403-error-1' ) ) {
+			if ( ( ! $_ratelimit && isset( $repo['code'], $repo['git'], $repo['wait'] ) )
+				&& in_array( $repo['code'], [ 403, 404 ], true )
+			) {
+				$_ratelimit = true;
+				$git_server = $this->get_class_vars( 'Base', 'git_servers' )[ $repo['git'] ];
+				if ( ! \PAnD::is_admin_notice_active( 'ratelimit-error-1' ) ) {
 					return;
 				} ?>
-				<div data-dismissible="403-error-1" class="notice-error notice is-dismissible">
+				<div data-dismissible="ratelimit-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
@@ -119,14 +121,16 @@ class Messages {
 						<br>
 						<?php
 						printf(
-							/* translators: %s: wait time */
-							esc_html__( 'GitHub API&#8217;s rate limit will reset in %s minutes.', 'git-updater' ),
+							/* translators: %1$s: git server, %2$s: wait time */
+							esc_html__( '%1$s API&#8217;s rate limit will reset in %2$s minutes.', 'git-updater' ),
+							esc_attr( $git_server ),
 							esc_attr( $repo['wait'] )
 						);
 						echo '<br>';
 						printf(
-							/* translators: %s: GitHub personal access token URL */
-							wp_kses_post( __( 'It looks like you are running into GitHub API rate limits. Be sure and configure a <a href="%s">Personal Access Token</a> to avoid this issue.', 'git-updater' ) ),
+							/* translators: %1$s: git server, %2$s: GitHub personal access token URL */
+							wp_kses_post( __( 'It looks like you are running into %1$s API rate limits. Be sure and configure a <a href="%2$s">Personal Access Token</a> to avoid this issue.', 'git-updater' ) ),
+							esc_attr( $git_server ),
 							esc_url( 'https://help.github.com/articles/creating-an-access-token-for-command-line-use/' )
 						);
 						?>
@@ -140,18 +144,19 @@ class Messages {
 	/**
 	 * Create error message or 401 (Authentication Error) error.
 	 * Usually 401 as private repo with no token set or incorrect user/pass.
+	 * GitHub uses a 404 error as an authentication error.
 	 */
-	public function show_401_error_message() {
-		$_401       = false;
-		$error_code = $this->get_error_codes();
+	public function show_authentication_error_message() {
+		$_authentication = false;
+		$error_code      = $this->get_error_codes();
 		foreach ( (array) $error_code as $repo ) {
-			if ( ( ! $_401 && isset( $repo['code'] ) ) && 401 === $repo['code'] ) {
-				$_401 = true;
-				if ( ! \PAnD::is_admin_notice_active( '401-error-1' ) ) {
+			if ( ( ! $_authentication && isset( $repo['code'] ) ) && in_array( $repo['code'], [ 401, 404 ], true ) ) {
+				$_authentication = true;
+				if ( ! \PAnD::is_admin_notice_active( 'authentication-error-1' ) ) {
 					return;
 				}
 				?>
-				<div data-dismissible="401-error-1" class="notice-error notice is-dismissible">
+				<div data-dismissible="authentication-error-1" class="notice-error notice is-dismissible">
 					<p>
 						<?php
 						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
