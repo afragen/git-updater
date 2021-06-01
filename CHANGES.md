@@ -1,4 +1,5 @@
 #### [unreleased]
+* add filter to modify repos on waiting for background tasks
 
 #### 10.1.0 / 2021-05-27
 * cache GitHub API response failures for rate limit timeout to avoid hammering the API
