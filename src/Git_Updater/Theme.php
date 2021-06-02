@@ -225,19 +225,16 @@ class Theme {
 	 */
 	public function get_remote_theme_meta() {
 		$themes = [];
-		foreach ( (array) $this->config as $theme ) {
 
-			/**
-			 * Filter to skip selected GitHub repos.
-			 *
-			 * @since 10.2.0
-			 * @param bool
-			 * @param \stdClass $theme Repo object.
-			 */
-			if ( apply_filters( 'gu_github_api_no_check', false, $theme ) ) {
-				continue;
-			}
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
+		foreach ( (array) $config as $theme ) {
 			$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 			$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
@@ -569,11 +566,16 @@ class Theme {
 			$transient = new \stdClass();
 		}
 
-		foreach ( (array) $this->config as $theme ) {
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $theme ) {
 			if ( ! property_exists( $theme, 'remote_version' ) ) {
-				continue;
-			}
-			if ( apply_filters( 'gu_github_api_no_check', false, $theme ) ) {
 				continue;
 			}
 			$response = [
