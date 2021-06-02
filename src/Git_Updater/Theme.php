@@ -573,6 +573,9 @@ class Theme {
 			if ( ! property_exists( $theme, 'remote_version' ) ) {
 				continue;
 			}
+			if ( apply_filters( 'gu_github_api_no_check', false, $theme ) ) {
+				continue;
+			}
 			$response = [
 				'theme'            => $theme->slug,
 				'new_version'      => $theme->remote_version,

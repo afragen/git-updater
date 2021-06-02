@@ -365,6 +365,9 @@ class Plugin {
 			if ( ! property_exists( $plugin, 'remote_version' ) ) {
 				continue;
 			}
+			if ( apply_filters( 'gu_github_api_no_check', false, $plugin ) ) {
+				continue;
+			}
 			$response = [
 				'slug'             => $plugin->slug,
 				'plugin'           => $plugin->file,
