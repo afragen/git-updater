@@ -457,7 +457,7 @@ class API {
 	 *
 	 * @return null|string
 	 */
-	protected function get_local_info( $repo, $file ) {
+	public function get_local_info( $repo, $file ) {
 		$response = false;
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -531,7 +531,7 @@ class API {
 	 *
 	 * @return bool
 	 */
-	protected function set_readme_info( $readme ) {
+	public function set_readme_info( $readme ) {
 		foreach ( (array) $this->type->sections as $section => $value ) {
 			if ( 'description' === $section ) {
 				continue;

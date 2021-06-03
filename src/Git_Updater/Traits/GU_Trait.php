@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
 
 /**
  * Trait GU_Trait
@@ -798,5 +799,39 @@ trait GU_Trait {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Set readme and changelog data when repo set to not check API.
+	 * Get data from local files.
+	 *
+	 * @param \stdClass|bool $false Plugin API response.
+	 * @param \stdClass      $repo Repo object.
+	 *
+	 * @return \stdClass
+	 */
+	public function set_no_api_check_readme_changes( $false, $repo ) {
+		if ( $false && ! isset( $repo->remote_version ) ) {
+			$repo_api       = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
+			$changelog_file = $this->base->get_changelog_filename( $repo );
+			$changelog      = $repo_api->get_local_info( $repo, $changelog_file );
+			if ( $changelog ) {
+				$parser                      = new \Parsedown();
+				$changes                     = $parser->text( $changelog );
+				$repo->sections['changelog'] = $changes;
+			}
+
+			$readme = $repo_api->get_local_info( $repo, 'readme.txt' );
+			if ( $readme ) {
+				$parser = new Readme_Parser( $readme );
+				$readme = $parser->parse_data();
+				$repo_api->set_readme_info( $readme );
+			}
+
+			$false_arr = array_merge( (array) $false, (array) $repo );
+			$false     = (object) $false_arr;
+		}
+
+		return $false;
 	}
 }

@@ -304,6 +304,7 @@ class Theme {
 		}
 
 		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+		$false = $this->set_no_api_check_readme_changes( $false, $theme );
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $theme ) ) {
