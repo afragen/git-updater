@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 10.2.0 / 2021-06-02
+* add filter to pre-process configuration array of repositories
+* add filter to modify repos on waiting for background tasks
+
 #### 10.1.0 / 2021-05-27
 * cache GitHub API response failures for rate limit timeout to avoid hammering the API
 * add constant `GU_MU_LOADER` to aid in mu-plugin loading of Git Updater PRO

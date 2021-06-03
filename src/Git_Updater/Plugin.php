@@ -239,8 +239,16 @@ class Plugin {
 	 */
 	public function get_remote_plugin_meta() {
 		$plugins = [];
-		foreach ( (array) $this->config as $plugin ) {
 
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $plugin ) {
 			$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 			$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
@@ -350,7 +358,15 @@ class Plugin {
 			$transient = new \stdClass();
 		}
 
-		foreach ( (array) $this->config as $plugin ) {
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $plugin ) {
 			if ( ! property_exists( $plugin, 'remote_version' ) ) {
 				continue;
 			}
