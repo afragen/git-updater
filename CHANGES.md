@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.2.1  2021-06-03
+* fix _View details_ for repos not checking API
+
 #### 10.2.0 / 2021-06-02
 * add filter to pre-process configuration array of repositories
 * add filter to modify repos on waiting for background tasks

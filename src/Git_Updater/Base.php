@@ -398,7 +398,7 @@ class Base {
 	 *
 	 * @return bool|string
 	 */
-	protected function get_changelog_filename( $repo ) {
+	public function get_changelog_filename( $repo ) {
 		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$changes     = null;
 		$local_files = null;
