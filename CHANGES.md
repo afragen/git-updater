@@ -1,6 +1,9 @@
 #### [unreleased]
 
-#### 10.2.1  2021-06-03
+#### 10.2.2 / 2021-06-04
+* fix duplicate pre-process filter
+
+#### 10.2.1 / 2021-06-03
 * fix _View details_ for repos not checking API
 
 #### 10.2.0 / 2021-06-02
