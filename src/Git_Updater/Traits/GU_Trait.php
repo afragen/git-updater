@@ -377,7 +377,7 @@ trait GU_Trait {
 		 * @since 10.2.0
 		 * @param array $repos Array of repositories.
 		 */
-		$repos = apply_filters( 'gu_github_api_no_wait', $repos );
+		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
 		foreach ( $repos as $git_repo ) {
 			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
