@@ -312,7 +312,7 @@ class Theme {
 		}
 
 		// wp.org theme.
-		if ( ! $theme ) {
+		if ( ! $theme || ( isset( $theme->dot_org ) && $theme->dot_org ) ) {
 			return $false;
 		}
 
