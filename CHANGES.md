@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.3.0 / 2021-06-14
 * add `class Ignore` to make it simpler to remove a repository from Git Updater functions
 
 #### 10.2.2 / 2021-06-04
