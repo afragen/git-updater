@@ -317,7 +317,7 @@ class Plugin {
 		}
 
 		// wp.org plugin.
-		if ( ! $plugin || ( $plugin->dot_org && $plugin->primary_branch === $plugin->branch ) ) {
+		if ( ! $plugin || ( ( isset( $plugin->dot_org ) && $plugin->dot_org ) && $plugin->primary_branch === $plugin->branch ) ) {
 			return $false;
 		}
 

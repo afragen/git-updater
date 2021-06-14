@@ -296,6 +296,6 @@
             "install-path": "../freemius/wordpress-sdk"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }
