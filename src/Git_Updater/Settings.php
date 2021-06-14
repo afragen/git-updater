@@ -835,6 +835,7 @@ class Settings {
 		$lock_title    = esc_html__( 'This is a private repository.', 'git-updater' );
 		$broken_title  = esc_html__( 'This repository has not connected to the API or was unable to connect.', 'git-updater' );
 		$dot_org_title = esc_html__( 'This repository is hosted on WordPress.org.', 'git-updater' );
+		$dismiss_title = esc_html__( 'This repository has been ignored and does not connect to the API.', 'git-updater' );
 
 		$plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
@@ -868,6 +869,7 @@ class Settings {
 					'private' => isset( $e->is_private ) ? $e->is_private : false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
+					'dismiss' => isset( $e->dismiss ) ? $e->dismiss : false,
 				];
 			},
 			$type_repos
@@ -876,16 +878,18 @@ class Settings {
 		$lock    = '&nbsp;<span title="' . $lock_title . '" class="dashicons dashicons-lock"></span>';
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
+		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon   = false !== strpos( $data['type'], 'theme' )
+			$dashicon     = false !== strpos( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private = $data['private'] ? $lock : null;
-			$is_broken  = $data['broken'] ? $broken : null;
-			$override   = $this->override_dot_org( $data['type'], $data );
-			$is_dot_org = $data['dot_org'] && ! $override ? $dot_org : null;
-			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken ) . '</p>' );
+			$is_private   = $data['private'] ? $lock : null;
+			$is_broken    = $data['broken'] ? $broken : null;
+			$override     = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
+			$is_dismissed = $data['dismiss'] ? $dismiss : null;
+			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
 }

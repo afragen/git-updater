@@ -460,7 +460,8 @@ class Theme {
 			} else {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
-			if ( $this->is_premium_only() ) {
+			$ignore = $this->get_class_vars( 'Ignore', 'repos' );
+			if ( $this->is_premium_only() && ! array_key_exists( $theme->slug, $ignore ) ) {
 				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
 		}
