@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `update_site_transient()` if repo skips API checks
 
 #### 10.3.0 / 2021-06-14
 * add `class Ignore` to make it simpler to remove a repository from Git Updater functions

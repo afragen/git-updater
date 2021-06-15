@@ -304,7 +304,6 @@ class Theme {
 		}
 
 		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
-		$false = $this->set_no_api_check_readme_changes( $false, $theme );
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $theme ) ) {
@@ -568,31 +567,36 @@ class Theme {
 			$transient = new \stdClass();
 		}
 
-		/**
-		 * Filter repositories.
-		 *
-		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
-		 */
-		$config = apply_filters( 'gu_config_pre_process', $this->config );
+		foreach ( (array) $this->config as $theme ) {
+			$requires   = [
+				'RequiresPHP' => 'Requires PHP',
+				'RequiresWP'  => 'Requires at least',
+			];
+			$filepath   = 'gist' === $theme->git
+				? trailingslashit( dirname( $theme->local_path ) ) . $theme->file
+				: $theme->local_path . basename( $theme->file );
+			$theme_data = get_file_data( $filepath, $requires );
 
-		foreach ( (array) $config as $theme ) {
-			if ( ! property_exists( $theme, 'remote_version' ) ) {
-				continue;
-			}
 			$response = [
 				'theme'            => $theme->slug,
-				'new_version'      => $theme->remote_version,
 				'url'              => $theme->uri,
-				'package'          => $theme->download_link,
-				'requires'         => $theme->requires,
-				'requires_php'     => $theme->requires_php,
-				'tested'           => $theme->tested,
 				'branch'           => $theme->branch,
-				'branches'         => array_keys( $theme->branches ),
 				'type'             => "{$theme->git}-{$theme->type}",
 				'update-supported' => true,
+				'requires'         => $theme_data['RequiresWP'],
+				'requires_php'     => $theme_data['RequiresPHP'],
 			];
+			if ( property_exists( $theme, 'remote_version' ) ) {
+				$response_api_checked = [
+					'new_version'  => $theme->remote_version,
+					'package'      => $theme->download_link,
+					'tested'       => $theme->tested,
+					'requires'     => $theme->requires,
+					'requires_php' => $theme->requires_php,
+					'branches'     => array_keys( $theme->branches ),
+				];
+				$response             = array_merge( $response, $response_api_checked );
+			}
 
 			if ( $this->can_update_repo( $theme ) ) {
 				// Skip on RESTful updating.

@@ -359,80 +359,85 @@ class Plugin {
 			$transient = new \stdClass();
 		}
 
-		/**
-		 * Filter repositories.
-		 *
-		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
-		 */
-		$config = apply_filters( 'gu_config_pre_process', $this->config );
+		foreach ( (array) $this->config as $plugin ) {
+				$requires    = [
+					'RequiresPHP' => 'Requires PHP',
+					'RequiresWP'  => 'Requires at least',
+				];
+				$filepath    = 'gist' === $plugin->git
+					? trailingslashit( dirname( $plugin->local_path ) ) . $plugin->file
+					: $plugin->local_path . basename( $plugin->file );
+				$plugin_data = get_file_data( $filepath, $requires );
 
-		foreach ( (array) $config as $plugin ) {
-			if ( ! property_exists( $plugin, 'remote_version' ) ) {
-				continue;
-			}
-			$response = [
-				'slug'             => $plugin->slug,
-				'plugin'           => $plugin->file,
-				'new_version'      => $plugin->remote_version,
-				'url'              => $plugin->uri,
-				'package'          => $plugin->download_link,
-				'icons'            => $plugin->icons,
-				'tested'           => $plugin->tested,
-				'requires'         => $plugin->requires,
-				'requires_php'     => $plugin->requires_php,
-				'icons'            => $plugin->icons,
-				'banners'          => $plugin->banners,
-				'branch'           => $plugin->branch,
-				'branches'         => array_keys( $plugin->branches ),
-				'type'             => "{$plugin->git}-{$plugin->type}",
-				'update-supported' => true,
-			];
+				$response = [
+					'slug'             => $plugin->slug,
+					'plugin'           => $plugin->file,
+					'url'              => $plugin->uri,
+					'icons'            => $plugin->icons,
+					'icons'            => $plugin->icons,
+					'banners'          => $plugin->banners,
+					'branch'           => $plugin->branch,
+					'type'             => "{$plugin->git}-{$plugin->type}",
+					'update-supported' => true,
+					'requires'         => $plugin_data['RequiresWP'],
+					'requires_php'     => $plugin_data['RequiresPHP'],
+				];
+				if ( property_exists( $plugin, 'remote_version' ) ) {
+					$response_api_checked = [
+						'new_version'  => $plugin->remote_version,
+						'package'      => $plugin->download_link,
+						'tested'       => $plugin->tested,
+						'requires'     => $plugin->requires,
+						'requires_php' => $plugin->requires_php,
+						'branches'     => array_keys( $plugin->branches ),
+					];
+					$response             = array_merge( $response, $response_api_checked );
+				}
 
-			if ( $this->can_update_repo( $plugin ) ) {
-				// Skip on RESTful updating.
-				// phpcs:disable WordPress.Security.NonceVerification.Recommended
-				if ( isset( $_GET['action'], $_GET['plugin'] )
+				if ( $this->can_update_repo( $plugin ) ) {
+					// Skip on RESTful updating.
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
+					if ( isset( $_GET['action'], $_GET['plugin'] )
 					&& 'git-updater-update' === $_GET['action']
 					&& $response['slug'] === $_GET['plugin']
-				) {
-					continue;
-				}
-				//phpcs:enable
+					) {
+						continue;
+					}
+					//phpcs:enable
 
-				// Pull update from dot org if not overriding.
-				if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
-					continue;
-				}
+					// Pull update from dot org if not overriding.
+					if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
+						continue;
+					}
 
-				// Update download link for release_asset non-primary branches.
-				if ( $plugin->release_asset && $plugin->primary_branch !== $plugin->branch ) {
-					$response['package'] = isset( $plugin->branches[ $plugin->branch ] )
+					// Update download link for release_asset non-primary branches.
+					if ( $plugin->release_asset && $plugin->primary_branch !== $plugin->branch ) {
+						$response['package'] = isset( $plugin->branches[ $plugin->branch ] )
 						? $plugin->branches[ $plugin->branch ]['download']
 						: null;
+					}
+
+					$transient->response[ $plugin->file ] = (object) $response;
+				} else {
+					// Add repo without update to $transient->no_update for 'View details' link.
+					if ( ! isset( $transient->no_update[ $plugin->file ] ) ) {
+						$transient->no_update[ $plugin->file ] = (object) $response;
+					}
+
+					$overrides = apply_filters( 'gu_override_dot_org', [] );
+					$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
+
+					if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
+						unset( $transient->response[ $plugin->file ] );
+					}
 				}
 
-				$transient->response[ $plugin->file ] = (object) $response;
-			} else {
-				// Add repo without update to $transient->no_update for 'View details' link.
-				if ( ! isset( $transient->no_update[ $plugin->file ] ) ) {
-					$transient->no_update[ $plugin->file ] = (object) $response;
-				}
-
-				$overrides = apply_filters( 'gu_override_dot_org', [] );
-				$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
-
-				if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
-					unset( $transient->response[ $plugin->file ] );
-				}
-			}
-
-			// Set transient on rollback.
+				// Set transient on rollback.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
-			) {
-				$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
-			}
+				if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
+				) {
+					$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
+				}
 		}
 		if ( property_exists( $transient, 'response' ) ) {
 			update_site_option( 'git_updater_plugin_updates', $transient->response );
