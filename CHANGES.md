@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.3.2 / 2021-06-14
+* fix `set_no_api_check_readme_changes()` conditional
+
 #### 10.3.1 / 2021-06-14
 * update `update_site_transient()` if repo skips API checks
 
