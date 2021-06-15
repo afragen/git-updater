@@ -1,6 +1,7 @@
 #### [unreleased]
 * add some defaults into `plugins_api()`
 * remove Freemius from autoloader
+* more error checking
 
 #### 10.3.2 / 2021-06-14
 * fix `set_no_api_check_readme_changes()` conditional
