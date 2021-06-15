@@ -839,6 +839,7 @@ trait GU_Trait {
 
 			$repo->requires     = empty( $repo->requires ) ? $repo_data['RequiresWP'] : $repo->requires;
 			$repo->requires_php = empty( $repo->requires_php ) ? $repo_data['RequiresPHP'] : $repo->requires_php;
+			$repo->version      = $repo->local_version;
 
 			$false_arr = array_merge( (array) $false, (array) $repo );
 			$false     = (object) $false_arr;
