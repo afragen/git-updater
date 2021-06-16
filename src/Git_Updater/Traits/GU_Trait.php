@@ -354,6 +354,7 @@ trait GU_Trait {
 
 	/**
 	 * Check to see if wp-cron/background updating has finished.
+	 * Or not managed by Git Updater.
 	 *
 	 * @param null|\stdClass $repo Repo object.
 	 *
@@ -364,8 +365,10 @@ trait GU_Trait {
 		if ( null !== $repo ) {
 			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
 
+			// Probably not managed by Git Updater if $cache is empty.
 			return empty( $cache );
 		}
+
 		$repos = array_merge(
 			Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs(),
 			Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs()
