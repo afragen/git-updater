@@ -327,7 +327,7 @@ class Plugin {
 		$response->author        = $plugin->author;
 		$response->homepage      = $plugin->homepage;
 		$response->donate_link   = $plugin->donate_link;
-		$response->version       = $plugin->remote_version ?? null;
+		$response->version       = $plugin->remote_version ?? $plugin->local_version;
 		$response->sections      = $plugin->sections;
 		$response->requires      = $plugin->requires;
 		$response->requires_php  = $plugin->requires_php;
