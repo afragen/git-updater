@@ -29,8 +29,6 @@ class GU_Freemius {
 	 * @return array|void
 	 */
 	public function init() {
-		require_once dirname( __DIR__, 2 ) . '/vendor/freemius/wordpress-sdk/start.php';
-
 		if ( ! function_exists( 'gu_fs' ) ) {
 
 			/**
@@ -42,6 +40,10 @@ class GU_Freemius {
 				global $gu_fs;
 
 				if ( ! isset( $gu_fs ) ) {
+
+					// Init Freemius SDK.
+					require_once dirname( __DIR__, 2 ) . '/vendor/freemius/wordpress-sdk/start.php';
+
 					$gu_fs = fs_dynamic_init(
 						[
 							'id'               => '8311',
