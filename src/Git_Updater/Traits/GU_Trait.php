@@ -811,7 +811,7 @@ trait GU_Trait {
 	 * @return \stdClass
 	 */
 	public function set_no_api_check_readme_changes( $false, $repo ) {
-		if ( ( $false || $repo ) && ! isset( $repo->remote_version ) ) {
+		if ( ( $false || $repo ) && isset( $repo->git ) && ! isset( $repo->remote_version ) ) {
 			$requires  = [
 				'RequiresPHP' => 'Requires PHP',
 				'RequiresWP'  => 'Requires at least',

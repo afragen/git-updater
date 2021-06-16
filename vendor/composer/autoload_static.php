@@ -6,10 +6,6 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitab5aa99e983331e4fb191664237a6ba3
 {
-    public static $files = array (
-        'a80dab40a30760cb3978d020dc92e2ef' => __DIR__ . '/..' . '/freemius/wordpress-sdk/start.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
         'F' => 
         array (

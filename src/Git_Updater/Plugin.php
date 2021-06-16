@@ -308,7 +308,7 @@ class Plugin {
 			return $false;
 		}
 
-		$plugin = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+		$plugin = isset( $response->slug, $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
 		$false  = $this->set_no_api_check_readme_changes( $false, $plugin );
 
 		// Skip if waiting for background update.
@@ -327,20 +327,20 @@ class Plugin {
 		$response->author        = $plugin->author;
 		$response->homepage      = $plugin->homepage;
 		$response->donate_link   = $plugin->donate_link;
-		$response->version       = $plugin->remote_version;
+		$response->version       = $plugin->remote_version ?? null;
 		$response->sections      = $plugin->sections;
 		$response->requires      = $plugin->requires;
 		$response->requires_php  = $plugin->requires_php;
 		$response->tested        = $plugin->tested;
-		$response->downloaded    = $plugin->downloaded;
-		$response->last_updated  = $plugin->last_updated;
-		$response->download_link = $plugin->download_link;
+		$response->downloaded    = $plugin->downloaded ?? 0;
+		$response->last_updated  = $plugin->last_updated ?? null;
+		$response->download_link = $plugin->download_link ?? null;
 		$response->banners       = $plugin->banners;
 		$response->icons         = ! empty( $plugin->icons ) ? $plugin->icons : [];
 		$response->contributors  = $plugin->contributors;
 		if ( ! $this->is_private( $plugin ) ) {
-			$response->num_ratings = $plugin->num_ratings;
-			$response->rating      = $plugin->rating;
+			$response->num_ratings = $plugin->num_ratings ?? 0;
+			$response->rating      = $plugin->rating ?? 0;
 		}
 
 		return $response;
