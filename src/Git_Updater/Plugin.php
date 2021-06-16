@@ -360,16 +360,8 @@ class Plugin {
 		}
 
 		foreach ( (array) $this->config as $plugin ) {
-				$requires    = [
-					'RequiresPHP' => 'Requires PHP',
-					'RequiresWP'  => 'Requires at least',
-				];
-				$filepath    = 'gist' === $plugin->git
-					? trailingslashit( dirname( $plugin->local_path ) ) . $plugin->file
-					: $plugin->local_path . basename( $plugin->file );
-				$plugin_data = get_file_data( $filepath, $requires );
-
-				$response = [
+				$plugin_requires = $this->get_repo_requirements( $plugin );
+				$response        = [
 					'slug'             => $plugin->slug,
 					'plugin'           => $plugin->file,
 					'url'              => $plugin->uri,
@@ -379,8 +371,8 @@ class Plugin {
 					'branch'           => $plugin->branch,
 					'type'             => "{$plugin->git}-{$plugin->type}",
 					'update-supported' => true,
-					'requires'         => $plugin_data['RequiresWP'],
-					'requires_php'     => $plugin_data['RequiresPHP'],
+					'requires'         => $plugin_requires['RequiresWP'],
+					'requires_php'     => $plugin_requires['RequiresPHP'],
 				];
 				if ( property_exists( $plugin, 'remote_version' ) ) {
 					$response_api_checked = [

@@ -568,23 +568,15 @@ class Theme {
 		}
 
 		foreach ( (array) $this->config as $theme ) {
-			$requires   = [
-				'RequiresPHP' => 'Requires PHP',
-				'RequiresWP'  => 'Requires at least',
-			];
-			$filepath   = 'gist' === $theme->git
-				? trailingslashit( dirname( $theme->local_path ) ) . $theme->file
-				: $theme->local_path . basename( $theme->file );
-			$theme_data = get_file_data( $filepath, $requires );
-
-			$response = [
+			$theme_requires = $this->get_repo_requirements( $theme );
+			$response       = [
 				'theme'            => $theme->slug,
 				'url'              => $theme->uri,
 				'branch'           => $theme->branch,
 				'type'             => "{$theme->git}-{$theme->type}",
 				'update-supported' => true,
-				'requires'         => $theme_data['RequiresWP'],
-				'requires_php'     => $theme_data['RequiresPHP'],
+				'requires'         => $theme_requires['RequiresWP'],
+				'requires_php'     => $theme_requires['RequiresPHP'],
 			];
 			if ( property_exists( $theme, 'remote_version' ) ) {
 				$response_api_checked = [

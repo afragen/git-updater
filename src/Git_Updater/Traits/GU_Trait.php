@@ -815,16 +815,8 @@ trait GU_Trait {
 	 */
 	public function set_no_api_check_readme_changes( $false, $repo ) {
 		if ( ( $false || $repo ) && isset( $repo->git ) && ! isset( $repo->remote_version ) ) {
-			$requires  = [
-				'RequiresPHP' => 'Requires PHP',
-				'RequiresWP'  => 'Requires at least',
-			];
-			$filepath  = 'gist' === $repo->git
-				? trailingslashit( dirname( $repo->local_path ) ) . $repo->file
-				: $repo->local_path . basename( $repo->file );
-			$repo_data = get_file_data( $filepath, $requires );
+			$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
 
-			$repo_api       = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
 			$changelog_file = $this->base->get_changelog_filename( $repo );
 			$changelog      = $changelog_file ? $repo_api->get_local_info( $repo, $changelog_file ) : false;
 			if ( $changelog ) {
@@ -840,8 +832,9 @@ trait GU_Trait {
 				$repo_api->set_readme_info( $readme );
 			}
 
-			$repo->requires     = empty( $repo->requires ) ? $repo_data['RequiresWP'] : $repo->requires;
-			$repo->requires_php = empty( $repo->requires_php ) ? $repo_data['RequiresPHP'] : $repo->requires_php;
+			$repo_requires      = $this->get_repo_requirements( $repo );
+			$repo->requires     = empty( $repo->requires ) ? $repo_requires['RequiresWP'] : $repo->requires;
+			$repo->requires_php = empty( $repo->requires_php ) ? $repo_requires['RequiresPHP'] : $repo->requires_php;
 			$repo->version      = $repo->local_version;
 
 			$false_arr = array_merge( (array) $false, (array) $repo );
@@ -849,5 +842,25 @@ trait GU_Trait {
 		}
 
 		return $false;
+	}
+
+	/**
+	 * Get WP and PHP requirements from main plugin/theme file.
+	 *
+	 * @param \stdClass $repo Repository object.
+	 *
+	 * @return array
+	 */
+	protected function get_repo_requirements( $repo ) {
+		$requires  = [
+			'RequiresPHP' => 'Requires PHP',
+			'RequiresWP'  => 'Requires at least',
+		];
+		$filepath  = 'gist' === $repo->git
+			? trailingslashit( dirname( $repo->local_path ) ) . $repo->file
+			: $repo->local_path . basename( $repo->file );
+		$repo_data = get_file_data( $filepath, $requires );
+
+		return $repo_data;
 	}
 }
