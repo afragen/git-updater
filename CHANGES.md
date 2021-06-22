@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 10.3.4 / 2021-06-22
+* refactor `get_repo_requirements()`
+* update Slack info
+* improve `plugins_api()` defaults
+
 #### 10.3.3 / 2021-06-15
 * add some defaults into `plugins_api()`
 * remove Freemius from autoloader
