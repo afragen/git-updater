@@ -138,18 +138,18 @@ class Bootstrap {
 		}
 	}
 
-		/**
-		 * Rename on activation.
-		 *
-		 * Correctly renames the slug when Git Updater is installed
-		 * via FTP or from plugin upload.
-		 *
-		 * Set current branch to `develop` if appropriate.
-		 *
-		 * `rename()` causes activation to fail.
-		 *
-		 * @return void
-		 */
+	/**
+	 * Rename on activation.
+	 *
+	 * Correctly renames the slug when Git Updater is installed
+	 * via FTP or from plugin upload.
+	 *
+	 * Set current branch to `develop` if appropriate.
+	 *
+	 * `rename()` causes activation to fail.
+	 *
+	 * @return void
+	 */
 	public function rename_on_activation() {
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
 		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
