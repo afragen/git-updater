@@ -292,6 +292,9 @@ class Plugin {
 	public function load_pre_filters() {
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
+
+		// Need to run at priority 0 for `wp_maybe_auto_update` hook.
+		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 0, 1 );
 	}
 
 	/**

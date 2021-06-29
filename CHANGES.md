@@ -1,4 +1,5 @@
 #### [unreleased]
+* run `site_transient_update_{plugins|themes}` at priority 0 for `wp_maybe_auto_update` hook
 
 #### 10.3.4 / 2021-06-22
 * refactor `get_repo_requirements()`
