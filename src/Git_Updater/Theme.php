@@ -265,11 +265,10 @@ class Theme {
 		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		if ( $schedule_event && ! empty( $themes ) ) {
-			if ( ! wp_next_scheduled( 'gu_get_remote_theme' )
-				&& ! $this->is_duplicate_wp_cron_event( 'gu_get_remote_theme' )
-				&& ! $disable_wp_cron
-			) {
+			if ( ! wp_next_scheduled( 'gu_get_remote_theme' ) && ! $disable_wp_cron ) {
 				wp_schedule_single_event( time(), 'gu_get_remote_theme', [ $themes ] );
+			} else {
+				$this->is_cron_overdue( wp_next_scheduled( 'gu_get_remote_theme' ) );
 			}
 		}
 

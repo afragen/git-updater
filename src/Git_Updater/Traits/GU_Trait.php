@@ -639,32 +639,12 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks if dupicate wp-cron event exists.
-	 *
-	 * @param string $event Name of wp-cron event.
-	 *
-	 * @return bool
-	 */
-	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array() ?: [];
-		foreach ( $cron as $timestamp => $cronhooks ) {
-			if ( key( $cronhooks ) === $event ) {
-				$this->is_cron_overdue( $cron, $timestamp );
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
 	 * @param array $cron      Array of WP-Cron events.
 	 * @param int   $timestamp WP-Cron event timestamp.
 	 */
-	public function is_cron_overdue( $cron, $timestamp ) {
+	public function is_cron_overdue( $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
