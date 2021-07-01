@@ -178,8 +178,8 @@ class Base {
 		$this->get_meta_themes();
 
 		// Schedule Git Updater cron task for auto updating.
-		if ( ! wp_next_scheduled( 'git_updater_auto_update' ) ) {
-			wp_schedule_single_event( wp_next_scheduled('wp_version_check'), 'git_updater_auto_update' );
+		if ( ! wp_next_scheduled( 'gu_maybe_auto_update' ) ) {
+			wp_schedule_single_event( wp_next_scheduled( 'wp_version_check' ), 'gu_maybe_auto_update' );
 		}
 
 		return true;
@@ -209,7 +209,7 @@ class Base {
 		add_action( 'wp_update_themes', [ $this, 'get_meta_themes' ] );
 		add_action( 'gu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
 		add_action( 'gu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'git_updater_auto_update', [ $this, 'cron_auto_update' ], 10, 0 );
+		add_action( 'gu_maybe_auto_update', [ $this, 'maybe_auto_update' ], 10, 0 );
 	}
 
 	/**
@@ -293,7 +293,7 @@ class Base {
 	 *
 	 * @return void
 	 */
-	public function cron_auto_update() {
+	public function maybe_auto_update() {
 		add_filter( 'gu_disable_cron', '__return_true' );
 		foreach ( [ 'update_plugins', 'update_themes' ] as $transient ) {
 			$current = get_site_transient( $transient );
@@ -308,7 +308,6 @@ class Base {
 			set_site_transient( $transient, $gu_transient );
 		}
 		remove_filter( 'gu_disable_cron', 10 );
-		error_log( 'running wp_maybe_auto_update() from Git Updater cron task' );
 		wp_maybe_auto_update();
 	}
 
