@@ -14,7 +14,6 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
-use Fragen\Git_Updater\PRO\Add_Ons;
 use Fragen\Git_Updater\PRO\Branch;
 
 /*
