@@ -184,7 +184,7 @@ trait GU_Trait {
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		return $this->get_class_vars( 'API\API', 'error_code' );
+		 return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
 	/**
@@ -639,14 +639,31 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Check to see if there's already a cron event for $hook.
+	 *
+	 * @param string $hook Cron event hook.
+	 *
+	 * @return bool
+	 */
+	public function is_cron_event_scheduled( $hook ) {
+		foreach ( wp_get_ready_cron_jobs() as $event ) {
+			if ( $hook === key( $event ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
-	 * @param array $cron      Array of WP-Cron events.
-	 * @param int   $timestamp WP-Cron event timestamp.
+	 * @param array    $cron      Array of WP-Cron events.
+	 * @param int|bool $timestamp WP-Cron event timestamp.
+	 *                            False if event not scheduled.
 	 */
 	public function is_cron_overdue( $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
-		if ( $overdue ) {
+		if ( $timestamp && $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
 			$error     = new \WP_Error( 'git_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Fragen\Git_Updater\Messages', $this )->create_error_message( $error );
