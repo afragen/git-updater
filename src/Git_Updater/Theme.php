@@ -575,7 +575,7 @@ class Theme {
 				'requires'         => $theme_requires['RequiresWP'],
 				'requires_php'     => $theme_requires['RequiresPHP'],
 			];
-			if ( property_exists( $theme, 'remote_version' ) ) {
+			if ( property_exists( $theme, 'remote_version' ) && $theme->remote_version ) {
 				$response_api_checked = [
 					'new_version'  => $theme->remote_version,
 					'package'      => $theme->download_link,
