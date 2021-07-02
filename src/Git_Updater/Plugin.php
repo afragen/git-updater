@@ -275,8 +275,6 @@ class Plugin {
 		if ( $schedule_event && ! empty( $plugins ) ) {
 			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_plugin' ) ) {
 				wp_schedule_single_event( time(), 'gu_get_remote_plugin', [ $plugins ] );
-			} else {
-				$this->is_cron_overdue( wp_next_scheduled( 'gu_get_remote_plugin', [ $plugins ] ) );
 			}
 		}
 
