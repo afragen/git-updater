@@ -184,7 +184,7 @@ trait GU_Trait {
 	 * @return array self::$error_code
 	 */
 	public function get_error_codes() {
-		 return $this->get_class_vars( 'API\API', 'error_code' );
+		return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
 	/**
