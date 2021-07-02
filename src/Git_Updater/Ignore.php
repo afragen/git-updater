@@ -62,7 +62,7 @@ class Ignore {
 			function( $type_repos ) {
 				foreach ( self::$repos  as $slug => $file ) {
 					if ( isset( $type_repos[ $slug ] ) ) {
-						$type_repos[ $slug ]->remote_version = true;
+						$type_repos[ $slug ]->remote_version = false;
 						$type_repos[ $slug ]->dismiss        = true;
 					}
 				}

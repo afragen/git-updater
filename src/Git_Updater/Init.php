@@ -49,6 +49,17 @@ class Init {
 	 */
 	public function run() {
 		if ( ! static::is_heartbeat() ) {
+
+			/**
+			 * Simple filter to turn on normal API checks, etc.
+			 *
+			 * @since Git Updater 10.2.0
+			 */
+			if ( ! apply_filters( 'gu_test_premium_plugins', false ) ) {
+				new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
+				new Ignore( 'git-remote-updater', 'git-remote-updater/git-remote-updater.php' );
+			}
+
 			$this->load_hooks();
 		}
 	}

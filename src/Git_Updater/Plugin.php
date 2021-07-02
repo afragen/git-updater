@@ -371,7 +371,7 @@ class Plugin {
 					'requires'         => $plugin_requires['RequiresWP'],
 					'requires_php'     => $plugin_requires['RequiresPHP'],
 				];
-				if ( property_exists( $plugin, 'remote_version' ) ) {
+				if ( property_exists( $plugin, 'remote_version' ) && $plugin->remote_version ) {
 					$response_api_checked = [
 						'new_version'  => $plugin->remote_version,
 						'package'      => $plugin->download_link,
