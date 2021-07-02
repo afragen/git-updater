@@ -652,6 +652,7 @@ trait GU_Trait {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
