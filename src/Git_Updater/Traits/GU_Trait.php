@@ -647,7 +647,7 @@ trait GU_Trait {
 	 */
 	public function is_cron_event_scheduled( $hook ) {
 		foreach ( wp_get_ready_cron_jobs() as $timestamp => $event ) {
-			if ( $hook === key( $event ) ) {
+			if ( key( $event ) === $hook ) {
 				$this->is_cron_overdue( $timestamp );
 				return true;
 			}
