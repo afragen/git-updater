@@ -265,10 +265,7 @@ class Theme {
 		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		if ( $schedule_event && ! empty( $themes ) ) {
-			if ( ! wp_next_scheduled( 'gu_get_remote_theme' )
-				&& ! $this->is_duplicate_wp_cron_event( 'gu_get_remote_theme' )
-				&& ! $disable_wp_cron
-			) {
+			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_theme' ) ) {
 				wp_schedule_single_event( time(), 'gu_get_remote_theme', [ $themes ] );
 			}
 		}
@@ -578,7 +575,7 @@ class Theme {
 				'requires'         => $theme_requires['RequiresWP'],
 				'requires_php'     => $theme_requires['RequiresPHP'],
 			];
-			if ( property_exists( $theme, 'remote_version' ) ) {
+			if ( property_exists( $theme, 'remote_version' ) && $theme->remote_version ) {
 				$response_api_checked = [
 					'new_version'  => $theme->remote_version,
 					'package'      => $theme->download_link,

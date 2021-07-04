@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 10.4.0 / 2021-07-04 🎆
+* add new WP-Cron task to run concurrently to `wp_version_check` so that Git Updater managed plugins and themes can take advantage of auto updating 🤞
+* added better check to see if background updating cron event is already scheduled
+* add `Ignore()` of certain premium add-ons so not needed in the individual plugins
+
 #### 10.3.4 / 2021-06-22
 * refactor `get_repo_requirements()`
 * update Slack info

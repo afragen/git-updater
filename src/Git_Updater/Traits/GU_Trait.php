@@ -639,18 +639,16 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks if dupicate wp-cron event exists.
+	 * Check to see if there's already a cron event for $hook.
 	 *
-	 * @param string $event Name of wp-cron event.
+	 * @param string $hook Cron event hook.
 	 *
 	 * @return bool
 	 */
-	public function is_duplicate_wp_cron_event( $event ) {
-		$cron = _get_cron_array() ?: [];
-		foreach ( $cron as $timestamp => $cronhooks ) {
-			if ( key( $cronhooks ) === $event ) {
-				$this->is_cron_overdue( $cron, $timestamp );
-
+	public function is_cron_event_scheduled( $hook ) {
+		foreach ( wp_get_ready_cron_jobs() as $timestamp => $event ) {
+			if ( key( $event ) === $hook ) {
+				$this->is_cron_overdue( $timestamp );
 				return true;
 			}
 		}
@@ -661,10 +659,11 @@ trait GU_Trait {
 	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
-	 * @param array $cron      Array of WP-Cron events.
-	 * @param int   $timestamp WP-Cron event timestamp.
+	 * @param int $timestamp WP-Cron event timestamp.
+	 *
+	 * @return void
 	 */
-	public function is_cron_overdue( $cron, $timestamp ) {
+	public function is_cron_overdue( $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
