@@ -12,6 +12,7 @@ namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
+use Fragen\Git_Updater\Shim;
 
 /**
  * Trait GU_Trait
@@ -682,7 +683,7 @@ trait GU_Trait {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$plugin_data = \get_plugin_data( dirname( __DIR__, 3 ) . '/git-updater.php' );
+		$plugin_data = \get_plugin_data( Shim::dirname( __DIR__, 3 ) . '/git-updater.php' );
 
 		return $plugin_data['Version'];
 	}

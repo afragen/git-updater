@@ -42,7 +42,7 @@ class GU_Freemius {
 				if ( ! isset( $gu_fs ) ) {
 
 					// Init Freemius SDK.
-					require_once dirname( __DIR__, 2 ) . '/vendor/freemius/wordpress-sdk/start.php';
+					require_once Shim::dirname( __DIR__, 2 ) . '/vendor/freemius/wordpress-sdk/start.php';
 
 					$gu_fs = fs_dynamic_init(
 						[
@@ -81,6 +81,6 @@ class GU_Freemius {
 	 * @return string
 	 */
 	public function add_icon() {
-		return dirname( __DIR__, 2 ) . '/assets/icon.svg';
+		return Shim::dirname( __DIR__, 2 ) . '/assets/icon.svg';
 	}
 }
