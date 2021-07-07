@@ -23,7 +23,7 @@ class Shim {
 	 * @param string $path File path for dirname().
 	 * @param int    $level Level of file path, added in PHP 7.0.
 	 *
-	 * @return callable
+	 * @return string
 	 */
 	public static function dirname( $path, $level = 1 ) {
 		if ( version_compare( phpversion(), '7.0', '>=' ) ) {
