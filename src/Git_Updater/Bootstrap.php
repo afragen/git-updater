@@ -104,7 +104,7 @@ class Bootstrap {
 	 * @return void|bool
 	 */
 	public function check_requirements() {
-		if ( version_compare( phpversion(), '7.0', '<=' ) ) {
+		if ( version_compare( phpversion(), '5.6', '<=' ) ) {
 			add_action(
 				'admin_init',
 				function () {
@@ -112,7 +112,7 @@ class Bootstrap {
 					printf(
 						/* translators: 1: minimum PHP version required */
 						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'git-updater' ) ),
-						'7.0'
+						'5.6'
 					);
 					echo '</p></div>';
 					\deactivate_plugins( plugin_basename( $this->file ) );
