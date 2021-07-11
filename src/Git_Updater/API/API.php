@@ -570,6 +570,7 @@ class API {
 	 * @return string|bool|\stdClass Release asset URI from AWS.
 	 */
 	protected function get_release_asset_redirect( $asset, $aws = false ) {
+		$rest = false;
 		if ( ! $asset ) {
 			return false;
 		}
@@ -581,8 +582,19 @@ class API {
 
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( $this->exit_no_update( $response ) && ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( isset( $_REQUEST['key'] ) ) {
+			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
+			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
+			$rest = $slug === $this->response['repo'];
+		}
+		// phpcs:enable
+
+		if ( $this->exit_no_update( $response )
+			// phpcs:ignore WordPress.Security.NonceVerification
+			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
+			&& ! $rest
+		) {
 			return false;
 		}
 

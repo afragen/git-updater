@@ -1,4 +1,5 @@
 #### [unreleased]
+* always get current release asset redirect URL on REST update
 
 #### 10.4.1 / 2021-07-11
 * added `class Shim` for PHP 5.6 compatibility, will remove when WP core changes minimum requirement
