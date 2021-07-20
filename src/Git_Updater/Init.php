@@ -54,6 +54,12 @@ class Init {
 			new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
 			new Ignore( 'git-remote-updater', 'git-remote-updater/git-remote-updater.php' );
 		}
+
+		if ( static::is_wp_cli() ) {
+			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 10, 1 );
+			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 10, 1 );
+		}
+
 	}
 
 	/**

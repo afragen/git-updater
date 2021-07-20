@@ -1,5 +1,6 @@
 #### [unreleased]
 * always get current release asset redirect URL on REST update
+* load `site_transient` hooks in WP-CLI for plugin/theme updating via WP-CLI
 
 #### 10.4.1 / 2021-07-11
 * added `class Shim` for PHP 5.6 compatibility, will remove when WP core changes minimum requirement
