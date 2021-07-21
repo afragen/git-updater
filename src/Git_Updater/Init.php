@@ -54,6 +54,14 @@ class Init {
 			new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
 			new Ignore( 'git-remote-updater', 'git-remote-updater/git-remote-updater.php' );
 		}
+
+		if ( static::is_wp_cli() ) {
+			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
+			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 15, 1 );
+
+			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
+			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 15, 1 );
+		}
 	}
 
 	/**

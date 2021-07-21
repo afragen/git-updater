@@ -213,6 +213,12 @@ class Theme {
 			$git_theme['release_asset']           = $header['release_asset'];
 			$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
+			// Fix branch for .git VCS.
+			if ( file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
+				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
+				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+			}
+
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;
 		}
 

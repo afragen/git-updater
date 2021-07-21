@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 10.4.2 / 2021-07-21
+* always get current release asset redirect URL on REST update
+* directly call `get_remote_repo_meta()` and load `site_transient` hooks in WP-CLI for plugin/theme updating via WP-CLI
+* use git branch as displayed branch for plugins/themes installed under git VCS
+
 #### 10.4.1 / 2021-07-11
 * added `class Shim` for PHP 5.6 compatibility, will remove when WP core changes minimum requirement
 
