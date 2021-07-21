@@ -218,6 +218,12 @@ class Plugin {
 					: null;
 			}
 
+			// Fix branch for .git VCS.
+			if ( file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
+				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_plugin['local_path'] . '.git/HEAD' ) ), 2 ) );
+				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+			}
+
 			/**
 			 * Filter config to fix repo slug.
 			 * Eg change Gist ID to slug.
