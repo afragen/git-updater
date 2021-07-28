@@ -262,14 +262,14 @@ class Settings {
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
-				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php esc_attr_e( $logo ); ?>" alt="Git Updater logo" /></a><br>
+				<a href="https://github.com/afragen/git-updater" target="_blank"><img src="<?php echo esc_attr( $logo ); ?>" alt="Git Updater logo" /></a><br>
 				<?php esc_html_e( __( 'Git Updater', 'git-updater' ) ); ?>
 			</h1>
 			<?php $this->options_tabs(); ?>
 			<?php $this->admin_page_notices(); ?>
 			<?php if ( 'git_updater_settings' === $tab ) : ?>
 				<?php $this->options_sub_tabs(); ?>
-				<form class="settings" method="post" action="<?php esc_attr_e( $action ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
 					<?php
 					settings_fields( 'git_updater' );
 					if ( 'git_updater' === $subtab ) {
@@ -284,7 +284,7 @@ class Settings {
 					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
-				<form class="settings" method="post" action="<?php esc_attr_e( $refresh_transients ); ?>">
+				<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
 					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
 				</form>
 			<?php endif; ?>
@@ -622,7 +622,7 @@ class Settings {
 		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">
+			<input class="ghu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 		</label>
 		<?php
 	}
@@ -635,8 +635,8 @@ class Settings {
 	public function token_callback_checkbox( $args ) {
 		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
 		?>
-		<label for="<?php esc_attr_e( $args['id'] ); ?>">
-			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="git_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
+		<label for="<?php echo esc_attr( $args['id'] ); ?>">
+			<input type="checkbox" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
 			<?php echo esc_attr( $args['title'] ); ?>
 		</label>
 		<?php

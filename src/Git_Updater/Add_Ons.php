@@ -382,7 +382,7 @@ class Add_Ons {
 		} else {
 			wp_create_nonce( $config['api'] );
 			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $install_api ); ?>">
+			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $install_api ); ?>">
 				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
 			</form>
 			<?php
@@ -402,7 +402,7 @@ class Add_Ons {
 			submit_button( esc_html__( 'Free Trial', 'git-updater' ), 'disabled' );
 		} else {
 			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php esc_attr_e( $purchase_addon ); ?>">
+			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $purchase_addon ); ?>">
 				<?php submit_button( esc_html__( 'Free Trial', 'git-updater' ) ); ?>
 			</form>
 			<?php
