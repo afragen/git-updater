@@ -152,6 +152,7 @@ class Theme {
 		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $themes, 'theme' ], '10.0.0', 'gu_additions' ) : $additions;
 
 		$themes = array_merge( $themes, (array) $additions );
+		ksort( $themes );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = [];

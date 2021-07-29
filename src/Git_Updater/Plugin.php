@@ -136,6 +136,7 @@ class Plugin {
 		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $plugins, 'plugin' ], '10.0.0', 'gu_additions' ) : $additions;
 
 		$plugins = array_merge( $plugins, (array) $additions );
+		ksort( $plugins );
 
 		foreach ( (array) $plugins as $slug => $plugin ) {
 			$git_plugin = [];
