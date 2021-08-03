@@ -571,7 +571,15 @@ class Theme {
 			$transient = new \stdClass();
 		}
 
-		foreach ( (array) $this->config as $theme ) {
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $theme ) {
 			$theme_requires = $this->get_repo_requirements( $theme );
 			$response       = [
 				'theme'            => $theme->slug,

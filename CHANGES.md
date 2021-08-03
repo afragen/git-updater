@@ -1,6 +1,7 @@
 #### [unreleased]
 * only use `esc_attr_e` for translating strings
 * ksort additions into plugin/theme array
+* use `gu_config_pre_process` filter in `update_site_transient()`
 
 #### 10.4.2 / 2021-07-21
 * always get current release asset redirect URL on REST update
