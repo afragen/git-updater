@@ -495,32 +495,8 @@ class API {
 	 * @access protected
 	 */
 	protected function add_meta_repo_object() {
-		$this->type->rating       = $this->make_rating( $this->type->repo_meta );
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
-		$this->type->num_ratings  = $this->type->repo_meta['watchers'];
 		$this->type->is_private   = $this->type->repo_meta['private'];
-	}
-
-	/**
-	 * Create some sort of rating from 0 to 100 for use in star ratings.
-	 * I'm really just making this up, more based upon popularity.
-	 *
-	 * @param array $repo_meta Array of repo meta data.
-	 *
-	 * @return integer
-	 */
-	protected function make_rating( $repo_meta ) {
-		$watchers    = ! empty( $repo_meta['watchers'] ) ? $repo_meta['watchers'] : 0;
-		$forks       = ! empty( $repo_meta['forks'] ) ? $repo_meta['forks'] : 0;
-		$open_issues = ! empty( $repo_meta['open_issues'] ) ? $repo_meta['open_issues'] : 0;
-
-		$rating = abs( (int) round( $watchers + ( $forks * 1.5 ) - ( $open_issues * 0.1 ) ) );
-
-		if ( 100 < $rating ) {
-			return 100;
-		}
-
-		return $rating;
 	}
 
 	/**

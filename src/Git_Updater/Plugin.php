@@ -342,10 +342,8 @@ class Plugin {
 		$response->banners       = $plugin->banners;
 		$response->icons         = $plugin->icons ?: [];
 		$response->contributors  = $plugin->contributors;
-		if ( ! $this->is_private( $plugin ) ) {
-			$response->num_ratings = $plugin->num_ratings ?: 0;
-			$response->rating      = $plugin->rating ?: 0;
-		}
+		$response->rating        = $plugin->rating;
+		$response->num_ratings   = $plugin->num_ratings;
 
 		return $response;
 	}
