@@ -333,7 +333,7 @@ class API {
 		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
 
 		if ( ! $response ) {
-			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.1/";
+			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.2/";
 			$url      = add_query_arg(
 				[
 					'action'                        => "{$this->type->type}_information",
@@ -341,7 +341,7 @@ class API {
 				],
 				$url
 			);
-			$response = wp_remote_get( $url );
+			$response = wp_remote_head( $url );
 
 			if ( is_wp_error( $response ) ) {
 				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -349,8 +349,8 @@ class API {
 				return false;
 			}
 
-			$response = json_decode( $response['body'] );
-			$response = ! empty( $response ) && ! isset( $response->error ) ? 'in dot org' : 'not in dot org';
+			$code     = wp_remote_retrieve_response_code( $response );
+			$response = 200 === $code ? 'in dot org' : 'not in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
