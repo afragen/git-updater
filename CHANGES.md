@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.5.0 / 2021-08-29
 * only use `esc_attr_e` for translating strings
 * ksort additions into plugin/theme array
 * use `gu_config_pre_process` filter in `update_site_transient()`
