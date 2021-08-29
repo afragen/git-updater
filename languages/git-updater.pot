@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 10.4.0\n"
+"Project-Id-Version: Git Updater 10.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-07-04T17:15:09+00:00\n"
+"POT-Creation-Date: 2021-08-29T16:47:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: git-updater\n"
@@ -252,39 +252,39 @@ msgid "Installed Plugins and Themes"
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:384
-#: src/Git_Updater/Theme.php:510
+#: src/Git_Updater/Theme.php:391
+#: src/Git_Updater/Theme.php:517
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:396
+#: src/Git_Updater/Theme.php:403
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:400
+#: src/Git_Updater/Theme.php:407
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:405
-#: src/Git_Updater/Theme.php:521
+#: src/Git_Updater/Theme.php:412
+#: src/Git_Updater/Theme.php:528
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:526
+#: src/Git_Updater/Theme.php:417
+#: src/Git_Updater/Theme.php:533
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:533
+#: src/Git_Updater/Theme.php:540
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:539
+#: src/Git_Updater/Theme.php:546
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 

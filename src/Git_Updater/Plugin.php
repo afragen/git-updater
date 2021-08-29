@@ -136,6 +136,7 @@ class Plugin {
 		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $plugins, 'plugin' ], '10.0.0', 'gu_additions' ) : $additions;
 
 		$plugins = array_merge( $plugins, (array) $additions );
+		ksort( $plugins );
 
 		foreach ( (array) $plugins as $slug => $plugin ) {
 			$git_plugin = [];
@@ -341,10 +342,8 @@ class Plugin {
 		$response->banners       = $plugin->banners;
 		$response->icons         = $plugin->icons ?: [];
 		$response->contributors  = $plugin->contributors;
-		if ( ! $this->is_private( $plugin ) ) {
-			$response->num_ratings = $plugin->num_ratings ?: 0;
-			$response->rating      = $plugin->rating ?: 0;
-		}
+		$response->rating        = $plugin->rating;
+		$response->num_ratings   = $plugin->num_ratings;
 
 		return $response;
 	}
@@ -362,7 +361,15 @@ class Plugin {
 			$transient = new \stdClass();
 		}
 
-		foreach ( (array) $this->config as $plugin ) {
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $plugin ) {
 				$plugin_requires = $this->get_repo_requirements( $plugin );
 				$response        = [
 					'slug'             => $plugin->slug,
@@ -428,7 +435,7 @@ class Plugin {
 				}
 
 				// Set transient on rollback.
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 				) {
 					$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );

@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 10.5.0 / 2021-08-29
+* only use `esc_attr_e` for translating strings
+* ksort additions into plugin/theme array
+* use `gu_config_pre_process` filter in `update_site_transient()`
+* remove vanity star ratings
+* speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`
+
 #### 10.4.2 / 2021-07-21
 * always get current release asset redirect URL on REST update
 * directly call `get_remote_repo_meta()` and load `site_transient` hooks in WP-CLI for plugin/theme updating via WP-CLI

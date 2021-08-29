@@ -152,6 +152,7 @@ class Theme {
 		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $themes, 'theme' ], '10.0.0', 'gu_additions' ) : $additions;
 
 		$themes = array_merge( $themes, (array) $additions );
+		ksort( $themes );
 
 		foreach ( (array) $themes as $theme ) {
 			$git_theme = [];
@@ -570,7 +571,15 @@ class Theme {
 			$transient = new \stdClass();
 		}
 
-		foreach ( (array) $this->config as $theme ) {
+		/**
+		 * Filter repositories.
+		 *
+		 * @since 10.2.0
+		 * @param array $this->config Array of repository objects.
+		 */
+		$config = apply_filters( 'gu_config_pre_process', $this->config );
+
+		foreach ( (array) $config as $theme ) {
 			$theme_requires = $this->get_repo_requirements( $theme );
 			$response       = [
 				'theme'            => $theme->slug,
