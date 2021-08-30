@@ -291,7 +291,7 @@ trait GU_Trait {
 
 		// Set $override if set in Skip Updates plugin.
 		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
-			$skip_updates = get_site_option( 'skip_updates' );
+			$skip_updates = get_site_option( 'skip_updates', [] );
 			foreach ( $skip_updates as $skip ) {
 				if ( $repo->file === $skip['slug'] ) {
 					$override = true;

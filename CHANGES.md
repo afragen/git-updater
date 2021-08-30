@@ -1,4 +1,5 @@
 #### [unreleased]
+* set default value for checking Skip Updates to empty array if nothing present
 
 #### 10.5.0 / 2021-08-29
 * only use `esc_attr_e` for translating strings
