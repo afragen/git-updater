@@ -154,7 +154,7 @@ class Theme {
 		$themes = array_merge( $themes, (array) $additions );
 		ksort( $themes );
 
-		foreach ( (array) $themes as $theme ) {
+		foreach ( (array) $themes as $slug => $theme ) {
 			$git_theme = [];
 			$header    = null;
 			$key       = array_filter(
@@ -206,7 +206,7 @@ class Theme {
 			$git_theme['author']                  = $theme['Author'];
 			$git_theme['local_version']           = strtolower( $theme['Version'] );
 			$git_theme['sections']['description'] = $theme['Description'];
-			$git_theme['local_path']              = get_theme_root() . '/' . $git_theme['slug'] . '/';
+			$git_theme['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
 			$git_theme['branch']                  = $branch;
 			$git_theme['primary_branch']          = $header['primary_branch'];
 			$git_theme['languages']               = $header['languages'];
