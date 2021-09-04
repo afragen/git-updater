@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.5.1 / 2021-09-04
 * set default value for Skip Updates option to empty array if nothing present
 * add file_exists check to  `get_repo_requirements()`
 * set `local_path` correctly
