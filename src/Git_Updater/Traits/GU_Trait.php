@@ -852,14 +852,18 @@ trait GU_Trait {
 	 * @return array
 	 */
 	protected function get_repo_requirements( $repo ) {
-		$requires  = [
+		$requires      = [
 			'RequiresPHP' => 'Requires PHP',
 			'RequiresWP'  => 'Requires at least',
 		];
-		$filepath  = 'gist' === $repo->git
+		$default_empty = [
+			'RequiresPHP' => null,
+			'RequiresWP'  => null,
+		];
+		$filepath      = 'gist' === $repo->git
 			? trailingslashit( dirname( $repo->local_path ) ) . $repo->file
 			: $repo->local_path . basename( $repo->file );
-		$repo_data = get_file_data( $filepath, $requires );
+		$repo_data     = file_exists( $filepath ) ? get_file_data( $filepath, $requires ) : $default_empty;
 
 		return $repo_data;
 	}

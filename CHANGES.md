@@ -1,5 +1,6 @@
 #### [unreleased]
 * set default value for Skip Updates option to empty array if nothing present
+* add file_exists check to  `get_repo_requirements()`
 
 #### 10.5.0 / 2021-08-29
 * only use `esc_attr_e` for translating strings
