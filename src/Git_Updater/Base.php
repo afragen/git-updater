@@ -493,7 +493,8 @@ class Base {
 			return $source;
 		}
 
-		if ( $this->is_premium_only() ) {
+		// Skip if Git Updater PRO being updated for new rollback update failure.
+		if ( 'git-updater-pro' !== $slug && $this->is_premium_only() ) {
 			( new Branch() )->set_branch_on_switch( $slug );
 
 			/*
