@@ -115,7 +115,7 @@ class Messages {
 			) {
 				$_ratelimit = true;
 				$git_server = $this->get_class_vars( 'Base', 'git_servers' )[ $repo['git'] ];
-				if ( ! \PAnD::is_admin_notice_active( 'ratelimit-error-1' ) ) {
+				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'ratelimit-error-1' ) ) {
 					return;
 				} ?>
 				<div data-dismissible="ratelimit-error-1" class="notice-error notice is-dismissible">
@@ -158,7 +158,7 @@ class Messages {
 		foreach ( (array) $error_code as $repo ) {
 			if ( ( ! $_authentication && isset( $repo['code'] ) ) && in_array( $repo['code'], [ 401, 404 ], true ) ) {
 				$_authentication = true;
-				if ( ! \PAnD::is_admin_notice_active( 'authentication-error-1' ) ) {
+				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'authentication-error-1' ) ) {
 					return;
 				}
 				?>

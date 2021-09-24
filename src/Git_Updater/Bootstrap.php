@@ -101,12 +101,8 @@ class Bootstrap {
 
 		( new Init() )->run();
 
-		/**
-		 * Initialize Persist Admin notices Dismissal.
-		 *
-		 * @link https://github.com/collizo4sky/persist-admin-notices-dismissal
-		 */
-		add_action( 'admin_init', [ 'PAnD', 'init' ] );
+		// Initialize time dissmissible admin notices.
+		new \WP_Dismiss_Notice();
 	}
 
 	/**
