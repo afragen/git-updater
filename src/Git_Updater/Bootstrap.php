@@ -48,6 +48,13 @@ class Bootstrap {
 	protected $dir;
 
 	/**
+	 * Holds nonce.
+	 *
+	 * @var $nonce
+	 */
+	protected static $nonce;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param  string $file Main plugin file.
@@ -56,6 +63,10 @@ class Bootstrap {
 	public function __construct( $file ) {
 		$this->file = $file;
 		$this->dir  = dirname( $file );
+		if ( ! function_exists( 'wp_create_nonce' ) ) {
+			require ABSPATH . WPINC . '/pluggable.php';
+		}
+		static::$nonce = wp_create_nonce( 'git-updater' );
 	}
 
 	/**
@@ -151,10 +162,12 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function rename_on_activation() {
+		if ( ! wp_verify_nonce( $this->nonce, 'git-updater' ) ) {
+			return;
+		}
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
-		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
-		$exploded = explode( '-', dirname( $slug ) );
+		$slug       = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
+		$exploded   = explode( '-', dirname( $slug ) );
 
 		if ( in_array( 'develop', $exploded, true ) ) {
 			$options = $this->get_class_vars( 'Base', 'options' );

@@ -56,6 +56,8 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function add_auth_header( $args, $url ) {
+		static::$nonce = wp_create_nonce( 'git-updater' );
+
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -158,7 +160,9 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
@@ -186,7 +190,6 @@ trait Basic_Auth_Loader {
 				$slug = array_pop( $slug );
 			}
 		}
-		// phpcs:enable
 
 		// In case $type set from Base::$caller doesn't match.
 		if ( ! $slug && isset( $headers['path'] ) ) {
@@ -213,6 +216,10 @@ trait Basic_Auth_Loader {
 	 * @return string $slug
 	 */
 	private function get_type_for_credentials( $slug, $repos, $url ) {
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		$type = $this->get_class_vars( 'Base', 'caller' );
 
 		$type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
@@ -230,12 +237,10 @@ trait Basic_Auth_Loader {
 		}
 
 		// Set for Remote Install.
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
 			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
 			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
 			: $type;
-		// phpcs:enable
 
 		return $type;
 	}
