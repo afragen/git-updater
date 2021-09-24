@@ -196,16 +196,18 @@ class Plugin {
 			$git_plugin['ci_job']                  = $header['ci_job'];
 			$git_plugin['release_asset']           = $header['release_asset'];
 			$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
-			$git_plugin['banners']['high']         =
+
+			preg_match( '/\/wp-content.*/', $git_plugin['local_path'], $matches );
+			$git_plugin['banners']['high'] =
 				file_exists( $git_plugin['local_path'] . 'assets/banner-1544x500.png' )
-					? $git_plugin['local_path'] . 'assets/banner-1544x500.png'
+					? home_url() . $matches[0] . 'assets/banner-1544x500.png'
 					: null;
-			$git_plugin['banners']['low']          =
+			$git_plugin['banners']['low']  =
 				file_exists( $git_plugin['local_path'] . 'assets/banner-772x250.png' )
-					? $git_plugin['local_path'] . 'assets/banner-772x250.png'
+					? home_url() . $matches[0] . 'assets/banner-772x250.png'
 					: null;
-			$git_plugin['icons']                   = [];
-			$icons                                 = [
+			$git_plugin['icons']           = [];
+			$icons                         = [
 				'svg'    => 'icon.svg',
 				'1x_png' => 'icon-128x128.png',
 				'1x_jpg' => 'icon-128x128.jpg',
@@ -215,7 +217,7 @@ class Plugin {
 			foreach ( $icons as $key => $filename ) {
 				$key                         = preg_replace( '/_png|_jpg/', '', $key );
 				$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-					? $git_plugin['local_path'] . 'assets/' . $filename
+					? home_url() . $matches[0] . 'assets/' . $filename
 					: null;
 			}
 
