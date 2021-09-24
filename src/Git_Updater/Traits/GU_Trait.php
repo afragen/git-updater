@@ -76,10 +76,7 @@ trait GU_Trait {
 		$base           = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this );
 		$base::$options = get_site_option( 'git_updater', [] );
 		$base::$options = $this->modify_options( $base::$options );
-		if ( ! function_exists( 'wp_create_nonce' ) ) {
-			require ABSPATH . WPINC . '/pluggable.php';
-		}
-		static::$nonce = wp_create_nonce( 'git-updater' );
+		static::$nonce  = wp_create_nonce( 'git-updater' );
 	}
 
 	/**
