@@ -160,7 +160,7 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function rename_on_activation() {
-		if ( ! wp_verify_nonce( $this->nonce, 'git-updater' ) ) {
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
 			return;
 		}
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );

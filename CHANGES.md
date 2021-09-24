@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.6.2 / 2021-09-24
+* oops, variable is static
+
 #### 10.6.1 / 2021-09-24 **Hotfix**
 * don't load `pluggable.php` too early, call `wp_create_nonce()` in `plugins_loaded` hook
 
