@@ -1,4 +1,5 @@
 #### [unreleased]
+* somewhere along the way the filepath to assets no longer works for display, now requires a URL
 
 #### 10.6.2 / 2021-09-24
 * oops, variable is static
