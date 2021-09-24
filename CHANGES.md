@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.6.0 / 2021-09-23
 * loads of security updates, nonce all the things
 
 #### 10.5.2 / 2021-09-05
