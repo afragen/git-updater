@@ -19,12 +19,22 @@ use Fragen\Git_Updater\Shim;
  */
 trait GU_Trait {
 	/**
+	 * Holds nonce.
+	 *
+	 * @var $nonce
+	 */
+	protected static $nonce;
+
+	/**
 	 * Checks to see if a heartbeat is resulting in activity.
 	 *
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		return isset( $_POST['action'] ) && 'heartbeat' === $_POST['action'];
 	}
 
@@ -66,6 +76,10 @@ trait GU_Trait {
 		$base           = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this );
 		$base::$options = get_site_option( 'git_updater', [] );
 		$base::$options = $this->modify_options( $base::$options );
+		if ( ! function_exists( 'wp_create_nonce' ) ) {
+			require ABSPATH . WPINC . '/pluggable.php';
+		}
+		static::$nonce = wp_create_nonce( 'git-updater' );
 	}
 
 	/**

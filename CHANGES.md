@@ -1,4 +1,5 @@
 #### [unreleased]
+* loads of security updates, nonce all the things
 
 #### 10.5.2 / 2021-09-05
 * skip Git Updater PRO features of `Base::upgrader_source_selection()` if updating Git Updater PRO, needed for new rollback update failure feature

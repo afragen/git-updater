@@ -88,6 +88,7 @@ class API {
 	public function __construct() {
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
 		static::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
+		static::$nonce         = wp_create_nonce( 'git-updater' );
 	}
 
 	/**
@@ -199,10 +200,9 @@ class API {
 		if ( ! in_array( $code, $allowed_codes, true ) ) {
 
 			// Cache GitHub API failure data.
-			$wait = in_array( $type['git'], [ 'github', 'gist' ], true )
+			$wait    = in_array( $type['git'], [ 'github', 'gist' ], true )
 				? GitHub_API::ratelimit_reset( $response, $this->type->slug )
 				: 0;
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$timeout = get_site_transient( 'gu_refresh_cache' )
 				|| ( ! empty( static::$options['github_access_token'] ) && 403 !== $code )
 				? 0 : $wait;
@@ -391,7 +391,10 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return false;
+		}
+
 		return ! isset( $_POST['gu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
@@ -460,7 +463,10 @@ class API {
 	public function get_local_info( $repo, $file ) {
 		$response = false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			return $response;
 		}
@@ -558,23 +564,23 @@ class API {
 
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
 
-		// phpcs:disable WordPress.Security.NonceVerification
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
 			$rest = $slug === $this->response['repo'];
 		}
-		// phpcs:enable
 
 		if ( $this->exit_no_update( $response )
-			// phpcs:ignore WordPress.Security.NonceVerification
 			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
 			&& ! $rest
 		) {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			$auth_header     = $this->add_auth_header( [], $asset );

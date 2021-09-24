@@ -88,12 +88,20 @@ class Base {
 	protected $config;
 
 	/**
+	 * Holds nonce.
+	 *
+	 * @var $nonce
+	 */
+	protected static $nonce;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		static::$options = get_site_option( 'git_updater', [] );
 		$this->set_installed_apis();
 		$this->add_extra_headers();
+		static::$nonce = wp_create_nonce( 'git-updater' );
 	}
 
 	/**
@@ -123,6 +131,10 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		/**
 		 * Filters whether to hide settings.
 		 *
@@ -157,7 +169,6 @@ class Base {
 			);
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
@@ -463,6 +474,10 @@ class Base {
 		$new_source      = null;
 		$upgrader_object = null;
 
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return $source;
+		}
+
 		/*
 		 * Rename plugins.
 		 */
@@ -488,7 +503,6 @@ class Base {
 		$repo = $this->get_repo_slugs( $slug, $upgrader_object );
 
 		// Not Git Updater plugin/theme.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['git_updater_repo'] ) && empty( $repo ) ) {
 			return $source;
 		}

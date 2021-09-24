@@ -33,6 +33,13 @@ class Messages {
 	public static $error_message = '';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		static::$nonce = wp_create_nonce( 'git-updater' );
+	}
+
+	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
 	 * @param string|\WP_Error $type Error type.
@@ -45,8 +52,7 @@ class Messages {
 		$update_pages   = [ 'update-core.php', 'plugins.php', 'themes.php' ];
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
-		if (
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) &&
 			( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
 			&& in_array( $pagenow, $settings_pages, true ) )
 			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
@@ -109,7 +115,7 @@ class Messages {
 			) {
 				$_ratelimit = true;
 				$git_server = $this->get_class_vars( 'Base', 'git_servers' )[ $repo['git'] ];
-				if ( ! \PAnD::is_admin_notice_active( 'ratelimit-error-1' ) ) {
+				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'ratelimit-error-1' ) ) {
 					return;
 				} ?>
 				<div data-dismissible="ratelimit-error-1" class="notice-error notice is-dismissible">
@@ -152,7 +158,7 @@ class Messages {
 		foreach ( (array) $error_code as $repo ) {
 			if ( ( ! $_authentication && isset( $repo['code'] ) ) && in_array( $repo['code'], [ 401, 404 ], true ) ) {
 				$_authentication = true;
-				if ( ! \PAnD::is_admin_notice_active( 'authentication-error-1' ) ) {
+				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'authentication-error-1' ) ) {
 					return;
 				}
 				?>

@@ -1,7 +1,7 @@
 {
   "name": "afragen/wp-dependency-installer",
   "description": "Library that helps WordPress plugin dependency management.",
-  "version": "3.1.0",
+  "version": "4.1.0",
   "type": "library",
   "license": "MIT",
   "authors": [
@@ -25,7 +25,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=5.6",
-    "collizo4sky/persist-admin-notices-dismissal": "^1"
+    "afragen/wp-dismiss-notice": "*"
   },
   "support": {
     "issues": "https://github.com/afragen/wp-dependency-installer/issues",
@@ -33,7 +33,8 @@
   },
   "autoload": {
     "classmap": [
-      "wp-dependency-installer.php"
+      "wp-dependency-installer.php",
+      "wp-dependency-installer-skin.php"
     ]
   }
 }

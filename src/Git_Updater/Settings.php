@@ -60,6 +60,7 @@ class Settings {
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
+		static::$nonce = wp_create_nonce( 'git-updater' );
 		$this->refresh_caches();
 		$this->load_options();
 	}
@@ -68,7 +69,10 @@ class Settings {
 	 * Check for cache refresh.
 	 */
 	protected function refresh_caches() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		if ( isset( $_POST['gu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
 			$this->delete_all_cached_data();
 			set_site_transient( 'gu_refresh_cache', true, 90 );
@@ -223,7 +227,9 @@ class Settings {
 	 * @access private
 	 */
 	private function options_tabs() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		$current_tab = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		echo '<nav class="nav-tab-wrapper" aria-label="Secondary menu">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
@@ -239,7 +245,9 @@ class Settings {
 	 * @access private
 	 */
 	private function options_sub_tabs() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		$current_tab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		echo '<nav class="nav-tab-wrapper" aria-label="Tertiary menu">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
@@ -253,12 +261,13 @@ class Settings {
 	 * Options page callback.
 	 */
 	public function create_admin_page() {
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		$action = is_multisite() ? 'edit.php?action=git-updater' : 'options.php';
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
-		// phpcs:enable
-		$logo = plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
+		$logo   = plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>
@@ -320,7 +329,9 @@ class Settings {
 	 * Display appropriate notice for Settings page actions.
 	 */
 	private function admin_page_notices() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
 			|| isset( $_GET['refresh_transients'] );
 
@@ -335,7 +346,6 @@ class Settings {
 		if ( $display ) {
 			echo '</p></div>';
 		}
-		// phpcs:enable
 	}
 
 	/**
@@ -649,7 +659,9 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
 		if ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page']
 		) {
@@ -670,7 +682,6 @@ class Settings {
 		 * @since 10.0.0
 		 */
 		do_action( 'gu_update_settings', $_POST );
-		// phpcs:enable
 
 		$this->redirect_on_save();
 	}
@@ -692,11 +703,12 @@ class Settings {
 			}
 		);
 
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		// phpcs:disable WordPress.Security.NonceVerification
-		$post_git_updater = isset( $_POST['git_updater'] ) ? wp_unslash( $_POST['git_updater'] ) : [];
-		// phpcs:enable
-		$options = array_merge( $options, $post_git_updater );
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
+		$post_git_updater = isset( $_POST['git_updater'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['git_updater'] ) ) : [];
+		$options          = array_merge( $options, $post_git_updater );
 
 		return $options;
 	}
@@ -736,17 +748,14 @@ class Settings {
 		 */
 		$option_page = 1 === count( $option_page ) ? apply_filters( 'gu_save_redirect', [ 'git_updater' ] ) : $option_page;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) && $is_option_page ) {
 			$update = true;
 		}
-		// phpcs:enable
 
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
 		if ( $is_option_page || $refresh_transients || $reset_api_key || $install_api_plugin ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
@@ -775,10 +784,12 @@ class Settings {
 	 * @return bool
 	 */
 	private function refresh_transients() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+			return;
+		}
+
 		if ( isset( $_REQUEST['git_updater_refresh_transients'] ) ) {
 			$_POST = $_REQUEST;
-			// phpcs:enable
 
 			return true;
 		}
