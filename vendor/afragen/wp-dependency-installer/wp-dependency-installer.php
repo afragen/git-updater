@@ -60,6 +60,13 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		private $notices;
 
 		/**
+		 * Holds nonce.
+		 *
+		 * @var $nonce
+		 */
+		protected static $nonce;
+
+		/**
 		 * Factory.
 		 *
 		 * @param string $caller File path to calling plugin/theme.
@@ -81,6 +88,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		private function __construct() {
 			$this->config  = [];
 			$this->notices = [];
+			static::$nonce = wp_create_nonce( 'wp-dependency-installer' );
 		}
 
 		/**
@@ -96,8 +104,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 			add_action( 'wp_ajax_dependency_installer', [ $this, 'ajax_router' ] );
 			add_filter( 'http_request_args', [ $this, 'add_basic_auth_headers' ], 15, 2 );
 
-			// Initialize Persist admin Notices Dismissal dependency.
-			add_action( 'admin_init', [ 'PAnD', 'init' ] );
+			new \WP_Dismiss_Notice();
 		}
 
 		/**
@@ -344,10 +351,12 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 * AJAX router.
 		 */
 		public function ajax_router() {
-			// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$method = isset( $_POST['method'] ) ? wp_unslash( $_POST['method'] ) : '';
-			$slug   = isset( $_POST['slug'] ) ? wp_unslash( $_POST['slug'] ) : '';
-			// phpcs:enable
+			if ( ! wp_verify_nonce( static::$nonce, 'wp-dependency-installer' ) ) {
+				return;
+			}
+
+			$method    = isset( $_POST['method'] ) ? sanitize_text_field( wp_unslash( $_POST['method'] ) ) : '';
+			$slug      = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( $_POST['slug'] ) ) : '';
 			$whitelist = [ 'install', 'activate', 'dismiss' ];
 
 			if ( in_array( $method, $whitelist, true ) ) {
@@ -422,7 +431,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 			$this->current_slug = $slug;
 			add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 2 );
 
-			$skin     = new WPDI_Plugin_Installer_Skin(
+			$skin     = new WP_Dependency_Installer_Skin(
 				[
 					'type'  => 'plugin',
 					'nonce' => wp_nonce_url( $this->config[ $slug ]['download_link'] ),
@@ -673,14 +682,14 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 					$dependency  = dirname( $notice['slug'] );
 					$dismissible = empty( $timeout ) ? '' : sprintf( 'dependency-installer-%1$s-%2$s', esc_attr( $dependency ), esc_attr( $timeout ) );
 				}
-				if ( class_exists( '\PAnD' ) && \PAnD::is_admin_notice_active( $dismissible ) ) {
+				if ( \WP_Dismiss_Notice::is_admin_notice_active( $dismissible ) ) {
 					printf(
 						'<div class="%1$s" data-dismissible="%2$s"><p><strong>[%3$s]</strong> %4$s%5$s</p></div>',
 						esc_attr( $class ),
 						esc_attr( $dismissible ),
 						esc_html( $label ),
 						esc_html( $message ),
-						$action // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						esc_html( $action )
 					);
 				}
 			}
@@ -861,26 +870,5 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 
 			return $args;
 		}
-	}
-
-	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-
-	/**
-	 * Class WPDI_Plugin_Installer_Skin
-	 */
-	class WPDI_Plugin_Installer_Skin extends Plugin_Installer_Skin {
-		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
-		public function header() {
-		}
-
-		public function footer() {
-		}
-
-		public function error( $errors ) {
-		}
-
-		public function feedback( $string, ...$args ) {
-		}
-		// phpcs:enable
 	}
 }

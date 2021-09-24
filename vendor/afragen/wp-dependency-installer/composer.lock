@@ -1,0 +1,63 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "2d6c0cc3676f3a42468dadac405f9554",
+    "packages": [
+        {
+            "name": "afragen/wp-dismiss-notice",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/afragen/wp-dismiss-notice.git",
+                "reference": "6db2f1365d97996a74c87787db3f7803027e48a0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/6db2f1365d97996a74c87787db3f7803027e48a0",
+                "reference": "6db2f1365d97996a74c87787db3f7803027e48a0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "wp-dismiss-notice.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andy Fragen",
+                    "email": "andy@thefragens.com",
+                    "homepage": "https://thefragens.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Library for time dismissible WordPress admin notices.",
+            "support": {
+                "issues": "https://github.com/afragen/wp-dismiss-notice/issues",
+                "source": "https://github.com/afragen/wp-dismiss-notice"
+            },
+            "time": "2021-09-23T19:56:44+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.6"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.1.0"
+}
