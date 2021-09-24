@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.6.4 / 2021-09-24
+* composer update, cause of course I needed to fix something
+
 #### 10.6.3 / 2021-09-24
 * somewhere along the way the filepath to assets no longer works for display, now requires a URL
 * composer update
