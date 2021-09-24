@@ -63,10 +63,12 @@ class Bootstrap {
 	public function __construct( $file ) {
 		$this->file = $file;
 		$this->dir  = dirname( $file );
-		if ( ! function_exists( 'wp_create_nonce' ) ) {
-			require ABSPATH . WPINC . '/pluggable.php';
-		}
-		static::$nonce = wp_create_nonce( 'git-updater' );
+		add_action(
+			'plugins_loaded',
+			function() {
+				static::$nonce = wp_create_nonce( 'git-updater' );
+			}
+		);
 	}
 
 	/**
