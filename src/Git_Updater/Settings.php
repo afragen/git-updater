@@ -230,7 +230,7 @@ class Settings {
 		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
 			return;
 		}
-		$current_tab = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
+		$current_tab = isset( $_GET['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		echo '<nav class="nav-tab-wrapper" aria-label="Secondary menu">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
@@ -248,7 +248,7 @@ class Settings {
 		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
 			return;
 		}
-		$current_tab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
+		$current_tab = isset( $_GET['subtab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		echo '<nav class="nav-tab-wrapper" aria-label="Tertiary menu">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
 			$active = ( $current_tab === $key ) ? 'nav-tab-active' : '';
@@ -265,8 +265,8 @@ class Settings {
 			return;
 		}
 		$action = is_multisite() ? 'edit.php?action=git-updater' : 'options.php';
-		$tab    = isset( $_GET['tab'] ) ? sanitize_file_name( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
-		$subtab = isset( $_GET['subtab'] ) ? sanitize_file_name( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
+		$tab    = isset( $_GET['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
+		$subtab = isset( $_GET['subtab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		$logo   = plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
 		?>
 		<div class="wrap git-updater-settings">

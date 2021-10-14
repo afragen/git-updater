@@ -1,4 +1,5 @@
 #### [unreleased]
+* sanitize array key with `sanitize_title_with_dashes()` not `sanitize_file_name()`, for underscores in key
 
 #### 10.6.4 / 2021-09-24
 * composer update, cause of course I needed to fix something
