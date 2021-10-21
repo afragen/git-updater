@@ -27,7 +27,11 @@ class Test_GUTrait extends \WP_UnitTestCase {
 			[ [ 0 => 'test' ], [ 0 => 'test' ] ],
 			[ [ '0' => 'test' ], [ 0 => 'test' ] ],
 			[ [ 'test' => 'test' ], [ 'test' => 'test' ] ],
-			[ [ '<test' => '<test' ], [ 'test' => '&lt;test' ] ],
+			[ [ 'test' => '<test' ], [ 'test' => '&lt;test' ] ],
+			[ [ '<test' => '<test' ], [ '' => '&lt;test' ] ],
+			[ [ 'test_one' => 'test' ], [ 'test_one' => 'test' ] ],
+			[ [ 'test-one' => 'test' ], [ 'test-one' => 'test' ] ],
+
 		];
 	}
 }

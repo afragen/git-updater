@@ -324,11 +324,7 @@ trait GU_Trait {
 	public function sanitize( $input ) {
 		$new_input = [];
 		foreach ( array_keys( (array) $input ) as $id ) {
-			if ( is_string( $id ) ) {
-				$new_input[ sanitize_file_name( $id ) ] = sanitize_text_field( $input[ $id ] );
-			} else {
-				$new_input[ sanitize_text_field( $id ) ] = sanitize_text_field( $input[ $id ] );
-			}
+			$new_input[ sanitize_title_with_dashes( $id ) ] = sanitize_text_field( $input[ $id ] );
 		}
 
 		return $new_input;
