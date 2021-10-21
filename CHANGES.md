@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.6.5 / 2021-10-21
 * sanitize array key with `sanitize_title_with_dashes()` not `sanitize_file_name()`, for underscores in key. Other devs may hook into `sanitize_file_name` filter and not unhook -- causing problems.
 
 #### 10.6.4 / 2021-09-24
