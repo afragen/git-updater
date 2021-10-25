@@ -197,7 +197,9 @@ class Plugin {
 			$git_plugin['release_asset']           = $header['release_asset'];
 			$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
-			preg_match( '/\/wp-content.*/', $git_plugin['local_path'], $matches );
+			$wp_content_dir = basename(WP_CONTENT_DIR);
+      preg_match( "/\/$wp_content_dir.*/", $git_plugin['local_path'], $matches );
+      
 			$git_plugin['banners']['high'] =
 				file_exists( $git_plugin['local_path'] . 'assets/banner-1544x500.png' )
 					? home_url() . $matches[0] . 'assets/banner-1544x500.png'
