@@ -45,7 +45,7 @@ jobs:
       run: php -v
 
     - name: Composer install
-      run: composer require yoast/phpunit-polyfills:"*"; composer require phpunit/phpunit:"${{ matrix.phpunit-versions }}" --with-all-dependencies; composer install --optimize-autoloader --prefer-dist; phpunit --version; ./vendor/phpunit/phpunit/phpunit --version
+      run: composer install --optimize-autoloader --prefer-dist
 
     - name: Start Mysql
       run: sudo service mysql start
@@ -54,4 +54,6 @@ jobs:
       run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
 
     - name: phpunit tests
-      run: ./vendor/phpunit/phpunit/phpunit --config=phpunit.xml
+      run: |
+        echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
+        /usr/local/bin/phpunit --config=phpunit.xml
