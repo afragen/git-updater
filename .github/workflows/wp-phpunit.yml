@@ -37,13 +37,13 @@ jobs:
         php-version: ${{ matrix.php-versions }}
         coverage: none
         extensions: mysql
-        tools: wp-cli, phpunit:${{ matrix.phpunit-versions }}
+        tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
 
     - name: Check PHP Version
       run: php -v
 
     - name: Composer install
-      run: composer install --optimize-autoloader --prefer-dist
+      run: composer require yoast/phpunit-polyfills:"*"; composer require phpunit/phpunit:"${{ matrix.phpunit-versions }}" --with-all-dependencies; composer install --optimize-autoloader --prefer-dist; phpunit --version; ./vendor/phpunit/phpunit/phpunit --version
 
     - name: Start Mysql
       run: sudo service mysql start
@@ -52,4 +52,4 @@ jobs:
       run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
 
     - name: phpunit tests
-      run: phpunit --config=phpunit.xml
+      run: ./vendor/phpunit/phpunit/phpunit --config=phpunit.xml
