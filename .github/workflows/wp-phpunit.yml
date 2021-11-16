@@ -38,6 +38,8 @@ jobs:
         coverage: none
         extensions: mysql
         tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
+      env:
+        COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
 
     - name: Check PHP Version
       run: php -v
