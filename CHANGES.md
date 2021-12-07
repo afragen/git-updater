@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.6.7 / 2021-12-07
 * update `Basic_Auth_Loader::unset_release_asset_auth()` to account for new location of some GitHub release assets
 
 #### 10.6.6 / 2021-10-27
