@@ -1,4 +1,5 @@
 #### [unreleased]
+* initialize variable in `Basic_Auth_Loader::unset_release_asset_auth()`
 
 #### 10.6.7 / 2021-12-07
 * update `Basic_Auth_Loader::unset_release_asset_auth()` to account for new location of some GitHub release assets
