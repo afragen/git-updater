@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `Basic_Auth_Loader::unset_release_asset_auth()` to account for new location of some GitHub release assets
 
 #### 10.6.6 / 2021-10-27
 * update regex for finding content directory, fixes [#971](https://github.com/afragen/git-updater/issues/971)

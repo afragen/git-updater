@@ -258,11 +258,15 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function unset_release_asset_auth( $args, $url ) {
-		$aws_host        = false !== strpos( $url, 's3.amazonaws.com' );
-		$github_releases = false !== strpos( $url, 'releases/download' )
-			|| false !== strpos( $url, 'github-releases' );
+		$release_asset_parts = [ 's3.amazonaws.com', 'releases/download', 'github-releases', 'release-asset' ];
+		foreach ( $release_asset_parts as $part ) {
+			if ( false !== strpos( $url, $part ) ) {
+				$releases = true;
+				break;
+			}
+		}
 
-		if ( $aws_host || $github_releases ) {
+		if ( $releases ) {
 			unset( $args['headers']['Authorization'] );
 		}
 
