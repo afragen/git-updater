@@ -28,9 +28,16 @@ class WP_Dismiss_Notice {
 			return;
 		}
 
+		$composer_js_path = '/vendor/afragen/wp-dismiss-notice/js/dismiss-notice.js';
+		$plugin_js_url    = plugins_url( 'js/dismiss-notice.js', __FILE__, 'wp-dismiss-notice' );
+
+		$js_url = 200 === wp_remote_retrieve_response_code( wp_remote_head( $plugin_js_url ) )
+			? $plugin_js_url
+			: get_stylesheet_directory_uri() . $composer_js_path;
+
 		wp_enqueue_script(
 			'dismissible-notices',
-			plugins_url( 'js/dismiss-notice.js', __FILE__ ),
+			$js_url,
 			[ 'jquery', 'common' ],
 			false,
 			true
