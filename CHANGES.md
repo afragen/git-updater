@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.6.9 / 2021-12-19
+* composer update, fixes [#975](https://github.com/afragen/git-updater/issues/975)
+
 #### 10.6.8 / 2021-12-17
 * initialize variable in `Basic_Auth_Loader::unset_release_asset_auth()`
 * composer update
