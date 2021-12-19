@@ -5,7 +5,7 @@
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '072340b98f5151e91cdc9e42ca73b42d1212be99',
+        'reference' => '6f663c7014a4cf739e8ca3a60d616937912bb21b',
         'name' => 'afragen/git-updater',
         'dev' => false,
     ),
@@ -16,7 +16,7 @@
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '072340b98f5151e91cdc9e42ca73b42d1212be99',
+            'reference' => '6f663c7014a4cf739e8ca3a60d616937912bb21b',
             'dev_requirement' => false,
         ),
         'afragen/singleton' => array(
@@ -51,12 +51,12 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dismiss-notice' => array(
-            'pretty_version' => '0.2.2',
-            'version' => '0.2.2.0',
+            'pretty_version' => '0.2.3',
+            'version' => '0.2.3.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dismiss-notice',
             'aliases' => array(),
-            'reference' => 'c2e737fe141a2f831da662373f7967b8b0faf35b',
+            'reference' => '21949732f1ea21d81500bdda8f882ac7eb0f98af',
             'dev_requirement' => false,
         ),
         'erusev/parsedown' => array(
