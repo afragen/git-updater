@@ -46,7 +46,6 @@ class Add_Ons {
 	public function __construct() {
 		$this->addon   = $this->load_addon_config();
 		$this->premium = $this->load_premium_config();
-		static::$nonce = \wp_create_nonce( 'git-updater' );
 		validate_active_plugins();
 	}
 
@@ -199,11 +198,10 @@ class Add_Ons {
 	 * Display appropriate notice for Remote Management page action.
 	 */
 	private function admin_page_notices() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
-
-		$display = isset( $_GET['install_api_plugin'] ) && '1' === $_GET['install_api_plugin'];
+		$display = isset( $_POST['install_api_plugin'] ) && '1' === $_POST['install_api_plugin'];
 		if ( $display ) {
 			echo '<div class="updated"><p>';
 			esc_html_e( 'Git Updater API plugin installed.', 'git-updater' );
@@ -280,10 +278,6 @@ class Add_Ons {
 	 * @return bool
 	 */
 	public function install_api_plugin() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		$config = false;
 		if ( isset( $_GET['install_api_plugin'] ) ) {
 

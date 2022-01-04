@@ -88,7 +88,6 @@ class API {
 	public function __construct() {
 		static::$options       = $this->get_class_vars( 'Base', 'options' );
 		static::$extra_headers = $this->get_class_vars( 'Base', 'extra_headers' );
-		static::$nonce         = wp_create_nonce( 'git-updater' );
 	}
 
 	/**
@@ -391,10 +390,6 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return false;
-		}
-
 		return ! isset( $_POST['gu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
@@ -462,10 +457,6 @@ class API {
 	 */
 	public function get_local_info( $repo, $file ) {
 		$response = false;
-
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
 
 		if ( isset( $_POST['gu_refresh_cache'] ) ) {
 			return $response;
@@ -563,10 +554,6 @@ class API {
 		}
 
 		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
-
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
 
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;

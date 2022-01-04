@@ -566,10 +566,6 @@ class Theme {
 	 * @return array|\stdClass
 	 */
 	public function update_site_transient( $transient ) {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		// needed to fix PHP 7.4 warning.
 		if ( ! \is_object( $transient ) ) {
 			$transient = new \stdClass();

@@ -48,13 +48,6 @@ class Bootstrap {
 	protected $dir;
 
 	/**
-	 * Holds nonce.
-	 *
-	 * @var $nonce
-	 */
-	protected static $nonce;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param  string $file Main plugin file.
@@ -63,12 +56,6 @@ class Bootstrap {
 	public function __construct( $file ) {
 		$this->file = $file;
 		$this->dir  = dirname( $file );
-		add_action(
-			'plugins_loaded',
-			function() {
-				static::$nonce = wp_create_nonce( 'git-updater' );
-			}
-		);
 	}
 
 	/**
@@ -160,9 +147,6 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function rename_on_activation() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
 		$slug       = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
 		$exploded   = explode( '-', dirname( $slug ) );
