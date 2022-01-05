@@ -604,12 +604,14 @@ class Theme {
 
 			if ( $this->can_update_repo( $theme ) ) {
 				// Skip on RESTful updating.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['theme'] )
 					&& 'git-updater-update' === $_GET['action']
 					&& $response['theme'] === $_GET['theme']
 				) {
 					continue;
 				}
+				// phpcs:enable
 
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {

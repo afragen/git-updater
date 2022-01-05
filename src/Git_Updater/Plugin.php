@@ -401,12 +401,14 @@ class Plugin {
 
 				if ( $this->can_update_repo( $plugin ) ) {
 					// Skip on RESTful updating.
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
 					if ( isset( $_GET['action'], $_GET['plugin'] )
-					&& 'git-updater-update' === $_GET['action']
-					&& $response['slug'] === $_GET['plugin']
+						&& 'git-updater-update' === $_GET['action']
+						&& $response['slug'] === $_GET['plugin']
 					) {
 						continue;
 					}
+					// phpcs:enable
 
 					// Pull update from dot org if not overriding.
 					if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
