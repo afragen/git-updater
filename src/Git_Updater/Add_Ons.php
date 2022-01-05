@@ -382,7 +382,6 @@ class Add_Ons {
 		if ( \is_plugin_active( $config['slug'] ) ) {
 			submit_button( esc_html__( 'Install & Activate', 'git-updater' ), 'disabled' );
 		} else {
-			wp_create_nonce( $config['api'] );
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $install_api ); ?>">
 				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
