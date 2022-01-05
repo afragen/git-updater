@@ -1,5 +1,5 @@
 #### [unreleased]
-* really try to fix WPCS
+* really try to fix WPCS, it's a combination of ignoring the known and verifying the unknown
 
 #### 10.6.9 / 2021-12-19
 * composer update, fixes [#975](https://github.com/afragen/git-updater/issues/975)
