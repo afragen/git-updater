@@ -641,6 +641,9 @@ class Theme {
 			}
 
 			// Set transient for rollback.
+			if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'upgrade-theme_' . $theme->slug ) ) {
+				continue;
+			}
 			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
 				$transient->response[ $theme->slug ] = ( new Branch() )->set_rollback_transient( 'theme', $theme );
