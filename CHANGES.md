@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.6.10 / 2022-01-09
 * really try to fix WPCS, it's a combination of ignoring the known and verifying the unknown
 
 #### 10.6.9 / 2021-12-19
