@@ -60,7 +60,6 @@ class Settings {
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
-		static::$nonce = wp_create_nonce( 'git-updater' );
 		$this->refresh_caches();
 		$this->load_options();
 	}
@@ -69,7 +68,7 @@ class Settings {
 	 * Check for cache refresh.
 	 */
 	protected function refresh_caches() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return;
 		}
 
@@ -227,7 +226,7 @@ class Settings {
 	 * @access private
 	 */
 	private function options_tabs() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$current_tab = isset( $_GET['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
@@ -245,7 +244,7 @@ class Settings {
 	 * @access private
 	 */
 	private function options_sub_tabs() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$current_tab = isset( $_GET['subtab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
@@ -261,7 +260,7 @@ class Settings {
 	 * Options page callback.
 	 */
 	public function create_admin_page() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$action = is_multisite() ? 'edit.php?action=git-updater' : 'options.php';
@@ -294,6 +293,7 @@ class Settings {
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
 				<form class="settings" method="post" action="<?php echo esc_attr( $refresh_transients ); ?>">
+					<?php wp_nonce_field( 'gu_refresh_cache' ); ?>
 					<?php submit_button( esc_html__( 'Refresh Cache', 'git-updater' ), 'primary', 'gu_refresh_cache' ); ?>
 				</form>
 			<?php endif; ?>
@@ -329,7 +329,7 @@ class Settings {
 	 * Display appropriate notice for Settings page actions.
 	 */
 	private function admin_page_notices() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
@@ -659,11 +659,11 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+			$this->redirect_on_save();
 		}
-		if ( isset( $_POST['option_page'] )
-			&& 'git_updater' === $_POST['option_page']
+		if ( ( isset( $_POST['option_page'] )
+			&& 'git_updater' === $_POST['option_page'] )
 		) {
 			$options = $this->filter_options();
 			update_site_option( 'git_updater', $this->sanitize( $options ) );
@@ -694,6 +694,9 @@ class Settings {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+			return;
+		}
 		$options = self::$options;
 
 		$options = array_filter(
@@ -702,10 +705,6 @@ class Settings {
 				return '1' !== $e;
 			}
 		);
-
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
 
 		$post_git_updater = isset( $_POST['git_updater'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['git_updater'] ) ) : [];
 		$options          = array_merge( $options, $post_git_updater );
@@ -773,6 +772,7 @@ class Settings {
 				],
 				$redirect_url
 			);
+			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
 			exit;
 		}
@@ -784,10 +784,9 @@ class Settings {
 	 * @return bool
 	 */
 	private function refresh_transients() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+			return false;
 		}
-
 		if ( isset( $_REQUEST['git_updater_refresh_transients'] ) ) {
 			$_POST = $_REQUEST;
 

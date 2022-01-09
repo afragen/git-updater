@@ -46,7 +46,6 @@ class Add_Ons {
 	public function __construct() {
 		$this->addon   = $this->load_addon_config();
 		$this->premium = $this->load_premium_config();
-		static::$nonce = \wp_create_nonce( 'git-updater' );
 		validate_active_plugins();
 	}
 
@@ -199,11 +198,10 @@ class Add_Ons {
 	 * Display appropriate notice for Remote Management page action.
 	 */
 	private function admin_page_notices() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
+		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
-
-		$display = isset( $_GET['install_api_plugin'] ) && '1' === $_GET['install_api_plugin'];
+		$display = isset( $_POST['install_api_plugin'] ) && '1' === $_POST['install_api_plugin'];
 		if ( $display ) {
 			echo '<div class="updated"><p>';
 			esc_html_e( 'Git Updater API plugin installed.', 'git-updater' );
@@ -280,11 +278,8 @@ class Add_Ons {
 	 * @return bool
 	 */
 	public function install_api_plugin() {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		$config = false;
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['install_api_plugin'] ) ) {
 
 			// Redirect back to the Add-Ons.
@@ -292,6 +287,7 @@ class Add_Ons {
 			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
 			switch ( $_GET['install_api_plugin'] ) {
+			//phpcs:enable
 				case 'gist':
 					$config = $this->addon['gist'];
 					break;
@@ -386,7 +382,6 @@ class Add_Ons {
 		if ( \is_plugin_active( $config['slug'] ) ) {
 			submit_button( esc_html__( 'Install & Activate', 'git-updater' ), 'disabled' );
 		} else {
-			wp_create_nonce( $config['api'] );
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $install_api ); ?>">
 				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>

@@ -566,10 +566,6 @@ class Theme {
 	 * @return array|\stdClass
 	 */
 	public function update_site_transient( $transient ) {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		// needed to fix PHP 7.4 warning.
 		if ( ! \is_object( $transient ) ) {
 			$transient = new \stdClass();
@@ -608,12 +604,14 @@ class Theme {
 
 			if ( $this->can_update_repo( $theme ) ) {
 				// Skip on RESTful updating.
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended
 				if ( isset( $_GET['action'], $_GET['theme'] )
 					&& 'git-updater-update' === $_GET['action']
 					&& $response['theme'] === $_GET['theme']
 				) {
 					continue;
 				}
+				// phpcs:enable
 
 				// Pull update from dot org if not overriding.
 				if ( ! $this->override_dot_org( 'theme', $theme ) ) {
@@ -643,6 +641,9 @@ class Theme {
 			}
 
 			// Set transient for rollback.
+			if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'upgrade-theme_' . $theme->slug ) ) {
+				continue;
+			}
 			if ( isset( $_GET['theme'], $_GET['rollback'] ) && $theme->slug === $_GET['theme']
 			) {
 				$transient->response[ $theme->slug ] = ( new Branch() )->set_rollback_transient( 'theme', $theme );

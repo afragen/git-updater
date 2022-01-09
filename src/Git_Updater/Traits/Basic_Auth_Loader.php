@@ -56,8 +56,6 @@ trait Basic_Auth_Loader {
 	 * @return array $args
 	 */
 	public function add_auth_header( $args, $url ) {
-		static::$nonce = wp_create_nonce( 'git-updater' );
-
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
@@ -160,9 +158,17 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
+		// Works for background processing or with bypass of WP-Cron.
+		if ( isset( $_POST['_wpnonce'] ) ) {
+			if ( isset( $_POST['gu_refresh_cache'] ) ) {
+				if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+					return null;
+				}
+			} elseif ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
+				return null;
+			}
 		}
+
 		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
@@ -216,10 +222,6 @@ trait Basic_Auth_Loader {
 	 * @return string $slug
 	 */
 	private function get_type_for_credentials( $slug, $repos, $url ) {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		$type = $this->get_class_vars( 'Base', 'caller' );
 
 		$type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
@@ -233,6 +235,17 @@ trait Basic_Auth_Loader {
 					$type = $repo->git;
 					break;
 				}
+			}
+		}
+
+		// Works for background processing or with bypass of WP-Cron.
+		if ( isset( $_POST['_wpnonce'] ) ) {
+			if ( isset( $_POST['gu_refresh_cache'] ) ) {
+				if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+					return null;
+				}
+			} elseif ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
+				return null;
 			}
 		}
 

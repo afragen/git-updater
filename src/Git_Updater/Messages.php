@@ -33,13 +33,6 @@ class Messages {
 	public static $error_message = '';
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		static::$nonce = wp_create_nonce( 'git-updater' );
-	}
-
-	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
 	 * @param string|\WP_Error $type Error type.
@@ -52,8 +45,8 @@ class Messages {
 		$update_pages   = [ 'update-core.php', 'plugins.php', 'themes.php' ];
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) &&
-			( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
+		if ( ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) )
+			&& ( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
 			&& in_array( $pagenow, $settings_pages, true ) )
 			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
 		) {

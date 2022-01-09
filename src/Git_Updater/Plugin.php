@@ -359,10 +359,6 @@ class Plugin {
 	 * @return mixed
 	 */
 	public function update_site_transient( $transient ) {
-		if ( ! wp_verify_nonce( static::$nonce, 'git-updater' ) ) {
-			return;
-		}
-
 		// needed to fix PHP 7.4 warning.
 		if ( ! \is_object( $transient ) ) {
 			$transient = new \stdClass();
@@ -405,12 +401,14 @@ class Plugin {
 
 				if ( $this->can_update_repo( $plugin ) ) {
 					// Skip on RESTful updating.
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
 					if ( isset( $_GET['action'], $_GET['plugin'] )
-					&& 'git-updater-update' === $_GET['action']
-					&& $response['slug'] === $_GET['plugin']
+						&& 'git-updater-update' === $_GET['action']
+						&& $response['slug'] === $_GET['plugin']
 					) {
 						continue;
 					}
+					// phpcs:enable
 
 					// Pull update from dot org if not overriding.
 					if ( ! $this->override_dot_org( 'plugin', $plugin ) ) {
@@ -440,6 +438,9 @@ class Plugin {
 				}
 
 				// Set transient on rollback.
+				if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'upgrade-plugin_' . $plugin->file ) ) {
+					continue;
+				}
 				if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
 				) {
 					$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
