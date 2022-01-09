@@ -180,11 +180,11 @@ trait Basic_Auth_Loader {
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
 			$plugins     = isset( $_REQUEST['plugins'] )
-			? array_map( 'dirname', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['plugins'] ) ) ) )
-			: [];
+				? array_map( 'dirname', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['plugins'] ) ) ) )
+				: [];
 			$themes      = isset( $_REQUEST['themes'] )
-			? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['themes'] ) ) )
-			: [];
+				? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['themes'] ) ) )
+				: [];
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter(
@@ -225,8 +225,8 @@ trait Basic_Auth_Loader {
 		$type = $this->get_class_vars( 'Base', 'caller' );
 
 		$type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
-		? $repos[ $slug ]->git
-		: $type;
+			? $repos[ $slug ]->git
+			: $type;
 
 		// Set for WP-CLI.
 		if ( ! $slug ) {
@@ -251,9 +251,9 @@ trait Basic_Auth_Loader {
 
 		// Set for Remote Install.
 		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
-		&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
-		? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
-		: $type;
+			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
+			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
+			: $type;
 
 		return $type;
 	}
