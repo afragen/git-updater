@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.6.11 /2022-01-14
 * remove nonce verification from `Basic_Auth_Loader`, ignore the known
 
 #### 10.6.10 / 2022-01-09
