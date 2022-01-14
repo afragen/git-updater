@@ -158,17 +158,7 @@ trait Basic_Auth_Loader {
 	 * @return bool|string $slug
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
-		// Works for background processing or with bypass of WP-Cron.
-		if ( isset( $_POST['_wpnonce'] ) ) {
-			if ( isset( $_POST['gu_refresh_cache'] ) ) {
-				if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
-					return null;
-				}
-			} elseif ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
-				return null;
-			}
-		}
-
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
 		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
@@ -179,12 +169,13 @@ trait Basic_Auth_Loader {
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
-			$plugins     = isset( $_REQUEST['plugins'] )
+			$plugins = isset( $_REQUEST['plugins'] )
 				? array_map( 'dirname', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['plugins'] ) ) ) )
 				: [];
-			$themes      = isset( $_REQUEST['themes'] )
+			$themes  = isset( $_REQUEST['themes'] )
 				? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['themes'] ) ) )
 				: [];
+			// phpcs:enable
 			$bulk_update = array_merge( $plugins, $themes );
 			if ( ! empty( $bulk_update ) ) {
 				$slug = array_filter(
@@ -238,22 +229,13 @@ trait Basic_Auth_Loader {
 			}
 		}
 
-		// Works for background processing or with bypass of WP-Cron.
-		if ( isset( $_POST['_wpnonce'] ) ) {
-			if ( isset( $_POST['gu_refresh_cache'] ) ) {
-				if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
-					return null;
-				}
-			} elseif ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
-				return null;
-			}
-		}
-
 		// Set for Remote Install.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
 			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
 			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
 			: $type;
+		// phpcs:enable
 
 		return $type;
 	}
