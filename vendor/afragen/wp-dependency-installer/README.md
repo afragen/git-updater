@@ -30,10 +30,10 @@ composer require afragen/wp-dependency-installer
 ```js
 [
   {
-    "name": "GitHub Updater",
+    "name": "Git Updater",
     "host": "github",
-    "slug": "github-updater/github-updater.php",
-    "uri": "afragen/github-updater",
+    "slug": "git-updater/git-updater.php",
+    "uri": "afragen/git-updater",
     "branch": "develop",
     "required": true,
     "token": null

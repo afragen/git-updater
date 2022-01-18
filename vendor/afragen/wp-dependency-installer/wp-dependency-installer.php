@@ -60,13 +60,6 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		private $notices;
 
 		/**
-		 * Holds nonce.
-		 *
-		 * @var $nonce
-		 */
-		protected static $nonce;
-
-		/**
 		 * Factory.
 		 *
 		 * @param string $caller File path to calling plugin/theme.
@@ -88,12 +81,6 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		private function __construct() {
 			$this->config  = [];
 			$this->notices = [];
-			add_action(
-				'plugins_loaded',
-				function() {
-					static::$nonce = wp_create_nonce( 'wp-dependency-installer' );
-				}
-			);
 		}
 
 		/**
@@ -108,6 +95,21 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 			add_action( 'network_admin_notices', [ $this, 'admin_notices' ] );
 			add_action( 'wp_ajax_dependency_installer', [ $this, 'ajax_router' ] );
 			add_filter( 'http_request_args', [ $this, 'add_basic_auth_headers' ], 15, 2 );
+
+			add_filter(
+				'wp_dependency_notices',
+				function( $notices, $slug ) {
+					foreach ( array_keys( $notices ) as $key ) {
+						if ( ! is_wp_error( $notices[ $key ] ) && $notices[ $key ]['slug'] === $slug ) {
+							$notices[ $key ]['nonce'] = $this->config[ $slug ]['nonce'];
+						}
+					}
+
+					return $notices;
+				},
+				10,
+				2
+			);
 
 			new \WP_Dismiss_Notice();
 		}
@@ -166,6 +168,12 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 				$dependency['source']    = $source;
 				$dependency['sources'][] = $source;
 				$slug                    = $dependency['slug'];
+
+				if ( ! function_exists( 'wp_create_nonce' ) ) {
+					require_once ABSPATH . WPINC . '/pluggable.php';
+				}
+				$dependency['nonce'] = \wp_create_nonce( 'wp-dependency-installer_' . $slug );
+
 				// Keep a reference of all dependent plugins.
 				if ( isset( $this->config[ $slug ] ) ) {
 					$dependency['sources'] = array_merge( $this->config[ $slug ]['sources'], $dependency['sources'] );
@@ -289,6 +297,10 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 					$this->modify_plugin_row( $slug );
 				}
 
+				if ( ! wp_verify_nonce( $dependency['nonce'], 'wp-dependency-installer_' . $slug ) ) {
+					return false;
+				}
+
 				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
 				if ( $this->is_active( $slug ) ) {
 					// Do nothing.
@@ -333,7 +345,8 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 							$.post(ajaxurl, {
 								action: 'dependency_installer',
 								method: $this.attr('data-action'),
-								slug  : $this.attr('data-slug')
+								slug  : $this.attr('data-slug'),
+								nonce : $this.attr('data-nonce')
 							}, function (response) {
 								$parent.html(response);
 							});
@@ -356,17 +369,19 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 * AJAX router.
 		 */
 		public function ajax_router() {
-			if ( ! wp_verify_nonce( static::$nonce, 'wp-dependency-installer' ) ) {
+			if ( isset( $_POST['nonce'], $_POST['slug'] )
+				&& ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp-dependency-installer_' . sanitize_text_field( wp_unslash( $_POST['slug'] ) ) )
+			) {
 				return;
 			}
-
 			$method    = isset( $_POST['method'] ) ? sanitize_text_field( wp_unslash( $_POST['method'] ) ) : '';
 			$slug      = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( $_POST['slug'] ) ) : '';
 			$whitelist = [ 'install', 'activate', 'dismiss' ];
 
 			if ( in_array( $method, $whitelist, true ) ) {
 				$response = $this->$method( $slug );
-				esc_html_e( $response['message'] );
+				$message  = is_wp_error( $response ) ? $response->get_error_message() : $response['message'];
+				esc_html_e( $message );
 			}
 			wp_die();
 		}
@@ -461,18 +476,19 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 
 			wp_cache_flush();
 			if ( $this->is_required( $slug ) ) {
-				$this->activate( $slug );
-
-				return [
-					'status'  => 'updated',
-					'slug'    => $slug,
-					/* translators: %s: Plugin name */
-					'message' => sprintf( esc_html__( '%s has been installed and activated.' ), $this->config[ $slug ]['name'] ),
-					'source'  => $this->config[ $slug ]['source'],
-				];
+				$result = $this->activate( $slug );
+				if ( ! is_wp_error( $result ) ) {
+					return [
+						'status'  => 'updated',
+						'slug'    => $slug,
+						/* translators: %s: Plugin name */
+						'message' => sprintf( esc_html__( '%s has been installed and activated.' ), $this->config[ $slug ]['name'] ),
+						'source'  => $this->config[ $slug ]['source'],
+					];
+				}
 			}
 
-			if ( true !== $result && 'error' === $result['status'] ) {
+			if ( is_wp_error( $result ) || ( true !== $result && 'error' === $result['status'] ) ) {
 				return $result;
 			}
 
@@ -511,6 +527,10 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 * @return array Message.
 		 */
 		public function activate( $slug ) {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return new WP_Error( 'wpdi_activate_plugins', __( 'Current user cannot activate plugins.' ), $this->config[ $slug ]['name'] );
+			}
+
 			// network activate only if on network admin pages.
 			$result = is_network_admin() ? activate_plugin( $slug, null, true ) : activate_plugin( $slug );
 
@@ -667,9 +687,10 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 
 				if ( isset( $notice['action'] ) ) {
 					$action = sprintf(
-						' <a href="javascript:;" class="wpdi-button" data-action="%1$s" data-slug="%2$s">%3$s Now &raquo;</a> ',
+						' <a href="javascript:;" class="wpdi-button" data-action="%1$s" data-slug="%2$s" data-nonce="%3$s">%4$s Now &raquo;</a> ',
 						esc_attr( $notice['action'] ),
 						esc_attr( $notice['slug'] ),
+						esc_attr( $notice['nonce'] ),
 						esc_html( ucfirst( $notice['action'] ) )
 					);
 				}

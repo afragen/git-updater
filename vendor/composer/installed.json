@@ -102,24 +102,24 @@
         },
         {
             "name": "afragen/wp-dependency-installer",
-            "version": "4.2.2",
-            "version_normalized": "4.2.2.0",
+            "version": "4.3.0",
+            "version_normalized": "4.3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dependency-installer.git",
-                "reference": "5e5419348c6cde7b02f3c33fb3fc3381062443a1"
+                "reference": "5c14a929387b9ff266c66291aae23546134a9bdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/5e5419348c6cde7b02f3c33fb3fc3381062443a1",
-                "reference": "5e5419348c6cde7b02f3c33fb3fc3381062443a1",
+                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/5c14a929387b9ff266c66291aae23546134a9bdf",
+                "reference": "5c14a929387b9ff266c66291aae23546134a9bdf",
                 "shasum": ""
             },
             "require": {
                 "afragen/wp-dismiss-notice": "*",
                 "php": ">=5.6"
             },
-            "time": "2021-09-26T22:10:22+00:00",
+            "time": "2022-01-18T21:30:20+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
