@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d6c0cc3676f3a42468dadac405f9554",
+    "content-hash": "522013fc51ab7aee32000de625cce168",
     "packages": [
         {
             "name": "afragen/wp-dismiss-notice",
-            "version": "0.1.1",
+            "version": "0.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dismiss-notice.git",
-                "reference": "6db2f1365d97996a74c87787db3f7803027e48a0"
+                "reference": "21949732f1ea21d81500bdda8f882ac7eb0f98af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/6db2f1365d97996a74c87787db3f7803027e48a0",
-                "reference": "6db2f1365d97996a74c87787db3f7803027e48a0",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/21949732f1ea21d81500bdda8f882ac7eb0f98af",
+                "reference": "21949732f1ea21d81500bdda8f882ac7eb0f98af",
                 "shasum": ""
             },
             "require": {
@@ -46,7 +46,7 @@
                 "issues": "https://github.com/afragen/wp-dismiss-notice/issues",
                 "source": "https://github.com/afragen/wp-dismiss-notice"
             },
-            "time": "2021-09-23T19:56:44+00:00"
+            "time": "2021-12-19T21:53:57+00:00"
         }
     ],
     "packages-dev": [],
@@ -59,5 +59,5 @@
         "php": ">=5.6"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
