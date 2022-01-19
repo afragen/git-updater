@@ -198,7 +198,7 @@ class Add_Ons {
 	 * Display appropriate notice for Remote Management page action.
 	 */
 	private function admin_page_notices() {
-		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$display = isset( $_POST['install_api_plugin'] ) && '1' === $_POST['install_api_plugin'];

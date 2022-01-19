@@ -68,7 +68,7 @@ class Settings {
 	 * Check for cache refresh.
 	 */
 	protected function refresh_caches() {
-		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return;
 		}
 
@@ -226,9 +226,7 @@ class Settings {
 	 * @access private
 	 */
 	private function options_tabs() {
-		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
-			return;
-		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current_tab = isset( $_GET['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		echo '<nav class="nav-tab-wrapper" aria-label="Secondary menu">';
 		foreach ( $this->settings_tabs() as $key => $name ) {
@@ -244,9 +242,7 @@ class Settings {
 	 * @access private
 	 */
 	private function options_sub_tabs() {
-		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
-			return;
-		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current_tab = isset( $_GET['subtab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
 		echo '<nav class="nav-tab-wrapper" aria-label="Tertiary menu">';
 		foreach ( $this->settings_sub_tabs() as $key => $name ) {
@@ -329,7 +325,7 @@ class Settings {
 	 * Display appropriate notice for Settings page actions.
 	 */
 	private function admin_page_notices() {
-		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
@@ -659,8 +655,9 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
 			$this->redirect_on_save();
+			return;
 		}
 		if ( ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page'] )
@@ -694,7 +691,7 @@ class Settings {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
 			return;
 		}
 		$options = self::$options;
@@ -784,7 +781,7 @@ class Settings {
 	 * @return bool
 	 */
 	private function refresh_transients() {
-		if ( isset( $_POST['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return false;
 		}
 		if ( isset( $_REQUEST['git_updater_refresh_transients'] ) ) {
