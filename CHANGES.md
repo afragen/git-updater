@@ -1,4 +1,5 @@
 #### [unreleased]
+* update nonce condtionals, require variables be set
 
 #### 10.6.12 / 2022-01-18
 * composer update for `wp-dependency-installer` fixes
