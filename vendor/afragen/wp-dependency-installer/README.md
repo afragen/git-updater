@@ -61,8 +61,12 @@ You will then need to update `wp-dependencies.json` to suit your requirements.
 
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
-WP_Dependency_Installer::instance( __DIR__ )->run();
+add_action( 'plugins_loaded', function() {
+  WP_Dependency_Installer::instance( __DIR__ )->run();
+});
 ```
+
+`WP_Dependency_Installer` should be loaded via an action hook like `plugins_loaded` or `init` to function properly as it requires `wp-includes/pluggable.php` to be loaded for `wp_create_nonce()`.
 
 4. (optional) Take a look at some of built in [Hooks](https://github.com/afragen/wp-dependency-installer/wiki/Actions-and-Hooks) and [Functions](https://github.com/afragen/wp-dependency-installer/wiki/Helper-Functions) to further customize your plugin look and behaviour:
 

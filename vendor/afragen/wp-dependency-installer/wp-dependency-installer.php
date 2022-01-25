@@ -168,11 +168,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 				$dependency['source']    = $source;
 				$dependency['sources'][] = $source;
 				$slug                    = $dependency['slug'];
-
-				if ( ! function_exists( 'wp_create_nonce' ) ) {
-					require_once ABSPATH . WPINC . '/pluggable.php';
-				}
-				$dependency['nonce'] = \wp_create_nonce( 'wp-dependency-installer_' . $slug );
+				$dependency['nonce']     = \wp_create_nonce( 'wp-dependency-installer_' . $slug );
 
 				// Keep a reference of all dependent plugins.
 				if ( isset( $this->config[ $slug ] ) ) {
