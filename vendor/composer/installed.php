@@ -5,7 +5,7 @@
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '2523a2eabb18ee0d0dc5de0715b7c3e00217f381',
+        'reference' => '680207b67585dfaaab7271e8f62ad45a54fa87b3',
         'name' => 'afragen/git-updater',
         'dev' => false,
     ),
@@ -16,7 +16,7 @@
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '2523a2eabb18ee0d0dc5de0715b7c3e00217f381',
+            'reference' => '680207b67585dfaaab7271e8f62ad45a54fa87b3',
             'dev_requirement' => false,
         ),
         'afragen/singleton' => array(
@@ -42,12 +42,12 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.0',
-            'version' => '4.3.0.0',
+            'pretty_version' => '4.3.2',
+            'version' => '4.3.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
             'aliases' => array(),
-            'reference' => '5c14a929387b9ff266c66291aae23546134a9bdf',
+            'reference' => '707d659fcbf690999dde8d5a4359e32e0675cf98',
             'dev_requirement' => false,
         ),
         'afragen/wp-dismiss-notice' => array(

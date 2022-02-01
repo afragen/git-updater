@@ -438,10 +438,8 @@ class Plugin {
 				}
 
 				// Set transient on rollback.
-				if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'upgrade-plugin_' . $plugin->file ) ) {
-					continue;
-				}
-				if ( isset( $_GET['plugin'], $_GET['rollback'] ) && $plugin->file === $_GET['plugin']
+				if ( isset( $_GET['_wpnonce'], $_GET['plugin'], $_GET['rollback'] )
+					&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'upgrade-plugin_' . $plugin->file )
 				) {
 					$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
 				}

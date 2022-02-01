@@ -168,11 +168,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 				$dependency['source']    = $source;
 				$dependency['sources'][] = $source;
 				$slug                    = $dependency['slug'];
-
-				if ( ! function_exists( 'wp_create_nonce' ) ) {
-					require_once ABSPATH . WPINC . '/pluggable.php';
-				}
-				$dependency['nonce'] = \wp_create_nonce( 'wp-dependency-installer_' . $slug );
+				$dependency['nonce']     = \wp_create_nonce( 'wp-dependency-installer_' . $slug );
 
 				// Keep a reference of all dependent plugins.
 				if ( isset( $this->config[ $slug ] ) ) {
@@ -369,8 +365,8 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 * AJAX router.
 		 */
 		public function ajax_router() {
-			if ( isset( $_POST['nonce'], $_POST['slug'] )
-				&& ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp-dependency-installer_' . sanitize_text_field( wp_unslash( $_POST['slug'] ) ) )
+			if ( ! isset( $_POST['nonce'], $_POST['slug'] )
+				|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp-dependency-installer_' . sanitize_text_field( wp_unslash( $_POST['slug'] ) ) )
 			) {
 				return;
 			}
