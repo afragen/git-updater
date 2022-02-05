@@ -1,5 +1,8 @@
 #### [unreleased]
+
+#### 10.6.14 / 2022-02-05
 * allow hooks to run if no settings to be saved in `Settings::update_settings()`
+* composer update
 
 #### 10.6.13 / 2022-02-01
 * update nonce condtionals, require variables be set
