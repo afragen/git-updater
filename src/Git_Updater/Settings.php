@@ -655,15 +655,13 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
-			$this->redirect_on_save();
-			return;
-		}
-		if ( ( isset( $_POST['option_page'] )
+		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+			if ( ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page'] )
-		) {
-			$options = $this->filter_options();
-			update_site_option( 'git_updater', $this->sanitize( $options ) );
+			) {
+				$options = $this->filter_options();
+				update_site_option( 'git_updater', $this->sanitize( $options ) );
+			}
 		}
 
 		/**

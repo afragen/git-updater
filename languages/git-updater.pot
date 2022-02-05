@@ -2,16 +2,16 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 10.6.12.1\n"
+"Project-Id-Version: Git Updater 10.6.14\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-01-19T01:08:50+00:00\n"
+"POT-Creation-Date: 2022-02-05T23:32:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.5.0\n"
+"X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
@@ -181,7 +181,7 @@ msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
 #: src/Git_Updater/Settings.php:137
-#: src/Git_Updater/Settings.php:808
+#: src/Git_Updater/Settings.php:806
 msgid "Settings"
 msgstr ""
 
@@ -231,23 +231,23 @@ msgstr ""
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:842
+#: src/Git_Updater/Settings.php:840
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:843
+#: src/Git_Updater/Settings.php:841
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:844
+#: src/Git_Updater/Settings.php:842
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:845
+#: src/Git_Updater/Settings.php:843
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:889
+#: src/Git_Updater/Settings.php:887
 msgid "Installed Plugins and Themes"
 msgstr ""
 

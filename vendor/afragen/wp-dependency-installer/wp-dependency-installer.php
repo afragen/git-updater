@@ -539,6 +539,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 
 			return [
 				'status'  => 'updated',
+				'slug'    => $slug,
 				/* translators: %s: Plugin name */
 				'message' => sprintf( esc_html__( '%s has been activated.' ), $this->config[ $slug ]['name'] ),
 				'source'  => $this->config[ $slug ]['source'],
