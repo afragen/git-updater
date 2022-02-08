@@ -598,6 +598,13 @@ class Settings {
 		 */
 		$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
 
+		// Show plugins/themes skipped using Skip Updates plugin.
+		$skip_updates = get_site_option( 'skip_updates', [] );
+		foreach ( $skip_updates as $skip_update ) {
+			$overrides[] = $skip_update['slug'];
+		}
+		$overrides = \array_unique( $overrides );
+
 		if ( ! empty( $overrides ) ) {
 			echo '<h4>' . esc_html__( 'Overridden Plugins and Themes', 'git-updater' ) . '</h4>';
 			echo '<p>' . esc_html__( 'The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories.', 'git-updater' ) . '</p>';
