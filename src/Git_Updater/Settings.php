@@ -68,7 +68,7 @@ class Settings {
 	 * Check for cache refresh.
 	 */
 	protected function refresh_caches() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return;
 		}
 
@@ -256,7 +256,7 @@ class Settings {
 	 * Options page callback.
 	 */
 	public function create_admin_page() {
-		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
+		if ( isset( $_GET['_wpnonce'] ) && ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$action = is_multisite() ? 'edit.php?action=git-updater' : 'options.php';
@@ -325,7 +325,7 @@ class Settings {
 	 * Display appropriate notice for Settings page actions.
 	 */
 	private function admin_page_notices() {
-		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) ) {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
@@ -662,7 +662,7 @@ class Settings {
 	 * @link http://benohead.com/wordpress-network-wide-plugin-settings/
 	 */
 	public function update_settings() {
-		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
 			if ( ( isset( $_POST['option_page'] )
 			&& 'git_updater' === $_POST['option_page'] )
 			) {
@@ -696,7 +696,7 @@ class Settings {
 	 * @return array|mixed
 	 */
 	private function filter_options() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'git_updater-options' ) ) {
 			return;
 		}
 		$options = self::$options;
@@ -786,7 +786,7 @@ class Settings {
 	 * @return bool
 	 */
 	private function refresh_transients() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			return false;
 		}
 		if ( isset( $_REQUEST['git_updater_refresh_transients'] ) ) {

@@ -25,7 +25,7 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	public static function is_heartbeat() {
-		if ( isset( $_POST['action'], $_POST['_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_nonce'] ) ), 'heartbeat-nonce' ) ) {
+		if ( isset( $_POST['action'], $_POST['_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_nonce'] ) ), 'heartbeat-nonce' ) ) {
 			return 'heartbeat' === $_POST['action'];
 		}
 			return false;

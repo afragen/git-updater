@@ -366,7 +366,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 */
 		public function ajax_router() {
 			if ( ! isset( $_POST['nonce'], $_POST['slug'] )
-				|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wp-dependency-installer_' . sanitize_text_field( wp_unslash( $_POST['slug'] ) ) )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nonce'] ) ), 'wp-dependency-installer_' . sanitize_text_field( wp_unslash( $_POST['slug'] ) ) )
 			) {
 				return;
 			}

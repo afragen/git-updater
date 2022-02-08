@@ -1,5 +1,6 @@
 #### [unreleased]
 * show overridden plugins/themes by [Skip Updates](https://wordpress.org/plugins/skip-updates/) plugin in Git Updater Settings tab
+* use `sanitize_key()` for nonces
 
 #### 10.6.14 / 2022-02-05
 * allow hooks to run if no settings to be saved in `Settings::update_settings()`
