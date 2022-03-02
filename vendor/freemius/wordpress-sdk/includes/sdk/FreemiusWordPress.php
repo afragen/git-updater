@@ -14,6 +14,9 @@
 	 * License for the specific language governing permissions and limitations
 	 * under the License.
 	 */
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
 
 	require_once dirname( __FILE__ ) . '/FreemiusBase.php';
 

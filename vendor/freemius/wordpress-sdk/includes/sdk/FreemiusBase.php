@@ -15,6 +15,10 @@
 	 * under the License.
 	 */
 
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
+
 	if ( ! defined( 'FS_API__VERSION' ) ) {
 		define( 'FS_API__VERSION', '1' );
 	}

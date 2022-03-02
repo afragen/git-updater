@@ -157,7 +157,7 @@ class Base {
 			);
 		}
 
-		if ( isset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
+		if ( isset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *

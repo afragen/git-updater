@@ -16,7 +16,7 @@
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '089e23eefd3d661c7a1f4246e38534623f353012',
+            'reference' => '6ef7a25b7fa6b6e35a2f35312a78b717686da4e3',
             'dev_requirement' => false,
         ),
         'afragen/singleton' => array(
@@ -42,12 +42,12 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.3',
-            'version' => '4.3.3.0',
+            'pretty_version' => '4.3.4',
+            'version' => '4.3.4.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
             'aliases' => array(),
-            'reference' => '5947e52d91969d2fc8e47a25c02325643b154ec8',
+            'reference' => 'd13c7f2caab8781758c46ebef508953ce98259db',
             'dev_requirement' => false,
         ),
         'afragen/wp-dismiss-notice' => array(

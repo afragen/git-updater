@@ -22,10 +22,12 @@
 				notice           = $( this ).parents( '.fs-notice' ),
 				ajaxActionSuffix = notice.attr( 'data-manager-id' ).replace( ':', '-' );
 
-			var data = {
-				action    : 'fs_resolve_firewall_issues_' + ajaxActionSuffix,
-				error_type: error_type
-			};
+            var data = {
+                action   : 'fs_resolve_firewall_issues_' + ajaxActionSuffix,
+                // As such we don't need to use `wp_json_encode` method but using it to follow wp.org guideline.
+                _wpnonce : <?php echo wp_json_encode( wp_create_nonce( 'fs_resolve_firewall_issues' ) ); ?>,
+                error_type: error_type
+            };
 
 			if ( 'squid' === error_type ) {
 				data.hosting_company = prompt( 'What is the name or URL of your hosting company?' );
@@ -39,7 +41,9 @@
 			}
 
 			if ( 'retry_ping' === error_type ) {
-				data.action = 'fs_retry_connectivity_test_' + ajaxActionSuffix;
+                data.action   = 'fs_retry_connectivity_test_' + ajaxActionSuffix;
+                // As such we don't need to use `wp_json_encode` method but using it to follow wp.org guideline.
+                data._wpnonce = <?php echo wp_json_encode( wp_create_nonce( 'fs_retry_connectivity_test' ) ); ?>;
 			}
 
 			$( this ).css({'cursor': 'wait'});
