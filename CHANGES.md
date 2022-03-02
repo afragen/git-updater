@@ -1,6 +1,9 @@
 #### [unreleased]
+
+#### 10.6.15 / 2022-03-02
 * show overridden plugins/themes by [Skip Updates](https://wordpress.org/plugins/skip-updates/) plugin in Git Updater Settings tab
 * use `sanitize_key()` for nonces
+* update Freemius/wordpress-sdk
 
 #### 10.6.14 / 2022-02-05
 * allow hooks to run if no settings to be saved in `Settings::update_settings()`

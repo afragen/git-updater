@@ -1,4 +1,9 @@
 <?php
+
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
+
     /**
      * @var array $VARS
      * @var Freemius $fs
