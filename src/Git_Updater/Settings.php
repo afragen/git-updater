@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -166,6 +167,9 @@ class Settings {
 		$gits       = $this->get_running_git_servers();
 		$git_subtab = [];
 		$gu_subtabs = [];
+
+		// Force GitHub Settings subtab. Fix for object cache and refresh cache conflict.
+		( new GitHub_API( new \stdClass() ) )->add_settings( static::$auth_required );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
