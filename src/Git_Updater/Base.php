@@ -374,7 +374,10 @@ class Base {
 			$language_pack->run();
 		}
 
-		if ( class_exists('Fragen\Git_Updater\PRO\REST\REST_API') && $this->caller instanceof \Fragen\Git_Updater\PRO\REST\REST_API ){
+		// Return data if being called from Git Updater PRO REST API.
+		if ( class_exists( 'Fragen\Git_Updater\PRO\REST\REST_API' )
+			&& $this->caller instanceof \Fragen\Git_Updater\PRO\REST\REST_API
+		) {
 			return $repo;
 		}
 
