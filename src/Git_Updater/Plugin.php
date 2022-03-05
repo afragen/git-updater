@@ -379,7 +379,6 @@ class Plugin {
 					'plugin'           => $plugin->file,
 					'url'              => $plugin->uri,
 					'icons'            => $plugin->icons,
-					'icons'            => $plugin->icons,
 					'banners'          => $plugin->banners,
 					'branch'           => $plugin->branch,
 					'type'             => "{$plugin->git}-{$plugin->type}",
