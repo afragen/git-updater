@@ -552,6 +552,7 @@ class API {
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['release_asset'] );
 			unset( $this->response['release_asset_redirect'] );
 		}
 
@@ -582,6 +583,7 @@ class API {
 			$release_asset_response = \wp_remote_get( $asset, $args );
 			$release_asset_response = json_decode( wp_remote_retrieve_body( $release_asset_response ) );
 			if ( ! empty( $release_asset_response ) ) {
+				$this->set_repo_cache( 'release_asset', $asset );
 				$this->set_repo_cache( 'release_asset_response', $release_asset_response );
 			}
 
