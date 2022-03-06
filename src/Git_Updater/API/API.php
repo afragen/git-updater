@@ -583,7 +583,6 @@ class API {
 			$release_asset_response = \wp_remote_get( $asset, $args );
 			$release_asset_response = json_decode( wp_remote_retrieve_body( $release_asset_response ) );
 			if ( ! empty( $release_asset_response ) ) {
-				$this->set_repo_cache( 'release_asset', $asset );
 				$this->set_repo_cache( 'release_asset_response', $release_asset_response );
 			}
 
@@ -593,7 +592,6 @@ class API {
 
 			// If $redirect not retrieved zero out value of release_asset in cache.
 			if ( 200 !== wp_remote_retrieve_response_code( $redirect ) ) {
-				$this->set_repo_cache( 'release_asset', false );
 				$this->set_repo_cache( 'release_asset_response', false );
 			}
 		}
