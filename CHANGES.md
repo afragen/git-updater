@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.7.0 / 2022-03-06
 * fix long standing object cache conflict with refresh cache and missing GitHub subtab by always showing GitHub subtab
 * return `get_remote_repo_meta()` data when called from Git Updater PRO REST API
 * add `default` icon data to `Plugin` object
