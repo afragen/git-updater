@@ -2,6 +2,7 @@
 * fix long standing object cache conflict with refresh cache and missing GitHub subtab by always showing GitHub subtab
 * return `get_remote_repo_meta()` data when called from Git Updater PRO REST API
 * add `default` icon data to `Plugin` object
+* add additional release asset data to repo cache
 
 #### 10.6.15 / 2022-03-02
 * show overridden plugins/themes by [Skip Updates](https://wordpress.org/plugins/skip-updates/) plugin in Git Updater Settings tab
