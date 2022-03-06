@@ -316,7 +316,7 @@ class Base {
 	 *
 	 * @param \stdClass $repo Repo object.
 	 *
-	 * @return bool
+	 * @return bool|\stdClass
 	 */
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
@@ -372,6 +372,13 @@ class Base {
 			$repo->download_link = $repo_api->construct_download_link();
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
+		}
+
+		// Return data if being called from Git Updater PRO REST API.
+		if ( class_exists( 'Fragen\Git_Updater\PRO\REST\REST_API' )
+			&& $this->caller instanceof \Fragen\Git_Updater\PRO\REST\REST_API
+		) {
+			return $repo;
 		}
 
 		return true;

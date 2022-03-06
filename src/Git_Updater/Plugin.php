@@ -209,11 +209,12 @@ class Plugin {
 					: null;
 			$git_plugin['icons']           = [];
 			$icons                         = [
-				'svg'    => 'icon.svg',
-				'1x_png' => 'icon-128x128.png',
-				'1x_jpg' => 'icon-128x128.jpg',
-				'2x_png' => 'icon-256x256.png',
-				'2x_jpg' => 'icon-256x256.jpg',
+				'svg'     => 'icon.svg',
+				'1x_png'  => 'icon-128x128.png',
+				'1x_jpg'  => 'icon-128x128.jpg',
+				'2x_png'  => 'icon-256x256.png',
+				'2x_jpg'  => 'icon-256x256.jpg',
+				'default' => '',
 			];
 			foreach ( $icons as $key => $filename ) {
 				$key                         = preg_replace( '/_png|_jpg/', '', $key );
@@ -378,7 +379,6 @@ class Plugin {
 					'slug'             => $plugin->slug,
 					'plugin'           => $plugin->file,
 					'url'              => $plugin->uri,
-					'icons'            => $plugin->icons,
 					'icons'            => $plugin->icons,
 					'banners'          => $plugin->banners,
 					'branch'           => $plugin->branch,

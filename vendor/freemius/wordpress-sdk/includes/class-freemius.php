@@ -4058,7 +4058,7 @@
             if ( empty( $unique_id ) || ! is_string( $unique_id ) ) {
                 $key = fs_strip_url_protocol( get_site_url( $blog_id ) );
 
-                $secure_auth = SECURE_AUTH_KEY;
+                $secure_auth = defined( 'SECURE_AUTH_KEY' ) ? SECURE_AUTH_KEY : '';
                 if ( empty( $secure_auth ) ||
                      false !== strpos( $secure_auth, ' ' ) ||
                      'put your unique phrase here' === $secure_auth

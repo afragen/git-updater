@@ -552,6 +552,7 @@ class API {
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
+			unset( $this->response['release_asset'] );
 			unset( $this->response['release_asset_redirect'] );
 		}
 
@@ -575,15 +576,23 @@ class API {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
+			$args         = $this->add_auth_header( [], $asset );
+			$octet_stream = [ 'accept' => 'application/octet-stream' ];
+
+			// Get additional release asset data.
+			$release_asset_response = \wp_remote_get( $asset, $args );
+			$release_asset_response = json_decode( wp_remote_retrieve_body( $release_asset_response ) );
+			if ( ! empty( $release_asset_response ) ) {
+				$this->set_repo_cache( 'release_asset_response', $release_asset_response );
+			}
+
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
-			$auth_header     = $this->add_auth_header( [], $asset );
-			$octet_stream    = [ 'accept' => 'application/octet-stream' ];
-			$args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
+			$args['headers'] = array_merge( $args['headers'], $octet_stream );
 			$redirect        = wp_remote_get( $asset, $args );
 
 			// If $redirect not retrieved zero out value of release_asset in cache.
 			if ( 200 !== wp_remote_retrieve_response_code( $redirect ) ) {
-				$this->set_repo_cache( 'release_asset', false );
+				$this->set_repo_cache( 'release_asset_response', false );
 			}
 		}
 
