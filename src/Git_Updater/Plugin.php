@@ -209,12 +209,11 @@ class Plugin {
 					: null;
 			$git_plugin['icons']           = [];
 			$icons                         = [
-				'svg'     => 'icon.svg',
-				'1x_png'  => 'icon-128x128.png',
-				'1x_jpg'  => 'icon-128x128.jpg',
-				'2x_png'  => 'icon-256x256.png',
-				'2x_jpg'  => 'icon-256x256.jpg',
-				'default' => '',
+				'svg'    => 'icon.svg',
+				'1x_png' => 'icon-128x128.png',
+				'1x_jpg' => 'icon-128x128.jpg',
+				'2x_png' => 'icon-256x256.png',
+				'2x_jpg' => 'icon-256x256.jpg',
 			];
 			foreach ( $icons as $key => $filename ) {
 				$key                         = preg_replace( '/_png|_jpg/', '', $key );
@@ -222,6 +221,7 @@ class Plugin {
 					? home_url() . $matches[0] . 'assets/' . $filename
 					: null;
 			}
+			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
 
 			// Fix branch for .git VCS.
 			if ( file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
