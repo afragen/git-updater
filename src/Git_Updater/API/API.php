@@ -59,10 +59,10 @@ class API {
 	/**
 	 * Variable to hold all repository remote info.
 	 *
-	 * @access protected
+	 * @access public
 	 * @var array
 	 */
-	protected $response = [];
+	public $response = [];
 
 	/**
 	 * Variable to hold AWS redirect URL.
