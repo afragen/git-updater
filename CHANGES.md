@@ -2,6 +2,7 @@
 * save GitHub release asset data in `parse_release_asset()`
 * clean up `get_release_asset_redirect()`
 * add geopattern-icon default plugin icon
+* use direct GitHub release asset URL, not use redirect
 
 #### 10.7.0 / 2022-03-06
 * fix long standing object cache conflict with refresh cache and missing GitHub subtab by always showing GitHub subtab
