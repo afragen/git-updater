@@ -216,10 +216,10 @@ class Plugin {
 				'2x_jpg' => 'icon-256x256.jpg',
 			];
 			foreach ( $icons as $key => $filename ) {
-				$key                         = preg_replace( '/_png|_jpg/', '', $key );
-				$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-					? home_url() . $matches[0] . 'assets/' . $filename
-					: null;
+				$key = preg_replace( '/_png|_jpg/', '', $key );
+				if ( file_exists( $git_plugin['local_path'] . 'assets/' . $filename ) ) {
+					$git_plugin['icons'][ $key ] = home_url() . $matches[0] . 'assets/' . $filename;
+				}
 			}
 			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
 
