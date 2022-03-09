@@ -199,32 +199,45 @@ class Plugin {
 
 			$content_dir_regex = '/\/' . basename( WP_CONTENT_DIR ) . '.*/';
 			preg_match( $content_dir_regex, $git_plugin['local_path'], $matches );
-			$git_plugin['banners']['high'] =
-				file_exists( $git_plugin['local_path'] . 'assets/banner-1544x500.png' )
-					? home_url() . $matches[0] . 'assets/banner-1544x500.png'
-					: null;
-			$git_plugin['banners']['low']  =
-				file_exists( $git_plugin['local_path'] . 'assets/banner-772x250.png' )
-					? home_url() . $matches[0] . 'assets/banner-772x250.png'
-					: null;
-			$git_plugin['icons']           = [];
-			$icons                         = [
+
+			/**
+			 * Filter to specify a unique assets directory.
+			 *
+			 * This will not work for hidden directories, ie `.wordpress-org`
+			 * as they are not reachable from the browser.
+			 *
+			 * @since 10.7.1
+			 */
+			$assets_dir            = apply_filters( 'gu_plugin_assets_dir', 'assets/', $slug );
+			$assets_dir            = trailingslashit( $assets_dir );
+			$banner_sizes          = [
+				'low'  => 'banner-772x250.png',
+				'high' => 'banner-1544x500.png',
+			];
+			$git_plugin['icons']   = [];
+			$git_plugin['banners'] = [];
+			$icons                 = [
 				'svg'    => 'icon.svg',
 				'1x_png' => 'icon-128x128.png',
 				'1x_jpg' => 'icon-128x128.jpg',
 				'2x_png' => 'icon-256x256.png',
 				'2x_jpg' => 'icon-256x256.jpg',
 			];
+			foreach ( $banner_sizes as $key => $size ) {
+				if ( \file_exists( $git_plugin['local_path'] . $assets_dir . $size ) ) {
+					$git_plugin['banners'][ $key ] = \home_url() . $matches[0] . $assets_dir . $size;
+				}
+			}
 			foreach ( $icons as $key => $filename ) {
-				$key                         = preg_replace( '/_png|_jpg/', '', $key );
-				$git_plugin['icons'][ $key ] = file_exists( $git_plugin['local_path'] . 'assets/' . $filename )
-					? home_url() . $matches[0] . 'assets/' . $filename
-					: null;
+				if ( \file_exists( $git_plugin['local_path'] . $assets_dir . $filename ) ) {
+					$key                         = preg_replace( '/_png|_jpg/', '', $key );
+					$git_plugin['icons'][ $key ] = \home_url() . $matches[0] . $assets_dir . $filename;
+				}
 			}
 			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
 
 			// Fix branch for .git VCS.
-			if ( file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
+			if ( \file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
 				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_plugin['local_path'] . '.git/HEAD' ) ), 2 ) );
 				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
 			}
