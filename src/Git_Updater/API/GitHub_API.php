@@ -123,6 +123,7 @@ class GitHub_API extends API implements API_Interface {
 		$endpoint           = '';
 
 		// Release asset.
+		// GitHub will use the release asset URL (browser_download_url) for both updating and installing.
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
