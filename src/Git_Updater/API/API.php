@@ -521,8 +521,18 @@ class API {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
 		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
-		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+		$readme['sections']   = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
+		$this->type->sections = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+
+		// Normalize 'tested' version.
+		if ( ! empty( $readme['tested'] ) ) {
+			list( $version )  = explode( '-', get_bloginfo( 'version' ) );
+			$version_arr      = explode( '.', $version );
+			$tested_arr       = explode( '.', $readme['tested'] );
+			$tested_arr[2]    = isset( $version_arr[2] ) ? $version_arr[2] : 0;
+			$readme['tested'] = implode( '.', $tested_arr );
+		}
+
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
 		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : null;
