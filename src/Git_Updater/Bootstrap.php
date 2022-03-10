@@ -69,7 +69,7 @@ class Bootstrap {
 
 		$message = sprintf(
 			/* translators: %s: documentation URL */
-			__( 'Git Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'git-updater' ),
+			__( 'Git Updater is missing required composer dependencies. <a href="%s" target="_blank" rel="noreferer">Learn more.</a>', 'git-updater' ),
 			'https://github.com/afragen/git-updater/wiki/Installation'
 		);
 
