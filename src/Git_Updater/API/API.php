@@ -529,7 +529,7 @@ class API {
 			list( $version )  = explode( '-', get_bloginfo( 'version' ) );
 			$version_arr      = explode( '.', $version );
 			$tested_arr       = explode( '.', $readme['tested'] );
-			$tested_arr[2]    = isset( $version_arr[2] ) ? $version_arr[2] : 0;
+			$tested_arr[2]    = isset( $version_arr[2] ) ? $version_arr[2] : 'x';
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
