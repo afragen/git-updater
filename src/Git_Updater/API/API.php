@@ -526,10 +526,12 @@ class API {
 
 		// Normalize 'tested' version.
 		if ( ! empty( $readme['tested'] ) ) {
-			list( $version )  = explode( '-', get_bloginfo( 'version' ) );
-			$version_arr      = explode( '.', $version );
-			$tested_arr       = explode( '.', $readme['tested'] );
-			$tested_arr[2]    = isset( $version_arr[2] ) ? $version_arr[2] : 'x';
+			list( $version ) = explode( '-', get_bloginfo( 'version' ) );
+			$version_arr     = explode( '.', $version );
+			$tested_arr      = explode( '.', $readme['tested'] );
+			if ( isset( $version_arr[2] ) ) {
+				$tested_arr[2] = $version_arr[2];
+			}
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
