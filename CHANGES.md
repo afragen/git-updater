@@ -4,6 +4,7 @@
 * add geopattern-icon default plugin icon
 * use direct GitHub release asset URL, not redirect URL
 * add filter `gu_plugin_assets_dir` to specify location of repository banners/icons
+* expanded support banners: .jpg, .png, RTL
 * normalize `Tested up to` data for point releases, similar to dot org
 
 #### 10.7.0 / 2022-03-06

@@ -207,12 +207,19 @@ class Plugin {
 			 * as they are not reachable from the browser.
 			 *
 			 * @since 10.7.1
+			 * @param string
 			 */
 			$assets_dir            = apply_filters( 'gu_plugin_assets_dir', 'assets/', $slug );
 			$assets_dir            = trailingslashit( $assets_dir );
 			$banner_sizes          = [
-				'low'  => 'banner-772x250.png',
-				'high' => 'banner-1544x500.png',
+				'low_png'      => 'banner-772x250.png',
+				'low_jpg'      => 'banner-772x250.jpg',
+				'low_png_rtl'  => 'banner-772x250-rtl.png',
+				'low_jpg_rtl'  => 'banner-772x250-rtl.jpg',
+				'high_png'     => 'banner-1544x500.png',
+				'high_jpg'     => 'banner-1544x500.jpg',
+				'high_png_rtl' => 'banner-1544x500-rtl.png',
+				'high_jpg_rtl' => 'banner-1544x500-rtl.jpg',
 			];
 			$git_plugin['icons']   = [];
 			$git_plugin['banners'] = [];
@@ -225,6 +232,7 @@ class Plugin {
 			];
 			foreach ( $banner_sizes as $key => $size ) {
 				if ( \file_exists( $git_plugin['local_path'] . $assets_dir . $size ) ) {
+					$key                           = preg_replace( '/_png|_jpg|_rtl/', '', $key );
 					$git_plugin['banners'][ $key ] = \home_url() . $matches[0] . $assets_dir . $size;
 				}
 			}
