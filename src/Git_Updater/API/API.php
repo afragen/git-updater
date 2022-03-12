@@ -59,10 +59,10 @@ class API {
 	/**
 	 * Variable to hold all repository remote info.
 	 *
-	 * @access protected
+	 * @access public
 	 * @var array
 	 */
-	protected $response = [];
+	public $response = [];
 
 	/**
 	 * Variable to hold AWS redirect URL.
@@ -521,8 +521,20 @@ class API {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
 		unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
-		$readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
-		$this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+		$readme['sections']   = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
+		$this->type->sections = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
+
+		// Normalize 'tested' version.
+		if ( ! empty( $readme['tested'] ) ) {
+			list( $version ) = explode( '-', get_bloginfo( 'version' ) );
+			$version_arr     = explode( '.', $version );
+			$tested_arr      = explode( '.', $readme['tested'] );
+			if ( isset( $version_arr[2] ) ) {
+				$tested_arr[2] = $version_arr[2];
+			}
+			$readme['tested'] = implode( '.', $tested_arr );
+		}
+
 		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
 		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
 		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : null;
@@ -578,22 +590,9 @@ class API {
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			$args         = $this->add_auth_header( [], $asset );
 			$octet_stream = [ 'accept' => 'application/octet-stream' ];
-
-			// Get additional release asset data.
-			$release_asset_response = \wp_remote_get( $asset, $args );
-			$release_asset_response = json_decode( wp_remote_retrieve_body( $release_asset_response ) );
-			if ( ! empty( $release_asset_response ) ) {
-				$this->set_repo_cache( 'release_asset_response', $release_asset_response );
-			}
-
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			$args['headers'] = array_merge( $args['headers'], $octet_stream );
-			$redirect        = wp_remote_get( $asset, $args );
-
-			// If $redirect not retrieved zero out value of release_asset in cache.
-			if ( 200 !== wp_remote_retrieve_response_code( $redirect ) ) {
-				$this->set_repo_cache( 'release_asset_response', false );
-			}
+			wp_remote_get( $asset, $args );
 		}
 
 		if ( ! empty( $this->redirect ) ) {

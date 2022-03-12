@@ -1,5 +1,15 @@
 #### [unreleased]
 
+#### 10.7.1 / 2022-03-12
+* save GitHub release asset data in `parse_release_asset()`
+* clean up `get_release_asset_redirect()`
+* add geopattern-icon default plugin icon
+* use direct GitHub release asset URL, not redirect URL
+* add filter `gu_plugin_assets_dir` to specify location of repository banners/icons
+* expanded support banners: .jpg, .png, RTL
+* normalize `Tested up to` data for point releases, similar to dot org
+* remove `noopener` from `target=_blank` links
+
 #### 10.7.0 / 2022-03-06
 * fix long standing object cache conflict with refresh cache and missing GitHub subtab by always showing GitHub subtab
 * return `get_remote_repo_meta()` data when called from Git Updater PRO REST API
