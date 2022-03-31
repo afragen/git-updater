@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 10.7.2 / 2022-03-31
 * fix directory rename for single file plugin update
 * revert GitHub_API release asset URL to return to redirect URL
 
