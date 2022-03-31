@@ -545,6 +545,16 @@ class Base {
 			$new_source   = trailingslashit( $remote_source ) . $slug;
 		}
 
+		// Move single file plugins into their own directory.
+		$single_file_plugin = isset( $config['.'] ) ? $config['.'] : false;
+		if ( $single_file_plugin
+			&& ( \property_exists( $single_file_plugin, 'slug' ) && '.' === $single_file_plugin->slug )
+		) {
+			// Strip `.php` from the filename.
+			$slug       = substr( $single_file_plugin->file, 0, -4 );
+			$new_source = trailingslashit( $remote_source ) . $slug;
+		}
+
 		return $new_source;
 	}
 

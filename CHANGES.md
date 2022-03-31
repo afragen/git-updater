@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix directory rename for single file plugin update
 
 #### 10.7.1 / 2022-03-12
 * save GitHub release asset data in `parse_release_asset()`
