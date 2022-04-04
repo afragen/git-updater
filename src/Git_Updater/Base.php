@@ -517,7 +517,11 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			$this->move( $source, $new_source );
+			if ( function_exists( 'move_dir' ) ) {
+				move_dir( $source, $new_source );
+			} else {
+				$this->move_dir( $source, $new_source );
+			}
 		}
 
 		return trailingslashit( $new_source );
@@ -543,16 +547,6 @@ class Base {
 			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
 			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
 			$new_source   = trailingslashit( $remote_source ) . $slug;
-		}
-
-		// Move single file plugins into their own directory.
-		$single_file_plugin = isset( $config['.'] ) ? $config['.'] : false;
-		if ( $single_file_plugin
-			&& ( \property_exists( $single_file_plugin, 'slug' ) && '.' === $single_file_plugin->slug )
-		) {
-			// Strip `.php` from the filename.
-			$slug       = substr( $single_file_plugin->file, 0, -4 );
-			$new_source = trailingslashit( $remote_source ) . $slug;
 		}
 
 		return $new_source;
