@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 10.7.1\n"
+"Project-Id-Version: Git Updater 10.8.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-03-12T22:24:53+00:00\n"
+"POT-Creation-Date: 2022-04-04T04:35:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: git-updater\n"
@@ -110,35 +110,35 @@ msgstr ""
 msgid "Free Trial"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:354
+#: src/Git_Updater/API/GitHub_API.php:351
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:361
+#: src/Git_Updater/API/GitHub_API.php:358
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:377
+#: src/Git_Updater/API/GitHub_API.php:374
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:404
+#: src/Git_Updater/API/GitHub_API.php:401
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:411
+#: src/Git_Updater/API/GitHub_API.php:408
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:422
+#: src/Git_Updater/API/GitHub_API.php:419
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:436
+#: src/Git_Updater/API/GitHub_API.php:433
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:450
+#: src/Git_Updater/API/GitHub_API.php:447
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
