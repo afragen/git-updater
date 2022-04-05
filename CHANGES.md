@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 10.9.0 / 2022-04-04
+* revert usage of `move_dir()` and `is_virtualbox()` -- for now
+
 #### 10.8.0 / 2022-04-03
 * use `move_dir()` and `is_virtualbox()` from [#51875](https://core.trac.wordpress.org/ticket/51857) [PR #2225](https://github.com/WordPress/wordpress-develop/pull/2225/files)
 * revert fix directory rename for single file plugin update
