@@ -688,140 +688,71 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Moves a directory from one location to another via the rename() PHP function.
-	 * If the renaming failed, falls back to copy_dir().
+	 * Rename or recursive file copy and delete.
 	 *
-	 * Assumes that WP_Filesystem() has already been called and setup.
+	 * This is more versatile than `$wp_filesystem->move()` for FS_METHOD 'direct'.
+	 * It moves/renames directories as well as files.
+	 * Fix for https://github.com/afragen/github-updater/issues/826,
+	 * strange failure of `rename()`.
 	 *
-	 * @since 6.1.0
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param string $from        Source directory.
-	 * @param string $to          Destination directory.
-	 *
-	 * @return true|WP_Error True on success, WP_Error on failure.
+	 * @return bool True for success, false for failure.
 	 */
-	public function move_dir( $from, $to ) {
-		global $wp_filesystem;
-
-		$result = false;
-
-		/*
-		 * Skip the rename() call on VirtualBox environments.
-		 * There are some known issues where rename() can fail on shared folders
-		 * without reporting an error properly.
-		 *
-		 * More details:
-		 * https://www.virtualbox.org/ticket/8761#comment:24
-		 * https://www.virtualbox.org/ticket/17971
-		 */
-		if ( 'direct' === $wp_filesystem->method && ! $this->is_virtualbox() ) {
-			$wp_filesystem->rmdir( $to );
-
-			$result = @rename( $from, $to );
+	public function move( $source, $destination ) {
+		if ( $this->filesystem_move( $source, $destination ) ) {
+			return true;
 		}
-
-		// Non-direct filesystems use some version of rename without a fallback.
-		if ( 'direct' !== $wp_filesystem->method ) {
-			$result = $wp_filesystem->move( $from, $to );
+		if ( is_dir( $destination ) && rename( $source, $destination ) ) {
+			return true;
 		}
-
-		if ( ! $result ) {
-			if ( ! $wp_filesystem->is_dir( $to ) ) {
-				if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-					return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+		if ( $dir = opendir( $source ) ) {
+			if ( ! file_exists( $destination ) ) {
+				mkdir( $destination );
+			}
+			$source = untrailingslashit( $source );
+			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			while ( false !== ( $file = readdir( $dir ) ) ) {
+				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
+					if ( is_dir( "{$source}/{$file}" ) ) {
+						$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
+					} else {
+						copy( "{$source}/{$file}", "{$destination}/{$file}" );
+						unlink( "{$source}/{$file}" );
+					}
 				}
 			}
-
-			$result = copy_dir( $from, $to );
-
-			if ( ! is_wp_error( $result ) ) {
-				// Clear the source directory.
-				$wp_filesystem->delete( $from, true );
+			$iterator = new \FilesystemIterator( $source );
+			if ( ! $iterator->valid() ) { // True if directory is empty.
+				rmdir( $source );
 			}
+			closedir( $dir );
+
+			return true;
 		}
 
-		return $result;
+		return false;
 	}
 
 	/**
-	 * Attempt to detect a VirtualBox environment.
+	 * Non-direct filesystem move.
 	 *
-	 * This attempts all known methods of detecting VirtualBox.
+	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
 	 *
-	 * @global $wp_filesystem The filesystem.
+	 * @param string $source      File path of source.
+	 * @param string $destination File path of destination.
 	 *
-	 * @since 6.1.0
-	 *
-	 * @return bool Whether or not VirtualBox was detected.
+	 * @return bool|void True on success, false on failure.
 	 */
-	public function is_virtualbox() {
+	public function filesystem_move( $source, $destination ) {
 		global $wp_filesystem;
-		static $is_virtualbox;
-
-		if ( null !== $is_virtualbox ) {
-			return $is_virtualbox;
+		if ( 'direct' !== $wp_filesystem->method ) {
+			return $wp_filesystem->move( $source, $destination );
 		}
 
-		// Detection via filter.
-		if ( apply_filters( 'is_virtualbox', false ) ) {
-			$is_virtualbox = true;
-			return $is_virtualbox;
-		}
-
-		// Detection via Composer.
-		if ( function_exists( 'getenv' ) && 'virtualbox' === getenv( 'COMPOSER_RUNTIME_ENV' ) ) {
-			$is_virtualbox = true;
-			return $is_virtualbox;
-		}
-
-		$virtualbox_unames = [ 'vvv' ];
-
-		// Detection via `php_uname()`.
-		if ( function_exists( 'php_uname' ) && in_array( php_uname( 'n' ), $virtualbox_unames, true ) ) {
-			$is_virtualbox = true;
-			return $is_virtualbox;
-		}
-
-		/*
-		 * Vagrant can use alternative providers.
-		 * This isn't reliable without some additional check(s).
-		 */
-		$virtualbox_usernames = [ 'vagrant' ];
-
-		// Detection via user name with POSIX.
-		if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_geteuid' ) ) {
-			$user = posix_getpwuid( posix_geteuid() );
-
-			if ( $user && in_array( $user['name'], $virtualbox_usernames, true ) ) {
-				$is_virtualbox = true;
-				return $is_virtualbox;
-			}
-		}
-
-		// Initialize the filesystem if not set.
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . '/wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
-
-		// Detection via file owner.
-		if ( in_array( $wp_filesystem->owner( __FILE__ ), $virtualbox_usernames, true ) ) {
-			$is_virtualbox = true;
-			return $is_virtualbox;
-		}
-
-		// Detection via file group.
-		if ( in_array( $wp_filesystem->group( __FILE__ ), $virtualbox_usernames, true ) ) {
-			$is_virtualbox = true;
-			return $is_virtualbox;
-		}
-
-		// Give up.
-		$is_virtualbox = false;
-
-		return $is_virtualbox;
+		return false;
 	}
 
 	/**
