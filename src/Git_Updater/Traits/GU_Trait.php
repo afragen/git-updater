@@ -730,7 +730,7 @@ trait GU_Trait {
 		if ( ! $result ) {
 			if ( ! $wp_filesystem->is_dir( $to ) ) {
 				if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-					return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+					return new \WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
 				}
 			}
 
@@ -779,7 +779,7 @@ trait GU_Trait {
 			return true;
 		}
 
-		return new WP_Error( 'recursive_copy_delete_failed', __( 'Could not move directory using `recursive_copy_delete`.' ), [ $source, $destination ] );
+		return new \WP_Error( 'recursive_copy_delete_failed', __( 'Could not move directory using `recursive_copy_delete`.' ), [ $source, $destination ] );
 	}
 
 	/**
