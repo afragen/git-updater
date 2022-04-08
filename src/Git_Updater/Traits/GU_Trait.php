@@ -734,23 +734,25 @@ trait GU_Trait {
 				}
 			}
 
-			$result = $this->copy_dir( $from, $to );
+			$result = $this->copy_rename( $from, $to );
 		}
 
 		return $result;
 	}
 
 	/**
-	 * Rename or recursive file copy and delete.
+	 * Recursive file copy and delete.
+	 *
+	 * Functions more like `rename()` in that the $source is deleted after copying.
 	 *
 	 * More versatile than WP Core `copy_dir()`.
 	 *
 	 * @param string $source      File path of source.
 	 * @param string $destination File path of destination.
 	 *
-	 * @return bool True for success, false for failure.
+	 * @return bool|\WP_Error True for success, \WP_Error for failure.
 	 */
-	public function copy_dir( $source, $destination ) {
+	public function copy_rename( $source, $destination ) {
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( $dir = opendir( $source ) ) {
 			if ( ! file_exists( $destination ) ) {
@@ -761,7 +763,7 @@ trait GU_Trait {
 			while ( false !== ( $file = readdir( $dir ) ) ) {
 				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
 					if ( is_dir( "{$source}/{$file}" ) ) {
-						$this->move_dir( "{$source}/{$file}", "{$destination}/{$file}" );
+						$this->copy_rename( "{$source}/{$file}", "{$destination}/{$file}" );
 					} else {
 						copy( "{$source}/{$file}", "{$destination}/{$file}" );
 						unlink( "{$source}/{$file}" );
@@ -777,7 +779,7 @@ trait GU_Trait {
 			return true;
 		}
 
-		return false;
+		return new WP_Error( 'copy_rename_failed', __( 'Could not move directory using `copy_rename`.' ), [ $source, $destination ] );
 	}
 
 	/**

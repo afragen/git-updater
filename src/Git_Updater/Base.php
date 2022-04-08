@@ -461,7 +461,7 @@ class Base {
 	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader      An Upgrader object.
 	 * @param array                            $hook_extra    Array of hook data.
 	 *
-	 * @return string
+	 * @return string|\WP_Error
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
 		$slug            = null;
@@ -517,7 +517,10 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			$this->move_dir( $source, $new_source );
+			$result = $this->move_dir( $source, $new_source );
+			if ( \is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
 
 		return trailingslashit( $new_source );
