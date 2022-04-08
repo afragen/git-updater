@@ -763,7 +763,7 @@ trait GU_Trait {
 			while ( false !== ( $file = readdir( $dir ) ) ) {
 				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
 					if ( is_dir( "{$source}/{$file}" ) ) {
-						$this->recursive_copy_delete( "{$source}/{$file}", "{$destination}/{$file}" );
+						$this->move_dir( "{$source}/{$file}", "{$destination}/{$file}" );
 					} else {
 						copy( "{$source}/{$file}", "{$destination}/{$file}" );
 						unlink( "{$source}/{$file}" );
