@@ -699,7 +699,6 @@ trait GU_Trait {
 	 *
 	 * @param string $from        Source directory.
 	 * @param string $to          Destination directory.
-	 *
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	public function move_dir( $from, $to ) {
