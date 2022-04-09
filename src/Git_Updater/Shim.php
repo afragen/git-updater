@@ -101,39 +101,56 @@ function move_dir( $from, $to ) {
  *
  * More versatile than WP Core `copy_dir()`.
  *
+ * @global \WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ *
  * @param string $source      File path of source.
  * @param string $destination File path of destination.
  *
  * @return bool|\WP_Error True for success, \WP_Error for failure.
  */
 function recursive_copy_delete( $source, $destination ) {
+	global $wp_filesystem;
+
 	// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 	if ( $dir = opendir( $source ) ) {
-		if ( ! file_exists( $destination ) ) {
-			mkdir( $destination );
+		if ( ! $wp_filesystem->is_dir( $destination ) ) {
+			if ( ! $wp_filesystem->mkdir( $destination, FS_CHMOD_DIR ) ) {
+				return new WP_Error( 'mkdir_failed_recursive_copy_delete', __( 'Could not create directory.' ), $destination );
+			}
 		}
 		$source = untrailingslashit( $source );
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( false !== ( $file = readdir( $dir ) ) ) {
 			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
-				if ( is_dir( "{$source}/{$file}" ) ) {
+				if ( $wp_filesystem->is_dir( "{$source}/{$file}" ) ) {
 					move_dir( "{$source}/{$file}", "{$destination}/{$file}" );
 				} else {
-					copy( "{$source}/{$file}", "{$destination}/{$file}" );
-					unlink( "{$source}/{$file}" );
+					if ( ! $wp_filesystem->copy( "{$source}/{$file}", "{$destination}/{$file}", true, FS_CHMOD_FILE ) ) {
+						// If copy failed, chmod file to 0644 and try again.
+						$wp_filesystem->chmod( "{$destination}/{$file}", FS_CHMOD_FILE );
+						if ( ! $wp_filesystem->copy( "{$source}/{$file}", "{$destination}/{$file}", true, FS_CHMOD_FILE ) ) {
+							return new WP_Error( 'copy_failed_recursive_copy_delete', __( 'Could not copy file.' ), $destination );
+						}
+					}
+					if ( ! $wp_filesystem->delete( "{$source}/{$file}" ) ) {
+						return new \WP_Error( 'delete_failed_recursive_copy_delete', __( 'Unable to delete file.' ), "{$source}/{$file}" );
+					}
 				}
 			}
 		}
+
 		$iterator = new \FilesystemIterator( $source );
 		if ( ! $iterator->valid() ) { // True if directory is empty.
-			rmdir( $source );
+			if ( ! $wp_filesystem->rmdir( $source ) ) {
+				new \WP_Error( 'rmdir_failed_recursive_copy_delete', __( 'Could not remove directory.' ), $source );
+			}
 		}
-		closedir( $dir );
+			closedir( $dir );
 
-		return true;
+			return true;
 	}
 
-	return new \WP_Error( 'recursive_copy_delete_failed', __( 'Could not move directory using `recursive_copy_delete`.' ), [ $source, $destination ] );
+	return new \WP_Error( 'opendir_failed_recursive_copy_delete', __( 'Could not open directory.' ), [ $source, $destination ] );
 }
 
 /**

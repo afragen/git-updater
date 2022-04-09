@@ -1,7 +1,7 @@
 #### [unreleased]
 * add most of `move_dir()` and `is_virtualbox()`
-* use `GU_Trait::recursive_copy_delete()` which is recursive copy > unlink, core `copy_dir()` doesn't work with how Git Updater renames downloads, can result in endless loop
-* update above to work with Rollback.
+* use `recursive_copy_delete()` which is recursive copy > unlink, core `copy_dir()` doesn't work with how Git Updater renames downloads, can result in endless loop
+* update above to work with Rollback
 * put `move_dir()`, `recursive_copy_delete()`, `is_virtualbox()` in `class Shim` for simpler usage from core functions
 
 #### 10.9.0 / 2022-04-04
