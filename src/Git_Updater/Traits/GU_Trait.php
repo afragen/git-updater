@@ -751,7 +751,7 @@ trait GU_Trait {
 	 *
 	 * @return bool|\WP_Error True for success, \WP_Error for failure.
 	 */
-	public function recursive_copy_delete( $source, $destination ) {
+	private function recursive_copy_delete( $source, $destination ) {
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( $dir = opendir( $source ) ) {
 			if ( ! file_exists( $destination ) ) {
@@ -792,7 +792,7 @@ trait GU_Trait {
 	 *
 	 * @return bool Whether or not VirtualBox was detected.
 	 */
-	public function is_virtualbox() {
+	private function is_virtualbox() {
 		global $wp_filesystem;
 		static $is_virtualbox;
 
