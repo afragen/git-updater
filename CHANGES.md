@@ -1,6 +1,6 @@
 #### [unreleased]
 * add most of move_dir() and is_virtualbox()
-* use GU_Trait::copy_rename() which is recursive copy > unlink, core copy_dir() doesn't work with how Git Updater renames downloads.
+* use GU_Trait::recursive_copy_delete() which is recursive copy > unlink, core copy_dir() doesn't work with how Git Updater renames downloads, can result in endless loop
 * update above to work with Rollback.
 
 #### 10.9.0 / 2022-04-04
