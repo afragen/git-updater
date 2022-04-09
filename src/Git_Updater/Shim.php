@@ -88,7 +88,7 @@ function move_dir( $from, $to ) {
 			}
 		}
 
-			$result = copy_dir( $from, $to );
+			$result = recursive_copy_delete( $from, $to );
 	}
 
 	return $result;
@@ -106,7 +106,7 @@ function move_dir( $from, $to ) {
  *
  * @return bool|\WP_Error True for success, \WP_Error for failure.
  */
-function copy_dir( $source, $destination ) {
+function recursive_copy_delete( $source, $destination ) {
 	// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 	if ( $dir = opendir( $source ) ) {
 		if ( ! file_exists( $destination ) ) {
