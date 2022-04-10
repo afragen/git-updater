@@ -123,7 +123,7 @@ function recursive_copy_delete( $source, $destination ) {
 		while ( false !== ( $file = readdir( $dir ) ) ) {
 			if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
 				if ( $wp_filesystem->is_dir( "{$source}/{$file}" ) ) {
-					move_dir( "{$source}/{$file}", "{$destination}/{$file}" );
+					recursive_copy_delete( "{$source}/{$file}", "{$destination}/{$file}" );
 				} else {
 					if ( ! $wp_filesystem->copy( "{$source}/{$file}", "{$destination}/{$file}", true, FS_CHMOD_FILE ) ) {
 						// If copy failed, chmod file to 0644 and try again.
