@@ -115,7 +115,7 @@ function recursive_copy_delete( $source, $destination ) {
 	if ( $dir = opendir( $source ) ) {
 		if ( ! $wp_filesystem->is_dir( $destination ) ) {
 			if ( ! $wp_filesystem->mkdir( $destination, FS_CHMOD_DIR ) ) {
-				return new WP_Error( 'mkdir_failed_recursive_copy_delete', __( 'Could not create directory.' ), $destination );
+				return new \WP_Error( 'mkdir_failed_recursive_copy_delete', __( 'Could not create directory.' ), $destination );
 			}
 		}
 		$source = untrailingslashit( $source );
@@ -129,7 +129,7 @@ function recursive_copy_delete( $source, $destination ) {
 						// If copy failed, chmod file to 0644 and try again.
 						$wp_filesystem->chmod( "{$destination}/{$file}", FS_CHMOD_FILE );
 						if ( ! $wp_filesystem->copy( "{$source}/{$file}", "{$destination}/{$file}", true, FS_CHMOD_FILE ) ) {
-							return new WP_Error( 'copy_failed_recursive_copy_delete', __( 'Could not copy file.' ), $destination );
+							return new \WP_Error( 'copy_failed_recursive_copy_delete', __( 'Could not copy file.' ), $destination );
 						}
 					}
 					if ( ! $wp_filesystem->delete( "{$source}/{$file}" ) ) {
