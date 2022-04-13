@@ -2,6 +2,7 @@
 * add most of `move_dir()` and `is_virtualbox()`
 * update above to work with Rollback
 * put `move_dir()` and `is_virtualbox()` in `class Shim` for simpler usage from core functions
+* make a new directory in `wp-content/upgrade/` for download slug fixing in `Base::upgrader_source_selection` to make better use of `move_dir()`
 
 #### 10.9.0 / 2022-04-04
 * revert usage of `move_dir()` and `is_virtualbox()` -- for now

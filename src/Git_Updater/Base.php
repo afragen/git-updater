@@ -464,10 +464,13 @@ class Base {
 	 * @return string|\WP_Error
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
+		global $wp_filesystem;
+
 		$slug            = null;
 		$repo            = null;
 		$new_source      = null;
 		$upgrader_object = null;
+		$remote_source   = $wp_filesystem->wp_content_dir() . 'upgrade/';
 
 		/*
 		 * Rename plugins.
