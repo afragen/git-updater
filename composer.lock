@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3902616c4dfc9028679ab6aee92b5307",
+    "content-hash": "cfe8eff982edb111c0b2eac65e7f8da2",
     "packages": [
         {
             "name": "afragen/singleton",

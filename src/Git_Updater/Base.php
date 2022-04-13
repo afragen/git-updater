@@ -517,8 +517,12 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			new Shim();
-			$result = move_dir( $source, $new_source );
+			if ( function_exists( 'move_dir' ) ) {
+				$result = \move_dir( $source, $new_source );
+			} else {
+				new Shim();
+				$result = move_dir( $source, $new_source );
+			}
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}
