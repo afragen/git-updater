@@ -798,4 +798,30 @@ trait GU_Trait {
 
 		return $repo_data;
 	}
+
+	/**
+	 * Deletes temporary upgrade directory.
+	 *
+	 * @since 10.10.0
+	 * @uses `upgrader_install_package_result` filter
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
+	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @return bool
+	 */
+	public function delete_upgrade_source( $result, $hook_extra ) {
+		global $wp_filesystem;
+
+		if ( $result['clear_destination'] && ! empty( $result['destination_name'] ) ) {
+			$wp_filesystem->delete(
+				$wp_filesystem->wp_content_dir() . "upgrade/{$result['destination_name']}",
+				true
+			);
+		}
+
+		return $result;
+	}
+
 }

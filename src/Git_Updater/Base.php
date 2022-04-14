@@ -530,6 +530,8 @@ class Base {
 				return $result;
 			}
 		}
+		// Clean up $new_source directory.
+		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 2 );
 
 		return trailingslashit( $new_source );
 	}
