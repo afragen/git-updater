@@ -394,8 +394,9 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		return ! isset( $_POST['gu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
+		$refresh = get_site_transient( 'gu_refresh_cache' );
+
+		return ! $refresh && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
 	/**
@@ -463,8 +464,7 @@ class API {
 	public function get_local_info( $repo, $file ) {
 		$response = false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['gu_refresh_cache'] ) ) {
+		if ( get_site_transient( 'gu_refresh_cache' ) ) {
 			return $response;
 		}
 
