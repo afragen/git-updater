@@ -183,7 +183,7 @@ class API {
 
 		// Use cached API failure data to avoid hammering the API.
 		$response = $this->get_repo_cache( md5( $url ) );
-		$cached   = isset( $response['error_cache'] ) && empty( $auth_header['headers'] );
+		$cached   = isset( $response['error_cache'] );
 		$response = $response ? $response['error_cache'] : $response;
 		$response = ! $response
 			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
@@ -197,21 +197,20 @@ class API {
 
 			return $response;
 		}
+
+		// Cache HTTP API error code for 60 minutes.
 		if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
-			$wait    = 60;
-			$timeout = get_site_transient( 'gu_refresh_cache' );
+			if ( ! get_site_transient( 'gu_refresh_cache' ) ) {
+				$timeout = 60;
 
-			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
-				$wait = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+				// Set timeout to GitHub rate limit reset.
+				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
+					$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+				}
+				$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
+
+				return false;
 			}
-
-			$timeout = ! get_site_transient( 'gu_refresh_cache' )
-				&& ! empty( $auth_header['headers'] )
-					? 0
-					: $wait;
-			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
-
-			return false;
 		}
 
 		static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
