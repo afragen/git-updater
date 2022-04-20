@@ -200,17 +200,15 @@ class API {
 
 		// Cache HTTP API error code for 60 minutes.
 		if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
-			if ( ! get_site_transient( 'gu_refresh_cache' ) ) {
-				$timeout = 60;
+			$timeout = 60;
 
-				// Set timeout to GitHub rate limit reset.
-				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
-					$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
-				}
-				$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
-
-				return false;
+			// Set timeout to GitHub rate limit reset.
+			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
+				$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
 			}
+			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
+
+			return false;
 		}
 
 		static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
