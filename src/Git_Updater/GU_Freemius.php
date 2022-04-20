@@ -29,7 +29,7 @@ class GU_Freemius {
 	 * @return array|void
 	 */
 	public function init() {
-		if ( ! function_exists( 'gu_fs' ) ) {
+		if ( ! function_exists( __NAMESPACE__ . '\gu_fs' ) ) {
 
 			/**
 			 * Create a helper function for easy SDK access.

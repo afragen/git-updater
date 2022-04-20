@@ -520,7 +520,7 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			if ( function_exists( 'move_dir' ) ) {
+			if ( function_exists( __NAMESPACE__ . '\move_dir' ) ) {
 				$result = \move_dir( $source, $new_source );
 			} else {
 				new Shim();
