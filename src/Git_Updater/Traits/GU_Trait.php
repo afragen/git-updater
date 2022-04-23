@@ -688,74 +688,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Rename or recursive file copy and delete.
-	 *
-	 * This is more versatile than `$wp_filesystem->move()` for FS_METHOD 'direct'.
-	 * It moves/renames directories as well as files.
-	 * Fix for https://github.com/afragen/github-updater/issues/826,
-	 * strange failure of `rename()`.
-	 *
-	 * @param string $source      File path of source.
-	 * @param string $destination File path of destination.
-	 *
-	 * @return bool True for success, false for failure.
-	 */
-	public function move( $source, $destination ) {
-		if ( $this->filesystem_move( $source, $destination ) ) {
-			return true;
-		}
-		if ( is_dir( $destination ) && rename( $source, $destination ) ) {
-			return true;
-		}
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
-		if ( $dir = opendir( $source ) ) {
-			if ( ! file_exists( $destination ) ) {
-				mkdir( $destination );
-			}
-			$source = untrailingslashit( $source );
-			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-			while ( false !== ( $file = readdir( $dir ) ) ) {
-				if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
-					if ( is_dir( "{$source}/{$file}" ) ) {
-						$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
-					} else {
-						copy( "{$source}/{$file}", "{$destination}/{$file}" );
-						unlink( "{$source}/{$file}" );
-					}
-				}
-			}
-			$iterator = new \FilesystemIterator( $source );
-			if ( ! $iterator->valid() ) { // True if directory is empty.
-				rmdir( $source );
-			}
-			closedir( $dir );
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Non-direct filesystem move.
-	 *
-	 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
-	 *
-	 * @param string $source      File path of source.
-	 * @param string $destination File path of destination.
-	 *
-	 * @return bool|void True on success, false on failure.
-	 */
-	public function filesystem_move( $source, $destination ) {
-		global $wp_filesystem;
-		if ( 'direct' !== $wp_filesystem->method ) {
-			return $wp_filesystem->move( $source, $destination );
-		}
-
-		return false;
-	}
-
-	/**
 	 * Test whether to use release asset.
 	 *
 	 * @param bool|string $branch_switch Branch to switch to or false.
@@ -866,4 +798,30 @@ trait GU_Trait {
 
 		return $repo_data;
 	}
+
+	/**
+	 * Deletes temporary upgrade directory.
+	 *
+	 * @since 10.10.0
+	 * @uses `upgrader_install_package_result` filter
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
+	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @return bool
+	 */
+	public function delete_upgrade_source( $result, $hook_extra ) {
+		global $wp_filesystem;
+
+		if ( $result['clear_destination'] && ! empty( $result['destination_name'] ) ) {
+			$wp_filesystem->delete(
+				$wp_filesystem->wp_content_dir() . "upgrade/{$result['destination_name']}",
+				true
+			);
+		}
+
+		return $result;
+	}
+
 }

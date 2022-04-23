@@ -461,13 +461,16 @@ class Base {
 	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader      An Upgrader object.
 	 * @param array                            $hook_extra    Array of hook data.
 	 *
-	 * @return string
+	 * @return string|\WP_Error
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
+		global $wp_filesystem;
+
 		$slug            = null;
 		$repo            = null;
 		$new_source      = null;
 		$upgrader_object = null;
+		$remote_source   = $wp_filesystem->wp_content_dir() . 'upgrade/';
 
 		/*
 		 * Rename plugins.
@@ -517,8 +520,18 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			$this->move( $source, $new_source );
+			if ( function_exists( 'move_dir' ) ) {
+				$result = \move_dir( $source, $new_source );
+			} else {
+				new Shim();
+				$result = move_dir( $source, $new_source );
+			}
+			if ( \is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
+		// Clean up $new_source directory.
+		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 2 );
 
 		return trailingslashit( $new_source );
 	}

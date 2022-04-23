@@ -181,8 +181,9 @@ class API {
 		$auth_header = $this->add_auth_header( [], $url );
 		$type        = $this->return_repo_type();
 
-		// Use cached API failure data to avoid hammering the GitHub API.
+		// Use cached API failure data to avoid hammering the API.
 		$response = $this->get_repo_cache( md5( $url ) );
+		$cached   = isset( $response['error_cache'] );
 		$response = $response ? $response['error_cache'] : $response;
 		$response = ! $response
 			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
@@ -196,39 +197,39 @@ class API {
 
 			return $response;
 		}
-		if ( ! in_array( $code, $allowed_codes, true ) ) {
 
-			// Cache GitHub API failure data.
-			$wait    = in_array( $type['git'], [ 'github', 'gist' ], true )
-				? GitHub_API::ratelimit_reset( $response, $this->type->slug )
-				: 0;
-			$timeout = get_site_transient( 'gu_refresh_cache' )
-				|| ( ! empty( static::$options['github_access_token'] ) && 403 !== $code )
-				? 0 : $wait;
+		// Cache HTTP API error code for 60 minutes.
+		if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
+			$timeout = 60;
+
+			// Set timeout to GitHub rate limit reset.
+			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
+				$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+			}
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
 
-			static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
-			static::$error_code[ $this->type->slug ] = array_merge(
-				static::$error_code[ $this->type->slug ],
-				[
-					'repo' => $this->type->slug,
-					'code' => $code,
-					'name' => $this->type->name,
-					'git'  => $this->type->git,
-				]
-			);
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
-
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
-				if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
-					$log_message = "Git Updater Error: {$this->type->name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
-					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					error_log( $log_message );
-				}
-			}
-
 			return false;
+		}
+
+		static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
+		static::$error_code[ $this->type->slug ] = array_merge(
+			static::$error_code[ $this->type->slug ],
+			[
+				'repo' => $this->type->slug,
+				'code' => $code,
+				'name' => $this->type->name,
+				'git'  => $this->type->git,
+			]
+		);
+		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
+
+		if ( $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
+			if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
+				$log_message = "Git Updater Error: {$this->type->name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( $log_message );
+			}
 		}
 
 		/**
@@ -390,8 +391,9 @@ class API {
 			return empty( static::$options['branch_switch'] );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		return ! isset( $_POST['gu_refresh_cache'] ) && ! $response && ! $this->can_update_repo( $this->type );
+		$refresh = get_site_transient( 'gu_refresh_cache' );
+
+		return ! $refresh && ! $response && ! $this->can_update_repo( $this->type );
 	}
 
 	/**
@@ -459,8 +461,7 @@ class API {
 	public function get_local_info( $repo, $file ) {
 		$response = false;
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['gu_refresh_cache'] ) ) {
+		if ( get_site_transient( 'gu_refresh_cache' ) ) {
 			return $response;
 		}
 
