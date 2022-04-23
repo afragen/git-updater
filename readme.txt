@@ -1,4 +1,5 @@
 # Git Updater
+
 Contributors: afragen
 Donate link: https://thefragens.com/git-updater-donate
 Tags: plugin, theme, language pack, updater
