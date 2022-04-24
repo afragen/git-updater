@@ -1,4 +1,5 @@
 #### [unreleased]
+* add plugin version to Settings page
 
 #### 10.10.0 / 2022-04-23
 * add most of `move_dir()` and `is_virtualbox()`
