@@ -30,13 +30,13 @@ class Shim {
 		if ( version_compare( phpversion(), '7.0', '>=' ) ) {
 			return dirname( $path, $level );
 		} else {
-			switch ( $level ) {
-				case 2:
-					return dirname( dirname( $path ) );
-				case 3:
-					return dirname( dirname( dirname( $path ) ) );
-				default:
-					return dirname( $path );
+		switch ( $level ) {
+			case 2:
+				return dirname( dirname( $path ) );
+			case 3:
+				return dirname( dirname( dirname( $path ) ) );
+			default:
+				return dirname( $path );
 			}
 		}
 	}
