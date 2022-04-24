@@ -523,7 +523,8 @@ class Base {
 			if ( function_exists( 'move_dir' ) ) {
 				$result = \move_dir( $source, $new_source );
 			} else {
-				new Shim();
+				//new Shim();
+				require_once __DIR__ . '/Shim.php';
 				$result = move_dir( $source, $new_source );
 			}
 			if ( \is_wp_error( $result ) ) {
