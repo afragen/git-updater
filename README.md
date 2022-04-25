@@ -17,7 +17,7 @@ This renaming process makes automated updates, just for this time, fail as the u
 * Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/git-updater/graphs/contributors)
 * Tags: plugin, theme, update, github, language pack
 * Requires at least: 5.2
-* Requires PHP: 5.6
+* Requires PHP: 7.2
 * Tested up to: trunk
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>

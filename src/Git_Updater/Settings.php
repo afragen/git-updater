@@ -108,7 +108,7 @@ class Settings {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'git-updater-settings', plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) ) . '/css/git-updater-settings.css', [], $this->get_plugin_version() );
+					wp_register_style( 'git-updater-settings', plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/css/git-updater-settings.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'git-updater-settings' );
 				}
 			);
@@ -266,7 +266,7 @@ class Settings {
 		$action = is_multisite() ? 'edit.php?action=git-updater' : 'options.php';
 		$tab    = isset( $_GET['tab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['tab'] ) ) : 'git_updater_settings';
 		$subtab = isset( $_GET['subtab'] ) ? sanitize_title_with_dashes( wp_unslash( $_GET['subtab'] ) ) : 'git_updater';
-		$logo   = plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
+		$logo   = plugins_url( basename( dirname( __DIR__, 2 ) ) . '/assets/GitUpdater_Logo.png' );
 		?>
 		<div class="wrap git-updater-settings">
 			<h1>

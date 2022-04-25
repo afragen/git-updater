@@ -1,5 +1,6 @@
 #### [unreleased]
 * add plugin version to Settings page
+* requires PHP 7.2+
 
 #### 10.10.0 / 2022-04-23
 * add most of `move_dir()` and `is_virtualbox()`

@@ -89,6 +89,7 @@ class Bootstrap {
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 
+		require_once __DIR__ . '/Shim.php';
 		( new Init() )->run();
 
 		// Initialize time dissmissible admin notices.
@@ -101,7 +102,7 @@ class Bootstrap {
 	 * @return void|bool
 	 */
 	public function check_requirements() {
-		if ( version_compare( phpversion(), '5.6', '<=' ) ) {
+		if ( version_compare( phpversion(), '7.2', '<=' ) ) {
 			add_action(
 				'admin_init',
 				function () {
@@ -109,7 +110,7 @@ class Bootstrap {
 					printf(
 						/* translators: 1: minimum PHP version required */
 						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'git-updater' ) ),
-						'5.6'
+						'7.2'
 					);
 					echo '</p></div>';
 					\deactivate_plugins( plugin_basename( $this->file ) );
