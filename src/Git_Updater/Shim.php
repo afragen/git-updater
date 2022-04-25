@@ -9,8 +9,6 @@
  */
 
 /**
- * Shim.php
- *
  * Loads WP 6.1 modified functions from Rollback.
  */
 
