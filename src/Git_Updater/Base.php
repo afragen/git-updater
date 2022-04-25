@@ -151,7 +151,7 @@ class Base {
 			add_action(
 				'admin_enqueue_scripts',
 				function () {
-					wp_register_style( 'git-updater', plugins_url( basename( Shim::dirname( __DIR__, 2 ) ) ) . '/css/git-updater.css', [], $this->get_plugin_version() );
+					wp_register_style( 'git-updater', plugins_url( basename( dirname( __DIR__, 2 ) ) ) . '/css/git-updater.css', [], $this->get_plugin_version() );
 					wp_enqueue_style( 'git-updater' );
 				}
 			);
@@ -523,7 +523,6 @@ class Base {
 			if ( function_exists( 'move_dir' ) ) {
 				$result = \move_dir( $source, $new_source );
 			} else {
-				new Shim();
 				$result = move_dir( $source, $new_source );
 			}
 			if ( \is_wp_error( $result ) ) {
@@ -672,7 +671,7 @@ class Base {
 		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
 
 		$git['headers'] = [ "GitHub{$type_cap}URI" => "GitHub {$type_cap} URI" ];
-		$git['icons']   = [ 'github' => basename( Shim::dirname( __DIR__, 2 ) ) . '/assets/github-logo.svg' ];
+		$git['icons']   = [ 'github' => basename( dirname( __DIR__, 2 ) ) . '/assets/github-logo.svg' ];
 
 		$git = apply_filters( 'gu_get_git_icon_data', $git, $type_cap );
 
