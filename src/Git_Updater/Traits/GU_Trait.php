@@ -813,7 +813,7 @@ trait GU_Trait {
 	public function delete_upgrade_source( $result, $hook_extra ) {
 		global $wp_filesystem;
 
-		if ( $result['clear_destination'] && ! empty( $result['destination_name'] ) ) {
+		if ( ! is_wp_error( $result ) && $result['clear_destination'] && ! empty( $result['destination_name'] ) ) {
 			$wp_filesystem->delete(
 				$wp_filesystem->wp_content_dir() . "upgrade/{$result['destination_name']}",
 				true

@@ -1,4 +1,5 @@
 #### [unreleased]
+* account for `WP_Error` as parameter
 
 #### 11.0.0 / 2022-04-24
 * add plugin version to Settings page
