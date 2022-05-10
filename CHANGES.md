@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 11.0.1 / 2022-05-10
 * account for `WP_Error` as parameter
 * fix cleanup after update
 * fix PHP Warning
