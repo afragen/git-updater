@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 11.0.1 / 2022-05-10
+* account for `WP_Error` as parameter
+* fix cleanup after update
+* fix PHP Warning
+
 #### 11.0.0 / 2022-04-24
 * add plugin version to Settings page
 * requires PHP 7.2+

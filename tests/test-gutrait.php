@@ -17,7 +17,7 @@ class Test_GUTrait extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	public function test_sanitize( $input = [], $expected ) {
+	public function test_sanitize( $input = [], $expected = [] ) {
 		$this->assertSame( $expected, $this->sanitize( $input ) );
 	}
 

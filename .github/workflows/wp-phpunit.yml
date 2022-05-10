@@ -19,13 +19,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-18.04]
-        php-versions: ['7.3', '7.4', '8.0', '8.1']
+        operating-system: [ubuntu-latest]
+        php-versions: ['7.4', '8.0', '8.1']
         phpunit-versions: ['9.5.20']
         include:
           - php-versions: '7.2'
             phpunit-versions: '7.5.20'
             operating-system: ubuntu-18.04
+          - php-versions: '7.3'
+            phpunit-versions: '9.5.20'
+            operating-system: 'ubuntu-18.04'
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
     - name: Checkout

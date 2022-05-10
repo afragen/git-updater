@@ -640,7 +640,7 @@ class Settings {
 		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="ghu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 		</label>
 		<?php
 	}

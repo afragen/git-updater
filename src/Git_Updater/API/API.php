@@ -217,7 +217,7 @@ class API {
 			[
 				'repo' => $this->type->slug,
 				'code' => $code,
-				'name' => $this->type->name,
+				'name' => isset( $this->type->name ) ? $this->type->name : $this->type->slug,
 				'git'  => $this->type->git,
 			]
 		);
