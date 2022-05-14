@@ -371,7 +371,7 @@ class API {
 		 * Filters the return value of exit_no_update.
 		 *
 		 * @since 10.0.0
-		 * @return bool `true` will exit this function early, default will not.
+		 * @param bool `true` will exit this function early, default will not.
 		 */
 		$always_fetch = (bool) apply_filters( 'gu_always_fetch_update', false );
 
