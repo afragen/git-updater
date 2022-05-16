@@ -36,6 +36,12 @@ trait API_Common {
 			$response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
 		}
 
+		/**
+		 * Filter the API decode response.
+		 *
+		 * @param mixed  $response API response.
+		 * @param string $git      Git host.
+		 */
 		return apply_filters( 'gu_decode_response', $response, $git );
 	}
 

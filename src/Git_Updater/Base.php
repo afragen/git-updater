@@ -127,7 +127,7 @@ class Base {
 		 * Filters whether to hide settings.
 		 *
 		 * @since 10.0.0
-		 * @return bool
+		 * @param bool
 		 */
 		$hide_settings = (bool) apply_filters( 'gu_hide_settings', false );
 
@@ -326,7 +326,7 @@ class Base {
 		 *
 		 * @since 10.0.0
 		 *
-		 * @return bool
+		 * @param bool
 		 */
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 

@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.0.2 / 2022-05-16
+* update `wp-dismiss-notice` with transient and only poll `wp_remote_get()` weekly
+
 #### 11.0.1 / 2022-05-10
 * account for `WP_Error` as parameter
 * fix cleanup after update
