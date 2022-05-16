@@ -32,10 +32,10 @@ class WP_Dismiss_Notice {
 		$plugin_js_url    = plugins_url( 'js/dismiss-notice.js', __FILE__, 'wp-dismiss-notice' );
 
 		// Test to get correct URL for JS.
-		$response = get_transient( 'wp-dismiss-notice' );
+		$response = get_transient( 'wp-dismiss-notice_jsurl' );
 		if ( ! $response ) {
 			$response = wp_remote_head( $plugin_js_url );
-			set_transient( 'wp-dismiss-notice', $response, WEEK_IN_SECONDS );
+			set_transient( 'wp-dismiss-notice_jsurl', $response, WEEK_IN_SECONDS );
 		}
 		$js_url = ( 200 === wp_remote_retrieve_response_code( $response ) ) || is_wp_error( $response )
 			? $plugin_js_url
