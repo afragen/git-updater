@@ -1,4 +1,5 @@
 #### [unreleased]
+* call `wp_cache_flush()` after 'Refresh Cache'
 
 #### 11.0.2 / 2022-05-16
 * update `wp-dismiss-notice` with transient and only poll `wp_remote_get()` weekly

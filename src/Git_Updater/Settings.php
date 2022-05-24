@@ -76,6 +76,7 @@ class Settings {
 		if ( isset( $_POST['gu_refresh_cache'] ) && ! ( $this instanceof Messages ) ) {
 			$this->delete_all_cached_data();
 			set_site_transient( 'gu_refresh_cache', true, 90 );
+			wp_cache_flush();
 		}
 	}
 
