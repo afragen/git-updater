@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 11.0.3 / 2022-05-29
 * call `wp_cache_flush()` after 'Refresh Cache'
 
 #### 11.0.2 / 2022-05-16
