@@ -57,19 +57,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "f878b2a815caace5f331b827b356b4eab9610561"
+                "reference": "a3b3a1313a8ca870f9d1ebd97148f63045a8adf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/f878b2a815caace5f331b827b356b4eab9610561",
-                "reference": "f878b2a815caace5f331b827b356b4eab9610561",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/a3b3a1313a8ca870f9d1ebd97148f63045a8adf9",
+                "reference": "a3b3a1313a8ca870f9d1ebd97148f63045a8adf9",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "time": "2021-01-11T22:07:25+00:00",
+            "time": "2022-06-10T20:13:50+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",

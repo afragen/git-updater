@@ -2,21 +2,21 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 11.0.0\n"
+"Project-Id-Version: Git Updater 11.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-04-25T06:31:19+00:00\n"
+"POT-Creation-Date: 2022-06-10T20:16:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
-#: src/Git_Updater/Settings.php:166
-#: src/Git_Updater/Settings.php:274
+#: src/Git_Updater/Settings.php:167
+#: src/Git_Updater/Settings.php:275
 msgid "Git Updater"
 msgstr ""
 
@@ -180,74 +180,74 @@ msgstr ""
 msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:138
-#: src/Git_Updater/Settings.php:818
+#: src/Git_Updater/Settings.php:139
+#: src/Git_Updater/Settings.php:819
 msgid "Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:216
-#: src/Git_Updater/Settings.php:374
+#: src/Git_Updater/Settings.php:217
+#: src/Git_Updater/Settings.php:375
 msgid "Git Updater Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:217
+#: src/Git_Updater/Settings.php:218
 msgctxt "Menu item"
 msgid "Git Updater"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:298
+#: src/Git_Updater/Settings.php:299
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:343
+#: src/Git_Updater/Settings.php:344
 msgid "Settings saved."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:345
+#: src/Git_Updater/Settings.php:346
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:387
+#: src/Git_Updater/Settings.php:388
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:400
+#: src/Git_Updater/Settings.php:401
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:412
+#: src/Git_Updater/Settings.php:413
 msgid "Display `deprecated hook` messaging in debug.log"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:575
+#: src/Git_Updater/Settings.php:576
 msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:614
+#: src/Git_Updater/Settings.php:615
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:615
+#: src/Git_Updater/Settings.php:616
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:852
+#: src/Git_Updater/Settings.php:853
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:853
+#: src/Git_Updater/Settings.php:854
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:854
+#: src/Git_Updater/Settings.php:855
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:855
+#: src/Git_Updater/Settings.php:856
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:899
+#: src/Git_Updater/Settings.php:900
 msgid "Installed Plugins and Themes"
 msgstr ""
 

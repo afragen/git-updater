@@ -237,25 +237,35 @@ class Parser {
 		// Parse headers.
 		$headers = array();
 
-		$line = $this->get_first_nonwhitespace( $contents );
+		$line                = $this->get_first_nonwhitespace( $contents );
+		$last_line_was_blank = false;
 		do {
 			$value = null;
-			if ( false === strpos( $line, ':' ) ) {
-
-				// Some plugins have line-breaks within the headers.
+			// If it doesn't look like a header value, maybe break to the next section.
+			if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
 				if ( empty( $line ) ) {
-					break;
-				} else {
+					// Some plugins have line-breaks within the headers...
+					$last_line_was_blank = true;
 					continue;
+				} else {
+					// We've hit a line that is not blank, but also doesn't look like a header, assume the Short Description and end Header parsing.
+					break;
 				}
 			}
 
 			$bits                = explode( ':', trim( $line ), 2 );
 			list( $key, $value ) = $bits;
 			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+
 			if ( isset( $this->valid_headers[ $key ] ) ) {
 				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+			} elseif ( $last_line_was_blank ) {
+				// If we skipped over a blank line, and then ended up with an unexpected header, assume we parsed too far and ended up in the Short Description.
+				// This final line will be added back into the stack after the loop for further parsing.
+				break;
 			}
+
+			$last_line_was_blank = false;
 		} while ( ( $line = array_shift( $contents ) ) !== null );
 		array_unshift( $contents, $line );
 
@@ -427,7 +437,7 @@ class Parser {
 			if ( $this->faq ) {
 				$this->sections['faq'] .= "\n<dl>\n";
 				foreach ( $this->faq as $question => $answer ) {
-					$question_slug          = sanitize_title_with_dashes( $question );
+					$question_slug          = rawurlencode( trim( strtolower( $question ) ) );
 					$this->sections['faq'] .= "<dt id='{$question_slug}'><h3>{$question}</h3></dt>\n<dd>{$answer}</dd>\n";
 				}
 				$this->sections['faq'] .= "\n</dl>\n";
@@ -523,7 +533,9 @@ class Parser {
 			'ul'         => array(),
 			'ol'         => array(),
 			'dl'         => array(),
-			'dt'         => array(),
+			'dt'         => array(
+				'id' => true,
+			),
 			'dd'         => array(),
 			'li'         => array(),
 			'h3'         => array(),
