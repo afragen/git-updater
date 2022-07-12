@@ -2,6 +2,7 @@
 * composer update for class parser updates
 * back to `sanitize_url`
 * update `class Shim`
+* update Freemius/wordpress-sdk
 
 #### 11.0.3 / 2022-05-29
 * call `wp_cache_flush()` after 'Refresh Cache'
@@ -63,7 +64,7 @@
 * composer update
 
 #### 10.6.13 / 2022-02-01
-* update nonce condtionals, require variables be set
+* update nonce conditionals, require variables be set
 
 #### 10.6.12 / 2022-01-18
 * composer update for `wp-dependency-installer` fixes

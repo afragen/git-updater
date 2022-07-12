@@ -263,23 +263,23 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.4.3",
-            "version_normalized": "2.4.3.0",
+            "version": "2.4.4",
+            "version_normalized": "2.4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "d2c3e1c27792f34123f928ea9fa73be56c337d13"
+                "reference": "1ae65094adc390ad562189d603b17a20feaa75c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/d2c3e1c27792f34123f928ea9fa73be56c337d13",
-                "reference": "d2c3e1c27792f34123f928ea9fa73be56c337d13",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/1ae65094adc390ad562189d603b17a20feaa75c0",
+                "reference": "1ae65094adc390ad562189d603b17a20feaa75c0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
             },
-            "time": "2022-03-03T09:14:17+00:00",
+            "time": "2022-07-10T06:43:09+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -299,7 +299,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.4.3"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.4.4"
             },
             "install-path": "../freemius/wordpress-sdk"
         }
