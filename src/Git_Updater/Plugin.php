@@ -350,25 +350,28 @@ class Plugin {
 			return $false;
 		}
 
-		$response->slug          = $plugin->slug;
-		$response->plugin_name   = $plugin->name;
-		$response->name          = $plugin->name;
-		$response->author        = $plugin->author;
-		$response->homepage      = $plugin->homepage;
-		$response->donate_link   = $plugin->donate_link;
-		$response->version       = $plugin->remote_version ?: $plugin->local_version;
-		$response->sections      = $plugin->sections;
-		$response->requires      = $plugin->requires;
-		$response->requires_php  = $plugin->requires_php;
-		$response->tested        = $plugin->tested;
-		$response->downloaded    = $plugin->downloaded ?: 0;
-		$response->last_updated  = $plugin->last_updated ?: null;
-		$response->download_link = $plugin->download_link ?: null;
-		$response->banners       = $plugin->banners;
-		$response->icons         = $plugin->icons ?: [];
-		$response->contributors  = $plugin->contributors;
-		$response->rating        = $plugin->rating;
-		$response->num_ratings   = $plugin->num_ratings;
+		$response->slug        = $plugin->slug;
+		$response->plugin_name = $plugin->name;
+		$response->name        = $plugin->name;
+		$response->author      = $plugin->author;
+		$response->homepage    = $plugin->homepage;
+		$response->donate_link = $plugin->donate_link;
+		$response->version     = $plugin->remote_version ?: $plugin->local_version;
+		$response->sections    = $plugin->sections;
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
+		$response->short_description = substr( strip_tags( trim( $plugin->sections['description'] ) ), 0, 175 ) . '...';
+		$response->requires          = $plugin->requires;
+		$response->requires_php      = $plugin->requires_php;
+		$response->tested            = $plugin->tested;
+		$response->downloaded        = $plugin->downloaded ?: 0;
+		$response->active_installs   = $response->downloaded;
+		$response->last_updated      = $plugin->last_updated ?: null;
+		$response->download_link     = $plugin->download_link ?: null;
+		$response->banners           = $plugin->banners;
+		$response->icons             = $plugin->icons ?: [];
+		$response->contributors      = $plugin->contributors;
+		$response->rating            = $plugin->rating;
+		$response->num_ratings       = $plugin->num_ratings;
 
 		return $response;
 	}
