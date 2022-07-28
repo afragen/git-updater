@@ -160,7 +160,7 @@ class Bootstrap {
 		}
 
 		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
-			@rename( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
+			move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
 		}
 	}
 }
