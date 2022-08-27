@@ -1,8 +1,11 @@
 #### [unreleased]
+
+#### 11.0.4 / 2022-08-27
 * composer update for class parser updates
 * back to `sanitize_url`
 * update `class Shim`
 * update Freemius/wordpress-sdk
+* update Slack invite link, need to update for every 100 uses
 
 #### 11.0.3 / 2022-05-29
 * call `wp_cache_flush()` after 'Refresh Cache'
