@@ -18,7 +18,6 @@ This renaming process makes automated updates, just for this time, fail as the u
 * Tags: plugin, theme, update, github, language pack
 * Requires at least: 5.2
 * Requires PHP: 7.2
-* Tested up to: trunk
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>
 * License: MIT
@@ -58,7 +57,7 @@ You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with
 
 ## Slack
 
-We now have a [Slack team for Git Updater](https://git-updater.slack.com). Please [click here for an invite](https://git-updater.herokuapp.com). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
+We now have a [Slack team for Git Updater](https://git-updater.slack.com). Please [click here for an invite](https://join.slack.com/t/git-updater/shared_invite/zt-1extq97hy-FjA1QAhjGNDzmFjjlRv3rg). You will be automatically added to the _#general_ and _#support_ channels. Please take a look at other channels too.
 
 ## Translations
 

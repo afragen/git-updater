@@ -587,77 +587,71 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 */
 		public function upgrader_source_selection( $source, $remote_source ) {
 			$new_source = trailingslashit( $remote_source ) . dirname( $this->current_slug );
-			$this->move( $source, $new_source );
+			$this->move_dir( $source, $new_source );
 
 			return trailingslashit( $new_source );
 		}
 
 		/**
-		 * Rename or recursive file copy and delete.
+		 * Moves a directory from one location to another via the rename() PHP function.
+		 * If the renaming failed, falls back to copy_dir().
 		 *
-		 * This is more versatile than `$wp_filesystem->move()`.
-		 * It moves/renames directories as well as files.
-		 * Fix for https://github.com/afragen/github-updater/issues/826,
-		 * strange failure of `rename()`.
+		 * Assumes that WP_Filesystem() has already been called and setup.
 		 *
-		 * @param string $source      File path of source.
-		 * @param string $destination File path of destination.
+		 * @since 6.1.0
 		 *
-		 * @return bool|void
+		 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+		 *
+		 * @param string $from        Source directory.
+		 * @param string $to          Destination directory.
+		 * @return true|WP_Error True on success, WP_Error on failure.
 		 */
-		private function move( $source, $destination ) {
-			if ( $this->filesystem_move( $source, $destination ) ) {
-				return true;
+		private function move_dir( $from, $to ) {
+			global $wp_filesystem;
+
+			$result = false;
+
+			/**
+			 * Fires before move_dir().
+			 *
+			 * @since 6.1.0
+			 */
+			do_action( 'pre_move_dir' );
+
+			if ( 'direct' === $wp_filesystem->method ) {
+				$wp_filesystem->rmdir( $to );
+
+				$result = @rename( $from, $to );
 			}
-			if ( is_dir( $destination ) && rename( $source, $destination ) ) {
-				return true;
+
+			// Non-direct filesystems use some version of rename without a fallback.
+			if ( 'direct' !== $wp_filesystem->method ) {
+				$result = $wp_filesystem->move( $from, $to );
 			}
-			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
-			if ( $dir = opendir( $source ) ) {
-				if ( ! file_exists( $destination ) ) {
-					mkdir( $destination );
-				}
-				$source = untrailingslashit( $source );
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-				while ( false !== ( $file = readdir( $dir ) ) ) {
-					if ( ( '.' !== $file ) && ( '..' !== $file ) && "{$source}/{$file}" !== $destination ) {
-						if ( is_dir( "{$source}/{$file}" ) ) {
-							$this->move( "{$source}/{$file}", "{$destination}/{$file}" );
-						} else {
-							copy( "{$source}/{$file}", "{$destination}/{$file}" );
-							unlink( "{$source}/{$file}" );
-						}
+
+			if ( ! $result ) {
+				if ( ! $wp_filesystem->is_dir( $to ) ) {
+					if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
+						return new \WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
 					}
 				}
-				$iterator = new \FilesystemIterator( $source );
-				if ( ! $iterator->valid() ) { // True if directory is empty.
-					rmdir( $source );
+
+				$result = copy_dir( $from, $to, [ basename( $to ) ] );
+
+				// Clear the source directory.
+				if ( ! is_wp_error( $result ) ) {
+					$wp_filesystem->delete( $from, true );
 				}
-				closedir( $dir );
-
-				return true;
 			}
 
-			return false;
-		}
+			/**
+			 * Fires after move_dir().
+			 *
+			 * @since 6.1.0
+			 */
+			do_action( 'post_move_dir' );
 
-		/**
-		 * Non-direct filesystem move.
-		 *
-		 * @uses $wp_filesystem->move() when FS_METHOD is not 'direct'
-		 *
-		 * @param string $source      File path of source.
-		 * @param string $destination File path of destination.
-		 *
-		 * @return bool|void True on success, false on failure.
-		 */
-		public function filesystem_move( $source, $destination ) {
-			global $wp_filesystem;
-			if ( 'direct' !== $wp_filesystem->method ) {
-				return $wp_filesystem->move( $source, $destination );
-			}
-
-			return false;
+			return $result;
 		}
 
 		/**
