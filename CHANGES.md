@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.0.5 / 2022-08-29
+* now requires WP 5.9 for readme parser `str_contains()` polyfill
+
 #### 11.0.4 / 2022-08-27
 * composer update for class parser updates
 * back to `sanitize_url`
