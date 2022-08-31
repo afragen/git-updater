@@ -159,8 +159,16 @@ class Bootstrap {
 			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
 		}
 
+		require_once __DIR__ . '/Shim.php';
 		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
-			move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
+			if ( function_exists( 'move_dir' ) ) {
+				$result = \move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
+			} else {
+				$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
+			}
+			if ( \is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
 	}
 }

@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.0.6 / 2022-08-31
+* fix `rename_on_activation` with `move_dir`
+
 #### 11.0.5 / 2022-08-29
 * now requires WP 5.9 for readme parser `str_contains()` polyfill
 
