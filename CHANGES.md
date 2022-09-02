@@ -1,7 +1,7 @@
 #### [unreleased]
 * add `str_contains`, `str_starts_with`, `str_ends_with` polyfills
 * decrease WP requirement back to 5.2
-* load `Shim` in main plugin file
+* load `Shim` in autoloader
 
 #### 11.0.6 / 2022-08-31
 * fix `rename_on_activation` with `move_dir`
