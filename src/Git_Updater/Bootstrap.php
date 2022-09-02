@@ -145,7 +145,7 @@ class Bootstrap {
 	 *
 	 * `rename()` causes activation to fail.
 	 *
-	 * @return void
+	 * @return void|bool
 	 */
 	public function rename_on_activation() {
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
@@ -159,11 +159,7 @@ class Bootstrap {
 		}
 
 		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
-			if ( function_exists( 'move_dir' ) ) {
-				$result = \move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
-			} else {
-				$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
-			}
+			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}

@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => 'f5d0d5b953f18b24e170f890ecedd365248dc071',
+        'reference' => '2952d7ab0faed10078e1c1aaa4b9c8041f396d1c',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => 'f5d0d5b953f18b24e170f890ecedd365248dc071',
+            'reference' => '2952d7ab0faed10078e1c1aaa4b9c8041f396d1c',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

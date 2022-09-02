@@ -166,8 +166,8 @@ class Parser {
 				&& false === strpos( $string, "\n" )
 				&& file_exists( $string )
 			)
-			|| preg_match( '!^https?://!i', $string ) 
-			|| preg_match( '!^data:text/plain!i', $string) ) 
+			|| preg_match( '!^https?://!i', $string )
+			|| preg_match( '!^data:text/plain!i', $string) )
 		{
 			$this->parse_readme( $string );
 		} elseif ( $string ) {
