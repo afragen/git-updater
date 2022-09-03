@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.1 / 2022-09-03
+* skip `rename_on_activation` when updating from webhook
+
 #### 11.1.0 / 2022-09-02
 * add `str_contains`, `str_starts_with`, `str_ends_with` polyfills
 * decrease WP requirement back to 5.2
