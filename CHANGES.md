@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 11.1.1 / 2022-09-03
 * skip `rename_on_activation` when updating from webhook
 
 #### 11.1.0 / 2022-09-02
