@@ -1,4 +1,5 @@
 #### [unreleased]
+* remove `gu_maybe_auto_update` cron task
 
 #### 11.1.0 / 2022-09-02
 * add `str_contains`, `str_starts_with`, `str_ends_with` polyfills

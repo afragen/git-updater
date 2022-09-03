@@ -208,7 +208,7 @@ class Base {
 		add_action( 'wp_update_themes', [ $this, 'get_meta_themes' ] );
 		add_action( 'gu_get_remote_plugin', [ $this, 'run_cron_batch' ], 10, 1 );
 		add_action( 'gu_get_remote_theme', [ $this, 'run_cron_batch' ], 10, 1 );
-		add_action( 'gu_maybe_auto_update', [ $this, 'maybe_auto_update' ], 10, 0 );
+		// add_action( 'gu_maybe_auto_update', [ $this, 'maybe_auto_update' ], 10, 0 );
 	}
 
 	/**
