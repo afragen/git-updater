@@ -148,6 +148,12 @@ class Bootstrap {
 	 * @return void|bool
 	 */
 	public function rename_on_activation() {
+		// Exit if coming from webhook.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['plugin'], $_GET['webhook_source'] ) && 'git-updater' === $_GET['plugin'] ) {
+			return;
+		}
+
 		$plugin_dir = trailingslashit( WP_PLUGIN_DIR );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$slug     = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : false;
