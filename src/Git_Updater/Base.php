@@ -177,9 +177,9 @@ class Base {
 		$this->get_meta_themes();
 
 		// Schedule Git Updater cron task for auto updating.
-		if ( ! wp_next_scheduled( 'gu_maybe_auto_update' ) ) {
-			wp_schedule_single_event( wp_next_scheduled( 'wp_version_check' ), 'gu_maybe_auto_update' );
-		}
+		// if ( ! wp_next_scheduled( 'gu_maybe_auto_update' ) ) {
+			// wp_schedule_single_event( wp_next_scheduled( 'wp_version_check' ), 'gu_maybe_auto_update' );
+		// }
 
 		return true;
 	}
@@ -292,7 +292,7 @@ class Base {
 	 *
 	 * @return void
 	 */
-	public function maybe_auto_update() {
+/* 	public function maybe_auto_update() {
 		add_filter( 'gu_disable_cron', '__return_true' );
 		foreach ( [ 'update_plugins', 'update_themes' ] as $transient ) {
 			$current = get_site_transient( $transient );
@@ -309,7 +309,7 @@ class Base {
 		remove_filter( 'gu_disable_cron', 10 );
 		wp_maybe_auto_update();
 	}
-
+ */
 	/**
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
