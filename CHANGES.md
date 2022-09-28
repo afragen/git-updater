@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.2 / 2022-09-27
+* deprecate `gu_maybe_auto_update` cron event
+
 #### 11.1.1 / 2022-09-03
 * skip `rename_on_activation` when updating from webhook
 
