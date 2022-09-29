@@ -194,6 +194,7 @@ class Settings {
 		 */
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
+		$gits = array_merge( [ 'authentication' ], $gits );
 		foreach ( $gits as $git ) {
 			$git = ! in_array( 'gitlab', $gits, true ) && 'gitlabce' === $git ? 'gitlab' : $git;
 			if ( array_key_exists( $git, $gu_subtabs ) ) {
@@ -285,12 +286,22 @@ class Settings {
 					if ( 'git_updater' === $subtab ) {
 						do_settings_sections( 'git_updater_install_settings' );
 						$this->add_hidden_settings_sections();
-					} else {
+					} elseif ( 'authentication' === $subtab ) {
 						do_settings_sections( 'git_updater_' . $subtab . '_install_settings' );
-						$this->display_gu_repos( $subtab );
 						$this->add_hidden_settings_sections( $subtab );
+						$gits = $this->get_running_git_servers();
+						$gits = array_diff( $gits, [ 'gitlabce' ] );
+						foreach ( $gits as $git ) {
+							echo '<div style=padding:10px;background-color:#dcdcde;">';
+							do_settings_sections( 'git_updater_' . $git . '_install_settings' );
+							echo '</div><br><br>';
+						}
+					} else {
+						$this->display_gu_repos( $subtab );
 					}
-					submit_button();
+					if ( in_array( $subtab, [ 'git_updater', 'authentication' ], true ) ) {
+						submit_button();
+					}
 					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
@@ -897,17 +908,19 @@ class Settings {
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
-		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
-		foreach ( $display_data as $data ) {
-			$dashicon     = false !== strpos( $data['type'], 'theme' )
+		if ( 'authentication' !== $git ) {
+			printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
+			foreach ( $display_data as $data ) {
+				$dashicon     = false !== strpos( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-			$is_private   = $data['private'] ? $lock : null;
-			$is_broken    = $data['broken'] ? $broken : null;
-			$override     = $this->override_dot_org( $data['type'], $data );
-			$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
-			$is_dismissed = $data['dismiss'] ? $dismiss : null;
-			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+				$is_private   = $data['private'] ? $lock : null;
+				$is_broken    = $data['broken'] ? $broken : null;
+				$override     = $this->override_dot_org( $data['type'], $data );
+				$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
+				$is_dismissed = $data['dismiss'] ? $dismiss : null;
+				printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
+			}
 		}
 	}
 }
