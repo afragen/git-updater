@@ -45,12 +45,12 @@ class GU_Appsero {
 
 		$gu_license = $client;
 
-		// Active insights
-		//$client->insights()->init();
-
 		// Activate insights and don't show notice.
 		$client->insights()->hide_notice()->init();
 		$client->insights()->optin();
+
+		// Active insights
+		$client->insights()->init();
 
 		// Active automatic updater
 		// $client->updater();
