@@ -18,23 +18,38 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Freemius integration.
- * Freemius 'start.php' autoloaded via composer.
+ * Appsero SDK integration.
+ * Appsero SDK autoloaded via composer.
  */
 class GU_Appsero {
 
+	/**
+	 * Plugin file path.
+	 *
+	 * @var string
+	 */
 	protected $plugin_file;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param string $file Plugin file path.
+	 */
 	public function __construct( $file ) {
 		$this->plugin_file = $file;
 	}
 
+	/**
+	 * Let's get going.
+	 *
+	 * @return void
+	 */
 	public function init() {
 		$this->appsero_init_tracker_git_updater();
 	}
 
 	/**
-	 * Initialize the plugin tracker
+	 * Initialize the plugin tracker.
 	 *
 	 * @return void
 	 */
@@ -49,10 +64,10 @@ class GU_Appsero {
 		$client->insights()->hide_notice()->init();
 		$client->insights()->optin();
 
-		// Active insights
+		// Active insights.
 		$client->insights()->init();
 
-		// Active automatic updater
+		// Active automatic updater.
 		// $client->updater();
 	}
 }
