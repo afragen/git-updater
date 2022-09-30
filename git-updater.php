@@ -55,7 +55,7 @@ register_activation_hook( __FILE__, array( new Bootstrap( __FILE__ ), 'rename_on
 add_action(
 	'plugins_loaded',
 	function() {
-		( new GU_Freemius() )->init();
+		//( new GU_Freemius() )->init();
 		( new Bootstrap( __FILE__ ) )->run();
 	}
 );
