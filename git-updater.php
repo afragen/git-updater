@@ -47,15 +47,15 @@ if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
 	( new Bootstrap( __FILE__ ) )->deactivate_die();
 }
 
-register_activation_hook( __FILE__, array( new Bootstrap( __FILE__ ), 'rename_on_activation' ) );
+register_activation_hook( __FILE__, [ new Bootstrap( __FILE__ ), 'rename_on_activation' ] );
 
 ( new Zipfile_API() )->load_hooks();
 ( new GU_Appsero( __FILE__ ) )->init();
 
 add_action(
 	'plugins_loaded',
-	function() {
-		//( new GU_Freemius() )->init();
+	function () {
+		// ( new GU_Freemius() )->init();
 		( new Bootstrap( __FILE__ ) )->run();
 	}
 );
