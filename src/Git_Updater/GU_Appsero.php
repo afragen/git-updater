@@ -56,8 +56,7 @@ class GU_Appsero {
 	public function appsero_init_tracker_git_updater() {
 		global $gu_license;
 
-		// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-		$gu_license = $client = new \Appsero\Client( 'fcd3d5c3-e40c-4484-9530-037955cef71f', 'Git Updater', $this->plugin_file );
+		$client = new \Appsero\Client( 'fcd3d5c3-e40c-4484-9530-037955cef71f', 'Git Updater', $this->plugin_file );
 
 		// Activate insights and don't show notice.
 		$client->insights()->hide_notice()->init();
@@ -66,16 +65,20 @@ class GU_Appsero {
 		// Active insights.
 		$client->insights()->init();
 
+		//$gu_license = $client->license();
+
 		// Active license page and checker
+		// $parent = is_multisite() ? 'settings.php' : 'options-general.php';
 		// $args = array(
-		// 'type'       => 'options',
-		// 'menu_title' => 'Git Updater License',
-		// 'page_title' => 'Git Updater License Settings',
-		// 'menu_slug'  => 'git_updater_settings',
+		// 'type'        => 'submenu',
+		// 'menu_title'  => 'Git Updater License',
+		// 'page_title'  => 'Git Updater License Settings',
+		// 'menu_slug'   => 'git-updater-license',
+		// 'parent_slug' => $parent,
 		// );
 		// $client->license()->add_settings_page( $args );
 
-		// Active automatic updater.
-		// $client->updater();
+		 // Active automatic updater.
+		 // $client->updater();
 	}
 }
