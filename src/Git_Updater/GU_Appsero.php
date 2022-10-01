@@ -58,12 +58,12 @@ class GU_Appsero {
 
 		$client = new \Appsero\Client( 'fcd3d5c3-e40c-4484-9530-037955cef71f', 'Git Updater', $this->plugin_file );
 
-		// Activate insights and don't show notice.
-		$client->insights()->hide_notice()->init();
+		// Activate insights.
+		$client->insights()
+			->hide_notice()
+			->add_plugin_data()
+			->init();
 		$client->insights()->optin();
-
-		// Active insights.
-		$client->insights()->init();
 
 		//$gu_license = $client->license();
 
