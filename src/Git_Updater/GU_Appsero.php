@@ -66,6 +66,15 @@ class GU_Appsero {
 		// Active insights.
 		$client->insights()->init();
 
+		// Active license page and checker
+		// $args = array(
+		// 'type'       => 'options',
+		// 'menu_title' => 'Git Updater License',
+		// 'page_title' => 'Git Updater License Settings',
+		// 'menu_slug'  => 'git_updater_settings',
+		// );
+		// $client->license()->add_settings_page( $args );
+
 		// Active automatic updater.
 		// $client->updater();
 	}
