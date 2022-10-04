@@ -10,8 +10,6 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Additions\Settings;
-use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
