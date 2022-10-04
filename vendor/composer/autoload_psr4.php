@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Fragen\\Git_Updater\\' => array($baseDir . '/src/Git_Updater'),
+    'Appsero\\' => array($vendorDir . '/appsero/client/src'),
 );
