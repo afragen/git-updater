@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 11.1.3 / 2022-10-04
 * replace Freemius SDK with Appsero SDK
 
 #### 11.1.2 / 2022-09-27
