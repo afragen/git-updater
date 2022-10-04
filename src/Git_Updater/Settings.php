@@ -365,6 +365,8 @@ class Settings {
 			[ $this, 'sanitize' ]
 		);
 
+		Singleton::get_instance( 'Install', $this )->run();
+		Singleton::get_instance( 'Remote_Management', $this )->init();
 		$this->gu_tokens();
 
 		/*
@@ -386,7 +388,6 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
-				'class' => $this->is_premium_only() ? '' : 'hidden',
 			]
 		);
 
@@ -728,16 +729,7 @@ class Settings {
 		$refresh_transients = $this->refresh_transients();
 		$install_api_plugin = Singleton::get_instance( 'Add_Ons', $this )->install_api_plugin();
 		$reset_api_key      = false;
-		if ( $this->is_premium_only() ) {
-			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
-		}
-
-		// Go to Freemius purchase link.
-		if ( isset( $_GET['purchase_premium_addon'] ) && check_admin_referer( 'gu-freemius-premium-addon' ) ) {
-			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-			wp_redirect( wp_unslash( $_GET['purchase_premium_addon'] ) );
-			exit;
-		}
+		$reset_api_key      = Singleton::get_instance( 'Fragen\Git_Updater\Remote_Management', $this )->reset_api_key();
 
 		/**
 		 * Filter to add to $option_page array.
@@ -755,7 +747,9 @@ class Settings {
 		 */
 		$option_page = 1 === count( $option_page ) ? apply_filters( 'gu_save_redirect', [ 'git_updater' ] ) : $option_page;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) && $is_option_page ) {
 			$update = true;
 		}

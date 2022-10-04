@@ -78,7 +78,7 @@ class GU_Appsero {
 		// );
 		// $client->license()->add_settings_page( $args );
 
-		 // Active automatic updater.
-		 // $client->updater();
+		// Active automatic updater.
+		// $client->updater();
 	}
 }

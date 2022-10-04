@@ -10,6 +10,7 @@
 
 namespace Fragen\Git_Updater;
 
+use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -89,6 +90,8 @@ class Bootstrap {
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 
+		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
+		( new REST_API() )->load_hooks();
 		( new Init() )->run();
 
 		// Initialize time dissmissible admin notices.

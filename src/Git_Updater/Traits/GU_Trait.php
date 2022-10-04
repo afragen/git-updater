@@ -49,18 +49,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks to see if Git Updater PRO is running.
-	 *
-	 * @return bool
-	 */
-	public function is_premium_only() {
-		if ( \is_plugin_active( 'git-updater-pro/git-updater-pro.php' ) ) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Load site options.
 	 */
 	public function load_options() {
