@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7843b297191325a03e039e0cd97bb822",
+    "content-hash": "0c353a5ed9872e4880723b3b16e22a69",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -297,45 +297,6 @@
                 "source": "https://github.com/erusev/parsedown/tree/1.7.x"
             },
             "time": "2019-12-30T22:54:17+00:00"
-        },
-        {
-            "name": "freemius/wordpress-sdk",
-            "version": "2.4.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "d4aa83b1e74f3269affcbfe0d2b75ceae35ba864"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/d4aa83b1e74f3269affcbfe0d2b75ceae35ba864",
-                "reference": "d4aa83b1e74f3269affcbfe0d2b75ceae35ba864",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-only"
-            ],
-            "description": "Freemius WordPress SDK",
-            "homepage": "https://freemius.com",
-            "keywords": [
-                "freemius",
-                "plugin",
-                "sdk",
-                "theme",
-                "wordpress",
-                "wordpress-plugin",
-                "wordpress-theme"
-            ],
-            "support": {
-                "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.4.5"
-            },
-            "time": "2022-07-31T06:50:47+00:00"
         }
     ],
     "packages-dev": [],

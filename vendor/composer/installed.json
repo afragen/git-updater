@@ -309,50 +309,8 @@
                 "source": "https://github.com/erusev/parsedown/tree/1.7.x"
             },
             "install-path": "../erusev/parsedown"
-        },
-        {
-            "name": "freemius/wordpress-sdk",
-            "version": "2.4.5",
-            "version_normalized": "2.4.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "d4aa83b1e74f3269affcbfe0d2b75ceae35ba864"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/d4aa83b1e74f3269affcbfe0d2b75ceae35ba864",
-                "reference": "d4aa83b1e74f3269affcbfe0d2b75ceae35ba864",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2"
-            },
-            "time": "2022-07-31T06:50:47+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-only"
-            ],
-            "description": "Freemius WordPress SDK",
-            "homepage": "https://freemius.com",
-            "keywords": [
-                "freemius",
-                "plugin",
-                "sdk",
-                "theme",
-                "wordpress",
-                "wordpress-plugin",
-                "wordpress-theme"
-            ],
-            "support": {
-                "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.4.5"
-            },
-            "install-path": "../freemius/wordpress-sdk"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }

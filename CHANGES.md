@@ -1,5 +1,5 @@
 #### [unreleased]
-* add Appsero SDK
+* replace Freemius SDK with Appsero SDK
 
 #### 11.1.2 / 2022-09-27
 * deprecate `gu_maybe_auto_update` cron event
