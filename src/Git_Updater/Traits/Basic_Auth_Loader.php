@@ -252,7 +252,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function unset_release_asset_auth( $args, $url ) {
+	private function unset_release_asset_auth( $args, $url ) {
 		$releases            = false;
 		$release_asset_parts = [ 's3.amazonaws.com', 'releases/download', 'github-releases', 'release-asset' ];
 		foreach ( $release_asset_parts as $part ) {

@@ -141,6 +141,7 @@ class Base {
 		if ( ! $hide_settings && Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
 			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
+			Singleton::get_instance( 'Authentication', $this )->run();
 		}
 
 		// Run Git Updater upgrade functions.
