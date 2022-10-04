@@ -65,7 +65,7 @@ class GU_Appsero {
 			->init();
 		$client->insights()->optin();
 
-		//$gu_license = $client->license();
+		$gu_license = $client->license();
 
 		// Active license page and checker
 		// $parent = is_multisite() ? 'settings.php' : 'options-general.php';
