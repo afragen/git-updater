@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.4 / 2022-10-04 (hotfix)
+* initialize Appsero SDK from `plugins_loaded` hook
+
 #### 11.1.3 / 2022-10-04
 * replace Freemius SDK with Appsero SDK
 
