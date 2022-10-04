@@ -93,8 +93,6 @@ class Bootstrap {
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
 		( new GU_Appsero( __FILE__ ) )->init();
-		( new REST_API() )->load_hooks();
-		( new Settings() )->load_hooks();
 		( new Init() )->run();
 
 		// Initialize time dissmissible admin notices.
