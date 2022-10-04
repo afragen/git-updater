@@ -90,8 +90,9 @@ class Bootstrap {
 		}
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
-
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
+
+		( new GU_Appsero( __FILE__ ) )->init();
 		( new REST_API() )->load_hooks();
 		( new Settings() )->load_hooks();
 		( new Init() )->run();
