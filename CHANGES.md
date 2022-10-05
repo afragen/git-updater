@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.6 / 2022-10-05
+* update Appsero SDK options
+
 #### 11.1.5 / 2022-10-05
 * pass correct file path to Appsero SDK
 
