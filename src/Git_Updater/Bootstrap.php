@@ -89,7 +89,7 @@ class Bootstrap {
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 
-		( new GU_Appsero( __FILE__ ) )->init();
+		( new GU_Appsero( $this->file ) )->init();
 		( new Init() )->run();
 
 		// Initialize time dissmissible admin notices.
