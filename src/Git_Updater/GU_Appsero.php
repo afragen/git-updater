@@ -69,10 +69,11 @@ class GU_Appsero {
 
 		// Active license page and checker
 		// $parent = is_multisite() ? 'settings.php' : 'options-general.php';
+		// $arrow = '<span class="dashicons dashicons-editor-break" style="transform:rotateY(180deg);padding:0 5px;"></span>';
 		// $args = array(
 		// 'type'        => 'submenu',
-		// 'menu_title'  => 'Git Updater License',
-		// 'page_title'  => 'Git Updater License Settings',
+		// 'menu_title'  => $arrow  .  __('License','git-updater'),
+		// 'page_title'  => __('Git Updater License Settings', 'git-updater'),
 		// 'menu_slug'   => 'git-updater-license',
 		// 'parent_slug' => $parent,
 		// );
