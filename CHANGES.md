@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.5 / 2022-10-05
+* pass correct file path to Appsero SDK
+
 #### 11.1.4 / 2022-10-04 (hotfix)
 * initialize Appsero SDK from `plugins_loaded` hook
 
