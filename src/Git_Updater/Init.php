@@ -13,7 +13,6 @@ namespace Fragen\Git_Updater;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
-use Fragen\Git_Updater\Additions\Additions;
 
 /*
  * Exit if called directly.
@@ -51,12 +50,12 @@ class Init {
 	public function run() {
 		if ( ! static::is_heartbeat() ) {
 			$this->load_hooks();
+
+			new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
+			new Ignore( 'git-remote-updater', 'git-remote-updater/git-remote-updater.php' );
 		}
 
 		if ( static::is_wp_cli() ) {
-			include_once __DIR__ . '/WP_CLI/CLI.php';
-			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
-
 			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
 			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 15, 1 );
 
@@ -94,20 +93,6 @@ class Init {
 		// Add git host icons.
 		add_filter( 'plugin_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
 		add_filter( 'theme_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
-
-		// Initiate Addtions.
-		add_filter(
-			'gu_additions',
-			function( $false, $repos, $type ) {
-				$config    = get_site_option( 'git_updater_additions', [] );
-				$additions = new Additions();
-				$additions->register( $config, $repos, $type );
-
-				return $additions->add_to_git_updater;
-			},
-			10,
-			3
-		);
 	}
 
 	/**

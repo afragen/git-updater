@@ -14,7 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
-use Fragen\Git_Updater\Branch;
+use Fragen\Git_Updater\PRO\Branch;
 
 /*
  * Exit if called directly.
@@ -345,9 +345,9 @@ class Base {
 			$language_pack->run();
 		}
 
-		// Return data if being called from Git Updater REST API.
-		if ( class_exists( 'Fragen\Git_Updater\REST\REST_API' )
-			&& $this->caller instanceof \Fragen\Git_Updater\REST\REST_API
+		// Return data if being called from Git Updater PRO REST API.
+		if ( class_exists( 'Fragen\Git_Updater\PRO\REST\REST_API' )
+			&& $this->caller instanceof \Fragen\Git_Updater\PRO\REST\REST_API
 		) {
 			return $repo;
 		}
@@ -473,17 +473,19 @@ class Base {
 			return $source;
 		}
 
-		// Skip if Git Updater being updated for new rollback update failure.
-		( new Branch() )->set_branch_on_switch( $slug );
+		// Skip if Git Updater PRO being updated for new rollback update failure.
+		if ( 'git-updater-pro' !== $slug && $this->is_premium_only() ) {
+			( new Branch() )->set_branch_on_switch( $slug );
 
-		/*
-		* Remote install source.
-		*/
-		$install_options = $this->get_class_vars( 'Fragen\Git_Updater\Install', 'install' );
-		if ( empty( $repo ) && isset( $install_options['git_updater_install_repo'] ) ) {
-			$slug                            = $install_options['git_updater_install_repo'];
-			$new_source                      = trailingslashit( $remote_source ) . $slug;
-			self::$options['remote_install'] = true;
+			/*
+			* Remote install source.
+			*/
+			$install_options = $this->get_class_vars( 'Fragen\Git_Updater\PRO\Install', 'install' );
+			if ( empty( $repo ) && isset( $install_options['git_updater_install_repo'] ) ) {
+				$slug                            = $install_options['git_updater_install_repo'];
+				$new_source                      = trailingslashit( $remote_source ) . $slug;
+				self::$options['remote_install'] = true;
+			}
 		}
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
