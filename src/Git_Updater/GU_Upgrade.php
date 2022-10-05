@@ -38,6 +38,7 @@ class GU_Upgrade {
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
 		$db_version = isset( $options['db_version'] ) ? (int) $options['db_version'] : 6000;
+		$this->get_core_options( $options );
 
 		if ( $db_version === $this->db_version ) {
 			return;
@@ -78,5 +79,34 @@ class GU_Upgrade {
 		}
 		require_once ABSPATH . '/wp-admin/includes/plugin.php';
 		\deactivate_plugins( 'github-updater/git-updater.php' );
+	}
+
+	/**
+	 * Update for non-password options.
+	 *
+	 * @global \Appsero\License $gu_license Appsero license object.
+	 *
+	 * @param array $options Git Updater options.
+	 *
+	 * @return void
+	 */
+	private function get_core_options( $options ) {
+		global $gu_license;
+		if ( $gu_license->is_valid() ) {
+			return;
+		}
+
+		$new_options = \array_filter(
+			$options,
+			function( $value, $key ) use ( &$options ) {
+				if ( 'db_version' === $key || str_contains( $key, 'current_branch' ) ) {
+					return $options[ $key ];
+				}
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		return $new_options; // TODO: remove after licensing.
+		update_site_option( 'git_updater', $new_options );
 	}
 }
