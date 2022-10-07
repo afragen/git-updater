@@ -61,23 +61,23 @@ class GU_Appsero {
 		// Activate insights.
 		$client->insights()
 			->hide_notice()
-			->add_plugin_data()
 			->init();
 		$client->insights()->optin();
+		// $client->insights()->add_plugin_data();
 
 		$gu_license = $client->license();
 
-		// Active license page and checker
-		// $parent = is_multisite() ? 'settings.php' : 'options-general.php';
-		// $arrow = '<span class="dashicons dashicons-editor-break" style="transform:rotateY(180deg);padding:0 5px;"></span>';
-		// $args = array(
-		// 'type'        => 'submenu',
-		// 'menu_title'  => $arrow  .  __('License','git-updater'),
-		// 'page_title'  => __('Git Updater License Settings', 'git-updater'),
-		// 'menu_slug'   => 'git-updater-license',
-		// 'parent_slug' => $parent,
-		// );
-		// $client->license()->add_settings_page( $args );
+		// Active license page and checker.
+		$parent = is_multisite() ? 'settings.php' : 'options-general.php';
+		$arrow  = '<span class="dashicons dashicons-editor-break" style="transform:rotateY(180deg);padding:0 5px;"></span>';
+		$args   = [
+			'type'        => 'submenu',
+			'menu_title'  => $arrow . __( 'License', 'git-updater' ),
+			'page_title'  => __( 'Git Updater License Settings', 'git-updater' ),
+			'menu_slug'   => 'git-updater-license',
+			'parent_slug' => $parent,
+		];
+		$client->license()->add_settings_page( $args );
 
 		// Active automatic updater.
 		// $client->updater();
