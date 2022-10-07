@@ -38,7 +38,7 @@ class GU_Upgrade {
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
 		$db_version = isset( $options['db_version'] ) ? (int) $options['db_version'] : 6000;
-		$this->get_core_options( $options );
+		$this->schedule_access_token_cleanup();
 
 		if ( $db_version === $this->db_version ) {
 			return;
@@ -84,18 +84,12 @@ class GU_Upgrade {
 	/**
 	 * Update for non-password options.
 	 *
-	 * @global \Appsero\License $gu_license Appsero license object.
-	 *
-	 * @param array $options Git Updater options.
+	 * @since 12.0.0
 	 *
 	 * @return void
 	 */
-	private function get_core_options( $options ) {
-		global $gu_license;
-		if ( $gu_license->is_valid() ) {
-			return;
-		}
-
+	public function flush_tokens() {
+		$options     = $this->get_class_vars( 'Base', 'options' );
 		$new_options = \array_filter(
 			$options,
 			function( $value, $key ) use ( &$options ) {
@@ -106,7 +100,27 @@ class GU_Upgrade {
 			ARRAY_FILTER_USE_BOTH
 		);
 
+		\error_log( 'flush tokens' );
 		return $new_options; // TODO: remove after licensing.
 		update_site_option( 'git_updater', $new_options );
+	}
+
+	/**
+	 * Schedule cleanup of the access tokens.
+	 *
+	 * @since 12.0.0
+	 *
+	 * @global \Appsero\License $gu_license Appsero license object.
+	 *
+	 * @return void
+	 */
+	private function schedule_access_token_cleanup() {
+		global $gu_license;
+
+		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) && ! $gu_license->is_valid() ) {
+			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'daily', 'gu_delete_access_tokens' );
+		}
+
+		add_action( 'gu_delete_access_tokens', [ $this, 'flush_tokens' ] );
 	}
 }
