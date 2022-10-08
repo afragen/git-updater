@@ -10,7 +10,7 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Additions\Settings;
+use Fragen\Git_Updater\Additions\Bootstrap as Additions_Bootstrap;
 use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
@@ -94,7 +94,7 @@ class Bootstrap {
 
 		( new GU_Appsero( $this->file ) )->init();
 		( new REST_API() )->load_hooks();
-		( new Settings() )->load_hooks();
+		( new Additions_Bootstrap( $this->file ) )->run();
 		( new Init() )->run();
 
 		// Initialize time dissmissible admin notices.

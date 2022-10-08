@@ -27,6 +27,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\API\Zipfile_API;
+use Fragen\Git_Updater\Additions\Additions;
 
 /*
  * Exit if called directly.
@@ -56,4 +57,17 @@ add_action(
 	function () {
 		( new Bootstrap( __FILE__ ) )->run();
 	}
+);
+
+// Initiate Additions.
+add_filter(
+	'gu_additions',
+	function( $false, $repos, $type ) {
+		$config    = get_site_option( 'git_updater_additions', [] );
+		$additions = new Additions();
+		$additions->register( $config, $repos, $type );
+		return $additions->add_to_git_updater;
+	},
+	10,
+	3
 );

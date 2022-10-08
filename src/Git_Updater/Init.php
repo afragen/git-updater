@@ -94,20 +94,6 @@ class Init {
 		// Add git host icons.
 		add_filter( 'plugin_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
 		add_filter( 'theme_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
-
-		// Initiate Addtions.
-		add_filter(
-			'gu_additions',
-			function( $false, $repos, $type ) {
-				$config    = get_site_option( 'git_updater_additions', [] );
-				$additions = new Additions();
-				$additions->register( $config, $repos, $type );
-
-				return $additions->add_to_git_updater;
-			},
-			10,
-			3
-		);
 	}
 
 	/**
