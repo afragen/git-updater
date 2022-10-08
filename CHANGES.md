@@ -1,4 +1,7 @@
 #### [unreleased]
+* re-integrate Git Updater PRO
+* integrate Git Updater Additions
+* add Authentication tab
 
 #### 11.1.4 / 2022-10-04 (hotfix)
 * initialize Appsero SDK from `plugins_loaded` hook
