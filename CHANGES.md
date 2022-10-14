@@ -1,4 +1,5 @@
 #### [unreleased]
+* load `class Shim` in `admin_init`
 
 #### 11.1.6 / 2022-10-05
 * update Appsero SDK options

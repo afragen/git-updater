@@ -166,8 +166,8 @@ class Parser {
 				&& false === strpos( $string, "\n" )
 				&& file_exists( $string )
 			)
-			|| preg_match( '!^https?://!i', $string )
-			|| preg_match( '!^data:text/plain!i', $string) )
+			|| preg_match( '!^https?://!i', $string ) 
+			|| preg_match( '!^data:text/plain!i', $string) ) 
 		{
 			$this->parse_readme( $string );
 		} elseif ( $string ) {
@@ -578,6 +578,9 @@ class Parser {
 	 */
 	protected function sanitize_contributors( $users ) {
 		foreach ( $users as $i => $name ) {
+			// Trim any leading `@` off the name, in the event that someone uses `@joe-bloggs`.
+			$name = ltrim( $name, '@' );
+
 			// Contributors should be listed by their WordPress.org Login name (Example: 'Joe Bloggs')
 			$user = get_user_by( 'login', $name );
 

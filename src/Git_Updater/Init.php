@@ -73,6 +73,14 @@ class Init {
 		add_action( 'init', [ $this->base, 'background_update' ] );
 		add_action( 'init', [ $this->base, 'set_options_filter' ] );
 
+		// Load Shim.php here to avoid PHP fatal once move_dir() in core.
+		add_action(
+			'admin_init',
+			function() {
+				require_once __DIR__ . '/Shim.php';
+			}
+		);
+
 		add_action( 'deprecated_hook_run', [ new Messages(), 'deprecated_error_message' ], 10, 4 );
 
 		// `wp_get_environment_type()` added in WordPress 5.5.
