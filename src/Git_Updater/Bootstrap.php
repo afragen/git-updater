@@ -92,6 +92,11 @@ class Bootstrap {
 		( new GU_Appsero( $this->file ) )->init();
 		( new Init() )->run();
 
+		if ( ! \function_exists( 'copy_dir' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		require_once __DIR__ . '/Shim.php';
+
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();
 	}
