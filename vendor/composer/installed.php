@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'afragen/git-updater',
-        'pretty_version' => 'dev-develop',
-        'version' => 'dev-develop',
-        'reference' => 'd0008d947a7198106345ebea610ffe4110578f7f',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '409f067ddcdf17b2dbd0c23a91f90eb97bee25f2',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'afragen/git-updater' => array(
-            'pretty_version' => 'dev-develop',
-            'version' => 'dev-develop',
-            'reference' => 'd0008d947a7198106345ebea610ffe4110578f7f',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '409f067ddcdf17b2dbd0c23a91f90eb97bee25f2',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -33,7 +33,7 @@
         'afragen/wordpress-plugin-readme-parser' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'a3b3a1313a8ca870f9d1ebd97148f63045a8adf9',
+            'reference' => '77fa0ee009bcfce63da1a51aa091dac20e242c98',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wordpress-plugin-readme-parser',
             'aliases' => array(
