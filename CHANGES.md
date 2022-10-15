@@ -1,5 +1,5 @@
 #### [unreleased]
-* load `class Shim` in `admin_init`
+* move `Shim.php` from autoloader as errs if `move_dir` in core
 
 #### 11.1.6 / 2022-10-05
 * update Appsero SDK options
