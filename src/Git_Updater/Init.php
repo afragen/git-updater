@@ -75,7 +75,7 @@ class Init {
 
 		// Load Shim.php here to avoid PHP fatal once move_dir() in core.
 		add_action(
-			'admin_init',
+			'init',
 			function() {
 				require_once __DIR__ . '/Shim.php';
 			}
