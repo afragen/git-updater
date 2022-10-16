@@ -1,5 +1,5 @@
 #### [unreleased]
-* check for copy_dir() exists as proxy for when move_dir() in core, avoid redeclaration error
+* load `wp-admin/includes/file.php` for when move_dir() in core, avoid redeclaration error
 
 #### 11.1.6 / 2022-10-05
 * update Appsero SDK options

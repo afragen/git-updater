@@ -38,11 +38,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	// Check to load file.php for when move_dir() is in core.
-	// Avoids a redeclaration error.
-	if ( ! \function_exists( 'copy_dir' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-	}
+	// Avoids a redeclaration error for move_dir().
+	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require __DIR__ . '/vendor/autoload.php';
 }
 
