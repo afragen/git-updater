@@ -165,7 +165,7 @@ trait Basic_Auth_Loader {
 		// Some installers, like TGMPA, pass an array.
 		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
 
-		$slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
+		$slug = str_contains( $slug, '/' ) ? dirname( $slug ) : $slug;
 
 		// Set for bulk upgrade.
 		if ( ! $slug ) {
@@ -181,7 +181,7 @@ trait Basic_Auth_Loader {
 				$slug = array_filter(
 					$bulk_update,
 					function ( $e ) use ( $url ) {
-						return false !== strpos( $url, $e );
+						return str_contains( $url, $e );
 					}
 				);
 				$slug = array_pop( $slug );
@@ -232,7 +232,7 @@ trait Basic_Auth_Loader {
 		// Set for Remote Install.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['git_updater_api'], $_POST['git_updater_repo'] )
-			&& false !== strpos( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
+			&& str_contains( $url, basename( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) ) )
 			? sanitize_text_field( wp_unslash( $_POST['git_updater_api'] ) )
 			: $type;
 		// phpcs:enable
@@ -256,7 +256,7 @@ trait Basic_Auth_Loader {
 		$releases            = false;
 		$release_asset_parts = [ 's3.amazonaws.com', 'releases/download', 'github-releases', 'release-asset' ];
 		foreach ( $release_asset_parts as $part ) {
-			if ( false !== strpos( $url, $part ) ) {
+			if ( str_contains( $url, $part ) ) {
 				$releases = true;
 				break;
 			}
