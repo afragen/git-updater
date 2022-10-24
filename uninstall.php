@@ -27,7 +27,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key' ];
+$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key', 'git_updater_additions' ];
 foreach ( $options as $option ) {
 	delete_option( $option );
 	delete_site_option( $option );
