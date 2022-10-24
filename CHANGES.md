@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.8 / 2022-10-24
+* remove premium add-ons from `Add-Ons`
+
 #### 11.1.7 / 2022-10-24
 * load `wp-admin/includes/file.php` for when move_dir() in core, avoid redeclaration error
 * allow updating of Git Remote Updater
