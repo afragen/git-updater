@@ -119,6 +119,30 @@ class Settings {
 			add_filter( 'gu_disable_wpcron', '__return_true' );
 		}
 
+		// Force load all API tabs.
+		if ( ! isset( self::$options['dynamic_api_loading'] ) ) {
+			$arr_subtabs = [
+				'github'    => 'GitHub',
+				'gist'      => 'Gist',
+				'bitbucket' => 'Bitbucket',
+				'gitlab'    => 'GitLab',
+				'gitea'     => 'Gitea',
+			];
+			add_filter(
+				'gu_running_git_servers',
+				function( $gits ) use ( &$arr_subtabs ) {
+					return array_flip( $arr_subtabs );
+				}
+			);
+			add_filter(
+				'gu_add_settings_subtabs',
+				function( $subtabs ) use ( &$arr_subtabs ) {
+
+					return array_merge( $subtabs, $arr_subtabs );
+				}
+			);
+		}
+
 		/**
 		 * Filters authentication required array.
 		 *
@@ -416,6 +440,18 @@ class Settings {
 		);
 
 		add_settings_field(
+			'dynamic_api_loading',
+			null,
+			[ $this, 'token_callback_checkbox' ],
+			'git_updater_install_settings',
+			'git_updater_settings',
+			[
+				'id'    => 'dynamic_api_loading',
+				'title' => esc_html__( 'Dynamic Loading of API Tabs', 'git-updater' ),
+			]
+		);
+
+		add_settings_field(
 			'deprecated_error_logging',
 			null,
 			[ $this, 'token_callback_checkbox' ],
@@ -541,6 +577,7 @@ class Settings {
 			'branch_switch',
 			'bypass_background_processing',
 			'deprecated_error_logging',
+			'dynamic_api_loading',
 		];
 
 		foreach ( $running_servers as $server ) {
