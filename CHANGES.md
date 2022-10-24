@@ -1,6 +1,7 @@
 #### [unreleased]
 * load `wp-admin/includes/file.php` for when move_dir() in core, avoid redeclaration error
 * allow updating of Git Remote Updater
+* now using `str_contains`
 
 #### 11.1.6 / 2022-10-05
 * update Appsero SDK options
