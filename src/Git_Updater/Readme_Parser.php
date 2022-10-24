@@ -121,7 +121,7 @@ class Readme_Parser extends Parser {
 	 * @return array $data
 	 */
 	public function readme_section_as_h4( $section, $data ) {
-		if ( empty( $data['sections'][ $section ] ) || false !== strpos( $data['sections'][ $section ], '<h4>' ) ) {
+		if ( empty( $data['sections'][ $section ] ) || str_contains( $data['sections'][ $section ], '<h4>' ) ) {
 			return $data;
 		}
 		$pattern = '~<p>=(.*)=</p>~';

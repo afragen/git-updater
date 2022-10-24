@@ -548,7 +548,7 @@ class Settings {
 				$key  = array_search( $e, $gu_unset_keys, true );
 				$repo = str_replace( 'current_branch_', '', $key );
 				if ( array_key_exists( $key, $gu_unset_keys )
-					&& false !== strpos( $key, 'current_branch' )
+					&& str_contains( $key, 'current_branch' )
 				) {
 					unset( $gu_unset_keys[ $key ] );
 				}
@@ -899,7 +899,7 @@ class Settings {
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = false !== strpos( $data['type'], 'theme' )
+			$dashicon     = str_contains( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private   = $data['private'] ? $lock : null;
