@@ -52,7 +52,6 @@ class Init {
 			$this->load_hooks();
 
 			new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
-			new Ignore( 'git-remote-updater', 'git-remote-updater/git-remote-updater.php' );
 		}
 
 		if ( static::is_wp_cli() ) {
