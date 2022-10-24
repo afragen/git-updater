@@ -58,46 +58,50 @@ class Add_Ons {
 		$config = [
 			'gist'      => [
 				[
-					'name'     => __( 'Git Updater - Gist', 'git-updater' ),
-					'host'     => 'github',
-					'slug'     => 'git-updater-gist/git-updater-gist.php',
-					'uri'      => 'afragen/git-updater-gist',
-					'branch'   => 'main',
-					'required' => true,
-					'api'      => 'gist',
+					'name'        => __( 'Git Updater - Gist', 'git-updater' ),
+					'description' => __( 'Add GitHub Gist hosted repositories to the Git Updater plugin.', 'git-updater' ),
+					'host'        => 'github',
+					'slug'        => 'git-updater-gist/git-updater-gist.php',
+					'uri'         => 'afragen/git-updater-gist',
+					'branch'      => 'main',
+					'required'    => true,
+					'api'         => 'gist',
 				],
 			],
 			'bitbucket' => [
 				[
-					'name'     => __( 'Git Updater - Bitbucket', 'git-updater' ),
-					'host'     => 'github',
-					'slug'     => 'git-updater-bitbucket/git-updater-bitbucket.php',
-					'uri'      => 'afragen/git-updater-bitbucket',
-					'branch'   => 'main',
-					'required' => true,
-					'api'      => 'bitbucket',
+					'name'        => __( 'Git Updater - Bitbucket', 'git-updater' ),
+					'description' => __( 'Add Bitbucket and Bitbucket Server repositories to the Git Updater plugin.', 'git-updater' ),
+					'host'        => 'github',
+					'slug'        => 'git-updater-bitbucket/git-updater-bitbucket.php',
+					'uri'         => 'afragen/git-updater-bitbucket',
+					'branch'      => 'main',
+					'required'    => true,
+					'api'         => 'bitbucket',
 				],
 			],
 			'gitlab'    => [
 				[
-					'name'     => __( 'Git Updater - GitLab', 'git-updater' ),
-					'host'     => 'github',
-					'slug'     => 'git-updater-gitlab/git-updater-gitlab.php',
-					'uri'      => 'afragen/git-updater-gitlab',
-					'branch'   => 'main',
-					'required' => true,
-					'api'      => 'gitlab',
+					'name'        => __( 'Git Updater - GitLab', 'git-updater' ),
+					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
+					'host'        => 'github',
+					'slug'        => 'git-updater-gitlab/git-updater-gitlab.php',
+					'uri'         => 'afragen/git-updater-gitlab',
+					'branch'      => 'main',
+					'required'    => true,
+					'api'         => 'gitlab',
 				],
 			],
 			'gitea'     => [
 				[
-					'name'     => __( 'Git Updater - Gitea', 'git-updater' ),
-					'host'     => 'github',
-					'slug'     => 'git-updater-gitea/git-updater-gitea.php',
-					'uri'      => 'afragen/git-updater-gitea',
-					'branch'   => 'main',
-					'required' => true,
-					'api'      => 'gitea',
+					'name'        => __( 'Git Updater - Gitea', 'git-updater' ),
+					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
+					'host'        => 'github',
+					'slug'        => 'git-updater-gitea/git-updater-gitea.php',
+					'uri'         => 'afragen/git-updater-gitea',
+					'branch'      => 'main',
+					'required'    => true,
+					'api'         => 'gitea',
 				],
 			],
 		];
@@ -220,18 +224,19 @@ class Add_Ons {
 		);
 
 		add_settings_section(
-			'premium_addons',
-			esc_html__( 'Premium Add-Ons', 'git-updater' ),
-			[ $this, 'insert_premium_cards' ],
-			'git_updater_addons_settings'
-		);
-
-		add_settings_section(
 			'addons',
 			esc_html__( 'API Add-Ons', 'git-updater' ),
 			[ $this, 'insert_cards' ],
 			'git_updater_addons_settings'
 		);
+
+		/*
+		 add_settings_section(
+			'premium_addons',
+			esc_html__( 'Premium Add-Ons', 'git-updater' ),
+			[ $this, 'insert_premium_cards' ],
+			'git_updater_addons_settings'
+		); */
 	}
 
 	/**
