@@ -11,7 +11,6 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -57,12 +56,26 @@ class Settings {
 	private static $options;
 
 	/**
+	 * Holds git hosts.
+	 *
+	 * @var array
+	 */
+	private static $git_hosts = [
+		'github'    => 'GitHub',
+		'gist'      => 'Gist',
+		'bitbucket' => 'Bitbucket',
+		'gitlab'    => 'GitLab',
+		'gitea'     => 'Gitea',
+	];
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
 		$this->refresh_caches();
 		$this->load_options();
+		$this->load_api_subtabs();
 	}
 
 	/**
@@ -119,30 +132,6 @@ class Settings {
 			add_filter( 'gu_disable_wpcron', '__return_true' );
 		}
 
-		// Force load all API tabs.
-		if ( ! isset( self::$options['dynamic_api_loading'] ) ) {
-			$arr_subtabs = [
-				'github'    => 'GitHub',
-				'gist'      => 'Gist',
-				'bitbucket' => 'Bitbucket',
-				'gitlab'    => 'GitLab',
-				'gitea'     => 'Gitea',
-			];
-			add_filter(
-				'gu_running_git_servers',
-				function( $gits ) use ( &$arr_subtabs ) {
-					return array_flip( $arr_subtabs );
-				}
-			);
-			add_filter(
-				'gu_add_settings_subtabs',
-				function( $subtabs ) use ( &$arr_subtabs ) {
-
-					return array_merge( $subtabs, $arr_subtabs );
-				}
-			);
-		}
-
 		/**
 		 * Filters authentication required array.
 		 *
@@ -194,9 +183,6 @@ class Settings {
 		$git_subtab = [];
 		$gu_subtabs = [];
 
-		// Force GitHub Settings subtab. Fix for object cache and refresh cache conflict.
-		( new GitHub_API( new \stdClass() ) )->add_settings( static::$auth_required );
-
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
 		 *
@@ -229,6 +215,33 @@ class Settings {
 		$subtabs = array_merge( $subtabs, $git_subtab );
 
 		return $subtabs;
+	}
+
+	/**
+	 * Force load API tabs of installed/active API plugins.
+	 *
+	 * @return void
+	 */
+	private function load_api_subtabs() {
+		$show_tabs = [ 'github' => 'GitHub' ];
+		foreach ( array_keys( static::$git_hosts )as $git ) {
+			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
+				$show_tabs[ $git ] = static::$git_hosts[ $git ];
+			}
+		}
+		add_filter(
+			'gu_running_git_servers',
+			function( $gits ) use ( &$show_tabs ) {
+				return array_merge( $gits, array_flip( $show_tabs ) );
+			}
+		);
+		add_filter(
+			'gu_add_settings_subtabs',
+			function( $subtabs ) use ( &$show_tabs ) {
+
+				return array_merge( $subtabs, $show_tabs );
+			}
+		);
 	}
 
 	/**
@@ -440,18 +453,6 @@ class Settings {
 		);
 
 		add_settings_field(
-			'dynamic_api_loading',
-			null,
-			[ $this, 'token_callback_checkbox' ],
-			'git_updater_install_settings',
-			'git_updater_settings',
-			[
-				'id'    => 'dynamic_api_loading',
-				'title' => esc_html__( 'Dynamic Loading of API Tabs', 'git-updater' ),
-			]
-		);
-
-		add_settings_field(
 			'deprecated_error_logging',
 			null,
 			[ $this, 'token_callback_checkbox' ],
@@ -577,7 +578,6 @@ class Settings {
 			'branch_switch',
 			'bypass_background_processing',
 			'deprecated_error_logging',
-			'dynamic_api_loading',
 		];
 
 		foreach ( $running_servers as $server ) {
