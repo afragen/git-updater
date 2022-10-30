@@ -51,7 +51,7 @@ class Init {
 		if ( ! static::is_heartbeat() ) {
 			$this->load_hooks();
 
-			new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
+			//new Ignore( 'git-updater-pro', 'git-updater-pro/git-updater-pro.php' );
 		}
 
 		if ( static::is_wp_cli() ) {
