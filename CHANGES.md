@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.9 / 2022-10-30
+* remove all `Ignore` items
+
 #### 11.1.8 / 2022-10-24
 * remove premium add-ons from `Add-Ons`
 
