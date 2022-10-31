@@ -99,9 +99,6 @@ class GU_Upgrade {
 			},
 			ARRAY_FILTER_USE_BOTH
 		);
-
-		\error_log( 'flush tokens' );
-		return $new_options; // TODO: remove after licensing.
 		update_site_option( 'git_updater', $new_options );
 	}
 
