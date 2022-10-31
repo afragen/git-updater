@@ -78,6 +78,15 @@ class License {
 
         // Active/Deactive corn schedule
         $this->run_schedule();
+
+        $this->transition();
+    }
+
+    private function transition(){
+        $days = ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
+		if ( ! $this->is_valid() && $days > 1 ) {
+            //$this->is_valid_licnese = true;
+		}
     }
 
     /**
