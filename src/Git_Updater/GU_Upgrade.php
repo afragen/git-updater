@@ -82,6 +82,27 @@ class GU_Upgrade {
 	}
 
 	/**
+	 * Check for deletion of cron event.
+	 *
+	 * @param null|bool|\WP_Error $pre       Value to return instead. Default null to continue unscheduling the event.
+	 * @param int                 $timestamp Timestamp for when to run the event.
+	 * @param string              $hook      Action hook, the execution of which will be unscheduled.
+	 * @param array               $args      Arguments to pass to the hook's callback function.
+	 * @param bool                $wp_error  Whether to return a WP_Error on failure.
+	 *
+	 * @return null|bool|\WP_Error
+	 */
+	public function pre_unschedule_event( $pre, $timestamp, $hook ) {
+		if ( 'gu_delete_access_tokens' === $hook ) {
+			$days = ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
+			if ( $days > 29 ) {
+				$this->flush_tokens();
+			}
+		}
+		return $pre;
+	}
+
+	/**
 	 * Update for non-password options.
 	 *
 	 * @since 12.0.0
