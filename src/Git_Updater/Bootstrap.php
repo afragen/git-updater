@@ -38,14 +38,14 @@ class Bootstrap {
 	/**
 	 * Holds main plugin file.
 	 *
-	 * @var $file
+	 * @var string
 	 */
 	protected $file;
 
 	/**
 	 * Holds main plugin directory.
 	 *
-	 * @var $dir
+	 * @var string
 	 */
 	protected $dir;
 
