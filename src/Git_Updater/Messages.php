@@ -65,6 +65,16 @@ class Messages {
 						]
 					);
 					break;
+				case 'get_license':
+					add_action(
+						is_multisite() ? 'network_admin_notices' : 'admin_notices',
+						[
+							$this,
+							'get_license',
+						]
+					);
+					break;
+
 				case 'waiting':
 					$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 					$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
@@ -239,5 +249,25 @@ class Messages {
 			);
 		}
 	}
+	/**
+	 * Generate information message to purchase.
+	 */
+	public function get_license() {
+		global $gu_license;
+		if ( null !== $gu_license->get_license() ) {
+			return;
+		}
 
+		?>
+		<div class="notice-info notice is-dismissible">
+			<p>
+				<?php esc_html_e( 'Git Updater Licensing', 'git-updater' ); ?>
+				<br>
+				<?php esc_html_e( 'Please consider purchasing a license for Git Updater and support continued development.', 'git-updater' ); ?>
+				<br>
+				<button>Purchase License</button>
+			</p>
+		</div>
+		<?php
+	}
 }

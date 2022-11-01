@@ -96,6 +96,7 @@ class Bootstrap {
 		( new REST_API() )->load_hooks();
 		( new Additions_Bootstrap( $this->file ) )->run();
 		( new Init() )->run();
+		( new Messages() )->create_error_message( 'get_license' );
 
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();
