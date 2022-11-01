@@ -3,6 +3,7 @@
 * integrate Git Updater Additions
 * add Authentication tab
 * load API tabs of installed/active API plugins
+* add auto-update setting for Git Updater
 
 #### 11.1.4 / 2022-10-04 (hotfix)
 * initialize Appsero SDK from `plugins_loaded` hook

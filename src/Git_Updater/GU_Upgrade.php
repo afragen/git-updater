@@ -30,7 +30,7 @@ class GU_Upgrade {
 	 *
 	 * @var int
 	 */
-	private $db_version = 8312;
+	private $db_version = 8312; // TODO: change number.
 
 	/**
 	 * Run update check against db_version.
@@ -52,7 +52,13 @@ class GU_Upgrade {
 				break;
 		}
 
-		$options = array_merge( (array) $options, [ 'db_version' => (int) $this->db_version ] );
+		$options = array_merge(
+			(array) $options,
+			[
+				'db_version'     => (int) $this->db_version,
+				'gu_auto_update' => '1',
+			]
+		);
 		update_site_option( 'git_updater', $options );
 	}
 
