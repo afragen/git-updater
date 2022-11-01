@@ -93,8 +93,6 @@ class GU_Upgrade {
 	 * @param null|bool|\WP_Error $pre       Value to return instead. Default null to continue unscheduling the event.
 	 * @param int                 $timestamp Timestamp for when to run the event.
 	 * @param string              $hook      Action hook, the execution of which will be unscheduled.
-	 * @param array               $args      Arguments to pass to the hook's callback function.
-	 * @param bool                $wp_error  Whether to return a WP_Error on failure.
 	 *
 	 * @return null|bool|\WP_Error
 	 */
