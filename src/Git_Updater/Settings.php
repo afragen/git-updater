@@ -467,7 +467,7 @@ class Settings {
 			'git_updater_settings',
 			[
 				'id'    => 'gu_auto_update',
-				'title' => esc_html__( 'Automatically keep Git Updater updated.', 'git-updater' ),
+				'title' => esc_html__( 'Automatically keep Git Updater up to date.', 'git-updater' ),
 			]
 		);
 
