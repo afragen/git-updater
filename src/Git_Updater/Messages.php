@@ -260,10 +260,10 @@ class Messages {
 		?>
 		<div class="notice-info notice is-dismissible">
 			<p>
-				<?php esc_html_e( 'Git Updater Licensing', 'git-updater' ); ?>
+				<?php esc_html_e( 'Please consider purchasing a Git Updater license for authenticated API requests and to support continued development.', 'git-updater' ); ?>
 				<br>
-				<?php esc_html_e( 'Please consider purchasing a license for Git Updater and support continued development.', 'git-updater' ); ?>
-				<br>
+				<?php esc_html_e( 'Only $15 for an unlimited yearly license.', 'git-updater' ); ?>
+				<br><br>
 				<a class="button primary-button regular" href="https://git-updater.com/store/"><?php esc_html_e( 'Go to Store', 'git-updater' ); ?></a>
 			</p>
 		</div>
