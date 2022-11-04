@@ -61,7 +61,7 @@ class Authentication extends API {
 	 * @return void
 	 */
 	public function print_section_authentication() {
-		esc_html_e( 'Set authentication tokens for git hosts.' );
+		esc_html_e( 'An active license is required to set authentication tokens.', 'git-updater' );
 		echo '<br><br><br>';
 	}
 }
