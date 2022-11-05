@@ -63,7 +63,9 @@ class GU_Appsero {
 			->hide_notice()
 			->add_plugin_data()
 			->init();
-		$client->insights()->optin();
+		if ( 'yes' !== get_option( $client->slug . '_allow_tracking' ) ) {
+			$client->insights()->optin();
+		}
 
 		$gu_license = $client->license();
 
