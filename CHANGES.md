@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 11.1.10 / 2022-11-05
+* fix Appsero cron task from running more than scheduled
+
 #### 11.1.9 / 2022-10-30
 * remove all `Ignore` items
 
