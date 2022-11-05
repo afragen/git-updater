@@ -264,7 +264,7 @@ class Messages {
 				<br>
 				<?php esc_html_e( 'Only $15 for an unlimited yearly license.', 'git-updater' ); ?>
 				<br><br>
-				<a class="button primary-button regular" href="https://git-updater.com/store/"><?php esc_html_e( 'Go to Store', 'git-updater' ); ?></a>
+				<a class="button primary-button regular" href="https://git-updater.com/store/"><?php esc_html_e( 'Purchase from Store', 'git-updater' ); ?></a>
 			</p>
 		</div>
 		<?php
