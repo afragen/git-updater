@@ -68,6 +68,7 @@ class GU_Appsero {
 		}
 
 		$gu_license = $client->license();
+		$this->is_trial();
 
 		// Active license page and checker.
 		$parent = is_multisite() ? 'settings.php' : 'options-general.php';
@@ -83,5 +84,20 @@ class GU_Appsero {
 
 		// Active automatic updater.
 		// $client->updater();
+	}
+
+	/**
+	 * Check if standard trial is still active.
+	 *
+	 * @return bool|void
+	 */
+	private function is_trial() {
+		global $gu_license;
+
+		$prop = new \ReflectionProperty( $gu_license, 'is_valid_licnese' );
+		$prop->setAccessible( true );
+		if ( 1 < ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS ) {
+			$prop->setValue( $gu_license, true );
+		}
 	}
 }

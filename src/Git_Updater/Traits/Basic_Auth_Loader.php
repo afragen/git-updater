@@ -58,7 +58,7 @@ trait Basic_Auth_Loader {
 	public function add_auth_header( $args, $url ) {
 		global $gu_license;
 		$credentials = $this->get_credentials( $url );
-		if ( ! $credentials['isset'] || $credentials['api.wordpress'] || ! $gu_license->is_valid() ) {
+		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;
 		}
 		if ( null !== $credentials['token'] && $gu_license->is_valid() ) {
