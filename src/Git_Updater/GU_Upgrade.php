@@ -140,7 +140,7 @@ class GU_Upgrade {
 		global $gu_license;
 
 		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) && ! $gu_license->is_valid() ) {
-			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'daily', 'gu_delete_access_tokens' );
+			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'twicedaily', 'gu_delete_access_tokens' );
 		}
 
 		add_action( 'gu_delete_access_tokens', [ $this, 'flush_tokens' ] );
