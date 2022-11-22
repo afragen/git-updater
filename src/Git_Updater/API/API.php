@@ -206,9 +206,8 @@ class API {
 			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
 				$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
 			}
+			$response['timeout'] = $timeout;
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
-
-			return false;
 		}
 
 		static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
@@ -221,6 +220,9 @@ class API {
 				'git'  => $this->type->git,
 			]
 		);
+		if ( isset( $response['timeout'] ) ) {
+			static::$error_code[ $this->type->slug ]['wait'] = $response['timeout'];
+		}
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 		if ( $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
