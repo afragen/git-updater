@@ -26,6 +26,13 @@ div.hide-git-updater-settings {
 	display: none;
 }
 
+.git-updater-settings .git-oauth-icon {
+	display:block;
+	clear:both;
+	width: 100px;
+	margin: 2em;
+}
+
 /* Add-Ons */
 .git-updater.plugin-card.plugin-card-git-updater-pro .name h3::after {
 	content: "♥♥♥";

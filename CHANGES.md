@@ -1,7 +1,7 @@
 #### [unreleased]
 * re-integrate Git Updater PRO
 * integrate Git Updater Additions
-* add Authentication tab
+* add git logo to subtab
 * load API tabs of installed/active API plugins
 * add auto-update setting for Git Updater
 
