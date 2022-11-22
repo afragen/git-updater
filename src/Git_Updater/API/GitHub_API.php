@@ -407,9 +407,9 @@ class GitHub_API extends API implements API_Interface {
 	 * Print the GitHub Personal Access Token text.
 	 */
 	public function print_section_github_access_token() {
+		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
 	}
 
 	/**
