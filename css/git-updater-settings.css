@@ -27,8 +27,8 @@ div.hide-git-updater-settings {
 }
 
 .git-updater-settings .git-oauth-icon {
-	display:block;
-	clear:both;
+	display: block;
+	clear: both;
 	width: 100px;
 	margin: 2em;
 }
@@ -36,7 +36,7 @@ div.hide-git-updater-settings {
 /* Add-Ons */
 .git-updater.plugin-card.plugin-card-git-updater-pro .name h3::after {
 	content: "♥♥♥";
-	color:red;
+	color: red;
 }
 
 .git-updater.plugin-card .plugin-card-bottom .submit {
