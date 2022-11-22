@@ -331,22 +331,12 @@ class Settings {
 					if ( 'git_updater' === $subtab ) {
 						do_settings_sections( 'git_updater_install_settings' );
 						$this->add_hidden_settings_sections();
-					} elseif ( 'authentication' === $subtab ) {
-						do_settings_sections( 'git_updater_' . $subtab . '_install_settings' );
-						$this->add_hidden_settings_sections( $subtab );
-						$gits = $this->get_running_git_servers();
-						$gits = array_diff( $gits, [ 'gitlabce' ] );
-						foreach ( $gits as $git ) {
-							echo '<div style=padding:10px;background-color:#dcdcde;">';
-							do_settings_sections( 'git_updater_' . $git . '_install_settings' );
-							echo '</div><br><br>';
-						}
 					} else {
+						do_settings_sections( 'git_updater_' . $subtab . '_install_settings' );
 						$this->display_gu_repos( $subtab );
+						$this->add_hidden_settings_sections( $subtab );
 					}
-					if ( in_array( $subtab, [ 'git_updater', 'authentication' ], true ) ) {
-						submit_button();
-					}
+					submit_button();
 					?>
 				</form>
 				<?php $refresh_transients = add_query_arg( [ 'git_updater_refresh_transients' => true ], $action ); ?>
