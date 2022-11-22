@@ -199,8 +199,10 @@ class GitHub_API extends API implements API_Interface {
 	 * @return void|int
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
-		if ( isset( $response['headers']['x-ratelimit-reset'] ) ) {
-			$reset = (int) $response['headers']['x-ratelimit-reset'];
+		$headers = wp_remote_retrieve_headers( $response );
+		$data    = $headers->getAll();
+		if ( isset( $data['x-ratelimit-reset'] ) ) {
+			$reset = (int) $data['x-ratelimit-reset'];
 			//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			$wait                        = date( 'i', $reset - time() );
 			static::$error_code[ $repo ] = isset( static::$error_code[ $repo ] ) ? static::$error_code[ $repo ] : [];
