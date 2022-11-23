@@ -20,7 +20,7 @@ A simple plugin to enable automatic updates to your GitHub hosted WordPress plug
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
+This plugin was originally designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
     GitHub Plugin URI: afragen/git-updater
     GitHub Plugin URI: https://github.com/afragen/git-updater
@@ -42,6 +42,8 @@ API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins ar
 * [Git Updater - Gist](https://github.com/afragen/git-updater-gist/releases/latest)
 
 ### Sponsor
+
+Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial trial period of a month.
 
 You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with continued development and support.
 
