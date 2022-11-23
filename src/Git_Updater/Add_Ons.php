@@ -223,7 +223,7 @@ class Add_Ons {
 
 			// Redirect back to the Add-Ons.
 			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
+			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
 			switch ( $_GET['install_api_plugin'] ) {
 			//phpcs:enable
