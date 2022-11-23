@@ -31,6 +31,7 @@ div.hide-git-updater-settings {
 	clear: both;
 	width: 100px;
 	margin: 2em;
+	display: none;
 }
 
 /* Add-Ons */
