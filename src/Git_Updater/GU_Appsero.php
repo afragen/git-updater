@@ -89,7 +89,7 @@ class GU_Appsero {
 	/**
 	 * Check if standard trial is still active.
 	 *
-	 * @return bool|void
+	 * @return void
 	 */
 	private function is_trial() {
 		global $gu_license;
