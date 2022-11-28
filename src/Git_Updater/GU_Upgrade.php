@@ -99,7 +99,7 @@ class GU_Upgrade {
 	public function pre_unschedule_event( $pre, $timestamp, $hook ) {
 		if ( 'gu_delete_access_tokens' === $hook ) {
 			$days = ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
-			if ( $days > 10 ) {
+			if ( $days > 29 ) {
 				$this->flush_tokens();
 			}
 		}
@@ -140,7 +140,7 @@ class GU_Upgrade {
 	 */
 	private function schedule_access_token_cleanup() {
 		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) ) {
-			wp_schedule_event( time() + ( 2 * \WEEK_IN_SECONDS ), 'twicedaily', 'gu_delete_access_tokens' );
+			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'twicedaily', 'gu_delete_access_tokens' );
 		}
 
 		add_action( 'gu_delete_access_tokens', [ $this, 'flush_tokens' ] );

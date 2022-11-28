@@ -135,7 +135,7 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function remove_cron_events() {
-		$crons = [ 'gu_get_remote_plugin', 'gu_get_remote_theme' ];
+		$crons = [ 'gu_get_remote_plugin', 'gu_get_remote_theme', 'gu_delete_access_tokens' ];
 		foreach ( $crons as $cron ) {
 			$timestamp = \wp_next_scheduled( $cron );
 			\wp_unschedule_event( $timestamp, $cron );
