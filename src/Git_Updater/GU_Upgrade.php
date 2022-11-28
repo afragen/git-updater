@@ -99,7 +99,7 @@ class GU_Upgrade {
 	public function pre_unschedule_event( $pre, $timestamp, $hook ) {
 		if ( 'gu_delete_access_tokens' === $hook ) {
 			$days = ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
-			if ( $days > 29 ) {
+			if ( $days > 10 ) {
 				$this->flush_tokens();
 			}
 		}
