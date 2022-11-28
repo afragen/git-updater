@@ -101,7 +101,7 @@ class Plugin {
 	 */
 	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
-		include_once ABSPATH . '/wp-admin/includes/plugin.php';
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
 		$git_plugins = [];

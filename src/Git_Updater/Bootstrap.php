@@ -66,7 +66,7 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function deactivate_die() {
-		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		\deactivate_plugins( plugin_basename( $this->file ) );
 
 		$message = sprintf(
@@ -90,6 +90,7 @@ class Bootstrap {
 		}
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
 		( new GU_Freemius() )->init();
