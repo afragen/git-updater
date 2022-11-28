@@ -114,6 +114,10 @@ class GU_Upgrade {
 	 * @return void
 	 */
 	public function flush_tokens() {
+		if ( gu_fs()->can_use_premium_code() || false === wp_next_scheduled( 'gu_delete_access_tokens' ) ) {
+			return;
+		}
+
 		$options     = $this->get_class_vars( 'Base', 'options' );
 		$new_options = \array_filter(
 			$options,
@@ -132,15 +136,11 @@ class GU_Upgrade {
 	 *
 	 * @since 12.0.0
 	 *
-	 * @global \Appsero\License $gu_license Appsero license object.
-	 *
 	 * @return void
 	 */
 	private function schedule_access_token_cleanup() {
-		global $gu_license;
-
-		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) && ! $gu_license->is_valid() ) {
-			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'twicedaily', 'gu_delete_access_tokens' );
+		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) ) {
+			wp_schedule_event( time() + ( 2 * \WEEK_IN_SECONDS ), 'twicedaily', 'gu_delete_access_tokens' );
 		}
 
 		add_action( 'gu_delete_access_tokens', [ $this, 'flush_tokens' ] );

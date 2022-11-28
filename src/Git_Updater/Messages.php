@@ -252,8 +252,7 @@ class Messages {
 	 * Generate information message to purchase.
 	 */
 	public function get_license() {
-		global $gu_license;
-		if ( null !== $gu_license->get_license()
+		if ( ( ! gu_fs()->is_not_paying() )
 			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-3' )
 		) {
 			return;
@@ -264,7 +263,7 @@ class Messages {
 			<p>
 				<?php esc_html_e( 'Please consider purchasing a Git Updater license for authenticated API requests and to support continued development.', 'git-updater' ); ?>
 				<br>
-				<?php esc_html_e( 'Only $15 for an unlimited yearly license.', 'git-updater' ); ?>
+				<?php esc_html_e( 'Only $19.99 for an unlimited yearly license.', 'git-updater' ); ?>
 				<br><br>
 				<a class="button primary-button regular" href="https://git-updater.com/store/"><?php esc_html_e( 'Purchase from Store', 'git-updater' ); ?></a>
 			</p>
