@@ -50,21 +50,23 @@ class GU_Freemius {
 
 					$gu_fs = fs_dynamic_init(
 						[
-							'id'               => '11525',
-							'slug'             => 'git-updater',
-							'premium_slug'     => 'git-updater',
-							'type'             => 'plugin',
-							'public_key'       => 'pk_aaa04d83b4c42470937266f9b4fca',
-							'is_premium'       => true,
-							'is_premium_only'  => true,
-							'has_addons'       => false,
-							'has_paid_plans'   => true,
-							'is_org_compliant' => false,
-							'trial'            => [
+							'id'                  => '11525',
+							'slug'                => 'git-updater',
+							'premium_slug'        => 'git-updater',
+							'type'                => 'plugin',
+							'public_key'          => 'pk_aaa04d83b4c42470937266f9b4fca',
+							'is_premium'          => true,
+							'premium_suffix'      => 'Default',
+							// If your plugin is a serviceware, set this option to false.
+							'has_premium_version' => true,
+							'has_addons'          => false,
+							'has_paid_plans'      => true,
+							'is_org_compliant'    => false,
+							'trial'               => [
 								'days'               => 14,
 								'is_require_payment' => true,
 							],
-							'menu'             => [
+							'menu'                => [
 								'slug'    => 'git-updater',
 								'support' => false,
 								'network' => true,
@@ -86,7 +88,7 @@ class GU_Freemius {
 		}
 		gu_fs()->add_filter( 'plugin_icon', [ $this, 'add_icon' ] );
 		gu_fs()->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
-		gu_fs()->add_filter( 'show_deactivation_feedback_form', '__return_false' );
+		// gu_fs()->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 		gu_fs()->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 	}
 
