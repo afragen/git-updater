@@ -100,13 +100,13 @@ class GU_Freemius {
 	/**
 	 * Show the contact submenu item only when the user have a valid non-expired license.
 	 *
-	 * @param $is_visible The filtered value. Whether the submenu item should be visible or not.
-	 * @param $menu_id    The ID of the submenu item.
+	 * @param bool   $is_visible The filtered value. Whether the submenu item should be visible or not.
+	 * @param string $menu_id    The ID of the submenu item.
 	 *
 	 * @return bool If true, the menu item should be visible.
 	 */
 	public function is_submenu_visible( $is_visible, $menu_id ) {
-		if ( 'contact' != $menu_id ) {
+		if ( 'contact' !== $menu_id ) {
 			return $is_visible;
 		}
 
