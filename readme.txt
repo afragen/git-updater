@@ -36,7 +36,7 @@ API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins ar
 
 ### Sponsor
 
-Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial trial period of a month.
+Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial free trial period. After the trial period Git Updater will not be able to make authenticated API requests.
 
 You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with continued development and support.
 
