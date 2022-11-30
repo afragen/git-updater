@@ -32,7 +32,8 @@ jobs:
           prerelease: false
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        id: upload-release-asset
+        uses: dream-encode/upload-release-asset-node16@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
