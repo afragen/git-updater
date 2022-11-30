@@ -86,6 +86,7 @@ class GU_Freemius {
 		}
 		gu_fs()->add_filter( 'plugin_icon', [ $this, 'add_icon' ] );
 		gu_fs()->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
+		gu_fs()->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 	}
 
 	/**
@@ -113,4 +114,20 @@ class GU_Freemius {
 		return gu_fs()->can_use_premium_code();
 	}
 
+	/**
+	 * Set extensions default to true.
+	 *
+	 * @param array $permissions Array of opt-in permissions.
+	 *
+	 * @return array
+	 */
+	public function permission_list( $permissions ) {
+		foreach ( $permissions as $key => $permission ) {
+			if ( 'extensions' === $permission['id'] ) {
+				$permissions[ $key ]['default'] = true;
+			}
+		}
+
+		return $permissions;
+	}
 }
