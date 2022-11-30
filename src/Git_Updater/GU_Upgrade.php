@@ -118,11 +118,18 @@ class GU_Upgrade {
 			return;
 		}
 
-		$options     = $this->get_class_vars( 'Base', 'options' );
-		$new_options = \array_filter(
+		$base_options = [
+			'db_version',
+			'branch_switch',
+			'bypass_background_processing',
+			'deprecated_error_logging',
+			'gu_auto_update',
+		];
+		$options      = $this->get_class_vars( 'Base', 'options' );
+		$new_options  = \array_filter(
 			$options,
-			function( $value, $key ) use ( &$options ) {
-				if ( 'db_version' === $key || str_contains( $key, 'current_branch' ) ) {
+			function( $value, $key ) use ( &$options, $base_options ) {
+				if ( in_array( $key, $base_options, true ) || str_contains( $key, 'current_branch' ) ) {
 					return $options[ $key ];
 				}
 			},
