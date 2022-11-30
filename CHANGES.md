@@ -1,9 +1,10 @@
 #### [unreleased]
 * re-integrate Git Updater PRO
 * integrate Git Updater Additions
-* add git logo to subtab
+* add git logo to subtab, hide for now
 * load API tabs of installed/active API plugins
 * add auto-update setting for Git Updater
+* replace Appsero SDK with Freemius SDK
 
 #### 11.1.4 / 2022-10-04 (hotfix)
 * initialize Appsero SDK from `plugins_loaded` hook
