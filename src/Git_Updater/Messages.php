@@ -253,13 +253,13 @@ class Messages {
 	 */
 	public function get_license() {
 		if ( ( ! gu_fs()->is_not_paying() )
-			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-3' )
+			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-5' )
 		) {
 			return;
 		}
 
 		?>
-		<div data-dismissible="license-3" class="notice-info notice is-dismissible">
+		<div data-dismissible="license-5" class="notice-info notice is-dismissible">
 			<p>
 				<?php esc_html_e( 'Please consider purchasing a Git Updater license for authenticated API requests and to support continued development.', 'git-updater' ); ?>
 				<br>
