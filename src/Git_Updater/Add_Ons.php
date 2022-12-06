@@ -44,8 +44,7 @@ class Add_Ons {
 	 * Add_Ons constructor.
 	 */
 	public function __construct() {
-		$this->addon   = $this->load_addon_config();
-		$this->premium = $this->load_premium_config();
+		$this->addon = $this->load_addon_config();
 		validate_active_plugins();
 	}
 
@@ -108,49 +107,6 @@ class Add_Ons {
 					'api'         => 'gitea',
 				],
 			],
-		];
-
-		return $config;
-	}
-
-	/**
-	 * Load premium add-on data.
-	 *
-	 * @return array
-	 */
-	protected function load_premium_config() {
-		$config = [
-			'pro'            => [
-				[
-					'repo'        => 'git-updater-pro',
-					'slug'        => 'git-updater-pro/git-updater-pro.php',
-					'name'        => __( 'Git Updater PRO', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
-				],
-			],
-			'additions'      => [
-				[
-					'repo'        => 'git-updater-additions',
-					'slug'        => 'git-updater-additions/git-updater-additions.php',
-					'name'        => __( 'Git Updater Additions', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8313/plan/13771/?trial=paid',
-				],
-			],
-			'remote-updater' => [
-				[
-					'repo'        => 'git-remote-updater',
-					'slug'        => 'git-remote-updater/git-remote-updater.php',
-					'name'        => __( 'Git Remote Updater', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8312/plan/13768/?trial=paid',
-				],
-			],
-
 		];
 
 		return $config;
@@ -233,14 +189,6 @@ class Add_Ons {
 			[ $this, 'insert_cards' ],
 			'git_updater_addons_settings'
 		);
-
-		/*
-		 add_settings_section(
-			'premium_addons',
-			esc_html__( 'Premium Add-Ons', 'git-updater' ),
-			[ $this, 'insert_premium_cards' ],
-			'git_updater_addons_settings'
-		); */
 	}
 
 	/**
@@ -256,24 +204,6 @@ class Add_Ons {
 		foreach ( $this->addon as $addon ) {
 			$addon = \array_pop( $addon );
 			$this->make_card( 'free', $addon );
-		}
-		echo '</div>';
-		echo '<div style="clear:both;"></div>';
-	}
-
-	/**
-	 * Some method to insert cards for premium plugin purchase.
-	 *
-	 * @return void
-	 */
-	public function insert_premium_cards() {
-		echo '<p>';
-		esc_html_e( 'Install premium plugins.', 'git-updater' );
-		echo '</p>';
-		echo '<div class="wp-list-table widefat plugin-install">';
-		foreach ( $this->premium as $addon ) {
-			$addon = array_pop( $addon );
-			$this->make_card( 'premium', $addon );
 		}
 		echo '</div>';
 		echo '<div style="clear:both;"></div>';
@@ -386,26 +316,6 @@ class Add_Ons {
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $install_api ); ?>">
 				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
-			</form>
-			<?php
-		}
-	}
-
-	/**
-	 * Get button for premium add-on card.
-	 *
-	 * @param array $config Array of plugin data.
-	 *
-	 * @return void
-	 */
-	private function premium_button( $config ) {
-		$purchase_addon = add_query_arg( [ 'purchase_premium_addon' => esc_url( wp_nonce_url( $config['link'], 'gu-freemius-premium-addon' ) ) ], $this->action );
-		if ( \is_plugin_active( $config['slug'] ) ) {
-			submit_button( esc_html__( 'Free Trial', 'git-updater' ), 'disabled' );
-		} else {
-			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $purchase_addon ); ?>">
-				<?php submit_button( esc_html__( 'Free Trial', 'git-updater' ) ); ?>
 			</form>
 			<?php
 		}

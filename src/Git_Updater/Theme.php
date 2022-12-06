@@ -12,7 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
-use Fragen\Git_Updater\PRO\Branch;
+use Fragen\Git_Updater\Branch;
 
 /*
  * Exit if called directly.
@@ -259,9 +259,7 @@ class Theme {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					if ( $this->is_premium_only() ) {
-						add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 2 );
-					}
+					add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 2 );
 				}
 			}
 		}
@@ -464,7 +462,7 @@ class Theme {
 				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
 			}
 			$ignore = $this->get_class_vars( 'Ignore', 'repos' );
-			if ( $this->is_premium_only() && ! array_key_exists( $theme->slug, $ignore ) ) {
+			if ( ! array_key_exists( $theme->slug, $ignore ) ) {
 				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
 		}

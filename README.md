@@ -54,7 +54,3 @@ We now have a [Slack team for Git Updater](https://git-updater.slack.com). Pleas
 ## Translations
 
 If you are a polyglot I would greatly appreciate translation contributions to [GlotPress for Git Updater](https://translate.git-updater.com).
-
-## Analytics
-
-Use of this plugin implies consent for obtaining [analytics data](https://appsero.com/features/analytics/) regarding its usage. This data is obtained via the Appsero SDK. If you wish to opt out of this data collection simply deactivate and remove the plugin. Your data will be automatically purged.
