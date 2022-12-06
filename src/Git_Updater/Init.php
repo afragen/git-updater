@@ -90,6 +90,9 @@ class Init {
 		// Add git host icons.
 		add_filter( 'plugin_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
 		add_filter( 'theme_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
+
+		// Check for deletion of cron event.
+		add_filter( 'pre_unschedule_event', [ Singleton::get_instance( 'GU_Upgrade', $this ), 'pre_unschedule_event' ], 10, 3 );
 	}
 
 	/**

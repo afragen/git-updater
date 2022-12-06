@@ -10,8 +10,8 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Singleton;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /**
  * Class Add_Ons
@@ -59,6 +59,7 @@ class Add_Ons {
 			'gist'      => [
 				[
 					'name'        => __( 'Git Updater - Gist', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add GitHub Gist hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gist/git-updater-gist.php',
@@ -71,6 +72,7 @@ class Add_Ons {
 			'bitbucket' => [
 				[
 					'name'        => __( 'Git Updater - Bitbucket', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add Bitbucket and Bitbucket Server repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-bitbucket/git-updater-bitbucket.php',
@@ -83,6 +85,7 @@ class Add_Ons {
 			'gitlab'    => [
 				[
 					'name'        => __( 'Git Updater - GitLab', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitlab/git-updater-gitlab.php',
@@ -95,7 +98,8 @@ class Add_Ons {
 			'gitea'     => [
 				[
 					'name'        => __( 'Git Updater - Gitea', 'git-updater' ),
-					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
+					'description' => __( 'Add Gitea hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitea/git-updater-gitea.php',
 					'uri'         => 'afragen/git-updater-gitea',
@@ -165,7 +169,7 @@ class Add_Ons {
 	 * Adds Remote Management tab to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = [ 'git_updater_addons' => esc_html__( 'Add-Ons', 'git-updater' ) ];
+		$install_tabs = [ 'git_updater_addons' => esc_html__( 'API Add-Ons', 'git-updater' ) ];
 		add_filter(
 			'gu_add_settings_tabs',
 			function ( $tabs ) use ( $install_tabs ) {
@@ -289,7 +293,7 @@ class Add_Ons {
 
 			// Redirect back to the Add-Ons.
 			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
+			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
 			switch ( $_GET['install_api_plugin'] ) {
 			//phpcs:enable
@@ -335,14 +339,6 @@ class Add_Ons {
 			$repo_api->type->git            = 'github';
 			$repo_api->type->enterprise     = false;
 			$repo_api->type->enterprise_api = false;
-
-			$cache = $this->get_repo_cache( $config['repo'] );
-			if ( ! $cache ) {
-				$repo_api->get_remote_info( basename( $config['slug'] ) );
-				$cache = $this->get_repo_cache( $config['repo'] );
-			}
-			$config['description'] = $cache[ $config['repo'] ]['Description'];
-			$config['author']      = $cache[ $config['repo'] ]['Author'];
 		}
 
 		$plugin_icon_url = \plugin_dir_url( dirname( __DIR__ ) ) . 'assets/icon.svg';

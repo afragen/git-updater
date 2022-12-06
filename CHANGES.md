@@ -1,5 +1,11 @@
 #### [unreleased]
 * ensure `$wp_filesystem` is available
+* re-integrate Git Updater PRO
+* integrate Git Updater Additions
+* add git logo to subtab, hide for now
+* load API tabs of installed/active API plugins
+* add auto-update setting for Git Updater
+* replace Appsero SDK with Freemius SDK
 
 #### 11.1.10 / 2022-11-05
 * fix Appsero cron task from running more than scheduled

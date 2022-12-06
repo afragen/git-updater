@@ -68,19 +68,36 @@ class GU_Appsero {
 		}
 
 		$gu_license = $client->license();
+		$this->is_trial();
 
-		// Active license page and checker
-		// $parent = is_multisite() ? 'settings.php' : 'options-general.php';
-		// $args = array(
-		// 'type'        => 'submenu',
-		// 'menu_title'  => 'Git Updater License',
-		// 'page_title'  => 'Git Updater License Settings',
-		// 'menu_slug'   => 'git-updater-license',
-		// 'parent_slug' => $parent,
-		// );
-		// $client->license()->add_settings_page( $args );
+		// Active license page and checker.
+		$parent = is_multisite() ? 'settings.php' : 'options-general.php';
+		$arrow  = '<span class="dashicons dashicons-editor-break" style="transform:rotateY(180deg);padding:0 5px;"></span>';
+		$args   = [
+			'type'        => 'submenu',
+			'menu_title'  => $arrow . __( 'License', 'git-updater' ),
+			'page_title'  => __( 'Git Updater License Settings', 'git-updater' ),
+			'menu_slug'   => 'git-updater-license',
+			'parent_slug' => $parent,
+		];
+		$client->license()->add_settings_page( $args );
 
 		 // Active automatic updater.
 		 // $client->updater();
+	}
+
+	/**
+	 * Check if standard trial is still active.
+	 *
+	 * @return void
+	 */
+	private function is_trial() {
+		global $gu_license;
+
+		$prop = new \ReflectionProperty( $gu_license, 'is_valid_licnese' );
+		$prop->setAccessible( true );
+		if ( 1 < ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS ) {
+			$prop->setValue( $gu_license, true );
+		}
 	}
 }

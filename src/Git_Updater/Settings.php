@@ -11,7 +11,6 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -57,12 +56,26 @@ class Settings {
 	private static $options;
 
 	/**
+	 * Holds git hosts.
+	 *
+	 * @var array
+	 */
+	private static $git_hosts = [
+		'github'    => 'GitHub',
+		'gist'      => 'Gist',
+		'bitbucket' => 'Bitbucket',
+		'gitlab'    => 'GitLab',
+		'gitea'     => 'Gitea',
+	];
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
 		$this->refresh_caches();
 		$this->load_options();
+		$this->load_api_subtabs();
 	}
 
 	/**
@@ -126,6 +139,13 @@ class Settings {
 		 * @param array static::$auth_required Array of authentication requirements.
 		 */
 		static::$auth_required = \apply_filters( 'gu_settings_auth_required', static::$auth_required );
+
+		if ( isset( self::$options['gu_auto_update'] ) ) {
+			$auto_updates   = get_site_option( 'auto_update_plugins' );
+			$path_arr       = pathinfo( $this->file );
+			$auto_updates[] = $this->gu_plugin_name;
+			update_site_option( 'auto_update_plugins', array_unique( $auto_updates ) );
+		}
 	}
 
 	/**
@@ -166,11 +186,9 @@ class Settings {
 	private function settings_sub_tabs() {
 		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
 		$gits       = $this->get_running_git_servers();
+		$gits       = array_merge( [ 'authentication' ], $gits );
 		$git_subtab = [];
 		$gu_subtabs = [];
-
-		// Force GitHub Settings subtab. Fix for object cache and refresh cache conflict.
-		( new GitHub_API( new \stdClass() ) )->add_settings( static::$auth_required );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
@@ -194,6 +212,7 @@ class Settings {
 		 */
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
+		// Dynamically add git subtabs.
 		foreach ( $gits as $git ) {
 			$git = ! in_array( 'gitlab', $gits, true ) && 'gitlabce' === $git ? 'gitlab' : $git;
 			if ( array_key_exists( $git, $gu_subtabs ) ) {
@@ -203,6 +222,33 @@ class Settings {
 		$subtabs = array_merge( $subtabs, $git_subtab );
 
 		return $subtabs;
+	}
+
+	/**
+	 * Force load API tabs of installed/active API plugins.
+	 *
+	 * @return void
+	 */
+	private function load_api_subtabs() {
+		$show_tabs = [ 'github' => 'GitHub' ];
+		foreach ( array_keys( static::$git_hosts )as $git ) {
+			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
+				$show_tabs[ $git ] = static::$git_hosts[ $git ];
+			}
+		}
+		add_filter(
+			'gu_running_git_servers',
+			function( $gits ) use ( &$show_tabs ) {
+				return array_merge( $gits, array_flip( $show_tabs ) );
+			}
+		);
+		add_filter(
+			'gu_add_settings_subtabs',
+			function( $subtabs ) use ( &$show_tabs ) {
+
+				return array_merge( $subtabs, $show_tabs );
+			}
+		);
 	}
 
 	/**
@@ -403,6 +449,18 @@ class Settings {
 		);
 
 		add_settings_field(
+			'gu_auto_update',
+			null,
+			[ $this, 'token_callback_checkbox' ],
+			'git_updater_install_settings',
+			'git_updater_settings',
+			[
+				'id'    => 'gu_auto_update',
+				'title' => esc_html__( 'Automatically keep Git Updater up to date.', 'git-updater' ),
+			]
+		);
+
+		add_settings_field(
 			'deprecated_error_logging',
 			null,
 			[ $this, 'token_callback_checkbox' ],
@@ -528,6 +586,7 @@ class Settings {
 			'branch_switch',
 			'bypass_background_processing',
 			'deprecated_error_logging',
+			'gu_auto_update',
 		];
 
 		foreach ( $running_servers as $server ) {
@@ -763,7 +822,8 @@ class Settings {
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
 		if ( $is_option_page || $refresh_transients || $reset_api_key || $install_api_plugin ) {
-			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( sanitize_url( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
@@ -899,7 +959,7 @@ class Settings {
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = str_contains( $data['type'], 'theme' )
+			$dashicon     = false !== strpos( $data['type'], 'theme' )
 				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private   = $data['private'] ? $lock : null;
