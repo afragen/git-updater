@@ -951,19 +951,17 @@ class Settings {
 		$broken  = '&nbsp;<span title="' . $broken_title . '" style="color:#f00;" class="dashicons dashicons-warning"></span>';
 		$dot_org = '&nbsp;<span title="' . $dot_org_title . '" class="dashicons dashicons-wordpress"></span></span>';
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
-		if ( 'authentication' !== $git ) {
-			printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
-			foreach ( $display_data as $data ) {
-				$dashicon     = false !== strpos( $data['type'], 'theme' )
-				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
-				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
-				$is_private   = $data['private'] ? $lock : null;
-				$is_broken    = $data['broken'] ? $broken : null;
-				$override     = $this->override_dot_org( $data['type'], $data );
-				$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
-				$is_dismissed = $data['dismiss'] ? $dismiss : null;
-				printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
-			}
+		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
+		foreach ( $display_data as $data ) {
+			$dashicon     = false !== strpos( $data['type'], 'theme' )
+			? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
+			: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+			$is_private   = $data['private'] ? $lock : null;
+			$is_broken    = $data['broken'] ? $broken : null;
+			$override     = $this->override_dot_org( $data['type'], $data );
+			$is_dot_org   = $data['dot_org'] && ! $override ? $dot_org : null;
+			$is_dismissed = $data['dismiss'] ? $dismiss : null;
+			printf( '<p>' . wp_kses_post( $dashicon . $data['name'] . $is_private . $is_dot_org . $is_broken . $is_dismissed ) . '</p>' );
 		}
 	}
 }
