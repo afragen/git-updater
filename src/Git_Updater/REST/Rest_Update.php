@@ -325,11 +325,8 @@ class Rest_Update {
 			$slug          = $params['plugin'] ?: $params['theme'];
 			$params['tag'] = $params['tag'] ?: $this->get_primary_branch( $slug );
 			extract( $params ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-			$override = false === $override ? false : true;
-			// TODO: Update for PHP 7.0
-			// $deprecated = strpos( $request->get_route(), ( new REST_API() )::$namespace ) ? false : true;
-			$rest_api   = new REST_API();
-			$deprecated = strpos( $request->get_route(), $rest_api::$namespace ) ? false : true;
+			$override   = false === $override ? false : true;
+			$deprecated = strpos( $request->get_route(), ( new REST_API() )::$namespace ) ? false : true;
 			if ( $deprecated ) {
 				$this->upgrader_skin->feedback( ( new REST_API() )->deprecated()['error'] );
 			}
