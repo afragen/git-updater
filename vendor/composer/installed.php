@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'afragen/git-updater',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => '7b1c670ecd2276d723795c9bf9590883d55f8ce1',
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => '77d85b280342fdd68e3d4c8c19e8f3275f8284f7',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'afragen/git-updater' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '7b1c670ecd2276d723795c9bf9590883d55f8ce1',
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '77d85b280342fdd68e3d4c8c19e8f3275f8284f7',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
