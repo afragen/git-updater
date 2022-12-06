@@ -213,11 +213,11 @@
 						$message = $fs->apply_filters( 'pending_activation_message', sprintf(
 						    /* translators: %s: name (e.g. Thanks John!) */
 							fs_text_inline( 'Thanks %s!', 'thanks-x', $slug ) . '<br>' .
-							fs_text_inline( 'You should receive an activation email for %s to your mailbox at %s. Please make sure you click the activation button in that email to %s.', 'pending-activation-message', $slug ),
+							fs_text_inline( 'You should receive a confirmation email for %s to your mailbox at %s. Please make sure you click the button in that email to %s.', 'pending-activation-message', $slug ),
 							$first_name,
 							'<b>' . $fs->get_plugin_name() . '</b>',
 							'<b>' . $current_user->user_email . '</b>',
-							fs_text_inline( 'complete the install', 'complete-the-install', $slug )
+							fs_text_inline( 'complete the opt-in', 'complete-the-opt-in', $slug )
 						) );
 					} else if ( $require_license_key ) {
 						$button_label = fs_text_inline( 'Activate License', 'activate-license', $slug );

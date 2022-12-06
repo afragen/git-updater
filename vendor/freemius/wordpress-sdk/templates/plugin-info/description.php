@@ -52,7 +52,7 @@
 <?php if ( ! empty( $plugin->info->screenshots ) ) : ?>
 	<?php $screenshots = $plugin->info->screenshots ?>
 	<div class="fs-screenshots clearfix">
-		<h2><?php fs_esc_html_echo_inline( 'Screenshots', 'screenshots', $plugin->slug ) ?></h2>
+		<h3><?php fs_esc_html_echo_inline( 'Screenshots', 'screenshots', $plugin->slug ) ?></h3>
 		<ul>
 			<?php $i = 0;
 				foreach ( $screenshots as $s => $url ) : ?>
