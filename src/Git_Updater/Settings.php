@@ -139,13 +139,6 @@ class Settings {
 		 * @param array static::$auth_required Array of authentication requirements.
 		 */
 		static::$auth_required = \apply_filters( 'gu_settings_auth_required', static::$auth_required );
-
-		if ( isset( self::$options['gu_auto_update'] ) ) {
-			$auto_updates   = get_site_option( 'auto_update_plugins' );
-			$path_arr       = pathinfo( $this->file );
-			$auto_updates[] = $this->gu_plugin_name;
-			update_site_option( 'auto_update_plugins', array_unique( $auto_updates ) );
-		}
 	}
 
 	/**
@@ -450,18 +443,6 @@ class Settings {
 		);
 
 		add_settings_field(
-			'gu_auto_update',
-			null,
-			[ $this, 'token_callback_checkbox' ],
-			'git_updater_install_settings',
-			'git_updater_settings',
-			[
-				'id'    => 'gu_auto_update',
-				'title' => esc_html__( 'Automatically keep Git Updater up to date.', 'git-updater' ),
-			]
-		);
-
-		add_settings_field(
 			'deprecated_error_logging',
 			null,
 			[ $this, 'token_callback_checkbox' ],
@@ -587,7 +568,6 @@ class Settings {
 			'branch_switch',
 			'bypass_background_processing',
 			'deprecated_error_logging',
-			'gu_auto_update',
 		];
 
 		foreach ( $running_servers as $server ) {

@@ -4,7 +4,7 @@
 * integrate Git Updater Additions
 * add git logo to subtab, hide for now
 * load API tabs of installed/active API plugins
-* add auto-update setting for Git Updater
+* set Git Updater to auto-update with new `$db_version`
 * replace Appsero SDK with Freemius SDK
 
 #### 11.1.10 / 2022-11-05
