@@ -31,13 +31,6 @@ class Settings {
 	use GU_Trait;
 
 	/**
-	 * Holds the plugin basename.
-	 *
-	 * @var string
-	 */
-	private $gu_plugin_name = 'git-updater/git-updater.php';
-
-	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 *
 	 * @var array

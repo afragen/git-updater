@@ -19,6 +19,13 @@ use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
 trait GU_Trait {
 
 	/**
+	 * Holds the plugin basename.
+	 *
+	 * @var string
+	 */
+	private $gu_plugin_name = 'git-updater/git-updater.php';
+
+	/**
 	 * Checks to see if a heartbeat is resulting in activity.
 	 *
 	 * @return bool
