@@ -96,6 +96,19 @@ class Init {
 
 		// Check for deletion of cron event.
 		add_filter( 'pre_unschedule_event', [ Singleton::get_instance( 'GU_Upgrade', $this ), 'pre_unschedule_event' ], 10, 3 );
+
+		// Force auto update.
+		add_filter(
+			'auto_update_plugin',
+			function( $update, $item ) {
+				if ( $this->gu_plugin_name === $item->plugin ) {
+					return true;
+				}
+				return $update;
+			},
+			15,
+			2
+		);
 	}
 
 	/**

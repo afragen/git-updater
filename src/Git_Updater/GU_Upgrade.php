@@ -47,13 +47,11 @@ class GU_Upgrade {
 		switch ( $db_version ) {
 			case version_compare( $db_version, $this->db_version, '<' ):
 				$this->delete_flush_cache();
-				$this->set_auto_update();
 				$this->save_db_version( $options );
 				break;
 			default:
 				break;
 		}
-
 	}
 
 	/**
@@ -77,17 +75,6 @@ class GU_Upgrade {
 	private function delete_flush_cache() {
 		wp_cache_flush();
 		$this->delete_all_cached_data();
-	}
-
-	/**
-	 * Set to auto update Git Updater.
-	 *
-	 * @return void
-	 */
-	private function set_auto_update() {
-		$auto_updates   = get_site_option( 'auto_update_plugins' );
-		$auto_updates[] = $this->gu_plugin_name;
-		update_site_option( 'auto_update_plugins', array_unique( $auto_updates ) );
 	}
 
 	/**
