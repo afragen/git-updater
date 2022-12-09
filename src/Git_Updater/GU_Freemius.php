@@ -90,6 +90,9 @@ class GU_Freemius {
 		gu_fs()->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
 		gu_fs()->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 		// gu_fs()->add_filter( 'show_deactivation_feedback_form', '__return_false' );
+
+		// Bypass Freemius' plugin updater, update-core.php.
+		remove_filter( 'admin_init', [ gu_fs(), '_add_premium_version_upgrade_selection' ] );
 	}
 
 	/**
