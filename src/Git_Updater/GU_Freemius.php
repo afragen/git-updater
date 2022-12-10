@@ -93,8 +93,7 @@ class GU_Freemius {
 		$gu_fs->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 		// $gu_fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
-		// Bypass Freemius' plugin updater, update-core.php.
-		remove_filter( 'admin_init', [ gu_fs(), '_add_premium_version_upgrade_selection' ] );
+		$this->remove_fs_plugin_updater_hooks( $gu_fs );
 	}
 
 	/**
@@ -137,5 +136,66 @@ class GU_Freemius {
 		}
 
 		return $permissions;
+	}
+
+	/**
+	 * Remove FS_Plugin_Updater hooks.
+	 * Allow Git Updater to use it's own update code for itself.
+	 *
+	 * @param \Freemius $gu_fs Freemius object.
+	 *
+	 * @return void
+	 */
+	public function remove_fs_plugin_updater_hooks( \Freemius $gu_fs ) {
+		$FS_Plugin_Updater = \FS_Plugin_Updater::instance( $gu_fs );
+		$plugin_name       = 'git-updater/git-updater.php';
+
+		// Bypass Freemius update-core.php.
+		remove_filter( 'admin_init', [ $gu_fs, '_add_premium_version_upgrade_selection' ] );
+
+		// Bypass Freemius plugins.php.
+		remove_filter( 'plugins_api', [ $FS_Plugin_Updater, 'plugins_api_filter' ], 10 );
+
+		remove_action(
+			"after_plugin_row_{$plugin_name}",
+			[
+				$FS_Plugin_Updater,
+				'catch_plugin_update_row',
+			],
+			9
+		);
+		remove_action(
+			"after_plugin_row_{$plugin_name}",
+			[
+				$FS_Plugin_Updater,
+				'edit_and_echo_plugin_update_row',
+			],
+			11
+		);
+
+		remove_action( 'admin_head', [ $FS_Plugin_Updater, 'catch_plugin_information_dialog_contents' ] );
+
+		remove_filter(
+			'http_request_host_is_external',
+			[
+				$FS_Plugin_Updater,
+				'http_request_host_is_external_filter',
+			],
+			10
+		);
+
+		// Freemius fix folder name.
+		remove_filter( 'upgrader_post_install', [ $FS_Plugin_Updater, '_maybe_update_folder_name' ], 10 );
+		remove_filter( 'upgrader_pre_install', [ 'FS_Plugin_Updater', '_store_basename_for_source_adjustment' ], 1 );
+		remove_filter( 'upgrader_source_selection', [ 'FS_Plugin_Updater', '_maybe_adjust_source_dir' ], 1 );
+
+		// Remove transient filter.
+		remove_filter(
+			'pre_set_site_transient_update_plugins',
+			[
+				$FS_Plugin_Updater,
+				'pre_set_site_transient_update_plugins_filter',
+			]
+		);
 	}
 }

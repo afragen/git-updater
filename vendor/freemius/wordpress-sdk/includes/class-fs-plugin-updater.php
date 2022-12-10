@@ -69,7 +69,7 @@
 
             $this->_logger = FS_Logger::get_logger( WP_FS__SLUG . '_' . $freemius->get_slug() . '_updater', WP_FS__DEBUG_SDK, WP_FS__ECHO_DEBUG_SDK );
 
-            //$this->filters();
+            $this->filters();
         }
 
         /**
