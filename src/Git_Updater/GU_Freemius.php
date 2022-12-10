@@ -150,12 +150,14 @@ class GU_Freemius {
 		$FS_Plugin_Updater = \FS_Plugin_Updater::instance( $gu_fs );
 		$plugin_name       = 'git-updater/git-updater.php';
 
-		// Bypass Freemius update-core.php.
+		// Bypass Freemius update-core.php dialog.
 		remove_filter( 'admin_init', [ $gu_fs, '_add_premium_version_upgrade_selection' ] );
 
-		// Bypass Freemius plugins.php.
+		// Remove Freemius View details modifications.
 		remove_filter( 'plugins_api', [ $FS_Plugin_Updater, 'plugins_api_filter' ], 10 );
+		remove_action( 'admin_head', [ $FS_Plugin_Updater, 'catch_plugin_information_dialog_contents' ] );
 
+		// Remove Freemius plugin row modifications.
 		remove_action(
 			"after_plugin_row_{$plugin_name}",
 			[
@@ -172,22 +174,6 @@ class GU_Freemius {
 			],
 			11
 		);
-
-		remove_action( 'admin_head', [ $FS_Plugin_Updater, 'catch_plugin_information_dialog_contents' ] );
-
-		remove_filter(
-			'http_request_host_is_external',
-			[
-				$FS_Plugin_Updater,
-				'http_request_host_is_external_filter',
-			],
-			10
-		);
-
-		// Freemius fix folder name.
-		remove_filter( 'upgrader_post_install', [ $FS_Plugin_Updater, '_maybe_update_folder_name' ], 10 );
-		remove_filter( 'upgrader_pre_install', [ 'FS_Plugin_Updater', '_store_basename_for_source_adjustment' ], 1 );
-		remove_filter( 'upgrader_source_selection', [ 'FS_Plugin_Updater', '_maybe_adjust_source_dir' ], 1 );
 
 		// Remove transient filter.
 		remove_filter(
