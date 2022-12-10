@@ -175,7 +175,7 @@ class GU_Freemius {
 			11
 		);
 
-		// Remove transient filter.
+		// Remove Freemius 'update_plugins' transient filter.
 		remove_filter(
 			'pre_set_site_transient_update_plugins',
 			[
