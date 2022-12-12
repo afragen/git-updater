@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.0.0 / 2022-12-12
 * ensure `$wp_filesystem` is available
 * re-integrate Git Updater PRO
 * integrate Git Updater Additions
