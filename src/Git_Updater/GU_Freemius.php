@@ -91,6 +91,7 @@ class GU_Freemius {
 		$gu_fs->add_filter( 'plugin_icon', [ $this, 'add_icon' ] );
 		$gu_fs->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
 		$gu_fs->add_filter( 'permission_list', [ $this, 'permission_list' ] );
+		gu_fs()->add_action( 'after_uninstall', [ $this, 'uninstall_cleanup' ] );
 		// $gu_fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
 		$this->remove_fs_plugin_updater_hooks( $gu_fs );
@@ -183,5 +184,25 @@ class GU_Freemius {
 				'pre_set_site_transient_update_plugins_filter',
 			]
 		);
+	}
+
+	/**
+	 * Uninstall.
+	 *
+	 * @return void
+	 */
+	public function uninstall_cleanup() {
+		$options = [ 'github_updater', 'github_updater_api_key', 'github_updater_remote_management', 'git_updater', 'git_updater_api_key', 'git_updater_additions' ];
+		foreach ( $options as $option ) {
+			delete_option( $option );
+			delete_site_option( $option );
+		}
+
+		global $wpdb;
+		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
+		$column        = is_multisite() ? 'meta_key' : 'option_name';
+		$delete_string = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
+
+		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 	}
 }

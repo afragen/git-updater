@@ -9,6 +9,7 @@
 * set Git Updater to auto-update with new `$db_version`
 * replace Appsero SDK with Freemius SDK
 * suspend Freemius plugin updating for Git Updater
+* fix uninstall.php for Freemius
 
 #### 11.1.10 / 2022-11-05
 * fix Appsero cron task from running more than scheduled
