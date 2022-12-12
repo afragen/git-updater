@@ -1,0 +1,40 @@
+<?php
+	/**
+	 * Sticky admin notices JavaScript handler for dismissing notice messages
+	 * by sending AJAX call to the server in order to remove the message from the Database.
+	 *
+	 * @package     Freemius
+	 * @copyright   Copyright (c) 2015, Freemius, Inc.
+	 * @license     https://www.gnu.org/licenses/gpl-3.0.html GNU General Public License Version 3
+	 * @since       1.0.7
+	 */
+
+	if ( ! defined( 'ABSPATH' ) ) {
+		exit;
+	}
+?>
+<script type="text/javascript" >
+	jQuery( document ).ready(function( $ ) {
+		$( '.fs-notice.fs-sticky .fs-close' ).click(function() {
+			var
+				notice           = $( this ).parents( '.fs-notice' ),
+				id               = notice.attr( 'data-id' ),
+				ajaxActionSuffix = notice.attr( 'data-manager-id' ).replace( ':', '-' );
+
+			notice.fadeOut( 'fast', function() {
+				var data = {
+					action   : 'fs_dismiss_notice_action_' + ajaxActionSuffix,
+                    // As such we don't need to use `wp_json_encode` method but using it to follow wp.org guideline.
+                    _wpnonce : <?php echo wp_json_encode( wp_create_nonce( 'fs_dismiss_notice_action' ) ); ?>,
+					message_id: id
+				};
+
+				$.post( <?php echo Freemius::ajax_url() ?>, data, function( response ) {
+
+				});
+
+				notice.remove();
+			});
+		});
+	});
+</script>

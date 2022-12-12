@@ -11,7 +11,6 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -32,13 +31,6 @@ class Settings {
 	use GU_Trait;
 
 	/**
-	 * Holds the plugin basename.
-	 *
-	 * @var string
-	 */
-	private $gu_plugin_name = 'git-updater/git-updater.php';
-
-	/**
 	 * Holds boolean on whether or not the repo requires authentication.
 	 *
 	 * @var array
@@ -57,12 +49,26 @@ class Settings {
 	private static $options;
 
 	/**
+	 * Holds git hosts.
+	 *
+	 * @var array
+	 */
+	private static $git_hosts = [
+		'github'    => 'GitHub',
+		'gist'      => 'Gist',
+		'bitbucket' => 'Bitbucket',
+		'gitlab'    => 'GitLab',
+		'gitea'     => 'Gitea',
+	];
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		self::$options = $this->get_class_vars( 'Base', 'options' );
 		$this->refresh_caches();
 		$this->load_options();
+		$this->load_api_subtabs();
 	}
 
 	/**
@@ -166,11 +172,9 @@ class Settings {
 	private function settings_sub_tabs() {
 		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
 		$gits       = $this->get_running_git_servers();
+		$gits       = array_merge( [ 'authentication' ], $gits );
 		$git_subtab = [];
 		$gu_subtabs = [];
-
-		// Force GitHub Settings subtab. Fix for object cache and refresh cache conflict.
-		( new GitHub_API( new \stdClass() ) )->add_settings( static::$auth_required );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
@@ -194,6 +198,7 @@ class Settings {
 		 */
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
+		// Dynamically add git subtabs.
 		foreach ( $gits as $git ) {
 			$git = ! in_array( 'gitlab', $gits, true ) && 'gitlabce' === $git ? 'gitlab' : $git;
 			if ( array_key_exists( $git, $gu_subtabs ) ) {
@@ -203,6 +208,33 @@ class Settings {
 		$subtabs = array_merge( $subtabs, $git_subtab );
 
 		return $subtabs;
+	}
+
+	/**
+	 * Force load API tabs of installed/active API plugins.
+	 *
+	 * @return void
+	 */
+	private function load_api_subtabs() {
+		$show_tabs = [ 'github' => 'GitHub' ];
+		foreach ( array_keys( static::$git_hosts )as $git ) {
+			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
+				$show_tabs[ $git ] = static::$git_hosts[ $git ];
+			}
+		}
+		add_filter(
+			'gu_running_git_servers',
+			function( $gits ) use ( &$show_tabs ) {
+				return array_merge( $gits, array_flip( $show_tabs ) );
+			}
+		);
+		add_filter(
+			'gu_add_settings_subtabs',
+			function( $subtabs ) use ( &$show_tabs ) {
+
+				return array_merge( $subtabs, $show_tabs );
+			}
+		);
 	}
 
 	/**
@@ -365,6 +397,8 @@ class Settings {
 			[ $this, 'sanitize' ]
 		);
 
+		Singleton::get_instance( 'Install', $this )->run();
+		Singleton::get_instance( 'Remote_Management', $this )->init();
 		$this->gu_tokens();
 
 		/*
@@ -386,7 +420,6 @@ class Settings {
 			[
 				'id'    => 'branch_switch',
 				'title' => esc_html__( 'Enable Branch Switching', 'git-updater' ),
-				'class' => $this->is_premium_only() ? '' : 'hidden',
 			]
 		);
 
@@ -728,16 +761,7 @@ class Settings {
 		$refresh_transients = $this->refresh_transients();
 		$install_api_plugin = Singleton::get_instance( 'Add_Ons', $this )->install_api_plugin();
 		$reset_api_key      = false;
-		if ( $this->is_premium_only() ) {
-			$reset_api_key = Singleton::get_instance( 'Fragen\Git_Updater\PRO\Remote_Management', $this )->reset_api_key();
-		}
-
-		// Go to Freemius purchase link.
-		if ( isset( $_GET['purchase_premium_addon'] ) && check_admin_referer( 'gu-freemius-premium-addon' ) ) {
-			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-			wp_redirect( wp_unslash( $_GET['purchase_premium_addon'] ) );
-			exit;
-		}
+		$reset_api_key      = Singleton::get_instance( 'Fragen\Git_Updater\Remote_Management', $this )->reset_api_key();
 
 		/**
 		 * Filter to add to $option_page array.
@@ -755,7 +779,9 @@ class Settings {
 		 */
 		$option_page = 1 === count( $option_page ) ? apply_filters( 'gu_save_redirect', [ 'git_updater' ] ) : $option_page;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ( isset( $_POST['action'] ) && 'update' === $_POST['action'] ) && $is_option_page ) {
 			$update = true;
 		}
@@ -763,7 +789,8 @@ class Settings {
 		$redirect_url = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
 
 		if ( $is_option_page || $refresh_transients || $reset_api_key || $install_api_plugin ) {
-			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( sanitize_url( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
 			parse_str( $query, $arr );
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
@@ -899,9 +926,9 @@ class Settings {
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = str_contains( $data['type'], 'theme' )
-				? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
-				: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
+			$dashicon     = false !== strpos( $data['type'], 'theme' )
+			? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
+			: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private   = $data['private'] ? $lock : null;
 			$is_broken    = $data['broken'] ? $broken : null;
 			$override     = $this->override_dot_org( $data['type'], $data );

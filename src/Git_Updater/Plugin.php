@@ -12,7 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
-use Fragen\Git_Updater\PRO\Branch;
+use Fragen\Git_Updater\Branch;
 
 /*
  * Exit if called directly.
@@ -101,7 +101,7 @@ class Plugin {
 	 */
 	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
-		include_once ABSPATH . '/wp-admin/includes/plugin.php';
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		$plugins     = get_plugins();
 		$git_plugins = [];
@@ -293,7 +293,6 @@ class Plugin {
 			// current_filter() check due to calling hook for shiny updates, don't show row twice.
 			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
-				&& $this->is_premium_only()
 			) {
 				add_action( "after_plugin_row_{$plugin->file}", [ new Branch(), 'plugin_branch_switcher' ], 15, 3 );
 			}

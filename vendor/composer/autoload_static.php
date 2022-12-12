@@ -15,20 +15,12 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         array (
             'Fragen\\Git_Updater\\' => 19,
         ),
-        'A' => 
-        array (
-            'Appsero\\' => 8,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'Fragen\\Git_Updater\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src/Git_Updater',
-        ),
-        'Appsero\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/appsero/client/src',
         ),
     );
 

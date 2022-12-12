@@ -10,8 +10,8 @@
 
 namespace Fragen\Git_Updater;
 
-use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Singleton;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /**
  * Class Add_Ons
@@ -44,8 +44,7 @@ class Add_Ons {
 	 * Add_Ons constructor.
 	 */
 	public function __construct() {
-		$this->addon   = $this->load_addon_config();
-		$this->premium = $this->load_premium_config();
+		$this->addon = $this->load_addon_config();
 		validate_active_plugins();
 	}
 
@@ -59,6 +58,7 @@ class Add_Ons {
 			'gist'      => [
 				[
 					'name'        => __( 'Git Updater - Gist', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add GitHub Gist hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gist/git-updater-gist.php',
@@ -71,6 +71,7 @@ class Add_Ons {
 			'bitbucket' => [
 				[
 					'name'        => __( 'Git Updater - Bitbucket', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add Bitbucket and Bitbucket Server repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-bitbucket/git-updater-bitbucket.php',
@@ -83,6 +84,7 @@ class Add_Ons {
 			'gitlab'    => [
 				[
 					'name'        => __( 'Git Updater - GitLab', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
 					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitlab/git-updater-gitlab.php',
@@ -95,7 +97,8 @@ class Add_Ons {
 			'gitea'     => [
 				[
 					'name'        => __( 'Git Updater - Gitea', 'git-updater' ),
-					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
+					'author'      => __( 'Andy Fragen' ),
+					'description' => __( 'Add Gitea hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitea/git-updater-gitea.php',
 					'uri'         => 'afragen/git-updater-gitea',
@@ -104,49 +107,6 @@ class Add_Ons {
 					'api'         => 'gitea',
 				],
 			],
-		];
-
-		return $config;
-	}
-
-	/**
-	 * Load premium add-on data.
-	 *
-	 * @return array
-	 */
-	protected function load_premium_config() {
-		$config = [
-			'pro'            => [
-				[
-					'repo'        => 'git-updater-pro',
-					'slug'        => 'git-updater-pro/git-updater-pro.php',
-					'name'        => __( 'Git Updater PRO', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that unlocks PRO features of branch switching, remote installation of plugins and themes, REST API, Webhooks, WP-CLI, and more.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8282/plan/13715/?trial=paid',
-				],
-			],
-			'additions'      => [
-				[
-					'repo'        => 'git-updater-additions',
-					'slug'        => 'git-updater-additions/git-updater-additions.php',
-					'name'        => __( 'Git Updater Additions', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that will add the appropriate data via hooks in Git Updater so that repositories that are not correctly configured to use Git Updater may be added to Git Updater without modifying the repository.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8313/plan/13771/?trial=paid',
-				],
-			],
-			'remote-updater' => [
-				[
-					'repo'        => 'git-remote-updater',
-					'slug'        => 'git-remote-updater/git-remote-updater.php',
-					'name'        => __( 'Git Remote Updater', 'git-updater' ),
-					'description' => __( 'A Git Updater add-on plugin that allows you to easily update Git Updater repositories in bulk via REST API endpoint updating. Requires Git Updater PRO.', 'git-updater' ),
-					'author'      => 'Andy Fragen',
-					'link'        => 'https://checkout.freemius.com/mode/dialog/plugin/8312/plan/13768/?trial=paid',
-				],
-			],
-
 		];
 
 		return $config;
@@ -165,7 +125,7 @@ class Add_Ons {
 	 * Adds Remote Management tab to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = [ 'git_updater_addons' => esc_html__( 'Add-Ons', 'git-updater' ) ];
+		$install_tabs = [ 'git_updater_addons' => esc_html__( 'API Add-Ons', 'git-updater' ) ];
 		add_filter(
 			'gu_add_settings_tabs',
 			function ( $tabs ) use ( $install_tabs ) {
@@ -229,14 +189,6 @@ class Add_Ons {
 			[ $this, 'insert_cards' ],
 			'git_updater_addons_settings'
 		);
-
-		/*
-		 add_settings_section(
-			'premium_addons',
-			esc_html__( 'Premium Add-Ons', 'git-updater' ),
-			[ $this, 'insert_premium_cards' ],
-			'git_updater_addons_settings'
-		); */
 	}
 
 	/**
@@ -258,24 +210,6 @@ class Add_Ons {
 	}
 
 	/**
-	 * Some method to insert cards for premium plugin purchase.
-	 *
-	 * @return void
-	 */
-	public function insert_premium_cards() {
-		echo '<p>';
-		esc_html_e( 'Install premium plugins.', 'git-updater' );
-		echo '</p>';
-		echo '<div class="wp-list-table widefat plugin-install">';
-		foreach ( $this->premium as $addon ) {
-			$addon = array_pop( $addon );
-			$this->make_card( 'premium', $addon );
-		}
-		echo '</div>';
-		echo '<div style="clear:both;"></div>';
-	}
-
-	/**
 	 * Install Git Updater API plugins.
 	 *
 	 * @uses afragen/wp-dependency-installer
@@ -289,7 +223,7 @@ class Add_Ons {
 
 			// Redirect back to the Add-Ons.
 			$_POST                     = $_REQUEST;
-			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
+			$_POST['_wp_http_referer'] = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : null;
 
 			switch ( $_GET['install_api_plugin'] ) {
 			//phpcs:enable
@@ -335,14 +269,6 @@ class Add_Ons {
 			$repo_api->type->git            = 'github';
 			$repo_api->type->enterprise     = false;
 			$repo_api->type->enterprise_api = false;
-
-			$cache = $this->get_repo_cache( $config['repo'] );
-			if ( ! $cache ) {
-				$repo_api->get_remote_info( basename( $config['slug'] ) );
-				$cache = $this->get_repo_cache( $config['repo'] );
-			}
-			$config['description'] = $cache[ $config['repo'] ]['Description'];
-			$config['author']      = $cache[ $config['repo'] ]['Author'];
 		}
 
 		$plugin_icon_url = \plugin_dir_url( dirname( __DIR__ ) ) . 'assets/icon.svg';
@@ -390,26 +316,6 @@ class Add_Ons {
 			?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $install_api ); ?>">
 				<?php submit_button( esc_html__( 'Install & Activate', 'git-updater' ) ); ?>
-			</form>
-			<?php
-		}
-	}
-
-	/**
-	 * Get button for premium add-on card.
-	 *
-	 * @param array $config Array of plugin data.
-	 *
-	 * @return void
-	 */
-	private function premium_button( $config ) {
-		$purchase_addon = add_query_arg( [ 'purchase_premium_addon' => esc_url( wp_nonce_url( $config['link'], 'gu-freemius-premium-addon' ) ) ], $this->action );
-		if ( \is_plugin_active( $config['slug'] ) ) {
-			submit_button( esc_html__( 'Free Trial', 'git-updater' ), 'disabled' );
-		} else {
-			?>
-			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $purchase_addon ); ?>">
-				<?php submit_button( esc_html__( 'Free Trial', 'git-updater' ) ); ?>
 			</form>
 			<?php
 		}

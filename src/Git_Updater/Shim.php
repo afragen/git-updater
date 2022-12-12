@@ -16,6 +16,13 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 if ( ! function_exists( 'move_dir' ) ) {
+	global $wp_filesystem;
+
+	if ( ! $wp_filesystem ) {
+		require_once ABSPATH . '/wp-admin/includes/file.php';
+		WP_Filesystem();
+	}
+
 	/**
 	 * Moves a directory from one location to another via the rename() PHP function.
 	 * If the renaming failed, falls back to copy_dir().

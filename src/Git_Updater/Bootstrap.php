@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater;
 
+use Fragen\Git_Updater\Additions\Bootstrap as Additions_Bootstrap;
+use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -36,14 +38,14 @@ class Bootstrap {
 	/**
 	 * Holds main plugin file.
 	 *
-	 * @var $file
+	 * @var string
 	 */
 	protected $file;
 
 	/**
 	 * Holds main plugin directory.
 	 *
-	 * @var $dir
+	 * @var string
 	 */
 	protected $dir;
 
@@ -64,7 +66,7 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function deactivate_die() {
-		require_once ABSPATH . '/wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		\deactivate_plugins( plugin_basename( $this->file ) );
 
 		$message = sprintf(
@@ -88,9 +90,14 @@ class Bootstrap {
 		}
 
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
-		( new GU_Appsero( $this->file ) )->init();
+		( new GU_Freemius() )->init();
+		( new REST_API() )->load_hooks();
+		( new Additions_Bootstrap( $this->file ) )->run();
 		( new Init() )->run();
+		( new Messages() )->create_error_message( 'get_license' );
 
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();

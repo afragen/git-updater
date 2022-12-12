@@ -19,6 +19,13 @@ use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
 trait GU_Trait {
 
 	/**
+	 * Holds the plugin basename.
+	 *
+	 * @var string
+	 */
+	private $gu_plugin_name = 'git-updater/git-updater.php';
+
+	/**
 	 * Checks to see if a heartbeat is resulting in activity.
 	 *
 	 * @return bool
@@ -46,18 +53,6 @@ trait GU_Trait {
 	 */
 	public static function is_doing_ajax() {
 		return defined( 'DOING_AJAX' ) && \DOING_AJAX;
-	}
-
-	/**
-	 * Checks to see if Git Updater PRO is running.
-	 *
-	 * @return bool
-	 */
-	public function is_premium_only() {
-		if ( \is_plugin_active( 'git-updater-pro/git-updater-pro.php' ) ) {
-			return true;
-		}
-		return false;
 	}
 
 	/**

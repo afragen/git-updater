@@ -34,7 +34,7 @@
     "afragen/wordpress-plugin-readme-parser": "dev-master",
     "afragen/singleton": "dev-master",
     "afragen/wp-dependency-installer": "^4",
-    "appsero/client": "^1.2"
+    "freemius/wordpress-sdk": "^2.5"
   },
   "autoload": {
     "psr-4": {

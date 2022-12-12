@@ -20,7 +20,7 @@ A simple plugin to enable automatic updates to your GitHub hosted WordPress plug
 
 ## Description
 
-This plugin was designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
+This plugin was originally designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
     GitHub Plugin URI: afragen/git-updater
     GitHub Plugin URI: https://github.com/afragen/git-updater
@@ -43,6 +43,8 @@ API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins ar
 
 ### Sponsor
 
+Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial free trial period. After the trial period Git Updater will not be able to make authenticated API requests.
+
 You can [sponsor me on GitHub](https://github.com/sponsors/afragen) to help with continued development and support.
 
 ## Slack
@@ -52,7 +54,3 @@ We now have a [Slack team for Git Updater](https://git-updater.slack.com). Pleas
 ## Translations
 
 If you are a polyglot I would greatly appreciate translation contributions to [GlotPress for Git Updater](https://translate.git-updater.com).
-
-## Analytics
-
-Use of this plugin implies consent for obtaining [analytics data](https://appsero.com/features/analytics/) regarding its usage. This data is obtained via the Appsero SDK. If you wish to opt out of this data collection simply deactivate and remove the plugin. Your data will be automatically purged.

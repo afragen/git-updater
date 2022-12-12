@@ -53,6 +53,9 @@ class Init {
 		}
 
 		if ( static::is_wp_cli() ) {
+			include_once __DIR__ . '/WP_CLI/CLI.php';
+			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
+
 			Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
 			add_filter( 'site_transient_update_plugins', [ Singleton::get_instance( 'Plugin', $this ), 'update_site_transient' ], 15, 1 );
 
@@ -90,6 +93,9 @@ class Init {
 		// Add git host icons.
 		add_filter( 'plugin_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
 		add_filter( 'theme_row_meta', [ $this->base, 'row_meta_icons' ], 15, 2 );
+
+		// Check for deletion of cron event.
+		add_filter( 'pre_unschedule_event', [ Singleton::get_instance( 'GU_Upgrade', $this ), 'pre_unschedule_event' ], 10, 3 );
 	}
 
 	/**
