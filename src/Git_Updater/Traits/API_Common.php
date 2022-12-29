@@ -58,15 +58,13 @@ trait API_Common {
 			return null;
 		}
 		if ( 'github' === $git ) {
-			do {
-				$assets = isset( $response->assets ) ? $response->assets : [];
-				foreach ( $assets as $asset ) {
-					if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
-						$response = $asset->url;
-						break;
-					}
+			$assets = isset( $response->assets ) ? $response->assets : [];
+			foreach ( $assets as $asset ) {
+				if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
+					$response = $asset->url;
+					break;
 				}
-			} while ( false );
+			}
 			$response = is_string( $response ) ? $response : null;
 			$this->set_repo_cache( 'release_asset_response', $asset );
 		}

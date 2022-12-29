@@ -1,4 +1,5 @@
 #### [unreleased]
+* cleanup parsing of GitHub release assets
 
 #### 12.0.0 / 2022-12-12
 * ensure `$wp_filesystem` is available
