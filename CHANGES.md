@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.0.1 / 2023-01-02
 * cleanup parsing of GitHub release assets
 * composer update to fix dependency conflict
 
