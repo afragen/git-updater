@@ -30,7 +30,7 @@ class GU_Upgrade {
 	 *
 	 * @var int
 	 */
-	private $db_version = '11.1.10.3'; // TODO: change number.
+	private $db_version = '12.0.0'; // TODO: change number.
 
 	/**
 	 * Run update check against db_version.

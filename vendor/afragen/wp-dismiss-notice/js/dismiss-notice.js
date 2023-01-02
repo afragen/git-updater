@@ -23,7 +23,7 @@
 					option_name = attr_value.join('-');
 
 					data = {
-						'action': 'dismiss_admin_notice',
+						'action': 'wp_dismiss_notice',
 						'option_name': option_name,
 						'dismissible_length': dismissible_length,
 						'nonce': window.wp_dismiss_notice.nonce

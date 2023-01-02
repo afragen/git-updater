@@ -16,7 +16,7 @@ class WP_Dismiss_Notice {
 	 */
 	public static function init() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'load_script' ] );
-		add_action( 'wp_ajax_dismiss_admin_notice', [ __CLASS__, 'dismiss_admin_notice' ] );
+		add_action( 'wp_ajax_wp_dismiss_notice', [ __CLASS__, 'dismiss_admin_notice' ] );
 	}
 
 	/**

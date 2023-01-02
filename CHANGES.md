@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 12.0.1 / 2023-01-02
+* cleanup parsing of GitHub release assets
+* composer update to fix dependency conflict
+
 #### 12.0.0 / 2022-12-12
 * ensure `$wp_filesystem` is available
 * re-integrate Git Updater PRO
