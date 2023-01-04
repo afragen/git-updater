@@ -1,5 +1,6 @@
 #### [unreleased]
 * PHP 8.1 compatibility fix, thanks @chesio
+* declare `class API` variable `$type`, avoid future PHP issues, thanks @chesio
 
 #### 12.0.1 / 2023-01-02
 * cleanup parsing of GitHub release assets
