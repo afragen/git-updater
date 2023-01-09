@@ -790,8 +790,8 @@ class Settings {
 
 		if ( $is_option_page || $refresh_transients || $reset_api_key || $install_api_plugin ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : null;
-			parse_str( $query, $arr );
+			$query = isset( $_POST['_wp_http_referer'] ) ? parse_url( html_entity_decode( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ) ) ), PHP_URL_QUERY ) : '';
+			parse_str( (string) $query, $arr );
 			$arr['tab']    = ! empty( $arr['tab'] ) ? $arr['tab'] : 'git_updater_settings';
 			$arr['subtab'] = ! empty( $arr['subtab'] ) ? $arr['subtab'] : 'git_updater';
 
