@@ -117,7 +117,7 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$this->response = is_array( $this->response ) ? $this->response : [];
+		$this->response = property_exists( $this, 'response' ) && is_array( $this->response ) ? $this->response : [];
 
 		$hours = $this->get_class_vars( 'API\API', 'hours' );
 		if ( ! $repo ) {
