@@ -57,6 +57,13 @@ class API {
 	protected $hours = 12;
 
 	/**
+	 * Holds 'plugin'|'theme' or plugin|theme object information for API classes.
+	 *
+	 * @var string|\stdClass
+	 */
+	public $type;
+
+	/**
 	 * Variable to hold all repository remote info.
 	 *
 	 * @access public
