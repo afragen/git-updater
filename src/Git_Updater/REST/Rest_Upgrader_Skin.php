@@ -53,7 +53,7 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 			$string = $this->upgrader->strings[ $string ];
 		}
 
-		if ( false !== strpos( $string, '%' ) ) {
+		if ( str_contains( $string, '%' ) ) {
 			if ( $args ) {
 				$args   = array_map( 'strip_tags', $args );
 				$args   = array_map( 'esc_html', $args );

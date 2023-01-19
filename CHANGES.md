@@ -1,4 +1,5 @@
 #### [unreleased]
+* update to use `str_contains()`
 
 #### 12.0.3 / 2023-01-19
 * update `Shim` for `move_dir()` and `wp_opcache_invalidate_directory()`

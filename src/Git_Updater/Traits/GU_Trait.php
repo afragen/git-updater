@@ -600,7 +600,7 @@ trait GU_Trait {
 		$header['primary_branch'] = false;
 
 		if ( ! empty( $header['host'] ) ) {
-			if ( 'GitHub' === $header_parts[0] && false === strpos( $header['host'], 'github.com' ) ) {
+			if ( 'GitHub' === $header_parts[0] && str_contains( $header['host'], 'github.com' ) ) {
 				$header['enterprise_uri']  = $header['base_uri'];
 				$header['enterprise_api']  = trim( $header['enterprise_uri'], '/' );
 				$header['enterprise_api'] .= '/api/v3';
