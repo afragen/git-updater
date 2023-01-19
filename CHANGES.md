@@ -1,5 +1,8 @@
 #### [unreleased]
+
+#### 12.0.3 / 2023-01-19
 * update `Shim` for `move_dir()` and `wp_opcache_invalidate_directory()`
+* composer update
 
 #### 12.0.2 / 2023-01-12
 * PHP 8.1 compatibility fix, thanks @chesio
