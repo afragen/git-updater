@@ -47,7 +47,7 @@ composer require afragen/wp-dependency-installer
   },
   {
     "name": "Local Development",
-    "host": "WordPress",
+    "host": "wordpress",
     "slug": "local-development/local-development.php",
     "uri": "https://wordpress.org/plugins/local-development/",
     "required": true

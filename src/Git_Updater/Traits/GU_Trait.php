@@ -467,7 +467,7 @@ trait GU_Trait {
 	 */
 	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
 		$arr    = [];
-		$slug = (string) $slug;
+		$slug   = (string) $slug;
 		$rename = explode( '-', $slug );
 		array_pop( $rename );
 		$rename = implode( '-', $rename );

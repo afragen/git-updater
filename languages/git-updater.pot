@@ -1,15 +1,15 @@
-# Copyright (C) 2022 Andy Fragen
+# Copyright (C) 2023 Andy Fragen
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.0.0\n"
+"Project-Id-Version: Git Updater 12.0.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-12-12T20:13:44+00:00\n"
+"POT-Creation-Date: 2023-01-19T16:33:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: git-updater\n"
@@ -239,6 +239,11 @@ msgstr ""
 msgid "Installed Plugins and Themes"
 msgstr ""
 
+#. translators: %s: The '$dir' argument.
+#: src/Git_Updater/Shim.php:108
+msgid "The %s argument must be a non-empty string."
+msgstr ""
+
 #. translators: %s: theme name
 #: src/Git_Updater/Theme.php:389
 #: src/Git_Updater/Theme.php:515
@@ -276,6 +281,6 @@ msgstr ""
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:663
+#: src/Git_Updater/Traits/GU_Trait.php:666
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
