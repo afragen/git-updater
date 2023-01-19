@@ -102,16 +102,16 @@
         },
         {
             "name": "afragen/wp-dependency-installer",
-            "version": "4.3.5",
+            "version": "4.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dependency-installer.git",
-                "reference": "aee91336474390c60f66398e1d730ea289a36a1f"
+                "reference": "9e681ea57e040fec5e18f1b91648d14e56f07ea4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/aee91336474390c60f66398e1d730ea289a36a1f",
-                "reference": "aee91336474390c60f66398e1d730ea289a36a1f",
+                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/9e681ea57e040fec5e18f1b91648d14e56f07ea4",
+                "reference": "9e681ea57e040fec5e18f1b91648d14e56f07ea4",
                 "shasum": ""
             },
             "require": {
@@ -158,7 +158,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-07-15T19:47:50+00:00"
+            "time": "2023-01-19T16:18:06+00:00"
         },
         {
             "name": "afragen/wp-dismiss-notice",
