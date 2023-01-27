@@ -37,7 +37,7 @@ if ( ! function_exists( 'move_dir' ) ) {
 	 * @param string $to        Destination directory.
 	 * @param bool   $overwrite Overwrite destination.
 	 *                          Default is false.
-	 * @return true|WP_Error True on success, WP_Error on failure.
+	 * @return bool|WP_Error True on success, False or WP_Error on failure.
 	 */
 	function move_dir( $from, $to, $overwrite = false ) {
 		global $wp_filesystem;
@@ -51,6 +51,10 @@ if ( ! function_exists( 'move_dir' ) ) {
 					'<code>$to</code>'
 				)
 			);
+		}
+
+		if ( trailingslashit( $from ) === trailingslashit( $to ) ) {
+			return false;
 		}
 
 		$result = false;
