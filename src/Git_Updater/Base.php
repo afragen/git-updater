@@ -488,7 +488,7 @@ class Base {
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( $source !== $new_source ) {
-			$result = move_dir( $source, $new_source );
+			$result = move_dir( $source, $new_source, true );
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}
@@ -630,7 +630,7 @@ class Base {
 	 * @return string
 	 */
 	public function get_git_icon( $file, $add_padding ) {
-		$type     = false !== strpos( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
+		$type     = str_contains( current_filter(), 'plugin' ) ? 'plugin' : 'theme';
 		$type_cap = ucfirst( $type );
 		$filepath = 'plugin' === $type ? WP_PLUGIN_DIR . "/$file" : get_theme_root() . "/$file/style.css";
 

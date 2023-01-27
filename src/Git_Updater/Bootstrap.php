@@ -173,7 +173,7 @@ class Bootstrap {
 		}
 
 		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
-			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater' );
+			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater', true );
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}

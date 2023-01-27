@@ -42,9 +42,9 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.6',
-            'version' => '4.3.6.0',
-            'reference' => '9e681ea57e040fec5e18f1b91648d14e56f07ea4',
+            'pretty_version' => '4.3.9',
+            'version' => '4.3.9.0',
+            'reference' => '1bac4a8e342f706688d6a839c14d4ab48bfab5e2',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
             'aliases' => array(),

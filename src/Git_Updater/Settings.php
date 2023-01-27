@@ -926,7 +926,7 @@ class Settings {
 		$dismiss = '&nbsp;<span title="' . $dismiss_title . '" class="dashicons dashicons-dismiss"></span></span>';
 		printf( '<h2>' . esc_html__( 'Installed Plugins and Themes', 'git-updater' ) . '</h2>' );
 		foreach ( $display_data as $data ) {
-			$dashicon     = false !== strpos( $data['type'], 'theme' )
+			$dashicon     = str_contains( $data['type'], 'theme' )
 			? '<span class="dashicons dashicons-admin-appearance"></span>&nbsp;&nbsp;'
 			: '<span class="dashicons dashicons-admin-plugins"></span>&nbsp;&nbsp;';
 			$is_private   = $data['private'] ? $lock : null;

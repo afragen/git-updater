@@ -236,7 +236,7 @@ class Install {
 		}
 
 		$headers = $this->parse_header_uri( $config['uri'] );
-		$api     = false !== strpos( $headers['host'], '.com' )
+		$api     = str_contains( $headers['host'], '.com' )
 			? rtrim( $headers['host'], '.com' )
 			: rtrim( $headers['host'], '.org' );
 
