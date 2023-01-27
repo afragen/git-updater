@@ -1,7 +1,7 @@
 #### [unreleased]
 * update to use `str_contains()`
 * log HTTP errors only hourly
-* compare trailing slashed sources in `Base::updater_source_selection()` otherwise potential for deletion of source
+* update `Shim::move_dir()` to exit early if source and destination differ only by trailing slash
 
 #### 12.0.3 / 2023-01-19
 * update `Shim` for `move_dir()` and `wp_opcache_invalidate_directory()`
