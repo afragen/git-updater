@@ -606,7 +606,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		 * @param string $to        Destination directory.
 		 * @param bool   $overwrite Overwrite destination.
 		 *                          Default is false.
-		 * @return true|WP_Error True on success, WP_Error on failure.
+		 * @return bool|WP_Error True on success, False or WP_Error on failure.
 		 */
 		private function move_dir( $from, $to, $overwrite = false ) {
 			global $wp_filesystem;
@@ -620,6 +620,10 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 						'<code>$to</code>'
 					)
 				);
+			}
+
+			if ( trailingslashit( $from ) === trailingslashit( $to ) ) {
+				return false;
 			}
 
 			$result = false;
