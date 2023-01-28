@@ -1,4 +1,5 @@
 #### [unreleased]
+* further limit log of HTTP errors, trying for only once per plugin
 
 #### 12.0.4 / 2023-01-27
 * update to use `str_contains()`
