@@ -206,3 +206,6 @@ class GU_Freemius {
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 	}
 }
+
+// Hopefully eliminate clone resolution popup as single license for unlimited sites.
+define( 'FS__RESOLVE_CLONE_AS', 'long_term_duplicate' );
