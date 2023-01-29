@@ -1,11 +1,12 @@
 #### [unreleased]
 * further limit log of HTTP errors, trying for only once per plugin
 * eliminate Freemius clone resolution popup
+* update `Shim:move_dir()` for improved error messaging
 
 #### 12.0.4 / 2023-01-27
 * update to use `str_contains()`
 * log HTTP errors only hourly
-* update `Shim::move_dir()` to exit early if source and destination differ only by trailing slash
+* update `Shim::move_dir()` to exit early if source and destination differ only by case or trailing slash
 
 #### 12.0.3 / 2023-01-19
 * update `Shim` for `move_dir()` and `wp_opcache_invalidate_directory()`

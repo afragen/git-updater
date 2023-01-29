@@ -611,20 +611,15 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 		private function move_dir( $from, $to, $overwrite = false ) {
 			global $wp_filesystem;
 
-			if ( ! $overwrite && $wp_filesystem->exists( $to ) ) {
-				return new WP_Error(
-					'to_directory_already_exists_move_dir',
-					sprintf(
-					/* translators: %s: The '$to' argument name. */
-						__( '%s already exists.' ),
-						'<code>$to</code>'
-					)
+			if ( trailingslashit( strtolower( $from ) ) === trailingslashit( strtolower( $to ) ) ) {
+				return new \WP_Error(
+					'source_destination_same_move_dir',
+					__( 'The source and destination are the same.' )
 				);
 			}
 
-			if ( trailingslashit( $from ) === trailingslashit( $to ) ) {
-				return false;
-			}
+			if ( ! $overwrite && $wp_filesystem->exists( $to ) ) {
+				return new \WP_Error( 'destination_already_exists_move_dir', __( 'The destination folder already exists.' ), $to );			}
 
 			$result = false;
 
