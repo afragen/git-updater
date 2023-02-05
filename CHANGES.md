@@ -2,6 +2,7 @@
 * further limit log of HTTP errors, trying for only once per plugin
 * eliminate Freemius clone resolution popup
 * update `Shim:move_dir()` for improved error messaging
+* update comparison in `Base::upgrader_source_selection` of `$source` and `$new_source`
 
 #### 12.0.4 / 2023-01-27
 * update to use `str_contains()`

@@ -487,7 +487,7 @@ class Base {
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
-		if ( $source !== $new_source ) {
+		if ( trailingslashit( $source ) !== trailingslashit( $new_source ) ) {
 			$result = move_dir( $source, $new_source, true );
 			if ( \is_wp_error( $result ) ) {
 				return $result;
