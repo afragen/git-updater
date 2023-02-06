@@ -37,24 +37,22 @@ if ( ! function_exists( 'move_dir' ) ) {
 	 * @param string $to        Destination directory.
 	 * @param bool   $overwrite Overwrite destination.
 	 *                          Default is false.
-	 * @return bool|WP_Error True on success, False or WP_Error on failure.
+	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	function move_dir( $from, $to, $overwrite = false ) {
 		global $wp_filesystem;
 
-		if ( ! $overwrite && $wp_filesystem->exists( $to ) ) {
-			return new WP_Error(
-				'to_directory_already_exists_move_dir',
-				sprintf(
-				/* translators: %s: The '$to' argument name. */
-					__( '%s already exists.' ),
-					'<code>$to</code>'
-				)
-			);
+		if ( trailingslashit( strtolower( $from ) ) === trailingslashit( strtolower( $to ) ) ) {
+			return new WP_Error( 'source_destination_same_move_dir', __( 'The source and destination are the same.' ) );
 		}
 
-		if ( trailingslashit( $from ) === trailingslashit( $to ) ) {
-			return false;
+		if ( $wp_filesystem->exists( $to ) ) {
+			if ( ! $overwrite ) {
+				return new WP_Error( 'destination_already_exists_move_dir', __( 'The destination folder already exists.' ), $to );
+			} elseif ( ! $wp_filesystem->delete( $to, true ) ) {
+				// Can't overwrite if the destination couldn't be deleted.
+				return new WP_Error( 'destination_not_deleted_move_dir', __( 'The destination directory already exists and could not be removed.' ) );
+			}
 		}
 
 		$result = false;

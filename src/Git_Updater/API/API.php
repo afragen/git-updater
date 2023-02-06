@@ -232,7 +232,7 @@ class API {
 		}
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
-		if ( isset( $response['timeout'] ) && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		if ( 'file' === self::$method && isset( $response['timeout'] ) && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
 			if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
 				$log_message = "Git Updater Error: {$this->type->name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
