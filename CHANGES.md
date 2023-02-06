@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.1.0 / 2023-02-06
 * further limit log of HTTP errors, trying for only once per plugin
 * eliminate Freemius clone resolution popup
 * update `Shim:move_dir()` for improved error messaging
