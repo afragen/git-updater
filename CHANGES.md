@@ -1,4 +1,5 @@
 #### [unreleased]
+* remove force of Network activation, messes up Freemius license activation on multisite
 
 #### 12.1.0 / 2023-02-06
 * further limit log of HTTP errors, trying for only once per plugin
