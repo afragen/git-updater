@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => 'beb4de8e1efea6fdff410d29991fee04f7b4dfaf',
+            'reference' => '8bd7c6bde5684693cd391ea9ef10d01bfe1c3564',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
