@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 12.1.1 / 2023-02-07
+* remove force of Network activation, messes up Freemius license activation on multisite
+* composer update
+
 #### 12.1.0 / 2023-02-06
 * further limit log of HTTP errors, trying for only once per plugin
 * eliminate Freemius clone resolution popup
