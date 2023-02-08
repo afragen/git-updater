@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 12.1.2 / 2023-02-08
+* fix for webhook updating issue if `$branches` not defined, thanks @awunsch
+
 #### 12.1.1 / 2023-02-07
 * remove force of Network activation, messes up Freemius license activation on multisite
 * composer update
