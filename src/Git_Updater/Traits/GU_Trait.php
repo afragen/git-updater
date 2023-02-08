@@ -692,7 +692,7 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	public function use_release_asset( $branch_switch = false ) {
-		$is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
+		$is_tag                  = property_exists( $this->type, 'branches' ) ? $branch_switch && ! array_key_exists( $branch_switch, (array) $this->type->branches ) : false;
 		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 

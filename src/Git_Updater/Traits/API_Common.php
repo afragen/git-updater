@@ -306,14 +306,14 @@ trait API_Common {
 
 			if ( $response ) {
 				$branches             = $this->parse_branch_response( $response );
-				$this->type->branches = $branches;
-				$this->set_repo_cache( 'branches', $branches );
+				$this->type->branches = (array) $branches;
+				$this->set_repo_cache( 'branches', (array) $branches );
 
 				return true;
 			}
 		}
 
-		$this->type->branches = $response;
+		$this->type->branches = (array) $response;
 
 		return true;
 	}
