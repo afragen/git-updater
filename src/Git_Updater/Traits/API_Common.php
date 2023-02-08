@@ -306,7 +306,7 @@ trait API_Common {
 
 			if ( $response ) {
 				$branches             = $this->parse_branch_response( $response );
-				$this->type->branches = $branches;
+				$this->type->branches = (array) $branches;
 				$this->set_repo_cache( 'branches', $branches );
 
 				return true;
