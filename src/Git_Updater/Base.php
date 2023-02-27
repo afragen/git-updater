@@ -363,24 +363,24 @@ class Base {
 	protected function set_defaults( $type ) {
 		if ( ! isset( $this->$type->slug ) ) {
 			$this->$type       = new \stdClass();
-			$this->$type->slug = null;
+			$this->$type->slug = '';
 		} elseif ( ! isset( self::$options[ $this->$type->slug ] ) ) {
-			self::$options[ $this->$type->slug ] = null;
+			self::$options[ $this->$type->slug ] = '';
 			add_site_option( 'git_updater', self::$options );
 		}
 
 		$this->$type->remote_version = '0.0.0';
 		$this->$type->newest_tag     = '0.0.0';
-		$this->$type->download_link  = null;
+		$this->$type->download_link  = '';
 		$this->$type->tags           = [];
 		$this->$type->rollback       = [];
 		$this->$type->branches       = [];
-		$this->$type->requires       = null;
-		$this->$type->tested         = null;
-		$this->$type->donate_link    = null;
+		$this->$type->requires       = '';
+		$this->$type->tested         = '';
+		$this->$type->donate_link    = '';
 		$this->$type->contributors   = [];
 		$this->$type->downloaded     = 0;
-		$this->$type->last_updated   = null;
+		$this->$type->last_updated   = '';
 		$this->$type->rating         = 0;
 		$this->$type->num_ratings    = 0;
 		$this->$type->transient      = [];

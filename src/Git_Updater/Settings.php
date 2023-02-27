@@ -217,7 +217,7 @@ class Settings {
 	 */
 	private function load_api_subtabs() {
 		$show_tabs = [ 'github' => 'GitHub' ];
-		foreach ( array_keys( static::$git_hosts )as $git ) {
+		foreach ( array_keys( static::$git_hosts ) as $git ) {
 			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
 				$show_tabs[ $git ] = static::$git_hosts[ $git ];
 			}
