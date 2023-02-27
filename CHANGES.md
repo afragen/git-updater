@@ -1,4 +1,5 @@
 #### [unreleased]
+* improved setting/default of `$options['bypass_background_processing']`
 * improved setting/default of `$options['branch_switch']`
 
 #### 12.1.2 / 2023-02-08

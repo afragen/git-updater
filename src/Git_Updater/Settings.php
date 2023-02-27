@@ -121,7 +121,7 @@ class Settings {
 			);
 		}
 
-		if ( isset( self::$options['bypass_background_processing'] ) ) {
+		if ( ! empty( self::$options['bypass_background_processing'] ) ) {
 			add_filter( 'gu_disable_wpcron', '__return_true' );
 		}
 
