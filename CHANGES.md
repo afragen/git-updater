@@ -1,4 +1,5 @@
 #### [unreleased]
+* improved setting/default of `$options['branch_switch']`
 
 #### 12.1.2 / 2023-02-08
 * fix for webhook updating issue if `$branches` not defined, thanks @awunsch

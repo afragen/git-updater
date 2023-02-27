@@ -361,10 +361,6 @@ class Base {
 	 * @param string $type (plugin|theme).
 	 */
 	protected function set_defaults( $type ) {
-		if ( ! isset( self::$options['branch_switch'] ) ) {
-			self::$options['branch_switch'] = null;
-		}
-
 		if ( ! isset( $this->$type->slug ) ) {
 			$this->$type       = new \stdClass();
 			$this->$type->slug = null;
