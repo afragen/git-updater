@@ -172,7 +172,6 @@ class Settings {
 	private function settings_sub_tabs() {
 		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
 		$gits       = $this->get_running_git_servers();
-		$gits       = array_merge( [ 'authentication' ], $gits );
 		$git_subtab = [];
 		$gu_subtabs = [];
 
