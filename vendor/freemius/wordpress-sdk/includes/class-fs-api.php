@@ -189,12 +189,14 @@
 		 * @param string $path
 		 * @param string $method
 		 * @param array  $params
-		 * @param bool   $retry Is in retry or first call attempt.
+		 * @param bool   $in_retry Is in retry or first call attempt.
 		 *
 		 * @return array|mixed|string|void
 		 */
-		private function _call( $path, $method = 'GET', $params = array(), $retry = false ) {
+		private function _call( $path, $method = 'GET', $params = array(), $in_retry = false ) {
             $this->_logger->entrance( $method . ':' . $path );
+
+            $force_http = ( ! $in_retry && self::$_options->get_option( 'api_force_http', false ) );
 
             if ( self::is_temporary_down() ) {
                 $result = $this->get_temporary_unavailable_error();
@@ -224,12 +226,15 @@
 
                 $result = $this->_api->Api( $path, $method, $params );
 
-                if ( null !== $result &&
-                     isset( $result->error ) &&
-                     isset( $result->error->code ) &&
-                     'request_expired' === $result->error->code
+                if (
+                    ! $in_retry &&
+                    null !== $result &&
+                    isset( $result->error ) &&
+                    isset( $result->error->code )
                 ) {
-                    if ( ! $retry ) {
+                    $retry = false;
+
+                    if ( 'request_expired' === $result->error->code ) {
                         $diff = isset( $result->error->timestamp ) ?
                             ( time() - strtotime( $result->error->timestamp ) ) :
                             false;
@@ -237,15 +242,35 @@
                         // Try to sync clock diff.
                         if ( false !== $this->_sync_clock_diff( $diff ) ) {
                             // Retry call with new synced clock.
-                            return $this->_call( $path, $method, $params, true );
+                            $retry = true;
                         }
+                    } else if (
+                        Freemius_Api_WordPress::IsHttps() &&
+                        FS_Api::is_ssl_error_response( $result )
+                    ) {
+                        $force_http = true;
+                        $retry      = true;
+                    }
+
+                    if ( $retry ) {
+                        if ( $force_http ) {
+                            $this->toggle_force_http( true );
+                        }
+
+                        $result = $this->_call( $path, $method, $params, true );
                     }
                 }
             }
 
-            if ( $this->_logger->is_on() && self::is_api_error( $result ) ) {
-                // Log API errors.
-                $this->_logger->api_error( $result );
+            if ( self::is_api_error( $result ) ) {
+                if ( $this->_logger->is_on() ) {
+                    // Log API errors.
+                    $this->_logger->api_error( $result );
+                }
+
+                if ( $force_http ) {
+                    $this->toggle_force_http( false );
+                }
             }
 
             return $result;
@@ -337,6 +362,25 @@
 			return $cached_result;
 		}
 
+        /**
+         * @todo Remove this method after migrating Freemius::safe_remote_post() to FS_Api::call().
+         *
+         * @author Leo Fajardo (@leorw)
+         * @since 2.5.4
+         *
+         * @param string $url
+         * @param array  $remote_args
+         *
+         * @return mixed
+         */
+        static function remote_request( $url, $remote_args ) {
+            if ( ! class_exists( 'Freemius_Api_WordPress' ) ) {
+                require_once WP_FS__DIR_SDK . '/FreemiusWordPress.php';
+            }
+
+            return Freemius_Api_WordPress::RemoteRequest( $url, $remote_args );
+        }
+
 		/**
 		 * Check if there's a cached version of the API request.
 		 *
@@ -407,50 +451,37 @@
 			return strtolower( $method . ':' . $canonized ) . ( ! empty( $params ) ? '#' . md5( json_encode( $params ) ) : '' );
 		}
 
-		/**
-		 * Test API connectivity.
-		 *
-		 * @author Vova Feldman (@svovaf)
-		 * @since  1.0.9 If fails, try to fallback to HTTP.
-		 * @since  1.1.6 Added a 5-min caching mechanism, to prevent from overloading the server if the API if
-		 *         temporary down.
-		 *
-		 * @return bool True if successful connectivity to the API.
-		 */
-		static function test() {
-			self::_init();
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.5.4
+         *
+         * @param bool $is_http
+         */
+        private function toggle_force_http( $is_http ) {
+            self::$_options->set_option( 'api_force_http', $is_http, true );
 
-			$cache_key = 'ping_test';
+            if ( $is_http ) {
+                Freemius_Api_WordPress::SetHttp();
+            } else {
+                Freemius_Api_WordPress::SetHttps();
+            }
+        }
 
-			$test = self::$_cache->get_valid( $cache_key, null );
-
-			if ( is_null( $test ) ) {
-				$test = Freemius_Api_WordPress::Test();
-
-				if ( false === $test && Freemius_Api_WordPress::IsHttps() ) {
-					// Fallback to HTTP, since HTTPS fails.
-					Freemius_Api_WordPress::SetHttp();
-
-					self::$_options->set_option( 'api_force_http', true, true );
-
-					$test = Freemius_Api_WordPress::Test();
-
-					if ( false === $test ) {
-						/**
-						 * API connectivity test fail also in HTTP request, therefore,
-						 * fallback to HTTPS to keep connection secure.
-						 *
-						 * @since 1.1.6
-						 */
-						self::$_options->set_option( 'api_force_http', false, true );
-					}
-				}
-
-				self::$_cache->set( $cache_key, $test, WP_FS__TIME_5_MIN_IN_SEC );
-			}
-
-			return $test;
-		}
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.5.4
+         *
+         * @param mixed $response
+         *
+         * @return bool
+         */
+        static function is_blocked( $response ) {
+            return (
+                self::is_api_error_object( $response, true ) &&
+                isset( $response->error->code ) &&
+                'api_blocked' === $response->error->code
+            );
+        }
 
 		/**
 		 * Check if API is temporary down.
@@ -486,56 +517,6 @@
 		}
 
 		/**
-		 * Ping API for connectivity test, and return result object.
-		 *
-		 * @author   Vova Feldman (@svovaf)
-		 * @since    1.0.9
-		 *
-		 * @param null|string $unique_anonymous_id
-		 * @param array       $params
-		 *
-		 * @return object
-		 */
-		function ping( $unique_anonymous_id = null, $params = array() ) {
-			$this->_logger->entrance();
-
-			if ( self::is_temporary_down() ) {
-				return $this->get_temporary_unavailable_error();
-			}
-
-			$pong = is_null( $unique_anonymous_id ) ?
-				Freemius_Api_WordPress::Ping() :
-				$this->_call( 'ping.json?' . http_build_query( array_merge(
-						array( 'uid' => $unique_anonymous_id ),
-						$params
-					) ) );
-
-			if ( $this->is_valid_ping( $pong ) ) {
-				return $pong;
-			}
-
-			if ( self::should_try_with_http( $pong ) ) {
-				// Fallback to HTTP, since HTTPS fails.
-				Freemius_Api_WordPress::SetHttp();
-
-				self::$_options->set_option( 'api_force_http', true, true );
-
-				$pong = is_null( $unique_anonymous_id ) ?
-					Freemius_Api_WordPress::Ping() :
-					$this->_call( 'ping.json?' . http_build_query( array_merge(
-							array( 'uid' => $unique_anonymous_id ),
-							$params
-						) ) );
-
-				if ( ! $this->is_valid_ping( $pong ) ) {
-					self::$_options->set_option( 'api_force_http', false, true );
-				}
-			}
-
-			return $pong;
-		}
-
-		/**
 		 * Check if based on the API result we should try
 		 * to re-run the same request with HTTP instead of HTTPS.
 		 *
@@ -564,20 +545,6 @@
 
 		}
 
-		/**
-		 * Check if valid ping request result.
-		 *
-		 * @author Vova Feldman (@svovaf)
-		 * @since  1.1.1
-		 *
-		 * @param mixed $pong
-		 *
-		 * @return bool
-		 */
-		function is_valid_ping( $pong ) {
-			return Freemius_Api_WordPress::Test( $pong );
-		}
-
 		function get_url( $path = '' ) {
 			return Freemius_Api_WordPress::GetUrl( $path, $this->_api->IsSandbox() );
 		}
@@ -594,6 +561,14 @@
 			self::$_cache = FS_Cache_Manager::get_manager( WP_FS__API_CACHE_OPTION_NAME );
 			self::$_cache->clear();
 		}
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since  2.5.4
+         */
+        static function clear_force_http_flag() {
+            self::$_options->unset_option( 'api_force_http' );
+        }
 
 		#----------------------------------------------------------------------------------
 		#region Error Handling
@@ -617,14 +592,52 @@
          * @since  2.0.0
          *
          * @param mixed $result
+         * @param bool  $ignore_message
          *
          * @return bool Is API result contains an error.
          */
-        static function is_api_error_object( $result ) {
+        static function is_api_error_object( $result, $ignore_message = false ) {
             return (
                 is_object( $result ) &&
                 isset( $result->error ) &&
-                isset( $result->error->message )
+                ( $ignore_message || isset( $result->error->message ) )
+            );
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.5.4
+         *
+         * @param WP_Error|object|string $response
+         *
+         * @return bool
+         */
+        static function is_ssl_error_response( $response ) {
+            $http_error = null;
+
+            if ( $response instanceof WP_Error ) {
+                if (
+                    isset( $response->errors ) &&
+                    isset( $response->errors['http_request_failed'] )
+                ) {
+                    $http_error = strtolower( $response->errors['http_request_failed'][0] );
+                }
+            } else if (
+                self::is_api_error_object( $response ) &&
+                ! empty( $response->error->message )
+            ) {
+                $http_error = $response->error->message;
+            }
+
+            return (
+                ! empty( $http_error ) &&
+                (
+                    false !== strpos( $http_error, 'curl error 35' ) ||
+                    (
+                        false === strpos( $http_error, '</html>' ) &&
+                        false !== strpos( $http_error, 'ssl' )
+                    )
+                )
             );
         }
 
