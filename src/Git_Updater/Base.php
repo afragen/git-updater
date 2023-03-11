@@ -220,16 +220,20 @@ class Base {
 		 *
 		 * @since 10.0.0
 		 *
-		 * @return null|array
+		 * @return array
 		 */
-		$config = apply_filters( 'gu_set_options', null );
+		$config = apply_filters( 'gu_set_options', [] );
 
 		/**
 		 * Filter the plugin options.
 		 *
 		 * @return null|array
 		 */
-		$config = null === $config ? apply_filters_deprecated( 'github_updater_set_options', [ null ], '6.1.0', 'gu_set_options' ) : $config;
+		$config = empty( $config ) ? apply_filters_deprecated( 'github_updater_set_options', [ [] ], '6.1.0', 'gu_set_options' ) : $config;
+
+		foreach ( array_keys( self::$git_servers ) as $git ) {
+			unset( $config[ "{$git}_access_token" ], $config[ "{$git}_enterprise_token" ] );
+		}
 
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
