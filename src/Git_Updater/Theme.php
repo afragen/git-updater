@@ -590,12 +590,13 @@ class Theme {
 			];
 			if ( property_exists( $theme, 'remote_version' ) && $theme->remote_version ) {
 				$response_api_checked = [
-					'new_version'  => $theme->remote_version,
-					'package'      => $theme->download_link,
-					'tested'       => $theme->tested,
-					'requires'     => $theme->requires,
-					'requires_php' => $theme->requires_php,
-					'branches'     => array_keys( $theme->branches ),
+					'new_version'    => $theme->remote_version,
+					'package'        => $theme->download_link,
+					'tested'         => $theme->tested,
+					'requires'       => $theme->requires,
+					'requires_php'   => $theme->requires_php,
+					'branches'       => array_keys( $theme->branches ),
+					'upgrade_notice' => isset( $theme->upgrade_notice ) ? implode( ' ', $theme->upgrade_notice ) : null,
 				];
 				$response             = array_merge( $response, $response_api_checked );
 			}

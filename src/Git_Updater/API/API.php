@@ -545,11 +545,16 @@ class API {
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
-		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
-		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;
-		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : null;
-		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : null;
-		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : null;
+		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : '';
+		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : '';
+		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : '';
+		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : '';
+		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : [];
+		if ( empty( $readme['upgrade_notice'] ) ) {
+			unset( $readme['upgrade_notice'] );
+		} else {
+			$this->type->upgrade_notice = $readme['upgrade_notice'];
+		}
 
 		return true;
 	}
