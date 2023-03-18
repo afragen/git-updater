@@ -49,10 +49,7 @@
   "autoload": {
     "psr-4": {
       "Fragen\\Git_Updater\\": "src/Git_Updater/"
-    },
-    "files": [
-      "src/Git_Updater/Shim.php"
-    ]
+    }
   },
   "scripts": {
     "post-update-cmd": [

@@ -93,6 +93,7 @@ class Bootstrap {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
+		require_once __DIR__ . '/Shim.php';
 		( new GU_Freemius() )->init();
 		( new REST_API() )->load_hooks();
 		( new Additions_Bootstrap( $this->file ) )->run();
