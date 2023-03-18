@@ -82,7 +82,7 @@ class Repo_List_Table extends \WP_List_Table {
 			[
 				'singular' => 'slug',     // singular name of the listed records.
 				'plural'   => 'slugs',    // plural name of the listed records.
-				'ajax'     => false,        // does this table support ajax?
+				'ajax'     => false,      // does this table support ajax?
 			]
 		);
 	}

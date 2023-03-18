@@ -28,6 +28,10 @@
         <severity>5</severity>
     </rule>
 
+    <rule ref="Squiz.PHP.CommentedOutCode">
+        <exclude name="Squiz.PHP.CommentedOutCode.Found"/>
+    </rule>
+
     <!-- Use short arrays -->
     <rule ref="Generic.Arrays">
         <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>

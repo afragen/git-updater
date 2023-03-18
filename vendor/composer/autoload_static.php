@@ -6,10 +6,6 @@ namespace Composer\Autoload;
 
 class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
 {
-    public static $files = array (
-        'f1ec494b6996a8b9d9e80ad0c590bdf0' => __DIR__ . '/../..' . '/src/Git_Updater/Shim.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
         'F' => 
         array (
