@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0"
+                "reference": "011f7eb2fd66a3c28ee82503fa2f7ae7cd9e4288"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
-                "reference": "be8e3c3b3a53ba30db9f77f5b3bcf2d5e58ed9c0",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/011f7eb2fd66a3c28ee82503fa2f7ae7cd9e4288",
+                "reference": "011f7eb2fd66a3c28ee82503fa2f7ae7cd9e4288",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "issues": "https://github.com/afragen/singleton/issues",
                 "source": "https://github.com/afragen/singleton/tree/master"
             },
-            "time": "2020-12-24T03:45:00+00:00"
+            "time": "2023-03-19T16:43:34+00:00"
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",

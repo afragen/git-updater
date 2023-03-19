@@ -1,7 +1,7 @@
 {
   "name": "afragen/singleton",
   "description": "A singleton static proxy generator.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "library",
   "keywords": [
     "wordpress",

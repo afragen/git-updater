@@ -7,6 +7,7 @@
 
     <!-- Exclude these -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
 
     <rule ref="WordPress-Core">

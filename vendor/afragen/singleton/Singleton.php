@@ -14,7 +14,7 @@ namespace Fragen;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	return;
 }
 
 if ( ! class_exists( 'Fragen\\Singleton' ) ) {
@@ -42,6 +42,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 
 			if ( null === $instance || ! isset( $instance[ $class ] ) ) {
 				$instance[ $class ] = new $class( $options );
+				$instance[$class]->caller = new \stdClass();
 			}
 
 			// Add calling object.
