@@ -24,6 +24,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 	 * A static proxy for creating Singletons from passed class names.
 	 *
 	 */
+	#[AllowDynamicProperties]
 	final class Singleton {
 		/**
 		 * Get instance of class.
@@ -42,7 +43,6 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 
 			if ( null === $instance || ! isset( $instance[ $class ] ) ) {
 				$instance[ $class ] = new $class( $options );
-				$instance[$class]->caller = new \stdClass();
 			}
 
 			// Add calling object.
