@@ -349,10 +349,9 @@ class Base {
 			$language_pack->run();
 		}
 
+		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'];
 		// Return data if being called from Git Updater REST API.
-		if ( class_exists( 'Fragen\Git_Updater\REST\REST_API' )
-			&& $this->caller instanceof \Fragen\Git_Updater\REST\REST_API
-		) {
+		if ( 'Fragen\Git_Updater\REST\REST_API' === $caller ) {
 			return $repo;
 		}
 
