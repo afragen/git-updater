@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '7ad1ce92d14c9ca493a863f180e510437b10eb13',
+        'reference' => '34ec95b78eec4c3c0a1c16e66ca0fe3e017053e2',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '7ad1ce92d14c9ca493a863f180e510437b10eb13',
+            'reference' => '34ec95b78eec4c3c0a1c16e66ca0fe3e017053e2',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'afragen/singleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '5a5f348e798149d342b2a3ccdadec75448214d41',
+            'reference' => '7bc443172710d85c45dd29196af7e2309d64d941',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/singleton',
             'aliases' => array(

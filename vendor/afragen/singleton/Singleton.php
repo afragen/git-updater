@@ -22,15 +22,14 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 	 * Class Singleton
 	 *
 	 * A static proxy for creating Singletons from passed class names.
-	 *
 	 */
 	final class Singleton {
 		/**
 		 * Get instance of class.
 		 *
-		 * @param string               $class_name
+		 * @param string               $class_name Class name.
 		 * @param object               $caller     Originating object.
-		 * @param null|array|\stdClass $options
+		 * @param null|array|\stdClass $options    Options for class constructor.
 		 *
 		 * @return \stdClass $instance[ $class ]
 		 */
@@ -50,8 +49,10 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		/**
 		 * Determine correct class name with namespace and return.
 		 *
-		 * @param string $class_name
-		 * @param string $class
+		 * @param string $class_name Class name.
+		 * @param string $class      Calling class name.
+		 *
+		 * @throws \Exception Undefinded class name.
 		 *
 		 * @return string Namespaced class name.
 		 */
@@ -70,7 +71,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			foreach ( $classes as $namespace ) {
 				$namespaced_class = $namespace . '\\' . $class_name;
 				if ( class_exists( $namespaced_class ) ) {
-					return $namespaced_class;
+					return ltrim( $namespaced_class, '\\' );
 				}
 			}
 
@@ -80,6 +81,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 				$message = "PHP Fatal error: {$e->getMessage()}\nPHP Stack trace:\n";
 				$trace   = $e->getTraceAsString();
 				error_log( $message . $trace );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				die( "<pre><strong>{$message}</strong>{$trace}</pre>" );
 			}
 		}
@@ -87,7 +89,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		/**
 		 * Get ReflectionClass of passed class name.
 		 *
-		 * @param string $class
+		 * @param string $class Class name.
 		 *
 		 * @return \ReflectionClass $reflection
 		 */
@@ -95,6 +97,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			try {
 				$reflection = new \ReflectionClass( $class );
 			} catch ( \ReflectionException $Exception ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				die( '<table>' . $Exception->xdebug_message . '</table>' );
 			}
 
