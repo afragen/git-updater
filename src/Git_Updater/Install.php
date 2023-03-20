@@ -181,7 +181,7 @@ class Install {
 			 * Check for GitHub Self-Hosted.
 			 */
 			if ( 'github' === self::$install['git_updater_api'] ) {
-				self::$install = Singleton::get_instance( 'Fragen\Git_Updater\API\GitHub_API', $this, new \stdClass() )->remote_install( $headers, self::$install );
+				self::$install = Singleton::get_instance( 'Fragen\Git_Updater\API\GitHub_API', $this )->remote_install( $headers, self::$install );
 			}
 
 			/**
