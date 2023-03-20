@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "7bc443172710d85c45dd29196af7e2309d64d941"
+                "reference": "38741c9a1ffe9d62292094a4dd493268ed650582"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/7bc443172710d85c45dd29196af7e2309d64d941",
-                "reference": "7bc443172710d85c45dd29196af7e2309d64d941",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/38741c9a1ffe9d62292094a4dd493268ed650582",
+                "reference": "38741c9a1ffe9d62292094a4dd493268ed650582",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "issues": "https://github.com/afragen/singleton/issues",
                 "source": "https://github.com/afragen/singleton/tree/master"
             },
-            "time": "2023-03-20T05:59:24+00:00"
+            "time": "2023-03-20T15:47:39+00:00"
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
@@ -254,16 +254,16 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.4",
+            "version": "2.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "612248cf7bf743999905684325264b172c410b8c"
+                "reference": "72c4f4ec119019976fe3326421f93cb089a8a527"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/612248cf7bf743999905684325264b172c410b8c",
-                "reference": "612248cf7bf743999905684325264b172c410b8c",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/72c4f4ec119019976fe3326421f93cb089a8a527",
+                "reference": "72c4f4ec119019976fe3326421f93cb089a8a527",
                 "shasum": ""
             },
             "require": {
@@ -287,9 +287,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.4"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.5"
             },
-            "time": "2023-03-05T11:49:24+00:00"
+            "time": "2023-03-20T07:22:28+00:00"
         }
     ],
     "packages-dev": [

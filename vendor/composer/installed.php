@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '34ec95b78eec4c3c0a1c16e66ca0fe3e017053e2',
+        'reference' => '0d3519b617a16743b93d962230ea6b9d0922468c',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '34ec95b78eec4c3c0a1c16e66ca0fe3e017053e2',
+            'reference' => '0d3519b617a16743b93d962230ea6b9d0922468c',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'afragen/singleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '7bc443172710d85c45dd29196af7e2309d64d941',
+            'reference' => '38741c9a1ffe9d62292094a4dd493268ed650582',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/singleton',
             'aliases' => array(
@@ -78,9 +78,9 @@
             'dev_requirement' => false,
         ),
         'freemius/wordpress-sdk' => array(
-            'pretty_version' => '2.5.4',
-            'version' => '2.5.4.0',
-            'reference' => '612248cf7bf743999905684325264b172c410b8c',
+            'pretty_version' => '2.5.5',
+            'version' => '2.5.5.0',
+            'reference' => '72c4f4ec119019976fe3326421f93cb089a8a527',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),

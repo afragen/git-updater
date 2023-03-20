@@ -27,13 +27,14 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		/**
 		 * Get instance of class.
 		 *
-		 * @param string               $class_name Class name.
-		 * @param object               $caller     Originating object.
-		 * @param null|array|\stdClass $options    Options for class constructor.
+		 * @param string            $class_name Class name.
+		 * @param object            $caller     Originating object.
+		 * @param null|array|object $options    Options for class constructor.
+		 *                                         Optional.
 		 *
-		 * @return \stdClass $instance[ $class ]
+		 * @return object $instance[ $class ]
 		 */
-		public static function get_instance( $class_name, $caller = null, $options = null ) {
+		public static function get_instance( $class_name, $caller, $options = null ) {
 			static $instance = null;
 
 			$class = get_class( $caller );

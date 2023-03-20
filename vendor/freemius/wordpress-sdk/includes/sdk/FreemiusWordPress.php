@@ -574,6 +574,21 @@
 		#region Connectivity Test
 		#----------------------------------------------------------------------------------
 
+        /**
+         * This method exists only for backward compatibility to prevent a fatal error from happening when called from an outdated piece of code.
+         *
+         * @param mixed $pPong
+         *
+         * @return bool
+         */
+        public static function Test( $pPong = null ) {
+            return (
+                is_object( $pPong ) &&
+                isset( $pPong->api ) &&
+                'pong' === $pPong->api
+            );
+        }
+
 		/**
 		 * Ping API to test connectivity.
 		 *
