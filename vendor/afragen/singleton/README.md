@@ -13,9 +13,10 @@ When using this Singleton class in your project you will create an array of clas
 ## Usage
 
 ```php
-@param string               $class_name
-@param object               $caller     Originating object.
-@param null|array|\stdClass $options
+@param string            $class_name Class name.
+@param object            $caller     Originating object.
+@param null|array|object $options    Options for class constructor.
+                                     Optional.
 
 Singleton::get_instance( $class_name, $calling_class, $options );
 ```
@@ -23,8 +24,6 @@ Singleton::get_instance( $class_name, $calling_class, $options );
 This will usually be called as follows.
 
 `Singleton::get_instance( 'MyClass', $this );`
-
-The class object created will also pass the calling object as `$instance[$class_name]->caller`.
 
 I do my best to automatically determine the namespace of the class. If the class is in a subfolder of `src` it will need to be designated in the call as follows.
 

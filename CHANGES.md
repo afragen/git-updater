@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.1.3 / 2023-03-20
 * improved setting/default of `$options['bypass_background_processing']`
 * improved setting/default of `$options['branch_switch']`
 * display upgrade notice on `update-core.php`
