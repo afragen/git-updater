@@ -7,18 +7,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "b37737a4b490e8b83ddb2eb38b7604ba41e6cb8f"
+                "reference": "5a5f348e798149d342b2a3ccdadec75448214d41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/b37737a4b490e8b83ddb2eb38b7604ba41e6cb8f",
-                "reference": "b37737a4b490e8b83ddb2eb38b7604ba41e6cb8f",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/5a5f348e798149d342b2a3ccdadec75448214d41",
+                "reference": "5a5f348e798149d342b2a3ccdadec75448214d41",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4"
+                "php": ">=5.6.5"
             },
-            "time": "2023-03-19T17:26:35+00:00",
+            "time": "2023-03-20T04:47:11+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
