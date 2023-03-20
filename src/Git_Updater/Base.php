@@ -88,6 +88,20 @@ class Base {
 	protected $config;
 
 	/**
+	 * Holds plugin data.
+	 *
+	 * @var \stdClass
+	 */
+	protected $plugin;
+
+	/**
+	 * Holds theme data.
+	 *
+	 * @var \stdClass
+	 */
+	protected $theme;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
