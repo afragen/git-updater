@@ -349,6 +349,7 @@ class Base {
 			$language_pack->run();
 		}
 
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'];
 		// Return data if being called from Git Updater REST API.
 		if ( 'Fragen\Git_Updater\REST\REST_API' === $caller ) {
