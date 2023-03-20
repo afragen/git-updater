@@ -721,12 +721,20 @@ trait GU_Trait {
 			}
 		);
 
+		if ( ! isset( $options['branch_switch'] ) ) {
+			$options['branch_switch'] = '0';
+		}
+
+		if ( ! isset( $options['bypass_background_processing'] ) ) {
+			$options['bypass_background_processing'] = '0';
+		}
+
 		// Check if filter set elsewhere.
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
-		if ( ! isset( $options['bypass_background_processing'] ) && $disable_wp_cron ) {
-			$options['bypass_background_processing'] = '-1';
+		if ( $disable_wp_cron ) {
+			$options['bypass_background_processing'] = '1';
 		}
 
 		return $options;

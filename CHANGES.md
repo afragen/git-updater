@@ -1,5 +1,11 @@
 #### [unreleased]
 
+#### 12.1.3 / 2023-03-20
+* improved setting/default of `$options['bypass_background_processing']`
+* improved setting/default of `$options['branch_switch']`
+* display upgrade notice on `update-core.php`
+* composer update `afragen/singleton` for PHP 8.2 compat
+
 #### 12.1.2 / 2023-02-08
 * fix for webhook updating issue if `$branches` not defined, thanks @awunsch
 

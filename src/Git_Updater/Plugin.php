@@ -412,12 +412,13 @@ class Plugin {
 				];
 				if ( property_exists( $plugin, 'remote_version' ) && $plugin->remote_version ) {
 					$response_api_checked = [
-						'new_version'  => $plugin->remote_version,
-						'package'      => $plugin->download_link,
-						'tested'       => $plugin->tested,
-						'requires'     => $plugin->requires,
-						'requires_php' => $plugin->requires_php,
-						'branches'     => array_keys( $plugin->branches ),
+						'new_version'    => $plugin->remote_version,
+						'package'        => $plugin->download_link,
+						'tested'         => $plugin->tested,
+						'requires'       => $plugin->requires,
+						'requires_php'   => $plugin->requires_php,
+						'branches'       => array_keys( $plugin->branches ),
+						'upgrade_notice' => isset( $plugin->upgrade_notice ) ? implode( ' ', $plugin->upgrade_notice ) : null,
 					];
 					$response             = array_merge( $response, $response_api_checked );
 				}

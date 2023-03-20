@@ -89,18 +89,6 @@
          * @author Leo Fajardo (@leorw)
          * @since  2.1.0
          *
-         * @return bool|null
-         */
-        public function is_required() {
-            return isset( $this->_data['required'] ) ?
-                $this->_data['required'] :
-                null;
-        }
-
-        /**
-         * @author Leo Fajardo (@leorw)
-         * @since  2.1.0
-         *
          * @param bool $is_required
          */
         public function store_is_required( $is_required ) {

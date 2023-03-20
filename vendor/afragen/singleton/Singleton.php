@@ -14,7 +14,7 @@ namespace Fragen;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	return;
 }
 
 if ( ! class_exists( 'Fragen\\Singleton' ) ) {
@@ -22,19 +22,19 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 	 * Class Singleton
 	 *
 	 * A static proxy for creating Singletons from passed class names.
-	 *
 	 */
 	final class Singleton {
 		/**
 		 * Get instance of class.
 		 *
-		 * @param string               $class_name
-		 * @param object               $caller     Originating object.
-		 * @param null|array|\stdClass $options
+		 * @param string            $class_name Class name.
+		 * @param object            $caller     Originating object.
+		 * @param null|array|object $options    Options for class constructor.
+		 *                                         Optional.
 		 *
-		 * @return \stdClass $instance[ $class ]
+		 * @return object $instance[ $class ]
 		 */
-		public static function get_instance( $class_name, $caller = null, $options = null ) {
+		public static function get_instance( $class_name, $caller, $options = null ) {
 			static $instance = null;
 
 			$class = get_class( $caller );
@@ -44,17 +44,16 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 				$instance[ $class ] = new $class( $options );
 			}
 
-			// Add calling object.
-			$instance[ $class ]->caller = $caller;
-
 			return $instance[ $class ];
 		}
 
 		/**
 		 * Determine correct class name with namespace and return.
 		 *
-		 * @param string $class_name
-		 * @param string $class
+		 * @param string $class_name Class name.
+		 * @param string $class      Calling class name.
+		 *
+		 * @throws \Exception Undefinded class name.
 		 *
 		 * @return string Namespaced class name.
 		 */
@@ -73,7 +72,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			foreach ( $classes as $namespace ) {
 				$namespaced_class = $namespace . '\\' . $class_name;
 				if ( class_exists( $namespaced_class ) ) {
-					return $namespaced_class;
+					return ltrim( $namespaced_class, '\\' );
 				}
 			}
 
@@ -83,6 +82,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 				$message = "PHP Fatal error: {$e->getMessage()}\nPHP Stack trace:\n";
 				$trace   = $e->getTraceAsString();
 				error_log( $message . $trace );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				die( "<pre><strong>{$message}</strong>{$trace}</pre>" );
 			}
 		}
@@ -90,7 +90,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		/**
 		 * Get ReflectionClass of passed class name.
 		 *
-		 * @param string $class
+		 * @param string $class Class name.
 		 *
 		 * @return \ReflectionClass $reflection
 		 */
@@ -98,6 +98,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 			try {
 				$reflection = new \ReflectionClass( $class );
 			} catch ( \ReflectionException $Exception ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				die( '<table>' . $Exception->xdebug_message . '</table>' );
 			}
 

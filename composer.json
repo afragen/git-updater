@@ -36,13 +36,20 @@
     "afragen/wp-dependency-installer": "^4",
     "freemius/wordpress-sdk": "^2.5"
   },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+    "squizlabs/php_codesniffer": "3.6.0",
+    "wp-coding-standards/wpcs": "~2.3.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
   "autoload": {
     "psr-4": {
       "Fragen\\Git_Updater\\": "src/Git_Updater/"
-    },
-    "files": [
-      "src/Git_Updater/Shim.php"
-    ]
+    }
   },
   "scripts": {
     "post-update-cmd": [

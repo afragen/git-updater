@@ -121,7 +121,7 @@ class Settings {
 			);
 		}
 
-		if ( isset( self::$options['bypass_background_processing'] ) ) {
+		if ( ! empty( self::$options['bypass_background_processing'] ) ) {
 			add_filter( 'gu_disable_wpcron', '__return_true' );
 		}
 
@@ -172,7 +172,6 @@ class Settings {
 	private function settings_sub_tabs() {
 		$subtabs    = [ 'git_updater' => esc_html__( 'Git Updater', 'git-updater' ) ];
 		$gits       = $this->get_running_git_servers();
-		$gits       = array_merge( [ 'authentication' ], $gits );
 		$git_subtab = [];
 		$gu_subtabs = [];
 
@@ -217,7 +216,7 @@ class Settings {
 	 */
 	private function load_api_subtabs() {
 		$show_tabs = [ 'github' => 'GitHub' ];
-		foreach ( array_keys( static::$git_hosts )as $git ) {
+		foreach ( array_keys( static::$git_hosts ) as $git ) {
 			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
 				$show_tabs[ $git ] = static::$git_hosts[ $git ];
 			}

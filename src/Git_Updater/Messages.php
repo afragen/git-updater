@@ -248,12 +248,13 @@ class Messages {
 			);
 		}
 	}
+
 	/**
 	 * Generate information message to purchase.
 	 */
 	public function get_license() {
 		if ( ( ! gu_fs()->is_not_paying() )
-			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-5' )
+			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-3' )
 		) {
 			return;
 		}

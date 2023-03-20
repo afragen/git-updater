@@ -301,10 +301,6 @@ class Branch {
 		);
 		$rollback_url      = sprintf( '%s%s', $nonced_update_url, '&rollback=' );
 
-		if ( ! isset( self::$options['branch_switch'] ) ) {
-			return;
-		}
-
 		ob_start();
 		if ( '1' === self::$options['branch_switch'] ) {
 			printf(
