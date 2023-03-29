@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `freemius/wordpress-sdk`
 
 #### 12.1.3 / 2023-03-20
 * improved setting/default of `$options['bypass_background_processing']`

@@ -348,14 +348,17 @@
          * @param string $pUrl
          * @param array  $pWPRemoteArgs
          *
-         * @return mixed
+         * @return array|WP_Error The response array or a WP_Error on failure.
          */
         static function RemoteRequest( $pUrl, $pWPRemoteArgs ) {
             $response = wp_remote_request( $pUrl, $pWPRemoteArgs );
 
             if (
-                empty( $response['headers'] ) ||
-                empty( $response['headers']['x-api-server'] )
+                is_array( $response ) &&
+                (
+                    empty( $response['headers'] ) ||
+                    empty( $response['headers']['x-api-server'] )
+                )
             ) {
                 // API is considered blocked if the response doesn't include the `x-api-server` header. When there's no error but this header doesn't exist, the response is usually not in the expected form (e.g., cannot be JSON-decoded).
                 $response = new WP_Error( 'api_blocked', htmlentities( $response['body'] ) );
