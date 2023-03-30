@@ -1,7 +1,7 @@
 {
     "name": "afragen/wp-dismiss-notice",
     "description": "Library for time dismissible WordPress admin notices.",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "type": "library",
     "license": "MIT",
     "authors": [
