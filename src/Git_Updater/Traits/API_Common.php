@@ -65,8 +65,7 @@ trait API_Common {
 					break;
 				}
 			}
-			$response = is_string( $response ) ? $response : null;
-			$this->set_repo_cache( 'release_asset_response', $asset );
+			$response = is_string( $response ) ? $response : '';
 		}
 
 		/**
