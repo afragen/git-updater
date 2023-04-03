@@ -40,9 +40,6 @@ jobs:
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check PHP Version
-        run: php -v
-
       - name: Composer install
         run: composer install --optimize-autoloader --prefer-dist
 
@@ -51,6 +48,7 @@ jobs:
 
       - name: Environment versions
         run: |
+          php --version
           composer --version
           mysql --version
           phpunit --version
