@@ -52,7 +52,6 @@ jobs:
       - name: Environment versions
         run: |
           composer --version
-          php --version
           mysql --version
           phpunit --version
 
