@@ -15,46 +15,48 @@ on:
 
 jobs:
   run:
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest]
-        php-versions: ['7.3', '7.4', '8.0', '8.1', '8.2']
-        phpunit-versions: ['9.6.6']
+        php-versions: ["7.3", "7.4", "8.0", "8.1", "8.2"]
+        phpunit-versions: ["9.6.6"]
         include:
-          - php-versions: '7.2'
-            phpunit-versions: '8.5.33'
-            operating-system: ubuntu-latest
+          - php-versions: "7.2"
+            phpunit-versions: "8.5.33"
 
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+    name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        coverage: none
-        extensions: mysql
-        tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
-      env:
-        COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+          extensions: mysql
+          tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Check PHP Version
-      run: php -v
+      - name: Check PHP Version
+        run: php -v
 
-    - name: Composer install
-      run: composer install --optimize-autoloader --prefer-dist
+      - name: Composer install
+        run: composer install --optimize-autoloader --prefer-dist
 
-    - name: Start Mysql
-      run: sudo service mysql start
+      - name: Setup Mysql
+        if: matrix.php-versions < '7.4'
+        run: docker run --rm --name=mysqld -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cakephp -p 3306:3306 -d mysql --default-authentication-plugin=mysql_native_password
 
-    - name: Install WP Tests
-      run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
+      - name: Start Mysql
+        run: sudo service mysql start
 
-    - name: phpunit tests
-      run: |
-        echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
-        /usr/local/bin/phpunit --config=phpunit.xml
+      - name: Install WP Tests
+        run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
+
+      - name: phpunit tests
+        run: |
+          echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
+          /usr/local/bin/phpunit --config=phpunit.xml
