@@ -49,7 +49,7 @@ jobs:
       - name: Start Mysql
         run: |
           sudo service mysql start
-          mysqladmin alter user 'root'@'localhost' identified with mysql_native_password by 'root';
+          mysql alter user 'root'@'localhost' identified with mysql_native_password by 'root';
           sudo service mysql stop
           sudo service mysql start
 
