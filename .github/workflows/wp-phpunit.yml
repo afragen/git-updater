@@ -47,11 +47,7 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql
-        run: |
-          sudo service mysql start
-          mysql alter user 'root'@'localhost' identified with mysql_native_password by 'root';
-          sudo service mysql stop
-          sudo service mysql start
+        run: sudo service mysql start
 
       - name: Environment versions
         run: |
