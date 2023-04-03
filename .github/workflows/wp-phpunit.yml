@@ -25,6 +25,7 @@ jobs:
         include:
           - php-versions: '7.2'
             phpunit-versions: '8.5.33'
+            operating-system: ubuntu-latest
 
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
