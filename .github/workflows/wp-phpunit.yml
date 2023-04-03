@@ -25,21 +25,21 @@ jobs:
         include:
           - php-versions: '7.2'
             phpunit-versions: '7.5.20'
-            operating-system: ubuntu-latest
+            operating-system: ubuntu-20.04
           - php-versions: '7.3'
             phpunit-versions: '9.5.20'
-            operating-system: ubuntu-latest
+            operating-system: ubuntu-20.04
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-versions }}
         coverage: none
-        extensions: mysqli
+        extensions: mysql
         tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
       env:
         COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
