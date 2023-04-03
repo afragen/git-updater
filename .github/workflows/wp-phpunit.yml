@@ -49,6 +49,13 @@ jobs:
       - name: Start Mysql
         run: sudo service mysql start
 
+      - name: Environment versions
+        run: |
+          composer --version
+          php --version
+          mysql --version
+          phpunit --version
+
       - name: Install WP Tests
         run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
 
