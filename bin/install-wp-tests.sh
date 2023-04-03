@@ -112,7 +112,7 @@ install_db() {
 	fi
 
 	# create database
-	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA --default-auth=mysql_native_password
+	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA --default-auth=caching_sha2_password
 }
 
 install_wp
