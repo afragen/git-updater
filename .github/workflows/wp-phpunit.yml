@@ -25,10 +25,10 @@ jobs:
         include:
           - php-versions: '7.2'
             phpunit-versions: '7.5.20'
-            operating-system: 'ubuntu-latest'
+            operating-system: ubuntu-latest
           - php-versions: '7.3'
             phpunit-versions: '9.5.20'
-            operating-system: 'ubuntu-latest'
+            operating-system: ubuntu-latest
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
     - name: Checkout
@@ -39,7 +39,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-versions }}
         coverage: none
-        extensions: mysql
+        extensions: mysqli
         tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
       env:
         COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
