@@ -50,7 +50,7 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql 8
-        if: matrix.php-versions > '7.4'
+        if: matrix.php-versions > '7.3'
         run: sudo service mysql start
 
       - name: Environment versions
