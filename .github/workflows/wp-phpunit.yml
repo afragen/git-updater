@@ -49,6 +49,7 @@ jobs:
           mysql --user=root --password=root --default-auth=caching_sha2_password
           sudo service mysql stop
           sudo service mysql start
+          mysqladmin variables
 
       - name: Environment versions
         run: |
