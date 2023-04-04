@@ -59,9 +59,7 @@ jobs:
           which php
           composer --version
           mysql --version
-          mysqladmin --version
           which mysql
-          which mysqladmin
           phpunit --version
           which phpunit
 
