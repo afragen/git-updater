@@ -30,6 +30,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup MySQL
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+            mysql-version: "5.7"
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
