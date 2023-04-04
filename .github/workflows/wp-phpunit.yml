@@ -49,7 +49,9 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql
-        run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
+        run: |
+          echo mysql -uroot -h127.0.0.1 -e 'SELECT version()'
+          sudo service mysql start
 
       - name: Environment versions
         run: |
