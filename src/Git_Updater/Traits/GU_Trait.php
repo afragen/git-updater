@@ -26,6 +26,13 @@ trait GU_Trait {
 	private $gu_plugin_name = 'git-updater/git-updater.php';
 
 	/**
+	 * Holds cached response.
+	 *
+	 * @var array
+	 */
+	private $response;
+
+	/**
 	 * Checks to see if a heartbeat is resulting in activity.
 	 *
 	 * @return bool
