@@ -44,13 +44,18 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql
-        run: sudo service mysql start
+        run: |
+          sudo service mysql start
+          mysql --default-auth=mysql_native_password -p
+          sudo service mysql restart
 
       - name: Environment versions
         run: |
           php --version
+          which php
           composer --version
           mysql --version
+          which mysql
           phpunit --version
           which phpunit
 
