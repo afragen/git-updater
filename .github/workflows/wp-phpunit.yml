@@ -49,10 +49,9 @@ jobs:
       - name: Composer install
         run: composer install --optimize-autoloader --prefer-dist
 
-      - name: Start Mysql
-        run: |
-          mysqladmin --user=root --password=root status
-          sudo service mysql start
+      - name: Start Mysql 8
+        if: matrix.php-versions > '7.4'
+        run: sudo service mysql start
 
       - name: Environment versions
         run: |
