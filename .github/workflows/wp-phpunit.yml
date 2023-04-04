@@ -51,7 +51,7 @@ jobs:
 
       - name: Start Mysql
         run: |
-          sudo service mysql status
+          mysqladmin -u root -p root status
           sudo service mysql start
 
       - name: Environment versions
