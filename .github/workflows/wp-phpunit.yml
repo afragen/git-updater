@@ -33,7 +33,7 @@ jobs:
       - name: Setup MySQL
         uses: shogo82148/actions-setup-mysql@v1
         with:
-            mysql-version: "5.7"
+          mysql-version: "5.7"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -49,7 +49,7 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql
-        run: sudo service mysql start
+        run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
 
       - name: Environment versions
         run: |
