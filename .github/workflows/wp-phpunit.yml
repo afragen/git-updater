@@ -46,7 +46,7 @@ jobs:
       - name: Start Mysql
         run: |
           sudo service mysql start
-          sudo mysql --default-auth=mysql_native_password
+          mysql --user=root --password root --default-auth=mysql_native_password
           sudo service mysql stop
           sudo service mysql start
 
