@@ -30,7 +30,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup MySQL
+      - name: Setup MySQL 5.7
+        if: matrix.php-versions > '7.3'
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: "5.7"
@@ -50,8 +51,7 @@ jobs:
 
       - name: Start Mysql
         run: |
-          echo mysql -uroot -hlocalhost -e 'SELECT 5.7'
-          echo sudo service mysql start
+          sudo service mysql start
 
       - name: Environment versions
         run: |
