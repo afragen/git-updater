@@ -60,4 +60,4 @@ jobs:
         run: |
           echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
           /usr/local/bin/phpunit --config=phpunit.xml
-          cat /tmp/wordpress/wp-config.php
+          cat /tmp/wordpress-tests-lib/wp-tests-config.php
