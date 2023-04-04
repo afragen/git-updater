@@ -49,12 +49,7 @@ jobs:
         run: composer install --optimize-autoloader --prefer-dist
 
       - name: Start Mysql
-        run: |
-          sudo service mysql start
-          mysql --user=root --password=root --default-auth=caching_sha2_password
-          sudo service mysql stop
-          sudo service mysql start
-          mysqladmin variables
+        run: sudo service mysql start
 
       - name: Environment versions
         run: |
