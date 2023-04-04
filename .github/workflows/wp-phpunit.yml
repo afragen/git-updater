@@ -46,7 +46,7 @@ jobs:
       - name: Start Mysql
         run: |
           sudo service mysql start
-          mysql --default-auth=mysql_native_password -p
+          mysqladmin --default-auth=mysql_native_password -p
           sudo service mysql restart
 
       - name: Environment versions
