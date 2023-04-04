@@ -55,7 +55,7 @@ jobs:
 
       - name: Start Mysql 5.7
         if: matrix.php-versions < '7.4'
-        run: mysql -uroot -hlocalhost -e 'SELECT version()'
+        run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
 
       - name: Environment versions
         run: |
