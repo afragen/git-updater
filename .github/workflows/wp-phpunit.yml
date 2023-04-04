@@ -51,7 +51,7 @@ jobs:
       - name: Start Mysql
         run: |
           echo mysql -uroot -hlocalhost -e 'SELECT 5.7'
-          sudo systemctl start mysql
+          echo sudo service mysql start
 
       - name: Environment versions
         run: |
