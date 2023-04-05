@@ -1,6 +1,7 @@
 # Based on https://github.com/wp-cli/scaffold-command/blob/f9bad3dd7224d5684d950d31c486df70905e386f/templates/plugin-github.mustache
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 # Thanks https://github.com/shivammathur
+# Thanks Alex Stine for rubber ducking and help figuring out MySQL 5.7
 name: WordPress Tests
 
 on:
