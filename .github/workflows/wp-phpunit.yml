@@ -35,9 +35,8 @@ jobs:
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: "5.7"
-          my-cnf: |
-            bind_address=localhost
-            root-password=root
+          my-cnf: bind_address=localhost
+          root-password: root
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
