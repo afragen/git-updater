@@ -162,16 +162,16 @@
         },
         {
             "name": "afragen/wp-dismiss-notice",
-            "version": "0.3.2",
+            "version": "0.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dismiss-notice.git",
-                "reference": "5a3dd3198c819a7e3df3062399f7c41548b5a8ab"
+                "reference": "606c0d5222ad223fb420bb33db947e592b213920"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/5a3dd3198c819a7e3df3062399f7c41548b5a8ab",
-                "reference": "5a3dd3198c819a7e3df3062399f7c41548b5a8ab",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/606c0d5222ad223fb420bb33db947e592b213920",
+                "reference": "606c0d5222ad223fb420bb33db947e592b213920",
                 "shasum": ""
             },
             "require": {
@@ -200,7 +200,7 @@
                 "issues": "https://github.com/afragen/wp-dismiss-notice/issues",
                 "source": "https://github.com/afragen/wp-dismiss-notice"
             },
-            "time": "2023-03-30T21:37:09+00:00"
+            "time": "2023-04-05T01:03:20+00:00"
         },
         {
             "name": "erusev/parsedown",

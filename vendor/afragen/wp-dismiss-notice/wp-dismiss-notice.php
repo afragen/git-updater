@@ -47,7 +47,7 @@ class WP_Dismiss_Notice {
 				set_transient( 'wp-dismiss-notice_jsurl', $response, WEEK_IN_SECONDS );
 			}
 		}
-		$js_url = ( 200 === $response )
+		$js_url = ( 200 === (int) $response )
 			? $plugin_js_url
 			: get_stylesheet_directory_uri() . $composer_js_path;
 

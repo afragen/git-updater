@@ -4,6 +4,7 @@
 * don't save unused data from `API_Common::parse_release_asset()`
 * update Freemius uninstall to use previous `uninstall.php` now renamed
 * more PHP 8.2 compatibility
+* composer update
 
 #### 12.1.3 / 2023-03-20
 * improved setting/default of `$options['bypass_background_processing']`
