@@ -27,12 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup MySQL 5.7
+      - name: Setup MySQL 8.0 for PHP < 7.4
         if: matrix.php-versions < '7.4'
         uses: shogo82148/actions-setup-mysql@v1
         with:
-          mysql-version: "5.7"
-          my-cnf: bind_address=127.0.0.1
+          mysql-version: "8.0"
+          my-cnf: |
+            bind_address=127.0.0.1
+            default-authentication-plugin=mysql_native_password
           root-password: root
 
       - name: Setup PHP
