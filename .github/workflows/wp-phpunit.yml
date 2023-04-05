@@ -35,7 +35,7 @@ jobs:
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: "5.7"
-          my-cnf: bind_address=localhost
+          my-cnf: bind_address=127.0.0.1
           root-password: root
 
       - name: Setup PHP
@@ -43,7 +43,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
-          extensions: mysql, mysqli, curl, tar
+          extensions: mysql, mysqli
           tools: composer, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,7 +51,7 @@ jobs:
       - name: Composer install
         run: composer install --optimize-autoloader --prefer-dist
 
-      - name: Start Mysql 8
+      - name: Start MySQL 8
         if: matrix.php-versions > '7.3'
         run: sudo service mysql start
 
@@ -67,7 +67,7 @@ jobs:
           ls -la /tmp/wordpress/
 
       - name: Install WP Tests
-        run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
 
       - name: PHPUnit tests
         run: |
