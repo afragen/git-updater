@@ -19,11 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["7.3", "7.4", "8.0", "8.1", "8.2"]
-        phpunit-versions: ["9.6.6"]
-        include:
-          - php-versions: "7.2"
-            phpunit-versions: "8.5.33"
+        php-versions: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2"]
 
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
@@ -44,7 +40,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: none
           extensions: mysql, mysqli
-          tools: composer, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
+          tools: composer, wp-cli, phpunit-polyfills, phpunit
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -57,16 +53,6 @@ jobs:
 
       - name: Install WP Tests
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
-
-      - name: Environment versions
-        run: |
-          php --version
-          which php
-          composer --version
-          mysql --version
-          which mysql
-          phpunit --version
-          which phpunit
 
       - name: PHPUnit tests
         run: |
