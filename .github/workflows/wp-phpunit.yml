@@ -44,7 +44,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           coverage: none
           extensions: mysql, mysqli
-          tools: composer, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
+          tools: composer, curl, tar, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
