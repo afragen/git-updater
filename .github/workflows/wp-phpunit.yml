@@ -55,6 +55,9 @@ jobs:
         if: matrix.php-versions > '7.3'
         run: sudo service mysql start
 
+      - name: Install WP Tests
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
+
       - name: Environment versions
         run: |
           php --version
@@ -65,9 +68,6 @@ jobs:
           phpunit --version
           which phpunit
           ls -la /tmp/wordpress/
-
-      - name: Install WP Tests
-        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
 
       - name: PHPUnit tests
         run: |
