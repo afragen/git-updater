@@ -2,6 +2,7 @@
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 # Thanks https://github.com/shivammathur
 # Thanks Alex Stine for rubber ducking and help figuring out MySQL 5.7
+# Thanks @desroj for idea to just use MySQL 8.0 with correct authentication method.
 name: WordPress Tests
 
 on:
@@ -27,8 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup MySQL 8.0 for PHP < 7.4
-        if: matrix.php-versions < '7.4'
+      - name: Setup MySQL 8.0 with mysql_native_password
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: "8.0"
@@ -49,10 +49,6 @@ jobs:
 
       - name: Composer install
         run: composer install --optimize-autoloader --prefer-dist
-
-      - name: Start MySQL 8
-        if: matrix.php-versions > '7.3'
-        run: sudo service mysql start
 
       - name: Install WP Tests
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
