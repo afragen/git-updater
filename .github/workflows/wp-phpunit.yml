@@ -63,7 +63,7 @@ jobs:
           mysql --version
           which mysql
           phpunit --version
-          which
+          which phpunit
           ls -la /tmp/wordpress/
 
       - name: Install WP Tests
