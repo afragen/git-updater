@@ -67,7 +67,6 @@ jobs:
           which mysql
           phpunit --version
           which phpunit
-          ls -la /tmp/wordpress/
 
       - name: PHPUnit tests
         run: |
