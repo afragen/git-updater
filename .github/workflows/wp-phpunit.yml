@@ -43,8 +43,8 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
-          extensions: mysql, mysqli
-          tools: composer, curl, tar, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
+          extensions: mysql, mysqli, curl, tar
+          tools: composer, wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -63,7 +63,8 @@ jobs:
           mysql --version
           which mysql
           phpunit --version
-          which phpunit
+          which
+          ls -la /tmp/wordpress/
 
       - name: Install WP Tests
         run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
