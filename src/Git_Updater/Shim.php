@@ -181,7 +181,7 @@ if ( ! function_exists( 'str_contains' ) ) {
 	 * @param string $needle   The substring to search for in the haystack.
 	 * @return bool True if `$needle` is in `$haystack`, otherwise false.
 	 */
-	function str_contains( $haystack, $needle ) {
+	function str_contains( $haystack = '', $needle = '' ) {
 		return ( '' === $needle || false !== strpos( $haystack, $needle ) );
 	}
 }
@@ -199,7 +199,7 @@ if ( ! function_exists( 'str_starts_with' ) ) {
 	 * @param string $needle   The substring to search for in the `$haystack`.
 	 * @return bool True if `$haystack` starts with `$needle`, otherwise false.
 	 */
-	function str_starts_with( $haystack, $needle ) {
+	function str_starts_with( $haystack = '', $needle = '' ) {
 		if ( '' === $needle ) {
 			return true;
 		}
@@ -220,7 +220,7 @@ if ( ! function_exists( 'str_ends_with' ) ) {
 	 * @param string $needle   The substring to search for in the `$haystack`.
 	 * @return bool True if `$haystack` ends with `$needle`, otherwise false.
 	 */
-	function str_ends_with( $haystack, $needle ) {
+	function str_ends_with( $haystack = '', $needle = '' ) {
 		if ( '' === $haystack && '' !== $needle ) {
 			return false;
 		}
