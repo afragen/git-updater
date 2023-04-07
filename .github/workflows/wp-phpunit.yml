@@ -2,7 +2,7 @@
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 # Thanks https://github.com/shivammathur
 # Thanks Alex Stine for rubber ducking and help figuring out MySQL 5.7
-# Thanks @desroj for idea to just use MySQL 8.0 with correct authentication method.
+# Thanks @desrosj for idea to just use MySQL 8.0 with correct authentication method.
 name: WordPress Tests
 
 on:
@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2"]
+        php-versions: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
 
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
