@@ -55,6 +55,7 @@ class Readme_Parser extends Parser {
 		$data = $this->faq_as_h4( $data );
 		$data = $this->readme_section_as_h4( 'changelog', $data );
 		$data = $this->readme_section_as_h4( 'description', $data );
+		$data = $this->readme_section_as_h4( 'installation', $data );
 
 		return $data;
 	}
