@@ -370,6 +370,8 @@ class REST_API {
 			'num_ratings'       => $repo_data->num_ratings,
 			'rating'            => $repo_data->rating,
 			'active_installs'   => $repo_data->downloaded,
+			'homepage'          => $repo_data->homepage,
+			'external'          => 'xxx',
 		];
 
 		if ( $repo_data->release_asset ) {
