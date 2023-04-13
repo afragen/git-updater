@@ -6,6 +6,7 @@
 * more PHP 8.2 compatibility
 * composer update
 * update `REST_API::get_plugins_api_data()` to return response without download link using boolean value in `download` query arg
+* hide Freemius menus with `gu_hide_settings` filter
 
 #### 12.1.3 / 2023-03-20
 * improved setting/default of `$options['bypass_background_processing']`

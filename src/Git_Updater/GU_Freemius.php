@@ -93,6 +93,11 @@ class GU_Freemius {
 		$gu_fs->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 		// $gu_fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
+		// Hide all Freemius menus with filter.
+		if ( (bool) apply_filters( 'gu_hide_settings', false ) ) {
+			$gu_fs->add_filter( 'is_submenu_visible', '__return_false' );
+		}
+
 		$this->remove_fs_plugin_updater_hooks( $gu_fs );
 
 		// Hopefully eliminate clone resolution popup as single license for unlimited sites.
