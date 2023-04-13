@@ -245,6 +245,10 @@ class Base {
 		 */
 		$config = empty( $config ) ? apply_filters_deprecated( 'github_updater_set_options', [ [] ], '6.1.0', 'gu_set_options' ) : $config;
 
+		foreach ( array_keys( self::$git_servers ) as $git ) {
+			unset( $config[ "{$git}_access_token" ], $config[ "{$git}_enterprise_token" ] );
+		}
+
 		if ( ! empty( $config ) ) {
 			$config        = $this->sanitize( $config );
 			self::$options = array_merge( get_site_option( 'git_updater' ), $config );
