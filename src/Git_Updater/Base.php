@@ -152,7 +152,7 @@ class Base {
 		 */
 		$hide_settings = $hide_settings ?: (bool) apply_filters_deprecated( 'github_updater_hide_settings', [ false ], '10.0.0', 'gu_hide_settings' );
 
-		if ( ! $hide_settings && Singleton::get_instance( 'Init', $this )->can_update() ) {
+		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
 			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
 		}

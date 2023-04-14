@@ -97,7 +97,10 @@ class Settings {
 	 * Load relevant action/filter hooks.
 	 */
 	protected function load_hooks() {
-		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
+		if ( ! (bool) apply_filters( 'gu_hide_settings', false ) ) {
+			add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_plugin_page' ] );
+		}
+
 		add_action( 'network_admin_edit_git-updater', [ $this, 'update_settings' ] );
 
 		add_filter(
