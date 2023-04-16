@@ -2,7 +2,7 @@
 * update `freemius/wordpress-sdk`
 * update `afragen/wp-dismiss-notice`
 * don't save unused data from `API_Common::parse_release_asset()`
-* update Freemius uninstall to use previous `uninstall.php` now renamed
+* don't use Freemius uninstall, use previous `uninstall.php`
 * more PHP 8.2 compatibility
 * composer update
 * update `REST_API::get_plugins_api_data()` to return response without download link using boolean value in `download` query arg
