@@ -56,7 +56,7 @@ class GU_Freemius {
 							'type'                => 'plugin',
 							'public_key'          => 'pk_aaa04d83b4c42470937266f9b4fca',
 							'is_premium'          => true,
-							'premium_suffix'      => 'Default',
+							'premium_suffix'      => '',
 							// If your plugin is a serviceware, set this option to false.
 							'has_premium_version' => true,
 							'has_addons'          => false,
