@@ -200,6 +200,6 @@ class GU_Freemius {
 	 * @return void
 	 */
 	public function uninstall_cleanup() {
-		require_once dirname( __DIR__, 2 ) . '/gu-uninstall.php';
+		require_once dirname( __DIR__, 2 ) . '/uninstall.php';
 	}
 }
