@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.2.1 / 2023-04-21
 * ensure `$wp_filesystem` set for `Bootstrap::rename_on_activation()`
 * uninstall tested to function correctly
 
