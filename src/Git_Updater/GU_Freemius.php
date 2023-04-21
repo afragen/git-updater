@@ -148,6 +148,15 @@ class GU_Freemius {
 	}
 
 	/**
+	 * Uninstall.
+	 *
+	 * @return void
+	 */
+	public function uninstall_cleanup() {
+		require_once dirname( __DIR__, 2 ) . '/gu-uninstall.php';
+	}
+
+	/**
 	 * Remove FS_Plugin_Updater hooks.
 	 * Allow Git Updater to use it's own update code for itself.
 	 *
@@ -192,14 +201,5 @@ class GU_Freemius {
 				'pre_set_site_transient_update_plugins_filter',
 			]
 		);
-	}
-
-	/**
-	 * Uninstall.
-	 *
-	 * @return void
-	 */
-	public function uninstall_cleanup() {
-		require_once dirname( __DIR__, 2 ) . '/uninstall.php';
 	}
 }
