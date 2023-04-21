@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.2.0 / 2023-04-20
 * update `freemius/wordpress-sdk`
 * update `afragen/wp-dismiss-notice`
 * don't save unused data from `API_Common::parse_release_asset()`
