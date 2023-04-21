@@ -91,6 +91,7 @@ class GU_Freemius {
 		$gu_fs->add_filter( 'plugin_icon', [ $this, 'add_icon' ] );
 		$gu_fs->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
 		$gu_fs->add_filter( 'permission_list', [ $this, 'permission_list' ] );
+		$gu_fs->add_action( 'after_uninstall', [ $this, 'uninstall_cleanup' ] );
 		// $gu_fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
 		// Hide all Freemius menus with filter.
@@ -144,6 +145,15 @@ class GU_Freemius {
 		}
 
 		return $permissions;
+	}
+
+	/**
+	 * Uninstall.
+	 *
+	 * @return void
+	 */
+	public function uninstall_cleanup() {
+		require_once dirname( __DIR__, 2 ) . '/gu-uninstall.php';
 	}
 
 	/**

@@ -157,6 +157,13 @@ class Bootstrap {
 	 * @return void|bool
 	 */
 	public function rename_on_activation() {
+		global $wp_filesystem;
+
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
 		// Exit if coming from webhook.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['plugin'], $_GET['webhook_source'] ) && 'git-updater' === $_GET['plugin'] ) {
