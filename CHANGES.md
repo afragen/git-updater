@@ -1,4 +1,5 @@
 #### [unreleased]
+* ensure `$wp_filesystem` set for `Bootstrap::rename_on_activation()`
 
 #### 12.2.0 / 2023-04-20
 * update `freemius/wordpress-sdk`
