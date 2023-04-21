@@ -55,7 +55,7 @@ trait API_Common {
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
 		if ( is_wp_error( $response ) ) {
-			return null;
+			return '';
 		}
 		if ( 'github' === $git ) {
 			$assets = isset( $response->assets ) ? $response->assets : [];
@@ -65,8 +65,7 @@ trait API_Common {
 					break;
 				}
 			}
-			$response = is_string( $response ) ? $response : null;
-			$this->set_repo_cache( 'release_asset_response', $asset );
+			$response = is_string( $response ) ? $response : '';
 		}
 
 		/**

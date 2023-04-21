@@ -41,6 +41,20 @@ class Branch {
 	protected $base;
 
 	/**
+	 * Holds rollback tag.
+	 *
+	 * @var string|bool
+	 */
+	protected $tag;
+
+	/**
+	 * Holds current repo cache.
+	 *
+	 * @var array|bool
+	 */
+	protected $cache;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {

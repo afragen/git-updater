@@ -2,7 +2,7 @@
 
 use Fragen\Git_Updater\Base;
 
-class RunningTest extends WP_UnitTestCase {
+class RunningTest extends \WP_UnitTestCase {
 	public function test_installed_apis() {
 		$installed_apis = [
 			'github_api'  => true,

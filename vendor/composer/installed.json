@@ -165,23 +165,23 @@
         },
         {
             "name": "afragen/wp-dismiss-notice",
-            "version": "0.3.0",
-            "version_normalized": "0.3.0.0",
+            "version": "0.3.4",
+            "version_normalized": "0.3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dismiss-notice.git",
-                "reference": "8b690bc045620811d3c0724c2a2746cf1baab809"
+                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/8b690bc045620811d3c0724c2a2746cf1baab809",
-                "reference": "8b690bc045620811d3c0724c2a2746cf1baab809",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/a195d3badb28965f6a33e04e7b488b7d8d29df39",
+                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6"
             },
-            "time": "2023-01-02T19:27:07+00:00",
+            "time": "2023-04-05T20:00:28+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -341,23 +341,23 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.5",
-            "version_normalized": "2.5.5.0",
+            "version": "2.5.6",
+            "version_normalized": "2.5.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "72c4f4ec119019976fe3326421f93cb089a8a527"
+                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/72c4f4ec119019976fe3326421f93cb089a8a527",
-                "reference": "72c4f4ec119019976fe3326421f93cb089a8a527",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
+                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
             },
-            "time": "2023-03-20T07:22:28+00:00",
+            "time": "2023-03-28T10:40:38+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -377,7 +377,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.5"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.6"
             },
             "install-path": "../freemius/wordpress-sdk"
         },

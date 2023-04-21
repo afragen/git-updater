@@ -324,9 +324,14 @@ class REST_API {
 	 * @return array|\WP_Error
 	 */
 	public function get_plugins_api_data( \WP_REST_Request $request ) {
-		$slug = $request->get_param( 'slug' );
+		$slug     = $request->get_param( 'slug' );
+		$download = $request->get_param( 'download' );
+		$download = 'true' === $download || '1' === $download ? true : false;
 		if ( ! $slug ) {
-			return (object) [ 'error' => 'The REST request likely has an invalid query argument.' ];
+			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
+		}
+		if ( false === $download && true === $download ) {
+			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a boolean for `download`.' ];
 		}
 		$repo_cache = $this->get_repo_cache( $slug );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
@@ -365,6 +370,8 @@ class REST_API {
 			'num_ratings'       => $repo_data->num_ratings,
 			'rating'            => $repo_data->rating,
 			'active_installs'   => $repo_data->downloaded,
+			'homepage'          => $repo_data->homepage,
+			'external'          => 'xxx',
 		];
 
 		if ( $repo_data->release_asset ) {
@@ -374,6 +381,10 @@ class REST_API {
 			} elseif ( $repo_cache['release_asset'] ) {
 				$plugins_api_data['download_link'] = $repo_cache['release_asset'];
 			}
+		}
+		if ( ! $download ) {
+			$plugins_api_data['download_link']         = '';
+			$plugins_api_data['sections']['changelog'] = "Refer to <a href='https://github.com/afragen/git-updater/blob/master/CHANGES.md'>changelog</a>";
 		}
 
 		return $plugins_api_data;

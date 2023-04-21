@@ -1,6 +1,8 @@
 # Based on https://github.com/wp-cli/scaffold-command/blob/f9bad3dd7224d5684d950d31c486df70905e386f/templates/plugin-github.mustache
 # Thanks Josh https://github.com/Shelob9/wordpress-plugin/blob/main/.github/workflows/wordpress.yml
 # Thanks https://github.com/shivammathur
+# Thanks Alex Stine for rubber ducking and help figuring out MySQL 5.7
+# Thanks @desrosj for idea to just use MySQL 8.0 with correct authentication method.
 name: WordPress Tests
 
 on:
@@ -15,48 +17,43 @@ on:
 
 jobs:
   run:
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest]
-        php-versions: ['7.4', '8.0', '8.1']
-        phpunit-versions: ['9.5.20']
-        include:
-          - php-versions: '7.2'
-            phpunit-versions: '7.5.20'
-            operating-system: ubuntu-18.04
-          - php-versions: '7.3'
-            phpunit-versions: '9.5.20'
-            operating-system: 'ubuntu-18.04'
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+        php-versions: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+
+    name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        coverage: none
-        extensions: mysql
-        tools: wp-cli, phpunit-polyfills, phpunit:${{ matrix.phpunit-versions }}
-      env:
-        COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup MySQL 8.0 with mysql_native_password
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+          mysql-version: "8.0"
+          my-cnf: |
+            bind_address=127.0.0.1
+            default-authentication-plugin=mysql_native_password
+          root-password: root
 
-    - name: Check PHP Version
-      run: php -v
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+          extensions: mysql, mysqli
+          tools: composer, wp-cli, phpunit-polyfills, phpunit
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Composer install
-      run: composer install --optimize-autoloader --prefer-dist
+      - name: Composer install
+        run: composer install --optimize-autoloader --prefer-dist
 
-    - name: Start Mysql
-      run: sudo service mysql start
+      - name: Install WP Tests
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
 
-    - name: Install WP Tests
-      run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest
-
-    - name: phpunit tests
-      run: |
-        echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
-        /usr/local/bin/phpunit --config=phpunit.xml
+      - name: PHPUnit tests
+        run: |
+          echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
+          phpunit --config=phpunit.xml

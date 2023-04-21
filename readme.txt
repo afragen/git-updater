@@ -62,3 +62,7 @@ We now have a [Slack team for Git Updater](https://git-updater.slack.com). Pleas
 #### Translations
 
 If you are a polyglot I would greatly appreciate translation contributions to [GlotPress for Git Updater](https://translate.git-updater.com).
+
+## Installation
+
+Go to [git-updater.com](https://git-updater.com) to download and install the latest version.

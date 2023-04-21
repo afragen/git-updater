@@ -116,9 +116,12 @@ class Rest_Update {
 				}
 
 				$current->response[ $plugin->file ] = (object) $update;
+				unset( $current->no_update[ $plugin->slug ] );
 
 				return $current;
-			}
+			},
+			15,
+			1
 		);
 
 		// Add authentication header to download package.
@@ -179,9 +182,12 @@ class Rest_Update {
 				}
 
 				$current->response[ $theme->slug ] = $update;
+				unset( $current->no_update[ $theme->slug ] );
 
 				return $current;
-			}
+			},
+			15,
+			1
 		);
 
 		// Add authentication header to download package.
