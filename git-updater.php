@@ -12,11 +12,12 @@
  * Plugin Name:       Git Updater
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           12.2.1
+ * Version:           12.2.1.1
  * Author:            Andy Fragen
  * License:           MIT
  * Domain Path:       /languages
  * Text Domain:       git-updater
+ * Network:           true
  * GitHub Plugin URI: https://github.com/afragen/git-updater
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.2
