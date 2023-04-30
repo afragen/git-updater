@@ -52,7 +52,7 @@
     }
   },
   "scripts": {
-    "post-update-cmd": [
+    "make-pot": [
       "wp i18n make-pot . languages/git-updater.pot"
     ],
     "wpcs": [
