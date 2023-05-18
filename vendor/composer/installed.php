@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => 'f0095b06e5a69141a182751f0122d940b4ceee8e',
+        'reference' => '29d752cb1336b3967b81ccc8ffd3eac3bb168b9f',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => 'f0095b06e5a69141a182751f0122d940b4ceee8e',
+            'reference' => '29d752cb1336b3967b81ccc8ffd3eac3bb168b9f',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -33,7 +33,7 @@
         'afragen/wordpress-plugin-readme-parser' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '77fa0ee009bcfce63da1a51aa091dac20e242c98',
+            'reference' => '38f4252aea6660fbaf9c8a54c85bf936de8b8ff6',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wordpress-plugin-readme-parser',
             'aliases' => array(
@@ -42,9 +42,9 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.12',
-            'version' => '4.3.12.0',
-            'reference' => 'da85ae335c8342878d83b5ed7fe56b58609db4e1',
+            'pretty_version' => '4.3.13',
+            'version' => '4.3.13.0',
+            'reference' => '6a6366d21710a34f134d747b1ae673daa165b78c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
             'aliases' => array(),
@@ -78,9 +78,9 @@
             'dev_requirement' => false,
         ),
         'freemius/wordpress-sdk' => array(
-            'pretty_version' => '2.5.6',
-            'version' => '2.5.6.0',
-            'reference' => '095fc9ced29efef5b18f9b7242bb80b0b4ac6aff',
+            'pretty_version' => '2.5.8',
+            'version' => '2.5.8.0',
+            'reference' => 'bbbcf3d976a1fd90355037b163746fdca6c93a4c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),

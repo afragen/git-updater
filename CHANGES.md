@@ -1,6 +1,7 @@
 #### [unreleased]
 * add back Network only activate for multisite, may cause issue where post-license activation Freemius doesn't re-direct to network admin
 * update anonymous functions as static functions for better performance
+* composer update
 
 #### 12.2.1 / 2023-04-21
 * ensure `$wp_filesystem` set for `Bootstrap::rename_on_activation()`

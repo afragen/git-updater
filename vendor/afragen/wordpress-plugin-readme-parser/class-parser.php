@@ -802,28 +802,4 @@ class Parser {
 		return $markdown->transform( $text );
 	}
 
-	/**
-	 * Determine if the readme contains unique installation instructions.
-	 *
-	 * When phrases are added here, the affected plugins will need to be reparsed to pick it up.
-	 *
-	 * @return bool Whether the instructions differ from default instructions.
-	 */
-	protected function has_unique_installation_instructions() {
-		if ( ! isset( $this->sections['installation'] ) ) {
-			return false;
-		}
-
-		// If the plugin installation section contains any of these phrases, skip it as it's not useful.
-		$common_phrases = array(
-			'This section describes how to install the plugin and get it working.', // Default readme.txt content
-		);
-		foreach ( $common_phrases as $phrase ) {
-			if ( false !== stripos( $this->sections['installation'], $phrase ) ) {
-				return false;
-			}
-		}
-
-		return true;
-	}
 }

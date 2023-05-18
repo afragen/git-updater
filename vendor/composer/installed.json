@@ -57,19 +57,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "77fa0ee009bcfce63da1a51aa091dac20e242c98"
+                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/77fa0ee009bcfce63da1a51aa091dac20e242c98",
-                "reference": "77fa0ee009bcfce63da1a51aa091dac20e242c98",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
+                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "time": "2022-10-14T02:55:01+00:00",
+            "time": "2023-05-18T19:15:40+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
@@ -102,24 +102,24 @@
         },
         {
             "name": "afragen/wp-dependency-installer",
-            "version": "4.3.12",
-            "version_normalized": "4.3.12.0",
+            "version": "4.3.13",
+            "version_normalized": "4.3.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dependency-installer.git",
-                "reference": "da85ae335c8342878d83b5ed7fe56b58609db4e1"
+                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/da85ae335c8342878d83b5ed7fe56b58609db4e1",
-                "reference": "da85ae335c8342878d83b5ed7fe56b58609db4e1",
+                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/6a6366d21710a34f134d747b1ae673daa165b78c",
+                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c",
                 "shasum": ""
             },
             "require": {
                 "afragen/wp-dismiss-notice": "*",
                 "php": ">=5.6"
             },
-            "time": "2023-02-06T04:22:45+00:00",
+            "time": "2023-05-18T18:49:19+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -341,23 +341,23 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.6",
-            "version_normalized": "2.5.6.0",
+            "version": "2.5.8",
+            "version_normalized": "2.5.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff"
+                "reference": "bbbcf3d976a1fd90355037b163746fdca6c93a4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
-                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/bbbcf3d976a1fd90355037b163746fdca6c93a4c",
+                "reference": "bbbcf3d976a1fd90355037b163746fdca6c93a4c",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
             },
-            "time": "2023-03-28T10:40:38+00:00",
+            "time": "2023-05-15T06:17:55+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -377,7 +377,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.6"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.8"
             },
             "install-path": "../freemius/wordpress-sdk"
         },

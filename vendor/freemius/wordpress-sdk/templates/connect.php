@@ -47,23 +47,8 @@
 		$site_url = substr( $site_url, $protocol_pos + 3 );
 	}
 
-	$freemius_site_www = 'https://freemius.com';
-
 	$freemius_usage_tracking_url = $fs->get_usage_tracking_terms_url();
 	$freemius_plugin_terms_url   = $fs->get_eula_url();
-
-	$freemius_site_url = $fs->is_premium() ?
-		$freemius_site_www :
-		$freemius_usage_tracking_url;
-
-	if ( $fs->is_premium() ) {
-		$freemius_site_url .= '?' . http_build_query( array(
-				'id'   => $fs->get_id(),
-				'slug' => $slug,
-			) );
-	}
-
-	$freemius_link = '<a href="' . $freemius_site_url . '" target="_blank" rel="noopener" tabindex="1">freemius.com</a>';
 
 	$error = fs_request_get( 'error' );
 
@@ -75,6 +60,12 @@
                                ( $is_premium_code || ! $has_release_on_freemius ) &&
                                fs_request_get_bool( 'require_license', ( $is_premium_code || $has_release_on_freemius ) )
                            );
+
+	$freemius_activation_terms_url = ($fs->is_premium() && $require_license_key) ?
+		$fs->get_license_activation_terms_url() :
+		$freemius_usage_tracking_url;
+
+	$freemius_activation_terms_html = '<a href="' . esc_url( $freemius_activation_terms_url ) . '" target="_blank" rel="noopener" tabindex="1">freemius.com</a>';
 
 	if ( $is_pending_activation ) {
 		$require_license_key = false;
@@ -265,13 +256,13 @@
 								'<b>' . esc_html( $fs->get_plugin_name() ) . '</b>',
 								'<b>' . $current_user->user_login . '</b>',
 								'<a href="' . $site_url . '" target="_blank" rel="noopener noreferrer">' . $site_url . '</a>',
-                                $freemius_link
+                                $freemius_activation_terms_html
 							),
 							$first_name,
 							$fs->get_plugin_name(),
 							$current_user->user_login,
 							'<a href="' . $site_url . '" target="_blank" rel="noopener noreferrer">' . $site_url . '</a>',
-							$freemius_link,
+							$freemius_activation_terms_html,
 							true
 						);
 					}
@@ -451,12 +442,16 @@
 		<?php endif ?>
         </div>
 		<div class="fs-terms">
-            <a class="fs-tooltip-trigger<?php echo is_rtl() ? ' rtl' : '' ?>" href="<?php echo $freemius_site_url ?>" target="_blank" rel="noopener" tabindex="1">Powered by Freemius<?php if ( $require_license_key ) : ?> <span class="fs-tooltip" style="width: 170px"><?php echo $fs->get_text_inline( 'Freemius is our licensing and software updates engine', 'permissions-extensions_desc' ) ?></span><?php endif ?></a>
+            <a class="fs-tooltip-trigger<?php echo is_rtl() ? ' rtl' : '' ?>" href="<?php echo esc_url( $freemius_activation_terms_url ) ?>" target="_blank" rel="noopener" tabindex="1">Powered by Freemius<?php if ( $require_license_key ) : ?> <span class="fs-tooltip" style="width: 170px"><?php echo $fs->get_text_inline( 'Freemius is our licensing and software updates engine', 'permissions-extensions_desc' ) ?></span><?php endif ?></a>
             &nbsp;&nbsp;-&nbsp;&nbsp;
 			<a href="https://freemius.com/privacy/" target="_blank" rel="noopener"
 			   tabindex="1"><?php fs_esc_html_echo_inline( 'Privacy Policy', 'privacy-policy', $slug ) ?></a>
 			&nbsp;&nbsp;-&nbsp;&nbsp;
-			<a href="<?php echo $require_license_key ? $freemius_plugin_terms_url : $freemius_usage_tracking_url ?>" target="_blank" rel="noopener" tabindex="1"><?php $require_license_key ? fs_echo_inline( 'License Agreement', 'license-agreement', $slug ) : fs_echo_inline( 'Terms of Service', 'tos', $slug ) ?></a>
+			<?php if ($require_license_key) : ?>
+				<a href="<?php echo esc_url( $freemius_plugin_terms_url ) ?>" target="_blank" rel="noopener" tabindex="1"><?php fs_echo_inline( 'License Agreement', 'license-agreement', $slug ) ?></a>
+			<?php else : ?>
+				<a href="<?php echo esc_url( $freemius_usage_tracking_url ) ?>" target="_blank" rel="noopener" tabindex="1"><?php fs_echo_inline( 'Terms of Service', 'tos', $slug ) ?></a>
+			<?php endif; ?>
 		</div>
 	</div>
 	<?php
