@@ -149,7 +149,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 		 *                        with sub-directories represented as nested arrays.
 		 * @param string $path    Absolute path to the directory.
 		 */
-		$invalidate_directory = function( $dirlist, $path ) use ( &$invalidate_directory ) {
+		$invalidate_directory = static function( $dirlist, $path ) use ( &$invalidate_directory ) {
 			$path = trailingslashit( $path );
 
 			foreach ( $dirlist as $name => $details ) {
