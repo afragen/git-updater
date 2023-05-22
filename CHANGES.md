@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.2.2 /2023-05-22
 * add back Network only activate for multisite, may cause issue where post-license activation Freemius doesn't re-direct to network admin
 * update anonymous functions as static functions for better performance
 * composer update
