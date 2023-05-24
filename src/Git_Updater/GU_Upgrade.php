@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class GU_Upgrade
  */
-class GU_Upgrade {
+final class GU_Upgrade {
 	use GU_Trait;
 
 	/**
