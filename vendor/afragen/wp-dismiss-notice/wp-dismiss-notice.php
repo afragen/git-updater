@@ -39,6 +39,14 @@ class WP_Dismiss_Notice {
 		 */
 		$vendor_dir       = apply_filters( 'dismiss_notice_vendor_dir', '/vendor' );
 		$composer_js_path = untrailingslashit( $vendor_dir ) . '/afragen/wp-dismiss-notice/js/dismiss-notice.js';
+
+		$theme_js_url  = get_theme_file_uri( $composer_js_path );
+		$theme_js_file = parse_url( $theme_js_url, PHP_URL_PATH );
+
+		if ( file_exists( ABSPATH . $theme_js_file ) ) {
+			$js_url = $theme_js_url;
+		}
+
 		if ( '/vendor' !== $vendor_dir ) {
 			$js_url = home_url( $composer_js_path );
 		}
