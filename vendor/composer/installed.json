@@ -165,23 +165,23 @@
         },
         {
             "name": "afragen/wp-dismiss-notice",
-            "version": "0.3.4",
-            "version_normalized": "0.3.4.0",
+            "version": "0.3.6",
+            "version_normalized": "0.3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dismiss-notice.git",
-                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39"
+                "reference": "63fbe9fd01f240fff382aa761dd52c12a16bd715"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/a195d3badb28965f6a33e04e7b488b7d8d29df39",
-                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/63fbe9fd01f240fff382aa761dd52c12a16bd715",
+                "reference": "63fbe9fd01f240fff382aa761dd52c12a16bd715",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6"
             },
-            "time": "2023-04-05T20:00:28+00:00",
+            "time": "2023-05-30T20:35:45+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
