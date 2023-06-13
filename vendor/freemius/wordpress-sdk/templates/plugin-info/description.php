@@ -56,11 +56,6 @@
 		<ul>
 			<?php $i = 0;
 				foreach ( $screenshots as $s => $url ) : ?>
-					<?php
-					// Relative URLs are replaced with WordPress.org base URL
-					// therefore we need to set absolute URLs.
-					$url = 'http' . ( WP_FS__IS_HTTPS ? 's' : '' ) . ':' . $url;
-					?>
 					<li class="<?php echo ( 0 === $i % 2 ) ? 'odd' : 'even' ?>">
 						<style>
 							#section-description .fs-screenshots <?php echo ".fs-screenshot-{$i}" ?>

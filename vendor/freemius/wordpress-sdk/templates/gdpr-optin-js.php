@@ -29,7 +29,8 @@
                     allowMarketing = $this.hasClass( 'allow-marketing' ),
                     cursor         = $this.css( 'cursor' ),
                     $products      = $gdprOptinNotice.find( 'span[data-plugin-id]' ),
-                    pluginIDs      = [];
+                    pluginIDs      = [],
+                    ajaxUrl        = <?php echo Freemius::ajax_url() ?>;
 
                 if ( $products.length > 0 ) {
                     $products.each(function() {
@@ -38,7 +39,7 @@
                 }
 
                 $.ajax({
-                    url       : <?php echo Freemius::ajax_url() ?> + '?' + $.param({
+                        url      : ajaxUrl + (ajaxUrl.includes('?') ? '&' : '?') + $.param({
                         action   : '<?php echo $fs->get_ajax_action( 'gdpr_optin_action' ) ?>',
                         security : '<?php echo $fs->get_ajax_security( 'gdpr_optin_action' ) ?>',
                         module_id: '<?php echo $fs->get_id() ?>'

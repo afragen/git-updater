@@ -106,10 +106,6 @@
 
     $has_tabs = $fs->_add_tabs_before_content();
 
-	if ( $has_tabs ) {
-		$query_params['tabs'] = 'true';
-	}
-
 	// Aliases.
 	$download_latest_text         = fs_text_x_inline( 'Download Latest', 'as download latest version', 'download-latest', $slug );
 	$downgrading_plan_text        = fs_text_inline( 'Downgrading your plan', 'downgrading-plan', $slug );
