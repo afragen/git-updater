@@ -241,10 +241,10 @@ class Theme {
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
-		foreach ( (array) $config as $theme ) {
-			$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-			$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
+		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
+		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
+		foreach ( (array) $config as $theme ) {
 			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli() || $disable_wp_cron
 			) {
 				$this->base->get_remote_repo_meta( $theme );
@@ -265,9 +265,6 @@ class Theme {
 		}
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
-
-		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		if ( $schedule_event && ! empty( $themes ) ) {
 			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_theme' ) ) {
