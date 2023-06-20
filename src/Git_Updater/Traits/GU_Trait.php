@@ -361,8 +361,10 @@ trait GU_Trait {
 		if ( null !== $repo ) {
 
 			// Getting class instance also runs API::settings_hook().
-			$git_class = 'Fragen\\Git_Updater\\API\\' . $this->base::$git_servers[ $repo->git ] . '_API';
-			Singleton::get_instance( $git_class, $this );
+			if ( property_exists( $repo, 'git' ) ) {
+				$git_class = 'Fragen\\Git_Updater\\API\\' . $this->base::$git_servers[ $repo->git ] . '_API';
+				Singleton::get_instance( $git_class, $this );
+			}
 
 			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
 
