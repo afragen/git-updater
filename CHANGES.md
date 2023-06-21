@@ -2,6 +2,7 @@
 * composer update
 * get `gu_disable_cron` hook result once per repository
 * ensure git class is instantiated when checking `waiting_for_background_update()`
+* add check for `$response->error` to `API::validate_response()`
 
 #### 12.2.2 /2023-05-22
 * add back Network only activate for multisite, may cause issue where post-license activation Freemius doesn't re-direct to network admin
