@@ -59,12 +59,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "c7968987f542a4be9b4120cbe219fc8eaaf2dd7c"
+                "reference": "c21c250a510972ac46658a315133ac8b91d60ba0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/c7968987f542a4be9b4120cbe219fc8eaaf2dd7c",
-                "reference": "c7968987f542a4be9b4120cbe219fc8eaaf2dd7c",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/c21c250a510972ac46658a315133ac8b91d60ba0",
+                "reference": "c21c250a510972ac46658a315133ac8b91d60ba0",
                 "shasum": ""
             },
             "require": {
@@ -75,8 +75,7 @@
             "type": "library",
             "autoload": {
                 "classmap": [
-                    "class-parser.php",
-                    "class-markdown.php"
+                    "class-parser.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -99,7 +98,7 @@
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
-            "time": "2023-06-24T17:51:31+00:00"
+            "time": "2023-06-24T18:22:04+00:00"
         },
         {
             "name": "afragen/wp-dependency-installer",

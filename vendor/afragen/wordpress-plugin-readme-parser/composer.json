@@ -27,8 +27,7 @@
   },
   "autoload": {
     "classmap": [
-      "class-parser.php",
-      "class-markdown.php"
+      "class-parser.php"
     ]
   }
 }

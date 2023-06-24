@@ -11,6 +11,5 @@ return array(
     'WP_Dependency_Installer' => $vendorDir . '/afragen/wp-dependency-installer/wp-dependency-installer.php',
     'WP_Dependency_Installer_Skin' => $vendorDir . '/afragen/wp-dependency-installer/wp-dependency-installer-skin.php',
     'WP_Dismiss_Notice' => $vendorDir . '/afragen/wp-dismiss-notice/wp-dismiss-notice.php',
-    'WordPressdotorg\\Plugin_Directory\\Markdown' => $vendorDir . '/afragen/wordpress-plugin-readme-parser/class-markdown.php',
     'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => $vendorDir . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
 );
