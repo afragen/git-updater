@@ -57,25 +57,26 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6"
+                "reference": "c7968987f542a4be9b4120cbe219fc8eaaf2dd7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
-                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/c7968987f542a4be9b4120cbe219fc8eaaf2dd7c",
+                "reference": "c7968987f542a4be9b4120cbe219fc8eaaf2dd7c",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "time": "2023-05-18T19:15:40+00:00",
+            "time": "2023-06-24T17:51:31+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
                 "classmap": [
-                    "class-parser.php"
+                    "class-parser.php",
+                    "class-markdown.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",

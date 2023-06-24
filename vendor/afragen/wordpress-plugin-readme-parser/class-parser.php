@@ -795,6 +795,11 @@ class Parser {
 	protected function parse_markdown( $text ) {
 		static $markdown = null;
 
+		// Return early if the Markdown processor isn't available.
+		if ( ! class_exists( '\WordPressdotorg\Plugin_Directory\Markdown' ) ) {
+			return $text;
+		}
+
 		if ( is_null( $markdown ) ) {
 			$markdown = new Markdown();
 		}

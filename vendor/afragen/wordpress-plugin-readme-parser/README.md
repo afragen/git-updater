@@ -13,3 +13,5 @@ The `index.php` file, when run locally, will update the `class-parser.php` file 
 `composer require afragen/wordpress-plugin-readme-parser:dev-master`
 
 `class-parser.php` uses [Michelf’s Markdown_Extra](https://github.com/michelf/php-markdown) but I use a more lightweight markdown parser, [erusev’s Parsedown](https://github.com/erusev/parsedown). Parsedown is required in this `composer.json`.
+
+`class-markdown.php` is shim for Markdown_Extra.

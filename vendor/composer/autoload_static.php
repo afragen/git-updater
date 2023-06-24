@@ -44,6 +44,7 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         'WP_Dependency_Installer' => __DIR__ . '/..' . '/afragen/wp-dependency-installer/wp-dependency-installer.php',
         'WP_Dependency_Installer_Skin' => __DIR__ . '/..' . '/afragen/wp-dependency-installer/wp-dependency-installer-skin.php',
         'WP_Dismiss_Notice' => __DIR__ . '/..' . '/afragen/wp-dismiss-notice/wp-dismiss-notice.php',
+        'WordPressdotorg\\Plugin_Directory\\Markdown' => __DIR__ . '/..' . '/afragen/wordpress-plugin-readme-parser/class-markdown.php',
         'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => __DIR__ . '/..' . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
     );
 
