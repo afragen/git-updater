@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.2.3 / 2023-06-27
 * composer update
 * get `gu_disable_cron` hook result once per repository
 * ensure git class is instantiated when checking `waiting_for_background_update()`
