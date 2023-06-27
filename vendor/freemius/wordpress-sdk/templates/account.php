@@ -106,10 +106,6 @@
 
     $has_tabs = $fs->_add_tabs_before_content();
 
-	if ( $has_tabs ) {
-		$query_params['tabs'] = 'true';
-	}
-
 	// Aliases.
 	$download_latest_text         = fs_text_x_inline( 'Download Latest', 'as download latest version', 'download-latest', $slug );
 	$downgrading_plan_text        = fs_text_inline( 'Downgrading your plan', 'downgrading-plan', $slug );
@@ -260,16 +256,16 @@
 	<div class="wrap fs-section">
 		<?php if ( ! $has_tabs && ! $fs->apply_filters( 'hide_account_tabs', false ) ) : ?>
 		<h2 class="nav-tab-wrapper">
-			<a href="<?php echo $fs->get_account_url() ?>"
+			<a href="<?php echo esc_url( $fs->get_account_url() ) ?>"
 			   class="nav-tab nav-tab-active"><?php fs_esc_html_echo_inline( 'Account', 'account', $slug ) ?></a>
 			<?php if ( $fs->has_addons() ) : ?>
-				<a href="<?php echo $fs->_get_admin_page_url( 'addons' ) ?>"
+				<a href="<?php echo esc_url( $fs->_get_admin_page_url( 'addons' ) ) ?>"
 				   class="nav-tab"><?php echo esc_html( $addons_text ) ?></a>
 			<?php endif ?>
 			<?php if ( $show_upgrade ) : ?>
-				<a href="<?php echo $fs->get_upgrade_url() ?>" class="nav-tab"><?php echo esc_html( $upgrade_text ) ?></a>
+				<a href="<?php echo esc_url( $fs->get_upgrade_url() ) ?>" class="nav-tab"><?php echo esc_html( $upgrade_text ) ?></a>
 				<?php if ( $fs->apply_filters( 'show_trial', true ) && ! $fs->is_trial_utilized() && $fs->has_trial_plan() ) : ?>
-					<a href="<?php echo $fs->get_trial_url() ?>" class="nav-tab"><?php fs_esc_html_echo_inline( 'Free Trial', 'free-trial', $slug ) ?></a>
+					<a href="<?php echo esc_url( $fs->get_trial_url() ) ?>" class="nav-tab"><?php fs_esc_html_echo_inline( 'Free Trial', 'free-trial', $slug ) ?></a>
 				<?php endif ?>
 			<?php endif ?>
 		</h2>
@@ -315,7 +311,7 @@
                                         <?php if ( $is_paying ) : ?>
                                             <?php if ( ! fs_is_network_admin() ) : ?>
                                             <li>
-                                                <form action="<?php echo $fs->_get_admin_page_url( 'account' ) ?>" method="POST">
+                                                <form action="<?php echo esc_url( $fs->_get_admin_page_url( 'account' ) ) ?>" method="POST">
                                                     <input type="hidden" name="fs_action" value="deactivate_license">
                                                     <?php wp_nonce_field( 'deactivate_license' ) ?>
                                                     <a href="#" class="fs-deactivate-license"><i
@@ -329,13 +325,13 @@
                                                        $is_active_subscription
                                             ) : ?>
                                                 <li>
-                                                    <form action="<?php echo $fs->_get_admin_page_url( 'account' ) ?>" method="POST">
+                                                    <form action="<?php echo esc_url( $fs->_get_admin_page_url( 'account' ) ) ?>" method="POST">
                                                         <input type="hidden" name="fs_action" value="downgrade_account">
                                                         <?php wp_nonce_field( 'downgrade_account' ) ?>
                                                         <a href="#"
                                                            onclick="if ( confirm('<?php echo esc_attr( sprintf(
                                                                $downgrade_x_confirm_text,
-                                                               ( $fs->is_only_premium()  ? $cancelling_subscription_text : $downgrading_plan_text ),
+                                                               ( $fs->is_only_premium() ? $cancelling_subscription_text : $downgrading_plan_text ),
                                                                $plan->title,
                                                                human_time_diff( time(), strtotime( $license->expiration ) )
                                                            ) ) ?> <?php if ( ! $license->is_block_features ) {
@@ -349,14 +345,14 @@
                                             <?php endif ?>
                                             <?php if ( $is_plan_change_supported ) : ?>
                                                 <li>
-                                                    <a href="<?php echo $fs->get_upgrade_url() ?>"><i
+                                                    <a href="<?php echo esc_url( $fs->get_upgrade_url() ) ?>"><i
                                                             class="dashicons dashicons-grid-view"></i> <?php echo esc_html( $change_plan_text ) ?></a>
                                                 </li>
                                                 <li>&nbsp;&bull;&nbsp;</li>
                                             <?php endif ?>
                                         <?php elseif ( $is_paid_trial ) : ?>
                                             <li>
-                                                <form action="<?php echo $fs->_get_admin_page_url( 'account' ) ?>" method="POST">
+                                                <form action="<?php echo esc_url( $fs->_get_admin_page_url( 'account' ) ) ?>" method="POST">
                                                     <input type="hidden" name="fs_action" value="cancel_trial">
                                                     <?php wp_nonce_field( 'cancel_trial' ) ?>
                                                     <a href="#" class="fs-cancel-trial"><i
@@ -367,8 +363,8 @@
                                         <?php endif ?>
                                     <?php endif ?>
                                     <li>
-                                        <form action="<?php echo $fs->_get_admin_page_url( 'account' ) ?>" method="POST">
-                                            <input type="hidden" name="fs_action" value="<?php echo $fs->get_unique_affix() ?>_sync_license">
+                                        <form action="<?php echo esc_url( $fs->_get_admin_page_url( 'account' ) ) ?>" method="POST">
+                                            <input type="hidden" name="fs_action" value="<?php echo esc_attr( $fs->get_unique_affix() ) ?>_sync_license">
                                             <?php wp_nonce_field( $fs->get_unique_affix() . '_sync_license' ) ?>
                                             <a href="#" onclick="this.parentNode.submit(); return false;"><i
                                                     class="dashicons dashicons-image-rotate"></i> <?php fs_esc_html_echo_x_inline( 'Sync', 'as synchronize', 'sync', $slug ) ?></a>
@@ -512,9 +508,9 @@
 												continue;
 											}
 											?>
-											<tr class="fs-field-<?php echo $p['id'] ?><?php if ( $odd ) : ?> alternate<?php endif ?>">
+											<tr class="fs-field-<?php echo esc_attr( $p['id'] ) ?><?php if ( $odd ) : ?> alternate<?php endif ?>">
 												<td>
-													<nobr><?php echo $p['title'] ?><?php echo ( ! empty( $p['title'] ) ) ? ':' : '' ?></nobr>
+													<nobr><?php echo esc_attr( $p['title'] ) ?><?php echo ( ! empty( $p['title'] ) ) ? ':' : '' ?></nobr>
 												</td>
 												<td<?php if ( 'plan' === $p['id'] || 'bundle_plan' === $p['id'] ) { echo ' colspan="2"'; }?>>
 													<?php if ( in_array( $p['id'], array( 'license_key', 'site_secret_key' ) ) ) : ?>
@@ -567,18 +563,18 @@
                                                                 );
                                                                 fs_require_template( 'account/partials/activate-license-button.php', $view_params ); ?>
 															<?php else : ?>
-																<form action="<?php echo $fs->_get_admin_page_url( 'account' ) ?>"
+																<form action="<?php echo esc_url( $fs->_get_admin_page_url( 'account' ) ) ?>"
 																      method="POST" class="button-group">
 																	<?php if ( $show_upgrade && $is_premium ) : ?>
-																		<a class="button activate-license-trigger <?php echo $fs->get_unique_affix() ?>" href="#"><?php fs_esc_html_echo_inline( 'Activate License', 'activate-license', $slug ) ?></a>
+																		<a class="button activate-license-trigger <?php echo esc_attr( $fs->get_unique_affix() ) ?>" href="#"><?php fs_esc_html_echo_inline( 'Activate License', 'activate-license', $slug ) ?></a>
 																	<?php endif ?>
 																	<input type="submit" class="button"
 																	       value="<?php echo esc_attr( $sync_license_text ) ?>">
 																	<input type="hidden" name="fs_action"
-																	       value="<?php echo $fs->get_unique_affix() ?>_sync_license">
+																	       value="<?php echo esc_attr( $fs->get_unique_affix() ) ?>_sync_license">
 																	<?php wp_nonce_field( $fs->get_unique_affix() . '_sync_license' ) ?>
 																	<?php if ( $show_upgrade || $is_plan_change_supported ) : ?>
-																	<a href="<?php echo $fs->get_upgrade_url() ?>"
+																	<a href="<?php echo esc_url( $fs->get_upgrade_url() ) ?>"
 																	   class="button<?php
 																		   echo $show_upgrade ?
 																			   ' button-primary fs-upgrade' :

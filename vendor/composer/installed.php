@@ -33,7 +33,7 @@
         'afragen/wordpress-plugin-readme-parser' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '38f4252aea6660fbaf9c8a54c85bf936de8b8ff6',
+            'reference' => 'c21c250a510972ac46658a315133ac8b91d60ba0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wordpress-plugin-readme-parser',
             'aliases' => array(
@@ -51,9 +51,9 @@
             'dev_requirement' => false,
         ),
         'afragen/wp-dismiss-notice' => array(
-            'pretty_version' => '0.3.4',
-            'version' => '0.3.4.0',
-            'reference' => 'a195d3badb28965f6a33e04e7b488b7d8d29df39',
+            'pretty_version' => '0.3.7',
+            'version' => '0.3.7.0',
+            'reference' => '3e2c694ca891fe94771457f54a3a5457a70c0aec',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wp-dismiss-notice',
             'aliases' => array(),
@@ -78,9 +78,9 @@
             'dev_requirement' => false,
         ),
         'freemius/wordpress-sdk' => array(
-            'pretty_version' => '2.5.8',
-            'version' => '2.5.8.0',
-            'reference' => 'bbbcf3d976a1fd90355037b163746fdca6c93a4c',
+            'pretty_version' => '2.5.9',
+            'version' => '2.5.9.0',
+            'reference' => 'e9e3b37d165a881326991a672af0269a6e2b2cda',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),

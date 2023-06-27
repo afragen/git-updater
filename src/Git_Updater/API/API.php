@@ -415,7 +415,7 @@ class API {
 	 * @return bool true if invalid
 	 */
 	protected function validate_response( $response ) {
-		return empty( $response ) || isset( $response->message ) || is_wp_error( $response );
+		return empty( $response ) || isset( $response->message ) || isset( $response->error ) || is_wp_error( $response );
 	}
 
 	/**

@@ -59,12 +59,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6"
+                "reference": "c21c250a510972ac46658a315133ac8b91d60ba0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
-                "reference": "38f4252aea6660fbaf9c8a54c85bf936de8b8ff6",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/c21c250a510972ac46658a315133ac8b91d60ba0",
+                "reference": "c21c250a510972ac46658a315133ac8b91d60ba0",
                 "shasum": ""
             },
             "require": {
@@ -98,7 +98,7 @@
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
-            "time": "2023-05-18T19:15:40+00:00"
+            "time": "2023-06-24T18:22:04+00:00"
         },
         {
             "name": "afragen/wp-dependency-installer",
@@ -162,16 +162,16 @@
         },
         {
             "name": "afragen/wp-dismiss-notice",
-            "version": "0.3.4",
+            "version": "0.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-dismiss-notice.git",
-                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39"
+                "reference": "3e2c694ca891fe94771457f54a3a5457a70c0aec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/a195d3badb28965f6a33e04e7b488b7d8d29df39",
-                "reference": "a195d3badb28965f6a33e04e7b488b7d8d29df39",
+                "url": "https://api.github.com/repos/afragen/wp-dismiss-notice/zipball/3e2c694ca891fe94771457f54a3a5457a70c0aec",
+                "reference": "3e2c694ca891fe94771457f54a3a5457a70c0aec",
                 "shasum": ""
             },
             "require": {
@@ -200,7 +200,7 @@
                 "issues": "https://github.com/afragen/wp-dismiss-notice/issues",
                 "source": "https://github.com/afragen/wp-dismiss-notice"
             },
-            "time": "2023-04-05T20:00:28+00:00"
+            "time": "2023-05-30T21:45:15+00:00"
         },
         {
             "name": "erusev/parsedown",
@@ -254,16 +254,16 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.8",
+            "version": "2.5.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "bbbcf3d976a1fd90355037b163746fdca6c93a4c"
+                "reference": "e9e3b37d165a881326991a672af0269a6e2b2cda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/bbbcf3d976a1fd90355037b163746fdca6c93a4c",
-                "reference": "bbbcf3d976a1fd90355037b163746fdca6c93a4c",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/e9e3b37d165a881326991a672af0269a6e2b2cda",
+                "reference": "e9e3b37d165a881326991a672af0269a6e2b2cda",
                 "shasum": ""
             },
             "require": {
@@ -287,9 +287,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.8"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.9"
             },
-            "time": "2023-05-15T06:17:55+00:00"
+            "time": "2023-06-12T06:57:05+00:00"
         }
     ],
     "packages-dev": [

@@ -10,6 +10,10 @@
 		exit;
 	}
 
+	/**
+	 * @var array $VARS
+	 */
+
 	$dismiss_text = fs_text_x_inline( 'Dismiss', 'as close a window', 'dismiss' );
 
 	$slug = '';
@@ -35,45 +39,74 @@
 			}
 		}
 	}
+
+	$attributes = array();
+	if ( ! empty( $VARS['id'] ) ) {
+		$attributes['data-id'] = $VARS['id'];
+	}
+	if ( ! empty( $VARS['manager_id'] ) ) {
+		$attributes['data-manager-id'] = $VARS['manager_id'];
+	}
+	if ( ! empty( $slug ) ) {
+		$attributes['data-slug'] = $slug;
+	}
+	if ( ! empty( $type ) ) {
+		$attributes['data-type'] = $type;
+	}
+
+	$classes = array( 'fs-notice' );
+	switch ( $VARS['type'] ) {
+		case 'error':
+			$classes[] = 'error';
+			$classes[] = 'form-invalid';
+			break;
+		case 'promotion':
+			$classes[] = 'updated';
+			$classes[] = 'promotion';
+			break;
+		case 'warn':
+			$classes[] = 'notice';
+			$classes[] = 'notice-warning';
+			break;
+		case 'update':
+		case 'success':
+		default:
+			$classes[] = 'updated';
+			$classes[] = 'success';
+			break;
+	}
+	if ( ! empty( $VARS['sticky'] ) ) {
+		$classes[] = 'fs-sticky';
+	}
+	if ( ! empty( $VARS['plugin'] ) ) {
+		$classes[] = 'fs-has-title';
+	}
+	if ( ! empty( $slug ) ) {
+		$classes[] = "fs-slug-{$slug}";
+	}
+	if ( ! empty( $type ) ) {
+		$classes[] = "fs-type-{$type}";
+	}
 ?>
-<div<?php if ( ! empty( $VARS['id'] ) ) : ?> data-id="<?php echo $VARS['id'] ?>"<?php endif ?><?php if ( ! empty( $VARS['manager_id'] ) ) : ?> data-manager-id="<?php echo $VARS['manager_id'] ?>"<?php endif ?><?php if ( ! empty( $slug ) ) : ?> data-slug="<?php echo $slug ?>"<?php endif ?><?php if ( ! empty( $type ) ) : ?> data-type="<?php echo $type ?>"<?php endif ?>
-	class="<?php
-		switch ( $VARS['type'] ) {
-			case 'error':
-				echo 'error form-invalid';
-				break;
-			case 'promotion':
-				echo 'updated promotion';
-				break;
-			case 'warn':
-			    echo 'notice notice-warning';
-			    break;
-			case 'update':
-//			echo 'update-nag update';
-//			break;
-			case 'success':
-			default:
-				echo 'updated success';
-				break;
-		}
-	?> fs-notice<?php if ( ! empty( $VARS['sticky'] ) ) {
-		echo ' fs-sticky';
-	} ?><?php if ( ! empty( $VARS['plugin'] ) ) {
-		echo ' fs-has-title';
-	} ?><?php if ( ! empty( $slug ) ) {
-		echo " fs-slug-{$slug}";
-	} ?><?php if ( ! empty( $type ) ) {
-		echo " fs-type-{$type}";
-	} ?>"><?php if ( ! empty( $VARS['plugin'] ) ) : ?>
-		<label class="fs-plugin-title"><?php echo $VARS['plugin'] ?></label>
+<div class="<?php echo fs_html_get_classname( $classes ); ?>" <?php echo fs_html_get_attributes( $attributes ); ?>>
+	<?php if ( ! empty( $VARS['plugin'] ) ) : ?>
+		<label class="fs-plugin-title">
+			<?php echo esc_html( $VARS['plugin'] ); ?>
+		</label>
 	<?php endif ?>
+
 	<?php if ( ! empty( $VARS['sticky'] ) && ( ! isset( $VARS['dismissible'] ) || false !== $VARS['dismissible'] ) ) : ?>
-		<div class="fs-close"><i class="dashicons dashicons-no"
-		                         title="<?php echo esc_attr( $dismiss_text ) ?>"></i> <span><?php echo esc_html( $dismiss_text ) ?></span>
+		<div class="fs-close">
+			<i class="dashicons dashicons-no" title="<?php echo esc_attr( $dismiss_text ) ?>"></i>
+			<span><?php echo esc_html( $dismiss_text ); ?></span>
 		</div>
 	<?php endif ?>
+
 	<div class="fs-notice-body">
-		<?php if ( ! empty( $VARS['title'] ) ) : ?><b><?php echo $VARS['title'] ?></b> <?php endif ?>
-		<?php echo $VARS['message'] ?>
+		<?php if ( ! empty( $VARS['title'] ) ) : ?>
+			<strong><?php echo fs_html_get_sanitized_html( $VARS['title'] ); ?></strong>
+		<?php endif ?>
+
+		<?php echo fs_html_get_sanitized_html( $VARS['message'] ); ?>
 	</div>
 </div>

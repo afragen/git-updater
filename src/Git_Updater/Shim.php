@@ -124,7 +124,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 					__( '%s expects a non-empty string.' ),
 					'<code>wp_opcache_invalidate_directory()</code>'
 				);
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error, WordPress.Security.EscapeOutput.OutputNotEscaped
 				trigger_error( $error_message );
 			}
 			return;

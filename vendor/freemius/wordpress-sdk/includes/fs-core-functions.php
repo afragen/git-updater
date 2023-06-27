@@ -133,10 +133,83 @@
     #region Request handlers.
     #--------------------------------------------------------------------------------
 
+    if ( ! function_exists( 'fs_request_get_raw' ) ) {
+        /**
+         * A helper function to fetch GET/POST user input with an optional default value when the input is not set.
+         * This function does not do sanitization. It is up to the caller to properly sanitize and validate the input.
+         *
+         * The return of this function is always unslashed.
+         *
+         * @since 2.5.10
+         *
+         * @param string      $key
+         * @param mixed       $def
+         * @param string|bool $type When set to 'get', it will look for the value passed via query string. When
+         *                          set to 'post', it will look for the value passed via the POST request's body. Otherwise,
+         *                          it will check if the parameter was passed using any of the mentioned two methods.
+         *
+         * @return mixed
+         */
+        function fs_request_get_raw( $key, $def = false, $type = false ) {
+            if ( is_string( $type ) ) {
+                $type = strtolower( $type );
+            }
+
+            /**
+             * Note to WordPress.org reviewers:
+             * This is a helper function to fetch GET/POST user input with an optional default value when the input is not set. The actual sanitization is done in the scope of the function's usage.
+             */
+            switch ( $type ) {
+                case 'post':
+                    // phpcs:ignore WordPress.Security.NonceVerification.Missing
+                    $value = isset( $_POST[ $key ] ) ? $_POST[ $key ] : $def;
+                    break;
+                case 'get':
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    $value = isset( $_GET[ $key ] ) ? $_GET[ $key ] : $def;
+                    break;
+                default:
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    $value = isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : $def;
+                    break;
+            }
+
+            // Don't unslash if the value itself is empty (empty string, null, empty array etc).
+            return empty( $value ) ? $value : wp_unslash( $value );
+        }
+    }
+
+    if ( ! function_exists( 'fs_sanitize_input' ) ) {
+        /**
+         * Sanitizes input recursively (if an array).
+         *
+         * @param mixed $input
+         *
+         * @return mixed
+         * @uses  sanitize_text_field()
+         * @since 2.5.10
+         */
+        function fs_sanitize_input( $input ) {
+            if ( is_array( $input ) ) {
+                foreach ( $input as $key => $value ) {
+                    $input[ $key ] = fs_sanitize_input( $value );
+                }
+            } else {
+                // Allow empty values to pass through as-is, like `null`, `''`, `0`, `'0'` etc.
+                $input = empty( $input ) ? $input : sanitize_text_field( $input );
+            }
+
+            return $input;
+        }
+    }
+
     if ( ! function_exists( 'fs_request_get' ) ) {
         /**
          * A helper method to fetch GET/POST user input with an optional default value when the input is not set.
+         *
          * @author Vova Feldman (@svovaf)
+         *
+         * @note The return value is always sanitized with sanitize_text_field().
          *
          * @param string      $key
          * @param mixed       $def
@@ -144,35 +217,17 @@
          *                          set to 'post' will look for the value passed via the POST request's body, otherwise,
          *                          will check if the parameter was passed in any of the two.
          *
+         *
          * @return mixed
          */
         function fs_request_get( $key, $def = false, $type = false ) {
-            if ( is_string( $type ) ) {
-                $type = strtolower( $type );
-            }
-
-            /**
-             * Note to WordPress.org Reviewers:
-             *  This is a helper method to fetch GET/POST user input with an optional default value when the input is not set. The actual sanitization is done in the scope of the function's usage.
-             */
-            switch ( $type ) {
-                case 'post':
-                    $value = isset( $_POST[ $key ] ) ? $_POST[ $key ] : $def;
-                    break;
-                case 'get':
-                    $value = isset( $_GET[ $key ] ) ? $_GET[ $key ] : $def;
-                    break;
-                default:
-                    $value = isset( $_REQUEST[ $key ] ) ? $_REQUEST[ $key ] : $def;
-                    break;
-            }
-
-            return $value;
+            return fs_sanitize_input( fs_request_get_raw( $key, $def, $type ) );
         }
     }
 
     if ( ! function_exists( 'fs_request_has' ) ) {
         function fs_request_has( $key ) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             return isset( $_REQUEST[ $key ] );
         }
     }
@@ -231,6 +286,7 @@
 
     if ( ! function_exists( 'fs_get_action' ) ) {
         function fs_get_action( $action_key = 'action' ) {
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
             if ( ! empty( $_REQUEST[ $action_key ] ) && is_string( $_REQUEST[ $action_key ] ) ) {
                 return strtolower( $_REQUEST[ $action_key ] );
             }
@@ -244,6 +300,7 @@
             }
 
             return false;
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
         }
     }
 
