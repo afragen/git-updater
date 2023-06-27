@@ -61,18 +61,18 @@
             <?php $site_props = array('uid', 'url', 'title', 'language') ?>
             <?php foreach ( $sites as $site ) : ?>
                 <tr<?php if ( ! empty( $site['license_id'] ) ) {
-                    echo ' data-license-id="' . $site['license_id'] . '"';
+                    echo ' data-license-id="' . esc_attr( $site['license_id'] ) . '"';
                 } ?>>
                     <?php if ( $require_license_key ) : ?>
                         <td><input type="checkbox" value="true" /></td>
                     <?php endif ?>
-                    <td class="blog-id"><span><?php echo $site['blog_id'] ?></span>.</td>
+                    <td class="blog-id"><span><?php echo esc_html( $site['blog_id'] ) ?></span>.</td>
                     <td width="600"><span><?php
                         $url = str_replace( 'http://', '', str_replace( 'https://', '', $site['url'] ) );
-                        echo $url;
+                        echo esc_html( $url );
                         ?></span>
                         <?php foreach ($site_props as $prop) : ?>
-                            <input class="<?php echo $prop ?>" type="hidden" value="<?php echo esc_attr($site[$prop]) ?>" />
+                            <input class="<?php echo esc_attr( $prop ) ?>" type="hidden" value="<?php echo esc_attr($site[$prop]) ?>" />
                         <?php endforeach ?>
                     </td>
                     <?php if ( ! $require_license_key ) : ?>

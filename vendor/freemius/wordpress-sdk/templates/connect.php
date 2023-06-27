@@ -365,8 +365,8 @@
 			<?php if ( $activate_with_current_user ) : ?>
 				<form action="" method="POST">
 					<input type="hidden" name="fs_action"
-					       value="<?php echo $fs->get_unique_affix() ?>_activate_existing">
-					<?php wp_nonce_field( 'activate_existing_' . $fs->get_public_key() ) ?>
+					       value="<?php echo esc_attr( $fs->get_unique_affix() . '_activate_existing' ) ?>">
+					<?php wp_nonce_field( $fs->get_unique_affix() . '_activate_existing' ) ?>
 					<input type="hidden" name="is_extensions_tracking_allowed" value="1">
 					<input type="hidden" name="is_diagnostic_tracking_allowed" value="1">
 					<button class="button button-primary" tabindex="1"
@@ -376,7 +376,7 @@
 				<form method="post" action="<?php echo WP_FS__ADDRESS ?>/action/service/user/install/">
 					<?php unset( $optin_params['sites']); ?>
 					<?php foreach ( $optin_params as $name => $value ) : ?>
-						<input type="hidden" name="<?php echo $name ?>" value="<?php echo esc_attr( $value ) ?>">
+						<input type="hidden" name="<?php echo esc_attr( $name ) ?>" value="<?php echo esc_attr( $value ) ?>">
 					<?php endforeach ?>
 					<input type="hidden" name="is_extensions_tracking_allowed" value="1">
                     <input type="hidden" name="is_diagnostic_tracking_allowed" value="1">
@@ -387,7 +387,9 @@
 				</form>
 			<?php endif ?>
             <?php if ( $require_license_key ) : ?>
-                <a id="license_issues_link" href="<?php echo $fs->apply_filters( 'known_license_issues_url', 'https://freemius.com/help/documentation/wordpress-sdk/license-activation-issues/' ) ?>" target="_blank"><?php fs_esc_html_echo_inline( 'License issues?', 'license-issues', $slug ) ?></a>
+                <a id="license_issues_link"
+                   href="<?php echo esc_url( $fs->apply_filters( 'known_license_issues_url', 'https://freemius.com/help/documentation/wordpress-sdk/license-activation-issues/' ) ) ?>"
+                   target="_blank"><?php fs_esc_html_echo_inline( 'License issues?', 'license-issues', $slug ) ?></a>
             <?php endif ?>
 
             <?php $fs->do_action( 'connect/after_actions', $activation_state ) ?>
@@ -412,12 +414,12 @@
                     <?php if ( $require_license_key ) : ?>
                         <a class="fs-trigger wp-core-ui" href="#" tabindex="1" style="color: inherit;"><?php echo sprintf(
                                 fs_esc_html_inline( 'For delivery of security & feature updates, and license management, %s needs to', 'license-sync-disclaimer', $slug ) . '<b class="fs-arrow"></b>',
-                                sprintf( '<nobr class="button-link" style="color: inherit;">%s</nobr>', $fs->get_plugin_title() )
+                                sprintf( '<nobr class="button-link" style="color: inherit;">%s</nobr>', esc_html( $fs->get_plugin_title() ) )
                             ) ?></a>
                     <?php else : ?>
                         <a class="fs-trigger wp-core-ui" href="#" tabindex="1" style="color: inherit;"><?php printf(
                                 fs_esc_html_inline( 'This will allow %s to', 'this-will-allow-x', $slug ) . '<b class="fs-arrow"></b>',
-                                sprintf( '<nobr class="button-link" style="color: inherit;">%s</nobr>', $fs->get_plugin_title() )
+                                sprintf( '<nobr class="button-link" style="color: inherit;">%s</nobr>', esc_html( $fs->get_plugin_title() ) )
                             ) ?></a>
                     <?php endif ?>
 					<ul><?php
@@ -442,7 +444,7 @@
 		<?php endif ?>
         </div>
 		<div class="fs-terms">
-            <a class="fs-tooltip-trigger<?php echo is_rtl() ? ' rtl' : '' ?>" href="<?php echo esc_url( $freemius_activation_terms_url ) ?>" target="_blank" rel="noopener" tabindex="1">Powered by Freemius<?php if ( $require_license_key ) : ?> <span class="fs-tooltip" style="width: 170px"><?php echo $fs->get_text_inline( 'Freemius is our licensing and software updates engine', 'permissions-extensions_desc' ) ?></span><?php endif ?></a>
+            <a class="fs-tooltip-trigger<?php echo is_rtl() ? ' rtl' : '' ?>" href="<?php echo esc_url( $freemius_activation_terms_url ) ?>" target="_blank" rel="noopener" tabindex="1">Powered by Freemius<?php if ( $require_license_key ) : ?> <span class="fs-tooltip" style="width: 170px"><?php echo esc_html( $fs->get_text_inline( 'Freemius is our licensing and software updates engine', 'permissions-extensions_desc' ) ) ?></span><?php endif ?></a>
             &nbsp;&nbsp;-&nbsp;&nbsp;
 			<a href="https://freemius.com/privacy/" target="_blank" rel="noopener"
 			   tabindex="1"><?php fs_esc_html_echo_inline( 'Privacy Policy', 'privacy-policy', $slug ) ?></a>

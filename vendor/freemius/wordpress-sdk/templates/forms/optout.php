@@ -118,11 +118,11 @@
 
     $form_id = "fs_opt_out_{$fs->get_id()}";
 ?>
-<div id="<?php echo $form_id ?>"
+<div id="<?php echo esc_attr( $form_id ) ?>"
      class="fs-modal fs-modal-opt-out"
-     data-plugin-id="<?php echo $fs->get_id() ?>"
-     data-action="<?php echo $fs->get_ajax_action( $ajax_action ) ?>"
-     data-security="<?php echo $fs->get_ajax_security( $ajax_action ) ?>"
+     data-plugin-id="<?php echo esc_attr( $fs->get_id() ) ?>"
+     data-action="<?php echo esc_attr( $fs->get_ajax_action( $ajax_action ) ) ?>"
+     data-security="<?php echo esc_attr(  $fs->get_ajax_security( $ajax_action ) ) ?>"
      style="display: none">
     <div class="fs-modal-dialog">
         <div class="fs-modal-header">
@@ -145,11 +145,12 @@
         </div>
         <?php foreach ( $permission_groups as $i => $permission_group ) : ?>
             <?php if ( ! empty( $permission_group[ 'prompt' ] ) ) : ?>
-                <div class="fs-<?php echo $permission_group[ 'id' ] ?>-opt-out fs-opt-out-disclaimer" data-group-id="<?php echo $permission_group[ 'id' ] ?>" style="display: none">
+                <div class="fs-<?php echo esc_attr( $permission_group[ 'id' ] ) ?>-opt-out fs-opt-out-disclaimer" data-group-id="<?php echo esc_attr( $permission_group[ 'id' ] ) ?>" style="display: none">
                     <div class="fs-modal-body">
                         <div class="fs-modal-panel active">
                             <div class="notice notice-error inline opt-out-error-message"><p></p></div>
                             <?php foreach ( $permission_group[ 'prompt' ] as $p ) : ?>
+                                <?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                 <p><?php echo $p ?></p>
                             <?php endforeach ?>
                         </div>
@@ -170,12 +171,12 @@
 	(function( $ ) {
 		$( document ).ready(function() {
             FS.OptOut(
-                '<?php echo $fs->get_id() ?>',
-                '<?php echo $slug ?>',
-                '<?php echo $fs->get_module_type() ?>',
+                <?php echo wp_json_encode( $fs->get_id() ) ?>,
+                <?php echo wp_json_encode( $slug ) ?>,
+                <?php echo wp_json_encode( $fs->get_module_type() ) ?>,
                 <?php echo $fs->is_registered( true ) ? 'true' : 'false' ?>,
                 <?php echo $fs->is_tracking_allowed() ? 'true' : 'false' ?>,
-                '<?php echo esc_js( $reconnect_url ) ?>'
+                <?php echo wp_json_encode( $reconnect_url ) ?>
             );
 		});
 	})( jQuery );

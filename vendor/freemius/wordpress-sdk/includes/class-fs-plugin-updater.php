@@ -134,7 +134,7 @@
         function catch_plugin_information_dialog_contents() {
             if (
                 'plugin-information' !== fs_request_get( 'tab', false ) ||
-                $this->_fs->get_slug() !== fs_request_get( 'plugin', false )
+                $this->_fs->get_slug() !== fs_request_get_raw( 'plugin', false )
             ) {
                 return;
             }
@@ -153,7 +153,7 @@
         function edit_and_echo_plugin_information_dialog_contents( $hook_suffix ) {
             if (
                 'plugin-information' !== fs_request_get( 'tab', false ) ||
-                $this->_fs->get_slug() !== fs_request_get( 'plugin', false )
+                $this->_fs->get_slug() !== fs_request_get_raw( 'plugin', false )
             ) {
                 return;
             }
