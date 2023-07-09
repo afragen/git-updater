@@ -72,7 +72,7 @@ class Add_Ons {
 				[
 					'name'        => __( 'Git Updater - Bitbucket', 'git-updater' ),
 					'author'      => __( 'Andy Fragen' ),
-					'description' => __( 'Add Bitbucket and Bitbucket Server repositories to the Git Updater plugin.', 'git-updater' ),
+					'description' => __( 'Add Bitbucket and Bitbucket Server hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-bitbucket/git-updater-bitbucket.php',
 					'uri'         => 'afragen/git-updater-bitbucket',
