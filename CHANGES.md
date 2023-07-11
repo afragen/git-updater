@@ -1,4 +1,6 @@
 #### [unreleased]
+* update Bitbucket Add-on message for consistency
+* ensure `Shim` available during `register_activation_hook()`
 
 #### 12.2.3 / 2023-06-27
 * composer update
