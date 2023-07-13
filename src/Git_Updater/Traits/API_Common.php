@@ -299,7 +299,7 @@ trait API_Common {
 			 */
 			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
-			if ( $this->validate_response( $response ) ) {
+			if ( $this->validate_response( $response ) || is_scalar( $response ) ) {
 				return false;
 			}
 
