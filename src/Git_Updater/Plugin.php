@@ -172,9 +172,7 @@ class Plugin {
 				unset( self::$options[ $current_branch ] );
 				update_site_option( 'git_updater', self::$options );
 			}
-			$branch = isset( self::$options[ $current_branch ] )
-				? self::$options[ $current_branch ]
-				: $header['primary_branch'];
+			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
 			$git_plugin['type']                    = 'plugin';
 			$git_plugin['git']                     = $repo_parts['git_server'];

@@ -85,9 +85,7 @@ class Settings {
 		if ( isset( $post_data['option_page'] ) &&
 			'git_updater_additions' === $post_data['option_page']
 		) {
-			$new_options = isset( $post_data['git_updater_additions'] )
-				? $post_data['git_updater_additions']
-				: [];
+			$new_options = $post_data['git_updater_additions'] ?? [];
 
 			$new_options = $this->sanitize( $new_options );
 
@@ -285,7 +283,7 @@ class Settings {
 	 * @return void
 	 */
 	public function callback_field( $args ) {
-		$placeholder = isset( $args['placeholder'] ) ? $args['placeholder'] : null;
+		$placeholder = $args['placeholder'] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
 			<input type="text" style="width:50%;" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="" placeholder="<?php echo esc_attr( $placeholder ); ?>">
@@ -332,7 +330,7 @@ class Settings {
 	 * @param array $args Callback args.
 	 */
 	public function callback_checkbox( $args ) {
-		$checked = isset( self::$options_additions[ $args['id'] ] ) ? self::$options_additions[ $args['id'] ] : null;
+		$checked = self::$options_additions[ $args['id'] ] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater_additions[<?php echo esc_attr( $args['setting'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >

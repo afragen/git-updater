@@ -687,7 +687,7 @@ class Settings {
 	 * @param array $args Callback args.
 	 */
 	public function token_callback_checkbox( $args ) {
-		$checked = isset( self::$options[ $args['id'] ] ) ? self::$options[ $args['id'] ] : null;
+		$checked = self::$options[ $args['id'] ] ?? null;
 		?>
 		<label for="<?php echo esc_attr( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="1" <?php checked( 1, intval( $checked ), true ); ?> <?php disabled( '-1', $checked, true ); ?> >
@@ -910,13 +910,13 @@ class Settings {
 				return [
 					'type'    => $e->type,
 					'slug'    => $e->slug,
-					'file'    => isset( $e->file ) ? $e->file : $e->slug,
+					'file'    => $e->file ?? $e->slug,
 					'branch'  => $e->branch,
 					'name'    => $e->name,
-					'private' => isset( $e->is_private ) ? $e->is_private : false,
+					'private' => $e->is_private ?? false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
-					'dot_org' => isset( $e->dot_org ) ? $e->dot_org : false,
-					'dismiss' => isset( $e->dismiss ) ? $e->dismiss : false,
+					'dot_org' => $e->dot_org ?? false,
+					'dismiss' => $e->dismiss ?? false,
 				];
 			},
 			$type_repos

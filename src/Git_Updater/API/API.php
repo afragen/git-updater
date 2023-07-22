@@ -217,13 +217,13 @@ class API {
 			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
 		}
 
-		static::$error_code[ $this->type->slug ] = isset( static::$error_code[ $this->type->slug ] ) ? static::$error_code[ $this->type->slug ] : [];
+		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
 		static::$error_code[ $this->type->slug ] = array_merge(
 			static::$error_code[ $this->type->slug ],
 			[
 				'repo' => $this->type->slug,
 				'code' => $code,
-				'name' => isset( $this->type->name ) ? $this->type->name : $this->type->slug,
+				'name' => $this->type->name ?? $this->type->slug,
 				'git'  => $this->type->git,
 			]
 		);
@@ -295,7 +295,7 @@ class API {
 			'owner'   => $this->type->owner,
 			'repo'    => $this->type->slug,
 			'branch'  => empty( $this->type->branch ) ? $this->type->primary_branch : $this->type->branch,
-			'gist_id' => isset( $this->type->gist_id ) ? $this->type->gist_id : null,
+			'gist_id' => $this->type->gist_id ?? null,
 		];
 
 		foreach ( $segments as $segment => $value ) {
@@ -339,7 +339,7 @@ class API {
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$response = isset( $this->response['dot_org'] ) ? $this->response['dot_org'] : false;
+		$response = $this->response['dot_org'] ?? false;
 
 		if ( ! $response ) {
 			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.2/";
@@ -545,11 +545,11 @@ class API {
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
-		$this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : '';
-		$this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : '';
-		$this->type->requires_php = isset( $readme['requires_php'] ) ? $readme['requires_php'] : '';
-		$this->type->donate_link  = isset( $readme['donate_link'] ) ? $readme['donate_link'] : '';
-		$this->type->contributors = isset( $readme['contributors'] ) ? $readme['contributors'] : [];
+		$this->type->tested       = $readme['tested'] ?? '';
+		$this->type->requires     = $readme['requires'] ?? '';
+		$this->type->requires_php = $readme['requires_php'] ?? '';
+		$this->type->donate_link  = $readme['donate_link'] ?? '';
+		$this->type->contributors = $readme['contributors'] ?? [];
 		if ( empty( $readme['upgrade_notice'] ) ) {
 			unset( $readme['upgrade_notice'] );
 		} else {
@@ -583,7 +583,7 @@ class API {
 			unset( $this->response['release_asset_redirect'] );
 		}
 
-		$response = isset( $this->response['release_asset_redirect'] ) ? $this->response['release_asset_redirect'] : false;
+		$response = $this->response['release_asset_redirect'] ?? false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['key'] ) ) {

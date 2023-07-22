@@ -88,7 +88,7 @@ trait GU_Trait {
 	 */
 	public function get_repo_cache( $repo = false ) {
 		if ( ! $repo ) {
-			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
+			$repo = $this->type->slug ?? 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$cache     = get_site_option( $cache_key );
@@ -121,7 +121,7 @@ trait GU_Trait {
 
 		$hours = $this->get_class_vars( 'API\API', 'hours' );
 		if ( ! $repo ) {
-			$repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
+			$repo = $this->type->slug ?? 'ghu';
 		}
 		$cache_key = 'ghu-' . md5( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
@@ -409,8 +409,8 @@ trait GU_Trait {
 		$header_parts         = parse_url( $repo_header );
 		$header_path          = pathinfo( $header_parts['path'] );
 		$header['original']   = $repo_header;
-		$header['scheme']     = isset( $header_parts['scheme'] ) ? $header_parts['scheme'] : null;
-		$header['host']       = isset( $header_parts['host'] ) ? $header_parts['host'] : null;
+		$header['scheme']     = $header_parts['scheme'] ?? null;
+		$header['host']       = $header_parts['host'] ?? null;
 		$header['owner']      = trim( $header_path['dirname'], '/' );
 		$header['repo']       = isset( $header_path['extension'] ) && 'git' === $header_path['extension'] ? $header_path['filename'] : $header_path['basename'];
 		$header['owner_repo'] = implode( '/', [ $header['owner'], $header['repo'] ] );

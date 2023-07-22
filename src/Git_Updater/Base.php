@@ -707,6 +707,6 @@ class Base {
 			}
 		}
 
-		return isset( $icon ) ? $icon : null;
+		return $icon ?? null;
 	}
 }
