@@ -55,6 +55,13 @@ class Branch {
 	protected $cache;
 
 	/**
+	 * Holds data to be stored.
+	 *
+	 * @var string[]
+	 */
+	protected $response;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
