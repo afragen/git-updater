@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.3.0 / 2023-08-10
 * update Bitbucket Add-on message for consistency
 * ensure `Shim` available during `register_activation_hook()`
 * add conditional to `get_remote_api_branches()` to ensure `$response` is not a scalar
