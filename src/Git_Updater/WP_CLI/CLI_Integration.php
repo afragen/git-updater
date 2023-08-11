@@ -199,7 +199,7 @@ class CLI_Integration extends WP_CLI_Command {
 		$themes                = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$configs               = array_merge( $plugins, $themes );
 
-		$repo = isset( $configs[ $slug ] ) ? $configs[ $slug ] : false;
+		$repo = $configs[ $slug ] ?? false;
 		if ( ! $repo ) {
 			WP_CLI::error( sprintf( 'There is no repository with slug: %s installed.', "'{$slug}'" ) );
 			exit;
@@ -238,12 +238,12 @@ class CLI_Integration extends WP_CLI_Command {
 	 * @return array $cli_config
 	 */
 	private function process_args( $uri, $assoc_args ) {
-		$token                 = isset( $assoc_args['token'] ) ? $assoc_args['token'] : false;
+		$token                 = $assoc_args['token'] ?? false;
 		$cli_config            = [];
 		$cli_config['uri']     = $uri;
 		$cli_config['private'] = $token;
-		$cli_config['branch']  = isset( $assoc_args['branch'] ) ? $assoc_args['branch'] : 'master';
-		$cli_config['slug']    = isset( $assoc_args['slug'] ) ? $assoc_args['slug'] : null;
+		$cli_config['branch']  = $assoc_args['branch'] ?? 'master';
+		$cli_config['slug']    = $assoc_args['slug'] ?? null;
 
 		switch ( $assoc_args ) {
 			case isset( $assoc_args['github'] ):

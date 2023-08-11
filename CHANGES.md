@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 12.3.0 / 2023-08-10
+* update Bitbucket Add-on message for consistency
+* ensure `Shim` available during `register_activation_hook()`
+* add conditional to `get_remote_api_branches()` to ensure `$response` is not a scalar
+* use null coalescing operator
+* update for PHP 8.2
+
 #### 12.2.3 / 2023-06-27
 * composer update
 * get `gu_disable_cron` hook result once per repository

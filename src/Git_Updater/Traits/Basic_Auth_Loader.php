@@ -74,7 +74,7 @@ trait Basic_Auth_Loader {
 			 */
 			$args = apply_filters( 'gu_get_auth_header', $args, $credentials );
 		}
-		$args['headers'] = isset( $args['headers'] ) ? $args['headers'] : [];
+		$args['headers'] = $args['headers'] ?? [];
 
 		return $args;
 	}
@@ -122,7 +122,7 @@ trait Basic_Auth_Loader {
 
 			$credentials['type']       = $type;
 			$credentials['isset']      = true;
-			$credentials['token']      = isset( $token ) ? $token : null;
+			$credentials['token']      = $token ?? null;
 			$credentials['enterprise'] = ! in_array( $headers['host'], [ 'github.com', 'api.github.com' ], true );
 		}
 

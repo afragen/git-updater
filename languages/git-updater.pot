@@ -2,16 +2,16 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.2.0\n"
+"Project-Id-Version: Git Updater 12.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-04-19T18:44:46+00:00\n"
+"POT-Creation-Date: 2023-08-11T00:39:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
@@ -49,7 +49,7 @@ msgid "Git Updater - Bitbucket"
 msgstr ""
 
 #: src/Git_Updater/Add_Ons.php:75
-msgid "Add Bitbucket and Bitbucket Server repositories to the Git Updater plugin."
+msgid "Add Bitbucket and Bitbucket Server hosted repositories to the Git Updater plugin."
 msgstr ""
 
 #: src/Git_Updater/Add_Ons.php:86
@@ -240,42 +240,42 @@ msgid "Installed Plugins and Themes"
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:389
-#: src/Git_Updater/Theme.php:515
+#: src/Git_Updater/Theme.php:384
+#: src/Git_Updater/Theme.php:510
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:401
+#: src/Git_Updater/Theme.php:396
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:405
+#: src/Git_Updater/Theme.php:400
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:526
+#: src/Git_Updater/Theme.php:405
+#: src/Git_Updater/Theme.php:521
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:415
-#: src/Git_Updater/Theme.php:531
+#: src/Git_Updater/Theme.php:410
+#: src/Git_Updater/Theme.php:526
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:538
+#: src/Git_Updater/Theme.php:533
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:544
+#: src/Git_Updater/Theme.php:539
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:666
+#: src/Git_Updater/Traits/GU_Trait.php:673
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""

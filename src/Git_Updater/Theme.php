@@ -188,9 +188,7 @@ class Theme {
 				unset( self::$options[ $current_branch ] );
 				update_site_option( 'git_updater', self::$options );
 			}
-			$branch = isset( self::$options[ $current_branch ] )
-				? self::$options[ $current_branch ]
-				: $header['primary_branch'];
+			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
 			$git_theme['type']                    = 'theme';
 			$git_theme['git']                     = $repo_parts['git_server'];
@@ -302,7 +300,7 @@ class Theme {
 			return $false;
 		}
 
-		$theme = isset( $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
+		$theme = $this->config[ $response->slug ] ?? false;
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $theme ) ) {

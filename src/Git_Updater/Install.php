@@ -240,7 +240,7 @@ class Install {
 			? rtrim( $headers['host'], '.com' )
 			: rtrim( $headers['host'], '.org' );
 
-		$api = isset( $config['git'] ) ? $config['git'] : $api;
+		$api = $config['git'] ?? $api;
 
 		$_POST['git_updater_repo']      = $config['uri'];
 		$_POST['git_updater_branch']    = $config['branch'];

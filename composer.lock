@@ -254,20 +254,24 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.9",
+            "version": "2.5.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "e9e3b37d165a881326991a672af0269a6e2b2cda"
+                "reference": "05bac841008b705bff9636f782c96fb0a73e615b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/e9e3b37d165a881326991a672af0269a6e2b2cda",
-                "reference": "e9e3b37d165a881326991a672af0269a6e2b2cda",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/05bac841008b705bff9636f782c96fb0a73e615b",
+                "reference": "05bac841008b705bff9636f782c96fb0a73e615b",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "wp-coding-standards/wpcs": "^2.3"
             },
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
@@ -287,9 +291,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.9"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.10"
             },
-            "time": "2023-06-12T06:57:05+00:00"
+            "time": "2023-07-18T06:35:08+00:00"
         }
     ],
     "packages-dev": [

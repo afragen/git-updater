@@ -58,7 +58,7 @@ trait API_Common {
 			return '';
 		}
 		if ( 'github' === $git ) {
-			$assets = isset( $response->assets ) ? $response->assets : [];
+			$assets = $response->assets ?? [];
 			foreach ( $assets as $asset ) {
 				if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
 					$response = $asset->url;
@@ -91,7 +91,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_info( $git, $request ) {
-		$response = isset( $this->response[ $this->type->slug ] ) ? $this->response[ $this->type->slug ] : false;
+		$response = $this->response[ $this->type->slug ] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'file';
@@ -124,7 +124,7 @@ trait API_Common {
 	 */
 	public function get_remote_api_tag( $request ) {
 		$repo_type = $this->return_repo_type();
-		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
+		$response  = $this->response['tags'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'tags';
@@ -161,7 +161,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_changes( $git, $changes, $request ) {
-		$response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
+		$response = $this->response['changes'] ?? false;
 
 		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
@@ -207,7 +207,7 @@ trait API_Common {
 			return false;
 		}
 
-		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
+		$response = $this->response['readme'] ?? false;
 
 		// Set $response from local file if no update available.
 		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
@@ -248,7 +248,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	public function get_remote_api_repo_meta( $request ) {
-		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
+		$response = $this->response['meta'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'meta';
@@ -280,7 +280,7 @@ trait API_Common {
 	 */
 	public function get_remote_api_branches( $git, $request ) {
 		$branches = [];
-		$response = isset( $this->response['branches'] ) ? $this->response['branches'] : false;
+		$response = $this->response['branches'] ?? false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
 			return false;
@@ -299,7 +299,7 @@ trait API_Common {
 			 */
 			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
-			if ( $this->validate_response( $response ) ) {
+			if ( $this->validate_response( $response ) || is_scalar( $response ) ) {
 				return false;
 			}
 
@@ -325,7 +325,7 @@ trait API_Common {
 	 * @return string $response Release asset URI.
 	 */
 	public function get_api_release_asset( $git, $request ) {
-		$response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+		$response = $this->response['release_asset'] ?? false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
