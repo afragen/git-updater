@@ -1,4 +1,4 @@
-### Changlog pre-12.0
+### Older changelog
 
 #### 11.1.10 / 2022-11-05
 * fix Appsero cron task from running more than scheduled
