@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `freemius/wordpress-sdk`
 
 #### 12.3.0 / 2023-08-10
 * update Bitbucket Add-on message for consistency

@@ -15,7 +15,7 @@
 	 *
 	 * @var string
 	 */
-	$this_sdk_version = '2.5.10';
+	$this_sdk_version = '2.5.11';
 
 	#region SDK Selection Logic --------------------------------------------------------------------
 

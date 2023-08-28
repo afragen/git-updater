@@ -1,0 +1,14 @@
+parameters:
+    level: 0
+    paths:
+        - config.php
+        - start.php
+        - require.php
+        - includes/
+        - templates/
+    bootstrapFiles:
+        - .phpstan/exceptions.php
+    ignoreErrors:
+        -
+            message: '#will always evaluate to true#'
+            path: includes/class-fs-plugin-updater.php
