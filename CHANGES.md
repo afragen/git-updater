@@ -1,5 +1,6 @@
 #### [unreleased]
 * update `freemius/wordpress-sdk`
+* WPCS 3.0.0 linting
 
 #### 12.3.0 / 2023-08-10
 * update Bitbucket Add-on message for consistency

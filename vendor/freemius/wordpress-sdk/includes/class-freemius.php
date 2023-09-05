@@ -5644,19 +5644,17 @@
                 $this->_cache->expire( 'tabs_stylesheets' );
             }
 
-            if ( $this->is_registered() ) {
-                if ( ! $this->is_addon() ) {
-                    add_action(
-                        is_admin() ? 'admin_init' : 'init',
-                        array( &$this, '_plugin_code_type_changed' )
-                    );
-                }
+            if ( ! $this->is_addon() ) {
+                add_action(
+                    is_admin() ? 'admin_init' : 'init',
+                    array( &$this, '_plugin_code_type_changed' )
+                );
+            }
 
-                if ( $this->is_premium() ) {
-                    // Purge cached payments after switching to the premium version.
-                    // @todo This logic doesn't handle purging the cache for serviceware module upgrade.
-                    $this->get_api_user_scope()->purge_cache( "/plugins/{$this->_module_id}/payments.json?include_addons=true" );
-                }
+            if ( $this->is_registered() && $this->is_premium() ) {
+                // Purge cached payments after switching to the premium version.
+                // @todo This logic doesn't handle purging the cache for serviceware module upgrade.
+                $this->get_api_user_scope()->purge_cache( "/plugins/{$this->_module_id}/payments.json?include_addons=true" );
             }
         }
 
@@ -5720,8 +5718,10 @@
                 }
             }
 
-            // Schedule code type changes event.
-            $this->schedule_install_sync();
+            if ( $this->is_registered() ) {
+                // Schedule code type changes event.
+                $this->schedule_install_sync();
+            }
 
             /**
              * Unregister the uninstall hook for the other version of the plugin (with different code type) to avoid
