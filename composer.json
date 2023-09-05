@@ -37,9 +37,7 @@
     "freemius/wordpress-sdk": "^2.5"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
-    "squizlabs/php_codesniffer": "3.6.0",
-    "wp-coding-standards/wpcs": "~2.3.0"
+    "wp-coding-standards/wpcs": "^3.0.0"
   },
   "config": {
     "allow-plugins": {
