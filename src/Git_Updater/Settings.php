@@ -226,13 +226,13 @@ class Settings {
 		}
 		add_filter(
 			'gu_running_git_servers',
-			static function( $gits ) use ( &$show_tabs ) {
+			static function ( $gits ) use ( &$show_tabs ) {
 				return array_merge( $gits, array_flip( $show_tabs ) );
 			}
 		);
 		add_filter(
 			'gu_add_settings_subtabs',
-			static function( $subtabs ) use ( &$show_tabs ) {
+			static function ( $subtabs ) use ( &$show_tabs ) {
 
 				return array_merge( $subtabs, $show_tabs );
 			}

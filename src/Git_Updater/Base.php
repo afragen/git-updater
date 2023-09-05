@@ -32,7 +32,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class Base {
 
-	use GU_Trait, Basic_Auth_Loader;
+	use GU_Trait;
+	use Basic_Auth_Loader;
 
 	/**
 	 * Variable for holding extra theme and plugin headers.

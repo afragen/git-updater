@@ -29,7 +29,8 @@ if ( ! defined( 'WPINC' ) ) {
  * Install <author>/<repo> directly from Git Updater.
  */
 class Install {
-	use GU_Trait, Basic_Auth_Loader;
+	use GU_Trait;
+	use Basic_Auth_Loader;
 
 	/**
 	 * Class options.

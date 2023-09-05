@@ -318,12 +318,12 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 	/**
 	 * Skin feedback.
 	 *
-	 * @param string $string  Feedback message.
+	 * @param string $message Feedback message.
 	 * @param array  ...$args Feedback args.
 	 *
 	 * @return void
 	 */
-	public function feedback( $string, ...$args ) {
+	public function feedback( $message, ...$args ) {
 	}
 }
 
@@ -356,11 +356,11 @@ class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
 	/**
 	 * Skin feedback.
 	 *
-	 * @param string $string  Feedback message.
+	 * @param string $message Feedback message.
 	 * @param array  ...$args Feedback args.
 	 *
 	 * @return void
 	 */
-	public function feedback( $string, ...$args ) {
+	public function feedback( $message, ...$args ) {
 	}
 }

@@ -86,7 +86,7 @@ class Rest_Update {
 		}
 
 		if ( ! $plugin ) {
-			throw new \UnexpectedValueException( 'Plugin not found or not updatable with Git Updater: ' . $plugin_slug );
+			throw new \UnexpectedValueException( 'Plugin not found or not updatable with Git Updater: ' . esc_html( $plugin_slug ) );
 		}
 
 		if ( is_plugin_active( $plugin->file ) ) {
@@ -157,7 +157,7 @@ class Rest_Update {
 		}
 
 		if ( ! $theme ) {
-			throw new \UnexpectedValueException( 'Theme not found or not updatable with Git Updater: ' . $theme_slug );
+			throw new \UnexpectedValueException( 'Theme not found or not updatable with Git Updater: ' . esc_html( $theme_slug ) );
 		}
 
 		Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $theme );

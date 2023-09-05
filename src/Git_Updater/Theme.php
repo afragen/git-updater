@@ -289,27 +289,27 @@ class Theme {
 	/**
 	 * Put changelog in themes_api, return WP.org data as appropriate.
 	 *
-	 * @param bool      $false    Default false.
+	 * @param bool      $result   Default false.
 	 * @param string    $action   The type of information being requested from the Theme Installation API.
 	 * @param \stdClass $response Theme API arguments.
 	 *
 	 * @return mixed
 	 */
-	public function themes_api( $false, $action, $response ) {
+	public function themes_api( $result, $action, $response ) {
 		if ( ! ( 'theme_information' === $action ) ) {
-			return $false;
+			return $result;
 		}
 
 		$theme = $this->config[ $response->slug ] ?? false;
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $theme ) ) {
-			return $false;
+			return $result;
 		}
 
 		// wp.org theme.
 		if ( ! $theme || ( isset( $theme->dot_org ) && $theme->dot_org ) ) {
-			return $false;
+			return $result;
 		}
 
 		$response->slug         = $theme->slug;

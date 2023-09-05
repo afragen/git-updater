@@ -35,7 +35,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function download_package( $args, $url ) {
+	final public function download_package( $args, $url ) {
 		if ( null !== $args['filename'] ) {
 			$args = array_merge( $args, $this->add_auth_header( $args, $url ) );
 			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
@@ -55,7 +55,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	public function add_auth_header( $args, $url ) {
+	final public function add_auth_header( $args, $url ) {
 		$credentials = $this->get_credentials( $url );
 		if ( ! $credentials['isset'] || $credentials['api.wordpress'] ) {
 			return $args;

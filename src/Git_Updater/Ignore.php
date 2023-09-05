@@ -45,7 +45,7 @@ class Ignore {
 		// Remove repository from array of repositories.
 		add_filter(
 			'gu_config_pre_process',
-			static function( $config ) {
+			static function ( $config ) {
 				foreach ( self::$repos as $slug => $file ) {
 					unset( $config[ $slug ] );
 				}
@@ -59,7 +59,7 @@ class Ignore {
 		// Fix to display properly in Settings git subtab.
 		add_filter(
 			'gu_display_repos',
-			static function( $type_repos ) {
+			static function ( $type_repos ) {
 				foreach ( self::$repos  as $slug => $file ) {
 					if ( isset( $type_repos[ $slug ] ) ) {
 						$type_repos[ $slug ]->remote_version = false;
@@ -76,7 +76,7 @@ class Ignore {
 		// Don't display Settings token field.
 		add_filter(
 			'gu_add_repo_setting_field',
-			static function( $arr, $token ) {
+			static function ( $arr, $token ) {
 				foreach ( self::$repos as $file ) {
 					if ( $file === $token->file ) {
 						$arr = [];
