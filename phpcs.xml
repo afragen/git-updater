@@ -17,7 +17,7 @@
     <rule ref="WordPress">
         <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
         <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
-        <exclude name="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase"/>
+        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
         <exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents"/>
         <exclude name="WordPress.WP.AlternativeFunctions.parse_url_parse_url"/>
         <exclude name="WordPress.WP.AlternativeFunctions.json_encode_json_encode"/>
