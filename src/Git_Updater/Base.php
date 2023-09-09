@@ -699,7 +699,8 @@ class Base {
 				$githost = str_replace( "{$type_cap}URI", '', $key );
 				$padding = is_rtl() ? 'padding-left: 6px;' : 'padding-right: 6px;';
 				$icon    = sprintf(
-					'<img src="%1$s" style="vertical-align:text-bottom;%2$s" height="16" width="16" alt="%3$s" />',
+					'<img title="%1$s" src="%2$s" style="vertical-align:text-bottom;%3$s" height="16" width="16" alt="%4$s" />',
+					__( 'Updates via Git Updater', 'git-updater' ),
 					plugins_url( $git['icons'][ strtolower( $githost ) ] ),
 					$add_padding ? $padding : '',
 					$githost
