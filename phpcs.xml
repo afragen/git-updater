@@ -4,9 +4,13 @@
 
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>
+    <arg value="sp"/>
+    <arg name="colors"/>
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>
+    
+    <file>.</file>
 
     <!-- Exclude these -->
     <exclude-pattern>/vendor/*</exclude-pattern>
