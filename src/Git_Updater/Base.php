@@ -621,6 +621,8 @@ class Base {
 	/**
 	 * Add git host based icons.
 	 *
+	 * @hooked theme_row_meta
+	 *
 	 * @param array  $links Row meta action links.
 	 * @param string $file  Plugin or theme file.
 	 *
@@ -633,6 +635,21 @@ class Base {
 		}
 
 		return $links;
+	}
+
+	/**
+	 * Append the GitHub icon to the auto-updates column text.
+	 *
+	 * @hooked plugin_auto_update_setting_html
+	 * @see \WP_Plugins_List_Table::single_row()
+	 *
+	 * @param string $html The existing HTML for the plugins.php Automatic Updates column.
+	 * @param string $file Plugin or theme file.
+	 *
+	 * @return string
+	 */
+	public function plugin_auto_update_setting_html( $html, $file ) {
+		return $html . ' | ' . $this->get_git_icon( $file, false );
 	}
 
 	/**
