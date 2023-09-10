@@ -649,7 +649,11 @@ class Base {
 	 * @return string
 	 */
 	public function plugin_auto_update_setting_html( $html, $file ) {
-		return $html . ' | ' . $this->get_git_icon( $file, false );
+		$icon = $this->get_git_icon( $file, false );
+		if( is_null( $icon ) ) {
+			return $html;
+		}
+		return "{$html} | {$icon}";
 	}
 
 	/**
