@@ -53,15 +53,16 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 			$string = $this->upgrader->strings[ $message ];
 		}
 
+		if ( empty( $string ) ) {
+			return;
+		}
+
 		if ( str_contains( $string, '%' ) ) {
 			if ( $args ) {
 				$args   = array_map( 'strip_tags', $args );
 				$args   = array_map( 'esc_html', $args );
 				$string = vsprintf( $string, $args );
 			}
-		}
-		if ( empty( $string ) ) {
-			return;
 		}
 
 		$this->messages[] = $string;
