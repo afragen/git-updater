@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.3.1 / 2023-10-19
 * update `freemius/wordpress-sdk`
 * WPCS 3.0.0 linting
 * popup on icon for "Updates via Git Updater", thanks @BrianHenryIE

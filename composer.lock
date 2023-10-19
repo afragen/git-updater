@@ -382,16 +382,16 @@
         },
         {
             "name": "phpcsstandards/phpcsextra",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSExtra.git",
-                "reference": "98bcdbacbda14b1db85f710b1853125726795bbc"
+                "reference": "746c3190ba8eb2f212087c947ba75f4f5b9a58d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSExtra/zipball/98bcdbacbda14b1db85f710b1853125726795bbc",
-                "reference": "98bcdbacbda14b1db85f710b1853125726795bbc",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSExtra/zipball/746c3190ba8eb2f212087c947ba75f4f5b9a58d5",
+                "reference": "746c3190ba8eb2f212087c947ba75f4f5b9a58d5",
                 "shasum": ""
             },
             "require": {
@@ -441,7 +441,7 @@
                 "issues": "https://github.com/PHPCSStandards/PHPCSExtra/issues",
                 "source": "https://github.com/PHPCSStandards/PHPCSExtra"
             },
-            "time": "2023-08-26T04:46:45+00:00"
+            "time": "2023-09-20T22:06:18+00:00"
         },
         {
             "name": "phpcsstandards/phpcsutils",
