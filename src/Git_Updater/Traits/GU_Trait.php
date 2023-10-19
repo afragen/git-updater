@@ -11,7 +11,7 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
+use Fragen\Git_Updater\Readme_Parser;
 
 /**
  * Trait GU_Trait
@@ -30,7 +30,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public static function is_heartbeat() {
+	final public static function is_heartbeat() {
 		if ( isset( $_POST['action'], $_POST['_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_nonce'] ) ), 'heartbeat-nonce' ) ) {
 			return 'heartbeat' === $_POST['action'];
 		}
@@ -42,7 +42,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public static function is_wp_cli() {
+	final public static function is_wp_cli() {
 		return defined( 'WP_CLI' ) && \WP_CLI;
 	}
 
@@ -51,14 +51,14 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public static function is_doing_ajax() {
+	final public static function is_doing_ajax() {
 		return defined( 'DOING_AJAX' ) && \DOING_AJAX;
 	}
 
 	/**
 	 * Load site options.
 	 */
-	public function load_options() {
+	final public function load_options() {
 		Singleton::get_instance( 'Fragen\Git_Updater\GU_Upgrade', $this )->convert_ghu_options_to_gu_options();
 		$base           = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this );
 		$base::$options = get_site_option( 'git_updater', [] );
@@ -71,7 +71,7 @@ trait GU_Trait {
 	 * @param  array $pages Array of pages.
 	 * @return bool
 	 */
-	public function is_current_page( array $pages ) {
+	final public function is_current_page( array $pages ) {
 		global $pagenow;
 
 		return in_array( $pagenow, $pages, true );
@@ -86,7 +86,7 @@ trait GU_Trait {
 	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	public function get_repo_cache( $repo = false ) {
+	final public function get_repo_cache( $repo = false ) {
 		if ( ! $repo ) {
 			$repo = $this->type->slug ?? 'ghu';
 		}
@@ -113,7 +113,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
+	final public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
@@ -162,17 +162,17 @@ trait GU_Trait {
 	 * Getter for class variables.
 	 *
 	 * @param string $class_name Name of class.
-	 * @param string $var        Name of variable.
+	 * @param string $name       Name of variable.
 	 *
 	 * @return mixed
 	 */
-	public function get_class_vars( $class_name, $var ) {
+	final public function get_class_vars( $class_name, $name ) {
 		$class          = Singleton::get_instance( $class_name, $this );
 		$reflection_obj = new \ReflectionObject( $class );
-		if ( ! $reflection_obj->hasProperty( $var ) ) {
+		if ( ! $reflection_obj->hasProperty( $name ) ) {
 			return false;
 		}
-		$property = $reflection_obj->getProperty( $var );
+		$property = $reflection_obj->getProperty( $name );
 		$property->setAccessible( true );
 
 		return $property->getValue( $class );
@@ -183,7 +183,7 @@ trait GU_Trait {
 	 *
 	 * @return array self::$error_code
 	 */
-	public function get_error_codes() {
+	final public function get_error_codes() {
 		return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
@@ -194,7 +194,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function can_update_repo( $type ) {
+	final public function can_update_repo( $type ) {
 		$wp_version = get_bloginfo( 'version' );
 
 		$wp_version_ok   = ! empty( $type->requires )
@@ -232,7 +232,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function delete_all_cached_data() {
+	final public function delete_all_cached_data() {
 		global $wpdb;
 
 		$table         = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
@@ -255,7 +255,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function is_private( $repo ) {
+	final public function is_private( $repo ) {
 		if ( ! isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
 			return true;
 		}
@@ -274,7 +274,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function override_dot_org( $type, $repo ) {
+	final public function override_dot_org( $type, $repo ) {
 		// Correctly account for dashicon in Settings page.
 		$icon           = is_array( $repo );
 		$repo           = is_array( $repo ) ? (object) $repo : $repo;
@@ -309,7 +309,7 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	public function sanitize( $input ) {
+	final public function sanitize( $input ) {
 		$new_input = [];
 		foreach ( array_keys( (array) $input ) as $id ) {
 			$new_input[ sanitize_title_with_dashes( $id ) ] = sanitize_text_field( $input[ $id ] );
@@ -324,7 +324,7 @@ trait GU_Trait {
 	 * @access public
 	 * @return array $gits
 	 */
-	public function get_running_git_servers() {
+	final public function get_running_git_servers() {
 		$plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 
@@ -356,7 +356,7 @@ trait GU_Trait {
 	 *
 	 * @return bool true when waiting for background job to finish.
 	 */
-	protected function waiting_for_background_update( $repo = null ) {
+	final protected function waiting_for_background_update( $repo = null ) {
 		$caches = [];
 		if ( null !== $repo ) {
 
@@ -405,7 +405,7 @@ trait GU_Trait {
 	 *
 	 * @return array $header
 	 */
-	protected function parse_header_uri( $repo_header ) {
+	final protected function parse_header_uri( $repo_header ) {
 		$header_parts         = parse_url( $repo_header );
 		$header_path          = pathinfo( $header_parts['path'] );
 		$header['original']   = $repo_header;
@@ -430,7 +430,7 @@ trait GU_Trait {
 	 *
 	 * @return mixed
 	 */
-	protected function get_repo_parts( $repo, $type ) {
+	final protected function get_repo_parts( $repo, $type ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
 
 		$arr['bool'] = false;
@@ -472,7 +472,7 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	protected function get_repo_slugs( $slug, $upgrader_object = null ) {
+	final protected function get_repo_slugs( $slug, $upgrader_object = null ) {
 		$arr    = [];
 		$slug   = (string) $slug;
 		$rename = explode( '-', $slug );
@@ -515,7 +515,7 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	public function get_headers( $type ) {
+	final public function get_headers( $type ) {
 		$default_plugin_headers = [
 			'Name'        => 'Plugin Name',
 			'PluginURI'   => 'Plugin URI',
@@ -559,7 +559,7 @@ trait GU_Trait {
 	 *
 	 * @return array $all_headers Reduced array of all headers.
 	 */
-	public function get_file_headers( $contents, $type ) {
+	final public function get_file_headers( $contents, $type ) {
 		$all_headers = [];
 		$all_headers = $this->get_headers( $type );
 		$all_headers = array_unique( $all_headers );
@@ -596,7 +596,7 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	public function parse_extra_headers( $header, $headers, $header_parts ) {
+	final public function parse_extra_headers( $header, $headers, $header_parts ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
 
 		$header['enterprise_uri'] = null;
@@ -649,7 +649,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function is_cron_event_scheduled( $hook ) {
+	final public function is_cron_event_scheduled( $hook ) {
 		foreach ( wp_get_ready_cron_jobs() as $timestamp => $event ) {
 			if ( key( $event ) === $hook ) {
 				$this->is_cron_overdue( $timestamp );
@@ -667,7 +667,7 @@ trait GU_Trait {
 	 *
 	 * @return void
 	 */
-	public function is_cron_overdue( $timestamp ) {
+	final public function is_cron_overdue( $timestamp ) {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
@@ -681,7 +681,7 @@ trait GU_Trait {
 	 *
 	 * @return string Git Updater plugin version
 	 */
-	public static function get_plugin_version() {
+	final public static function get_plugin_version() {
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -698,7 +698,7 @@ trait GU_Trait {
 	 *
 	 * @return bool
 	 */
-	public function use_release_asset( $branch_switch = false ) {
+	final public function use_release_asset( $branch_switch = false ) {
 		$is_tag                  = property_exists( $this->type, 'branches' ) ? $branch_switch && ! array_key_exists( $branch_switch, (array) $this->type->branches ) : false;
 		$switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
@@ -751,13 +751,13 @@ trait GU_Trait {
 	 * Set readme and changelog data when repo set to not check API.
 	 * Get data from local files.
 	 *
-	 * @param \stdClass|bool $false Plugin API response.
+	 * @param \stdClass|bool $response Plugin API response.
 	 * @param \stdClass      $repo Repo object.
 	 *
 	 * @return \stdClass
 	 */
-	public function set_no_api_check_readme_changes( $false, $repo ) {
-		if ( ( $false || $repo ) && isset( $repo->git ) && ! isset( $repo->remote_version ) ) {
+	final public function set_no_api_check_readme_changes( $response, $repo ) {
+		if ( ( $response || $repo ) && isset( $repo->git ) && ! isset( $repo->remote_version ) ) {
 			$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
 
 			$changelog_file = $this->base->get_changelog_filename( $repo );
@@ -780,11 +780,11 @@ trait GU_Trait {
 			$repo->requires_php = empty( $repo->requires_php ) ? $repo_requires['RequiresPHP'] : $repo->requires_php;
 			$repo->version      = $repo->local_version;
 
-			$false_arr = array_merge( (array) $false, (array) $repo );
-			$false     = (object) $false_arr;
+			$response_arr = array_merge( (array) $response, (array) $repo );
+			$response     = (object) $response_arr;
 		}
 
-		return $false;
+		return $response;
 	}
 
 	/**
@@ -794,7 +794,7 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	protected function get_repo_requirements( $repo ) {
+	final protected function get_repo_requirements( $repo ) {
 		$requires      = [
 			'RequiresPHP' => 'Requires PHP',
 			'RequiresWP'  => 'Requires at least',
@@ -823,7 +823,7 @@ trait GU_Trait {
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
 	 * @return bool
 	 */
-	public function delete_upgrade_source( $result, $hook_extra ) {
+	final public function delete_upgrade_source( $result, $hook_extra ) {
 		global $wp_filesystem;
 
 		if ( ! is_wp_error( $result ) && ! empty( $result['destination_name'] ) ) {
@@ -835,5 +835,4 @@ trait GU_Trait {
 
 		return $result;
 	}
-
 }

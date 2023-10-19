@@ -134,7 +134,7 @@ final class GU_Upgrade {
 		$options      = $this->get_class_vars( 'Base', 'options' );
 		$new_options  = array_filter(
 			$options,
-			static function( $value, $key ) use ( &$options, $base_options ) {
+			static function ( $value, $key ) use ( &$options, $base_options ) {
 				if ( in_array( $key, $base_options, true ) || str_contains( $key, 'current_branch' ) ) {
 					return $options[ $key ];
 				}

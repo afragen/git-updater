@@ -536,5 +536,4 @@ class Branch {
 
 		print '</ul>';
 	}
-
 }

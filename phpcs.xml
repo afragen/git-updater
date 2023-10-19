@@ -1,27 +1,42 @@
 <?xml version="1.0"?>
-<ruleset name="AJF-Coding-Standards">
+<ruleset name="AJF Coding Standards">
     <description>A custom ruleset to take in account both WordPress and personal standards.</description>
 
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>
+    <arg value="sp"/>
+    <arg name="colors"/>
+
+    <!-- Only check PHP files. -->
+    <arg name="extensions" value="php"/>
+    
+    <file>.</file>
 
     <!-- Exclude these -->
-    <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*/tests/*</exclude-pattern>
-    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>/vendor/*</exclude-pattern>
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <exclude-pattern>/tests/*</exclude-pattern>
+    <exclude-pattern>*.js</exclude-pattern>
 
-    <rule ref="WordPress-Core">
-        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
-    </rule>
     <rule ref="WordPress">
-        <!-- <exclude name="WordPress.Files.FileName" /> -->
-        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
-        <exclude name="WordPress.NamingConventions.ValidVariableName" />
-        <exclude name="WordPress.WP.I18n.NonSingularStringLiteralText" />
-        <exclude name="WordPress.PHP.NoSilencedErrors.Discouraged" />
-        <exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.parse_url_parse_url"/>
+        <exclude name="WordPress.WP.AlternativeFunctions.json_encode_json_encode"/>
+        <exclude name="WordPress.WP.I18n.NonSingularStringLiteralText"/>
+
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose"/>
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
+        <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace"/>
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceAfterOpen"/>
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.SpaceBeforeClose"/>
+        <exclude name="Squiz.ControlStructures.InlineIfDeclaration.NotSingleLine"/>
+        <exclude name="Squiz.ControlStructures.ElseIfDeclaration.NotAllowed"/>
+        <exclude name="Squiz.ControlStructures.SwitchDeclaration.MissingDefault"/>
+        <exclude name="Squiz.ControlStructures.SwitchDeclaration.EmptyDefault"/>
+        <exclude name="Squiz.ControlStructures.SwitchDeclaration.EmptyCase"/>
     </rule>
 
     <!-- Enforce space before closing parenthesis -->
@@ -29,19 +44,30 @@
         <severity>5</severity>
     </rule>
 
-    <rule ref="Squiz.PHP.CommentedOutCode">
-        <exclude name="Squiz.PHP.CommentedOutCode.Found"/>
+    <rule ref="Universal.Classes">
+        <exclude name="Universal.Classes.RequireFinalClass.NonFinalClassFound"/>
+        <exclude name="Universal.Classes.DisallowFinalClass.FinalClassFound"/>
+    </rule>
+    <rule ref="Universal.Namespaces">
+        <exclude name="Universal.Namespaces.EnforceCurlyBraceSyntax.Forbidden"/>
+    </rule>
+    <rule ref="Universal.FunctionDeclarations">
+        <exclude name="Universal.FunctionDeclarations.NoLongClosures.ExceedsRecommended"/>
+        <exclude name="Universal.FunctionDeclarations.NoLongClosures.ExceedsMaximum"/>
+    </rule>
+    <rule ref="Universal.Operators">
+        <exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+    </rule>
+    <rule ref="Universal.CodeAnalysis">
+        <exclude name="Universal.CodeAnalysis.ConstructorDestructorReturn.ReturnValueFound"/>
+        <exclude name="Universal.CodeAnalysis.ConstructorDestructorReturn.ReturnValueFound"/>
     </rule>
 
     <!-- Use short arrays -->
+    <rule ref="Universal.Arrays">
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax.Found"/>
+    </rule>
     <rule ref="Generic.Arrays">
         <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
-    </rule>
-
-    <!-- Use parse_url(), file_get_contents(), json_encode() -->
-    <rule ref="WordPress.WP">
-        <exclude name="WordPress.WP.AlternativeFunctions.parse_url_parse_url"/>
-        <exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents"/>
-        <exclude name="WordPress.WP.AlternativeFunctions.json_encode_json_encode"/>
     </rule>
 </ruleset>

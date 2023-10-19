@@ -25,7 +25,8 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Init
  */
 class Init {
-	use GU_Trait, Basic_Auth_Loader;
+	use GU_Trait;
+	use Basic_Auth_Loader;
 
 	/**
 	 * Holds Class Base object.
@@ -83,7 +84,7 @@ class Init {
 		// Load hook for adding authentication headers for download packages.
 		add_filter(
 			'upgrader_pre_download',
-			function() {
+			function () {
 				add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
 				return false; // upgrader_pre_download filter default return value.
 			}

@@ -1204,7 +1204,7 @@
          * @param string $key     String key for overrides.
          * @param string $slug    Module slug for overrides.
          *
-         * @return string
+         * @return void
          */
         function fs_esc_js_echo_x_inline( $text, $context, $key = '', $slug = 'freemius' ) {
             echo esc_js( _fs_text_x_inline( $text, $context, $key, $slug ) );

@@ -26,7 +26,9 @@ if ( ! defined( 'WPINC' ) ) {
  * Class API
  */
 class API {
-	use API_Common, GU_Trait, Basic_Auth_Loader;
+	use API_Common;
+	use GU_Trait;
+	use Basic_Auth_Loader;
 
 	/**
 	 * Holds HTTP error code from API call.

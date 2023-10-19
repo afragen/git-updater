@@ -473,8 +473,12 @@
 						 */
 						if ( filter_var( $matches[1], FILTER_VALIDATE_IP ) ) {
 							if ( strlen( inet_pton( $matches[1] ) ) === 16 ) {
-//						    error_log('Invalid IPv6 configuration on server, Please disable or get native IPv6 on your server.');
-								// Hook to an action triggered just before cURL is executed to resolve the IP version to v4.
+								/**
+								 * error_log('Invalid IPv6 configuration on server, Please disable or get native IPv6 on your server.');
+								 * Hook to an action triggered just before cURL is executed to resolve the IP version to v4.
+								 * 
+								 * @phpstan-ignore-next-line
+								 */
 								add_action( 'http_api_curl', 'Freemius_Api_WordPress::CurlResolveToIPv4', 10, 1 );
 
 								// Re-run request.

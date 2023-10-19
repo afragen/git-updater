@@ -320,28 +320,28 @@ class Plugin {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param bool      $false    Default false.
+	 * @param bool      $result   Default false.
 	 * @param string    $action   The type of information being requested from the Plugin Installation API.
 	 * @param \stdClass $response Plugin API arguments.
 	 *
 	 * @return mixed
 	 */
-	public function plugins_api( $false, $action, $response ) {
+	public function plugins_api( $result, $action, $response ) {
 		if ( ! ( 'plugin_information' === $action ) ) {
-			return $false;
+			return $result;
 		}
 
 		$plugin = isset( $response->slug, $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
-		$false  = $this->set_no_api_check_readme_changes( $false, $plugin );
+		$result = $this->set_no_api_check_readme_changes( $result, $plugin );
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $plugin ) ) {
-			return $false;
+			return $result;
 		}
 
 		// wp.org plugin.
 		if ( ! $plugin || ( ( isset( $plugin->dot_org ) && $plugin->dot_org ) && $plugin->primary_branch === $plugin->branch ) ) {
-			return $false;
+			return $result;
 		}
 
 		$response->slug        = $plugin->slug;

@@ -10,7 +10,7 @@
 
 namespace Fragen\Git_Updater\Traits;
 
-use Fragen\Git_Updater\Readme_Parser as Readme_Parser;
+use Fragen\Git_Updater\Readme_Parser;
 
 /**
  * Trait API_Common
@@ -90,7 +90,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_info( $git, $request ) {
+	final public function get_remote_api_info( $git, $request ) {
 		$response = $this->response[ $this->type->slug ] ?? false;
 
 		if ( ! $response ) {
@@ -122,7 +122,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_tag( $request ) {
+	final public function get_remote_api_tag( $request ) {
 		$repo_type = $this->return_repo_type();
 		$response  = $this->response['tags'] ?? false;
 
@@ -160,7 +160,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_changes( $git, $changes, $request ) {
+	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$response = $this->response['changes'] ?? false;
 
 		// Set $response from local file if no update available.
@@ -202,7 +202,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_readme( $git, $request ) {
+	final public function get_remote_api_readme( $git, $request ) {
 		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
 			return false;
 		}
@@ -247,7 +247,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_repo_meta( $request ) {
+	final public function get_remote_api_repo_meta( $request ) {
 		$response = $this->response['meta'] ?? false;
 
 		if ( ! $response ) {
@@ -278,7 +278,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	public function get_remote_api_branches( $git, $request ) {
+	final public function get_remote_api_branches( $git, $request ) {
 		$branches = [];
 		$response = $this->response['branches'] ?? false;
 
@@ -324,7 +324,7 @@ trait API_Common {
 	 * @param  string $request Query for API->api().
 	 * @return string $response Release asset URI.
 	 */
-	public function get_api_release_asset( $git, $request ) {
+	final public function get_api_release_asset( $git, $request ) {
 		$response = $this->response['release_asset'] ?? false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {

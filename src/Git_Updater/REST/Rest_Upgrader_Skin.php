@@ -45,12 +45,16 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	 * Overrides the feedback method.
 	 * Adds the feedback string to the messages array.
 	 *
-	 * @param string $string  Message.
+	 * @param string $message  Message.
 	 * @param array  ...$args Array of args.
 	 */
-	public function feedback( $string, ...$args ) {
-		if ( isset( $this->upgrader->strings[ $string ] ) ) {
-			$string = $this->upgrader->strings[ $string ];
+	public function feedback( $message, ...$args ) {
+		if ( isset( $this->upgrader->strings[ $message ] ) ) {
+			$string = $this->upgrader->strings[ $message ];
+		}
+
+		if ( empty( $string ) ) {
+			return;
 		}
 
 		if ( str_contains( $string, '%' ) ) {
@@ -59,9 +63,6 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 				$args   = array_map( 'esc_html', $args );
 				$string = vsprintf( $string, $args );
 			}
-		}
-		if ( empty( $string ) ) {
-			return;
 		}
 
 		$this->messages[] = $string;

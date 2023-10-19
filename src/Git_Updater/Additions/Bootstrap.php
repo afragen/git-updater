@@ -62,6 +62,4 @@ class Bootstrap {
 	public function run() {
 		( new Settings() )->load_hooks();
 	}
-
-
 }

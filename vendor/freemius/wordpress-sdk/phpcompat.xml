@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="PHP Compatibility">
+	<description>Apply PHP compatibility checks to all files</description>
+	<config name="testVersion" value="5.6-"/>
+	<arg name="extensions" value="php"/>
+	<ini name="memory_limit" value="256M"/>
+	<arg name="basepath" value="./"/>
+	<arg name="parallel" value="20"/>
+
+	<file>./</file>
+
+	<rule ref="PHPCompatibility"/>
+
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/assets/*</exclude-pattern>
+	<exclude-pattern>/languages/*</exclude-pattern>
+	<exclude-pattern>.phpstan</exclude-pattern>
+</ruleset>

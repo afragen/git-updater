@@ -59,6 +59,7 @@ if ( ! function_exists( 'move_dir' ) ) {
 
 		if ( 'direct' === $wp_filesystem->method ) {
 			if ( $wp_filesystem->delete( $to, true ) ) {
+				// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.rename_rename
 				$result = @rename( $from, $to );
 			}
 		} else {
@@ -149,7 +150,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 		 *                        with sub-directories represented as nested arrays.
 		 * @param string $path    Absolute path to the directory.
 		 */
-		$invalidate_directory = static function( $dirlist, $path ) use ( &$invalidate_directory ) {
+		$invalidate_directory = static function ( $dirlist, $path ) use ( &$invalidate_directory ) {
 			$path = trailingslashit( $path );
 
 			foreach ( $dirlist as $name => $details ) {
