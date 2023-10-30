@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `freemius/wordpress-sdk`
 
 #### 12.3.1 / 2023-10-19
 * update `freemius/wordpress-sdk`

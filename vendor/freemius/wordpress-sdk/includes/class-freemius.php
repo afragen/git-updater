@@ -425,6 +425,14 @@
 
             $this->_storage = FS_Storage::instance( $this->_module_type, $this->_slug );
 
+            // If not set or 24 hours have already passed from the last time it's set, set the last load timestamp to the current time.
+            if (
+                ! isset( $this->_storage->last_load_timestamp ) ||
+                $this->_storage->last_load_timestamp < ( time() - ( WP_FS__TIME_24_HOURS_IN_SEC ) )
+            ) {
+                $this->_storage->last_load_timestamp = time();
+            }
+
             $this->_cache = FS_Cache_Manager::get_manager( WP_FS___OPTION_PREFIX . "cache_{$module_id}" );
 
             $this->_logger = FS_Logger::get_logger( WP_FS__SLUG . '_' . $this->get_unique_affix(), WP_FS__DEBUG_SDK, WP_FS__ECHO_DEBUG_SDK );
@@ -1348,6 +1356,30 @@
             }
         }
 
+        function _run_garbage_collector() {
+            // @todo - Remove this check once the garbage collector is ready to be out of beta.
+            if ( true !== fs_get_optional_constant( 'WP_FS__ENABLE_GARBAGE_COLLECTOR', false ) ) {
+                return;
+            }
+
+            if ( ! $this->is_user_in_admin() ) {
+                return;
+            }
+
+            require_once WP_FS__DIR_INCLUDES . '/class-fs-lock.php';
+
+            $lock = new FS_Lock( 'garbage_collection' );
+
+            if ( $lock->is_locked() ) {
+                return;
+            }
+
+            // Create a 1-day lock.
+            $lock->lock( WP_FS__TIME_24_HOURS_IN_SEC );
+
+            FS_Garbage_Collector::instance()->clean();
+        }
+
         /**
          * Opens the support forum subemenu item in a new browser page.
          *
@@ -1442,6 +1474,8 @@
                         $this->_plugins_loaded();
                     }
                 }
+
+                add_action( 'plugins_loaded', array( &$this, '_run_garbage_collector' ) );
 
                 if ( ! self::is_ajax() ) {
                     if ( ! $this->is_addon() ) {
@@ -3089,11 +3123,8 @@
                 return false;
             }
 
-            $url_params = array();
-            parse_str( parse_url( $url, PHP_URL_QUERY ), $url_params );
-
-            $sub_url_params = array();
-            parse_str( parse_url( $sub_url, PHP_URL_QUERY ), $sub_url_params );
+            $url_params     = fs_parse_url_params( $url );
+            $sub_url_params = fs_parse_url_params( $sub_url );
 
             foreach ( $sub_url_params as $key => $val ) {
                 if ( ! isset( $url_params[ $key ] ) || $val != $url_params[ $key ] ) {
@@ -14791,9 +14822,15 @@
             }
 
             if ( ! $this->is_registered() ) {
+                $email_address = isset( $affiliate['email'] ) ? $affiliate['email'] : '';
+
+                if ( ! is_email( $email_address ) ) {
+                    self::shoot_ajax_failure('Invalid email address.');
+                }
+
                 // Opt in but don't track usage.
                 $next_page = $this->opt_in(
-                    false,
+                    $email_address,
                     false,
                     false,
                     false,
@@ -25424,6 +25461,12 @@
                 return false;
             }
 
+            $tabs_html = $this->get_tabs_html();
+
+            if ( empty( $tabs_html ) ) {
+                return false;
+            }
+
             /**
              * Enqueue the original stylesheets that are included in the
              * theme settings page. That way, if the theme settings has
@@ -25438,7 +25481,7 @@
             }
 
             // Cut closing </div> tag.
-            echo substr( trim( $this->get_tabs_html() ), 0, - 6 );
+            echo substr( trim( $tabs_html ), 0, - 6 );
 
             return true;
         }

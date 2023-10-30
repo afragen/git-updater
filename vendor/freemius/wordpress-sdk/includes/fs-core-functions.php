@@ -588,6 +588,33 @@
         }
     }
 
+    if ( ! function_exists( 'fs_parse_url_params' ) ) {
+        /**
+         * Returns the query parameters of the given URL if there are any.
+         *
+         * @param string $url
+         * @param bool   $html_entity_decode
+         *
+         * @return array<string, string> Key value pair where key represents the parameter name and value represents the parameter value.
+         */
+        function fs_parse_url_params( $url, $html_entity_decode = false ) {
+            $query_str  = parse_url( $url, PHP_URL_QUERY );
+            $url_params = array();
+
+            if ( empty( $query_str ) ) {
+                return $url_params;
+            }
+
+            if ( $html_entity_decode ) {
+                $query_str = html_entity_decode( $query_str );
+            }
+
+            parse_str( $query_str, $url_params );
+
+            return $url_params;
+        }
+    }
+
     if ( ! function_exists( 'fs_starts_with' ) ) {
         /**
          * Check if string starts with.
@@ -1457,5 +1484,22 @@
                     array( "fs_{$tag}_{$module_unique_affix}" ),
                     array_slice( $args, 2 ) )
             );
+        }
+    }
+
+    if ( ! function_exists( 'fs_get_optional_constant' ) ) {
+        /**
+         * Gets the value of an optional constant. If the constant is not defined, the default value will be returned.
+         *
+         * @author Swashata Ghosh (@swashata)
+         * @since 2.5.12.5
+         *
+         * @param string $constant_name
+         * @param mixed $default_value
+         *
+         * @return mixed
+         */
+        function fs_get_optional_constant( $constant_name, $default_value = null ) {
+            return defined( $constant_name ) ? constant( $constant_name ) : $default_value;
         }
     }

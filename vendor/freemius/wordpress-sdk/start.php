@@ -15,7 +15,7 @@
 	 *
 	 * @var string
 	 */
-	$this_sdk_version = '2.5.12';
+	$this_sdk_version = '2.6.0';
 
 	#region SDK Selection Logic --------------------------------------------------------------------
 
@@ -46,6 +46,29 @@
 	 */
 	$file_path    = fs_normalize_path( __FILE__ );
 	$fs_root_path = dirname( $file_path );
+
+    if (
+        ! function_exists( 'wp_get_current_user' ) &&
+        /**
+         * `get_stylesheet()` will rely on `wp_get_current_user()` when it is being filtered by `theme-previews.php`. That happens only when the site editor is loaded or when the site editor is sending REST requests.
+         * @see theme-previews.php:wp_get_theme_preview_path()
+         *
+         * @todo If this behavior is fixed in the core, we will remove this workaround.
+         * @since WP 6.3.0
+         */
+        (
+            'site-editor.php' === basename( $_SERVER['SCRIPT_FILENAME'] ) ||
+            (
+                function_exists( 'wp_is_json_request' ) &&
+                wp_is_json_request() &&
+                ! empty( $_GET['wp_theme_preview'] )
+            )
+        )
+    ) {
+        // Requiring this file since the call to get_stylesheet() below can trigger a call to wp_get_current_user() when previewing a theme.
+        require_once ABSPATH . 'wp-includes/pluggable.php';
+    }
+
     /**
      * Get the themes directory where the active theme is located (not passing the stylesheet will make WordPress
      * assume that the themes directory is inside `wp-content`.
