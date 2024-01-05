@@ -254,16 +254,16 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.6.1",
+            "version": "2.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "9fb47e3b864a0039c0cd96312a638b8324c0c30a"
+                "reference": "ea3a288e52ff74c755b3c1eb857f41c5a2d899e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/9fb47e3b864a0039c0cd96312a638b8324c0c30a",
-                "reference": "9fb47e3b864a0039c0cd96312a638b8324c0c30a",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/ea3a288e52ff74c755b3c1eb857f41c5a2d899e5",
+                "reference": "ea3a288e52ff74c755b3c1eb857f41c5a2d899e5",
                 "shasum": ""
             },
             "require": {
@@ -296,9 +296,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.6.1"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.6.2"
             },
-            "time": "2023-12-03T15:10:12+00:00"
+            "time": "2023-12-31T12:29:30+00:00"
         }
     ],
     "packages-dev": [

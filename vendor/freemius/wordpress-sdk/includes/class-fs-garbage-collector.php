@@ -281,7 +281,7 @@
             $has_updated_option = false;
 
             foreach ( $users as $user_id => $user ) {
-                if ( ! isset( $user_has_install[ $user_id ] ) ) {
+                if ( ! isset( $user_has_install_map[ $user_id ] ) ) {
                     unset( $users[ $user_id ] );
 
                     foreach( $products_user_id_license_ids_map as $product_id => $user_id_license_ids_map ) {
