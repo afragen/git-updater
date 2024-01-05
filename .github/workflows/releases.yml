@@ -15,7 +15,7 @@ jobs:
 
       - name: Get tag
         id: tag
-        run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Build project
         run: git archive -o /tmp/git-updater-${{ steps.tag.outputs.tag }}.zip --prefix=git-updater/ ${{ steps.tag.outputs.tag }}
