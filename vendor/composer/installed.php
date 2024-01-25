@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '2512d9958b0149a92970fda83316b1bc8bc3dd9b',
+        'reference' => '12a812cee5d960c21e94197781839d5bdeee45d2',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '2512d9958b0149a92970fda83316b1bc8bc3dd9b',
+            'reference' => '12a812cee5d960c21e94197781839d5bdeee45d2',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -33,7 +33,7 @@
         'afragen/wordpress-plugin-readme-parser' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'c21c250a510972ac46658a315133ac8b91d60ba0',
+            'reference' => '2f4fbe89bb7ffaf905eb28b385b7d1def4a83f54',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/wordpress-plugin-readme-parser',
             'aliases' => array(
@@ -105,9 +105,9 @@
             'dev_requirement' => true,
         ),
         'squizlabs/php_codesniffer' => array(
-            'pretty_version' => '3.8.0',
-            'version' => '3.8.0.0',
-            'reference' => '5805f7a4e4958dbb5e944ef1e6edae0a303765e7',
+            'pretty_version' => '3.8.1',
+            'version' => '3.8.1.0',
+            'reference' => '14f5fff1e64118595db5408e946f3a22c75807f7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../squizlabs/php_codesniffer',
             'aliases' => array(),

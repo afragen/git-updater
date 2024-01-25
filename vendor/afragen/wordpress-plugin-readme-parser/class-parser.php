@@ -144,7 +144,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $ignore_tags = array(
+	public $ignore_tags = array(
 		'plugin',
 		'wordpress',
 	);
@@ -225,6 +225,8 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
+			$this->warnings['invalid_plugin_name_header'] = true;
+
 			$this->name = $line = $this->get_first_nonwhitespace( $contents );
 
 			// Ensure that the line read wasn't an actual header or description.
@@ -273,8 +275,14 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
-			$this->tags = array_diff( $this->tags, $this->ignore_tags );
-			$this->tags = array_slice( $this->tags, 0, 5 );
+			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
+				$this->tags = array_diff( $this->tags, $this->ignore_tags );
+				$this->warnings['ignored_tags'] = true;
+			}
+			if ( count( $this->tags ) > 5 ) {
+				$this->tags = array_slice( $this->tags, 0, 5 );
+				$this->warnings['too_many_tags'] = true;
+			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $this->sanitize_requires_version( $headers['requires'] );
@@ -408,13 +416,20 @@ class Parser {
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
 			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->warnings['no_short_description_present'] = true;
 		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$this->short_description = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 150 );
+		if ( $short_description !== $this->short_description ) {
+			if ( empty( $this->warnings['no_short_description_present'] ) ) {
+				$this->warnings['trimmed_short_description'] = true;
+			}
+			$this->short_description = $short_description;
+		}
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
@@ -464,7 +479,7 @@ class Parser {
 			}
 		}
 
-		return $line;
+		return $line ?? '';
 	}
 
 	/**
