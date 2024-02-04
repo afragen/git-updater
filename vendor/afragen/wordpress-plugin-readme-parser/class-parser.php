@@ -227,13 +227,21 @@ class Parser {
 		if ( 'plugin name' == strtolower( $this->name ) ) {
 			$this->warnings['invalid_plugin_name_header'] = true;
 
-			$this->name = $line = $this->get_first_nonwhitespace( $contents );
+			$this->name = false;
+			$line       = $this->get_first_nonwhitespace( $contents );
 
-			// Ensure that the line read wasn't an actual header or description.
-			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
-				$this->name = false;
-				array_unshift( $contents, $line );
+			// Ensure that the line read doesn't look like a description.
+			if ( strlen( $line ) < 50 && ! $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+				$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 			}
+		}
+
+		// It's possible to leave the plugin name header off entirely.
+		if ( $this->parse_possible_header( $this->name, true /* only valid headers */ ) ) {
+			array_unshift( $contents, $line );
+
+			$this->warnings['invalid_plugin_name_header'] = true;
+			$this->name                                   = false;
 		}
 
 		// Parse headers.
@@ -242,9 +250,11 @@ class Parser {
 		$line                = $this->get_first_nonwhitespace( $contents );
 		$last_line_was_blank = false;
 		do {
-			$value = null;
+			$value  = null;
+			$header = $this->parse_possible_header( $line );
+
 			// If it doesn't look like a header value, maybe break to the next section.
-			if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			if ( ! $header ) {
 				if ( empty( $line ) ) {
 					// Some plugins have line-breaks within the headers...
 					$last_line_was_blank = true;
@@ -255,12 +265,10 @@ class Parser {
 				}
 			}
 
-			$bits                = explode( ':', trim( $line ), 2 );
-			list( $key, $value ) = $bits;
-			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+			list( $key, $value ) = $header;
 
 			if ( isset( $this->valid_headers[ $key ] ) ) {
-				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+				$headers[ $this->valid_headers[ $key ] ] = $value;
 			} elseif ( $last_line_was_blank ) {
 				// If we skipped over a blank line, and then ended up with an unexpected header, assume we parsed too far and ended up in the Short Description.
 				// This final line will be added back into the stack after the loop for further parsing.
@@ -519,6 +527,31 @@ class Parser {
 		}
 
 		return trim( $desc );
+	}
+
+	/**
+	 * Parse a line to see if it's a header.
+	 *
+	 * @access protected
+	 *
+	 * @param string $line       The line from the readme to parse.
+	 * @param bool   $only_valid Whether to only return a valid known header.
+	 * @return false|array
+	 */
+	protected function parse_possible_header( $line, $only_valid = false ) {
+		if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			return false;
+		}
+
+		list( $key, $value ) = explode( ':', $line, 2 );
+		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+		$value               = trim( $value, " \t*-\r\n" );
+
+		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
+			return false;
+		}
+
+		return [ $key, $value ];
 	}
 
 	/**
