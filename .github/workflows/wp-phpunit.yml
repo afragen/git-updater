@@ -26,7 +26,7 @@ jobs:
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@master
 
       - name: Setup MySQL 8.0 with mysql_native_password
         uses: shogo82148/actions-setup-mysql@v1
