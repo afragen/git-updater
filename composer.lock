@@ -59,12 +59,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "0dc64ee6d4cb6d32e3855d016763d9bd08652e0f"
+                "reference": "2a67b37dbdcbb24d5b1d976d039b083c3833b245"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/0dc64ee6d4cb6d32e3855d016763d9bd08652e0f",
-                "reference": "0dc64ee6d4cb6d32e3855d016763d9bd08652e0f",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/2a67b37dbdcbb24d5b1d976d039b083c3833b245",
+                "reference": "2a67b37dbdcbb24d5b1d976d039b083c3833b245",
                 "shasum": ""
             },
             "require": {
@@ -98,7 +98,7 @@
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
-            "time": "2024-02-02T17:46:48+00:00"
+            "time": "2024-02-27T16:41:56+00:00"
         },
         {
             "name": "afragen/wp-dependency-installer",

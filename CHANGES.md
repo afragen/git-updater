@@ -2,6 +2,7 @@
 * update `freemius/wordpress-sdk`
 * update `class-parser.php`
 * use `is_wp_version_compatible()` and `is_php_version_compatible()` in `GU_Trait::can_update_repo()`
+* update `gu-loader.php` with generic loader
 
 #### 12.3.1 / 2023-10-19
 * update `freemius/wordpress-sdk`

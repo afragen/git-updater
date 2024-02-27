@@ -99,7 +99,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $expected_sections = array(
+	public $expected_sections = array(
 		'description',
 		'installation',
 		'faq',
@@ -114,7 +114,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $alias_sections = array(
+	public $alias_sections = array(
 		'frequently_asked_questions' => 'faq',
 		'change_log'                 => 'changelog',
 		'screenshot'                 => 'screenshots',
@@ -125,7 +125,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $valid_headers = array(
+	public $valid_headers = array(
 		'tested'            => 'tested',
 		'tested up to'      => 'tested',
 		'requires'          => 'requires',
@@ -148,6 +148,23 @@ class Parser {
 		'plugin',
 		'wordpress',
 	);
+
+	/**
+	 * The maximum field lengths for the readme.
+	 *
+	 * @var array
+	 */
+	public $maximum_field_lengths = array(
+		'short_description' => 150,
+		'section'           => 1500,
+	);
+
+	/**
+	 * The raw contents of the readme file.
+	 *
+	 * @var string
+	 */
+	public $raw_contents = '';
 
 	/**
 	 * Parser constructor.
@@ -196,6 +213,8 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme_contents( $contents ) {
+		$this->raw_contents = $contents;
+
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
@@ -287,6 +306,24 @@ class Parser {
 				$this->tags = array_diff( $this->tags, $this->ignore_tags );
 				$this->warnings['ignored_tags'] = true;
 			}
+
+			// Check if the tags are low-quality (ie. little used)
+			if ( $this->tags && taxonomy_exists( 'plugin_tags' ) ) {
+				$tags = get_terms( array(
+					'taxonomy' => 'plugin_tags',
+					'name'     => $this->tags,
+				) );
+
+				$low_usage_tags = array_filter(
+					$tags,
+					function( $term ) {
+						return $term->count < 5;
+					}
+				);
+
+				$this->warnings['low_usage_tags'] = wp_list_pluck( $low_usage_tags, 'name' );
+			}
+
 			if ( count( $this->tags ) > 5 ) {
 				$this->tags = array_slice( $this->tags, 0, 5 );
 				$this->warnings['too_many_tags'] = true;
@@ -410,6 +447,14 @@ class Parser {
 			unset( $this->sections['upgrade_notice'] );
 		}
 
+		foreach ( $this->sections as $section => $content ) {
+			$this->sections[ $section ] = $this->trim_length( $content, 'section', 'words' );
+
+			if ( $content !== $this->sections[ $section ] ) {
+				$this->warnings["trimmed_section_{$section}"] = true;
+			}
+		}
+
 		// Display FAQs as a definition list.
 		if ( isset( $this->sections['faq'] ) ) {
 			$this->faq             = $this->parse_section( $this->sections['faq'] );
@@ -431,7 +476,7 @@ class Parser {
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$short_description       = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 'short_description' );
 		if ( $short_description !== $this->short_description ) {
 			if ( empty( $this->warnings['no_short_description_present'] ) ) {
 				$this->warnings['trimmed_short_description'] = true;
@@ -505,9 +550,29 @@ class Parser {
 	 *
 	 * @param string $desc
 	 * @param int    $length
+	 * @param string $type   The type of the length, 'char' or 'words'.
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150 ) {
+	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+		if ( is_string( $length ) ) {
+			$length = $this->maximum_field_lengths[ $length ] ?? $length;
+		}
+
+		if ( 'words' === $type ) {
+			// Split by whitespace, capturing it so we can put it back together.
+			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			$word_count_with_spaces = $length * 2;
+
+			if ( count( $pieces ) < $word_count_with_spaces ) {
+				return $desc;
+			}
+
+			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
+
+			return implode( '', $pieces ) . ' &hellip;';
+		}
+
 		// Apply the length restriction without counting html entities.
 		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
 
