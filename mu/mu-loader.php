@@ -77,7 +77,9 @@ class MU_Loader {
 	 * @return void
 	 */
 	public function after_plugin_row_updates( $plugin_file ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		print "<script>jQuery('.inactive[data-plugin=\"{$plugin_file}\"]').attr('class','active');</script>";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		print "<script>jQuery('.active[data-plugin=\"{$plugin_file}\"] .check-column input').attr( 'disabled','disabled' );</script>";
 	}
 
