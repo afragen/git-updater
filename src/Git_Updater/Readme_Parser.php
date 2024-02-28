@@ -143,7 +143,7 @@ class Readme_Parser extends Parser {
 	 *
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150 ) {
+	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
 		if ( mb_strlen( $desc ) > $length ) {
 			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
 
