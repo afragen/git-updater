@@ -3,7 +3,7 @@
 * update `class-parser.php`
 * use `is_wp_version_compatible()` and `is_php_version_compatible()` in `GU_Trait::can_update_repo()`
 * update `gu-loader.php` with generic loader
-* update `Readme_Parser::trim_length` parameters
+* update `Readme_Parser::trim_length`
 
 #### 12.3.1 / 2023-10-19
 * update `freemius/wordpress-sdk`
