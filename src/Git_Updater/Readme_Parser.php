@@ -140,6 +140,7 @@ class Readme_Parser extends Parser {
 	 *
 	 * @param string $desc   Description.
 	 * @param int    $length Number of characters.
+	 * @param string $type   The type of the length, 'char' or 'words'.
 	 *
 	 * @return string
 	 */
