@@ -1,39 +1,39 @@
-# Copyright (C) 2023 Andy Fragen
+# Copyright (C) 2024 Andy Fragen
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.3.1\n"
+"Project-Id-Version: Git Updater 12.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-10-19T22:55:12+00:00\n"
+"POT-Creation-Date: 2024-03-04T19:03:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.8.1\n"
+"X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
+#: git-updater.php
 #: src/Git_Updater/Settings.php:176
 #: src/Git_Updater/Settings.php:309
 msgid "Git Updater"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: git-updater.php
 msgid "https://git-updater.com"
 msgstr ""
 
 #. Description of the plugin
+#: git-updater.php
 msgid "A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist."
 msgstr ""
 
 #. Author of the plugin
+#: git-updater.php
 msgid "Andy Fragen"
-msgstr ""
-
-#: mu/gu-loader.php:106
-msgid "Activated as mu-plugin"
 msgstr ""
 
 #: src/Git_Updater/Add_Ons.php:60
@@ -280,6 +280,6 @@ msgstr ""
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:673
+#: src/Git_Updater/Traits/GU_Trait.php:671
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""

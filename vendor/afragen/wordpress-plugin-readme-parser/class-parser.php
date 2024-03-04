@@ -156,7 +156,9 @@ class Parser {
 	 */
 	public $maximum_field_lengths = array(
 		'short_description' => 150,
-		'section'           => 1500,
+		'section'           => 2500,
+		'section-changelog' => 5000,
+		'section-faq'       => 5000,
 	);
 
 	/**
@@ -448,7 +450,12 @@ class Parser {
 		}
 
 		foreach ( $this->sections as $section => $content ) {
-			$this->sections[ $section ] = $this->trim_length( $content, 'section', 'words' );
+			$max_length = "section-{$section}";
+			if ( ! isset( $this->maximum_field_lengths[ $max_length ] ) ) {
+				$max_length = 'section';
+			}
+
+			$this->sections[ $section ] = $this->trim_length( $content, $max_length, 'words' );
 
 			if ( $content !== $this->sections[ $section ] ) {
 				$this->warnings["trimmed_section_{$section}"] = true;
