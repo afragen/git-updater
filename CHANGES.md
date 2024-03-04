@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`
 * update `class-parser.php`
 * use `is_wp_version_compatible()` and `is_php_version_compatible()` in `GU_Trait::can_update_repo()`
