@@ -99,7 +99,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $expected_sections = array(
+	public $expected_sections = array(
 		'description',
 		'installation',
 		'faq',
@@ -114,7 +114,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $alias_sections = array(
+	public $alias_sections = array(
 		'frequently_asked_questions' => 'faq',
 		'change_log'                 => 'changelog',
 		'screenshot'                 => 'screenshots',
@@ -125,7 +125,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $valid_headers = array(
+	public $valid_headers = array(
 		'tested'            => 'tested',
 		'tested up to'      => 'tested',
 		'requires'          => 'requires',
@@ -144,10 +144,29 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $ignore_tags = array(
+	public $ignore_tags = array(
 		'plugin',
 		'wordpress',
 	);
+
+	/**
+	 * The maximum field lengths for the readme.
+	 *
+	 * @var array
+	 */
+	public $maximum_field_lengths = array(
+		'short_description' => 150,
+		'section'           => 2500,
+		'section-changelog' => 5000,
+		'section-faq'       => 5000,
+	);
+
+	/**
+	 * The raw contents of the readme file.
+	 *
+	 * @var string
+	 */
+	public $raw_contents = '';
 
 	/**
 	 * Parser constructor.
@@ -196,6 +215,8 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme_contents( $contents ) {
+		$this->raw_contents = $contents;
+
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
@@ -225,13 +246,23 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->name = $line = $this->get_first_nonwhitespace( $contents );
+			$this->warnings['invalid_plugin_name_header'] = true;
 
-			// Ensure that the line read wasn't an actual header or description.
-			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
-				$this->name = false;
-				array_unshift( $contents, $line );
+			$this->name = false;
+			$line       = $this->get_first_nonwhitespace( $contents );
+
+			// Ensure that the line read doesn't look like a description.
+			if ( strlen( $line ) < 50 && ! $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+				$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 			}
+		}
+
+		// It's possible to leave the plugin name header off entirely.
+		if ( $this->parse_possible_header( $this->name, true /* only valid headers */ ) ) {
+			array_unshift( $contents, $line );
+
+			$this->warnings['invalid_plugin_name_header'] = true;
+			$this->name                                   = false;
 		}
 
 		// Parse headers.
@@ -240,9 +271,11 @@ class Parser {
 		$line                = $this->get_first_nonwhitespace( $contents );
 		$last_line_was_blank = false;
 		do {
-			$value = null;
+			$value  = null;
+			$header = $this->parse_possible_header( $line );
+
 			// If it doesn't look like a header value, maybe break to the next section.
-			if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			if ( ! $header ) {
 				if ( empty( $line ) ) {
 					// Some plugins have line-breaks within the headers...
 					$last_line_was_blank = true;
@@ -253,12 +286,10 @@ class Parser {
 				}
 			}
 
-			$bits                = explode( ':', trim( $line ), 2 );
-			list( $key, $value ) = $bits;
-			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+			list( $key, $value ) = $header;
 
 			if ( isset( $this->valid_headers[ $key ] ) ) {
-				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+				$headers[ $this->valid_headers[ $key ] ] = $value;
 			} elseif ( $last_line_was_blank ) {
 				// If we skipped over a blank line, and then ended up with an unexpected header, assume we parsed too far and ended up in the Short Description.
 				// This final line will be added back into the stack after the loop for further parsing.
@@ -273,8 +304,32 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
-			$this->tags = array_diff( $this->tags, $this->ignore_tags );
-			$this->tags = array_slice( $this->tags, 0, 5 );
+			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
+				$this->tags = array_diff( $this->tags, $this->ignore_tags );
+				$this->warnings['ignored_tags'] = true;
+			}
+
+			// Check if the tags are low-quality (ie. little used)
+			if ( $this->tags && taxonomy_exists( 'plugin_tags' ) ) {
+				$tags = get_terms( array(
+					'taxonomy' => 'plugin_tags',
+					'name'     => $this->tags,
+				) );
+
+				$low_usage_tags = array_filter(
+					$tags,
+					function( $term ) {
+						return $term->count < 5;
+					}
+				);
+
+				$this->warnings['low_usage_tags'] = wp_list_pluck( $low_usage_tags, 'name' );
+			}
+
+			if ( count( $this->tags ) > 5 ) {
+				$this->tags = array_slice( $this->tags, 0, 5 );
+				$this->warnings['too_many_tags'] = true;
+			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $this->sanitize_requires_version( $headers['requires'] );
@@ -394,6 +449,19 @@ class Parser {
 			unset( $this->sections['upgrade_notice'] );
 		}
 
+		foreach ( $this->sections as $section => $content ) {
+			$max_length = "section-{$section}";
+			if ( ! isset( $this->maximum_field_lengths[ $max_length ] ) ) {
+				$max_length = 'section';
+			}
+
+			$this->sections[ $section ] = $this->trim_length( $content, $max_length, 'words' );
+
+			if ( $content !== $this->sections[ $section ] ) {
+				$this->warnings["trimmed_section_{$section}"] = true;
+			}
+		}
+
 		// Display FAQs as a definition list.
 		if ( isset( $this->sections['faq'] ) ) {
 			$this->faq             = $this->parse_section( $this->sections['faq'] );
@@ -408,13 +476,20 @@ class Parser {
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
 			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->warnings['no_short_description_present'] = true;
 		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$this->short_description = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 'short_description' );
+		if ( $short_description !== $this->short_description ) {
+			if ( empty( $this->warnings['no_short_description_present'] ) ) {
+				$this->warnings['trimmed_short_description'] = true;
+			}
+			$this->short_description = $short_description;
+		}
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
@@ -464,7 +539,7 @@ class Parser {
 			}
 		}
 
-		return $line;
+		return $line ?? '';
 	}
 
 	/**
@@ -482,9 +557,29 @@ class Parser {
 	 *
 	 * @param string $desc
 	 * @param int    $length
+	 * @param string $type   The type of the length, 'char' or 'words'.
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150 ) {
+	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+		if ( is_string( $length ) ) {
+			$length = $this->maximum_field_lengths[ $length ] ?? $length;
+		}
+
+		if ( 'words' === $type ) {
+			// Split by whitespace, capturing it so we can put it back together.
+			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			$word_count_with_spaces = $length * 2;
+
+			if ( count( $pieces ) < $word_count_with_spaces ) {
+				return $desc;
+			}
+
+			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
+
+			return implode( '', $pieces ) . ' &hellip;';
+		}
+
 		// Apply the length restriction without counting html entities.
 		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
 
@@ -504,6 +599,31 @@ class Parser {
 		}
 
 		return trim( $desc );
+	}
+
+	/**
+	 * Parse a line to see if it's a header.
+	 *
+	 * @access protected
+	 *
+	 * @param string $line       The line from the readme to parse.
+	 * @param bool   $only_valid Whether to only return a valid known header.
+	 * @return false|array
+	 */
+	protected function parse_possible_header( $line, $only_valid = false ) {
+		if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			return false;
+		}
+
+		list( $key, $value ) = explode( ':', $line, 2 );
+		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+		$value               = trim( $value, " \t*-\r\n" );
+
+		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
+			return false;
+		}
+
+		return [ $key, $value ];
 	}
 
 	/**

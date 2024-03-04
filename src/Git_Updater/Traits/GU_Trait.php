@@ -195,13 +195,11 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function can_update_repo( $type ) {
-		$wp_version = get_bloginfo( 'version' );
-
 		$wp_version_ok   = ! empty( $type->requires )
-			? version_compare( $wp_version, $type->requires, '>=' )
+			? \is_wp_version_compatible( $type->requires )
 			: true;
 		$php_version_ok  = ! empty( $type->requires_php )
-			? version_compare( phpversion(), $type->requires_php, '>=' )
+			? \is_php_version_compatible( $type->requires_php )
 			: true;
 		$remote_is_newer = isset( $type->remote_version )
 			? version_compare( $type->remote_version, $type->local_version, '>' )

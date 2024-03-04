@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 12.4.0 / 2024-03-04
+* update `freemius/wordpress-sdk`
+* update `class-parser.php`
+* use `is_wp_version_compatible()` and `is_php_version_compatible()` in `GU_Trait::can_update_repo()`
+* update `gu-loader.php` with generic loader
+* update `Readme_Parser::trim_length`
+
 #### 12.3.1 / 2023-10-19
 * update `freemius/wordpress-sdk`
 * WPCS 3.0.0 linting

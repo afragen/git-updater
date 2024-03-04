@@ -140,11 +140,34 @@ class Readme_Parser extends Parser {
 	 *
 	 * @param string $desc   Description.
 	 * @param int    $length Number of characters.
+	 * @param string $type   The type of the length, 'char' or 'words'.
 	 *
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150 ) {
-		if ( mb_strlen( $desc ) > $length ) {
+	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+		if ( is_string( $length ) ) {
+			$length = $this->maximum_field_lengths[ $length ] ?? $length;
+		}
+
+		if ( 'words' === $type ) {
+			// Split by whitespace, capturing it so we can put it back together.
+			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			$word_count_with_spaces = $length * 2;
+
+			if ( count( $pieces ) < $word_count_with_spaces ) {
+				return $desc;
+			}
+
+			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
+
+			return implode( '', $pieces ) . ' &hellip;';
+		}
+
+		// Apply the length restriction without counting html entities.
+		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
+
+		if ( $str_length > $length ) {
 			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
 
 			// If not a full sentence, and one ends within 20% of the end, trim it to that.
