@@ -239,6 +239,14 @@ class Parser {
 		$line       = $this->get_first_nonwhitespace( $contents );
 		$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 
+		// It's possible to leave the plugin name header off entirely.. 
+		if ( $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+			array_unshift( $contents, $line );
+
+			$this->warnings['invalid_plugin_name_header'] = true;
+			$this->name                                   = false;
+		}
+
 		// Strip Github style header\n==== underlines.
 		if ( ! empty( $contents ) && '' === trim( $contents[0], '=-' ) ) {
 			array_shift( $contents );
@@ -254,15 +262,10 @@ class Parser {
 			// Ensure that the line read doesn't look like a description.
 			if ( strlen( $line ) < 50 && ! $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
 				$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
+			} else {
+				// Put it back on the stack to be processed.
+				array_unshift( $contents, $line );
 			}
-		}
-
-		// It's possible to leave the plugin name header off entirely.
-		if ( $this->parse_possible_header( $this->name, true /* only valid headers */ ) ) {
-			array_unshift( $contents, $line );
-
-			$this->warnings['invalid_plugin_name_header'] = true;
-			$this->name                                   = false;
 		}
 
 		// Parse headers.

@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `class-parser.php`
 
 #### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`
