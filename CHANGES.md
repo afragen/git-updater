@@ -1,6 +1,7 @@
 #### [unreleased]
 * update `class-parser.php`
 * update `Requires PHP` to 7.4 for `class-parser.php`
+* update `Requires WP` to 5.9
 
 #### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`

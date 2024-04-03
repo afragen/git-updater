@@ -6,7 +6,7 @@
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/git-updater/graphs/contributors)
 * Tags: plugin, theme, update, github, language pack
-* Requires at least: 5.6
+* Requires at least: 5.9
 * Requires PHP: 7.4
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>
