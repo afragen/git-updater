@@ -177,7 +177,7 @@ class Parser {
 	 * the parse_readme() function, not the parse_readme_contents() function, so
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
-	public function __construct( $string ) {
+	public function __construct( $string = '' ) {
 		if (
 			(
 				// If it's longer than the Filesystem path limit or contains newlines, it's not worth a file_exists() check.
@@ -307,31 +307,15 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
+
 			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
 				$this->tags = array_diff( $this->tags, $this->ignore_tags );
 				$this->warnings['ignored_tags'] = true;
 			}
 
-			// Check if the tags are low-quality (ie. little used)
-			if ( $this->tags && taxonomy_exists( 'plugin_tags' ) ) {
-				$tags = get_terms( array(
-					'taxonomy' => 'plugin_tags',
-					'name'     => $this->tags,
-				) );
-
-				$low_usage_tags = array_filter(
-					$tags,
-					function( $term ) {
-						return $term->count < 5;
-					}
-				);
-
-				$this->warnings['low_usage_tags'] = wp_list_pluck( $low_usage_tags, 'name' );
-			}
-
 			if ( count( $this->tags ) > 5 ) {
+				$this->warnings['too_many_tags'] = array_slice( $this->tags, 4 );
 				$this->tags = array_slice( $this->tags, 0, 5 );
-				$this->warnings['too_many_tags'] = true;
 			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
@@ -714,15 +698,15 @@ class Parser {
 
 			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
 			if ( ! $user ) {
+				$this->warnings['contributor_ignored'] ??= [];
+				$this->warnings['contributor_ignored'][] = $name;
 				unset( $users[ $i ] );
-				$this->warnings['contributor_ignored'] = true;
 				continue;
 			}
 
 			// Overwrite whatever the author has specified with the sanitized nicename.
 			$users[ $i ] = $user->user_nicename;
 		}
-
 		return $users;
 	}
 

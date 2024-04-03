@@ -30,7 +30,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.4",
     "afragen/wordpress-plugin-readme-parser": "dev-master",
     "afragen/singleton": "dev-master",
     "afragen/wp-dependency-installer": "^4",
