@@ -7334,7 +7334,7 @@
             wp_enqueue_script( 'jquery' );
             wp_enqueue_script( 'json2' );
 
-            fs_enqueue_local_script( 'postmessage', 'nojquery.ba-postmessage.min.js' );
+            fs_enqueue_local_script( 'postmessage', 'nojquery.ba-postmessage.js' );
             fs_enqueue_local_script( 'fs-postmessage', 'postmessage.js' );
         }
 
@@ -13736,6 +13736,18 @@
             $license_key = trim( fs_request_get_raw( 'license_key' ) );
 
             if ( empty( $license_key ) ) {
+                $license_id = trim( fs_request_get_raw( 'license_id' ) );
+
+                if ( FS_Plugin_License::is_valid_id( $license_id ) ) {
+                    $license = $this->_get_license_by_id( $license_id, false );
+
+                    if ( is_object( $license ) ) {
+                        $license_key = $license->secret_key;
+                    }
+                }
+            }
+
+            if ( empty( $license_key ) ) {
                 exit;
             }
 
@@ -14139,15 +14151,21 @@
                     }
                 }
 
+                $is_connected = null;
+
                 if ( true !== $result && ! FS_Api::is_api_result_entity( $result ) ) {
                     if ( FS_Api::is_blocked( $result ) ) {
                         $result->error->message = $this->generate_api_blocked_notice_message_from_result( $result );
+
+                        $is_connected = false;
                     }
 
                     $error = FS_Api::is_api_error_object( $result ) ?
                         $result->error->message :
                         var_export( $result, true );
                 } else {
+                    $is_connected = true;
+
                     $fs->network_upgrade_mode_completed();
 
                     $fs->_user = $user;
@@ -14164,6 +14182,8 @@
                         $fs->get_parent_instance()->get_account_url() :
                         $fs->get_after_activation_url( 'after_connect_url' );
                 }
+
+                $fs->update_connectivity_info( $is_connected );
             } else {
                 $next_page = $fs->opt_in(
                     false,
@@ -24090,7 +24110,7 @@
 
             if ( $this->is_registered() ) {
                 // If opted-in, override trial with up to date data from API.
-                $trial_plans       = FS_Plan_Manager::instance()->get_trial_plans( $this->_plans );
+                $trial_plans       = FS_Plan_Manager::instance()->get_visible_trial_plans( $this->_plans );
                 $trial_plans_count = count( $trial_plans );
 
                 if ( 0 === $trial_plans_count ) {
