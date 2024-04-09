@@ -413,7 +413,7 @@ class REST_API {
 			$options     = $this->get_class_vars( 'Base', 'options' );
 			$slug        = ! empty( $plugin_slug ) ? $plugin_slug : $theme_slug;
 
-			if ( empty( $plugin_slug ) && empty( $theme_slug ) || ! isset( $options[ $slug ] ) ) {
+			if ( ( empty( $plugin_slug ) && empty( $theme_slug ) ) || ! isset( $options[ $slug ] ) ) {
 				throw new \UnexpectedValueException( 'No plugin or theme specified for branch reset.' );
 			}
 
