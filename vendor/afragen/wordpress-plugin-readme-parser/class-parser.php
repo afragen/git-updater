@@ -309,13 +309,13 @@ class Parser {
 			$this->tags = array_filter( $this->tags );
 
 			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
-				$this->tags = array_diff( $this->tags, $this->ignore_tags );
-				$this->warnings['ignored_tags'] = true;
+				$this->warnings['ignored_tags'] = array_intersect( $this->tags, $this->ignore_tags );
+				$this->tags                     = array_diff( $this->tags, $this->ignore_tags );
 			}
 
 			if ( count( $this->tags ) > 5 ) {
-				$this->warnings['too_many_tags'] = array_slice( $this->tags, 4 );
-				$this->tags = array_slice( $this->tags, 0, 5 );
+				$this->warnings['too_many_tags'] = array_slice( $this->tags, 5 );
+				$this->tags                      = array_slice( $this->tags, 0, 5 );
 			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
@@ -554,7 +554,12 @@ class Parser {
 
 		if ( 'words' === $type ) {
 			// Split by whitespace, capturing it so we can put it back together.
-			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+			$pieces = @preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			// In the event of an error (Likely invalid UTF8 data), perform the same split, this time in a non-UTF8 safe manner, as a fallback.
+			if ( $pieces === false ) {
+				$pieces = preg_split( '/(\s+)/', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+			}
 
 			$word_count_with_spaces = $length * 2;
 
