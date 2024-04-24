@@ -21349,7 +21349,7 @@
                  * associated with that ID is not included in the user's licenses collection.
                  * Save previous value to manage remote license renewals.
                  */
-                $was_license_expired_before_sync = $this->_license->is_expired();
+                $was_license_expired_before_sync = is_object( $this->_license ) && $this->_license->is_expired();
                 $this->_sync_licenses(
                     $site->license_id,
                     ( $is_context_single_site ?
