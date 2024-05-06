@@ -341,13 +341,24 @@ class Parser {
 		if ( ! empty( $headers['license'] ) ) {
 			// Handle the many cases of "License: GPLv2 - http://..."
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
-				$headers['license_uri'] = $url[1];
-				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
+				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n(" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n(" );
 			}
+
 			$this->license = $headers['license'];
 		}
 		if ( ! empty( $headers['license_uri'] ) ) {
 			$this->license_uri = $headers['license_uri'];
+		}
+
+		// Validate the license specified.
+		if ( ! $this->license ) {
+			$this->warnings['license_missing'] = true;
+		} else {
+			$license_error = $this->validate_license( $this->license );
+			if ( true !== $license_error ) {
+				$this->warnings[ $license_error ] = $this->license;
+			}
 		}
 
 		// Parse the short description.
@@ -917,6 +928,97 @@ class Parser {
 		}
 
 		return $markdown->transform( $text );
+	}
+
+	/**
+	 * Validate whether the license specified appears to be valid or not.
+	 *
+	 * NOTE: This does not require a SPDX license to be specified, but it should be a valid license nonetheless.
+	 *
+	 * @param string $license The specified license.
+	 * @return string|bool True if it looks good, error code on failure.
+	 */
+	public function validate_license( $license ) {
+		/*
+		 * This is a shortlist of keywords that are expected to be found in a valid license field.
+		 * See https://www.gnu.org/licenses/license-list.en.html for possible compatible licenses.
+		 */
+		$probably_compatible = [
+			'GPL', 'General Public License',
+			// 'GNU 2', 'GNU Public', 'GNU Version 2' explicitely not included, as it's not a specific license.
+			'MIT',
+			'ISC',
+			'Expat',
+			'Apache 2', 'Apache License 2',
+			'X11', 'Modified BSD', 'New BSD', '3 Clause BSD', 'BSD 3',
+			'FreeBSD', 'Simplified BSD', '2 Clause BSD', 'BSD 2',
+			'MPL', 'Mozilla Public License',
+			strrev( 'LPFTW' ), strrev( 'kcuf eht tahw od' ), // To avoid some code scanners..
+			'Public Domain', 'CC0', 'Unlicense',
+			'CC BY', // Note: BY-NC & BY-ND are a no-no. See below.
+			'zlib',
+		];
+
+		/*
+		 * This is a shortlist of keywords that are likely related to a non-GPL  compatible license.
+		 * See https://www.gnu.org/licenses/license-list.en.html for possible explanations.
+		 */
+		$probably_incompatible = [
+			'4 Clause BSD', 'BSD 4 Clause', 
+			'Apache 1',
+			'CC BY-NC', 'CC-NC', 'NonCommercial',
+			'CC BY-ND', 'NoDerivative',
+			'EUPL',
+			'OSL',
+			'Personal use', 'without permission', 'without prior auth', 'you may not',
+			'Proprietery', 'proprietary',
+		];
+
+		$sanitize_license = static function( $license ) {
+			$license = strtolower( $license );
+
+			// Localised or verbose licences.
+			$license = str_replace( 'licence', 'license', $license );
+			$license = str_replace( 'clauses', 'clause', $license ); // BSD
+			$license = str_replace( 'creative commons', 'cc', $license );
+
+			// If it looks like a full GPL statement, trim it back, for this function.
+			if ( 0 === stripos( $license, 'GNU GENERAL PUBLIC LICENSE Version 2, June 1991 Copyright (C) 1989' ) ) {
+				$license = 'gplv2';
+			}
+
+			// Replace 'Version 9' & v9 with '9' for simplicity.
+			$license = preg_replace( '/(version |v)([0-9])/i', '$2', $license );
+
+			// Remove unexpected characters
+			$license = preg_replace( '/(\s*[^a-z0-9. ]+\s*)/i', '', $license );
+
+			// Remove all spaces
+			$license = preg_replace( '/\s+/', '', $license );
+
+			return $license;
+		};
+
+		$probably_compatible   = array_map( $sanitize_license, $probably_compatible );
+		$probably_incompatible = array_map( $sanitize_license, $probably_incompatible );
+		$license               = $sanitize_license( $license );
+
+		// First check to see if it's most probably an incompatible license.
+		foreach ( $probably_incompatible as $match ) {
+			if ( str_contains( $license, $match ) ) {
+				return 'invalid_license';
+			}
+		}
+
+		// Check to see if it's likely compatible.
+		foreach ( $probably_compatible as $match ) {
+			if ( str_contains( $license, $match ) ) {
+				return true;
+			}
+		}
+
+		// If we've made it this far, it's neither likely incompatible, or likely compatible, so unknown.
+		return 'unknown_license';
 	}
 
 }
