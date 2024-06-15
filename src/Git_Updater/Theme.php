@@ -402,7 +402,7 @@ class Theme {
 			} else {
 				printf(
 					/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-					esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'git-updater' ),
+					esc_html__( 'View version %1$s details%2$s or %3$s update now%2$s.', 'git-updater' ),
 					esc_attr( $response['new_version'] ),
 					'</a>',
 					sprintf(
@@ -518,7 +518,7 @@ class Theme {
 					if ( ! empty( $current->response[ $theme->slug ]['package'] ) ) {
 						printf(
 							/* translators: 1: version number, 2: closing anchor tag, 3: update URL */
-							esc_html__( 'View version %1$s details%2$s or %3$supdate now%2$s.', 'git-updater' ),
+							esc_html__( 'View version %1$s details%2$s or %3$s update now%2$s.', 'git-updater' ),
 							$theme->remote_version = isset( $theme->remote_version ) ? esc_attr( $theme->remote_version ) : null,
 							'</a>',
 							sprintf(
@@ -536,7 +536,7 @@ class Theme {
 						);
 						printf(
 							/* translators: %s: opening/closing paragraph and italic tags */
-							esc_html__( '%1$sAutomatic update is unavailable for this theme.%2$s', 'git-updater' ),
+							esc_html__( '%1$s Automatic update is unavailable for this theme.%2$s', 'git-updater' ),
 							'<p><i>',
 							'</i></p>'
 						);

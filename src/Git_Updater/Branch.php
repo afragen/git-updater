@@ -322,7 +322,7 @@ class Branch {
 		if ( '1' === self::$options['branch_switch'] ) {
 			printf(
 				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater-pro' ),
+				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$s another version%3$s', 'git-updater-pro' ),
 				esc_attr( $theme->branch ),
 				'<a href="#" onclick="jQuery(\'#gu_versions\').toggle();return false;">',
 				'</a>.</p>'
@@ -424,7 +424,7 @@ class Branch {
 		echo wp_kses_post( $this->base->get_git_icon( $file, true ) );
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater-pro' ),
+			esc_html__( 'Current branch is `%1$s`, try %2$s another version%3$s', 'git-updater-pro' ),
 			esc_attr( $data['branch'] ),
 			'<a href="#" onclick="jQuery(\'#' . esc_attr( $data['id'] ) . '\').toggle();return false;">',
 			'</a>.'

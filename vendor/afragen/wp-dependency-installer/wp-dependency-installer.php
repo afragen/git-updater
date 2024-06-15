@@ -841,7 +841,7 @@ if ( ! class_exists( 'WP_Dependency_Installer' ) ) {
 			 */
 			if ( apply_filters( 'wp_dependency_required_label', true ) ) {
 				/* translators: %s: opening and closing span tags */
-				$actions = array_merge( [ 'required-plugin' => sprintf( esc_html__( '%1$sRequired Plugin%2$s' ), '<span class="network_active" style="font-variant-caps: small-caps;">', '</span>' ) ], $actions );
+				$actions = array_merge( [ 'required-plugin' => sprintf( esc_html__( '%1$s Required Plugin%2$s' ), '<span class="network_active" style="font-variant-caps: small-caps;">', '</span>' ) ], $actions );
 			}
 
 			return $actions;
