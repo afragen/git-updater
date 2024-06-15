@@ -204,11 +204,11 @@ class Repo_List_Table extends \WP_List_Table {
 	public function get_columns() {
 		$columns = [
 			// 'cb'             => '<input type="checkbox" />', // Render a checkbox instead of text.
-			'slug'           => esc_html__( 'Slug', 'git-updater-additions' ),
-			'uri'            => esc_html__( 'URL', 'git-updater-additions' ),
-			'primary_branch' => esc_html__( 'Primary Branch', 'git-updater-additions' ),
-			'release_asset'  => esc_html__( 'Release Asset', 'git-updater-additions' ),
-			'type'           => esc_html__( 'Type', 'git-updater-additions' ),
+			'slug'           => esc_html__( 'Slug', 'git-updater' ),
+			'uri'            => esc_html__( 'URL', 'git-updater' ),
+			'primary_branch' => esc_html__( 'Primary Branch', 'git-updater' ),
+			'release_asset'  => esc_html__( 'Release Asset', 'git-updater' ),
+			'type'           => esc_html__( 'Type', 'git-updater' ),
 		];
 
 		return $columns;
@@ -254,7 +254,7 @@ class Repo_List_Table extends \WP_List_Table {
 	 **************************************************************************/
 	public function get_bulk_actions() {
 		$actions = [
-			'delete' => esc_html__( 'Delete', 'git-updater-additions' ),
+			'delete' => esc_html__( 'Delete', 'git-updater' ),
 		];
 
 		// return $actions;
@@ -285,7 +285,7 @@ class Repo_List_Table extends \WP_List_Table {
 			}
 		}
 		if ( 'edit' === $this->current_action() ) {
-			wp_die( esc_html__( 'Items would go to edit when we write that code.', 'git-updater-additions' ) );
+			wp_die( esc_html__( 'Items would go to edit when we write that code.', 'git-updater' ) );
 		}
 	}
 
@@ -437,7 +437,7 @@ class Repo_List_Table extends \WP_List_Table {
 		// Fetch, prepare, sort, and filter our data...
 		$this->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h2>' . esc_html__( 'Additions List Table', 'git-updater-additions' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Additions List Table', 'git-updater' ) . '</h2>';
 
 		// Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions.
 		echo '<form id="sites-list" method="get">';

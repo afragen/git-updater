@@ -102,10 +102,10 @@ class Install {
 	public function add_settings_tabs() {
 		$install_tabs = [];
 		if ( current_user_can( 'install_plugins' ) ) {
-			$install_tabs['git_updater_install_plugin'] = esc_html__( 'Install Plugin', 'git-updater-pro' );
+			$install_tabs['git_updater_install_plugin'] = esc_html__( 'Install Plugin', 'git-updater' );
 		}
 		if ( current_user_can( 'install_themes' ) ) {
-			$install_tabs['git_updater_install_theme'] = esc_html__( 'Install Theme', 'git-updater-pro' );
+			$install_tabs['git_updater_install_theme'] = esc_html__( 'Install Theme', 'git-updater' );
 		}
 		add_filter(
 			'gu_add_settings_tabs',
@@ -161,7 +161,7 @@ class Install {
 			// Exit early if no repo entered.
 			if ( empty( $_POST['git_updater_repo'] ) ) {
 				echo '<h3>';
-				esc_html_e( 'A repository URI is required.', 'git-updater-pro' );
+				esc_html_e( 'A repository URI is required.', 'git-updater' );
 				echo '</h3>';
 
 				return false;
@@ -316,10 +316,10 @@ class Install {
 			settings_fields( 'git_updater_install' );
 			do_settings_sections( 'git_updater_install_' . $type );
 			if ( 'plugin' === $type ) {
-				submit_button( esc_html__( 'Install Plugin', 'git-updater-pro' ) );
+				submit_button( esc_html__( 'Install Plugin', 'git-updater' ) );
 			}
 			if ( 'theme' === $type ) {
-				submit_button( esc_html__( 'Install Theme', 'git-updater-pro' ) );
+				submit_button( esc_html__( 'Install Theme', 'git-updater' ) );
 			}
 			?>
 		</form>
@@ -336,10 +336,10 @@ class Install {
 
 		// Place translatable strings into variables.
 		if ( 'plugin' === $type ) {
-			$repo_type = esc_html__( 'Plugin', 'git-updater-pro' );
+			$repo_type = esc_html__( 'Plugin', 'git-updater' );
 		}
 		if ( 'theme' === $type ) {
-			$repo_type = esc_html__( 'Theme', 'git-updater-pro' );
+			$repo_type = esc_html__( 'Theme', 'git-updater' );
 		}
 
 		register_setting(
@@ -351,7 +351,7 @@ class Install {
 		add_settings_section(
 			$type,
 			/* translators: variable is 'Plugin' or 'Theme' */
-			sprintf( esc_html__( 'Git Updater Install %s', 'git-updater-pro' ), $repo_type ),
+			sprintf( esc_html__( 'Git Updater Install %s', 'git-updater' ), $repo_type ),
 			[],
 			'git_updater_install_' . $type
 		);
@@ -359,7 +359,7 @@ class Install {
 		add_settings_field(
 			$type . '_repo',
 			/* translators: variable is 'Plugin' or 'Theme' */
-			sprintf( esc_html__( '%s URI', 'git-updater-pro' ), $repo_type ),
+			sprintf( esc_html__( '%s URI', 'git-updater' ), $repo_type ),
 			[ $this, 'get_repo' ],
 			'git_updater_install_' . $type,
 			$type
@@ -367,7 +367,7 @@ class Install {
 
 		add_settings_field(
 			$type . '_branch',
-			esc_html__( 'Repository Branch', 'git-updater-pro' ),
+			esc_html__( 'Repository Branch', 'git-updater' ),
 			[ $this, 'branch' ],
 			'git_updater_install_' . $type,
 			$type
@@ -375,7 +375,7 @@ class Install {
 
 		add_settings_field(
 			$type . '_api',
-			esc_html__( 'Remote Repository Host', 'git-updater-pro' ),
+			esc_html__( 'Remote Repository Host', 'git-updater' ),
 			[ $this, 'install_api' ],
 			'git_updater_install_' . $type,
 			$type
@@ -410,7 +410,7 @@ class Install {
 			<input type="text" style="width:50%;" id="git_updater_repo" name="git_updater_repo" value="" autofocus>
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'URI is case sensitive.', 'git-updater-pro' ); ?>
+				<?php esc_html_e( 'URI is case sensitive.', 'git-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -425,7 +425,7 @@ class Install {
 			<input type="text" style="width:50%;" id="git_updater_branch" name="git_updater_branch" value="" placeholder="master">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter branch name or leave empty for `master`', 'git-updater-pro' ); ?>
+				<?php esc_html_e( 'Enter branch name or leave empty for `master`', 'git-updater' ); ?>
 			</span>
 		</label>
 		<?php
@@ -475,7 +475,7 @@ class Install {
 		);
 		$activate_link = esc_url( wp_nonce_url( $activate_link, 'switch-theme_' . $stylesheet ) );
 
-		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'git-updater-pro' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'git-updater-pro' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
+		$install_actions['activate'] = '<a href="' . $activate_link . '" class="activatelink"><span aria-hidden="true">' . esc_attr__( 'Activate', 'git-updater' ) . '</span><span class="screen-reader-text">' . esc_attr__( 'Activate', 'git-updater' ) . ' &#8220;' . $stylesheet . '&#8221;</span></a>';
 
 		if ( is_network_admin() && current_user_can( 'manage_network_themes' ) ) {
 			$network_activate_link = add_query_arg(
@@ -487,7 +487,7 @@ class Install {
 			);
 			$network_activate_link = esc_url( wp_nonce_url( $network_activate_link, 'enable-theme_' . $stylesheet ) );
 
-			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'git-updater-pro' ) . '</a>';
+			$install_actions['network_enable'] = '<a href="' . $network_activate_link . '" target="_parent">' . esc_attr_x( 'Network Enable', 'This refers to a network activation in a multisite installation', 'git-updater' ) . '</a>';
 			unset( $install_actions['activate'] );
 		}
 		ksort( $install_actions );
