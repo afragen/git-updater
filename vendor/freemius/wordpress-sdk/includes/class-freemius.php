@@ -4174,12 +4174,16 @@
                 ! empty( $this->_storage->connectivity_test ) &&
                 isset( $this->_storage->connectivity_test['is_active'] )
             ) {
-                $is_active = $this->_storage->connectivity_test['is_active'];
+                $is_connected = isset( $this->_storage->connectivity_test['is_connected'] ) ?
+                    $this->_storage->connectivity_test['is_connected'] :
+                    null;
+                $is_active    = ( $this->_storage->connectivity_test['is_active'] || is_object( $this->_site ) );
             } else {
-                $is_active = $this->should_turn_fs_on( $this->apply_filters( 'is_plugin_update', $this->is_plugin_update() ) );
-
-                $this->store_connectivity_info( (object) array( 'is_active' => $is_active ), null );
+                $is_connected = null;
+                $is_active    = $this->should_turn_fs_on( $this->apply_filters( 'is_plugin_update', $this->is_plugin_update() ) );
             }
+
+            $this->store_connectivity_info( (object) array( 'is_active' => $is_active ), $is_connected );
 
             if ( $is_active ) {
                 $this->_is_on = true;
@@ -5484,7 +5488,12 @@
                 'affiliate_moderation' => $this->get_option( $plugin_info, 'has_affiliation' ),
                 'bundle_id'            => $this->get_option( $plugin_info, 'bundle_id', null ),
                 'bundle_public_key'    => $this->get_option( $plugin_info, 'bundle_public_key', null ),
-                'opt_in_moderation'    => $this->get_option( $plugin_info, 'opt_in', null ),
+                'opt_in_moderation'    => $this->get_option(
+                    $plugin_info,
+                    'opt_in',
+                    // For backward compatibility, we support both parameter names: opt_in and opt_in_moderation.
+                    $this->get_option( $plugin_info, 'opt_in_moderation', null )
+                ),
             ) );
 
             if ( $plugin->is_updated() ) {
