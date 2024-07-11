@@ -5,6 +5,7 @@
 * update `freemius/wordpress-sdk`
 * update `printf()` in `class Branches`
 * fix old `git-updater-pro` and `git-updater-additions` textdomains
+* update `Base::upgrader_source_selection()` to not `move_dir()` when basenames of `$source` and `$new_source` are identical, fixes potential issue with release assets
 
 #### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`

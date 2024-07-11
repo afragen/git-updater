@@ -502,12 +502,17 @@ class Base {
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
+		if ( basename( $source ) === basename( $new_source ) ) {
+			$new_source = $source;
+		}
+
 		if ( trailingslashit( strtolower( $source ) ) !== trailingslashit( strtolower( $new_source ) ) ) {
 			$result = move_dir( $source, $new_source, true );
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}
 		}
+
 		// Clean up $new_source directory.
 		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 2 );
 
