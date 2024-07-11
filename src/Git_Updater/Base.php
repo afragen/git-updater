@@ -502,7 +502,7 @@ class Base {
 
 		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
-		if ( basename( $source ) === basename( $new_source ) ) {
+		if ( basename( dirname( $source ) ) === basename( $new_source ) ) {
 			$new_source = $source;
 		}
 
