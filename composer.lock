@@ -254,16 +254,16 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.7.3",
+            "version": "2.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "dad8c4f268f826d1f5a98737d26216d6dede5b03"
+                "reference": "2741ba2b4f819b5018f68529036e505ef1e7c349"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/dad8c4f268f826d1f5a98737d26216d6dede5b03",
-                "reference": "dad8c4f268f826d1f5a98737d26216d6dede5b03",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/2741ba2b4f819b5018f68529036e505ef1e7c349",
+                "reference": "2741ba2b4f819b5018f68529036e505ef1e7c349",
                 "shasum": ""
             },
             "require": {
@@ -296,9 +296,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.7.3"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.7.4"
             },
-            "time": "2024-07-01T05:51:06+00:00"
+            "time": "2024-08-07T14:07:59+00:00"
         }
     ],
     "packages-dev": [
@@ -548,16 +548,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.10.1",
+            "version": "3.10.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "8f90f7a53ce271935282967f53d0894f8f1ff877"
+                "reference": "86e5f5dd9a840c46810ebe5ff1885581c42a3017"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/8f90f7a53ce271935282967f53d0894f8f1ff877",
-                "reference": "8f90f7a53ce271935282967f53d0894f8f1ff877",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/86e5f5dd9a840c46810ebe5ff1885581c42a3017",
+                "reference": "86e5f5dd9a840c46810ebe5ff1885581c42a3017",
                 "shasum": ""
             },
             "require": {
@@ -624,7 +624,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-05-22T21:24:41+00:00"
+            "time": "2024-07-21T23:26:44+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
