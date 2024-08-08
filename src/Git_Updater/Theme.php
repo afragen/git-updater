@@ -254,10 +254,10 @@ class Theme {
 			 * Add update row to theme row, only in multisite.
 			 */
 			if ( is_multisite() ) {
-				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 2 );
+				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 1 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 2 );
+					add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 1 );
 				}
 			}
 		}
@@ -426,9 +426,8 @@ class Theme {
 	 * @author @grappler
 	 *
 	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
 	 */
-	public function remove_after_theme_row( $theme_key, $theme ) {
+	public function remove_after_theme_row( $theme_key ) {
 		$themes = $this->get_theme_configs();
 
 		if ( array_key_exists( $theme_key, $themes ) ) {

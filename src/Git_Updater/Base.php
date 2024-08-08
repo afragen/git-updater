@@ -508,13 +508,13 @@ class Base {
 
 		if ( trailingslashit( strtolower( $source ) ) !== trailingslashit( strtolower( $new_source ) ) ) {
 			$result = move_dir( $source, $new_source, true );
-			if ( \is_wp_error( $result ) ) {
+			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 		}
 
 		// Clean up $new_source directory.
-		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 2 );
+		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 1 );
 
 		return trailingslashit( $new_source );
 	}

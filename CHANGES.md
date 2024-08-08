@@ -6,6 +6,7 @@
 * update `printf()` in `class Branches`
 * fix old `git-updater-pro` and `git-updater-additions` textdomains
 * update `Base::upgrader_source_selection()` when trying to update `$source` and `$new_source` when destination directories are identical
+* remove unused parameters in certain functions
 
 #### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`

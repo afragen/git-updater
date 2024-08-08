@@ -291,7 +291,7 @@ class Install {
 					'install_theme_complete_actions',
 				],
 				10,
-				3
+				1
 			);
 		}
 
@@ -454,12 +454,10 @@ class Install {
 	 * Fix activation links after theme installation, no method to get proper theme name.
 	 *
 	 * @param array $install_actions Array of theme actions.
-	 * @param mixed $api             Unused.
-	 * @param mixed $theme_info      Theme slug.
 	 *
 	 * @return mixed
 	 */
-	public function install_theme_complete_actions( $install_actions, $api, $theme_info ) {
+	public function install_theme_complete_actions( $install_actions ) {
 		if ( isset( $install_actions['preview'] ) ) {
 			unset( $install_actions['preview'] );
 		}

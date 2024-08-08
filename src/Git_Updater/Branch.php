@@ -205,12 +205,11 @@ class Branch {
 	/**
 	 * Add branch switch row to plugins page.
 	 *
-	 * @param string    $plugin_file Plugin file.
-	 * @param \stdClass $plugin_data Plugin repo data.
+	 * @param string $plugin_file Plugin file.
 	 *
 	 * @return bool
 	 */
-	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
+	public function plugin_branch_switcher( $plugin_file ) {
 		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
@@ -260,11 +259,10 @@ class Branch {
 	 * Create branch switcher row for theme multisite installation.
 	 *
 	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
 	 *
 	 * @return bool
 	 */
-	public function multisite_branch_switcher( $theme_key, $theme ) {
+	public function multisite_branch_switcher( $theme_key ) {
 		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
