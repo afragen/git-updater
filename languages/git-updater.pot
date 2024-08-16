@@ -2,16 +2,16 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.4.0.4\n"
+"Project-Id-Version: Git Updater 12.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/git-updater\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-06-15T18:42:04+00:00\n"
+"POT-Creation-Date: 2024-08-16T17:01:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.10.0\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
@@ -180,7 +180,7 @@ msgstr ""
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
-#: src/Git_Updater/Base.php:703
+#: src/Git_Updater/Base.php:708
 msgid "Updates via Git Updater"
 msgstr ""
 
@@ -195,29 +195,29 @@ msgid "Git Updater cannot run on PHP versions older than %1$s."
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/Git_Updater/Branch.php:325
-#: src/Git_Updater/Branch.php:427
+#: src/Git_Updater/Branch.php:323
+#: src/Git_Updater/Branch.php:425
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:333
+#: src/Git_Updater/Branch.php:331
 msgid "Choose a Version"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:376
-#: src/Git_Updater/Branch.php:534
+#: src/Git_Updater/Branch.php:374
+#: src/Git_Updater/Branch.php:532
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/Git_Updater/Branch.php:380
+#: src/Git_Updater/Branch.php:378
 msgid "Install"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:466
+#: src/Git_Updater/Branch.php:464
 msgid "Switch to branch "
 msgstr ""
 
-#: src/Git_Updater/Branch.php:526
+#: src/Git_Updater/Branch.php:524
 msgid "Switch to release "
 msgstr ""
 
@@ -269,11 +269,11 @@ msgstr ""
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/Git_Updater/Install.php:478
+#: src/Git_Updater/Install.php:476
 msgid "Activate"
 msgstr ""
 
-#: src/Git_Updater/Install.php:490
+#: src/Git_Updater/Install.php:488
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
@@ -433,7 +433,7 @@ msgstr ""
 
 #. translators: %s: theme name
 #: src/Git_Updater/Theme.php:384
-#: src/Git_Updater/Theme.php:510
+#: src/Git_Updater/Theme.php:509
 msgid "There is a new version of %s available."
 msgstr ""
 
@@ -448,23 +448,23 @@ msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
 #: src/Git_Updater/Theme.php:405
-#: src/Git_Updater/Theme.php:521
+#: src/Git_Updater/Theme.php:520
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
 #: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:526
+#: src/Git_Updater/Theme.php:525
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:533
+#: src/Git_Updater/Theme.php:532
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:539
+#: src/Git_Updater/Theme.php:538
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 

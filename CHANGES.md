@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.5.0 / 2024-08-16
 * update `class-parser.php`
 * update `Requires PHP` to 7.4 for `class-parser.php`
 * update `Requires WP` to 5.9
