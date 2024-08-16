@@ -1,5 +1,15 @@
 #### [unreleased]
 
+#### 12.5.0 / 2024-08-16
+* update `class-parser.php`
+* update `Requires PHP` to 7.4 for `class-parser.php`
+* update `Requires WP` to 5.9
+* update `freemius/wordpress-sdk`
+* update `printf()` in `class Branches`
+* fix old `git-updater-pro` and `git-updater-additions` textdomains
+* update `Base::upgrader_source_selection()` when trying to update `$source` and `$new_source` when destination directories are identical
+* remove unused parameters in certain functions
+
 #### 12.4.0 / 2024-03-04
 * update `freemius/wordpress-sdk`
 * update `class-parser.php`

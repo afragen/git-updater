@@ -139,7 +139,7 @@ fs_enqueue_local_style( 'fs_dialog_boxes', '/admin/dialog-boxes.css' );
             + '			<div class="fs-modal-panel active">' + <?php echo json_encode( $subscription_cancellation_html ) ?> + '<p class="fs-price-increase-warning" style="display: none;">' + <?php echo json_encode( $prices_increase_text ) ?> + '</p></div>'
             + '		</div>'
             + '		<div class="fs-modal-footer">'
-            + '			<a href="#" class="button button-secondary button-close"><?php fs_esc_attr_echo( 'cancel', $slug ) ?></a>'
+            + '			<a href="#" class="button button-secondary button-close"><?php fs_esc_attr_echo_inline( 'Cancel', 'cancel', $slug ) ?></a>'
             + '			<a href="#" class="button button-primary button-deactivate disabled"><?php fs_esc_attr_echo_inline( 'Proceed', 'proceed', $slug ) ?></a>'
             + '		</div>'
             + '	</div>'
@@ -194,7 +194,7 @@ fs_enqueue_local_style( 'fs_dialog_boxes', '/admin/dialog-boxes.css' );
 
                     $modal.find('.fs-price-increase-warning').show();
                 } else {
-                    $primaryButton.html( <?php echo fs_json_encode_echo_inline( 'Proceed', 'proceed', $slug ) ?> );
+                    $primaryButton.html( <?php fs_json_encode_echo_inline( 'Proceed', 'proceed', $slug ) ?> );
                     $modal.find('.fs-price-increase-warning').hide();
                 }
 
@@ -271,7 +271,7 @@ fs_enqueue_local_style( 'fs_dialog_boxes', '/admin/dialog-boxes.css' );
         function updateButtonLabels() {
             $modal.find('.button-primary').text( <?php fs_json_encode_echo_inline( 'Proceed', 'proceed', $slug ) ?> );
 
-            $modal.find('.button-secondary').text( <?php fs_json_encode_echo( 'cancel', $slug ) ?> );
+            $modal.find('.button-secondary').text( <?php fs_json_encode_echo_inline( 'Cancel', 'cancel', $slug ) ?> );
         }
     })( jQuery );
 </script>

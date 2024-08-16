@@ -121,7 +121,7 @@ class Settings {
 	 * Adds Additions tab to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = [ 'git_updater_additions' => esc_html__( 'Additions', 'git-updater-additions' ) ];
+		$install_tabs = [ 'git_updater_additions' => esc_html__( 'Additions', 'git-updater' ) ];
 		add_filter(
 			'gu_add_settings_tabs',
 			function ( $tabs ) use ( $install_tabs ) {
@@ -183,7 +183,7 @@ class Settings {
 
 		add_settings_field(
 			'type',
-			esc_html__( 'Repository Type', 'git-updater-additions' ),
+			esc_html__( 'Repository Type', 'git-updater' ),
 			[ $this, 'callback_dropdown' ],
 			'git_updater_additions',
 			'git_updater_additions',
@@ -195,7 +195,7 @@ class Settings {
 
 		add_settings_field(
 			'slug',
-			esc_html__( 'Repository Slug', 'git-updater-additions' ),
+			esc_html__( 'Repository Slug', 'git-updater' ),
 			[ $this, 'callback_field' ],
 			'git_updater_additions',
 			'git_updater_additions',
@@ -209,7 +209,7 @@ class Settings {
 
 		add_settings_field(
 			'uri',
-			esc_html__( 'Repository URI', 'git-updater-additions' ),
+			esc_html__( 'Repository URI', 'git-updater' ),
 			[ $this, 'callback_field' ],
 			'git_updater_additions',
 			'git_updater_additions',
@@ -222,28 +222,28 @@ class Settings {
 
 		add_settings_field(
 			'primary_branch',
-			esc_html__( 'Primary Branch', 'git-updater-additions' ),
+			esc_html__( 'Primary Branch', 'git-updater' ),
 			[ $this, 'callback_field' ],
 			'git_updater_additions',
 			'git_updater_additions',
 			[
 				'id'          => 'git_updater_additions_primary_branch',
 				'setting'     => 'primary_branch',
-				'title'       => __( 'Ensure proper primary branch, default is `master`', 'git-updater-additions' ),
+				'title'       => __( 'Ensure proper primary branch, default is `master`', 'git-updater' ),
 				'placeholder' => 'master',
 			]
 		);
 
 		add_settings_field(
 			'release_asset',
-			esc_html__( 'Release Asset', 'git-updater-additions' ),
+			esc_html__( 'Release Asset', 'git-updater' ),
 			[ $this, 'callback_checkbox' ],
 			'git_updater_additions',
 			'git_updater_additions',
 			[
 				'id'      => 'git_updater_additions_release_asset',
 				'setting' => 'release_asset',
-				'title'   => __( 'Check if a release asset is required.', 'git-updater-additions' ),
+				'title'   => __( 'Check if a release asset is required.', 'git-updater' ),
 			]
 		);
 	}
@@ -271,7 +271,7 @@ class Settings {
 	 */
 	public function print_section_additions() {
 		echo '<p>';
-		esc_html_e( 'If there are git repositories that do not natively support Git Updater you can add them here.', 'git-updater-additions' );
+		esc_html_e( 'If there are git repositories that do not natively support Git Updater you can add them here.', 'git-updater' );
 		echo '</p>';
 	}
 

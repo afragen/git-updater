@@ -161,7 +161,6 @@
 
                 fs_require_once_template( 'plugin-icon.php', $vars );
             ?>
-            <!--			<img class="fs-connect-logo" width="--><?php //echo $size ?><!--" height="--><?php //echo $size ?><!--" src="//img.freemius.com/logo/connect.svg"/>-->
         </div>
         <div class="fs-box-container">
 		<div class="fs-content">

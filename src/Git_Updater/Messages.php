@@ -46,9 +46,9 @@ class Messages {
 		$settings_pages = [ 'settings.php', 'options-general.php' ];
 
 		if ( ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu_settings' ) )
-			&& ( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
+			&& ( ( ( ! isset( $_GET['page'] ) || 'git-updater' !== $_GET['page'] )
 			&& in_array( $pagenow, $settings_pages, true ) )
-			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true )
+			|| ! in_array( $pagenow, array_merge( $update_pages, $settings_pages ), true ) )
 		) {
 			return false;
 		}

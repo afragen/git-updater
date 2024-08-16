@@ -280,3 +280,7 @@ The free version is the one that you should give your users to download. Therefo
 Copyright (c) Freemius®, Inc.
 
 Licensed under the GNU general public license (version 3).
+
+## Contributing
+
+Please see our [contributing guide](CONTRIBUTING.md).

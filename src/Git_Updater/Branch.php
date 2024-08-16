@@ -205,12 +205,11 @@ class Branch {
 	/**
 	 * Add branch switch row to plugins page.
 	 *
-	 * @param string    $plugin_file Plugin file.
-	 * @param \stdClass $plugin_data Plugin repo data.
+	 * @param string $plugin_file Plugin file.
 	 *
 	 * @return bool
 	 */
-	public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
+	public function plugin_branch_switcher( $plugin_file ) {
 		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
@@ -260,11 +259,10 @@ class Branch {
 	 * Create branch switcher row for theme multisite installation.
 	 *
 	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
 	 *
 	 * @return bool
 	 */
-	public function multisite_branch_switcher( $theme_key, $theme ) {
+	public function multisite_branch_switcher( $theme_key ) {
 		if ( empty( self::$options['branch_switch'] ) ) {
 			return false;
 		}
@@ -322,7 +320,7 @@ class Branch {
 		if ( '1' === self::$options['branch_switch'] ) {
 			printf(
 				/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater-pro' ),
+				'<p>' . esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
 				esc_attr( $theme->branch ),
 				'<a href="#" onclick="jQuery(\'#gu_versions\').toggle();return false;">',
 				'</a>.</p>'
@@ -330,7 +328,7 @@ class Branch {
 			?>
 			<div id="gu_versions" style="display:none; width: 100%;">
 				<label><select style="width: 60%;" onchange="if(jQuery(this).val() != '') { jQuery(this).parent().next().show(); jQuery(this).parent().next().attr('href','<?php echo esc_url( $rollback_url ); ?>'+jQuery(this).val()); } else jQuery(this).parent().next().hide();">
-				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater-pro' ); ?>&#8230;</option>
+				<option value=""><?php esc_html_e( 'Choose a Version', 'git-updater' ); ?>&#8230;</option>
 			<?php
 
 			// Disable branch switching to primary branch for release assets.
@@ -373,11 +371,11 @@ class Branch {
 				}
 			}
 			if ( empty( $theme->rollback ) ) {
-				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'git-updater-pro' ) . '</option></select></label>';
+				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</option></select></label>';
 			}
 			?>
 					</select></label>
-				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'git-updater-pro' ); ?></a>
+				<a style="display: none;" class="button-primary" href="?"><?php esc_html_e( 'Install', 'git-updater' ); ?></a>
 			</div>
 			<?php
 		}
@@ -424,7 +422,7 @@ class Branch {
 		echo wp_kses_post( $this->base->get_git_icon( $file, true ) );
 		printf(
 			/* translators: 1: branch name, 2: jQuery dropdown, 3: closing tag */
-			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater-pro' ),
+			esc_html__( 'Current branch is `%1$s`, try %2$sanother version%3$s', 'git-updater' ),
 			esc_attr( $data['branch'] ),
 			'<a href="#" onclick="jQuery(\'#' . esc_attr( $data['id'] ) . '\').toggle();return false;">',
 			'</a>.'
@@ -463,7 +461,7 @@ class Branch {
 		if ( null !== $data['branches'] ) {
 			foreach ( array_keys( $data['branches'] ) as $branch ) {
 				printf(
-					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to branch ', 'git-updater-pro' ) . esc_attr( $branch ) . '">%s</a></li>',
+					'<li><a href="%1$s%2$s" aria-label="' . esc_html__( 'Switch to branch ', 'git-updater' ) . '%3$s">%3$s</a></li>',
 					esc_url( $data['nonced_update_url'] ),
 					'&rollback=' . rawurlencode( $branch ),
 					esc_attr( $branch )
@@ -523,7 +521,7 @@ class Branch {
 
 			foreach ( $rollback as $tag ) {
 				printf(
-					'<li><a href="%s%s" aria-label="' . esc_html__( 'Switch to release ', 'git-updater-pro' ) . esc_attr( $tag ) . '">%s</a></li>',
+					'<li><a href="%1$s%2$s" aria-label="' . esc_html__( 'Switch to release ', 'git-updater' ) . '%3$s">%3$s</a></li>',
 					esc_url( $data['nonced_update_url'] ),
 					'&rollback=' . rawurlencode( $tag ),
 					esc_attr( $tag )
@@ -531,7 +529,7 @@ class Branch {
 			}
 		}
 		if ( empty( $rollback ) ) {
-			echo '<li>' . esc_html__( 'No previous tags to rollback to.', 'git-updater-pro' ) . '</li>';
+			echo '<li>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</li>';
 		}
 
 		print '</ul>';

@@ -54,7 +54,7 @@ class Remote_Management {
 	 * Adds Remote Management tab to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = [ 'git_updater_remote_management' => esc_html__( 'Remote Management', 'git-updater-pro' ) ];
+		$install_tabs = [ 'git_updater_remote_management' => esc_html__( 'Remote Management', 'git-updater' ) ];
 		add_filter(
 			'gu_add_settings_tabs',
 			function ( $tabs ) use ( $install_tabs ) {
@@ -88,7 +88,7 @@ class Remote_Management {
 			</form>
 			<?php $reset_api_action = add_query_arg( [ 'git_updater_reset_api_key' => true ], $action ); ?>
 			<form class="settings no-sub-tabs" method="post" action="<?php echo esc_attr( $reset_api_action ); ?>">
-				<?php submit_button( esc_html__( 'Reset REST API key', 'git-updater-pro' ) ); ?>
+				<?php submit_button( esc_html__( 'Reset REST API key', 'git-updater' ) ); ?>
 			</form>
 			<?php
 		}
@@ -102,7 +102,7 @@ class Remote_Management {
 		$display = isset( $_GET['reset'] ) && '1' === $_GET['reset'];
 		if ( $display ) {
 			echo '<div class="updated"><p>';
-			esc_html_e( 'REST API key reset.', 'git-updater-pro' );
+			esc_html_e( 'REST API key reset.', 'git-updater' );
 			echo '</p></div>';
 		}
 	}
@@ -119,7 +119,7 @@ class Remote_Management {
 
 		add_settings_section(
 			'remote_management',
-			esc_html__( 'Remote Management', 'git-updater-pro' ),
+			esc_html__( 'Remote Management', 'git-updater' ),
 			[ $this, 'print_section_remote_management' ],
 			'git_updater_remote_settings'
 		);
@@ -142,14 +142,14 @@ class Remote_Management {
 		);
 
 		echo '<p>';
-		esc_html_e( 'Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'git-updater-pro' );
+		esc_html_e( 'Remote Management services should just work for plugins like MainWP, ManageWP, InfiniteWP, iThemes Sync and others.', 'git-updater' );
 		echo '</p>';
 
 		echo '<p>';
 		printf(
 			wp_kses_post(
 				/* translators: %s: Link to Git Remote Updater repository */
-				__( 'The <a href="%s">Git Remote Updater</a> plugin was specifically created to make the remote management of Git Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings.', 'git-updater-pro' )
+				__( 'The <a href="%s">Git Remote Updater</a> plugin was specifically created to make the remote management of Git Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings.', 'git-updater' )
 			),
 			'https://git-updater.com/knowledge-base/git-remote-updater/'
 		);
@@ -159,7 +159,7 @@ class Remote_Management {
 		printf(
 			wp_kses_post(
 				/* translators: 1: home URL, 2: REST API key */
-				__( 'Site URL: %1$s<br> REST API key: %2$s', 'git-updater-pro' )
+				__( 'Site URL: %1$s<br> REST API key: %2$s', 'git-updater' )
 			),
 			'<span style="font-family:monospace;">' . esc_url( home_url() ) . '</span>',
 			'<span style="font-family:monospace;">' . esc_attr( self::$api_key ) . '</span>'
@@ -170,7 +170,7 @@ class Remote_Management {
 		printf(
 			wp_kses_post(
 				/* translators: 1: Link to wiki, 2: RESTful API URL */
-				__( 'Please refer to the <a href="%s">Git Updater Knowledge Base</a> for complete list of attributes.', 'git-updater-pro' )
+				__( 'Please refer to the <a href="%s">Git Updater Knowledge Base</a> for complete list of attributes.', 'git-updater' )
 			),
 			'https://git-updater.com/knowledge-base/remote-management-restful-endpoints/'
 		);
@@ -180,7 +180,7 @@ class Remote_Management {
 		printf(
 			wp_kses_post(
 				/* translators: link to REST API endpoint for updating */
-				__( 'REST API endpoints for webhook updating begin at: %s', 'git-updater-pro' )
+				__( 'REST API endpoints for webhook updating begin at: %s', 'git-updater' )
 			),
 			'<br><span style="font-family:monospace;">' . esc_url( $update_endpoint ) . '</span>'
 		);
@@ -190,7 +190,7 @@ class Remote_Management {
 		printf(
 			wp_kses_post(
 				/* translators: link to REST API endpoint for branch resetting */
-				__( 'REST API endpoints for webhook branch resetting begin at: %s', 'git-updater-pro' )
+				__( 'REST API endpoints for webhook branch resetting begin at: %s', 'git-updater' )
 			),
 			'<br><span style="font-family:monospace;">' . esc_url( $branch_reset_endpoint ) . '</span>'
 		);

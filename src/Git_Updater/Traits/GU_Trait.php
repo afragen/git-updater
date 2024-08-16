@@ -817,11 +817,11 @@ trait GU_Trait {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
-	 * @param array          $hook_extra Extra arguments passed to hooked filters.
+	 * @param array|WP_Error $result Result from WP_Upgrader::install_package().
+
 	 * @return bool
 	 */
-	final public function delete_upgrade_source( $result, $hook_extra ) {
+	final public function delete_upgrade_source( $result ) {
 		global $wp_filesystem;
 
 		if ( ! is_wp_error( $result ) && ! empty( $result['destination_name'] ) ) {

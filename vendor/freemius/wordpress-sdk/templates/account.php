@@ -22,8 +22,8 @@
 	 * @var FS_Plugin_Tag $update
 	 */
 	$update = $fs->has_release_on_freemius() ?
-        $fs->get_update( false, false, WP_FS__TIME_24_HOURS_IN_SEC / 24 ) :
-        null;
+		$fs->get_update( false, false ) :
+		null;
 
 	if ( is_object($update) ) {
 		/**
@@ -510,7 +510,7 @@
 											?>
 											<tr class="fs-field-<?php echo esc_attr( $p['id'] ) ?><?php if ( $odd ) : ?> alternate<?php endif ?>">
 												<td>
-													<nobr><?php echo esc_attr( $p['title'] ) ?><?php echo ( ! empty( $p['title'] ) ) ? ':' : '' ?></nobr>
+													<nobr><?php echo esc_html( $p['title'] ) ?><?php echo ( ! empty( $p['title'] ) ) ? ':' : '' ?></nobr>
 												</td>
 												<td<?php if ( 'plan' === $p['id'] || 'bundle_plan' === $p['id'] ) { echo ' colspan="2"'; }?>>
 													<?php if ( in_array( $p['id'], array( 'license_key', 'site_secret_key' ) ) ) : ?>

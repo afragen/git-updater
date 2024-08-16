@@ -289,6 +289,10 @@
          * @return bool
          */
         function is_first_payment_pending() {
+            if ( $this->is_lifetime() ) {
+                return false;
+            }
+
             return ( WP_FS__TIME_24_HOURS_IN_SEC >= strtotime( $this->expiration ) - strtotime( $this->created ) );
         }
 

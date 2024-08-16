@@ -13,6 +13,7 @@
     /**
      * @property int $blog_id
      */
+    #[AllowDynamicProperties]
     class FS_Site extends FS_Scope_Entity {
         /**
          * @var number

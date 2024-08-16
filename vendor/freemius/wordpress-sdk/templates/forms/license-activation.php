@@ -151,7 +151,7 @@ HTML;
                     $license->get_html_escaped_masked_secret_key()
                 );
 
-                $license_input_html .= "<option data-id='{$license->id}' value='{$license->secret_key}' data-left='{$license->left()}'>{$label}</option>";
+                $license_input_html .= "<option data-id='{$license->id}' value='{$license->id}' data-left='{$license->left()}'>{$label}</option>";
             }
 
             $license_input_html .= '</select>';
@@ -178,7 +178,6 @@ HTML;
                     type="text"
                     value="{$value}"
                     data-id="{$available_license->id}"
-                    data-license-key="{$available_license->secret_key}"
                     data-left="{$available_license->left()}"
                     readonly />
 HTML;
@@ -562,17 +561,17 @@ HTML;
 					return;
 				}
 
-				var
-                    licenseKey = '';
+                var licenseKey = '',
+                    licenseID  = '';
 
 				if ( hasLicenseTypes ) {
 				    if ( isOtherLicenseKeySelected() ) {
 				        licenseKey = $otherLicenseKey.val();
                     } else {
 				        if ( ! hasLicensesDropdown ) {
-                            licenseKey = $availableLicenseKey.data( 'license-key' );
+                            licenseID = $availableLicenseKey.data( 'id' );
                         } else {
-                            licenseKey = $licensesDropdown.val();
+                            licenseID = $licensesDropdown.val();
                         }
                     }
                 } else {
@@ -581,16 +580,21 @@ HTML;
 
 				disableActivateLicenseButton();
 
-				if (0 === licenseKey.length) {
+				if ( 0 === licenseID.length && 0 === licenseKey.length ) {
 					return;
 				}
 
                 var data = {
                     action     : '<?php echo $fs->get_ajax_action( 'activate_license' ) ?>',
                     security   : '<?php echo $fs->get_ajax_security( 'activate_license' ) ?>',
-                    license_key: licenseKey,
                     module_id  : '<?php echo $fs->get_id() ?>'
                 };
+
+                if ( licenseID.length > 0 ) {
+                    data.license_id = licenseID;
+                } else {
+                    data.license_key = licenseKey;
+                }
 
                 if ( isNetworkActivation ) {
                     var
