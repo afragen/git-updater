@@ -1,4 +1,5 @@
 #### [unreleased]
+* check existence of `FS__RESOLVE_CLONE_AS` before setting
 
 #### 12.5.0 / 2024-08-16
 * update `class-parser.php`
