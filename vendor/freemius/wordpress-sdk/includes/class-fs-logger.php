@@ -32,6 +32,9 @@
 		 */
 		private static $_abspathLength;
 
+		/**
+		 * @var FS_Logger[] $LOGGERS
+		 */
 		private static $LOGGERS = array();
 		private static $LOG = array();
 		private static $CNT = 0;
@@ -124,7 +127,6 @@
 
 			self::hook_footer();
 		}
-
 		function echo_on() {
 			$this->on();
 
@@ -320,6 +322,11 @@
 
 			$table = "{$wpdb->prefix}fs_logger";
 
+			/**
+			 * Drop logging table in any case.
+			 */
+			$result = $wpdb->query( "DROP TABLE IF EXISTS $table;" );
+
 			if ( $is_on ) {
 				/**
 				 * Create logging table.
@@ -329,7 +336,7 @@
 				 *
 				 * @link https://core.trac.wordpress.org/ticket/2695
 				 */
-				$result = $wpdb->query( "CREATE TABLE {$table} (
+				$result = $wpdb->query( "CREATE TABLE IF NOT EXISTS {$table} (
 `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 `process_id` INT UNSIGNED NOT NULL,
 `user_name` VARCHAR(64) NOT NULL,
@@ -348,15 +355,11 @@ KEY `process_id` (`process_id` ASC),
 KEY `process_logger` (`process_id` ASC, `logger` ASC),
 KEY `function` (`function` ASC),
 KEY `type` (`type` ASC))" );
-			} else {
-				/**
-				 * Drop logging table.
-				 */
-				$result = $wpdb->query( "DROP TABLE IF EXISTS $table;" );
 			}
 
 			if ( false !== $result ) {
 				update_option( 'fs_storage_logger', ( $is_on ? 1 : 0 ) );
+				self::$_isStorageLoggingOn = $is_on;
 			}
 
 			return ( false !== $result );
