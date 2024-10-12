@@ -1,5 +1,6 @@
 #### [unreleased]
 * check existence of `FS__RESOLVE_CLONE_AS` before setting
+* add filter hook `gu_api_domain` to set domain for default API updating
 
 #### 12.5.0 / 2024-08-16
 * update `class-parser.php`

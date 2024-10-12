@@ -89,10 +89,19 @@ trait Basic_Auth_Loader {
 	 * @return array $credentials
 	 */
 	private function get_credentials( $url ) {
-		$options     = get_site_option( 'git_updater' );
-		$headers     = parse_url( $url );
+		$options = get_site_option( 'git_updater' );
+		$headers = parse_url( $url );
+
+		/**
+		 * Filter hook to set an API domain for updating.
+		 *
+		 * @since 12.x.0
+		 * @param string Default is 'api.wordpress.org'.
+		 */
+		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
+
 		$credentials = [
-			'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,
+			'api.wordpress' => $api_domain === isset( $headers['host'] ) ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
