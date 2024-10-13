@@ -382,13 +382,13 @@
         }
 
         /**
+         * Moved from the Freemius class.
+         *
          * @author Leo Fajardo (@leorw)
-         *  Moved from Freemius
          *
          * @return array
          *
          * @since  2.5.0
-         *
          */
         static function get_all_modules_sites() {
             Freemius::get_static_logger()->entrance();
