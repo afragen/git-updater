@@ -106,6 +106,8 @@
 
             if ( ! $this->_fs->has_any_active_valid_license() ) {
                 add_action( 'admin_head', array( &$this, 'catch_plugin_information_dialog_contents' ) );
+            } else {
+                add_action( 'admin_footer', array( &$this, '_add_fs_allow_updater_and_dialog_request_param' ) );
             }
 
             if ( ! WP_FS__IS_PRODUCTION_MODE ) {
@@ -131,13 +133,46 @@
 
         /**
          * @author Leo Fajardo (@leorw)
+         * @since 2.7.4
+         */
+        function _add_fs_allow_updater_and_dialog_request_param() {
+            if ( ! $this->is_plugin_information_dialog_for_plugin() ) {
+                return;
+            }
+            ?>
+            <script type="text/javascript">
+                if ( typeof jQuery !== 'undefined' ) {
+                    jQuery( document ).on( 'wp-plugin-updating', function( event, args ) {
+                        if ( typeof args === 'object' && args.slug && typeof args.slug === 'string' ) {
+                            if ( <?php echo json_encode( $this->_fs->get_slug() ) ?> === args.slug ) {
+                                args.fs_allow_updater_and_dialog = true;
+                            }
+                        }
+                    } );
+                }
+            </script>
+            <?php
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.7.4
+         *
+         * @return bool
+         */
+        private function is_plugin_information_dialog_for_plugin() {
+            return (
+                'plugin-information' === fs_request_get( 'tab', false ) &&
+                $this->_fs->get_slug() === fs_request_get_raw( 'plugin', false )
+            );
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
          * @since 2.1.4
          */
         function catch_plugin_information_dialog_contents() {
-            if (
-                'plugin-information' !== fs_request_get( 'tab', false ) ||
-                $this->_fs->get_slug() !== fs_request_get_raw( 'plugin', false )
-            ) {
+            if ( ! $this->is_plugin_information_dialog_for_plugin() ) {
                 return;
             }
 
@@ -616,7 +651,7 @@
 
             $slug = $this->_fs->get_slug();
 
-            if ( $this->_fs->is_org_repo_compliant() && $this->_fs->is_freemium() ) {
+            if ( $this->can_fetch_data_from_wp_org() ) {
                 if ( ! isset( $this->_translation_updates ) ) {
                     $this->_translation_updates = array();
 
@@ -874,6 +909,16 @@
         }
 
         /**
+         * Returns true if the product can fetch data from WordPress.org.
+         *
+         * @author Leo Fajardo (@leorw)
+         * @since  2.7.4
+         */
+        private function can_fetch_data_from_wp_org() {
+            return ( $this->_fs->is_org_repo_compliant() && $this->_fs->is_freemium() );
+        }
+
+        /**
          * Fetches module translation updates from wordpress.org.
          *
          * @author Leo Fajardo (@leorw)
@@ -1057,7 +1102,7 @@
             }
 
             $plugin_in_repo = false;
-            if ( ! $is_addon ) {
+            if ( ! $is_addon && $this->can_fetch_data_from_wp_org() ) {
                 // Try to fetch info from .org repository.
                 $data = self::_fetch_plugin_info_from_repository( $action, $args );
 

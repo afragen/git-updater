@@ -343,8 +343,16 @@ class API {
 	protected function get_dot_org_data() {
 		$response = $this->response['dot_org'] ?? false;
 
+		/**
+		 * Filter hook to set an API domain for updating.
+		 *
+		 * @since 12.x.0
+		 * @param string Default is 'api.wordpress.org'.
+		 */
+		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
+
 		if ( ! $response ) {
-			$url      = "https://api.wordpress.org/{$this->type->type}s/info/1.2/";
+			$url      = "https://{$api_domain}/{$this->type->type}s/info/1.2/";
 			$url      = add_query_arg(
 				[
 					'action'                        => "{$this->type->type}_information",

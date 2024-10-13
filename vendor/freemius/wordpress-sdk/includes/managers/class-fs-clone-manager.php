@@ -333,7 +333,7 @@
             }
 
             if ( ! isset( $this->all_installs ) ) {
-                $this->all_installs = Freemius::get_all_modules_sites();
+                $this->all_installs = FS_DebugManager::get_all_modules_sites();
             }
 
             // Check if there's another blog that has the same site.

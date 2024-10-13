@@ -102,7 +102,9 @@ class GU_Freemius {
 		$this->remove_fs_plugin_updater_hooks( $gu_fs );
 
 		// Hopefully eliminate clone resolution popup as single license for unlimited sites.
-		define( 'FS__RESOLVE_CLONE_AS', 'long_term_duplicate' );
+		if ( ! defined( 'FS__RESOLVE_CLONE_AS' ) ) {
+			define( 'FS__RESOLVE_CLONE_AS', 'long_term_duplicate' );
+		}
 	}
 
 	/**

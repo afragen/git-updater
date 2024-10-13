@@ -50,6 +50,7 @@
 	require_once WP_FS__DIR_INCLUDES . '/class-fs-api.php';
 	require_once WP_FS__DIR_INCLUDES . '/class-fs-plugin-updater.php';
 	require_once WP_FS__DIR_INCLUDES . '/class-fs-security.php';
+	require_once WP_FS__DIR_INCLUDES . '/managers/class-fs-debug-manager.php';
     require_once WP_FS__DIR_INCLUDES . '/class-fs-options.php';
     require_once WP_FS__DIR_INCLUDES . '/class-fs-storage.php';
     require_once WP_FS__DIR_INCLUDES . '/class-fs-admin-notices.php';
