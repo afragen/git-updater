@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.6.0 / 2024-10-13
 * check existence of `FS__RESOLVE_CLONE_AS` before setting
 * add filter hook `gu_api_domain` to set domain for default API updating
 * add filter hook `gu_ignore_dot_org` to completely ignore updates from dot org. Works as if every plugin/theme is in the `gu_override_dot_org` hook
