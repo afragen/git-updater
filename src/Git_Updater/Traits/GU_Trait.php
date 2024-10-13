@@ -303,7 +303,7 @@ trait GU_Trait {
 		 * @since 12.x.0
 		 * @param bool Default is false. Do not ignore updates from dot org.
 		 */
-		return ! $dot_org_master || $override || apply_filter( 'gu_ignore_dot_org', false );
+		return ! $dot_org_master || $override || apply_filters( 'gu_ignore_dot_org', false );
 	}
 
 	/**
