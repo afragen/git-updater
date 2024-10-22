@@ -82,4 +82,22 @@
 				's_ctx_secure' => $this->get_secure_token( $entity, $timestamp, $action ),
 			);
 		}
+
+		/**
+		 * Gets a sandbox trial token for a given plugin, plan, and trial timestamp.
+		 *
+		 * @param FS_Plugin      $plugin
+		 * @param FS_Plugin_Plan $plan
+		 * @param int            $trial_timestamp
+		 *
+		 * @return string
+		 */
+		function get_trial_token( FS_Plugin $plugin, FS_Plugin_Plan $plan, $trial_timestamp ) {
+			return md5(
+				$plugin->secret_key . $plugin->public_key .
+				$plan->trial_period .
+				$plan->id .
+				$trial_timestamp
+			);
+		}
 	}

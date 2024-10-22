@@ -355,7 +355,9 @@
 					}
 				}
 
-				self::$_cache->set( $cache_key, $result, $expiration );
+				if ( is_numeric( $expiration ) ) {
+					self::$_cache->set( $cache_key, $result, $expiration );
+				}
 
 				$cached_result = $result;
 			} else {
