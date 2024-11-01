@@ -459,6 +459,9 @@ class Theme {
 			if ( ! array_key_exists( $theme->slug, $ignore ) ) {
 				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
+
+			// Add git host icon to theme panel.
+			$prepared_themes[ $theme->slug ]['description'] .= $this->base->get_git_icon( $theme->slug, false );
 		}
 
 		return $prepared_themes;

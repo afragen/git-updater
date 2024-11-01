@@ -1,5 +1,6 @@
 #### [unreleased]
 * remove `load_plugin_textdomain()`
+* add git host icon to single site theme description
 
 #### 12.6.0 / 2024-10-13
 * check existence of `FS__RESOLVE_CLONE_AS` before setting
