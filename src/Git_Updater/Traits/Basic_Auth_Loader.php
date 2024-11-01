@@ -101,7 +101,7 @@ trait Basic_Auth_Loader {
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 
 		$credentials = [
-			'api.wordpress' => $api_domain === isset( $headers['host'] ) ? $headers['host'] : false,
+			'api.wordpress' => isset( $headers['host'] ) === $api_domain ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
