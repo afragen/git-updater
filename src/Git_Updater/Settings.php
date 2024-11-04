@@ -396,7 +396,7 @@ class Settings {
 		register_setting(
 			'git_updater',
 			'git_updater',
-			[ $this, 'sanitize' ]
+			[ 'sanitize_callback' => [ $this, 'sanitize' ] ]
 		);
 
 		Singleton::get_instance( 'Install', $this )->run();
