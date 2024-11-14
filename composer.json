@@ -51,7 +51,7 @@
   },
   "scripts": {
     "make-pot": [
-      "wp i18n make-pot . languages/git-updater.pot"
+       "wp i18n make-pot --headers='{\"Report-Msgid-Bugs-To\":\"https://github.com/afragen/git-updater/issues\"}' . languages/git-updater.pot"
     ],
     "wpcs": [
       "vendor/bin/phpcbf .; vendor/bin/phpcs ."
