@@ -1,4 +1,5 @@
 #### [unreleased]
+* look for `__()` functions loading in hooks before `init`
 * remove `load_plugin_textdomain()`
 * add git host icon to single site theme description
 * don't save to GitHub.com access token from single repo remote install

@@ -55,7 +55,12 @@ class Settings {
 				$this->save_settings( $post_data );
 			}
 		);
-		$this->add_settings_tabs();
+		add_action(
+			'init',
+			function () {
+				$this->add_settings_tabs();
+			}
+		);
 
 		add_filter(
 			'gu_add_admin_page',
