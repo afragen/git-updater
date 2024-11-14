@@ -104,6 +104,9 @@ class Language_Pack {
 		);
 
 		foreach ( $repos as $repo ) {
+			if ( ! str_contains( current_filter(), $repo->type ) ) {
+				continue;
+			}
 			foreach ( $locales as $locale ) {
 				$lang_pack_mod   = isset( $repo->language_packs->$locale )
 					? strtotime( $repo->language_packs->$locale->updated )
