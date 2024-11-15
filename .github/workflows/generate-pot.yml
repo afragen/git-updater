@@ -2,9 +2,8 @@ name: Generate POT
 
 on:
   push:
-    branches:
-      - master
-      - develop
+    tags:
+      - "**"
 
 jobs:
   WP_POT_Generator:
