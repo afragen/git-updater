@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - master
-      - main
-      - develop
 
 jobs:
   WP_POT_Generator:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@master
     - name: WordPress POT Generator
       uses: varunsridharan/action-wp-pot-generator@2.0
       with:
@@ -19,6 +17,6 @@ jobs:
         item_slug: '${{ github.event.repository.name }}'
         domain: '${{ github.event.repository.name }}'
         package_name: '${{ github.event.repository.name }}'
-        headers: '{"Report-Msgid-Bugs-To":"https://github.com/afragen/${{ github.event.repository.name }}/issues"}'
+        headers: '{"Report-Msgid-Bugs-To":"https://github.com/${{ github.event.repository.full_name }}/${{ github.event.repository.name }}/issues"}'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
