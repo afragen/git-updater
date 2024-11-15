@@ -181,7 +181,7 @@ class Settings {
 
 		add_settings_section(
 			'git_updater_additions',
-			esc_html__( 'Additions', 'github-updater' ),
+			esc_html__( 'Additions', 'git-updater' ),
 			[ $this, 'print_section_additions' ],
 			'git_updater_additions'
 		);
@@ -207,7 +207,7 @@ class Settings {
 			[
 				'id'          => 'git_updater_additions_slug',
 				'setting'     => 'slug',
-				'title'       => __( 'Ensure proper slug for plugin or theme.', 'git-updater-addtions' ),
+				'title'       => __( 'Ensure proper slug for plugin or theme.', 'git-updater' ),
 				'placeholder' => 'plugin-slug/plugin-slug.php',
 			]
 		);
@@ -221,7 +221,7 @@ class Settings {
 			[
 				'id'      => 'git_updater_additions_uri',
 				'setting' => 'uri',
-				'title'   => __( 'Ensure proper URI for plugin or theme.', 'git-updater-addtions' ),
+				'title'   => __( 'Ensure proper URI for plugin or theme.', 'git-updater' ),
 			]
 		);
 

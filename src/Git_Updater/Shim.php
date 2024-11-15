@@ -43,15 +43,15 @@ if ( ! function_exists( 'move_dir' ) ) {
 		global $wp_filesystem;
 
 		if ( trailingslashit( strtolower( $from ) ) === trailingslashit( strtolower( $to ) ) ) {
-			return new WP_Error( 'source_destination_same_move_dir', __( 'The source and destination are the same.' ) );
+			return new WP_Error( 'source_destination_same_move_dir', __( 'The source and destination are the same.', 'git-updater' ) );
 		}
 
 		if ( $wp_filesystem->exists( $to ) ) {
 			if ( ! $overwrite ) {
-				return new WP_Error( 'destination_already_exists_move_dir', __( 'The destination folder already exists.' ), $to );
+				return new WP_Error( 'destination_already_exists_move_dir', __( 'The destination folder already exists.', 'git-updater' ), $to );
 			} elseif ( ! $wp_filesystem->delete( $to, true ) ) {
 				// Can't overwrite if the destination couldn't be deleted.
-				return new WP_Error( 'destination_not_deleted_move_dir', __( 'The destination directory already exists and could not be removed.' ) );
+				return new WP_Error( 'destination_not_deleted_move_dir', __( 'The destination directory already exists and could not be removed.', 'git-updater' ) );
 			}
 		}
 
@@ -87,7 +87,7 @@ if ( ! function_exists( 'move_dir' ) ) {
 		if ( ! $result ) {
 			if ( ! $wp_filesystem->is_dir( $to ) ) {
 				if ( ! $wp_filesystem->mkdir( $to, FS_CHMOD_DIR ) ) {
-					return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.' ), $to );
+					return new WP_Error( 'mkdir_failed_move_dir', __( 'Could not create directory.', 'git-updater' ), $to );
 				}
 			}
 
@@ -122,7 +122,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 			if ( WP_DEBUG ) {
 				$error_message = sprintf(
 				/* translators: %s: The function name. */
-					__( '%s expects a non-empty string.' ),
+					__( '%s expects a non-empty string.', 'git-updater' ),
 					'<code>wp_opcache_invalidate_directory()</code>'
 				);
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error, WordPress.Security.EscapeOutput.OutputNotEscaped

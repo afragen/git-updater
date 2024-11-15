@@ -58,7 +58,7 @@ class Add_Ons {
 			'gist'      => [
 				[
 					'name'        => __( 'Git Updater - Gist', 'git-updater' ),
-					'author'      => __( 'Andy Fragen' ),
+					'author'      => __( 'Andy Fragen', 'git-updater' ),
 					'description' => __( 'Add GitHub Gist hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gist/git-updater-gist.php',
@@ -71,7 +71,7 @@ class Add_Ons {
 			'bitbucket' => [
 				[
 					'name'        => __( 'Git Updater - Bitbucket', 'git-updater' ),
-					'author'      => __( 'Andy Fragen' ),
+					'author'      => __( 'Andy Fragen', 'git-updater' ),
 					'description' => __( 'Add Bitbucket and Bitbucket Server hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-bitbucket/git-updater-bitbucket.php',
@@ -84,7 +84,7 @@ class Add_Ons {
 			'gitlab'    => [
 				[
 					'name'        => __( 'Git Updater - GitLab', 'git-updater' ),
-					'author'      => __( 'Andy Fragen' ),
+					'author'      => __( 'Andy Fragen', 'git-updater' ),
 					'description' => __( 'Add GitLab hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitlab/git-updater-gitlab.php',
@@ -97,7 +97,7 @@ class Add_Ons {
 			'gitea'     => [
 				[
 					'name'        => __( 'Git Updater - Gitea', 'git-updater' ),
-					'author'      => __( 'Andy Fragen' ),
+					'author'      => __( 'Andy Fragen', 'git-updater' ),
 					'description' => __( 'Add Gitea hosted repositories to the Git Updater plugin.', 'git-updater' ),
 					'host'        => 'github',
 					'slug'        => 'git-updater-gitea/git-updater-gitea.php',

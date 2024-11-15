@@ -441,7 +441,7 @@ class Install {
 				<?php foreach ( self::$git_servers as $key => $value ) : ?>
 					<?php if ( self::$installed_apis[ $key . '_api' ] ) : ?>
 						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $key ); ?> >
-							<?php esc_html_e( $value ); ?>
+							<?php echo esc_html( $value ); ?>
 						</option>
 					<?php endif ?>
 				<?php endforeach ?>

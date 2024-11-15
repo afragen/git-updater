@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix missing/incorrect textdomains
 * look for `__()` functions loading in hooks before `init`
 * remove `load_plugin_textdomain()`
 * add git host icon to single site theme description
