@@ -19,6 +19,6 @@ jobs:
         item_slug: '${{ github.event.repository.name }}'
         domain: '${{ github.event.repository.name }}'
         package_name: '${{ github.event.repository.name }}'
-        headers: '{\"Report-Msgid-Bugs-To\":\"https://github.com/afragen/${{ github.event.repository.name }}/issues\"}'
+        headers: '{"Report-Msgid-Bugs-To":"https://github.com/afragen/${{ github.event.repository.name }}/issues"}'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
