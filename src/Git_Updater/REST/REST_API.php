@@ -436,7 +436,7 @@ class REST_API {
 				'webhook'      => $_GET, // phpcs:ignore WordPress.Security.NonceVerification
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 			];
-			$rest_update->log_exit( $response, 417 );
+			$rest_update->log_exit( $response, 418 );
 		}
 	}
 }

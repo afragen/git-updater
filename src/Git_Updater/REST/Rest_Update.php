@@ -283,7 +283,7 @@ class Rest_Update {
 				'elapsed_time' => round( ( microtime( true ) - $start ) * 1000, 2 ) . ' ms',
 				'deprecated'   => $deprecated,
 			];
-			$this->log_exit( $http_response, 417 );
+			$this->log_exit( $http_response, 418 );
 		}
 
 		// Only set branch on successful update.
@@ -313,7 +313,7 @@ class Rest_Update {
 
 		if ( $this->is_error() ) {
 			$response['success'] = false;
-			$this->log_exit( $response, 417 );
+			$this->log_exit( $response, 418 );
 		}
 		$this->log_exit( $response, 200 );
 	}
