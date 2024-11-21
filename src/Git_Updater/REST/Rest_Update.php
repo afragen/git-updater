@@ -127,6 +127,12 @@ class Rest_Update {
 		// Add authentication header to download package.
 		add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
 
+		/**
+		 * Remove `Expect` header during webhook, issue with WPEngine and continued
+		 * processing of downloaded zip.
+		 */
+		add_filter( 'http_request_args', [ $this,'remove_expect_header' ], 15, 1 );
+
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->file );
 
@@ -192,6 +198,12 @@ class Rest_Update {
 
 		// Add authentication header to download package.
 		add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
+
+		/**
+		 * Remove `Expect` header during webhook, issue with WPEngine and continued
+		 * processing of downloaded zip.
+		 */
+		add_filter( 'http_request_args', [ $this,'remove_expect_header' ], 15, 1 );
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->slug );
@@ -459,5 +471,22 @@ class Rest_Update {
 			wp_die( wp_send_json_error( $response, $code ) );
 		}
 		// phpcs:enable
+	}
+
+	/**
+	 * Remove `Expect` header during webhook.
+	 *
+	 * Issue with WPEngine and having this header in a webhook
+	 * when user not logged in to WPEngine.
+	 *
+	 * @param array $args Array of HTTP args.
+	 *
+	 * @return array
+	 */
+	public static function remove_expect_header( array $args ) {
+		$args['headers']['Expect'] = '';
+		remove_filter( 'http_request_args', [ __CLASS__, 'remove_expect_header' ], 15 );
+
+		return $args;
 	}
 }

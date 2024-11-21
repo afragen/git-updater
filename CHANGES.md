@@ -4,6 +4,7 @@
 * remove `load_plugin_textdomain()`
 * add git host icon to single site theme description
 * don't save to GitHub.com access token from single repo remote install
+* remove `Expect` header during REST update as it seems to cause an issue with WPEngine's stack
 
 #### 12.6.0 / 2024-10-13
 * check existence of `FS__RESOLVE_CLONE_AS` before setting
