@@ -230,7 +230,7 @@ class API {
 			]
 		);
 		if ( isset( $response['timeout'] ) ) {
-			static::$error_code[$this->type->slug]['wait'] = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response, $this->type->slug );
 		}
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
