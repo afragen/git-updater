@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: WordPress POT Generator
-        uses: varunsridharan/action-wp-pot-generator@^2
+        uses: varunsridharan/action-wp-pot-generator@2
         with:
           save_path: "./languages"
           item_slug: "${{ github.event.repository.name }}"
