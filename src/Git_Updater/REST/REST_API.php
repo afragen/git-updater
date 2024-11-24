@@ -34,6 +34,14 @@ class REST_API {
 	public static $namespace = 'git-updater/v1';
 
 	/**
+	 * Variable to hold all repository remote info.
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $response = [];
+
+	/**
 	 * Load hooks.
 	 *
 	 * @return void
