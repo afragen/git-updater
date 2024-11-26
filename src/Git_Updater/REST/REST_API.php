@@ -106,7 +106,25 @@ class REST_API {
 			[
 				'show_in_index'       => true,
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'get_plugins_api_data' ],
+				'callback'            => [ $this, 'get_api_data' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
+					'slug' => [
+						'default'           => false,
+						'required'          => true,
+						'validate_callback' => 'sanitize_title_with_dashes',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			self::$namespace,
+			'themes-api',
+			[
+				'show_in_index'       => true,
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_api_data' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'slug' => [
@@ -323,18 +341,18 @@ class REST_API {
 	}
 
 	/**
-	 * Get specific repo plugin API data.
+	 * Get specific repo plugin|theme API data.
 	 *
-	 * Returns data consistent with `plugins_api()` request.
+	 * Returns data consistent with `plugins_api()` or `themes_api()` request.
 	 *
 	 * @param \WP_REST_Request $request REST API response.
 	 *
 	 * @return array|\WP_Error
 	 */
-	public function get_plugins_api_data( \WP_REST_Request $request ) {
+	public function get_api_data( \WP_REST_Request $request ) {
 		$slug     = $request->get_param( 'slug' );
 		$download = $request->get_param( 'download' );
-		$download = 'true' === $download || '1' === $download ? true : false;
+		$download = 'false' === $download || '0' === $download ? false : true;
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
@@ -343,19 +361,28 @@ class REST_API {
 		}
 		$repo_cache = $this->get_repo_cache( $slug );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 
-		if ( ! \array_key_exists( $slug, $gu_plugins ) ) {
+		$type = array_key_exists( $slug, $gu_plugins ) ? 'plugin' : 'theme';
+
+		if ( 'theme' === $type && ! \array_key_exists( $slug, $gu_themes ) ) {
+			return (object) [ 'error' => 'Specified theme does not exist.' ];
+		}
+
+		if ( 'plugin' === $type && ! \array_key_exists( $slug, $gu_plugins ) ) {
 			return (object) [ 'error' => 'Specified plugin does not exist.' ];
 		}
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
-		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_plugins[ $slug ] );
+		$repo_data = 'plugin' === $type
+			? Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_plugins[ $slug ] )
+			: Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_themes[ $slug ] );
 
 		if ( ! is_object( $repo_data ) ) {
-			return (object) [ 'error' => 'Plugin data response is incorrect.' ];
+			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
-		$plugins_api_data = [
+		$repo_api_data = [
 			'name'              => $repo_data->name,
 			'slug'              => $repo_data->slug,
 			'git'               => $repo_data->git,
@@ -371,7 +398,7 @@ class REST_API {
 			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 175 ) . '...',
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
-			'download_link'     => $repo_data->download_link,
+			'download_link'     => $download ? $repo_data->download_link : '',
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
 			'last_updated'      => $repo_data->last_updated,
@@ -382,20 +409,15 @@ class REST_API {
 			'external'          => 'xxx',
 		];
 
-		if ( $repo_data->release_asset ) {
-			if ( property_exists( $repo_cache['release_asset_response'], 'browser_download_url' ) ) {
-				$plugins_api_data['download_link']   = $repo_cache['release_asset_response']->browser_download_url;
-				$plugins_api_data['active_installs'] = $repo_cache['release_asset_response']->download_count;
+		if ( $download && $repo_data->release_asset ) {
+			if ( isset( $repo_cache['release_asset_redirect'] ) ) {
+				$repo_api_data['download_link'] = $repo_cache['release_asset_redirect'];
 			} elseif ( $repo_cache['release_asset'] ) {
-				$plugins_api_data['download_link'] = $repo_cache['release_asset'];
+				$repo_api_data['download_link'] = $repo_cache['release_asset'];
 			}
 		}
-		if ( ! $download ) {
-			$plugins_api_data['download_link']         = '';
-			$plugins_api_data['sections']['changelog'] = "Refer to <a href='https://github.com/afragen/git-updater/blob/master/CHANGES.md'>changelog</a>";
-		}
 
-		return $plugins_api_data;
+		return $repo_api_data;
 	}
 
 	/**

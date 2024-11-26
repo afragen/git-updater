@@ -211,6 +211,8 @@ class Theme {
 			$git_theme['ci_job']                  = $header['ci_job'];
 			$git_theme['release_asset']           = $header['release_asset'];
 			$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+			$git_theme['icons']                   = [];
+			$git_theme['banners']                 = [];
 
 			// Fix branch for .git VCS.
 			if ( file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {

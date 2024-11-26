@@ -5,6 +5,7 @@
 * add git host icon to single site theme description
 * don't save to GitHub.com access token from single repo remote install
 * fix PHP 8.1 creation dynamic variable from `class REST_API`
+* update REST API response to return `plugins_api()` or `themes_api()` style response
 
 #### 12.6.0 / 2024-10-13
 * check existence of `FS__RESOLVE_CLONE_AS` before setting
