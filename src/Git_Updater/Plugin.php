@@ -327,7 +327,7 @@ class Plugin {
 	 * @return mixed
 	 */
 	public function plugins_api( $result, $action, $response ) {
-		if ( ! ( 'plugin_information' === $action ) ) {
+		if ( 'plugin_information' !== $action ) {
 			return $result;
 		}
 

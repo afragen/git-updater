@@ -298,7 +298,7 @@ class Theme {
 	 * @return mixed
 	 */
 	public function themes_api( $result, $action, $response ) {
-		if ( ! ( 'theme_information' === $action ) ) {
+		if ( 'theme_information' !== $action ) {
 			return $result;
 		}
 
