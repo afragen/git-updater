@@ -409,6 +409,9 @@ class REST_API {
 			'external'          => 'xxx',
 		];
 
+		$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
+		$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+
 		if ( $download && $repo_data->release_asset ) {
 			if ( isset( $repo_cache['release_asset_redirect'] ) ) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_redirect'];
