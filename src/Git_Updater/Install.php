@@ -201,8 +201,14 @@ class Install {
 			$url      = self::$install['download_link'];
 			$upgrader = $this->get_upgrader( $type, $url );
 
-			// Ensure authentication headers are present for download packages.
-			add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
+			// Load hook for adding authentication headers for download packages.
+			add_filter(
+				'upgrader_pre_download',
+				function () {
+					add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
+					return false; // upgrader_pre_download filter default return value.
+				}
+			);
 
 			// Install the repo from the $source urldecode() and save branch setting.
 			if ( $upgrader && $upgrader->install( $url ) ) {

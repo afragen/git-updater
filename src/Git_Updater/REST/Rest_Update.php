@@ -124,8 +124,14 @@ class Rest_Update {
 			1
 		);
 
-		// Add authentication header to download package.
-		add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
+		// Load hook for adding authentication headers for download packages.
+		add_filter(
+			'upgrader_pre_download',
+			function () {
+				add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
+				return false; // upgrader_pre_download filter default return value.
+			}
+		);
 
 		$upgrader = new \Plugin_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $plugin->file );
@@ -190,8 +196,14 @@ class Rest_Update {
 			1
 		);
 
-		// Add authentication header to download package.
-		add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
+		// Load hook for adding authentication headers for download packages.
+		add_filter(
+			'upgrader_pre_download',
+			function () {
+				add_filter( 'http_request_args', [ Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this ), 'download_package' ], 15, 2 );
+				return false; // upgrader_pre_download filter default return value.
+			}
+		);
 
 		$upgrader = new \Theme_Upgrader( $this->upgrader_skin );
 		$upgrader->upgrade( $theme->slug );
