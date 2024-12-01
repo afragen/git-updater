@@ -29,8 +29,7 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 *
 		 * @param string            $class_name Class name.
 		 * @param object            $caller     Originating object.
-		 * @param null|array|object $options    Options for class constructor.
-		 *                                         Optional.
+		 * @param null|array|object $options    Options for class constructor. Optional.
 		 *
 		 * @return object $instance[ $class ]
 		 */

@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '43b9178e0f34f36c00ccad970e8c22c5e4572c0b',
+        'reference' => 'ae7f7a78804630841d1d8b559af9878ba65c52e7',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '43b9178e0f34f36c00ccad970e8c22c5e4572c0b',
+            'reference' => 'ae7f7a78804630841d1d8b559af9878ba65c52e7',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'afragen/singleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '5b6534c51bc867d235e74fa4bf7d451c43bfc1fc',
+            'reference' => 'c93d90651dcf027bcd365d81bccf1eda73fe2f2d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/singleton',
             'aliases' => array(
@@ -105,9 +105,9 @@
             'dev_requirement' => true,
         ),
         'squizlabs/php_codesniffer' => array(
-            'pretty_version' => '3.10.3',
-            'version' => '3.10.3.0',
-            'reference' => '62d32998e820bddc40f99f8251958aed187a5c9c',
+            'pretty_version' => '3.11.1',
+            'version' => '3.11.1.0',
+            'reference' => '19473c30efe4f7b3cd42522d0b2e6e7f243c6f87',
             'type' => 'library',
             'install_path' => __DIR__ . '/../squizlabs/php_codesniffer',
             'aliases' => array(),
