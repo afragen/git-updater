@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.7.0 / 2024-11-30
 * fix missing/incorrect textdomains
 * look for `__()` functions loading in hooks before `init`
 * remove `load_plugin_textdomain()`
