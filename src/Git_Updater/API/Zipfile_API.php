@@ -85,7 +85,7 @@ class Zipfile_API {
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
 			'zipfile_slug',
-			esc_html__( 'Zipfile Slug', 'gi-updater' ),
+			esc_html__( 'Zipfile Slug', 'git-updater' ),
 			[ $this, 'zipfile_slug' ],
 			'git_updater_install_' . $type,
 			$type
@@ -101,7 +101,7 @@ class Zipfile_API {
 			<input class="zipfile_setting" type="text" style="width:50%;" id="zipfile_slug" name="zipfile_slug" value="" placeholder="my-repo-slug">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter plugin or theme slug.', 'gi-updater' ); ?>
+				<?php esc_html_e( 'Enter plugin or theme slug.', 'git-updater' ); ?>
 			</span>
 		</label>
 		<?php

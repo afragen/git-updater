@@ -463,15 +463,13 @@ class GitHub_API extends API implements API_Interface {
 	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
-		$github_com                     = true;
 		$options['github_access_token'] = static::$options['github_access_token'] ?? null;
 
 		if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://api.github.com';
 			$headers['host'] = 'github.com';
 		} else {
-			$base       = $headers['base_uri'] . '/api/v3';
-			$github_com = false;
+			$base = $headers['base_uri'] . '/api/v3';
 		}
 
 		$install['download_link'] = "{$base}/repos/{$install['git_updater_repo']}/zipball/{$install['git_updater_branch']}";
@@ -486,13 +484,6 @@ class GitHub_API extends API implements API_Interface {
 		 */
 		if ( ! empty( $install['github_access_token'] ) ) {
 			$install['options'][ $install['repo'] ] = $install['github_access_token'];
-			if ( $github_com ) {
-				$install['options']['github_access_token'] = $install['github_access_token'];
-			}
-		}
-
-		if ( ! empty( static::$options['github_access_token'] ) ) {
-			unset( $install['options']['github_access_token'] );
 		}
 
 		return $install;

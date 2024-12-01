@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '847dd5f83e0ba8def47dea29be2306f5e4773583',
+        'reference' => '86c9d6546f3173b38e1e992febd66703ee797a92',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '847dd5f83e0ba8def47dea29be2306f5e4773583',
+            'reference' => '86c9d6546f3173b38e1e992febd66703ee797a92',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'afragen/singleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '5b6534c51bc867d235e74fa4bf7d451c43bfc1fc',
+            'reference' => 'c93d90651dcf027bcd365d81bccf1eda73fe2f2d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../afragen/singleton',
             'aliases' => array(
@@ -78,9 +78,9 @@
             'dev_requirement' => false,
         ),
         'freemius/wordpress-sdk' => array(
-            'pretty_version' => '2.8.1',
-            'version' => '2.8.1.0',
-            'reference' => 'cc31279d088909135b6b2d8b4f2696312f5731fc',
+            'pretty_version' => '2.9.0',
+            'version' => '2.9.0.0',
+            'reference' => '56696717c5f0b7fb395618e88e1b592d1893e5dc',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),
@@ -105,9 +105,9 @@
             'dev_requirement' => true,
         ),
         'squizlabs/php_codesniffer' => array(
-            'pretty_version' => '3.10.3',
-            'version' => '3.10.3.0',
-            'reference' => '62d32998e820bddc40f99f8251958aed187a5c9c',
+            'pretty_version' => '3.11.1',
+            'version' => '3.11.1.0',
+            'reference' => '19473c30efe4f7b3cd42522d0b2e6e7f243c6f87',
             'type' => 'library',
             'install_path' => __DIR__ . '/../squizlabs/php_codesniffer',
             'aliases' => array(),

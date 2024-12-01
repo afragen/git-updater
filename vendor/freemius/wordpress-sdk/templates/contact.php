@@ -7,14 +7,20 @@
 	 */
 
 	/**
+     * Update (October 9, 2024 by @swashata):
+	 *   Following request from the wp.org plugin review team, we have stopped
+	 *   embedding the contact form inside an i-frame for wp.org hosted free version
+	 *   of plugins. Now they will be opened in a new tab.
+     *
 	 * Note for WordPress.org Theme/Plugin reviewer:
 	 *  Freemius is an SDK for plugin and theme developers. Since the core
 	 *  of the SDK is relevant both for plugins and themes, for obvious reasons,
 	 *  we only develop and maintain one code base.
 	 *
-	 *  This code (and page) will not run for wp.org themes (only plugins).
+	 *  This code (and page) will not run for wp.org themes or plugins. It will
+	 *   run only for premium version of the plugin/theme that is using the SDK.
 	 *
-	 *  In addition, this page loads an i-frame. We intentionally named it 'frame'
+	 *  In addition, when this page loads an i-frame. We intentionally named it 'frame'
 	 *  so it will pass the "Theme Check" that is looking for the string "i" . "frame".
 	 *
 	 * UPDATE:
@@ -50,28 +56,7 @@
 	$fs   = freemius( $VARS['id'] );
 	$slug = $fs->get_slug();
 
-	$context_params = array(
-		'plugin_id'         => $fs->get_id(),
-		'plugin_public_key' => $fs->get_public_key(),
-		'plugin_version'    => $fs->get_plugin_version(),
-	);
-
-
-	// Get site context secure params.
-	if ( $fs->is_registered() ) {
-		$context_params = array_merge( $context_params, FS_Security::instance()->get_context_params(
-			$fs->get_site(),
-			time(),
-			'contact'
-		) );
-	}
-
-	$query_params = array_merge( $_GET, array_merge( $context_params, array(
-		'plugin_version' => $fs->get_plugin_version(),
-		'wp_login_url'   => wp_login_url(),
-		'site_url'       => Freemius::get_unfiltered_site_url(),
-//		'wp_admin_css' => get_bloginfo('wpurl') . "/wp-admin/load-styles.php?c=1&load=buttons,wp-admin,dashicons",
-	) ) );
+	$query_params = FS_Contact_Form_Manager::instance()->get_query_params( $fs );
 
 	$view_params = array(
 		'id'   => $VARS['id'],
@@ -117,12 +102,3 @@
 	if ( $has_tabs ) {
 		$fs->_add_tabs_after_content();
 	}
-
-	$params = array(
-		'page'           => 'contact',
-		'module_id'      => $fs->get_id(),
-		'module_type'    => $fs->get_module_type(),
-		'module_slug'    => $slug,
-		'module_version' => $fs->get_plugin_version(),
-	);
-	fs_require_template( 'powered-by.php', $params );

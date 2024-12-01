@@ -21,14 +21,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Load textdomain.
-add_action(
-	'init',
-	function () {
-		load_plugin_textdomain( 'git-updater' );
-	}
-);
-
 /**
  * Class Bootstrap
  */
@@ -85,10 +77,6 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function run() {
-		if ( ! $this->check_requirements() ) {
-			return;
-		}
-
 		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
@@ -102,33 +90,6 @@ class Bootstrap {
 
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();
-	}
-
-	/**
-	 * Check PHP requirements and deactivate plugin if not met.
-	 *
-	 * @return void|bool
-	 */
-	public function check_requirements() {
-		if ( version_compare( phpversion(), '7.2', '<=' ) ) {
-			add_action(
-				'admin_init',
-				function () {
-					echo '<div class="error notice is-dismissible"><p>';
-					printf(
-						/* translators: 1: minimum PHP version required */
-						wp_kses_post( __( 'Git Updater cannot run on PHP versions older than %1$s.', 'git-updater' ) ),
-						'7.2'
-					);
-					echo '</p></div>';
-					\deactivate_plugins( plugin_basename( $this->file ) );
-				}
-			);
-
-			return false;
-		}
-
-		return true;
 	}
 
 	/**

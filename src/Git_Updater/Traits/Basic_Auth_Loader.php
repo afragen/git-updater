@@ -101,7 +101,7 @@ trait Basic_Auth_Loader {
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 
 		$credentials = [
-			'api.wordpress' => $api_domain === isset( $headers['host'] ) ? $headers['host'] : false,
+			'api.wordpress' => isset( $headers['host'] ) === $api_domain ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
@@ -261,7 +261,7 @@ trait Basic_Auth_Loader {
 	 *
 	 * @return array $args
 	 */
-	private function unset_release_asset_auth( $args, $url ) {
+	final public function unset_release_asset_auth( $args, $url ) {
 		$releases            = false;
 		$release_asset_parts = [ 's3.amazonaws.com', 'releases/download', 'github-releases', 'release-asset' ];
 		foreach ( $release_asset_parts as $part ) {

@@ -211,6 +211,8 @@ class Theme {
 			$git_theme['ci_job']                  = $header['ci_job'];
 			$git_theme['release_asset']           = $header['release_asset'];
 			$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+			$git_theme['icons']                   = [];
+			$git_theme['banners']                 = [];
 
 			// Fix branch for .git VCS.
 			if ( file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
@@ -296,7 +298,7 @@ class Theme {
 	 * @return mixed
 	 */
 	public function themes_api( $result, $action, $response ) {
-		if ( ! ( 'theme_information' === $action ) ) {
+		if ( 'theme_information' !== $action ) {
 			return $result;
 		}
 
@@ -459,6 +461,9 @@ class Theme {
 			if ( ! array_key_exists( $theme->slug, $ignore ) ) {
 				$prepared_themes[ $theme->slug ]['description'] .= ( new Branch() )->single_install_switcher( $theme );
 			}
+
+			// Add git host icon to theme panel.
+			$prepared_themes[ $theme->slug ]['description'] .= $this->base->get_git_icon( $theme->slug, false );
 		}
 
 		return $prepared_themes;
