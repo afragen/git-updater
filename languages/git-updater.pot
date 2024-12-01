@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: git-updater 12.6.0.3\n"
+"Project-Id-Version: git-updater 12.7.0\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-15T17:13:44+00:00\n"
+"POT-Creation-Date: 2024-12-01T00:57:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: git-updater\n"
@@ -238,12 +238,12 @@ msgid "Switch to release "
 msgstr ""
 
 #: src/Git_Updater/Install.php:105
-#: src/Git_Updater/Install.php:319
+#: src/Git_Updater/Install.php:325
 msgid "Install Plugin"
 msgstr ""
 
 #: src/Git_Updater/Install.php:108
-#: src/Git_Updater/Install.php:322
+#: src/Git_Updater/Install.php:328
 msgid "Install Theme"
 msgstr ""
 
@@ -251,45 +251,45 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/Git_Updater/Install.php:339
+#: src/Git_Updater/Install.php:345
 msgid "Plugin"
 msgstr ""
 
-#: src/Git_Updater/Install.php:342
+#: src/Git_Updater/Install.php:348
 msgid "Theme"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:354
+#: src/Git_Updater/Install.php:360
 msgid "Git Updater Install %s"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:362
+#: src/Git_Updater/Install.php:368
 msgid "%s URI"
 msgstr ""
 
-#: src/Git_Updater/Install.php:370
+#: src/Git_Updater/Install.php:376
 msgid "Repository Branch"
 msgstr ""
 
-#: src/Git_Updater/Install.php:378
+#: src/Git_Updater/Install.php:384
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/Git_Updater/Install.php:413
+#: src/Git_Updater/Install.php:419
 msgid "URI is case sensitive."
 msgstr ""
 
-#: src/Git_Updater/Install.php:428
+#: src/Git_Updater/Install.php:434
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/Git_Updater/Install.php:476
+#: src/Git_Updater/Install.php:482
 msgid "Activate"
 msgstr ""
 
-#: src/Git_Updater/Install.php:488
+#: src/Git_Updater/Install.php:494
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
@@ -469,39 +469,39 @@ msgid "%s expects a non-empty string."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:384
-#: src/Git_Updater/Theme.php:512
+#: src/Git_Updater/Theme.php:386
+#: src/Git_Updater/Theme.php:514
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:396
+#: src/Git_Updater/Theme.php:398
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:400
+#: src/Git_Updater/Theme.php:402
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:405
-#: src/Git_Updater/Theme.php:523
+#: src/Git_Updater/Theme.php:407
+#: src/Git_Updater/Theme.php:525
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:528
+#: src/Git_Updater/Theme.php:412
+#: src/Git_Updater/Theme.php:530
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:535
+#: src/Git_Updater/Theme.php:537
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:541
+#: src/Git_Updater/Theme.php:543
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
