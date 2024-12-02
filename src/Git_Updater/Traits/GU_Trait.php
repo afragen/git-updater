@@ -686,13 +686,9 @@ trait GU_Trait {
 	 * @return string Git Updater plugin version
 	 */
 	final public static function get_plugin_version() {
-		if ( ! function_exists( 'get_plugin_data' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
+		$plugin_version = get_file_data( dirname( __DIR__, 3 ) . '/git-updater.php', [ 'Version' => 'Version' ] )['Version'];
 
-		$plugin_data = \get_plugin_data( dirname( __DIR__, 3 ) . '/git-updater.php' );
-
-		return $plugin_data['Version'];
+		return $plugin_version;
 	}
 
 	/**
