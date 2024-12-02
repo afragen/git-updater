@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix `API::get_dot_org_data()` to work with WPE mirror
 
 #### 12.7.0 / 2024-11-30
 * fix missing/incorrect textdomains
