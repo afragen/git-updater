@@ -5,7 +5,7 @@ Donate link: https://thefragens.com/git-updater-donate
 Tags: plugin, theme, language pack, updater
 Requires at least: 5.9
 Requires PHP: 7.4
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: master
 License: MIT
 

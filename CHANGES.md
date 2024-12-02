@@ -1,4 +1,7 @@
 #### [unreleased]
+
+#### 12.7.1 / 2024-12-02
+* use `get_file_date()` to return plugin version
 * fix `API::get_dot_org_data()` to work with WPE mirror
 
 #### 12.7.0 / 2024-11-30
