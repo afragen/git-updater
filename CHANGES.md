@@ -1,5 +1,4 @@
 #### [unreleased]
-* update `freemius/wordpress-sdk`
 
 #### 12.7.1 / 2024-12-02
 * use `get_file_date()` to return plugin version
