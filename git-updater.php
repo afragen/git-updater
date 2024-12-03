@@ -41,7 +41,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	// Avoids a redeclaration error for move_dir() from Shim.php.
 	require_once ABSPATH . 'wp-admin/includes/file.php';
-	require __DIR__ . '/vendor/autoload.php';
+	require_once __DIR__ . '/vendor/autoload.php';
 }
 
 // Check for composer autoloader.
