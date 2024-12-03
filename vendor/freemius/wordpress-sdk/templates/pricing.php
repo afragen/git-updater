@@ -69,6 +69,11 @@
 
     wp_enqueue_script( 'freemius-pricing', $pricing_js_url );
 
+    $pricing_css_path = $fs->apply_filters( 'pricing/css_path', null );
+    if ( is_string( $pricing_css_path ) ) {
+        wp_enqueue_style( 'freemius-pricing', fs_asset_url( $pricing_css_path ) );
+    }
+
 	$has_tabs = $fs->_add_tabs_before_content();
 
 	if ( $has_tabs ) {
@@ -95,6 +100,8 @@
             'unique_affix'           => $fs->get_unique_affix(),
             'show_annual_in_monthly' => $fs->apply_filters( 'pricing/show_annual_in_monthly', true ),
             'license'                => $fs->has_active_valid_license() ? $fs->_get_license() : null,
+            'plugin_icon'            => $fs->get_local_icon_url(),
+            'disable_single_package' => $fs->apply_filters( 'pricing/disable_single_package', false ),
         ), $query_params );
 
         wp_add_inline_script( 'freemius-pricing', 'Freemius.pricing.new( ' . json_encode( $pricing_config ) . ' )' );

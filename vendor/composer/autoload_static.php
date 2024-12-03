@@ -11,6 +11,10 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         array (
             'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 57,
         ),
+        'M' => 
+        array (
+            'McAskill\\Composer\\' => 18,
+        ),
         'F' => 
         array (
             'Fragen\\Git_Updater\\' => 19,
@@ -21,6 +25,10 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
         array (
             0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
+        ),
+        'McAskill\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
         ),
         'Fragen\\Git_Updater\\' => 
         array (

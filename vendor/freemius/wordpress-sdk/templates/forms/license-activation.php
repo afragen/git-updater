@@ -569,7 +569,7 @@ HTML;
 				        licenseKey = $otherLicenseKey.val();
                     } else {
 				        if ( ! hasLicensesDropdown ) {
-                            licenseID = $availableLicenseKey.data( 'id' );
+                            licenseID = $availableLicenseKey.data( 'id' ).toString();
                         } else {
                             licenseID = $licensesDropdown.val();
                         }
