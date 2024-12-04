@@ -387,16 +387,16 @@
         },
         {
             "name": "mcaskill/composer-exclude-files",
-            "version": "v4.0.0",
+            "version": "v4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mcaskill/composer-plugin-exclude-files.git",
-                "reference": "d053829d49ff3b0ba0ba3896f36b27b866b839e8"
+                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/d053829d49ff3b0ba0ba3896f36b27b866b839e8",
-                "reference": "d053829d49ff3b0ba0ba3896f36b27b866b839e8",
+                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/ed68fc7d6da2146ed2c32c92904587c9e03c985a",
+                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a",
                 "shasum": ""
             },
             "require": {
@@ -405,15 +405,15 @@
             },
             "require-dev": {
                 "composer/composer": "^2.3",
-                "phpstan/phpstan": "^1.7",
-                "symfony/phpunit-bridge": "^6.0"
+                "phpstan/phpstan": "^1.11",
+                "symfony/phpunit-bridge": "^7.1"
             },
             "type": "composer-plugin",
             "extra": {
+                "class": "McAskill\\Composer\\ExcludeFilePlugin",
                 "branch-alias": {
                     "dev-main": "4.x-dev"
-                },
-                "class": "McAskill\\Composer\\ExcludeFilePlugin"
+                }
             },
             "autoload": {
                 "psr-4": {
@@ -433,9 +433,9 @@
             "description": "Exclude files from autoload_files.php",
             "support": {
                 "issues": "https://github.com/mcaskill/composer-plugin-exclude-files/issues",
-                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v4.0.0"
+                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v4.0.1"
             },
-            "time": "2024-05-19T18:19:20+00:00"
+            "time": "2024-12-03T21:08:26+00:00"
         },
         {
             "name": "phpcsstandards/phpcsextra",
