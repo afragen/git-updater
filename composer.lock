@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e076e21237b37876ca643ca953846402",
+    "content-hash": "a3e3a970936795ee3089e7e1409f62bf",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -254,16 +254,16 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.10.0",
+            "version": "2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "d3c35b9bd430ba335600ef979b8f7f742504ed3a"
+                "reference": "56696717c5f0b7fb395618e88e1b592d1893e5dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/d3c35b9bd430ba335600ef979b8f7f742504ed3a",
-                "reference": "d3c35b9bd430ba335600ef979b8f7f742504ed3a",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/56696717c5f0b7fb395618e88e1b592d1893e5dc",
+                "reference": "56696717c5f0b7fb395618e88e1b592d1893e5dc",
                 "shasum": ""
             },
             "require": {
@@ -279,11 +279,6 @@
                 "wp-coding-standards/wpcs": "^2.3"
             },
             "type": "library",
-            "autoload": {
-                "files": [
-                    "start.php"
-                ]
-            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-only"
@@ -301,9 +296,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.10.0"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.9.0"
             },
-            "time": "2024-12-03T09:04:58+00:00"
+            "time": "2024-10-21T10:21:58+00:00"
         }
     ],
     "packages-dev": [
