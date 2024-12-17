@@ -361,21 +361,14 @@ class REST_API {
 		}
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
-		$type = array_key_exists( $slug, $gu_plugins ) ? 'plugin' : 'theme';
-
-		if ( 'theme' === $type && ! \array_key_exists( $slug, $gu_themes ) ) {
-			return (object) [ 'error' => 'Specified theme does not exist.' ];
-		}
-
-		if ( 'plugin' === $type && ! \array_key_exists( $slug, $gu_plugins ) ) {
-			return (object) [ 'error' => 'Specified plugin does not exist.' ];
+		if ( ! array_key_exists( $slug, $gu_repos ) ) {
+			return (object) [ 'error' => 'Specified repo does not exist.' ];
 		}
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
-		$repo_data = 'plugin' === $type
-			? Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_plugins[ $slug ] )
-			: Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_themes[ $slug ] );
+		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
 		if ( ! is_object( $repo_data ) ) {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
