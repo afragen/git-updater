@@ -581,7 +581,7 @@ class API {
 	 *
 	 * @return string|bool|\stdClass Release asset URI from AWS.
 	 */
-	protected function get_release_asset_redirect( $asset, $aws = false ) {
+	public function get_release_asset_redirect( $asset, $aws = false ) {
 		$rest = false;
 		if ( ! $asset ) {
 			return false;

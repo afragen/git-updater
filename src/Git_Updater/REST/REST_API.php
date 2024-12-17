@@ -359,7 +359,6 @@ class REST_API {
 		if ( false === $download && true === $download ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a boolean for `download`.' ];
 		}
-		$repo_cache = $this->get_repo_cache( $slug );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 
@@ -417,10 +416,12 @@ class REST_API {
 		}
 
 		if ( $download && $repo_data->release_asset ) {
+			$repo_cache = $this->get_repo_cache( $slug );
 			if ( isset( $repo_cache['release_asset_redirect'] ) ) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_redirect'];
 			} elseif ( $repo_cache['release_asset'] ) {
-				$repo_api_data['download_link'] = $repo_cache['release_asset'];
+				$_REQUEST['override']           = true;
+				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 
