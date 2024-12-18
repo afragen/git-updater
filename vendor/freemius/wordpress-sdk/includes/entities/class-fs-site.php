@@ -190,7 +190,7 @@
                 fs_ends_with( $subdomain, '.cloudwaysapps.com' ) ||
                 // Kinsta
                 (
-                    ( fs_starts_with( $subdomain, 'staging-' ) || fs_starts_with( $subdomain, 'env-' ) ) &&
+                    ( fs_starts_with( $subdomain, 'stg-' ) ||  fs_starts_with( $subdomain, 'staging-' ) || fs_starts_with( $subdomain, 'env-' ) ) &&
                     ( fs_ends_with( $subdomain, '.kinsta.com' ) || fs_ends_with( $subdomain, '.kinsta.cloud' ) )
                 ) ||
                 // DesktopServer
@@ -206,6 +206,40 @@
                 // 10Web Hosting
                 ( fs_ends_with( $subdomain, '-dev.10web.site' ) || fs_ends_with( $subdomain, '-dev.10web.cloud' ) )
             );
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since  2.9.1
+         *
+         * @param string $host
+         *
+         * @return bool
+         */
+        static function is_playground_wp_environment_by_host( $host ) {
+            // Services aimed at providing a WordPress sandbox environment.
+            $sandbox_wp_environment_domains = array(
+                // InstaWP
+                'instawp.xyz',
+
+                // TasteWP
+                'tastewp.com',
+
+                // WordPress Playground
+                'playground.wordpress.net',
+            );
+
+            foreach ( $sandbox_wp_environment_domains as $domain) {
+                if (
+                    ( $host === $domain ) ||
+                    fs_ends_with( $host, '.' . $domain ) ||
+                    fs_ends_with( $host, '-' . $domain )
+                ) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         function is_localhost() {

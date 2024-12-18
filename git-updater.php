@@ -12,7 +12,7 @@
  * Plugin Name:       Git Updater
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           12.7.1
+ * Version:           12.7.2
  * Author:            Andy Fragen
  * License:           MIT
  * Domain Path:       /languages
@@ -41,7 +41,7 @@ if ( ! defined( 'WPINC' ) ) {
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	// Avoids a redeclaration error for move_dir() from Shim.php.
 	require_once ABSPATH . 'wp-admin/includes/file.php';
-	require __DIR__ . '/vendor/autoload.php';
+	require_once __DIR__ . '/vendor/autoload.php';
 }
 
 // Check for composer autoloader.

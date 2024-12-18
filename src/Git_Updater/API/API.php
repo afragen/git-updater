@@ -346,7 +346,7 @@ class API {
 		/**
 		 * Filter hook to set an API domain for updating.
 		 *
-		 * @since 12.x.0
+		 * @since 12.6.0
 		 * @param string Default is 'api.wordpress.org'.
 		 */
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
@@ -581,7 +581,7 @@ class API {
 	 *
 	 * @return string|bool|\stdClass Release asset URI from AWS.
 	 */
-	protected function get_release_asset_redirect( $asset, $aws = false ) {
+	public function get_release_asset_redirect( $asset, $aws = false ) {
 		$rest = false;
 		if ( ! $asset ) {
 			return false;

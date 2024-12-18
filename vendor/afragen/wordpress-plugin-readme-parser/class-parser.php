@@ -365,19 +365,17 @@ class Parser {
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
 			if ( empty( $trimmed ) ) {
-				$this->short_description .= "\n";
 				continue;
 			}
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
 				 ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] )
 			) {
-
 				// Stop after any Markdown heading.
 				array_unshift( $contents, $line );
 				break;
 			}
 
-			$this->short_description .= $line . "\n";
+			$this->short_description .= $line . ' ';
 		}
 		$this->short_description = trim( $this->short_description );
 

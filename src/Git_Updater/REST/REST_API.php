@@ -359,24 +359,16 @@ class REST_API {
 		if ( false === $download && true === $download ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a boolean for `download`.' ];
 		}
-		$repo_cache = $this->get_repo_cache( $slug );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
-		$type = array_key_exists( $slug, $gu_plugins ) ? 'plugin' : 'theme';
-
-		if ( 'theme' === $type && ! \array_key_exists( $slug, $gu_themes ) ) {
-			return (object) [ 'error' => 'Specified theme does not exist.' ];
-		}
-
-		if ( 'plugin' === $type && ! \array_key_exists( $slug, $gu_plugins ) ) {
-			return (object) [ 'error' => 'Specified plugin does not exist.' ];
+		if ( ! array_key_exists( $slug, $gu_repos ) ) {
+			return (object) [ 'error' => 'Specified repo does not exist.' ];
 		}
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
-		$repo_data = 'plugin' === $type
-			? Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_plugins[ $slug ] )
-			: Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_themes[ $slug ] );
+		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
 		if ( ! is_object( $repo_data ) ) {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
@@ -388,6 +380,7 @@ class REST_API {
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'is_private'        => $repo_data->is_private,
+			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
 			'contributors'      => $repo_data->contributors,
@@ -410,7 +403,9 @@ class REST_API {
 			'external'          => 'xxx',
 		];
 
-		if ( $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
+		$repo_cache = $this->get_repo_cache( $slug );
+
+		if ( $repo_api_data['download_link'] && $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
 		) {
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
@@ -420,7 +415,8 @@ class REST_API {
 			if ( isset( $repo_cache['release_asset_redirect'] ) ) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_redirect'];
 			} elseif ( $repo_cache['release_asset'] ) {
-				$repo_api_data['download_link'] = $repo_cache['release_asset'];
+				$_REQUEST['override']           = true;
+				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 

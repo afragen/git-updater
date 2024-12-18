@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 12.7.2 / 2024-12-18
+* update `freemius/wordpress-sdk`
+* use `mcaskill/composer-exclude-files` to exclude autoloading `start.php` from Freemius, issues arise
+* update `REST_API::get_api_data()` to always get current release asset redirect as appropriate
+
 #### 12.7.1 / 2024-12-02
 * use `get_file_date()` to return plugin version
 * fix `API::get_dot_org_data()` to work with WPE mirror

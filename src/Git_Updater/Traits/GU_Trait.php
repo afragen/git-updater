@@ -300,7 +300,7 @@ trait GU_Trait {
 		/**
 		 * Filter hook to completely ignore any updates from dot org when using Git Updater.
 		 *
-		 * @since 12.x.0
+		 * @since 12.6.0
 		 * @param bool Default is false. Do not ignore updates from dot org.
 		 */
 		return ! $dot_org_master || $override || apply_filters( 'gu_ignore_dot_org', false );
