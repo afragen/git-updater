@@ -342,7 +342,7 @@ trait API_Common {
 			}
 		}
 
-		if ( $response && ( ! isset( $this->response['release_asset'] ) || ! $this->response['release_asset'] ) ) {
+		if ( $response && ! $this->response['release_asset'] ) {
 			$this->set_repo_cache( 'release_asset', $response );
 		}
 
