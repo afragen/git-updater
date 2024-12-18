@@ -126,6 +126,21 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
+			if ( ! isset( $this->response['release_asset_download'] ) ) {
+				$auth_header = $this->add_auth_header( $this->default_http_get_args, $release_asset );
+				$response    = wp_remote_get( $release_asset, $auth_header );
+				if ( is_wp_error( $response ) ) {
+					return $response;
+				}
+				$response = json_decode( wp_remote_retrieve_body( $response ) );
+				if ( property_exists( $response, 'browser_download_url' ) ) {
+					$this->set_repo_cache( 'release_asset_download', $response->browser_download_url );
+				}
+			}
+			if ( isset( $this->response['release_asset_download'] ) ) {
+				return $this->response['release_asset_download'];
+			}
+
 			return $this->get_release_asset_redirect( $release_asset, true );
 		}
 

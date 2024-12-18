@@ -1,4 +1,5 @@
 #### [unreleased]
+* use `browser_download_url` for GitHub release asset when available otherwise get redirect url
 
 #### 12.7.2 / 2024-12-18
 * update `freemius/wordpress-sdk`
