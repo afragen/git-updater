@@ -405,7 +405,8 @@ class REST_API {
 
 		$repo_cache = $this->get_repo_cache( $slug );
 
-		if ( $repo_api_data['download_link'] && $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
+		if ( $repo_api_data['download_link']
+			&& ( $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) )
 		) {
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
