@@ -414,9 +414,8 @@ class REST_API {
 			if ( isset( $repo_cache['release_asset_redirect'] ) ) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_redirect'];
 			} elseif ( $repo_cache['release_asset'] ) {
-				//$_REQUEST['override']           = true;
-				//$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
-				$repo_api_data['download_link'] = $repo_cache['release_asset'];
+				$_REQUEST['override']           = true;
+				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
 		}
 
