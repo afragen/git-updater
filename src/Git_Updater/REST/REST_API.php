@@ -380,7 +380,7 @@ class REST_API {
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'is_private'        => $repo_data->is_private,
-			'relase_asset'      => $repo_data->release_asset,
+			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
 			'contributors'      => $repo_data->contributors,
