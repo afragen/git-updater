@@ -327,7 +327,10 @@ class API {
 		 */
 		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
 
-		$base     = $download_link ? $type['base_download'] : $type['base_uri'];
+		$base = $download_link ? $type['base_download'] : $type['base_uri'];
+		if ( is_string( $base ) && str_starts_with( $endpoint, $base ) ) {
+			return $endpoint;
+		}
 		$endpoint = $repo_api->add_endpoints( $this, $endpoint );
 
 		return $base . $endpoint;
