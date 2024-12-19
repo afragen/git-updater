@@ -404,6 +404,7 @@ class REST_API {
 		];
 
 		$repo_cache = $this->get_repo_cache( $slug );
+		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
 
 		if ( $repo_api_data['download_link']
 			&& ( $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) )
