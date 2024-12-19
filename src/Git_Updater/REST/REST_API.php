@@ -413,7 +413,9 @@ class REST_API {
 		}
 
 		if ( $download && $repo_data->release_asset ) {
-			if ( isset( $repo_cache['release_asset_download'] ) ) {
+			if ( isset( $repo_cache['release_asset_download'] )
+				&& 'bitbucket' !== $repo_api_data['git']
+			) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_download'];
 			} elseif ( $repo_cache['release_asset'] ) {
 				$_REQUEST['override']           = true;

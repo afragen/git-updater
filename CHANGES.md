@@ -1,5 +1,6 @@
 #### [unreleased]
 * update GitHub release asset parsing
+* update REST_API for Bitbucket update link
 
 #### 12.7.2 / 2024-12-18
 * update `freemius/wordpress-sdk`
