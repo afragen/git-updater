@@ -136,6 +136,25 @@ class REST_API {
 			]
 		);
 
+		register_rest_route(
+			self::$namespace,
+			'update-api',
+			[
+				'show_in_index'       => true,
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_api_data' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
+					'slug' => [
+						'default'           => false,
+						'required'          => true,
+						'validate_callback' => 'sanitize_title_with_dashes',
+					],
+				],
+			]
+		);
+
+
 		$update_args = [
 			'key'        => [
 				'default'           => false,
