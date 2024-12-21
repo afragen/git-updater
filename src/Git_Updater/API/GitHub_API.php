@@ -126,6 +126,14 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_asset = $this->get_release_asset();
 
+			if ( empty( $this->response['release_asset_download'] ) ) {
+				$response = $this->api( $release_asset );
+				$this->parse_release_asset_response( $response );
+			}
+			if ( ! empty( $this->response['release_asset_download'] ) ) {
+				return $this->response['release_asset_download'];
+			}
+
 			return $this->get_release_asset_redirect( $release_asset, true );
 		}
 
@@ -308,6 +316,22 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return $branches;
+	}
+
+	/**
+	 * Parse release asset API response.
+	 *
+	 * @param \stdClass $response API response.
+	 *
+	 * @return void
+	 */
+	public function parse_release_asset_response( $response ) {
+		if ( $this->validate_response( $response ) ) {
+			return;
+		}
+		if ( property_exists( $response, 'browser_download_url' ) ) {
+			$this->set_repo_cache( 'release_asset_download', $response->browser_download_url );
+		}
 	}
 
 	/**
