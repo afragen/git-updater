@@ -314,7 +314,7 @@ trait API_Common {
 			$dotwp        = str_replace( ':path', '.wordpress-org', $request );
 
 			// If using $dotwp the assets we want should be there, so check that first.
-			$response     = $this->api( $dotwp );
+			$response = $this->api( $dotwp );
 			if ( is_object( $response ) ) {
 				$response = $this->api( $assets );
 			}
