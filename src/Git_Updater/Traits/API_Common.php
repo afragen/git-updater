@@ -311,10 +311,12 @@ trait API_Common {
 		if ( ! $response ) {
 			self::$method = 'assets';
 			$assets       = str_replace( ':path', 'assets', $request );
-			$dotwp        = \str_replace( ':path', '.wordpress-org', $request );
-			$response     = $this->api( $assets );
+			$dotwp        = str_replace( ':path', '.wordpress-org', $request );
+
+			// If using $dotwp the assets we want should be there, so check that first.
+			$response     = $this->api( $dotwp );
 			if ( is_object( $response ) ) {
-				$response = $this->api( $dotwp );
+				$response = $this->api( $assets );
 			}
 
 			if ( is_array( $response ) ) {
