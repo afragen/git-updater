@@ -71,14 +71,16 @@ class Additions {
 			$file_path = 'plugin' === $repo_type ? WP_PLUGIN_DIR . "/{$repo['slug']}" : null;
 			$file_path = 'theme' === $repo_type ? get_theme_root() . "/{$repo['slug']}/style.css" : $file_path;
 
-			if ( ! file_exists( $file_path ) || $type !== $repo_type ) {
+			if ( $type !== $repo_type ) {
 				continue;
 			}
 
 			$all_headers = Singleton::get_instance( 'Base', $this )->get_headers( $repo_type );
 
 			$additions[ $repo['slug'] ]['type'] = $repo_type;
-			$additions[ $repo['slug'] ]         = get_file_data( $file_path, $all_headers );
+			if ( file_exists( $file_path ) ) {
+				$additions[ $repo['slug'] ] = get_file_data( $file_path, $all_headers );
+			}
 
 			switch ( $repo['type'] ) {
 				case 'github_plugin':

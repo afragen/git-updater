@@ -348,7 +348,9 @@ class Base {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
 					$repo_api->get_repo_meta();
-					$changelog = $this->get_changelog_filename( $repo );
+					$repo_api->get_repo_contents();
+					$repo_api->get_repo_assets();
+					$changelog = $this->get_changelog_filename( $repo_api );
 					if ( $changelog ) {
 						$repo_api->get_remote_changes( $changelog );
 					}
@@ -362,6 +364,7 @@ class Base {
 			$repo->download_link = $repo_api->construct_download_link();
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
+			$this->add_assets( $repo_api );
 		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
@@ -414,27 +417,64 @@ class Base {
 	/**
 	 * Get filename of changelog and return.
 	 *
-	 * @param \stdClass $repo Repo object.
+	 * @param \stdClass $repo_api API object.
 	 *
 	 * @return bool|string
 	 */
-	public function get_changelog_filename( $repo ) {
-		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
-		$changes     = null;
-		$local_files = null;
-
-		if ( is_dir( $repo->local_path ) ) {
-			$local_files = scandir( $repo->local_path, 0 );
-		}
-
-		$changes = array_intersect( (array) $local_files, $changelogs );
-		$changes = array_pop( $changes );
+	public function get_changelog_filename( $repo_api ) {
+		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
+		$changes    = array_intersect( (array) $repo_api->response['contents'], $changelogs );
+		$changes    = array_pop( $changes );
 
 		if ( ! empty( $changes ) ) {
 			return $changes;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Add assets from remote repo.
+	 *
+	 * @param GitHub_API $repo API object.
+	 *
+	 * @return void
+	 */
+	public function add_assets( $repo ) {
+		$assets = $repo->response['assets'] ?? false;
+
+		if ( ! $assets ) {
+			return;
+		}
+		$banner_sizes = [
+			'low_png'      => 'banner-772x250.png',
+			'low_jpg'      => 'banner-772x250.jpg',
+			'low_png_rtl'  => 'banner-772x250-rtl.png',
+			'low_jpg_rtl'  => 'banner-772x250-rtl.jpg',
+			'high_png'     => 'banner-1544x500.png',
+			'high_jpg'     => 'banner-1544x500.jpg',
+			'high_png_rtl' => 'banner-1544x500-rtl.png',
+			'high_jpg_rtl' => 'banner-1544x500-rtl.jpg',
+		];
+		$icons        = [
+			'svg'    => 'icon.svg',
+			'1x_png' => 'icon-128x128.png',
+			'1x_jpg' => 'icon-128x128.jpg',
+			'2x_png' => 'icon-256x256.png',
+			'2x_jpg' => 'icon-256x256.jpg',
+		];
+		foreach ( $banner_sizes as $key => $size ) {
+			if ( isset( $assets[ $size ] ) ) {
+				$key                         = preg_replace( '/_png|_jpg|_rtl/', '', $key );
+				$repo->type->banners[ $key ] = $assets[ $size ];
+			}
+		}
+		foreach ( $icons as $key => $filename ) {
+			if ( isset( $assets[ $filename ] ) ) {
+				$key                       = preg_replace( '/_png|_jpg/', '', $key );
+				$repo->type->icons[ $key ] = $assets[ $filename ];
+			}
+		}
 	}
 
 	/**

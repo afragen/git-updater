@@ -201,7 +201,7 @@ trait GU_Trait {
 		$php_version_ok  = ! empty( $type->requires_php )
 			? \is_php_version_compatible( $type->requires_php )
 			: true;
-		$remote_is_newer = isset( $type->remote_version )
+		$remote_is_newer = isset( $type->remote_version, $type->local_version )
 			? version_compare( $type->remote_version, $type->local_version, '>' )
 			: false;
 
@@ -805,7 +805,7 @@ trait GU_Trait {
 		];
 		$filepath      = 'gist' === $repo->git
 			? trailingslashit( dirname( $repo->local_path ) ) . $repo->file
-			: $repo->local_path . basename( $repo->file );
+			: '';
 		$repo_data     = file_exists( $filepath ) ? get_file_data( $filepath, $requires ) : $default_empty;
 
 		return $repo_data;

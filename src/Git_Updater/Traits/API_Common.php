@@ -203,19 +203,18 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		if ( ! $this->local_file_exists( 'readme.txt' ) ) {
+		$readme = array_intersect( $this->response['contents'], [ 'readme.txt','readme.md' ] );
+		$readme = array_pop( $readme );
+
+		if ( empty( $readme ) ) {
 			return false;
 		}
 
 		$response = $this->response['readme'] ?? false;
 
-		// Set $response from local file if no update available.
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = $this->get_local_info( $this->type, 'readme.txt' );
-		}
-
 		if ( ! $response ) {
 			self::$method = 'readme';
+			$request      = str_replace( ':readme', $readme, $request );
 			$response     = $this->api( $request );
 			$response     = $this->decode_response( $git, $response );
 		}
@@ -266,6 +265,67 @@ trait API_Common {
 
 		$this->type->repo_meta = $response;
 		$this->add_meta_repo_object();
+
+		return true;
+	}
+
+	/**
+	 * Read the root contents of the repo.
+	 *
+	 * @param string $git     Name of API, eg 'github'.
+	 * @param string $request API request.
+	 *
+	 * @return bool
+	 */
+	final public function get_remote_api_contents( $git, $request ) {
+		$response = $this->response['contents'] ?? false;
+
+		if ( ! $response ) {
+			self::$method = 'contents';
+			$response     = $this->api( $request );
+
+			if ( $response ) {
+				$response = $this->parse_contents_response( $response );
+				$this->set_repo_cache( 'contents', $response );
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Read the assets folder of the repo.
+	 *
+	 * @param string $git     Name of API, eg 'github'.
+	 * @param string $request API request.
+	 *
+	 * @return bool
+	 */
+	final public function get_remote_api_assets( $git, $request ) {
+		$response = $this->response['assets'] ?? false;
+
+		if ( ! $response ) {
+			self::$method = 'assets';
+			$assets       = str_replace( ':path', 'assets', $request );
+			$dotwp        = \str_replace( ':path', '.wordpress-org', $request );
+			$response     = $this->api( $assets );
+			if ( is_object( $response ) ) {
+				$response = $this->api( $dotwp );
+			}
+
+			if ( is_array( $response ) ) {
+				$response = $this->parse_asset_dir_response( $response );
+				$this->set_repo_cache( 'assets', $response );
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
 
 		return true;
 	}

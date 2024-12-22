@@ -78,7 +78,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool|void
 	 */
 	public function get_remote_readme() {
-		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/readme.txt' );
+		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/:readme' );
 	}
 
 	/**
@@ -106,6 +106,24 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function get_release_asset() {
 		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+	}
+
+	/**
+	 * Return list of files at GitHub repo root.
+	 *
+	 * @return array
+	 */
+	public function get_repo_contents() {
+		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );
+	}
+
+	/**
+	 * Return list of repository assets.
+	 *
+	 * @return array
+	 */
+	public function get_repo_assets() {
+		return $this->get_remote_api_assets( 'github', '/repos/:owner/:repo/contents/:path' );
 	}
 
 	/**
@@ -362,6 +380,40 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return [ $tags, $rollback ];
+	}
+
+	/**
+	 * Parse remote root files.
+	 *
+	 * @param \stdClass|array $response  Response from API call.
+	 *
+	 * @return array
+	 */
+	protected function parse_contents_response( $response ) {
+		$contents = [];
+		foreach ( $response as $content ) {
+			if ( str_contains( $content->name, '.' ) ) {
+				$contents[] = $content->name;
+			}
+		}
+
+		return $contents;
+	}
+
+	/**
+	 * Parse remote assets directory.
+	 *
+	 * @param \stdClass|array $response  Response from API call.
+	 *
+	 * @return array
+	 */
+	protected function parse_asset_dir_response( $response ) {
+		$assets = [];
+		foreach ( $response as $asset ) {
+			$assets[ $asset->name ] = $asset->download_url;
+		}
+
+		return $assets;
 	}
 
 	/**

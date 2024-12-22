@@ -509,6 +509,14 @@ class API {
 		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
 		$this->type->dot_org        = $response['dot_org'];
 		$this->type->primary_branch = ! empty( $response['PrimaryBranch'] ) ? $response['PrimaryBranch'] : $this->type->primary_branch;
+		if ( ! isset( $this->type->name ) ) {
+			$this->type->name                    = $response['Name'];
+			$this->type->local_version           = strtolower( $response['Version'] );
+			$this->type->author                  = $response['Author'];
+			$this->type->name                    = $response['Name'];
+			$this->type->homepage                = $response['PluginURI'];
+			$this->type->sections['description'] = $response['Description'];
+		}
 	}
 
 	/**

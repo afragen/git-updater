@@ -174,76 +174,43 @@ class Plugin {
 			}
 			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
-			$git_plugin['type']                    = 'plugin';
-			$git_plugin['git']                     = $repo_parts['git_server'];
-			$git_plugin['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
-			$git_plugin['enterprise']              = $header['enterprise_uri'];
-			$git_plugin['enterprise_api']          = $header['enterprise_api'];
-			$git_plugin['owner']                   = $header['owner'];
-			$git_plugin['slug']                    = $header['repo'];
-			$git_plugin['branch']                  = $branch;
-			$git_plugin['primary_branch']          = $header['primary_branch'];
-			$git_plugin['file']                    = $slug;
-			$git_plugin['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
-			$git_plugin['author']                  = $plugin['Author'];
-			$git_plugin['name']                    = $plugin['Name'];
-			$git_plugin['homepage']                = $plugin['PluginURI'];
-			$git_plugin['local_version']           = strtolower( $plugin['Version'] );
-			$git_plugin['sections']['description'] = $plugin['Description'];
-			$git_plugin['languages']               = $header['languages'];
-			$git_plugin['ci_job']                  = $header['ci_job'];
-			$git_plugin['release_asset']           = $header['release_asset'];
-			$git_plugin['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+			$git_plugin['type']           = 'plugin';
+			$git_plugin['git']            = $repo_parts['git_server'];
+			$git_plugin['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
+			$git_plugin['enterprise']     = $header['enterprise_uri'];
+			$git_plugin['enterprise_api'] = $header['enterprise_api'];
+			$git_plugin['owner']          = $header['owner'];
+			$git_plugin['slug']           = $header['repo'];
+			$git_plugin['file']           = $slug;
 
-			$content_dir_regex = '/\/' . basename( WP_CONTENT_DIR ) . '.*/';
-			preg_match( $content_dir_regex, $git_plugin['local_path'], $matches );
+			$git_plugin['branch']         = $branch;
+			$git_plugin['primary_branch'] = $header['primary_branch'];
+			$git_plugin['ci_job']         = $header['ci_job'];
+			$git_plugin['release_asset']  = $header['release_asset'];
+			$git_plugin['languages']      = $header['languages'];
+			$git_plugin['sections']       = [];
 
-			/**
-			 * Filter to specify a unique assets directory.
-			 *
-			 * This will not work for hidden directories, ie `.wordpress-org`
-			 * as they are not reachable from the browser.
-			 *
-			 * @since 10.7.1
-			 * @param string
-			 */
-			$assets_dir            = apply_filters( 'gu_plugin_assets_dir', 'assets/', $slug );
-			$assets_dir            = trailingslashit( $assets_dir );
-			$banner_sizes          = [
-				'low_png'      => 'banner-772x250.png',
-				'low_jpg'      => 'banner-772x250.jpg',
-				'low_png_rtl'  => 'banner-772x250-rtl.png',
-				'low_jpg_rtl'  => 'banner-772x250-rtl.jpg',
-				'high_png'     => 'banner-1544x500.png',
-				'high_jpg'     => 'banner-1544x500.jpg',
-				'high_png_rtl' => 'banner-1544x500-rtl.png',
-				'high_jpg_rtl' => 'banner-1544x500-rtl.jpg',
-			];
-			$git_plugin['icons']   = [];
-			$git_plugin['banners'] = [];
-			$icons                 = [
-				'svg'    => 'icon.svg',
-				'1x_png' => 'icon-128x128.png',
-				'1x_jpg' => 'icon-128x128.jpg',
-				'2x_png' => 'icon-256x256.png',
-				'2x_jpg' => 'icon-256x256.jpg',
-			];
-			foreach ( $banner_sizes as $key => $size ) {
-				if ( \file_exists( $git_plugin['local_path'] . $assets_dir . $size ) ) {
-					$key                           = preg_replace( '/_png|_jpg|_rtl/', '', $key );
-					$git_plugin['banners'][ $key ] = \home_url() . $matches[0] . $assets_dir . $size;
-				}
+			if ( isset( $plugin['Name'] ) ) {
+				$git_plugin['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
+				$git_plugin['local_version']           = strtolower( $plugin['Version'] );
+				$git_plugin['author']                  = $plugin['Author'];
+				$git_plugin['name']                    = $plugin['Name'];
+				$git_plugin['homepage']                = $plugin['PluginURI'];
+				$git_plugin['sections']['description'] = $plugin['Description'];
+
 			}
-			foreach ( $icons as $key => $filename ) {
-				if ( \file_exists( $git_plugin['local_path'] . $assets_dir . $filename ) ) {
-					$key                         = preg_replace( '/_png|_jpg/', '', $key );
-					$git_plugin['icons'][ $key ] = \home_url() . $matches[0] . $assets_dir . $filename;
-				}
+			$git_plugin['broken'] = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+
+			if ( isset( $git_plugin['local_path'] ) ) {
+				$content_dir_regex = '/\/' . basename( WP_CONTENT_DIR ) . '.*/';
+				preg_match( $content_dir_regex, $git_plugin['local_path'], $matches );
 			}
+
 			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
+			$git_plugin['banners']          = [];
 
 			// Fix branch for .git VCS.
-			if ( \file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
+			if ( isset( $git_plugin['local_path'] ) && file_exists( $git_plugin['local_path'] . '.git/HEAD' ) ) {
 				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_plugin['local_path'] . '.git/HEAD' ) ), 2 ) );
 				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
 			}
