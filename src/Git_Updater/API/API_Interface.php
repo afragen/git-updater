@@ -39,7 +39,7 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param string $changes Changelog filename - (deprecated).
+	 * @param null $changes Changelog filename - (deprecated).
 	 *
 	 * @return mixed
 	 */
