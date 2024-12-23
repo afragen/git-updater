@@ -64,9 +64,11 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
+	 * @param string $changes The changelog filename - deprecated.
+	 *
 	 * @return bool
 	 */
-	public function get_remote_changes() {
+	public function get_remote_changes( $changes ) {
 		return $this->get_remote_api_changes( 'github', '/repos/:owner/:repo/contents/:changelog' );
 	}
 
@@ -104,15 +106,6 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function get_release_asset() {
 		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
-	}
-
-	/**
-	 * Return list of files at GitHub repo root.
-	 *
-	 * @return array
-	 */
-	public function get_repo_contents() {
-		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );
 	}
 
 	/**

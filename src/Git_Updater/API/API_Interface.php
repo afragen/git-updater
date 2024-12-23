@@ -39,9 +39,11 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
+	 * @param string $changes Changelog filename - (deprecated).
+	 *
 	 * @return mixed
 	 */
-	public function get_remote_changes();
+	public function get_remote_changes( $changes );
 
 	/**
 	 * Read and parse remote readme.txt.
