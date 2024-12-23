@@ -276,34 +276,6 @@ trait API_Common {
 	}
 
 	/**
-	 * Read the root contents of the repo.
-	 *
-	 * @param string $git     Name of API, eg 'github'.
-	 * @param string $request API request.
-	 *
-	 * @return bool
-	 */
-	final public function get_remote_api_contents( $git, $request ) {
-		$response = $this->response['contents'] ?? false;
-
-		if ( ! $response ) {
-			self::$method = 'contents';
-			$response     = $this->api( $request );
-
-			if ( $response ) {
-				$response = $this->parse_contents_response( $response );
-				$this->set_repo_cache( 'contents', $response );
-			}
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Read the assets folder of the repo.
 	 *
 	 * @param string $git     Name of API, eg 'github'.

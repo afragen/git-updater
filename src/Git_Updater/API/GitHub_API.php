@@ -374,24 +374,6 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Parse remote root files.
-	 *
-	 * @param \stdClass|array $response  Response from API call.
-	 *
-	 * @return array
-	 */
-	protected function parse_contents_response( $response ) {
-		$contents = [];
-		foreach ( $response as $content ) {
-			if ( str_contains( $content->name, '.' ) ) {
-				$contents[] = $content->name;
-			}
-		}
-
-		return $contents;
-	}
-
-	/**
 	 * Parse remote assets directory.
 	 *
 	 * @param \stdClass|array $response Response from API call.
