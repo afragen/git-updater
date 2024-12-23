@@ -153,6 +153,24 @@ class REST_API {
 
 		register_rest_route(
 			self::$namespace,
+			'flush-repo-cache',
+			[
+				'show_in_index'       => true,
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'flush_repo_cache' ],
+				'permission_callback' => '__return_true',
+				'args'                => [
+					'slug' => [
+						'default'           => false,
+						'required'          => true,
+						'validate_callback' => 'sanitize_title_with_dashes',
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			self::$namespace,
 			'update',
 			[
 				[
@@ -409,6 +427,32 @@ class REST_API {
 		}
 
 		return $repo_api_data;
+	}
+
+	/**
+	 * Flush individual repository cache.
+	 *
+	 * @param \WP_REST_Request $request REST API response.
+	 *
+	 * @return \stdClass
+	 */
+	public function flush_repo_cache( $request ) {
+		$slug = $request->get_param( 'slug' );
+		if ( ! $slug ) {
+			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
+		}
+		$flush   = $this->set_repo_cache( $slug, false, $slug );
+		$message = $flush
+			? [
+				'success' => true,
+				$slug     => "Repository cache for $slug has been flushed.",
+			]
+			: [
+				'success' => false,
+				$slug     => 'Repository cache flush failed.',
+			];
+
+		return (object) $message;
 	}
 
 	/**
