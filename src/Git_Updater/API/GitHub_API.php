@@ -64,12 +64,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param string $changes Changelog filename.
-	 *
 	 * @return bool
 	 */
-	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'github', $changes, "/repos/:owner/:repo/contents/{$changes}" );
+	public function get_remote_changes() {
+		return $this->get_remote_api_changes( 'github', '/repos/:owner/:repo/contents/:changelog' );
 	}
 
 	/**
@@ -403,12 +401,17 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote assets directory.
 	 *
-	 * @param \stdClass|array $response  Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array
+	 * @return \stdClass|array
 	 */
 	protected function parse_asset_dir_response( $response ) {
 		$assets = [];
+
+		if ( isset( $response->message ) ) {
+			return $response;
+		}
+
 		foreach ( $response as $asset ) {
 			$assets[ $asset->name ] = $asset->download_url;
 		}

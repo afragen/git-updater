@@ -39,11 +39,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param string $changes Changelog filename.
-	 *
 	 * @return mixed
 	 */
-	public function get_remote_changes( $changes );
+	public function get_remote_changes();
 
 	/**
 	 * Read and parse remote readme.txt.

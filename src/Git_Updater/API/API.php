@@ -514,7 +514,7 @@ class API {
 			$this->type->local_version           = strtolower( $response['Version'] );
 			$this->type->author                  = $response['Author'];
 			$this->type->name                    = $response['Name'];
-			$this->type->homepage                = $response['PluginURI'];
+			$this->type->homepage                = isset( $response['PluginURI'] ) ? $response['PluginURI'] : '';
 			$this->type->sections['description'] = $response['Description'];
 		}
 	}

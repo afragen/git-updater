@@ -99,7 +99,7 @@ trait API_Common {
 			$response     = $this->decode_response( $git, $response );
 		}
 
-		if ( $response && is_string( $response ) && ! is_wp_error( $response ) ) {
+		if ( ( $response && is_string( $response ) ) || is_wp_error( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
 			$this->set_repo_cache( $this->type->slug, $response );
 			$this->set_repo_cache( 'repo', $this->type->slug );
@@ -130,7 +130,7 @@ trait API_Common {
 			self::$method = 'tags';
 			$response     = $this->api( $request );
 
-			if ( ! $response ) {
+			if ( ! $response || is_wp_error( $response ) ) {
 				$response          = new \stdClass();
 				$response->message = 'No tags found';
 			}
@@ -155,35 +155,38 @@ trait API_Common {
 	 * Read the remote CHANGES.md file.
 	 *
 	 * @param string $git     Name of API, eg 'github'.
-	 * @param string $changes Changelog filename.
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	final public function get_remote_api_changes( $git, $changes, $request ) {
-		$response = $this->response['changes'] ?? false;
-
-		// Set $response from local file if no update available.
-		if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-			$response = $this->get_local_info( $this->type, $changes );
-		}
+	final public function get_remote_api_changes( $git, $request ) {
+		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
+		$response   = $this->response['changes'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response     = $this->api( $request );
-			$response     = $this->decode_response( $git, $response );
-		}
+			foreach ( $changelogs as $changelog ) {
+				$new_request = str_replace( ':changelog', $changelog, $request );
+				$response    = $this->api( $new_request );
 
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No changelog found';
+				if ( ! isset( $response->message ) ) {
+					break;
+				}
+			}
+			$response = $this->decode_response( $git, $response );
+
+			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No changelog found';
+				$this->set_repo_cache( 'changes', $response );
+			}
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( $response && ! isset( $this->response['changes'] ) ) {
+		if ( ! isset( $this->response['changes'] ) ) {
 			$parser   = new \Parsedown();
 			$response = $parser->text( $response );
 			$this->set_repo_cache( 'changes', $response );
@@ -203,32 +206,35 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		$readme = array_intersect( $this->response['contents'], [ 'readme.txt','readme.md' ] );
-		$readme = array_pop( $readme );
-
-		if ( empty( $readme ) ) {
-			return false;
-		}
-
+		$readmes  = [ 'readme.txt', 'readme.md' ];
 		$response = $this->response['readme'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$request      = str_replace( ':readme', $readme, $request );
-			$response     = $this->api( $request );
-			$response     = $this->decode_response( $git, $response );
-		}
 
-		if ( ! $response && ! is_wp_error( $response ) ) {
-			$response          = new \stdClass();
-			$response->message = 'No readme found';
+			foreach ( $readmes as $readme ) {
+				$new_request = str_replace( ':readme', $readme, $request );
+				$response    = $this->api( $new_request );
+
+				if ( ! isset( $response->message ) ) {
+					break;
+				}
+			}
+
+			$response = $this->decode_response( $git, $response );
+
+			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No readme found';
+				$this->set_repo_cache( 'readme', $response );
+			}
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( $response && ! isset( $this->response['readme'] ) ) {
+		if ( ! isset( $this->response['readme'] ) ) {
 			$parser   = new Readme_Parser( $response );
 			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
@@ -306,21 +312,29 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
+		$assets   = [ '.wordpress-org', 'assets' ];
 		$response = $this->response['assets'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'assets';
-			$assets       = str_replace( ':path', 'assets', $request );
-			$dotwp        = str_replace( ':path', '.wordpress-org', $request );
 
-			// If using $dotwp the assets we want should be there, so check that first.
-			$response = $this->api( $dotwp );
-			if ( is_object( $response ) ) {
-				$response = $this->api( $assets );
+			foreach ( $assets as $asset ) {
+				$new_request = str_replace( ':path', $asset, $request );
+				$response    = $this->api( $new_request );
+
+				if ( ! is_object( $response ) ) {
+					break;
+				}
 			}
 
-			if ( is_array( $response ) ) {
+			if ( $response ) {
 				$response = $this->parse_asset_dir_response( $response );
+
+				if ( ! is_array( $response ) || is_wp_error( $response ) ) {
+					$response          = new \stdClass();
+					$response->message = 'No assets found';
+				}
+
 				$this->set_repo_cache( 'assets', $response );
 			}
 		}

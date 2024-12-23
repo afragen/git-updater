@@ -347,14 +347,10 @@ class Base {
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
 				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
-					$repo_api->get_repo_meta();
-					$repo_api->get_repo_contents();
-					$repo_api->get_repo_assets();
-					$changelog = $this->get_changelog_filename( $repo_api );
-					if ( $changelog ) {
-						$repo_api->get_remote_changes( $changelog );
-					}
 					$repo_api->get_remote_readme();
+					$repo_api->get_remote_changes();
+					$repo_api->get_repo_meta();
+					$repo_api->get_repo_assets();
 				}
 				if ( ! empty( self::$options['branch_switch'] ) ) {
 					$repo_api->get_remote_branches();
@@ -444,7 +440,7 @@ class Base {
 	public function add_assets( $repo ) {
 		$assets = $repo->response['assets'] ?? false;
 
-		if ( ! $assets ) {
+		if ( ! $assets || is_object( $assets ) ) {
 			return;
 		}
 		$banner_sizes = [
