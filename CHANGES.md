@@ -1,4 +1,8 @@
 #### [unreleased]
+* add API get for repo root contents for GitHub/Gitea for efficiency, other git APIs don't seem to have similar REST endpoint
+* add feature to virtually add repos via Additions tab to server REST update-api endpoint
+* switch to getting most data via API calls and not from locally installed files
+* add REST endpoint to individually flush repo cache
 
 #### 12.8.0 / 2024-12-21
 * update GitHub release asset parsing
