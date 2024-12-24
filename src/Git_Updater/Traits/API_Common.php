@@ -212,7 +212,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		$readmes  = [ 'readme.txt', 'readme.md', 'README.md' ];
+		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
 		$response = $this->response['readme'] ?? false;
 		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			$readmes = array_intersect( $this->response['contents']['files'], $readmes );
