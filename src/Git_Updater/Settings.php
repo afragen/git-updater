@@ -651,12 +651,12 @@ class Settings {
 			echo '<p>' . esc_html__( 'The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories.', 'git-updater' ) . '</p>';
 
 			foreach ( $plugins as $plugin ) {
-				if ( in_array( $plugin->file, $overrides, true ) ) {
+				if ( in_array( $plugin->file, $overrides, true ) && isset( $plugin->name ) ) {
 					echo '<p>' . wp_kses_post( $dashicon_plugin . $plugin->name ) . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
-				if ( in_array( $theme->slug, $overrides, true ) ) {
+				if ( in_array( $theme->slug, $overrides, true ) && isset( $theme->name ) ) {
 					echo '<p>' . wp_kses_post( $dashicon_theme . $theme->name ) . '</p>';
 				}
 			}
