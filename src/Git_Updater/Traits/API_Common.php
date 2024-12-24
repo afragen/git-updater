@@ -163,13 +163,19 @@ trait API_Common {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$response   = $this->response['changes'] ?? false;
 
+		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
+			$changelogs = array_intersect( $this->response['contents']['files'], $changelogs );
+		}
+
 		if ( ! $response ) {
 			self::$method = 'changes';
 			foreach ( $changelogs as $changelog ) {
 				$new_request = str_replace( ':changelog', $changelog, $request );
 				$response    = $this->api( $new_request );
 
-				if ( ! isset( $response->message ) ) {
+				$error = isset( $response->message );
+				$error = isset( $response->error ) ? true : $error;
+				if ( ! $error ) {
 					break;
 				}
 			}
@@ -206,8 +212,11 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		$readmes  = [ 'readme.txt', 'readme.md' ];
+		$readmes  = [ 'readme.txt', 'readme.md', 'README.md' ];
 		$response = $this->response['readme'] ?? false;
+		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
+			$readmes = array_intersect( $this->response['contents']['files'], $readmes );
+		}
 
 		if ( ! $response ) {
 			self::$method = 'readme';
@@ -216,11 +225,12 @@ trait API_Common {
 				$new_request = str_replace( ':readme', $readme, $request );
 				$response    = $this->api( $new_request );
 
-				if ( ! isset( $response->message ) ) {
+				$error = isset( $response->message );
+				$error = isset( $response->error ) ? true : $error;
+				if ( ! $error ) {
 					break;
 				}
 			}
-
 			$response = $this->decode_response( $git, $response );
 
 			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
@@ -286,6 +296,9 @@ trait API_Common {
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets   = [ '.wordpress-org', 'assets' ];
 		$response = $this->response['assets'] ?? false;
+		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
+			$assets = array_intersect( $this->response['contents']['dirs'], $assets );
+		}
 
 		if ( ! $response ) {
 			self::$method = 'assets';
@@ -299,16 +312,18 @@ trait API_Common {
 				}
 			}
 
-			if ( $response ) {
-				$response = $this->parse_asset_dir_response( $response );
+			$error = isset( $response->message );
+			$error = isset( $response->error ) ? true : $error;
+			$error = ! is_array( $response ) ? true : $error;
+			$error = is_wp_error( $response ) ? true : $error;
 
-				if ( ! is_array( $response ) || is_wp_error( $response ) ) {
-					$response          = new \stdClass();
-					$response->message = 'No assets found';
-				}
-
-				$this->set_repo_cache( 'assets', $response );
+			if ( $error ) {
+				$response          = new \stdClass();
+				$response->message = 'No assets found';
 			}
+
+			$response = $this->parse_asset_dir_response( $response );
+			$this->set_repo_cache( 'assets', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -399,5 +414,35 @@ trait API_Common {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Read the root contents of the repo.
+	 *
+	 * Only for GitHub and Gitea.
+	 *
+	 * @param string $git     Name of API, eg 'github'.
+	 * @param string $request API request.
+	 *
+	 * @return bool
+	 */
+	final public function get_remote_api_contents( $git, $request ) {
+		$response = $this->response['contents'] ?? false;
+
+		if ( ! $response ) {
+			self::$method = 'contents';
+			$response     = $this->api( $request );
+
+			if ( $response ) {
+				$response = $this->parse_contents_response( $response );
+				$this->set_repo_cache( 'contents', $response );
+			}
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

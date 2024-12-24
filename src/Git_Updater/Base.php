@@ -346,6 +346,9 @@ class Base {
 
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
+				if ( in_array( $repo->git, [ 'github','gitea' ], true ) ) {
+					$repo_api->get_repo_contents();
+				}
 				$repo_api->get_remote_readme();
 				$repo_api->get_remote_changes( '' );
 				$repo_api->get_repo_meta();
