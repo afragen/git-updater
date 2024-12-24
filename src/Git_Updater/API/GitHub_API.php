@@ -190,6 +190,7 @@ class GitHub_API extends API implements API_Interface {
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
+			case 'assets':
 			case 'changes':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
@@ -385,7 +386,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote root files/dirs.
 	 *
-	 * @param \stdClass|array $response  Response from API call.
+	 * @param \stdClass|array $response Response from API call.
 	 *
 	 * @return array
 	 */
