@@ -495,7 +495,7 @@ class Settings {
 			}
 
 			$setting_field['id']    = $token->slug;
-			$setting_field['title'] = $type . esc_html( $token->name );
+			$setting_field['title'] = isset( $token->name ) ? $type . esc_html( $token->name ) : $type . esc_html__( 'Name not available', 'git-updater' );
 
 			/**
 			 * Filter repo settings fields.
@@ -912,7 +912,7 @@ class Settings {
 					'slug'    => $e->slug,
 					'file'    => $e->file ?? $e->slug,
 					'branch'  => $e->branch,
-					'name'    => $e->name,
+					'name'    => $e->name ?? esc_attr__( 'Name not available', 'git-updater' ),
 					'private' => $e->is_private ?? false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => $e->dot_org ?? false,
