@@ -216,6 +216,7 @@ trait API_Common {
 		$response = $this->response['readme'] ?? false;
 		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			$readmes = array_intersect( $this->response['contents']['files'], $readmes );
+			rsort( $readmes );
 		}
 
 		if ( ! $response ) {
