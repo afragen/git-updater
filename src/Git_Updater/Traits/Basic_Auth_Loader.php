@@ -206,6 +206,12 @@ trait Basic_Auth_Loader {
 					$slug = $key;
 					break;
 				}
+				if ( isset( $this->type->gist_id ) ) {
+					if ( $key === $this->type->gist_id ) {
+						$slug = $this->type->slug;
+						break;
+					}
+				}
 			}
 		}
 
