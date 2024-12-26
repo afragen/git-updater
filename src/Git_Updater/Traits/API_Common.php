@@ -155,6 +155,7 @@ trait API_Common {
 	 * Read the remote CHANGES.md file.
 	 *
 	 * @param string $git     Name of API, eg 'github'.
+	 * @param string $changes Name of changelog file - deprecated.
 	 * @param string $request API request.
 	 *
 	 * @return bool
