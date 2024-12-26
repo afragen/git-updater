@@ -69,7 +69,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'github', '/repos/:owner/:repo/contents/:changelog' );
+		return $this->get_remote_api_changes( 'github', $changes, '/repos/:owner/:repo/contents/:changelog' );
 	}
 
 	/**

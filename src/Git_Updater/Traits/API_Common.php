@@ -159,7 +159,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	final public function get_remote_api_changes( $git, $request ) {
+	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$response   = $this->response['changes'] ?? false;
 
