@@ -170,13 +170,12 @@ class Theme {
 			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
-			$repo_uri = $theme[ $key ];
 
 			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
 			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'theme' );
 
 			if ( $repo_parts['bool'] ) {
-				$header = $this->parse_header_uri( $repo_uri );
+				$header = $this->parse_header_uri( $theme[ $key ] );
 			}
 
 			$header         = $this->parse_extra_headers( $header, $theme, $header_parts );

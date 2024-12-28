@@ -154,7 +154,6 @@ class Plugin {
 			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
-			$repo_uri = $plugin[ $key ];
 
 			$header_parts = explode( ' ', self::$extra_headers[ $key ] );
 			$repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );
