@@ -201,11 +201,6 @@ class Plugin {
 			}
 			$git_plugin['broken'] = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
-			if ( isset( $git_plugin['local_path'] ) ) {
-				$content_dir_regex = '/\/' . basename( WP_CONTENT_DIR ) . '.*/';
-				preg_match( $content_dir_regex, $git_plugin['local_path'], $matches );
-			}
-
 			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
 			$git_plugin['banners']          = [];
 
