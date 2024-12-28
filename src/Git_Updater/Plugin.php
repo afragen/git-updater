@@ -182,7 +182,6 @@ class Plugin {
 			$git_plugin['owner']          = $header['owner'];
 			$git_plugin['slug']           = $header['repo'];
 			$git_plugin['file']           = $slug;
-
 			$git_plugin['branch']         = $branch;
 			$git_plugin['primary_branch'] = $header['primary_branch'];
 			$git_plugin['ci_job']         = $header['ci_job'];
