@@ -190,32 +190,35 @@ class Theme {
 			}
 			$branch = self::$options[ $current_branch ] ?? $header['primary_branch'];
 
-			$git_theme['type']                    = 'theme';
-			$git_theme['git']                     = $repo_parts['git_server'];
-			$git_theme['uri']                     = "{$header['base_uri']}/{$header['owner_repo']}";
-			$git_theme['enterprise']              = $header['enterprise_uri'];
-			$git_theme['enterprise_api']          = $header['enterprise_api'];
-			$git_theme['owner']                   = $header['owner'];
-			$git_theme['slug']                    = $header['repo'];
-			$git_theme['file']                    = "{$header['repo']}/style.css";
-			$git_theme['name']                    = $theme['Name'];
-			$git_theme['theme_uri']               = $theme['ThemeURI'];
-			$git_theme['homepage']                = $theme['ThemeURI'];
-			$git_theme['author']                  = $theme['Author'];
-			$git_theme['local_version']           = strtolower( $theme['Version'] );
-			$git_theme['sections']['description'] = $theme['Description'];
-			$git_theme['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
-			$git_theme['branch']                  = $branch;
-			$git_theme['primary_branch']          = $header['primary_branch'];
-			$git_theme['languages']               = $header['languages'];
-			$git_theme['ci_job']                  = $header['ci_job'];
-			$git_theme['release_asset']           = $header['release_asset'];
-			$git_theme['broken']                  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
-			$git_theme['icons']                   = [];
-			$git_theme['banners']                 = [];
+			$git_theme['type']           = 'theme';
+			$git_theme['git']            = $repo_parts['git_server'];
+			$git_theme['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
+			$git_theme['enterprise']     = $header['enterprise_uri'];
+			$git_theme['enterprise_api'] = $header['enterprise_api'];
+			$git_theme['owner']          = $header['owner'];
+			$git_theme['slug']           = $header['repo'];
+			$git_theme['file']           = "{$header['repo']}/style.css";
+			$git_theme['branch']         = $branch;
+			$git_theme['primary_branch'] = $header['primary_branch'];
+			$git_theme['languages']      = $header['languages'];
+			$git_theme['ci_job']         = $header['ci_job'];
+			$git_theme['release_asset']  = $header['release_asset'];
+
+			if ( isset( $theme['Name'] ) ) {
+				$git_theme['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
+				$git_theme['local_version']           = strtolower( $theme['Version'] );
+				$git_theme['author']                  = $theme['Author'];
+				$git_theme['name']                    = $theme['Name'];
+				$git_theme['homepage']                = $theme['ThemeURI'];
+				$git_theme['sections']['description'] = $theme['Description'];
+			}
+
+			$git_theme['broken']  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
+			$git_theme['icons']   = [];
+			$git_theme['banners'] = [];
 
 			// Fix branch for .git VCS.
-			if ( file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
+			if ( isset( $git_theme['local_path'] ) && file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
 				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
 				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
 			}
