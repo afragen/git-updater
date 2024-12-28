@@ -198,8 +198,8 @@ class Plugin {
 				$git_plugin['sections']['description'] = $plugin['Description'];
 
 			}
-			$git_plugin['broken'] = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 
+			$git_plugin['broken']           = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
 			$git_plugin['icons']['default'] = "https://s.w.org/plugins/geopattern-icon/{$git_plugin['slug']}.svg";
 			$git_plugin['banners']          = [];
 
