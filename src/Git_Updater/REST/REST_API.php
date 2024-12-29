@@ -170,15 +170,30 @@ class REST_API {
 			self::$namespace,
 			'flush-repo-cache',
 			[
-				'show_in_index'       => true,
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'flush_repo_cache' ],
-				'permission_callback' => '__return_true',
-				'args'                => [
-					'slug' => [
-						'default'           => false,
-						'required'          => true,
-						'validate_callback' => 'sanitize_title_with_dashes',
+				[
+					'show_in_index'       => true,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'flush_repo_cache' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'default'           => false,
+							'required'          => true,
+							'validate_callback' => 'sanitize_title_with_dashes',
+						],
+					],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'flush_repo_cache' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'default'           => false,
+							'required'          => true,
+							'validate_callback' => 'sanitize_title_with_dashes',
+						],
 					],
 				],
 			]
