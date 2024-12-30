@@ -118,7 +118,7 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Return list of files at GitHub repo root.
+	 * Return list of files at repo root.
 	 *
 	 * @return array
 	 */
@@ -423,7 +423,9 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		foreach ( $response as $asset ) {
-			$assets[ $asset->name ] = $asset->download_url;
+			if ( 'file' === $asset->type ) {
+				$assets[ $asset->name ] = $asset->download_url;
+			}
 		}
 
 		return $assets;
