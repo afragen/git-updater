@@ -163,10 +163,7 @@ trait API_Common {
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
 		$response   = $this->response['changes'] ?? false;
-
-		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
-			$changelogs = array_intersect( $this->response['contents']['files'], $changelogs );
-		}
+		$changelogs = array_intersect( $this->response['contents']['files'], $changelogs );
 
 		if ( ! $response ) {
 			self::$method = 'changes';
@@ -215,10 +212,8 @@ trait API_Common {
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
 		$response = $this->response['readme'] ?? false;
-		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
-			$readmes = array_intersect( $this->response['contents']['files'], $readmes );
-			rsort( $readmes ); // Try readme.txt first.
-		}
+		$readmes  = array_intersect( $this->response['contents']['files'], $readmes );
+		rsort( $readmes ); // Try readme.txt first.
 
 		if ( ! $response ) {
 			self::$method = 'readme';
@@ -298,9 +293,7 @@ trait API_Common {
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets   = [ '.wordpress-org', 'assets' ];
 		$response = $this->response['assets'] ?? false;
-		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
-			$assets = array_intersect( $this->response['contents']['dirs'], $assets );
-		}
+		$assets   = array_intersect( $this->response['contents']['dirs'], $assets );
 
 		if ( ! $response ) {
 			self::$method = 'assets';
