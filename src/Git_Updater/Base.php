@@ -433,8 +433,7 @@ class Base {
 	/**
 	 * Add assets from remote repo.
 	 *
-	 * @param GitHub_API $repo API object.
-	 * // TODO: Make work with Bitbucket, GitLab, Gitea.
+	 * @param GitHub_API|Bitbucket_API|GitLab_API|Gitea_API $repo API object.
 	 *
 	 * @return void
 	 */
