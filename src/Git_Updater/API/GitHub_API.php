@@ -58,7 +58,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( '/repos/:owner/:repo/tags' );
+		return $this->get_remote_api_tag( 'github', '/repos/:owner/:repo/tags' );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( '/repos/:owner/:repo' );
+		return $this->get_remote_api_repo_meta( 'github', '/repos/:owner/:repo' );
 	}
 
 	/**

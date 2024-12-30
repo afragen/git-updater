@@ -118,11 +118,12 @@ trait API_Common {
 	/**
 	 * Get remote info for tags.
 	 *
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	final public function get_remote_api_tag( $request ) {
+	final public function get_remote_api_tag( $git, $request ) {
 		$repo_type = $this->return_repo_type();
 		$response  = $this->response['tags'] ?? false;
 
@@ -255,11 +256,12 @@ trait API_Common {
 	/**
 	 * Read the repository meta from API.
 	 *
+	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
 	 * @return bool
 	 */
-	final public function get_remote_api_repo_meta( $request ) {
+	final public function get_remote_api_repo_meta( $git, $request ) {
 		$response = $this->response['meta'] ?? false;
 
 		if ( ! $response ) {
