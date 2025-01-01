@@ -416,8 +416,6 @@ trait API_Common {
 	/**
 	 * Read the root contents of the repo.
 	 *
-	 * Only for GitHub and Gitea.
-	 *
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
