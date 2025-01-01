@@ -410,25 +410,6 @@ class Base {
 	}
 
 	/**
-	 * Get filename of changelog and return.
-	 *
-	 * @param \stdClass $repo_api API object.
-	 *
-	 * @return bool|string
-	 */
-	public function get_changelog_filename( $repo_api ) {
-		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
-		$changes    = array_intersect( (array) $repo_api->response['contents'], $changelogs );
-		$changes    = array_pop( $changes );
-
-		if ( ! empty( $changes ) ) {
-			return $changes;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Add assets from remote repo.
 	 *
 	 * @param GitHub_API|Bitbucket_API|GitLab_API|Gitea_API $repo API object.

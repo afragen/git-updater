@@ -748,46 +748,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Set readme and changelog data when repo set to not check API.
-	 * Get data from local files.
-	 *
-	 * @param \stdClass|bool $response Plugin API response.
-	 * @param \stdClass      $repo Repo object.
-	 *
-	 * @return \stdClass
-	 */
-	final public function set_no_api_check_readme_changes( $response, $repo ) {
-		if ( ( $response || $repo ) && isset( $repo->git ) && ! isset( $repo->remote_version ) ) {
-			$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
-
-			$changelog_file = $this->base->get_changelog_filename( $repo );
-			$changelog      = $changelog_file ? $repo_api->get_local_info( $repo, $changelog_file ) : false;
-			if ( $changelog ) {
-				$parser                      = new \Parsedown();
-				$changes                     = $parser->text( $changelog );
-				$repo->sections['changelog'] = $changes;
-			}
-
-			$readme = $repo_api->get_local_info( $repo, 'readme.txt' );
-			if ( $readme ) {
-				$parser = new Readme_Parser( $readme );
-				$readme = $parser->parse_data();
-				$repo_api->set_readme_info( $readme );
-			}
-
-			$repo_requires      = $this->get_repo_requirements( $repo );
-			$repo->requires     = empty( $repo->requires ) ? $repo_requires['RequiresWP'] : $repo->requires;
-			$repo->requires_php = empty( $repo->requires_php ) ? $repo_requires['RequiresPHP'] : $repo->requires_php;
-			$repo->version      = $repo->local_version;
-
-			$response_arr = array_merge( (array) $response, (array) $repo );
-			$response     = (object) $response_arr;
-		}
-
-		return $response;
-	}
-
-	/**
 	 * Get WP and PHP requirements from main plugin/theme file.
 	 *
 	 * @param \stdClass $repo Repository object.

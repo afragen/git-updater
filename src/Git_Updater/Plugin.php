@@ -292,7 +292,6 @@ class Plugin {
 		}
 
 		$plugin = isset( $response->slug, $this->config[ $response->slug ] ) ? $this->config[ $response->slug ] : false;
-		$result = $this->set_no_api_check_readme_changes( $result, $plugin );
 
 		// Skip if waiting for background update.
 		if ( $this->waiting_for_background_update( $plugin ) ) {
