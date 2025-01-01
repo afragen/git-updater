@@ -513,7 +513,6 @@ class API {
 			$this->type->name                    = $response['Name'];
 			$this->type->local_version           = strtolower( $response['Version'] );
 			$this->type->author                  = $response['Author'];
-			$this->type->name                    = $response['Name'];
 			$this->type->homepage                = isset( $response['PluginURI'] ) ? $response['PluginURI'] : '';
 			$this->type->homepage                = isset( $response['ThemeURI'] ) ? $response['ThemeURI'] : $this->type->homepage;
 			$this->type->sections['description'] = $response['Description'];
