@@ -428,6 +428,11 @@ class GitHub_API extends API implements API_Interface {
 			}
 		}
 
+		if ( empty( $assets ) ) {
+			$assets['message'] = 'No assets found';
+			$assets            = (object) $assets;
+		}
+
 		return $assets;
 	}
 
