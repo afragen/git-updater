@@ -495,7 +495,7 @@ class Settings {
 			}
 
 			$setting_field['id']    = $token->slug;
-			$setting_field['title'] = $type . esc_html( $token->name );
+			$setting_field['title'] = isset( $token->name ) ? $type . esc_html( $token->name ) : $type . esc_html__( 'Name not available', 'git-updater' );
 
 			/**
 			 * Filter repo settings fields.
@@ -651,12 +651,12 @@ class Settings {
 			echo '<p>' . esc_html__( 'The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories.', 'git-updater' ) . '</p>';
 
 			foreach ( $plugins as $plugin ) {
-				if ( in_array( $plugin->file, $overrides, true ) ) {
+				if ( in_array( $plugin->file, $overrides, true ) && isset( $plugin->name ) ) {
 					echo '<p>' . wp_kses_post( $dashicon_plugin . $plugin->name ) . '</p>';
 				}
 			}
 			foreach ( $themes as $theme ) {
-				if ( in_array( $theme->slug, $overrides, true ) ) {
+				if ( in_array( $theme->slug, $overrides, true ) && isset( $theme->name ) ) {
 					echo '<p>' . wp_kses_post( $dashicon_theme . $theme->name ) . '</p>';
 				}
 			}
@@ -912,7 +912,7 @@ class Settings {
 					'slug'    => $e->slug,
 					'file'    => $e->file ?? $e->slug,
 					'branch'  => $e->branch,
-					'name'    => $e->name,
+					'name'    => $e->name ?? esc_attr__( 'Name not available', 'git-updater' ),
 					'private' => $e->is_private ?? false,
 					'broken'  => ! isset( $e->remote_version ) || '0.0.0' === $e->remote_version,
 					'dot_org' => $e->dot_org ?? false,

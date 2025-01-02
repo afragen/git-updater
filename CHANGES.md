@@ -1,4 +1,9 @@
 #### [unreleased]
+* add API get for repo root contents for efficiency
+* add feature to virtually add repos via Additions tab to server REST update-api endpoint
+* switch to getting most data via API calls and not from locally installed files
+* add REST endpoint to individually flush repo cache
+* fix `Basic_Auth_Loader::get_slug_for_credentials()` to get slug for gist
 
 #### 12.8.0 / 2024-12-21
 * update GitHub release asset parsing
