@@ -442,7 +442,6 @@ class REST_API {
 			&& ( $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) )
 		) {
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
-			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
 		}
 
 		if ( $download && $repo_data->release_asset ) {
@@ -455,6 +454,10 @@ class REST_API {
 				$_REQUEST['override']           = true;
 				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
 			}
+		}
+		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+		if ( empty( $auth_header['headers'] ) ) {
+			unset( $repo_api_data['auth_header'] );
 		}
 
 		return $repo_api_data;
