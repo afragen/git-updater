@@ -162,7 +162,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
-		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
+		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
 		$response   = $this->response['changes'] ?? false;
 		$changelogs = array_intersect( $this->response['contents']['files'], $changelogs );
 
