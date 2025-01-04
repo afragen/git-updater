@@ -447,6 +447,7 @@ class REST_API {
 
 		if ( $download && $repo_data->release_asset ) {
 			if ( isset( $repo_cache['release_asset_download'] )
+				&& ! apply_filters( 'gu_github_release_asset_redirect', false, $repo_cache )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_download'];
