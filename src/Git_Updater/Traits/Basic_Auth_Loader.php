@@ -269,7 +269,7 @@ trait Basic_Auth_Loader {
 	 */
 	final public function unset_release_asset_auth( $args, $url ) {
 		$releases            = false;
-		$release_asset_parts = [ 's3.amazonaws.com', 'objects.githubusercontent.com', 'X-Amz-Credential' ];
+		$release_asset_parts = [ 's3.amazonaws.com', 'objects.githubusercontent.com', 'X-Amz-' ];
 		foreach ( $release_asset_parts as $part ) {
 			if ( str_contains( $url, $part ) ) {
 				$releases = true;
