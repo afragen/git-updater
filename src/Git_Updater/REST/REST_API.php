@@ -455,6 +455,9 @@ class REST_API {
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_download'];
+				$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
+				$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+				unset($repo_api_data['auth_header']['headers']['Authorization']);
 			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
 				$_REQUEST['override']           = true;
 				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
