@@ -402,7 +402,7 @@ class REST_API {
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
-		if ( ! is_object( $repo_data ) ) {
+		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
