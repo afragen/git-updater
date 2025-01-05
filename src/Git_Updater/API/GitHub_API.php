@@ -348,10 +348,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return;
 		}
-		if ( ! apply_filters( 'gu_github_release_asset_redirect', false, $this->response ) ) {
-			if ( property_exists( $response, 'browser_download_url' ) ) {
-				$this->set_repo_cache( 'release_asset_download', $response->browser_download_url );
-			}
+		if ( property_exists( $response, 'url' ) ) {
+			$this->set_repo_cache( 'release_asset_download', $response->url );
 		}
 	}
 

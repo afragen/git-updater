@@ -39,6 +39,7 @@ trait Basic_Auth_Loader {
 		if ( null !== $args['filename'] ) {
 			$args = array_merge( $args, $this->add_auth_header( $args, $url ) );
 			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
+			$args = array_merge( $args, $this->add_accept_header( $args, $url ) );
 		}
 		remove_filter( 'http_request_args', [ $this, 'download_package' ] );
 
@@ -63,6 +64,7 @@ trait Basic_Auth_Loader {
 		if ( null !== $credentials['token'] ) {
 			if ( 'github' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+				$args['headers']['github']        = $credentials['slug'];
 			}
 
 			/**
@@ -133,6 +135,7 @@ trait Basic_Auth_Loader {
 			$credentials['isset']      = true;
 			$credentials['token']      = $token ?? null;
 			$credentials['enterprise'] = ! in_array( $headers['host'], [ 'github.com', 'api.github.com' ], true );
+			$credentials['slug']       = $slug;
 		}
 
 		// Filter hook args.
@@ -279,6 +282,25 @@ trait Basic_Auth_Loader {
 
 		if ( $releases ) {
 			unset( $args['headers']['Authorization'] );
+		}
+
+		return $args;
+	}
+
+	final public function add_accept_header( $args, $url ) {
+		$repo_cache = [];
+		foreach ( $args['headers'] as $key => $value ) {
+			if ( 'Authorization' === $key ) {
+				continue;
+			}
+			if ( in_array( $key, [ 'github','gist','bitbucket','gitlab','gitea' ] ) ) {
+				$repo_cache = $this->get_repo_cache( $value );
+				unset( $args['headers'][ $key ] );
+			}
+		}
+		if ( isset( $repo_cache['release_asset_download'] ) ) {
+			$octet_stream    = [ 'Accept' => 'application/octet-stream' ];
+			$args['headers'] = array_merge( $args['headers'], $octet_stream );
 		}
 
 		return $args;
