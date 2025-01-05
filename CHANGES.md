@@ -4,8 +4,8 @@
 * switch to getting most data via API calls and not from locally installed files
 * add REST endpoint to individually flush repo cache
 * fix `Basic_Auth_Loader::get_slug_for_credentials()` to get slug for gist
-* add filter `gu_github_release_asset_redirect` to aid in switching to redirected release asset download link
 * update `$release_asset_parts` in `Basic_Auth_Loader::unset_release_asset_auth()` for AWS download link
+* improved release asset handling
 
 #### 12.8.0 / 2024-12-21
 * update GitHub release asset parsing
