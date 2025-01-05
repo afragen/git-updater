@@ -39,7 +39,7 @@ trait Basic_Auth_Loader {
 		if ( null !== $args['filename'] ) {
 			$args = array_merge( $args, $this->add_auth_header( $args, $url ) );
 			$args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
-			$args = array_merge( $args, $this->add_accept_header( $args, $url ) );
+			$args = array_merge( $args, $this->add_accept_header( $args ) );
 		}
 		remove_filter( 'http_request_args', [ $this, 'download_package' ] );
 
@@ -287,13 +287,20 @@ trait Basic_Auth_Loader {
 		return $args;
 	}
 
-	final public function add_accept_header( $args, $url ) {
+	/**
+	 * Add Accept HTTP header.
+	 *
+	 * @param array $args The URL arguments passed.
+	 *
+	 * @return array $args
+	 */
+	final public function add_accept_header( $args ) {
 		$repo_cache = [];
 		foreach ( $args['headers'] as $key => $value ) {
 			if ( 'Authorization' === $key ) {
 				continue;
 			}
-			if ( in_array( $key, [ 'github','gist','bitbucket','gitlab','gitea' ] ) ) {
+			if ( in_array( $key, [ 'github','gist','bitbucket','gitlab','gitea' ], true ) ) {
 				$repo_cache = $this->get_repo_cache( $value );
 				unset( $args['headers'][ $key ] );
 			}
