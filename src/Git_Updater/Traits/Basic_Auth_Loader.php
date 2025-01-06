@@ -297,9 +297,6 @@ trait Basic_Auth_Loader {
 	final public function add_accept_header( $args ) {
 		$repo_cache = [];
 		foreach ( $args['headers'] as $key => $value ) {
-			if ( 'Authorization' === $key ) {
-				continue;
-			}
 			if ( in_array( $key, [ 'github','gist','bitbucket','gitlab','gitea' ], true ) ) {
 				$repo_cache = $this->get_repo_cache( $value );
 				unset( $args['headers'][ $key ] );
