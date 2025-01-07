@@ -214,7 +214,17 @@ trait API_Common {
 		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
 		$response = $this->response['readme'] ?? false;
 		$readmes  = array_intersect( $this->response['contents']['files'], $readmes );
-		rsort( $readmes ); // Try readme.txt first.
+
+		// Use readme.txt if it exists.
+		$readme_txt = array_filter(
+			$readmes,
+			function ( $readme ) {
+				if ( 'readme.txt' === $readme ) {
+					return $readme;
+				}
+			}
+		);
+		$readmes    = ! empty( $readme_txt ) ? $readme_txt : $readmes;
 
 		if ( ! $response ) {
 			self::$method = 'readme';
