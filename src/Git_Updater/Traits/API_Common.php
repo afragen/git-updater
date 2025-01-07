@@ -224,7 +224,7 @@ trait API_Common {
 				}
 			}
 		);
-		$readmes    = ! empty( $readme_txt ) ? $readme_txt : $readmes;
+		$readmes    = array_unique( array_merge( $readme_txt, $readmes ) );
 
 		if ( ! $response ) {
 			self::$method = 'readme';
