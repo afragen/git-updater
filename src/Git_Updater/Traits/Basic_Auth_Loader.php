@@ -108,6 +108,7 @@ trait Basic_Auth_Loader {
 			'token'         => null,
 			'type'          => null,
 			'enterprise'    => null,
+			'slug'          => null,
 		];
 
 		if ( $credentials['api.wordpress'] ) {
