@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.9.0 / 2025-01-07
 * add API get for repo root contents for efficiency
 * add feature to virtually add repos via Additions tab to server REST update-api endpoint
 * switch to getting most data via API calls and not from locally installed files
