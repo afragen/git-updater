@@ -63,6 +63,6 @@ jobs:
 
       - name: Create pull request
         if: env.CHANGES_DETECTED == 1
-        run: gh pr create --base main --head generate-pot --title "Generate POT - $(date +'%Y-%m-%d')" --body "Automated PR"
+        run: gh pr create --base {{ $github.ref_name }} --head generate-pot --title "Generate POT - $(date +'%Y-%m-%d')" --body "Automated PR"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
