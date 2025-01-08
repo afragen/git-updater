@@ -105,15 +105,30 @@ class REST_API {
 				self::$namespace,
 				$route,
 				[
-					'show_in_index'       => true,
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_api_data' ],
-					'permission_callback' => '__return_true',
-					'args'                => [
-						'slug' => [
-							'default'           => false,
-							'required'          => true,
-							'validate_callback' => 'sanitize_title_with_dashes',
+					[
+						'show_in_index'       => true,
+						'methods'             => \WP_REST_Server::READABLE,
+						'callback'            => [ $this, 'get_api_data' ],
+						'permission_callback' => '__return_true',
+						'args'                => [
+							'slug' => [
+								'default'           => false,
+								'required'          => true,
+								'validate_callback' => 'sanitize_title_with_dashes',
+							],
+						],
+					],
+					[
+						'show_in_index'       => false,
+						'methods'             => \WP_REST_Server::CREATABLE,
+						'callback'            => [ $this, 'get_api_data' ],
+						'permission_callback' => '__return_true',
+						'args'                => [
+							'slug' => [
+								'default'           => false,
+								'required'          => true,
+								'validate_callback' => 'sanitize_title_with_dashes',
+							],
 						],
 					],
 				]
@@ -150,6 +165,39 @@ class REST_API {
 				'default' => false,
 			],
 		];
+
+		register_rest_route(
+			self::$namespace,
+			'flush-repo-cache',
+			[
+				[
+					'show_in_index'       => true,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'flush_repo_cache' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'default'           => false,
+							'required'          => true,
+							'validate_callback' => 'sanitize_title_with_dashes',
+						],
+					],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'flush_repo_cache' ],
+					'permission_callback' => '__return_true',
+					'args'                => [
+						'slug' => [
+							'default'           => false,
+							'required'          => true,
+							'validate_callback' => 'sanitize_title_with_dashes',
+						],
+					],
+				],
+			]
+		);
 
 		register_rest_route(
 			self::$namespace,
@@ -354,7 +402,7 @@ class REST_API {
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
-		if ( ! is_object( $repo_data ) ) {
+		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
@@ -390,25 +438,64 @@ class REST_API {
 		$repo_cache = $this->get_repo_cache( $slug );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
 
-		if ( $repo_api_data['download_link']
-			&& ( $repo_api_data['is_private'] || in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) )
-		) {
+		// Add HTTP headers.
+		if ( $repo_api_data['download_link'] ) {
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], $repo_api_data['download_link'] );
 			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->unset_release_asset_auth( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
+			$repo_api_data['auth_header'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_accept_header( $repo_api_data['auth_header'], $repo_api_data['download_link'] );
 		}
 
+		// Update release asset download link .
 		if ( $download && $repo_data->release_asset ) {
-			if ( isset( $repo_cache['release_asset_download'] )
+			if ( ( isset( $repo_cache['release_asset_download'] )
+				|| ! isset( $repo_cache['release_asset_redirect'] ) )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_download'];
-			} elseif ( $repo_cache['release_asset'] ) {
+			} elseif ( isset( $repo_cache['release_asset'] ) && $repo_cache['release_asset'] ) {
 				$_REQUEST['override']           = true;
 				$repo_api_data['download_link'] = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->get_release_asset_redirect( $repo_cache['release_asset'], true );
+				unset( $repo_api_data['auth_header'] );
 			}
 		}
 
+		if ( ! $repo_api_data['is_private']
+			&& ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
+		) {
+			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
+		}
+
+		if ( empty( $repo_api_data['auth_header']['headers'] ) ) {
+			unset( $repo_api_data['auth_header'] );
+		}
+
 		return $repo_api_data;
+	}
+
+	/**
+	 * Flush individual repository cache.
+	 *
+	 * @param \WP_REST_Request $request REST API response.
+	 *
+	 * @return \stdClass
+	 */
+	public function flush_repo_cache( $request ) {
+		$slug = $request->get_param( 'slug' );
+		if ( ! $slug ) {
+			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
+		}
+		$flush   = $this->set_repo_cache( $slug, false, $slug );
+		$message = $flush
+			? [
+				'success' => true,
+				$slug     => "Repository cache for $slug has been flushed.",
+			]
+			: [
+				'success' => false,
+				$slug     => 'Repository cache flush failed.',
+			];
+
+		return (object) $message;
 	}
 
 	/**

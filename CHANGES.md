@@ -1,5 +1,14 @@
 #### [unreleased]
 
+#### 12.9.0 / 2025-01-07
+* add API get for repo root contents for efficiency
+* add feature to virtually add repos via Additions tab to server REST update-api endpoint
+* switch to getting most data via API calls and not from locally installed files
+* add REST endpoint to individually flush repo cache
+* fix `Basic_Auth_Loader::get_slug_for_credentials()` to get slug for gist
+* update `$release_asset_parts` in `Basic_Auth_Loader::unset_release_asset_auth()` for AWS download link
+* improved release asset handling
+
 #### 12.8.0 / 2024-12-21
 * update GitHub release asset parsing
 * update `REST_API` for Bitbucket update link

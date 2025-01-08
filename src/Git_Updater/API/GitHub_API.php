@@ -58,18 +58,18 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_remote_tag() {
-		return $this->get_remote_api_tag( '/repos/:owner/:repo/tags' );
+		return $this->get_remote_api_tag( 'github', '/repos/:owner/:repo/tags' );
 	}
 
 	/**
 	 * Read the remote CHANGES.md file.
 	 *
-	 * @param string $changes Changelog filename.
+	 * @param string $changes The changelog filename - deprecated.
 	 *
 	 * @return bool
 	 */
 	public function get_remote_changes( $changes ) {
-		return $this->get_remote_api_changes( 'github', $changes, "/repos/:owner/:repo/contents/{$changes}" );
+		return $this->get_remote_api_changes( 'github', $changes, '/repos/:owner/:repo/contents/:changelog' );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool|void
 	 */
 	public function get_remote_readme() {
-		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/readme.txt' );
+		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/:readme' );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool
 	 */
 	public function get_repo_meta() {
-		return $this->get_remote_api_repo_meta( '/repos/:owner/:repo' );
+		return $this->get_remote_api_repo_meta( 'github', '/repos/:owner/:repo' );
 	}
 
 	/**
@@ -106,6 +106,24 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function get_release_asset() {
 		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+	}
+
+	/**
+	 * Return list of repository assets.
+	 *
+	 * @return array
+	 */
+	public function get_repo_assets() {
+		return $this->get_remote_api_assets( 'github', '/repos/:owner/:repo/contents/:path' );
+	}
+
+	/**
+	 * Return list of files at repo root.
+	 *
+	 * @return array
+	 */
+	public function get_repo_contents() {
+		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );
 	}
 
 	/**
@@ -172,6 +190,7 @@ class GitHub_API extends API implements API_Interface {
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
+			case 'assets':
 			case 'changes':
 				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
 				break;
@@ -329,8 +348,8 @@ class GitHub_API extends API implements API_Interface {
 		if ( $this->validate_response( $response ) ) {
 			return;
 		}
-		if ( property_exists( $response, 'browser_download_url' ) ) {
-			$this->set_repo_cache( 'release_asset_download', $response->browser_download_url );
+		if ( property_exists( $response, 'url' ) ) {
+			$this->set_repo_cache( 'release_asset_download', $response->url );
 		}
 	}
 
@@ -362,6 +381,59 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return [ $tags, $rollback ];
+	}
+
+	/**
+	 * Parse remote root files/dirs.
+	 *
+	 * @param \stdClass|array $response Response from API call.
+	 *
+	 * @return array
+	 */
+	protected function parse_contents_response( $response ) {
+		$files = [];
+		$dirs  = [];
+		foreach ( $response as $content ) {
+			if ( 'file' === $content->type ) {
+				$files[] = $content->name;
+			}
+			if ( 'dir' === $content->type ) {
+				$dirs[] = $content->name;
+			}
+		}
+
+		return [
+			'files' => $files,
+			'dirs'  => $dirs,
+		];
+	}
+
+	/**
+	 * Parse remote assets directory.
+	 *
+	 * @param \stdClass|array $response Response from API call.
+	 *
+	 * @return \stdClass|array
+	 */
+	protected function parse_asset_dir_response( $response ) {
+		$assets = [];
+
+		if ( isset( $response->message ) || is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		foreach ( $response as $asset ) {
+			if ( 'file' === $asset->type ) {
+				$assets[ $asset->name ] = $asset->download_url;
+			}
+		}
+
+		if ( empty( $assets ) ) {
+			$assets['message'] = 'No assets found';
+			$assets            = (object) $assets;
+		}
+
+		return $assets;
 	}
 
 	/**

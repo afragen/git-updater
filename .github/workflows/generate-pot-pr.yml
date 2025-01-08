@@ -1,0 +1,68 @@
+name: Generate POT PR
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  generate-pot:
+    name: Generate POT PR
+    if: github.repository == "${{ github.event.repository.full_name }}"
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+
+      - name: Setup WP-CLI
+        uses: godaddy-wordpress/setup-wp-cli@1
+
+      - name: Configure git user
+        run: |
+          git config --global user.email "andy@thefragens.com"
+          git config --global user.name "Andy Fragen"
+
+      - name: Check if remote branch exists
+        run: echo "REMOTE_BRANCH_EXISTS=$([[ -z $(git ls-remote --heads origin generate-pot) ]] && echo "0" || echo "1")" >> $GITHUB_ENV
+
+      - name: Create branch to base pull request on
+        if: env.REMOTE_BRANCH_EXISTS == 0
+        run: |
+          git checkout -b generate-pot
+
+      - name: Fetch existing branch to add commits to
+        if: env.REMOTE_BRANCH_EXISTS == 1
+        run: |
+          git fetch --all --prune
+          git checkout generate-pot
+          git pull --no-rebase
+
+      - name: Generate POT
+        run: |
+          wp i18n make-pot . "./languages/${{ github.event.repository.name }}.pot" --headers='{"Report-Msgid-Bugs-To":"https://github.com/${{ github.event.repository.full_name }}/issues"}'
+
+      - name: Check if there are changes
+        run: echo "CHANGES_DETECTED=$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")" >> $GITHUB_ENV
+
+      - name: Commit changes
+        if: env.CHANGES_DETECTED == 1
+        run: |
+          git add "./languages/${{ github.event.repository.name }}.pot"
+          git commit -m "Generate POT - $(date +'%Y-%m-%d')"
+          git push origin generate-pot
+
+      - name: Create pull request
+        if: env.CHANGES_DETECTED == 1
+        run: gh pr create --base main --head generate-pot --title "Generate POT - $(date +'%Y-%m-%d')" --body "Automated PR"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

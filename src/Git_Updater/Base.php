@@ -346,14 +346,11 @@ class Base {
 
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
-				if ( ! apply_filters( 'github_updater_run_at_scale', false ) ) {
-					$repo_api->get_repo_meta();
-					$changelog = $this->get_changelog_filename( $repo );
-					if ( $changelog ) {
-						$repo_api->get_remote_changes( $changelog );
-					}
-					$repo_api->get_remote_readme();
-				}
+				$repo_api->get_repo_contents();
+				$repo_api->get_remote_readme();
+				$repo_api->get_remote_changes( '' );
+				$repo_api->get_repo_meta();
+				$repo_api->get_repo_assets();
 				if ( ! empty( self::$options['branch_switch'] ) ) {
 					$repo_api->get_remote_branches();
 				}
@@ -362,12 +359,15 @@ class Base {
 			$repo->download_link = $repo_api->construct_download_link();
 			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
+			$this->add_assets( $repo_api );
 		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'];
 		// Return data if being called from Git Updater REST API.
-		if ( 'Fragen\Git_Updater\REST\REST_API' === $caller ) {
+		if ( 'Fragen\Git_Updater\REST\REST_API' === $caller
+			|| 'Fragen\Git_Updater\Init' === $caller
+		) {
 			return $repo;
 		}
 
@@ -412,29 +412,47 @@ class Base {
 	}
 
 	/**
-	 * Get filename of changelog and return.
+	 * Add assets from remote repo.
 	 *
-	 * @param \stdClass $repo Repo object.
+	 * @param GitHub_API|Bitbucket_API|GitLab_API|Gitea_API $repo API object.
 	 *
-	 * @return bool|string
+	 * @return void
 	 */
-	public function get_changelog_filename( $repo ) {
-		$changelogs  = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md' ];
-		$changes     = null;
-		$local_files = null;
+	public function add_assets( $repo ) {
+		$assets = $repo->response['assets'] ?? false;
 
-		if ( is_dir( $repo->local_path ) ) {
-			$local_files = scandir( $repo->local_path, 0 );
+		if ( ! $assets || is_object( $assets ) ) {
+			return;
 		}
-
-		$changes = array_intersect( (array) $local_files, $changelogs );
-		$changes = array_pop( $changes );
-
-		if ( ! empty( $changes ) ) {
-			return $changes;
+		$banner_sizes = [
+			'low_png'      => 'banner-772x250.png',
+			'low_jpg'      => 'banner-772x250.jpg',
+			'low_png_rtl'  => 'banner-772x250-rtl.png',
+			'low_jpg_rtl'  => 'banner-772x250-rtl.jpg',
+			'high_png'     => 'banner-1544x500.png',
+			'high_jpg'     => 'banner-1544x500.jpg',
+			'high_png_rtl' => 'banner-1544x500-rtl.png',
+			'high_jpg_rtl' => 'banner-1544x500-rtl.jpg',
+		];
+		$icons        = [
+			'svg'    => 'icon.svg',
+			'1x_png' => 'icon-128x128.png',
+			'1x_jpg' => 'icon-128x128.jpg',
+			'2x_png' => 'icon-256x256.png',
+			'2x_jpg' => 'icon-256x256.jpg',
+		];
+		foreach ( $banner_sizes as $key => $size ) {
+			if ( isset( $assets[ $size ] ) ) {
+				$key                         = preg_replace( '/_png|_jpg|_rtl/', '', $key );
+				$repo->type->banners[ $key ] = $assets[ $size ];
+			}
 		}
-
-		return false;
+		foreach ( $icons as $key => $filename ) {
+			if ( isset( $assets[ $filename ] ) ) {
+				$key                       = preg_replace( '/_png|_jpg/', '', $key );
+				$repo->type->icons[ $key ] = $assets[ $filename ];
+			}
+		}
 	}
 
 	/**
