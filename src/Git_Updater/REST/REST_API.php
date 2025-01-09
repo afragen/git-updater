@@ -412,6 +412,7 @@ class REST_API {
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'is_private'        => $repo_data->is_private,
+			'dot_org'           => $repo_data->dot_org,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
