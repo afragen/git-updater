@@ -29,8 +29,8 @@ jobs:
 
       - name: Configure git user
         run: |
-          git config --global user.email "andy@thefragens.com"
-          git config --global user.name "Andy Fragen"
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
 
       - name: Check if remote branch exists
         run: echo "REMOTE_BRANCH_EXISTS=$([[ -z $(git ls-remote --heads origin generate-pot) ]] && echo "0" || echo "1")" >> $GITHUB_ENV
