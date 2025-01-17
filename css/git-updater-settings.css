@@ -48,3 +48,8 @@ div.hide-git-updater-settings {
 .git-updater.plugin-card .desc {
 	margin-right: 0;
 }
+
+.git-updater-addons .plugin-card-bottom .column-rating,
+.git-updater-addons .plugin-card-bottom .column-downloaded {
+	display: none;
+}
