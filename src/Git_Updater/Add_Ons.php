@@ -188,15 +188,14 @@ class Add_Ons {
 
 		$new_source = $source;
 
-		foreach ( self::$addons as $addon ) {
-			if ( str_contains( $source, $addon ) ) {
-				$hook_extra['plugin'] = "{$addon}/{$addon}.php";
-				break;
-			}
-		}
-
 		// Rename plugins.
 		if ( $upgrader instanceof \Plugin_Upgrader ) {
+			foreach ( self::$addons as $addon ) {
+				if ( str_contains( $source, $addon ) ) {
+					$hook_extra['plugin'] = "{$addon}/{$addon}.php";
+					break;
+				}
+			}
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
