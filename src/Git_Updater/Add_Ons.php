@@ -80,6 +80,13 @@ class Add_Ons {
 		if ( 'git_updater_addons' === $tab ) {
 			wp_enqueue_script( 'plugin-install' );
 			wp_enqueue_script( 'updates' );
+			wp_enqueue_script(
+				'ghu-addons',
+				plugin_dir_url( $this->gu_plugin_name ) . '/js/ghu-addons.js',
+				[ 'updates' ],
+				self::get_plugin_version(),
+				[ 'in_footer' => true ]
+			);
 			add_thickbox();
 			do_settings_sections( 'git_updater_addons_settings' );
 		}
