@@ -119,9 +119,9 @@ class Add_Ons {
 		$wp_list_table        = _get_list_table( 'WP_Plugin_Install_List_Table' );
 		$wp_list_table->items = $this->get_addon_api_results();
 
-		echo '</div><form id="plugin-filter" class="git-updater-addons" method="post">';
+		echo '<form id="plugin-filter" class="git-updater-addons" method="post">';
 		$wp_list_table->display();
-		echo '</form';
+		echo '</form>';
 	}
 
 	/**
