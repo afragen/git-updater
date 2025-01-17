@@ -78,6 +78,9 @@ class Add_Ons {
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'git_updater_addons' === $tab ) {
+			wp_enqueue_script( 'plugin-install' );
+			wp_enqueue_script( 'updates' );
+			add_thickbox();
 			do_settings_sections( 'git_updater_addons_settings' );
 		}
 	}
@@ -86,10 +89,6 @@ class Add_Ons {
 	 * Settings for Add Ons.
 	 */
 	public function addons_page_init() {
-		wp_enqueue_script( 'plugin-install' );
-		add_thickbox();
-		wp_enqueue_script( 'updates' );
-
 		register_setting(
 			'git_updater_addons',
 			'git_updater_addons_settings',
