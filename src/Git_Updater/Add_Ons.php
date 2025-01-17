@@ -97,7 +97,7 @@ class Add_Ons {
 
 		add_settings_section(
 			'addons',
-			esc_html__( 'API Add-Ons', 'git-updater' ),
+			'',
 			[ $this, 'insert_cards' ],
 			'git_updater_addons_settings'
 		);
