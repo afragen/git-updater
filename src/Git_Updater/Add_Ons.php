@@ -81,8 +81,8 @@ class Add_Ons {
 			wp_enqueue_script( 'plugin-install' );
 			wp_enqueue_script( 'updates' );
 			wp_enqueue_script(
-				'ghu-addons',
-				plugin_dir_url( $this->gu_plugin_name ) . '/js/ghu-addons.js',
+				'ajax-activate',
+				plugin_dir_url( $this->gu_plugin_name ) . '/js/ajax-activate.js',
 				[ 'updates' ],
 				self::get_plugin_version(),
 				[ 'in_footer' => true ]
