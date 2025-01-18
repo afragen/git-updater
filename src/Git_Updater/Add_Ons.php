@@ -42,7 +42,7 @@ class Add_Ons {
 	 */
 	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'addons_page_init' ] );
-		add_action( 'admin_init', [ $this, 'prevent_redirect_on_modal_activation' ] );
+		add_action( 'install_plugins_pre_plugin-information', [ $this, 'prevent_redirect_on_modal_activation' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 4 );
 
@@ -118,8 +118,6 @@ class Add_Ons {
 	 * @return void
 	 */
 	public function prevent_redirect_on_modal_activation() {
-		global $pagenow;
-
 		if (
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			isset( $_GET['plugin'] ) && in_array( $_GET['plugin'], self::$addons, true )
@@ -143,7 +141,7 @@ class Add_Ons {
 	 * @return array|object The original result or the modified result as an object.
 	 */
 	public function plugins_api( $result, $action, $args ) {
-		if ( in_array( $args->slug, static::$addons, true ) ) {
+		if ( isset( $args->slug ) && in_array( $args->slug, static::$addons, true ) ) {
 			$results = (array) $this->get_addon_api_results();
 
 			if ( isset( $results[ $args->slug ] ) ) {
