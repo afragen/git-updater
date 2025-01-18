@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1e1209b2ecd86579e0a99ada60c17b7d",
+    "content-hash": "a159c3202f8aa219b0002ad2a4b87d71",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -99,66 +99,6 @@
                 "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
             },
             "time": "2024-12-10T23:43:17+00:00"
-        },
-        {
-            "name": "afragen/wp-dependency-installer",
-            "version": "4.3.13",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/afragen/wp-dependency-installer.git",
-                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/6a6366d21710a34f134d747b1ae673daa165b78c",
-                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c",
-                "shasum": ""
-            },
-            "require": {
-                "afragen/wp-dismiss-notice": "*",
-                "php": ">=5.6"
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "wp-dependency-installer.php",
-                    "wp-dependency-installer-skin.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Andy Fragen",
-                    "email": "andy@thefragens.com",
-                    "homepage": "https://thefragens.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Matt Gibbs",
-                    "homepage": "https://facetwp.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Raruto",
-                    "homepage": "https://raruto.github.io",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Library that helps WordPress plugin dependency management.",
-            "support": {
-                "issues": "https://github.com/afragen/wp-dependency-installer/issues",
-                "source": "https://github.com/afragen/wp-dependency-installer"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/afragen",
-                    "type": "github"
-                }
-            ],
-            "time": "2023-05-18T18:49:19+00:00"
         },
         {
             "name": "afragen/wp-dismiss-notice",

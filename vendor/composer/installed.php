@@ -3,7 +3,7 @@
         'name' => 'afragen/git-updater',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '9a1c0556323a008c908ef4d009a075214b33189b',
+        'reference' => '5e3fd847c473c85d980284586009226f5590210d',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'afragen/git-updater' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '9a1c0556323a008c908ef4d009a075214b33189b',
+            'reference' => '5e3fd847c473c85d980284586009226f5590210d',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -39,15 +39,6 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'dev_requirement' => false,
-        ),
-        'afragen/wp-dependency-installer' => array(
-            'pretty_version' => '4.3.13',
-            'version' => '4.3.13.0',
-            'reference' => '6a6366d21710a34f134d747b1ae673daa165b78c',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../afragen/wp-dependency-installer',
-            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'afragen/wp-dismiss-notice' => array(

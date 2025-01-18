@@ -101,69 +101,6 @@
             "install-path": "../afragen/wordpress-plugin-readme-parser"
         },
         {
-            "name": "afragen/wp-dependency-installer",
-            "version": "4.3.13",
-            "version_normalized": "4.3.13.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/afragen/wp-dependency-installer.git",
-                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-dependency-installer/zipball/6a6366d21710a34f134d747b1ae673daa165b78c",
-                "reference": "6a6366d21710a34f134d747b1ae673daa165b78c",
-                "shasum": ""
-            },
-            "require": {
-                "afragen/wp-dismiss-notice": "*",
-                "php": ">=5.6"
-            },
-            "time": "2023-05-18T18:49:19+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "classmap": [
-                    "wp-dependency-installer.php",
-                    "wp-dependency-installer-skin.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Andy Fragen",
-                    "email": "andy@thefragens.com",
-                    "homepage": "https://thefragens.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Matt Gibbs",
-                    "homepage": "https://facetwp.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Raruto",
-                    "homepage": "https://raruto.github.io",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Library that helps WordPress plugin dependency management.",
-            "support": {
-                "issues": "https://github.com/afragen/wp-dependency-installer/issues",
-                "source": "https://github.com/afragen/wp-dependency-installer"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/afragen",
-                    "type": "github"
-                }
-            ],
-            "install-path": "../afragen/wp-dependency-installer"
-        },
-        {
             "name": "afragen/wp-dismiss-notice",
             "version": "0.3.7",
             "version_normalized": "0.3.7.0",

@@ -45,8 +45,6 @@ return array(
     'PHPCSUtils\\Utils\\TextStrings' => $vendorDir . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/TextStrings.php',
     'PHPCSUtils\\Utils\\UseStatements' => $vendorDir . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/UseStatements.php',
     'PHPCSUtils\\Utils\\Variables' => $vendorDir . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/Variables.php',
-    'WP_Dependency_Installer' => $vendorDir . '/afragen/wp-dependency-installer/wp-dependency-installer.php',
-    'WP_Dependency_Installer_Skin' => $vendorDir . '/afragen/wp-dependency-installer/wp-dependency-installer-skin.php',
     'WP_Dismiss_Notice' => $vendorDir . '/afragen/wp-dismiss-notice/wp-dismiss-notice.php',
     'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => $vendorDir . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
 );
