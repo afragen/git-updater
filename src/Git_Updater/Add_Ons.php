@@ -159,35 +159,6 @@ class Add_Ons {
 	}
 
 	/**
-	 * Gets API results for the add-ons.
-	 *
-	 * The results are cached.
-	 *
-	 * @return array An array of API results.
-	 */
-	public function get_addon_api_results() {
-		$api_results = $this->get_repo_cache( 'gu_addon_api_results' );
-
-		if ( false === $api_results ) {
-			$api_results = [];
-			$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
-
-			foreach ( self::$addons as $addon ) {
-				$response = wp_remote_post( "{$api_url}{$addon}" );
-
-				if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
-					continue;
-				}
-
-				$api_results[ $addon ] = json_decode( wp_remote_retrieve_body( $response ), true );
-			}
-			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+24 hours' );
-		}
-
-		return isset( $api_results['timeout'] ) ? $api_results['gu_addon_api_results'] : $api_results;
-	}
-
-	/**
 	 * Correctly rename addon for activation.
 	 *
 	 * @param string                           $source        Path fo $source.
@@ -225,5 +196,55 @@ class Add_Ons {
 		}
 
 		return trailingslashit( $new_source );
+	}
+
+	/**
+	 * Some method to insert cards for API plugin installation.
+	 *
+	 * @return void
+	 */
+	public function insert_cards() {
+		global $tab;
+		$tab = ''; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		if ( ! function_exists( 'wp_get_plugin_action_button' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		}
+
+		$wp_list_table        = _get_list_table( 'WP_Plugin_Install_List_Table' );
+		$wp_list_table->items = $this->get_addon_api_results();
+
+		echo '<form id="plugin-filter" class="git-updater-addons" method="post">';
+		$wp_list_table->display();
+		echo '</form>';
+	}
+
+	/**
+	 * Gets API results for the add-ons.
+	 *
+	 * The results are cached.
+	 *
+	 * @return array An array of API results.
+	 */
+	public function get_addon_api_results() {
+		$api_results = $this->get_repo_cache( 'gu_addon_api_results' );
+
+		if ( false === $api_results ) {
+			$api_results = [];
+			$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
+
+			foreach ( self::$addons as $addon ) {
+				$response = wp_remote_post( "{$api_url}{$addon}" );
+
+				if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
+					continue;
+				}
+
+				$api_results[ $addon ] = json_decode( wp_remote_retrieve_body( $response ), true );
+			}
+			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+24 hours' );
+		}
+
+		return isset( $api_results['timeout'] ) ? $api_results['gu_addon_api_results'] : $api_results;
 	}
 }
