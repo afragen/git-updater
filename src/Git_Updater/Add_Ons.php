@@ -121,12 +121,8 @@ class Add_Ons {
 		global $pagenow;
 
 		if (
-			'plugin-install.php' === $pagenow
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			&& isset( $_GET['tab'], $_GET['plugin'] )
-			&& 'plugin-information' === $_GET['tab']
-			&& in_array( $_GET['plugin'], self::$addons, true )
-			// phpcs:enable
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			isset( $_GET['plugin'] ) && in_array( $_GET['plugin'], self::$addons, true )
 		) {
 			wp_enqueue_script(
 				'ajax-activate',
