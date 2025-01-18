@@ -42,6 +42,7 @@ class Add_Ons {
 	 */
 	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'addons_page_init' ] );
+		add_action( 'admin_init', [ $this, 'prevent_redirect_on_modal_activation' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
 		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 4 );
 
@@ -111,24 +112,30 @@ class Add_Ons {
 	}
 
 	/**
-	 * Some method to insert cards for API plugin installation.
+	 * Prevents redirection when an add-on is activated
+	 * from its plugin information modal.
 	 *
 	 * @return void
 	 */
-	public function insert_cards() {
-		global $tab;
-		$tab = ''; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	public function prevent_redirect_on_modal_activation() {
+		global $pagenow;
 
-		if ( ! function_exists( 'wp_get_plugin_action_button' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		if (
+			'plugin-install.php' === $pagenow
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			&& isset( $_GET['tab'], $_GET['plugin'] )
+			&& 'plugin-information' === $_GET['tab']
+			&& in_array( $_GET['plugin'], self::$addons, true )
+			// phpcs:enable
+		) {
+			wp_enqueue_script(
+				'ajax-activate',
+				plugin_dir_url( $this->gu_plugin_name ) . '/js/ajax-activate.js',
+				[ 'updates' ],
+				self::get_plugin_version(),
+				[ 'in_footer' => true ]
+			);
 		}
-
-		$wp_list_table        = _get_list_table( 'WP_Plugin_Install_List_Table' );
-		$wp_list_table->items = $this->get_addon_api_results();
-
-		echo '<form id="plugin-filter" class="git-updater-addons" method="post">';
-		$wp_list_table->display();
-		echo '</form>';
 	}
 
 	/**

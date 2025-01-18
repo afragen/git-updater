@@ -1,7 +1,10 @@
 (function( $, wp ) {
-	var $pluginFilter = $( "#plugin-filter, #plugin-information-footer" ),
+	var $document     = $( document ),
+		$pluginFilter = $( "#plugin-filter, #plugin-information-footer" ),
 		__            = wp.i18n.__;
 		_x            = wp.i18n._x,
+
+		$document.off( 'click', '#plugin-information-footer .activate-now' );
 
 		$pluginFilter.off( "click" );
 		$pluginFilter.on( "click", ".activate-now", function( event ) {
@@ -74,9 +77,11 @@
 			case 'delete-theme':
 				wp.updates.deleteTheme( job.data );
 				break;
+
 			case 'check_plugin_dependencies':
 				wp.updates.checkPluginDependencies( job.data );
 				break;
+
 			default:
 				break;
 		}
