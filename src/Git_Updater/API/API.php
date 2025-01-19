@@ -502,13 +502,15 @@ class API {
 	 * @param array $response Repo data.
 	 */
 	protected function set_file_info( $response ) {
-		$this->type->transient      = $response;
-		$this->type->remote_version = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
-		$this->type->requires_php   = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
-		$this->type->requires       = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
-		$this->type->requires       = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
-		$this->type->dot_org        = $response['dot_org'];
-		$this->type->primary_branch = ! empty( $response['PrimaryBranch'] ) ? $response['PrimaryBranch'] : $this->type->primary_branch;
+		$this->type->transient        = $response;
+		$this->type->remote_version   = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
+		$this->type->requires_php     = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
+		$this->type->requires         = ! empty( $response['RequiresWP'] ) ? $response['RequiresWP'] : null;
+		$this->type->requires         = ! empty( $response['Requires'] ) ? $response['Requires'] : $this->type->requires;
+		$this->type->dot_org          = $response['dot_org'];
+		$this->type->primary_branch   = ! empty( $response['PrimaryBranch'] ) ? $response['PrimaryBranch'] : $this->type->primary_branch;
+		$this->type->update_uri       = ! empty( $response['UpdateURI'] ) ? $response['UpdateURI'] : null;
+		$this->type->requires_plugins = ! empty( $response['RequiresPlugins'] ) ? explode( ',', $response['RequiresPlugins'] ) : [];
 		if ( ! isset( $this->type->name ) ) {
 			$this->type->name                    = $response['Name'];
 			$this->type->local_version           = strtolower( $response['Version'] );

@@ -420,6 +420,7 @@ class REST_API {
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,
 			'requires_php'      => $repo_data->requires_php,
+			'requires_plugins'  => $repo_data->requires_plugins,
 			'sections'          => $repo_data->sections,
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
 			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 175 ) . '...',
