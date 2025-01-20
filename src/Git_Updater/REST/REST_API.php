@@ -427,6 +427,7 @@ class REST_API {
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',
+			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
 			'last_updated'      => $repo_data->last_updated,
