@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a159c3202f8aa219b0002ad2a4b87d71",
+    "content-hash": "593584a99761e15156ce2ecea04601a5",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -699,7 +699,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4"
+        "php": ">=8.0"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
