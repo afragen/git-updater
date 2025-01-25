@@ -134,6 +134,26 @@ class REST_API {
 				]
 			);
 		}
+		register_rest_route(
+			self::$namespace,
+			'get-additions-data',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_additions_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'get_additions_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+			]
+		);
 
 		$update_args = [
 			'key'        => [
@@ -473,6 +493,15 @@ class REST_API {
 		}
 
 		return $repo_api_data;
+	}
+
+	/**
+	 * Get Additions data.
+	 *
+	 * @return array
+	 */
+	public function get_additions_data() {
+		return get_site_option( 'git_updater_additions', [] );
 	}
 
 	/**

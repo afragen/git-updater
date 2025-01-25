@@ -3,6 +3,7 @@
 * added features by @costdev for AJAXifying
 * added parsing of `Update URI` and `Requires Plugins` headers
 * increase requirements to PHP 8+
+* added REST endpoint to export data from Additions
 
 #### 12.9.0 / 2025-01-07
 * add API get for repo root contents for efficiency
