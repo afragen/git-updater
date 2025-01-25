@@ -467,7 +467,7 @@ class Base {
 	 *
 	 * @return string|\WP_Error
 	 */
-	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
+	public function upgrader_source_selection( string $source, string $remote_source, \Plugin_Upgrader|\Theme_Upgrader $upgrader, $hook_extra = [] ) {
 		global $wp_filesystem;
 
 		$slug            = null;
