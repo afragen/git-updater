@@ -134,6 +134,28 @@ class REST_API {
 				]
 			);
 		}
+
+		register_rest_route(
+			self::$namespace,
+			'update-api-additions',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_additions_api_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'get_additions_api_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+			]
+		);
+
 		register_rest_route(
 			self::$namespace,
 			'get-additions-data',
@@ -493,6 +515,32 @@ class REST_API {
 		}
 
 		return $repo_api_data;
+	}
+
+	/**
+	 * Get Additions plugin|theme API data.
+	 *
+	 * @param \WP_REST_Request $request REST API response.
+	 *
+	 * @return array
+	 */
+	public function get_additions_api_data( \WP_REST_Request $request ) {
+		$api_data   = [];
+		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
+		$additions  = (array) get_site_option( 'git_updater_additions', [] );
+
+		foreach ( $additions as $addition ) {
+			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( array_key_exists( $slug, $gu_tokens ) ) {
+				$request->set_param( 'slug', $slug );
+				$api_data[ $slug ] = $this->get_api_data( $request );
+			}
+		}
+
+		return $api_data;
 	}
 
 	/**
