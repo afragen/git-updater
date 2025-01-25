@@ -102,7 +102,7 @@ class Additions {
 			}
 
 			$addition['PrimaryBranch'] = ! empty( $repo['primary_branch'] ) ? $repo['primary_branch'] : 'master';
-			$addition['ReleaseAsset']  = isset( $repo['release_asset'] ) ? 'true' : null;
+			$addition['ReleaseAsset']  = ! empty( $repo['release_asset'] ) ? true : false;
 
 			$this->add_to_git_updater[ $repo['slug'] ] = array_merge( $additions[ $repo['slug'] ], $addition );
 		}
