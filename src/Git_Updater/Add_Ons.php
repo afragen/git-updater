@@ -28,6 +28,7 @@ class Add_Ons {
 		'git-updater-bitbucket',
 		'git-updater-gitlab',
 		'git-updater-gitea',
+		'git-updater-federation',
 	];
 
 	/**
