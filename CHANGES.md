@@ -6,6 +6,7 @@
 * added REST endpoint to export data from Additions
 * added REST endpoint to export Update API data from Additions
 * update Freemius/wordpress-sdk
+* change 'API Add-Ons' to 'Add-Ons'
 
 #### 12.9.0 / 2025-01-07
 * add API get for repo root contents for efficiency
