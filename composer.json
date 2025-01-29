@@ -40,6 +40,19 @@
     "wp-coding-standards/wpcs": "^3.0.0",
     "mcaskill/composer-exclude-files": "^4.0"
   },
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "freemius/wordpress-sdk",
+        "version": "2.11.0",
+        "dist": {
+          "type": "zip",
+          "url": "/tmp/wordpress-sdk-2.11.0.zip"
+        }
+      }
+    }
+  ],
   "extra": {
     "exclude-from-files": [
       "freemius/wordpress-sdk/start.php"
