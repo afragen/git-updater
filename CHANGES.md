@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.10.0 / 2025-01-29
 * refactor `Add_Ons` to use `plugins-api` REST endpoint and standard plugin card
 * added features by @costdev for AJAXifying
 * added parsing of `Update URI` and `Requires Plugins` headers
