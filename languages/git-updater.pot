@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.9.0\n"
+"Project-Id-Version: Git Updater 12.10.0\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-01-08T04:00:56+00:00\n"
+"POT-Creation-Date: 2025-01-29T21:43:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: git-updater\n"
@@ -33,10 +33,6 @@ msgstr ""
 
 #. Author of the plugin
 #: git-updater.php
-#: src/Git_Updater/Add_Ons.php:61
-#: src/Git_Updater/Add_Ons.php:74
-#: src/Git_Updater/Add_Ons.php:87
-#: src/Git_Updater/Add_Ons.php:100
 msgid "Andy Fragen"
 msgstr ""
 
@@ -107,58 +103,12 @@ msgstr ""
 msgid "Check if a release asset is required."
 msgstr ""
 
-#: src/Git_Updater/Additions/Settings.php:279
+#: src/Git_Updater/Additions/Settings.php:280
 msgid "If there are git repositories that do not natively support Git Updater you can add them here."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:60
-msgid "Git Updater - Gist"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:62
-msgid "Add GitHub Gist hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:73
-msgid "Git Updater - Bitbucket"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:75
-msgid "Add Bitbucket and Bitbucket Server hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:86
-msgid "Git Updater - GitLab"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:88
-msgid "Add GitLab hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:99
-msgid "Git Updater - Gitea"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:101
-msgid "Add Gitea hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:128
-#: src/Git_Updater/Add_Ons.php:188
-msgid "API Add-Ons"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:171
-msgid "Git Updater API plugin installed."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:201
-msgid "Install additional API plugins."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:314
-#: src/Git_Updater/Add_Ons.php:318
-msgid "Install & Activate"
+#: src/Git_Updater/Add_Ons.php:57
+msgid "Add-Ons"
 msgstr ""
 
 #: src/Git_Updater/API/GitHub_API.php:449
@@ -377,7 +327,7 @@ msgid "REST API endpoints for webhook branch resetting begin at: %s"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:148
-#: src/Git_Updater/Settings.php:848
+#: src/Git_Updater/Settings.php:846
 msgid "Settings"
 msgstr ""
 
@@ -416,7 +366,7 @@ msgid "Display `deprecated hook` messaging in debug.log"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:498
-#: src/Git_Updater/Settings.php:915
+#: src/Git_Updater/Settings.php:913
 msgid "Name not available"
 msgstr ""
 
@@ -432,23 +382,23 @@ msgstr ""
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:882
+#: src/Git_Updater/Settings.php:880
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:883
+#: src/Git_Updater/Settings.php:881
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:884
+#: src/Git_Updater/Settings.php:882
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:885
+#: src/Git_Updater/Settings.php:883
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:929
+#: src/Git_Updater/Settings.php:927
 msgid "Installed Plugins and Themes"
 msgstr ""
 
@@ -510,6 +460,6 @@ msgstr ""
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:677
+#: src/Git_Updater/Traits/GU_Trait.php:680
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
