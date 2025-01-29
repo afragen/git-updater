@@ -54,7 +54,7 @@ class Add_Ons {
 	 * Adds Remote Management tab to Settings page.
 	 */
 	public function add_settings_tabs() {
-		$install_tabs = [ 'git_updater_addons' => esc_html__( 'API Add-Ons', 'git-updater' ) ];
+		$install_tabs = [ 'git_updater_addons' => esc_html__( 'Add-Ons', 'git-updater' ) ];
 		add_filter(
 			'gu_add_settings_tabs',
 			function ( $tabs ) use ( $install_tabs ) {
