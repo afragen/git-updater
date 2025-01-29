@@ -125,7 +125,6 @@ class Additions {
 		}
 		if ( $pre_config !== $config ) {
 			update_site_option( 'git_updater_additions', $config );
-
 		}
 	}
 }
