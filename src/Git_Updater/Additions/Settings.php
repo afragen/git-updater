@@ -266,7 +266,8 @@ class Settings {
 		foreach ( (array) $input as $key => $value ) {
 			$new_input[0][ $key ] = 'uri' === $key ? untrailingslashit( esc_url_raw( trim( $value ) ) ) : sanitize_text_field( $value );
 		}
-		$new_input[0]['ID'] = md5( $new_input[0]['slug'] );
+		$new_input[0]['ID']     = md5( $new_input[0]['slug'] );
+		$new_input[0]['source'] = md5( home_url() );
 
 		return $new_input;
 	}

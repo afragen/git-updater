@@ -194,8 +194,14 @@
          * @since  1.0.7
          */
         static function _add_sticky_dismiss_javascript() {
+            $sticky_admin_notice_js_template_name = 'sticky-admin-notice-js.php';
+
+            if ( ! file_exists( fs_get_template_path( $sticky_admin_notice_js_template_name ) ) ) {
+                return;
+            }
+
             $params = array();
-            fs_require_once_template( 'sticky-admin-notice-js.php', $params );
+            fs_require_once_template( $sticky_admin_notice_js_template_name, $params );
         }
 
         private static $_added_sticky_javascript = false;

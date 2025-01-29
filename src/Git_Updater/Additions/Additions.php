@@ -46,6 +46,7 @@ class Additions {
 		}
 
 		$this->add_headers( $config, $repos, $type );
+		$this->add_source( $config );
 
 		return true;
 	}
@@ -102,9 +103,28 @@ class Additions {
 			}
 
 			$addition['PrimaryBranch'] = ! empty( $repo['primary_branch'] ) ? $repo['primary_branch'] : 'master';
-			$addition['ReleaseAsset']  = isset( $repo['release_asset'] ) ? 'true' : null;
+			$addition['ReleaseAsset']  = ! empty( $repo['release_asset'] ) ? true : false;
 
 			$this->add_to_git_updater[ $repo['slug'] ] = array_merge( $additions[ $repo['slug'] ], $addition );
+		}
+	}
+
+	/**
+	 * Add home_url() as element of addition
+	 *
+	 * @param array $config Array of config data.
+	 *
+	 * @return void
+	 */
+	public function add_source( $config ) {
+		$pre_config = $config;
+		foreach ( $config as $key => $addition ) {
+			if ( ! isset( $addition['source'] ) ) {
+				$config[ $key ]['source'] = md5( home_url() );
+			}
+		}
+		if ( $pre_config !== $config ) {
+			update_site_option( 'git_updater_additions', $config );
 		}
 	}
 }

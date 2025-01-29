@@ -72,7 +72,7 @@ class Repo_List_Table extends \WP_List_Table {
 			$option['slug']           = $option['slug'] ?: null;
 			$option['uri']            = $option['uri'] ?: null;
 			$option['primary_branch'] = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
-			$option['release_asset']  = isset( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : null;
+			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 			$options[ $key ]          = $option;
 		}
 		self::$options = (array) $options;
@@ -310,7 +310,7 @@ class Repo_List_Table extends \WP_List_Table {
 		/**
 		 * First, lets decide how many records per page to show.
 		 */
-		$per_page = 5;
+		$per_page = 10;
 
 		/**
 		 * REQUIRED. Now we need to define our column headers. This includes a complete

@@ -521,17 +521,19 @@ trait GU_Trait {
 	 */
 	final public function get_headers( $type ) {
 		$default_plugin_headers = [
-			'Name'        => 'Plugin Name',
-			'PluginURI'   => 'Plugin URI',
-			'Version'     => 'Version',
-			'Description' => 'Description',
-			'Author'      => 'Author',
-			'AuthorURI'   => 'Author URI',
-			'TextDomain'  => 'Text Domain',
-			'DomainPath'  => 'Domain Path',
-			'Network'     => 'Network',
-			'Requires'    => 'Requires at least',
-			'RequiresPHP' => 'Requires PHP',
+			'Name'            => 'Plugin Name',
+			'PluginURI'       => 'Plugin URI',
+			'Version'         => 'Version',
+			'Description'     => 'Description',
+			'Author'          => 'Author',
+			'AuthorURI'       => 'Author URI',
+			'TextDomain'      => 'Text Domain',
+			'DomainPath'      => 'Domain Path',
+			'Network'         => 'Network',
+			'Requires'        => 'Requires at least',
+			'RequiresPHP'     => 'Requires PHP',
+			'UpdateURI'       => 'Update URI',
+			'RequiresPlugins' => 'Requires Plugins',
 		];
 
 		$default_theme_headers = [
@@ -548,6 +550,7 @@ trait GU_Trait {
 			'DomainPath'  => 'Domain Path',
 			'Requires'    => 'Requires at least',
 			'RequiresPHP' => 'Requires PHP',
+			'UpdateURI'   => 'Update URI',
 		];
 
 		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );

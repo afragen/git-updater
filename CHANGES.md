@@ -1,5 +1,15 @@
 #### [unreleased]
 
+#### 12.10.0 / 2025-01-29
+* refactor `Add_Ons` to use `plugins-api` REST endpoint and standard plugin card
+* added features by @costdev for AJAXifying
+* added parsing of `Update URI` and `Requires Plugins` headers
+* increase requirements to PHP 8+
+* added REST endpoint to export data from Additions
+* added REST endpoint to export Update API data from Additions
+* update Freemius/wordpress-sdk
+* change 'API Add-Ons' to 'Add-Ons'
+
 #### 12.9.0 / 2025-01-07
 * add API get for repo root contents for efficiency
 * add feature to virtually add repos via Additions tab to server REST update-api endpoint

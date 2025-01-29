@@ -135,6 +135,48 @@ class REST_API {
 			);
 		}
 
+		register_rest_route(
+			self::$namespace,
+			'update-api-additions',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_additions_api_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'get_additions_api_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+			]
+		);
+
+		register_rest_route(
+			self::$namespace,
+			'get-additions-data',
+			[
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_additions_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+				[
+					'show_in_index'       => false,
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'get_additions_data' ],
+					'permission_callback' => '__return_true',
+					'args'                => [],
+				],
+			]
+		);
+
 		$update_args = [
 			'key'        => [
 				'default'           => false,
@@ -412,6 +454,7 @@ class REST_API {
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'is_private'        => $repo_data->is_private,
+			'dot_org'           => $repo_data->dot_org,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
@@ -419,12 +462,14 @@ class REST_API {
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,
 			'requires_php'      => $repo_data->requires_php,
+			'requires_plugins'  => $repo_data->requires_plugins,
 			'sections'          => $repo_data->sections,
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
 			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 175 ) . '...',
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',
+			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
 			'last_updated'      => $repo_data->last_updated,
@@ -470,6 +515,41 @@ class REST_API {
 		}
 
 		return $repo_api_data;
+	}
+
+	/**
+	 * Get Additions plugin|theme API data.
+	 *
+	 * @param \WP_REST_Request $request REST API response.
+	 *
+	 * @return array
+	 */
+	public function get_additions_api_data( \WP_REST_Request $request ) {
+		$api_data   = [];
+		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
+		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
+		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
+		$additions  = (array) get_site_option( 'git_updater_additions', [] );
+
+		foreach ( $additions as $addition ) {
+			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( array_key_exists( $slug, $gu_tokens ) ) {
+				$request->set_param( 'slug', $slug );
+				$api_data[ $slug ] = $this->get_api_data( $request );
+			}
+		}
+
+		return $api_data;
+	}
+
+	/**
+	 * Get Additions data.
+	 *
+	 * @return array
+	 */
+	public function get_additions_data() {
+		return get_site_option( 'git_updater_additions', [] );
 	}
 
 	/**
