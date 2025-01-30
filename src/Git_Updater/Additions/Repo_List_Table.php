@@ -77,7 +77,7 @@ class Repo_List_Table extends \WP_List_Table {
 			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 			$options[ $key ]          = $option;
 		}
-		self::$options = $this->reduce_additions( (array) $options );
+		self::$options = $this->deduplicate( (array) $options );
 
 		// Set parent defaults.
 		parent::__construct(
@@ -457,13 +457,13 @@ class Repo_List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Reduce $options to unique values.
+	 * Remove duplicate $options to unique values.
 	 *
-	 * @param array $options Array of Addition options.
+	 * @param array $options Array of Additions options.
 	 *
 	 * @return array
 	 */
-	private function reduce_additions( $options ) {
+	private function deduplicate( $options ) {
 		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
 		$list_plugin_addons = isset( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
 		$list_theme_addons  = $this->get_repo_cache( 'git_updater_repository_add_theme' );
@@ -471,6 +471,7 @@ class Repo_List_Table extends \WP_List_Table {
 		$options            = array_merge( $options, $list_plugin_addons, $list_theme_addons );
 		foreach ( array_keys( $options ) as $key ) {
 			unset( $options[ $key ]['source'] );
+			$options[ $key ]['release_asset'] = isset( $options[ $key ]['release_asset'] ) ? $options[ $key ]['release_asset'] : false;
 			ksort( $options[ $key ] );
 		}
 		$options = array_map( 'unserialize', array_unique( array_map( 'serialize', $options ) ) );
