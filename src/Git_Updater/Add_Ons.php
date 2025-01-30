@@ -28,7 +28,7 @@ class Add_Ons {
 		'git-updater-bitbucket',
 		'git-updater-gitlab',
 		'git-updater-gitea',
-		'git-updater-federation',
+		// 'git-updater-federation',
 	];
 
 	/**
@@ -182,7 +182,7 @@ class Add_Ons {
 			}
 		}
 
-		if ( basename( $source ) === $slug ) {
+		if ( ! isset( $slug ) || basename( $source ) === $slug ) {
 			return $source;
 		}
 
@@ -235,9 +235,16 @@ class Add_Ons {
 					continue;
 				}
 
-				$api_results[ $addon ] = json_decode( wp_remote_retrieve_body( $response ), true );
+				$response = json_decode( wp_remote_retrieve_body( $response ), true );
+				if ( isset( $response['error'] ) ) {
+					continue;
+				}
+
+				$api_results[ $addon ] = $response;
 			}
-			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+24 hours' );
+			if ( count( $api_results ) === count( self::$addons ) ) {
+				$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+24 hours' );
+			}
 		}
 
 		return isset( $api_results['timeout'] ) ? $api_results['gu_addon_api_results'] : $api_results;
