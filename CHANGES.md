@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.10.1 / 2025-01-30
 * fix issue with release asset
 * add guard to `Add-Ons`
 * remove `git-updater-federation` from `Add-Ons`
