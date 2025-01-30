@@ -182,7 +182,7 @@ class Add_Ons {
 			}
 		}
 
-		if ( basename( $source ) === $slug ) {
+		if ( ! isset( $slug ) || basename( $source ) === $slug ) {
 			return $source;
 		}
 
