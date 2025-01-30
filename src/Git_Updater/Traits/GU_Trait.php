@@ -643,7 +643,7 @@ trait GU_Trait {
 				}
 			}
 		}
-		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? 'true' === $headers['ReleaseAsset'] : $header['release_asset'];
+		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? true === (bool) $headers['ReleaseAsset'] : $header['release_asset'];
 		$header['primary_branch'] = ! $header['primary_branch'] && ! empty( $headers['PrimaryBranch'] ) ? $headers['PrimaryBranch'] : 'master';
 
 		return $header;

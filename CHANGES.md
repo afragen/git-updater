@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix issue with release asset
 
 #### 12.10.0 / 2025-01-29
 * refactor `Add_Ons` to use `plugins-api` REST endpoint and standard plugin card
