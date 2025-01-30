@@ -68,7 +68,7 @@ add_filter(
 		$config    = get_site_option( 'git_updater_additions', [] );
 		$additions = new Additions();
 		$additions->register( $config, $repos, $type );
-		$additions->add_to_git_updater = array_merge( $additions->add_to_git_updater, (array) $listing );
+		$additions->add_to_git_updater = array_merge( (array) $additions->add_to_git_updater, (array) $listing );
 
 		return $additions->add_to_git_updater;
 	},
