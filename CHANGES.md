@@ -1,14 +1,15 @@
 #### [unreleased]
 * fix issue with release asset
 * add guard to `Add-Ons`
+* remove `git-updater-federation` from `Add-Ons`
 
 #### 12.10.0 / 2025-01-29
 * refactor `Add_Ons` to use `plugins-api` REST endpoint and standard plugin card
 * added features by @costdev for AJAXifying
 * added parsing of `Update URI` and `Requires Plugins` headers
 * increase requirements to PHP 8+
-* added REST endpoint to export data from Additions
-* added REST endpoint to export Update API data from Additions
+* added REST endpoint to export data from `Additions`
+* added REST endpoint to export Update API data from `Additions`
 * update Freemius/wordpress-sdk
 * change 'API Add-Ons' to 'Add-Ons'
 
