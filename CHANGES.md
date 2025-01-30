@@ -1,4 +1,5 @@
 #### [unreleased]
+* update Additons to add additional listings
 
 #### 12.10.1 / 2025-01-30
 * fix issue with release asset

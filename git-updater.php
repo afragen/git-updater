@@ -12,7 +12,7 @@
  * Plugin Name:       Git Updater
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           12.10.1
+ * Version:           12.10.1.1
  * Author:            Andy Fragen
  * License:           MIT
  * Domain Path:       /languages
@@ -68,6 +68,8 @@ add_filter(
 		$config    = get_site_option( 'git_updater_additions', [] );
 		$additions = new Additions();
 		$additions->register( $config, $repos, $type );
+		$additions->add_to_git_updater = array_merge( $additions->add_to_git_updater, (array) $listing );
+
 		return $additions->add_to_git_updater;
 	},
 	10,

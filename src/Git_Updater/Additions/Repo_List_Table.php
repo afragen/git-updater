@@ -29,6 +29,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  * Class Site_List_Table
  */
 class Repo_List_Table extends \WP_List_Table {
+	use \Fragen\Git_Updater\Traits\GU_Trait;
+
 	/**
 	 * Holds site options.
 	 *
@@ -75,7 +77,7 @@ class Repo_List_Table extends \WP_List_Table {
 			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 			$options[ $key ]          = $option;
 		}
-		self::$options = (array) $options;
+		self::$options = $this->reduce_additions( (array) $options );
 
 		// Set parent defaults.
 		parent::__construct(
@@ -452,5 +454,27 @@ class Repo_List_Table extends \WP_List_Table {
 		$this->display();
 		echo '</form>';
 		echo '</div>';
+	}
+
+	/**
+	 * Reduce $options to unique values.
+	 *
+	 * @param array $options Array of Addition options.
+	 *
+	 * @return array
+	 */
+	private function reduce_additions( $options ) {
+		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
+		$list_plugin_addons = isset( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
+		$list_theme_addons  = $this->get_repo_cache( 'git_updater_repository_add_theme' );
+		$list_theme_addons  = isset( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
+		$options            = array_merge( $options, $list_plugin_addons, $list_theme_addons );
+		foreach ( array_keys( $options ) as $key ) {
+			unset( $options[ $key ]['source'] );
+			ksort( $options[ $key ] );
+		}
+		$options = array_map( 'unserialize', array_unique( array_map( 'serialize', $options ) ) );
+
+		return $options;
 	}
 }
