@@ -1,5 +1,6 @@
 #### [unreleased]
 * fix issue with release asset
+* add guard to `Add-Ons`
 
 #### 12.10.0 / 2025-01-29
 * refactor `Add_Ons` to use `plugins-api` REST endpoint and standard plugin card
