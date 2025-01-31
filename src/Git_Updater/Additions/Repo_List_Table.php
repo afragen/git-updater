@@ -74,7 +74,7 @@ class Repo_List_Table extends \WP_List_Table {
 			$option['slug']           = $option['slug'] ?: null;
 			$option['uri']            = $option['uri'] ?: null;
 			$option['primary_branch'] = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
-			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['release_asset']  = ! empty( $option['release_asset'] ) ? (bool) $option['release_asset'] : false;
 			$options[ $key ]          = $option;
 		}
 		self::$options = $this->deduplicate( (array) $options );
@@ -471,10 +471,14 @@ class Repo_List_Table extends \WP_List_Table {
 		$options            = array_merge( $options, $list_plugin_addons, $list_theme_addons );
 		foreach ( array_keys( $options ) as $key ) {
 			unset( $options[ $key ]['source'] );
-			$options[ $key ]['release_asset'] = isset( $options[ $key ]['release_asset'] ) ? $options[ $key ]['release_asset'] : false;
+			$options[ $key ]['release_asset'] = isset( $options[ $key ]['release_asset'] ) ? (bool) $options[ $key ]['release_asset'] : false;
 			ksort( $options[ $key ] );
 		}
 		$options = array_map( 'unserialize', array_unique( array_map( 'serialize', $options ) ) );
+
+		foreach ( array_keys( $options ) as $key ) {
+			$options[ $key ]['release_asset'] = $options[ $key ]['release_asset'] ? '<span class="dashicons dashicons-yes"></span>' : $options[ $key ]['release_asset'];
+		}
 
 		return $options;
 	}
