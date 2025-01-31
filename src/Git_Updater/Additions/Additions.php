@@ -142,10 +142,10 @@ class Additions {
 		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
 		$list_plugin_addons = isset( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
 
-		$list_theme_addons  = $this->get_repo_cache( 'git_updater_repository_add_theme' );
-		$list_theme_addons  = isset( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
+		$list_theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
+		$list_theme_addons = isset( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
 
-		$options            = array_merge( $options, $list_plugin_addons, $list_theme_addons );
+		$options = array_merge( $options, $list_plugin_addons, $list_theme_addons );
 		foreach ( array_keys( $options ) as $key ) {
 			unset( $options[ $key ]['source'] );
 			$options[ $key ]['release_asset'] = isset( $options[ $key ]['release_asset'] ) ? true : false;
