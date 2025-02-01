@@ -48,7 +48,6 @@ class Additions {
 		}
 
 		$this->add_headers( $config, $repos, $type );
-		// $this->add_source( $config );
 
 		return true;
 	}
