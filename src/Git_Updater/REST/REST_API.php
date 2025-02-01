@@ -481,10 +481,6 @@ class REST_API {
 			'external'          => 'xxx',
 		];
 
-		if ( 'theme' === $repo_api_data['type'] ) {
-			$repo_api_data['theme_uri'] = $repo_api_data['url'];
-		}
-
 		$repo_cache = $this->get_repo_cache( $slug );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
 
