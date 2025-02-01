@@ -453,6 +453,7 @@ class REST_API {
 			'slug'              => $repo_data->slug,
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
+			'url'               => $repo_data->uri,
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
 			'release_asset'     => $repo_data->release_asset,
