@@ -192,6 +192,7 @@ class Theme {
 			$git_theme['type']           = 'theme';
 			$git_theme['git']            = $repo_parts['git_server'];
 			$git_theme['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
+			$git_theme['theme_uri']      = $header['owner_repo'];
 			$git_theme['enterprise']     = $header['enterprise_uri'];
 			$git_theme['enterprise_api'] = $header['enterprise_api'];
 			$git_theme['owner']          = $header['owner'];
