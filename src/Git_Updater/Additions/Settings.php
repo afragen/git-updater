@@ -43,6 +43,7 @@ class Settings {
 	 */
 	private function load_options() {
 		self::$options_additions = get_site_option( 'git_updater_additions', [] );
+		self::$options_additions = ( new Additions() )->deduplicate( self::$options_additions );
 	}
 
 	/**
