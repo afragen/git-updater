@@ -482,7 +482,7 @@ class REST_API {
 		];
 
 		if ( 'theme' === $repo_api_data['type'] ) {
-			$repo_api_data['theme_uri'] = '';
+			$repo_api_data['theme_uri'] = $repo_api_data['url'];
 		}
 
 		$repo_cache = $this->get_repo_cache( $slug );
