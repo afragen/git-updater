@@ -1,5 +1,12 @@
 #### [unreleased]
 
+#### 12.11.0 / 2025-02-02
+* update Additions to add additional listings
+* more updates for possibly passing `null`
+* update `REST_API::get_api_data`
+* update `Theme` to add `theme_uri` to update transient
+* update to pass complete data for multiple uses of `gu_additions` hook
+
 #### 12.10.1 / 2025-01-30
 * fix issue with release asset
 * add guard to `Add-Ons`

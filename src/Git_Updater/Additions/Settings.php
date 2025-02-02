@@ -149,14 +149,15 @@ class Settings {
 		$this->additions_page_init();
 
 		if ( 'git_updater_additions' === $tab ) {
-			$action = add_query_arg(
+			$action  = add_query_arg(
 				[
 					'page' => 'git-updater',
 					'tab'  => $tab,
 				],
 				$action
 			);
-			( new Repo_List_Table( self::$options_additions ) )->render_list_table();
+			$options = ( new Additions() )->deduplicate( self::$options_additions );
+			( new Repo_List_Table( $options ) )->render_list_table();
 			?>
 			<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
 				<?php
@@ -266,8 +267,8 @@ class Settings {
 		foreach ( (array) $input as $key => $value ) {
 			$new_input[0][ $key ] = 'uri' === $key ? untrailingslashit( esc_url_raw( trim( $value ) ) ) : sanitize_text_field( $value );
 		}
-		$new_input[0]['ID']     = md5( $new_input[0]['slug'] );
-		$new_input[0]['source'] = md5( home_url() );
+		$new_input[0]['primary_branch'] = ! empty( $new_input[0]['primary_branch'] ) ? $new_input[0]['primary_branch'] : 'master';
+		$new_input[0]['ID']             = md5( $new_input[0]['slug'] );
 
 		return $new_input;
 	}

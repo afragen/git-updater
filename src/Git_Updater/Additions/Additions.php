@@ -21,6 +21,8 @@ use Fragen\Singleton;
  * @uses \Fragen\Singleton
  */
 class Additions {
+	use \Fragen\Git_Updater\Traits\GU_Trait;
+
 	/**
 	 * Holds array of plugin/theme headers to add to Git Updater.
 	 *
@@ -46,7 +48,6 @@ class Additions {
 		}
 
 		$this->add_headers( $config, $repos, $type );
-		$this->add_source( $config );
 
 		return true;
 	}
@@ -126,5 +127,31 @@ class Additions {
 		if ( $pre_config !== $config ) {
 			update_site_option( 'git_updater_additions', $config );
 		}
+	}
+
+	/**
+	 * Remove duplicate $options to unique values.
+	 * Caches created in Fragen\Git_Updater\Federation::load_additions().
+	 *
+	 * @param array $options Array of Additions options.
+	 *
+	 * @return array
+	 */
+	public function deduplicate( $options ) {
+		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
+		$list_plugin_addons = ! empty( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
+
+		$list_theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
+		$list_theme_addons = ! empty( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
+
+		$options = array_merge( $options, $list_plugin_addons, $list_theme_addons );
+		foreach ( array_keys( $options ) as $key ) {
+			unset( $options[ $key ]['source'] );
+			$options[ $key ]['release_asset'] = ! empty( $options[ $key ]['release_asset'] ) ? true : false;
+			ksort( $options[ $key ] );
+		}
+		$options = array_map( 'unserialize', array_unique( array_map( 'serialize', $options ) ) );
+
+		return $options;
 	}
 }
