@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.11.0 / 2025-02-02
 * update Additions to add additional listings
 * more updates for possibly passing `null`
 * update `REST_API::get_api_data`
