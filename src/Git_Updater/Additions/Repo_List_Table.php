@@ -281,6 +281,7 @@ class Repo_List_Table extends \WP_List_Table {
 			foreach ( self::$options as $key => $option ) {
 				if ( in_array( $slug, $option, true ) ) {
 					unset( self::$options[ $key ] );
+					update_site_option( 'git_updater_additions', self::$options );
 				}
 			}
 		}
