@@ -157,7 +157,7 @@ class Settings {
 				$action
 			);
 			$options = ( new Additions() )->deduplicate( self::$options_additions );
-			update_site_option( 'git_updater_additions', $options );
+			//update_site_option( 'git_updater_additions', $options );
 			( new Repo_List_Table( $options ) )->render_list_table();
 			?>
 			<form class="settings" method="post" action="<?php echo esc_attr( $action ); ?>">
