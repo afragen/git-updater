@@ -525,6 +525,7 @@ class Settings {
 			$setting_field['callback'] = $token->slug;
 
 			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
+
 			add_settings_field(
 				$setting_field['id'],
 				$title,

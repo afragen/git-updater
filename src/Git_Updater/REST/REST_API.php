@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\REST;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Singleton;
 
 /**
@@ -550,7 +551,10 @@ class REST_API {
 	 * @return array
 	 */
 	public function get_additions_data() {
-		return get_site_option( 'git_updater_additions', [] );
+		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions = ( new Additions() )->deduplicate( $additions );
+
+		return $additions;
 	}
 
 	/**

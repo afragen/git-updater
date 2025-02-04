@@ -1,5 +1,6 @@
 #### [unreleased]
 * save source with Additions
+* update `Additions::deduplicate()`
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings

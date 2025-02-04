@@ -139,13 +139,36 @@ class Additions {
 	 * @return array
 	 */
 	public function deduplicate( $options ) {
+		if ( empty( $options ) ) {
+			return $options;
+		}
+
 		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
 		$list_plugin_addons = ! empty( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
 
 		$list_theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
 		$list_theme_addons = ! empty( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
 
-		$options = array_merge( $options, $list_plugin_addons, $list_theme_addons );
+		$listings = array_merge( $list_plugin_addons, $list_theme_addons );
+
+		foreach ( $listings as $key => $item ) {
+			foreach ( $options as $option ) {
+				if ( $item['ID'] === $option['ID'] && $item['source'] !== $option['source'] ) {
+					unset( $listings[ $key ] );
+				}
+			}
+		}
+
+		$listing_repos = get_site_option( 'git_updater_federation' );
+		foreach ( $listing_repos as $listing_repo ) {
+			foreach ( $options as $key => $item ) {
+				if ( $item['source'] === $listing_repo['ID'] ) {
+					unset( $options[ $key ] );
+				}
+			}
+		}
+
+		$options = array_merge( $options, $listings );
 		foreach ( array_keys( $options ) as $key ) {
 			$options[ $key ]['release_asset'] = ! empty( $options[ $key ]['release_asset'] ) ? true : false;
 			ksort( $options[ $key ] );
