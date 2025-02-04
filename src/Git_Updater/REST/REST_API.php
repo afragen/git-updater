@@ -537,6 +537,7 @@ class REST_API {
 			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
 
 			if ( array_key_exists( $slug, $gu_tokens ) ) {
+				$file = $gu_tokens[ $slug ]->file;
 				$request->set_param( 'slug', $slug );
 				$api_data[ $slug ] = $this->get_api_data( $request );
 			}
