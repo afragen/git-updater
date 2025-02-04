@@ -1,5 +1,5 @@
 #### [unreleased]
-* save `Additions::$options` in `Settings` to ensure boolean release asset value
+* save source with Additions
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings

@@ -48,6 +48,7 @@ class Additions {
 		}
 
 		$this->add_headers( $config, $repos, $type );
+		$this->add_source( $config );
 
 		return true;
 	}
@@ -146,7 +147,6 @@ class Additions {
 
 		$options = array_merge( $options, $list_plugin_addons, $list_theme_addons );
 		foreach ( array_keys( $options ) as $key ) {
-			unset( $options[ $key ]['source'] );
 			$options[ $key ]['release_asset'] = ! empty( $options[ $key ]['release_asset'] ) ? true : false;
 			ksort( $options[ $key ] );
 		}

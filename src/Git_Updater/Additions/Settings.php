@@ -270,6 +270,7 @@ class Settings {
 		}
 		$new_input[0]['primary_branch'] = ! empty( $new_input[0]['primary_branch'] ) ? $new_input[0]['primary_branch'] : 'master';
 		$new_input[0]['ID']             = md5( $new_input[0]['slug'] );
+		$new_input[0]['source']         = md5( home_url() );
 
 		return $new_input;
 	}
