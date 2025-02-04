@@ -160,6 +160,7 @@ class Additions {
 		}
 
 		$listing_repos = get_site_option( 'git_updater_federation' );
+		$listing_repos = $listing_repos ?: [];
 		foreach ( $listing_repos as $listing_repo ) {
 			foreach ( $options as $key => $item ) {
 				if ( $item['source'] === $listing_repo['ID'] ) {
