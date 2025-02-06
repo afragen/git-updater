@@ -498,13 +498,13 @@ trait GU_Trait {
 			];
 
 			// Exact match.
-			if ( \in_array( $slug, $slug_check, true ) ) {
+			if ( in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
 			}
 
 			// Soft match, there may still be an exact $slug match.
-			if ( \in_array( $rename, $slug_check, true ) ) {
+			if ( in_array( $rename, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 			}
 		}
