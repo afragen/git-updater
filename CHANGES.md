@@ -1,6 +1,7 @@
 #### [unreleased]
 * save source with Additions
 * update `Additions::deduplicate()`
+* update `Base::upgrader_source_selection()` rename to allow for AJAX installation, thanks @costdev
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings
