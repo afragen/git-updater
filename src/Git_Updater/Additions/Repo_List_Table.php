@@ -376,7 +376,7 @@ class Repo_List_Table extends \WP_List_Table {
 		 * without filtering. We'll need this later, so you should always include it
 		 * in your own package classes.
 		 */
-		$total_items = count( $data );
+		$total_items = 0 < count( $data ) ? count( $data ) : 1;
 
 		/**
 		 * Let's decide how many records per page to show.
