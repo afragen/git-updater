@@ -149,27 +149,27 @@ class Additions {
 		$list_theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
 		$list_theme_addons = ! empty( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
 
-		$listings = array_merge( $list_plugin_addons, $list_theme_addons );
+		$packages = array_merge( $list_plugin_addons, $list_theme_addons );
 
-		foreach ( $listings as $key => $item ) {
+		foreach ( $packages as $key => $item ) {
 			foreach ( $options as $option ) {
 				if ( $item['ID'] === $option['ID'] && $item['source'] !== $option['source'] ) {
-					unset( $listings[ $key ] );
+					unset( $packages[ $key ] );
 				}
 			}
 		}
 
-		$listing_repos = get_site_option( 'git_updater_federation' );
-		$listing_repos = $listing_repos ?: [];
-		foreach ( $listing_repos as $listing_repo ) {
+		$collections = get_site_option( 'git_updater_collections' );
+		$collections = $collections ?: [];
+		foreach ( $collections as $collection ) {
 			foreach ( $options as $key => $item ) {
-				if ( $item['source'] === $listing_repo['ID'] ) {
+				if ( $item['source'] === $collection['ID'] ) {
 					unset( $options[ $key ] );
 				}
 			}
 		}
 
-		$options = array_merge( $options, $listings );
+		$options = array_merge( $options, $packages );
 		foreach ( array_keys( $options ) as $key ) {
 			$options[ $key ]['release_asset'] = ! empty( $options[ $key ]['release_asset'] ) ? true : false;
 			ksort( $options[ $key ] );
