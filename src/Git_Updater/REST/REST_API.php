@@ -536,6 +536,10 @@ class REST_API {
 		foreach ( $additions as $addition ) {
 			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
 
+			if ( true === (bool) $addition['private_package'] ) {
+				continue;
+			}
+
 			if ( array_key_exists( $slug, $gu_tokens ) ) {
 				$file = $gu_tokens[ $slug ]->file;
 				$request->set_param( 'slug', $slug );
@@ -554,6 +558,12 @@ class REST_API {
 	public function get_additions_data() {
 		$additions = get_site_option( 'git_updater_additions', [] );
 		$additions = ( new Additions() )->deduplicate( $additions );
+		$additions = array_filter(
+			$additions,
+			function ( $addition ) {
+				return ! $addition['private_package'];
+			}
+		);
 
 		return $additions;
 	}
