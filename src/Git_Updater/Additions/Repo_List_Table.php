@@ -310,11 +310,6 @@ class Repo_List_Table extends \WP_List_Table {
 		global $wpdb; // This is used only if making any database queries.
 
 		/**
-		 * First, lets decide how many records per page to show.
-		 */
-		$per_page = 10;
-
-		/**
 		 * REQUIRED. Now we need to define our column headers. This includes a complete
 		 * array of columns to be displayed (slugs & titles), a list of columns
 		 * to keep hidden, and a list of columns that are sortable. Each of these
@@ -379,6 +374,11 @@ class Repo_List_Table extends \WP_List_Table {
 		 * in your own package classes.
 		 */
 		$total_items = count( $data );
+
+		/**
+		 * Let's decide how many records per page to show.
+		 */
+		$per_page = $total_items;
 
 		/**
 		 * The WP_List_Table class does not handle pagination for us, so we need
