@@ -5,6 +5,7 @@
 * add `git-update-collections`to `Add-Ons`
 * make list table show all elements
 * add `Private Package` option for `Additions`, these private packages are not to be used with bulk REST endpoints
+* switch to standard `uninstall.php` as issue with calling `Freemius` during their `after_uninstall` hook
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings
