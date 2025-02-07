@@ -96,7 +96,7 @@ class Settings {
 
 			foreach ( $options as $option ) {
 				$is_plugin_slug = preg_match( '@/@', $new_options[0]['slug'] );
-				$type_plugin    = \preg_match( '/plugin/', $new_options[0]['type'] );
+				$type_plugin    = preg_match( '/plugin/', $new_options[0]['type'] );
 				$bad_input      = $type_plugin && ! $is_plugin_slug;
 				$bad_input      = ! $bad_input ? ! $type_plugin && $is_plugin_slug : $bad_input;
 				$bad_input      = $bad_input || empty( $new_options[0]['slug'] ) || empty( $new_options[0]['uri'] );
@@ -252,6 +252,19 @@ class Settings {
 				'title'   => __( 'Check if a release asset is required.', 'git-updater' ),
 			]
 		);
+
+		add_settings_field(
+			'private_package',
+			esc_html__( 'Private Package', 'git-updater' ),
+			[ $this, 'callback_checkbox' ],
+			'git_updater_additions',
+			'git_updater_additions',
+			[
+				'id'      => 'git_updater_additions_private_package',
+				'setting' => 'private_package',
+				'title'   => __( 'Check if this package is not to be shared for bulk REST endpoints.', 'git-updater' ),
+			]
+		);
 	}
 
 	/**
@@ -267,9 +280,10 @@ class Settings {
 		foreach ( (array) $input as $key => $value ) {
 			$new_input[0][ $key ] = 'uri' === $key ? untrailingslashit( esc_url_raw( trim( $value ) ) ) : sanitize_text_field( $value );
 		}
-		$new_input[0]['primary_branch'] = ! empty( $new_input[0]['primary_branch'] ) ? $new_input[0]['primary_branch'] : 'master';
-		$new_input[0]['ID']             = md5( $new_input[0]['slug'] );
-		$new_input[0]['source']         = md5( home_url() );
+		$new_input[0]['primary_branch']  = ! empty( $new_input[0]['primary_branch'] ) ? $new_input[0]['primary_branch'] : 'master';
+		$new_input[0]['ID']              = md5( $new_input[0]['slug'] );
+		$new_input[0]['source']          = md5( home_url() );
+		$new_input[0]['private_package'] = ! empty( $new_input[0]['private_package'] ) ? true : false;
 
 		return $new_input;
 	}

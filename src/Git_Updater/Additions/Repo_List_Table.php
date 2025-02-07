@@ -67,13 +67,14 @@ class Repo_List_Table extends \WP_List_Table {
 		];
 		// self::$examples = $examples;
 		foreach ( (array) $options as $key => $option ) {
-			$option['ID']             = $option['ID'] ?: null;
-			$option['type']           = $option['type'] ?: null;
-			$option['slug']           = $option['slug'] ?: null;
-			$option['uri']            = $option['uri'] ?: null;
-			$option['source']         = $option['source'] ?: null;
-			$option['primary_branch'] = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
-			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['ID']              = $option['ID'] ?: null;
+			$option['type']            = $option['type'] ?: null;
+			$option['slug']            = $option['slug'] ?: null;
+			$option['uri']             = $option['uri'] ?: null;
+			$option['source']          = $option['source'] ?: null;
+			$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
+			$option['release_asset']   = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['private_package'] = ! empty( $option['private_package'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 
 			$options[ $key ] = $option;
 		}
@@ -117,6 +118,7 @@ class Repo_List_Table extends \WP_List_Table {
 			case 'primary_branch':
 			case 'release_asset':
 			case 'type':
+			case 'private_package':
 				return $item[ $column_name ];
 			default:
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
@@ -206,11 +208,12 @@ class Repo_List_Table extends \WP_List_Table {
 	public function get_columns() {
 		$columns = [
 			// 'cb'             => '<input type="checkbox" />', // Render a checkbox instead of text.
-			'slug'           => esc_html__( 'Slug', 'git-updater' ),
-			'uri'            => esc_html__( 'URL', 'git-updater' ),
-			'primary_branch' => esc_html__( 'Primary Branch', 'git-updater' ),
-			'release_asset'  => esc_html__( 'Release Asset', 'git-updater' ),
-			'type'           => esc_html__( 'Type', 'git-updater' ),
+			'slug'            => esc_html__( 'Slug', 'git-updater' ),
+			'uri'             => esc_html__( 'URL', 'git-updater' ),
+			'primary_branch'  => esc_html__( 'Primary Branch', 'git-updater' ),
+			'release_asset'   => esc_html__( 'Release Asset', 'git-updater' ),
+			'private_package' => esc_html__( 'Private Package', 'git-updater' ),
+			'type'            => esc_html__( 'Type', 'git-updater' ),
 		];
 
 		return $columns;
