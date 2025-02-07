@@ -536,7 +536,7 @@ class REST_API {
 		foreach ( $additions as $addition ) {
 			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
 
-			if ( true === (bool) $addition['private_package'] ) {
+			if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
 				continue;
 			}
 
@@ -561,7 +561,7 @@ class REST_API {
 		$additions = array_filter(
 			$additions,
 			function ( $addition ) {
-				return ! $addition['private_package'];
+				return ! (bool) $addition['private_package'];
 			}
 		);
 
