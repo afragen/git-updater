@@ -182,7 +182,7 @@ class Settings {
 
 		add_settings_section(
 			'git_updater_additions',
-			esc_html__( 'Additions', 'git-updater' ),
+			esc_html__( 'Addition Packages', 'git-updater' ),
 			[ $this, 'print_section_additions' ],
 			'git_updater_additions'
 		);
