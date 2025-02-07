@@ -4,6 +4,7 @@
 * update `Base::upgrader_source_selection()` rename to allow for AJAX installation, thanks @costdev
 * add `git-update-collections`to `Add-Ons`
 * make list table show all elements
+* add `Private Package` option for `Additions`, these private packages are not to be used with bulk REST endpoints
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings
