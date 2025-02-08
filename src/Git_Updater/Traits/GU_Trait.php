@@ -483,6 +483,13 @@ trait GU_Trait {
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
+		// For AJAX install need to exit as slug is correct. Refer to Add-Ons.
+		if ( check_ajax_referer( 'updates' ) ) {
+			if ( isset( $_POST['action'] ) && str_contains( sanitize_key( wp_unslash( $_POST['action'] ) ), 'install' ) ) {
+				return $arr;
+			}
+		}
+
 		if ( null === $upgrader_object ) {
 			$upgrader_object = $this;
 		}
