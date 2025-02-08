@@ -45,7 +45,6 @@ class Add_Ons {
 		add_action( 'admin_init', [ $this, 'addons_page_init' ] );
 		add_action( 'install_plugins_pre_plugin-information', [ $this, 'prevent_redirect_on_modal_activation' ] );
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
-		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 4 );
 
 		$this->add_settings_tabs();
 	}
@@ -151,46 +150,6 @@ class Add_Ons {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Correctly rename addon for activation.
-	 *
-	 * @param string                           $source        Path fo $source.
-	 * @param string                           $remote_source Path of $remote_source.
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader      An Upgrader object.
-	 * @param array                            $hook_extra    Array of hook data.
-	 *
-	 * @return string|\WP_Error
-	 */
-	public function upgrader_source_selection( string $source, string $remote_source, \Plugin_Upgrader|\Theme_Upgrader $upgrader, $hook_extra = [] ) {
-		global $wp_filesystem;
-
-		$new_source = $source;
-
-		// Rename plugins.
-		if ( $upgrader instanceof \Plugin_Upgrader ) {
-			foreach ( self::$addons as $addon ) {
-				if ( str_contains( $source, $addon ) ) {
-					$hook_extra['plugin'] = "{$addon}/{$addon}.php";
-					break;
-				}
-			}
-			if ( isset( $hook_extra['plugin'] ) ) {
-				$slug       = dirname( $hook_extra['plugin'] );
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
-		}
-
-		if ( ! isset( $slug ) || basename( $source ) === $slug ) {
-			return $source;
-		}
-
-		if ( trailingslashit( strtolower( $source ) ) !== trailingslashit( strtolower( $new_source ) ) ) {
-			$wp_filesystem->move( $source, $new_source, true );
-		}
-
-		return trailingslashit( $new_source );
 	}
 
 	/**
