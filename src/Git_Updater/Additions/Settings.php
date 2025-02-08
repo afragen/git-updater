@@ -261,7 +261,7 @@ class Settings {
 			[
 				'id'      => 'git_updater_additions_private_package',
 				'setting' => 'private_package',
-				'title'   => __( 'Check if this package is not to be shared for bulk REST endpoints.', 'git-updater' ),
+				'title'   => __( 'Check if this package is not to be shared with aggregators.', 'git-updater' ),
 			]
 		);
 	}
