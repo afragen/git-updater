@@ -9,6 +9,7 @@
 * add early exit in `get_repo_slugs()` during AJAX installation for Add-Ons
 * remove soft match in `get_repo_slugs()`
 * removed `Add_Ons::upgrader_source_selection` no longer needed
+* save/export tags from `readme.txt` for REST endpoint
 
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings

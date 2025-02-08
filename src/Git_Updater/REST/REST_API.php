@@ -471,6 +471,7 @@ class REST_API {
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',
+			'tags'              => $repo_data->readme_tags ?? [],
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
