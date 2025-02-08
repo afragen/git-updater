@@ -143,13 +143,13 @@ class Additions {
 			return $options;
 		}
 
-		$list_plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
-		$list_plugin_addons = ! empty( $list_plugin_addons['git_updater_repository_add_plugin'] ) ? $list_plugin_addons['git_updater_repository_add_plugin'] : [];
+		$plugin_addons = $this->get_repo_cache( 'git_updater_repository_add_plugin' );
+		$plugin_addons = ! empty( $plugin_addons['git_updater_repository_add_plugin'] ) ? $plugin_addons['git_updater_repository_add_plugin'] : [];
 
-		$list_theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
-		$list_theme_addons = ! empty( $list_theme_addons['git_updater_repository_add_theme'] ) ? $list_theme_addons['git_updater_repository_add_theme'] : [];
+		$theme_addons = $this->get_repo_cache( 'git_updater_repository_add_theme' );
+		$theme_addons = ! empty( $theme_addons['git_updater_repository_add_theme'] ) ? $theme_addons['git_updater_repository_add_theme'] : [];
 
-		$packages = array_merge( $list_plugin_addons, $list_theme_addons );
+		$packages = array_merge( $plugin_addons, $theme_addons );
 
 		foreach ( $packages as $key => $item ) {
 			foreach ( $options as $option ) {
