@@ -483,7 +483,7 @@ trait GU_Trait {
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
-		// For AJAX install, not from Install tab, need to exit as slug is correct. Refer to Add-Ons.
+		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
 		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
 			&& ( wp_doing_ajax() && check_ajax_referer( 'updates' ) )
 		) {
