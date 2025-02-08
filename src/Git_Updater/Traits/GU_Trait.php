@@ -512,7 +512,7 @@ trait GU_Trait {
 
 			// Soft match, there may still be an exact $slug match.
 			if ( in_array( $rename, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
+				// $arr['slug'] = $repo->slug;
 			}
 		}
 
