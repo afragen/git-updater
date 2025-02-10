@@ -32,8 +32,15 @@ jobs:
         with:
           files: /tmp/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip
 
+      - name: Get final asset URL
+        id: asset_url
+        run: |
+          URL="$(curl -s -I -o /dev/null -w "%{redirect_url}" "${{ fromJson(steps.upload.outputs.assets)[0].browser_download_url }}")"
+          echo "final_url=${URL}" >> "${GITHUB_OUTPUT}"
+
+
       - name: Generate build provenance attestation
         uses: johnbillion/action-wordpress-plugin-attestation@0.7.0
         with:
-          zip-path: ${{ steps.deploy.outputs.zip-path }}
-          zip-url: "https://github.com/${{ github.event.repository.full_name }}/releases/download/${{ steps.tag.outputs.tag }}/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip"
+          zip-path: /tmp/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip
+          zip-url: ${{ steps.asset_url.outputs.final_url }}
