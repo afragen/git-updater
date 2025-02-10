@@ -38,7 +38,6 @@ jobs:
           URL="$(curl -s -I -o /dev/null -w "%{redirect_url}" "${{ fromJson(steps.upload.outputs.assets)[0].browser_download_url }}")"
           echo "final_url=${URL}" >> "${GITHUB_OUTPUT}"
 
-
       - name: Generate build provenance attestation
         uses: johnbillion/action-wordpress-plugin-attestation@0.7.0
         with:
