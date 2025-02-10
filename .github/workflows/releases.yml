@@ -35,7 +35,7 @@ jobs:
       - name: Get final asset URL
         id: asset_url
         run: |
-          URL="$(curl -s -I -o /dev/null -w "%{redirect_url}" "${{ fromJson(steps.upload.outputs.assets)[0].browser_download_url }}")"
+          URL="$(curl -s -I -o /dev/null -w "%{redirect_url}" "${{ fromJson(steps.create_release.outputs.assets)[0].browser_download_url }}")"
           echo "final_url=${URL}" >> "${GITHUB_OUTPUT}"
 
       - name: Generate build provenance attestation
