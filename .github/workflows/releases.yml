@@ -36,4 +36,4 @@ jobs:
         uses: johnbillion/action-wordpress-plugin-attestation@0.7.0
         with:
           zip-path: ${{ steps.deploy.outputs.zip-path }}
-          zip-url: "https://github.com/${{ github.event.repository.full_name }}/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip"
+          zip-url: "https://github.com/${{ github.event.repository.full_name }}/releases/download/${{ steps.tag.outputs.tag }}/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip"
