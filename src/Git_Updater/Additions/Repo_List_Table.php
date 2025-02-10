@@ -67,12 +67,14 @@ class Repo_List_Table extends \WP_List_Table {
 		];
 		// self::$examples = $examples;
 		foreach ( (array) $options as $key => $option ) {
-			$option['ID']             = $option['ID'] ?: null;
-			$option['type']           = $option['type'] ?: null;
-			$option['slug']           = $option['slug'] ?: null;
-			$option['uri']            = $option['uri'] ?: null;
-			$option['primary_branch'] = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
-			$option['release_asset']  = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['ID']              = $option['ID'] ?: null;
+			$option['type']            = $option['type'] ?: null;
+			$option['slug']            = $option['slug'] ?: null;
+			$option['uri']             = $option['uri'] ?: null;
+			$option['source']          = $option['source'] ?: null;
+			$option['primary_branch']  = ! empty( $option['primary_branch'] ) ? $option['primary_branch'] : 'master';
+			$option['release_asset']   = ! empty( $option['release_asset'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
+			$option['private_package'] = ! empty( $option['private_package'] ) ? '<span class="dashicons dashicons-yes"></span>' : false;
 
 			$options[ $key ] = $option;
 		}
@@ -116,6 +118,7 @@ class Repo_List_Table extends \WP_List_Table {
 			case 'primary_branch':
 			case 'release_asset':
 			case 'type':
+			case 'private_package':
 				return $item[ $column_name ];
 			default:
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
@@ -205,11 +208,12 @@ class Repo_List_Table extends \WP_List_Table {
 	public function get_columns() {
 		$columns = [
 			// 'cb'             => '<input type="checkbox" />', // Render a checkbox instead of text.
-			'slug'           => esc_html__( 'Slug', 'git-updater' ),
-			'uri'            => esc_html__( 'URL', 'git-updater' ),
-			'primary_branch' => esc_html__( 'Primary Branch', 'git-updater' ),
-			'release_asset'  => esc_html__( 'Release Asset', 'git-updater' ),
-			'type'           => esc_html__( 'Type', 'git-updater' ),
+			'slug'            => esc_html__( 'Slug', 'git-updater' ),
+			'uri'             => esc_html__( 'URL', 'git-updater' ),
+			'primary_branch'  => esc_html__( 'Primary Branch', 'git-updater' ),
+			'release_asset'   => esc_html__( 'Release Asset', 'git-updater' ),
+			'private_package' => esc_html__( 'Private Package', 'git-updater' ),
+			'type'            => esc_html__( 'Type', 'git-updater' ),
 		];
 
 		return $columns;
@@ -309,11 +313,6 @@ class Repo_List_Table extends \WP_List_Table {
 		global $wpdb; // This is used only if making any database queries.
 
 		/**
-		 * First, lets decide how many records per page to show.
-		 */
-		$per_page = 10;
-
-		/**
 		 * REQUIRED. Now we need to define our column headers. This includes a complete
 		 * array of columns to be displayed (slugs & titles), a list of columns
 		 * to keep hidden, and a list of columns that are sortable. Each of these
@@ -377,7 +376,12 @@ class Repo_List_Table extends \WP_List_Table {
 		 * without filtering. We'll need this later, so you should always include it
 		 * in your own package classes.
 		 */
-		$total_items = count( $data );
+		$total_items = 0 < count( $data ) ? count( $data ) : 1;
+
+		/**
+		 * Let's decide how many records per page to show.
+		 */
+		$per_page = $total_items;
 
 		/**
 		 * The WP_List_Table class does not handle pagination for us, so we need
@@ -438,7 +442,7 @@ class Repo_List_Table extends \WP_List_Table {
 		// Fetch, prepare, sort, and filter our data...
 		$this->prepare_items();
 		echo '<div class="wrap">';
-		echo '<h2>' . esc_html__( 'Additions List Table', 'git-updater' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Addition Packages List Table', 'git-updater' ) . '</h2>';
 
 		// Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions.
 		echo '<form id="sites-list" method="get">';

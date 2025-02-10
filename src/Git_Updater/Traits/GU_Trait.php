@@ -483,6 +483,15 @@ trait GU_Trait {
 		array_pop( $rename );
 		$rename = implode( '-', $rename );
 
+		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
+		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
+			&& ( wp_doing_ajax() && check_ajax_referer( 'updates' ) )
+		) {
+			if ( str_contains( sanitize_key( wp_unslash( $_POST['action'] ) ), 'install' ) ) {
+				$arr['slug'] = $slug;
+			}
+		}
+
 		if ( null === $upgrader_object ) {
 			$upgrader_object = $this;
 		}
@@ -498,14 +507,14 @@ trait GU_Trait {
 			];
 
 			// Exact match.
-			if ( \in_array( $slug, $slug_check, true ) ) {
+			if ( in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
 			}
 
 			// Soft match, there may still be an exact $slug match.
-			if ( \in_array( $rename, $slug_check, true ) ) {
-				$arr['slug'] = $repo->slug;
+			if ( in_array( $rename, $slug_check, true ) ) {
+				// $arr['slug'] = $repo->slug;
 			}
 		}
 

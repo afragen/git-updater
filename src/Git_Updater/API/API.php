@@ -578,6 +578,7 @@ class API {
 		} else {
 			$this->type->upgrade_notice = $readme['upgrade_notice'];
 		}
+		$this->type->readme_tags = $readme['tags'];
 
 		return true;
 	}

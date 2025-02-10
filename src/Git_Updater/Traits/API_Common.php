@@ -213,7 +213,7 @@ trait API_Common {
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
 		$response = $this->response['readme'] ?? false;
-		$readmes  = array_intersect( $this->response['contents']['files'], $readmes );
+		$readmes  = array_intersect( (array) $this->response['contents']['files'], $readmes );
 
 		// Use readme.txt if it exists.
 		$readme_txt = array_filter(

@@ -1,5 +1,18 @@
 #### [unreleased]
 
+#### 12.12.0 / 2025-02-10
+* save source with `Additions`
+* update `Additions::deduplicate()`
+* update `Base::upgrader_source_selection()` rename to allow for AJAX installation, thanks @costdev
+* add `git-updater-collections`to `Add-Ons`
+* make list table show all elements
+* add `Private Package` option for `Additions`, these private packages are not to be shared with aggregators
+* switch to standard `uninstall.php` as issue with calling `Freemius` during their `after_uninstall` hook
+* add early exit in `get_repo_slugs()` during AJAX installation for `Add-Ons`
+* remove soft match in `get_repo_slugs()`
+* removed `Add_Ons::upgrader_source_selection` no longer needed
+* save/export tags from `readme.txt` for REST endpoint
+
 #### 12.11.0 / 2025-02-02
 * update Additions to add additional listings
 * more updates for possibly passing `null`

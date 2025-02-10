@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\REST;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Singleton;
 
 /**
@@ -470,6 +471,7 @@ class REST_API {
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',
+			'tags'              => $repo_data->readme_tags ?? [],
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
@@ -535,7 +537,12 @@ class REST_API {
 		foreach ( $additions as $addition ) {
 			$slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
 
+			if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
+				continue;
+			}
+
 			if ( array_key_exists( $slug, $gu_tokens ) ) {
+				$file = $gu_tokens[ $slug ]->file;
 				$request->set_param( 'slug', $slug );
 				$api_data[ $slug ] = $this->get_api_data( $request );
 			}
@@ -550,7 +557,16 @@ class REST_API {
 	 * @return array
 	 */
 	public function get_additions_data() {
-		return get_site_option( 'git_updater_additions', [] );
+		$additions = get_site_option( 'git_updater_additions', [] );
+		$additions = ( new Additions() )->deduplicate( $additions );
+		$additions = array_filter(
+			$additions,
+			function ( $addition ) {
+				return ! (bool) $addition['private_package'];
+			}
+		);
+
+		return $additions;
 	}
 
 	/**
