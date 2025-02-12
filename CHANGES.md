@@ -1,4 +1,5 @@
 #### [unreleased]
+* revert uninstall back to Freemius
 
 #### 12.12.0 / 2025-02-10
 * save source with `Additions`
