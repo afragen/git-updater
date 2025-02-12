@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.12.1 / 2025-02-12
 * revert uninstall back to Freemius
 
 #### 12.12.0 / 2025-02-10
