@@ -36,4 +36,3 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: /tmp/${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}.zip
-          github-token: ${{ secrets.GITHUB_TOKEN }}
