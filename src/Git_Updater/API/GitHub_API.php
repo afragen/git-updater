@@ -35,7 +35,7 @@ class GitHub_API extends API implements API_Interface {
 	public function __construct( $type = null ) {
 		parent::__construct();
 		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		$this->response = [];
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );

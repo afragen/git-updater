@@ -193,7 +193,7 @@ class API {
 		// Use cached API failure data to avoid hammering the API.
 		$response = $this->get_repo_cache( md5( $url ) );
 		$cached   = isset( $response['error_cache'] );
-		$response = $response ? $response['error_cache'] : $response;
+		$response = $response && $cached ? $response['error_cache'] : $response;
 		$response = ! $response
 			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
 			: $response;
@@ -251,6 +251,9 @@ class API {
 		 * @param \stdClass $this Current API object.
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
+
+		// If we made it this far API data must be OK, save to avoid extra call above.
+		$this->set_repo_cache( md5( $url ), $response, md5( $url ) );
 
 		return json_decode( wp_remote_retrieve_body( $response ) );
 	}
