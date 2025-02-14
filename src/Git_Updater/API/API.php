@@ -191,32 +191,38 @@ class API {
 		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
-		$response = $this->get_repo_cache( md5( $url ) );
+		$response = $this->get_repo_cache( $this->type->slug );
 		$cached   = isset( $response['error_cache'] );
-		$response = $response && $cached ? $response['error_cache'] : $response;
-		$response = ! $response
-			? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
-			: $response;
+		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
+		$response = $response && $cached && isset( $response['error_cache'] ) ? $response['error_cache'] : $response;
+		if ( ! $response ) {
+			$response = ! $response
+				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
+				: $response;
 
-		$code          = (int) wp_remote_retrieve_response_code( $response );
-		$allowed_codes = [ 200 ];
+			$code          = (int) wp_remote_retrieve_response_code( $response );
+			$allowed_codes = [ 200 ];
 
-		if ( is_wp_error( $response ) ) {
-			Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
+			if ( is_wp_error( $response ) ) {
+				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
-			return $response;
-		}
-
-		// Cache HTTP API error code for 60 minutes.
-		if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
-			$timeout = 60;
-
-			// Set timeout to GitHub rate limit reset.
-			if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
-				$timeout = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+				return $response;
 			}
-			$response['timeout'] = $timeout;
-			$this->set_repo_cache( 'error_cache', $response, md5( $url ), "+{$timeout} minutes" );
+
+			// Cache HTTP API error code for 60 minutes.
+			if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
+				$timeout = 60;
+
+				// Set timeout to GitHub rate limit reset.
+				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
+					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
+				}
+				$response['timeout'] = ! $timeout ? $response['timeout'] : $timeout;
+				$this->set_repo_cache( 'error_cache', $response, false, "+{$timeout} minutes" );
+			}
+
+			// If we made it this far API data must be OK, save to avoid extra call above.
+			$this->set_repo_cache( md5( $url ), $response );
 		}
 
 		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
@@ -224,13 +230,12 @@ class API {
 			static::$error_code[ $this->type->slug ],
 			[
 				'repo' => $this->type->slug,
-				'code' => $code,
 				'name' => $this->type->name ?? $this->type->slug,
 				'git'  => $this->type->git,
 			]
 		);
-		if ( isset( $response['timeout'] ) ) {
-			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response, $this->type->slug );
+		if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
+			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
 		}
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
@@ -252,10 +257,10 @@ class API {
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
-		// If we made it this far API data must be OK, save to avoid extra call above.
-		$this->set_repo_cache( md5( $url ), $response, md5( $url ) );
+		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : $response;
+		$body     = wp_remote_retrieve_body( $response );
 
-		return json_decode( wp_remote_retrieve_body( $response ) );
+		return is_null( json_decode( $body ) ) ? $body : json_decode( $body );
 	}
 
 	/**
@@ -347,7 +352,8 @@ class API {
 	 * @return bool|int|mixed|string|\WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$response = $this->response['dot_org'] ?? false;
+		$this->response = $this->get_repo_cache( $this->type->slug );
+		$response       = $this->response['dot_org'] ?? false;
 
 		/**
 		 * Filter hook to set an API domain for updating.
