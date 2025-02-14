@@ -223,12 +223,12 @@ class GitHub_API extends API implements API_Interface {
 	 * @param array  $response HTTP headers.
 	 * @param string $repo     Repo name.
 	 *
-	 * @return bool|int
+	 * @return int
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		$headers = wp_remote_retrieve_headers( $response );
 		if ( empty( $headers ) ) {
-			return false;
+			return 60;
 		}
 		$data = $headers->getAll();
 		if ( isset( $data['x-ratelimit-reset'] ) ) {
