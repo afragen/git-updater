@@ -230,6 +230,7 @@ class API {
 			static::$error_code[ $this->type->slug ],
 			[
 				'repo' => $this->type->slug,
+				'code' => isset( $code ) ? $code : '',
 				'name' => $this->type->name ?? $this->type->slug,
 				'git'  => $this->type->git,
 			]
