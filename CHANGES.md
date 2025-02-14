@@ -1,4 +1,5 @@
 #### [unreleased]
+* update caching
 
 #### 12.12.1 / 2025-02-12
 * revert uninstall back to Freemius
