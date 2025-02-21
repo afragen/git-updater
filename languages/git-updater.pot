@@ -1,15 +1,15 @@
-# Copyright (C) 2024 Andy Fragen
+# Copyright (C) 2025 Andy Fragen
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: git-updater 12.6.0.3\n"
-"Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/git-updater/issues\n"
+"Project-Id-Version: Git Updater 12.12.0\n"
+"Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-15T17:13:44+00:00\n"
+"POT-Creation-Date: 2025-02-10T18:54:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: git-updater\n"
@@ -33,50 +33,54 @@ msgstr ""
 
 #. Author of the plugin
 #: git-updater.php
-#: src/Git_Updater/Add_Ons.php:61
-#: src/Git_Updater/Add_Ons.php:74
-#: src/Git_Updater/Add_Ons.php:87
-#: src/Git_Updater/Add_Ons.php:100
 msgid "Andy Fragen"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:207
+#: src/Git_Updater/Additions/Repo_List_Table.php:211
 msgid "Slug"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:208
+#: src/Git_Updater/Additions/Repo_List_Table.php:212
 msgid "URL"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:209
+#: src/Git_Updater/Additions/Repo_List_Table.php:213
 #: src/Git_Updater/Additions/Settings.php:230
 msgid "Primary Branch"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:210
+#: src/Git_Updater/Additions/Repo_List_Table.php:214
 #: src/Git_Updater/Additions/Settings.php:244
 msgid "Release Asset"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:211
+#: src/Git_Updater/Additions/Repo_List_Table.php:215
+#: src/Git_Updater/Additions/Settings.php:257
+msgid "Private Package"
+msgstr ""
+
+#: src/Git_Updater/Additions/Repo_List_Table.php:216
 msgid "Type"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:257
+#: src/Git_Updater/Additions/Repo_List_Table.php:262
 msgid "Delete"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:288
+#: src/Git_Updater/Additions/Repo_List_Table.php:293
 msgid "Items would go to edit when we write that code."
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:440
-msgid "Additions List Table"
+#: src/Git_Updater/Additions/Repo_List_Table.php:445
+msgid "Addition Packages List Table"
 msgstr ""
 
-#: src/Git_Updater/Additions/Settings.php:129
-#: src/Git_Updater/Additions/Settings.php:184
+#: src/Git_Updater/Additions/Settings.php:128
 msgid "Additions"
+msgstr ""
+
+#: src/Git_Updater/Additions/Settings.php:184
+msgid "Addition Packages"
 msgstr ""
 
 #: src/Git_Updater/Additions/Settings.php:191
@@ -107,89 +111,47 @@ msgstr ""
 msgid "Check if a release asset is required."
 msgstr ""
 
-#: src/Git_Updater/Additions/Settings.php:279
+#: src/Git_Updater/Additions/Settings.php:264
+msgid "Check if this package is not to be shared with aggregators."
+msgstr ""
+
+#: src/Git_Updater/Additions/Settings.php:295
 msgid "If there are git repositories that do not natively support Git Updater you can add them here."
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:60
-msgid "Git Updater - Gist"
+#: src/Git_Updater/Add_Ons.php:56
+msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/Add_Ons.php:62
-msgid "Add GitHub Gist hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:73
-msgid "Git Updater - Bitbucket"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:75
-msgid "Add Bitbucket and Bitbucket Server hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:86
-msgid "Git Updater - GitLab"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:88
-msgid "Add GitLab hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:99
-msgid "Git Updater - Gitea"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:101
-msgid "Add Gitea hosted repositories to the Git Updater plugin."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:128
-#: src/Git_Updater/Add_Ons.php:188
-msgid "API Add-Ons"
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:171
-msgid "Git Updater API plugin installed."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:201
-msgid "Install additional API plugins."
-msgstr ""
-
-#: src/Git_Updater/Add_Ons.php:314
-#: src/Git_Updater/Add_Ons.php:318
-msgid "Install & Activate"
-msgstr ""
-
-#: src/Git_Updater/API/GitHub_API.php:353
+#: src/Git_Updater/API/GitHub_API.php:449
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:360
+#: src/Git_Updater/API/GitHub_API.php:456
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:376
+#: src/Git_Updater/API/GitHub_API.php:472
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:403
+#: src/Git_Updater/API/GitHub_API.php:499
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:410
+#: src/Git_Updater/API/GitHub_API.php:506
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:423
+#: src/Git_Updater/API/GitHub_API.php:519
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:437
+#: src/Git_Updater/API/GitHub_API.php:533
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:451
+#: src/Git_Updater/API/GitHub_API.php:547
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -201,7 +163,7 @@ msgstr ""
 msgid "Enter plugin or theme slug."
 msgstr ""
 
-#: src/Git_Updater/Base.php:708
+#: src/Git_Updater/Base.php:732
 msgid "Updates via Git Updater"
 msgstr ""
 
@@ -238,12 +200,12 @@ msgid "Switch to release "
 msgstr ""
 
 #: src/Git_Updater/Install.php:105
-#: src/Git_Updater/Install.php:319
+#: src/Git_Updater/Install.php:325
 msgid "Install Plugin"
 msgstr ""
 
 #: src/Git_Updater/Install.php:108
-#: src/Git_Updater/Install.php:322
+#: src/Git_Updater/Install.php:328
 msgid "Install Theme"
 msgstr ""
 
@@ -251,45 +213,45 @@ msgstr ""
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/Git_Updater/Install.php:339
+#: src/Git_Updater/Install.php:345
 msgid "Plugin"
 msgstr ""
 
-#: src/Git_Updater/Install.php:342
+#: src/Git_Updater/Install.php:348
 msgid "Theme"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:354
+#: src/Git_Updater/Install.php:360
 msgid "Git Updater Install %s"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:362
+#: src/Git_Updater/Install.php:368
 msgid "%s URI"
 msgstr ""
 
-#: src/Git_Updater/Install.php:370
+#: src/Git_Updater/Install.php:376
 msgid "Repository Branch"
 msgstr ""
 
-#: src/Git_Updater/Install.php:378
+#: src/Git_Updater/Install.php:384
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/Git_Updater/Install.php:413
+#: src/Git_Updater/Install.php:419
 msgid "URI is case sensitive."
 msgstr ""
 
-#: src/Git_Updater/Install.php:428
+#: src/Git_Updater/Install.php:434
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/Git_Updater/Install.php:476
+#: src/Git_Updater/Install.php:482
 msgid "Activate"
 msgstr ""
 
-#: src/Git_Updater/Install.php:488
+#: src/Git_Updater/Install.php:494
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
@@ -377,7 +339,7 @@ msgid "REST API endpoints for webhook branch resetting begin at: %s"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:148
-#: src/Git_Updater/Settings.php:848
+#: src/Git_Updater/Settings.php:847
 msgid "Settings"
 msgstr ""
 
@@ -415,35 +377,40 @@ msgstr ""
 msgid "Display `deprecated hook` messaging in debug.log"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:611
+#: src/Git_Updater/Settings.php:498
+#: src/Git_Updater/Settings.php:914
+msgid "Name not available"
+msgstr ""
+
+#: src/Git_Updater/Settings.php:612
 msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:650
+#: src/Git_Updater/Settings.php:651
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:651
+#: src/Git_Updater/Settings.php:652
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:882
+#: src/Git_Updater/Settings.php:881
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:883
+#: src/Git_Updater/Settings.php:882
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:884
+#: src/Git_Updater/Settings.php:883
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:885
+#: src/Git_Updater/Settings.php:884
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:929
+#: src/Git_Updater/Settings.php:928
 msgid "Installed Plugins and Themes"
 msgstr ""
 
@@ -469,42 +436,42 @@ msgid "%s expects a non-empty string."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:384
-#: src/Git_Updater/Theme.php:512
+#: src/Git_Updater/Theme.php:389
+#: src/Git_Updater/Theme.php:517
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:396
+#: src/Git_Updater/Theme.php:401
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:400
+#: src/Git_Updater/Theme.php:405
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:405
-#: src/Git_Updater/Theme.php:523
+#: src/Git_Updater/Theme.php:410
+#: src/Git_Updater/Theme.php:528
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:528
+#: src/Git_Updater/Theme.php:415
+#: src/Git_Updater/Theme.php:533
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:535
+#: src/Git_Updater/Theme.php:540
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:541
+#: src/Git_Updater/Theme.php:546
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:677
+#: src/Git_Updater/Traits/GU_Trait.php:689
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
