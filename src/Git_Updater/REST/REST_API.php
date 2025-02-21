@@ -467,7 +467,7 @@ class REST_API {
 			'requires_plugins'  => $repo_data->requires_plugins,
 			'sections'          => $repo_data->sections,
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
-			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 175 ) . '...',
+			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 147 ) . '...',
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',

@@ -312,7 +312,7 @@ class Plugin {
 		$response->version     = $plugin->remote_version ?: $plugin->local_version;
 		$response->sections    = $plugin->sections;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
-		$response->short_description = substr( strip_tags( trim( $plugin->sections['description'] ) ), 0, 175 ) . '...';
+		$response->short_description = substr( strip_tags( trim( $plugin->sections['description'] ) ), 0, 147 ) . '...';
 		$response->requires          = $plugin->requires;
 		$response->requires_php      = $plugin->requires_php;
 		$response->tested            = $plugin->tested;
