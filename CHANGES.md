@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.13.0 / 2025-02-21
 * update caching
 * add `versions` to REST endpoint for `{plugins|themes|update}-api`
 * update generate POT workflow
