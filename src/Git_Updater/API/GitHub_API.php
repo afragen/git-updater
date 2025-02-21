@@ -35,7 +35,7 @@ class GitHub_API extends API implements API_Interface {
 	public function __construct( $type = null ) {
 		parent::__construct();
 		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		$this->response = [];
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -223,11 +223,14 @@ class GitHub_API extends API implements API_Interface {
 	 * @param array  $response HTTP headers.
 	 * @param string $repo     Repo name.
 	 *
-	 * @return void|int
+	 * @return int
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		$headers = wp_remote_retrieve_headers( $response );
-		$data    = $headers->getAll();
+		if ( empty( $headers ) ) {
+			return 60;
+		}
+		$data = $headers->getAll();
 		if ( isset( $data['x-ratelimit-reset'] ) ) {
 			$reset = (int) $data['x-ratelimit-reset'];
 			//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date

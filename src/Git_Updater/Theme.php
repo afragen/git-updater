@@ -447,7 +447,7 @@ class Theme {
 	 *
 	 * @param array $prepared_themes Array of prepared themes.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public function customize_theme_update_html( $prepared_themes ) {
 		foreach ( (array) $this->config as $theme ) {

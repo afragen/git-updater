@@ -62,7 +62,7 @@ jobs:
           git push origin generate-pot
 
       - name: Create pull request
-        if: env.CHANGES_DETECTED == 1
+        if: env.CHANGES_DETECTED == 1 && env.REMOTE_BRANCH_EXISTS == 0
         run: gh pr create --base ${BRANCH_NAME} --head generate-pot --title "Generate POT - $(date +'%Y-%m-%d')" --body "Automated PR"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
