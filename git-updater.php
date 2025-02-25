@@ -75,3 +75,14 @@ add_filter(
 	10,
 	3
 );
+
+add_filter(
+	'gu_get_auth_header',
+	static function ( $args, $credentials ) {
+		error_log( 'Args: ' . var_export( $args, true ) );
+		error_log( 'Credentials: ' . var_export( $credentials, true ) );
+		return $args;
+	},
+	20,
+	2
+);
