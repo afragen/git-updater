@@ -75,34 +75,3 @@ add_filter(
 	10,
 	3
 );
-
-add_filter(
-	'gu_get_auth_header',
-	static function ( $args, $credentials ) {
-		error_log('gu_get_auth_header');
-		error_log( 'Args: ' . var_export( $args, true ) );
-		error_log( 'Credentials: ' . var_export( $credentials, true ) );
-		return $args;
-	},
-	20,
-	2
-);
-
-add_filter(
-	'gu_post_get_credentials',
-	static function ( $credentials, $args ) {
-		error_log('gu_post_get_credentials');
-		error_log( 'Args: ' . var_export( $args, true ) );
-		error_log( 'Credentials: ' . var_export( $credentials, true ) );
-		return $args;
-	},
-	20,
-	2
-);
-
-add_filter( 'http_request_args', function($parsed_args, $url ){
-	error_log( 'http_request_args');
-	error_log( 'Parsed Args: '. \var_export( $parsed_args, true));
-	error_log('URL: '. \var_export($url, true));
-	return $parsed_args;
-},20,2);
