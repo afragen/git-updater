@@ -76,8 +76,7 @@ trait Basic_Auth_Loader {
 			 */
 			$args = apply_filters( 'gu_get_auth_header', $args, $credentials );
 
-		} elseif ( null !== $credentials['type'] ) {
-			// Make sure slug passed with no token for release assets.
+		} elseif ( null !== $credentials['type'] ) { // No access token.
 			$args['headers'][ $credentials['type'] ] = $credentials['slug'];
 		}
 		$args['headers'] = $args['headers'] ?? [];
