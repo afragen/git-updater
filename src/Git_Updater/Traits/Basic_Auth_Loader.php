@@ -76,6 +76,11 @@ trait Basic_Auth_Loader {
 			 */
 			$args = apply_filters( 'gu_get_auth_header', $args, $credentials );
 		}
+
+		// Make sure slug passed with no token.
+		if ( null !== $credentials['type'] && ! isset( $args['headers'][ $credentials['type'] ] ) ) {
+			$args['headers'][ $credentials['type'] ] = $credentials['slug'];
+		}
 		$args['headers'] = $args['headers'] ?? [];
 
 		return $args;

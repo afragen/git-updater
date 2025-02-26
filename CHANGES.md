@@ -1,4 +1,5 @@
 #### [unreleased]
+* make sure proper release asset headers are present even without token set
 
 #### 12.13.0 / 2025-02-21
 * update caching
