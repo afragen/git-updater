@@ -1,4 +1,5 @@
 #### [unreleased]
+* update to correct format of readme tags
 
 #### 12.14.0 / 2025-02-26
 * make sure proper release asset headers are added even if access token not set

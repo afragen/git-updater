@@ -588,6 +588,15 @@ class API {
 		} else {
 			$this->type->upgrade_notice = $readme['upgrade_notice'];
 		}
+
+		// Properly format tags.
+		if ( ! empty( $readme['tags'] ) ) {
+			foreach ( $readme['tags'] as $key => $tag ) {
+				unset( $readme['tags'][ $key ] );
+				$key                    = strtolower( str_replace( ' ', '-', $tag ) );
+				$readme['tags'][ $key ] = $tag;
+			}
+		}
 		$this->type->readme_tags = $readme['tags'];
 
 		return true;
