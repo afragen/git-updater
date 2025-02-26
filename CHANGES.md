@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 12.14.0 / 2025-02-26
+* make sure proper release asset headers are added even if access token not set
+* ensure _short description_ is 150 characters or less
+
 #### 12.13.0 / 2025-02-21
 * update caching
 * add `versions` to REST endpoint for `{plugins|themes|update}-api`

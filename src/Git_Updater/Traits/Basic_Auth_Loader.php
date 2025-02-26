@@ -75,6 +75,9 @@ trait Basic_Auth_Loader {
 			 * @param array $credentials Array of repository credential data.
 			 */
 			$args = apply_filters( 'gu_get_auth_header', $args, $credentials );
+
+		} elseif ( null !== $credentials['type'] ) { // No access token.
+			$args['headers'][ $credentials['type'] ] = $credentials['slug'];
 		}
 		$args['headers'] = $args['headers'] ?? [];
 
