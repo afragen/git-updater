@@ -318,8 +318,9 @@ class Plugin {
 		$response->tested            = $plugin->tested;
 		$response->downloaded        = $plugin->downloaded ?: 0;
 		$response->active_installs   = $response->downloaded;
-		$response->last_updated      = $plugin->last_updated ?: null;
-		$response->download_link     = $plugin->download_link ?: null;
+		$response->last_updated      = $plugin->last_updated ?: '';
+		$response->added             = $plugin->added ?: '';
+		$response->download_link     = $plugin->download_link ?: '';
 		$response->banners           = $plugin->banners;
 		$response->icons             = $plugin->icons ?: [];
 		$response->contributors      = $plugin->contributors;
