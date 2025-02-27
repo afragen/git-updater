@@ -477,7 +477,7 @@ class REST_API {
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
 			'last_updated'      => gmdate( 'Y-m-d h:ia T', strtotime( $repo_data->last_updated ) ),
-			'added'             => isset( $repo_data->added ) ? gmdate( 'Y-m-d', strtotime( $repo_data->added ) ) : null,
+			'added'             =>  gmdate( 'Y-m-d', strtotime( $repo_data->added ) ) ,
 			'num_ratings'       => $repo_data->num_ratings,
 			'rating'            => $repo_data->rating,
 			'active_installs'   => $repo_data->downloaded,

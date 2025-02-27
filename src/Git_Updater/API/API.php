@@ -538,7 +538,7 @@ class API {
 	 */
 	protected function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
-		$this->type->added        = $this->type->repo_meta['added'];
+		$this->type->added        = $this->type->repo_meta['added'] ?? null;
 		$this->type->is_private   = $this->type->repo_meta['private'];
 	}
 
