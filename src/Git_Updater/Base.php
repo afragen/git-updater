@@ -400,7 +400,7 @@ class Base {
 		$this->$type->contributors   = [];
 		$this->$type->downloaded     = 0;
 		$this->$type->last_updated   = '';
-		$this->type->added           = '';
+		$this->$type->added           = '';
 		$this->$type->rating         = 0;
 		$this->$type->num_ratings    = 0;
 		$this->$type->transient      = [];
