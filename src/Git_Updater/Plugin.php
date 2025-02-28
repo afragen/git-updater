@@ -133,8 +133,6 @@ class Plugin {
 		);
 
 		$additions = apply_filters( 'gu_additions', null, $plugins, 'plugin' );
-		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $plugins, 'plugin' ], '10.0.0', 'gu_additions' ) : $additions;
-
 		$plugins = array_merge( $plugins, (array) $additions );
 		ksort( $plugins );
 
@@ -239,7 +237,6 @@ class Plugin {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		foreach ( (array) $config as $plugin ) {
 			if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli() || $disable_wp_cron ) {
@@ -409,7 +406,6 @@ class Plugin {
 					}
 
 					$overrides = apply_filters( 'gu_override_dot_org', [] );
-					$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
 
 					if ( isset( $transient->response[ $plugin->file ] ) && in_array( $plugin->file, $overrides, true ) ) {
 						unset( $transient->response[ $plugin->file ] );

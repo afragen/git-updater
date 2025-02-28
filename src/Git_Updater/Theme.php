@@ -149,8 +149,6 @@ class Theme {
 		);
 
 		$additions = apply_filters( 'gu_additions', null, $themes, 'theme' );
-		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, $themes, 'theme' ], '10.0.0', 'gu_additions' ) : $additions;
-
 		$themes = array_merge( $themes, (array) $additions );
 		ksort( $themes );
 
@@ -245,7 +243,6 @@ class Theme {
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		foreach ( (array) $config as $theme ) {
 			if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli() || $disable_wp_cron
@@ -634,7 +631,6 @@ class Theme {
 				}
 
 				$overrides = apply_filters( 'gu_override_dot_org', [] );
-				$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
 
 				if ( isset( $transient->response[ $theme->slug ] ) && in_array( $theme->slug, $overrides, true ) ) {
 					unset( $transient->response[ $theme->slug ] );

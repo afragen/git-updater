@@ -150,14 +150,6 @@ class Settings {
 		/**
 		 * Filter settings tabs.
 		 *
-		 * @since 8.0.0
-		 * @param array $tabs Array of default tabs.
-		 */
-		$settings_tabs = apply_filters_deprecated( 'github_updater_add_settings_tabs', [ $tabs ], '10.0.0', '' );
-
-		/**
-		 * Filter settings tabs.
-		 *
 		 * @since 10.0.0
 		 * @param array $tabs Array of default tabs.
 		 */
@@ -177,17 +169,6 @@ class Settings {
 		$gits       = $this->get_running_git_servers();
 		$git_subtab = [];
 		$gu_subtabs = [];
-
-		/**
-		 * Filter subtabs to be able to add subtab from git API class.
-		 *
-		 * @since 8.0.0
-		 *
-		 * @param array $gu_subtabs Array of added subtabs.
-		 *
-		 * @return array $subtabs Array of subtabs.
-		 */
-		$gu_subtabs = apply_filters_deprecated( 'github_updater_add_settings_subtabs', [ $gu_subtabs ], '10.0.0', 'gu_add_settings_subtabs' );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
@@ -508,15 +489,6 @@ class Settings {
 			 */
 			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
 
-			/**
-			 * Filter repo settings fields.
-			 *
-			 * @param array
-			 * @param \stdClass $token Repository object.
-			 * @param string $token->git Name of git host, eg. GitHub.
-			 */
-			$repo_setting_field = empty( $repo_setting_field ) ? apply_filters_deprecated( 'github_updater_add_repo_setting_field', [ [], $token, $token->git ], '10.0.0', 'gu_add_repo_setting_field' ) : $repo_setting_field;
-
 			if ( empty( $repo_setting_field ) ) {
 				continue;
 			}
@@ -631,14 +603,6 @@ class Settings {
 		 * @return array
 		 */
 		$overrides = apply_filters( 'gu_override_dot_org', [] );
-
-		/**
-		 * Filter to return array of overrides to dot org.
-		 *
-		 * @since 8.5.0
-		 * @return array
-		 */
-		$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
 
 		// Show plugins/themes skipped using Skip Updates plugin.
 		$skip_updates = get_site_option( 'skip_updates', [] );
@@ -768,18 +732,10 @@ class Settings {
 		/**
 		 * Filter to add to $option_page array.
 		 *
-		 * @since 8.0.0
-		 * @return array
-		 */
-		$option_page = apply_filters_deprecated( 'github_updater_save_redirect', [ [ 'git_updater' ] ], '10.0.0', 'gu_save_redirect' );
-
-		/**
-		 * Filter to add to $option_page array.
-		 *
 		 * @since 10.0.0
 		 * @return array
 		 */
-		$option_page = 1 === count( $option_page ) ? apply_filters( 'gu_save_redirect', [ 'git_updater' ] ) : $option_page;
+		$option_page = apply_filters( 'gu_save_redirect', [ 'git_updater' ] );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );
