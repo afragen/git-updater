@@ -407,14 +407,6 @@ class API {
 		 */
 		$always_fetch = (bool) apply_filters( 'gu_always_fetch_update', false );
 
-		/**
-		 * Filters the return value of exit_no_update.
-		 *
-		 * @since 6.0.0
-		 * @return bool `true` will exit this function early, default will not.
-		 */
-		$always_fetch = $always_fetch ?: (bool) apply_filters_deprecated( 'ghu_always_fetch_update', [ false ], '10.0.0', 'gu_always_fetch_update' );
-
 		if ( $always_fetch ) {
 			return false;
 		}

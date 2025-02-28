@@ -171,8 +171,6 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		$download_link = $download_link_base . $endpoint;
-
-		$download_link = apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $this->type, $branch_switch ], '10.0.0', 'gu_post_construct_download_link' );
 		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $this->type, $branch_switch );
 
 		return $download_link;

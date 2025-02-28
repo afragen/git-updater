@@ -106,18 +106,6 @@ class Branch {
 		 * Filter download link so developers can point to specific ZipFile
 		 * to use as a download link during a branch switch.
 		 *
-		 * @since 8.6.0
-		 *
-		 * @param string    $download_link Download URL.
-		 * @param /stdClass $repo
-		 * @param string    $this->tag     Branch or tag for rollback.
-		 */
-		$download_link = apply_filters_deprecated( 'github_updater_post_construct_download_link', [ $download_link, $repo, $this->tag ], '10.0.0', 'gu_post_construct_download_link' );
-
-		/**
-		 * Filter download link so developers can point to specific ZipFile
-		 * to use as a download link during a branch switch.
-		 *
 		 * @since 10.0.0
 		 *
 		 * @param string    $download_link Download URL.
@@ -353,14 +341,6 @@ class Branch {
 				 */
 				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
-				/**
-				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
-				 *
-				 * @since 9.6.0
-				 * @param int Number of rollbacks. Zero implies value not set.
-				 */
-				$num_rollbacks = 0 === $num_rollbacks ? apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' ) : $num_rollbacks;
-
 				// Still only return last tag if using release assets.
 				$rollback = 0 === $num_rollbacks || $theme->release_asset
 					? array_slice( $rollback, 0, 1 )
@@ -446,16 +426,6 @@ class Branch {
 		 */
 		$no_release_asset_branches = (bool) apply_filters( 'gu_no_release_asset_branches', false );
 
-		/**
-		 * Filter out branches for release assets if desired.
-		 * Removes all branches from the branch switcher leaving only the tags.
-		 *
-		 * @since 9.9.1
-		 *
-		 * @return bool
-		 */
-		$no_release_asset_branches = $no_release_asset_branches ?: (bool) apply_filters_deprecated( 'github_updater_no_release_asset_branches', [ false ], '10.0.0', 'gu_no_release_asset_branches' );
-
 		$data['branches'] = $data['release_asset'] && $no_release_asset_branches ? [] : $data['branches'];
 
 		if ( null !== $data['branches'] ) {
@@ -482,14 +452,6 @@ class Branch {
 			 */
 			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
-			/**
-			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
-			 *
-			 * @since 9.6.0
-			 * @param int Number of rollbacks. Zero implies value not set.
-			 */
-			$num_rollbacks = 0 === $num_rollbacks ? absint( apply_filters_deprecated( 'github_updater_number_rollbacks', [ 0 ], '10.0.0', 'gu_number_rollbacks' ) ) : $num_rollbacks;
-
 			// Still only return last tag if using release assets.
 			$rollback = 0 === $num_rollbacks || $data['release_asset']
 				? array_slice( $rollback, 0, 1 )
@@ -504,15 +466,6 @@ class Branch {
 				 * @return array
 				 */
 				$release_asset_rollback = apply_filters( 'gu_release_asset_rollback', $rollback, $file );
-
-				/**
-				 * Filter release asset rollbacks.
-				 *
-				 * @since 9.9.2
-				 *
-				 * @return array
-				 */
-				$release_asset_rollback = apply_filters_deprecated( 'github_updater_release_asset_rollback', [ $rollback, $file ], '10.0.0', 'gu_release_asset_rollback' );
 
 				if ( ! empty( $release_asset_rollback ) && is_array( $release_asset_rollback ) ) {
 					$rollback = $release_asset_rollback;

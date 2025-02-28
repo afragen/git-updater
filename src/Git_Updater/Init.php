@@ -112,16 +112,6 @@ class Init {
 
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
 
-		/**
-		 * Filter $admin_pages to be able to adjust the pages where Git Updater runs.
-		 *
-		 * @since 8.0.0
-		 * @deprecated 9.1.0
-		 *
-		 * @param array $admin_pages Default array of admin pages where Git Updater runs.
-		 */
-		apply_filters_deprecated( 'github_updater_add_admin_pages', [ null ], '9.1.0' );
-
 		return $can_user_update;
 	}
 }
