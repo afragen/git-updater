@@ -133,7 +133,7 @@ class Plugin {
 		);
 
 		$additions = apply_filters( 'gu_additions', null, $plugins, 'plugin' );
-		$plugins = array_merge( $plugins, (array) $additions );
+		$plugins   = array_merge( $plugins, (array) $additions );
 		ksort( $plugins );
 
 		foreach ( (array) $plugins as $slug => $plugin ) {

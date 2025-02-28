@@ -149,7 +149,7 @@ class Theme {
 		);
 
 		$additions = apply_filters( 'gu_additions', null, $themes, 'theme' );
-		$themes = array_merge( $themes, (array) $additions );
+		$themes    = array_merge( $themes, (array) $additions );
 		ksort( $themes );
 
 		foreach ( (array) $themes as $slug => $theme ) {

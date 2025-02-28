@@ -262,7 +262,7 @@ trait GU_Trait {
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
 
 		$overrides = apply_filters( 'gu_override_dot_org', [] );
-		$override = in_array( $transient_key, $overrides, true );
+		$override  = in_array( $transient_key, $overrides, true );
 
 		// Set $override if set in Skip Updates plugin.
 		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
