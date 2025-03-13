@@ -1,7 +1,7 @@
 #### [unreleased]
 * update to correct format of readme tags
 * add correctly formated date/time for `update-api` REST endpoint
-* remove deprecated filters from v10 and earlier
+* remove deprecated hooks from v10 and earlier
 
 #### 12.14.0 / 2025-02-26
 * make sure proper release asset headers are added even if access token not set

@@ -161,13 +161,6 @@ class Base {
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *
-			 * @since 6.0.0
-			 */
-			do_action_deprecated( 'ghu_refresh_transients', [], '10.0.0', 'gu_refresh_transients' );
-
-			/**
-			 * Fires later in cycle when Refreshing Cache.
-			 *
 			 * @since 10.0.0
 			 */
 			do_action( 'gu_refresh_transients' );

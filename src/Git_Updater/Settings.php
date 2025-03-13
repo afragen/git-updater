@@ -319,17 +319,6 @@ class Settings {
 			/**
 			 * Action hook to add admin page data to appropriate $tab.
 			 *
-			 * @since 8.0.0
-			 *
-			 * @param string $tab    Name of tab.
-			 * @param string $action Save action for appropriate WordPress installation.
-			 *                       Single site or Multisite.
-			 */
-			do_action_deprecated( 'github_updater_add_admin_page', [ $tab, $action ], 'gu_add_admin_page' );
-
-			/**
-			 * Action hook to add admin page data to appropriate $tab.
-			 *
 			 * @since 10.0.0
 			 *
 			 * @param string $tab    Name of tab.
@@ -417,28 +406,6 @@ class Settings {
 				'title' => esc_html__( 'Bypass WP-Cron Background Processing for Debugging', 'git-updater' ),
 			]
 		);
-
-		add_settings_field(
-			'deprecated_error_logging',
-			null,
-			[ $this, 'token_callback_checkbox' ],
-			'git_updater_install_settings',
-			'git_updater_settings',
-			[
-				'id'    => 'deprecated_error_logging',
-				'title' => esc_html__( 'Display `deprecated hook` messaging in debug.log', 'git-updater' ),
-				'class' => defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : 'hidden',
-			]
-		);
-
-		/**
-		 * Hook to add Git API settings.
-		 *
-		 * @since 8.0.0
-		 *
-		 * @param array $auth_required Array containing authorization needs of git APIs.
-		 */
-		do_action_deprecated( 'github_updater_add_settings', [ static::$auth_required ], '10.0.0', 'gu_add_settings' );
 
 		/**
 		 * Hook to add Git API settings.
@@ -535,7 +502,6 @@ class Settings {
 			'db_version',
 			'branch_switch',
 			'bypass_background_processing',
-			'deprecated_error_logging',
 		];
 
 		foreach ( $running_servers as $server ) {
@@ -676,13 +642,6 @@ class Settings {
 				update_site_option( 'git_updater', $this->sanitize( $options ) );
 			}
 		}
-
-		/**
-		 * Save $options in add-on classes.
-		 *
-		 * @since 8.0.0
-		 */
-		do_action_deprecated( 'github_updater_update_settings', [ $_POST ], '10.0.0', 'gu_update_settings' );
 
 		/**
 		 * Save $options in add-on classes.

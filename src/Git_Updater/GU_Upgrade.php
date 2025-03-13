@@ -129,7 +129,6 @@ final class GU_Upgrade {
 			'db_version',
 			'branch_switch',
 			'bypass_background_processing',
-			'deprecated_error_logging',
 		];
 		$options      = $this->get_class_vars( 'Base', 'options' );
 		$new_options  = array_filter(

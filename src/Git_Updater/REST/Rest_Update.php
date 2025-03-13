@@ -250,14 +250,6 @@ class Rest_Update {
 			/**
 			 * Allow access into the REST Update process.
 			 *
-			 * @since  10.0.0
-			 * @access public
-			 */
-			do_action_deprecated( 'github_updater_pre_rest_process_request', [], '10.0.0', 'gu_pre_rest_process_request' );
-
-			/**
-			 * Allow access into the REST Update process.
-			 *
 			 * @since  7.6.0
 			 * @access public
 			 */
@@ -442,16 +434,6 @@ class Rest_Update {
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( json_encode( $response, $json_encode_flags ) );
-
-		/**
-		 * Action hook after processing REST process.
-		 *
-		 * @since 8.6.0
-		 *
-		 * @param array $response
-		 * @param int   $code     HTTP response.
-		 */
-		do_action_deprecated( 'github_updater_post_rest_process_request', [ $response, $code ], '10.0.0', 'gu_post_rest_process_request' );
 
 		/**
 		 * Action hook after processing REST process.
