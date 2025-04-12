@@ -396,10 +396,10 @@ class GitHub_API extends API implements API_Interface {
 		$files = [];
 		$dirs  = [];
 		foreach ( $response as $content ) {
-			if ( 'file' === $content->type ) {
+			if ( property_exists( $content, 'type' ) && 'file' === $content->type ) {
 				$files[] = $content->name;
 			}
-			if ( 'dir' === $content->type ) {
+			if ( property_exists( $content, 'type' ) && 'dir' === $content->type ) {
 				$dirs[] = $content->name;
 			}
 		}
@@ -546,7 +546,7 @@ class GitHub_API extends API implements API_Interface {
 			<input class="github_setting" type="password" style="width:50%;" id="github_access_token" name="github_access_token" value="" autocomplete="new-password">
 			<br>
 			<span class="description">
-				<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'git-updater' ); ?>
+			<?php esc_html_e( 'Enter GitHub Access Token for private GitHub repositories.', 'git-updater' ); ?>
 			</span>
 		</label>
 		<?php
