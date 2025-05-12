@@ -412,12 +412,12 @@
          * @author Vova Feldman (@svovaf)
          * @since 2.5.0
          *
-         * @param Freemius    $instance
-         * @param string|false $license_key
+         * @param Freemius               $instance
+         * @param FS_Plugin_License|null $license
          *
          * @return bool TRUE if successfully connected. FALSE if failed and had to restore install from backup.
          */
-        private function delete_install_and_connect( Freemius $instance, $license_key = false ) {
+        private function delete_install_and_connect( Freemius $instance, $license = null ) {
             $user = Freemius::_get_user_by_id( $instance->get_site()->user_id );
 
             $instance->delete_current_install( true );
@@ -430,6 +430,9 @@
                 $user = Freemius::_get_user_by_email( $current_user->user_email );
             }
 
+            $license_key      = ( is_object( $license ) ? $license->secret_key : false );
+            $license_owner_id = ( is_object( $license ) ? $license->user_id : null );
+
             if ( is_object( $user ) ) {
                 // When a clone is found, we prefer to use the same user of the original install for the opt-in.
                 $instance->install_with_user( $user, $license_key, false, false );
@@ -439,7 +442,14 @@
                     false,
                     false,
                     false,
-                    $license_key
+                    $license_key,
+                    false,
+                    false,
+                    false,
+                    null,
+                    array(),
+                    true,
+                    $license_owner_id
                 );
             }
 
@@ -505,7 +515,7 @@
             }
 
             // If the site is a clone of another subsite in the network, or a localhost one, try to auto activate the license.
-            return $this->delete_install_and_connect( $instance, $license->secret_key );
+            return $this->delete_install_and_connect( $instance, $license );
         }
 
         /**

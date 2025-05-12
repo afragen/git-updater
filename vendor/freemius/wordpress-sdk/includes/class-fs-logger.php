@@ -636,7 +636,17 @@ KEY `type` (`type` ASC))" );
 			$offset = 0,
 			$order = false
 		) {
-			global $wpdb;
+			if ( empty( $filename ) ) {
+				$filename = 'fs-logs-' . date( 'Y-m-d_H-i-s', WP_FS__SCRIPT_START_TIME ) . '.csv';
+			}
+
+			$upload_dir = wp_upload_dir();
+			$filepath   = rtrim( $upload_dir['path'], '/' ) . "/{$filename}";
+
+			WP_Filesystem();
+			if ( ! $GLOBALS['wp_filesystem']->is_writable( dirname( $filepath ) ) ) {
+				return false;
+			}
 
 			$query = self::build_db_logs_query(
 				$filters,
@@ -645,14 +655,6 @@ KEY `type` (`type` ASC))" );
 				$order,
 				true
 			);
-
-			$upload_dir = wp_upload_dir();
-			if ( empty( $filename ) ) {
-				$filename = 'fs-logs-' . date( 'Y-m-d_H-i-s', WP_FS__SCRIPT_START_TIME ) . '.csv';
-			}
-			$filepath = rtrim( $upload_dir['path'], '/' ) . "/{$filename}";
-
-			$query .= " INTO OUTFILE '{$filepath}' FIELDS TERMINATED BY '\t' ESCAPED BY '\\\\' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\\n'";
 
 			$columns = '';
 			for ( $i = 0, $len = count( self::$_log_columns ); $i < $len; $i ++ ) {
@@ -665,9 +667,13 @@ KEY `type` (`type` ASC))" );
 
 			$query = "SELECT {$columns} UNION ALL " . $query;
 
-			$result = $wpdb->query( $query );
+			$result = $GLOBALS['wpdb']->get_results( $query );
 
 			if ( false === $result ) {
+				return false;
+			}
+
+			if ( ! self::write_csv_to_filesystem( $filepath, $result ) ) {
 				return false;
 			}
 
@@ -689,6 +695,33 @@ KEY `type` (`type` ASC))" );
 			}
 
 			return rtrim( $upload_dir['url'], '/' ) . $filename;
+		}
+
+		/**
+		 * @param string $file_path
+		 * @param array  $query_results
+		 *
+		 * @return bool
+		 */
+		private static function write_csv_to_filesystem( $file_path, $query_results ) {
+			if ( empty( $query_results ) ) {
+				return false;
+			}
+
+			$content = '';
+
+			foreach ( $query_results as $row ) {
+				$row_data = array_map( function ( $value ) {
+					return str_replace( "\n", ' ', $value );
+				}, (array) $row );
+				$content  .= implode( "\t", $row_data ) . "\n";
+			}
+
+			if ( ! $GLOBALS['wp_filesystem']->put_contents( $file_path, $content, FS_CHMOD_FILE ) ) {
+				return false;
+			}
+
+			return true;
 		}
 
 		#endregion

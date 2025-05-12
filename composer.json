@@ -37,13 +37,7 @@
     "freemius/wordpress-sdk": "^2.11"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "^3.0.0",
-    "mcaskill/composer-exclude-files": "^4.0"
-  },
-   "extra": {
-    "exclude-from-files": [
-      "freemius/wordpress-sdk/start.php"
-    ]
+    "wp-coding-standards/wpcs": "^3.0.0"
   },
   "config": {
     "allow-plugins": {

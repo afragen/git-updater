@@ -13,6 +13,8 @@
 	$fs_options      = FS_Options::instance( WP_FS__ACCOUNTS_OPTION_NAME, true );
 	$scheduled_crons = array();
 
+	$is_fs_debug_page = ( isset( $VARS['is_fs_debug_page'] ) && $VARS['is_fs_debug_page'] );
+
 	$module_types = array(
 		WP_FS__MODULE_TYPE_PLUGIN,
 		WP_FS__MODULE_TYPE_THEME
@@ -73,8 +75,17 @@
 
 	$sec_text = fs_text_x_inline( 'sec', 'seconds' );
 ?>
+<?php if ( $is_fs_debug_page ) : ?>
+<h2>
+    <button class="fs-debug-table-toggle-button" aria-expanded="true">
+        <span class="fs-debug-table-toggle-icon">▼</span>
+    </button>
+    <?php fs_esc_html_echo_inline( 'Scheduled Crons' ) ?>
+</h2>
+<?php else : ?>
 <h1><?php fs_esc_html_echo_inline( 'Scheduled Crons' ) ?></h1>
-<table class="widefat">
+<?php endif ?>
+<table class="widefat fs-debug-table">
 	<thead>
 	<tr>
 		<th><?php fs_esc_html_echo_inline( 'Slug' ) ?></th>
