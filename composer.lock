@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db0920adf4d305926faa2c37f1f460fe",
+    "content-hash": "8b161e0a061f68a9b1ee08093853c061",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -647,7 +647,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {
         "afragen/singleton": 20,
         "afragen/wordpress-plugin-readme-parser": 20

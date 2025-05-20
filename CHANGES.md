@@ -5,6 +5,7 @@
 * add error checking to `parse_contents_response()`
 * update Freemius/wordpress-sdk
 * add support for `Plugin ID` and `Theme ID` headers for FAIR
+* update `composer.json`
 
 #### 12.14.0 / 2025-02-26
 * make sure proper release asset headers are added even if access token not set

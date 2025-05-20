@@ -1,58 +1,57 @@
 {
-  "name": "afragen/git-updater",
-  "description": "A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs.",
-  "type": "wordpress-plugin",
-  "keywords": [
-    "wordpress",
-    "plugin",
-    "theme",
-    "updater"
-  ],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Andy Fragen",
-      "email": "andy@thefragens.com",
-      "homepage": "https://thefragens.com",
-      "role": "Developer"
-    }
-  ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/afragen/git-updater"
-    }
-  ],
-  "support": {
-    "issues": "https://github.com/afragen/git-updater/issues",
-    "source": "https://github.com/afragen/git-updater"
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "require": {
-    "php": ">=8.0",
-    "afragen/wordpress-plugin-readme-parser": "dev-master",
-    "afragen/singleton": "dev-master",
-    "afragen/wp-dismiss-notice": "*",
-    "freemius/wordpress-sdk": "^2.11"
-  },
-  "require-dev": {
-    "wp-coding-standards/wpcs": "^3.0.0"
-  },
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "mcaskill/composer-exclude-files": true
-    }
-  },
-  "autoload": {
-    "psr-4": {
-      "Fragen\\Git_Updater\\": "src/Git_Updater/"
-    }
-  },
-  "scripts": {
-    "wpcs": [
-      "vendor/bin/phpcbf .; vendor/bin/phpcs ."
-    ]
-  }
+	"name": "afragen/git-updater",
+	"description": "A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs.",
+	"type": "wordpress-plugin",
+	"keywords": [
+		"wordpress",
+		"plugin",
+		"theme",
+		"updater"
+	],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Andy Fragen",
+			"email": "andy@thefragens.com",
+			"homepage": "https://thefragens.com",
+			"role": "Developer"
+		}
+	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/afragen/git-updater"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/afragen/git-updater/issues",
+		"source": "https://github.com/afragen/git-updater"
+	},
+	"prefer-stable": true,
+	"require": {
+		"php": ">=8.0",
+		"afragen/wordpress-plugin-readme-parser": "dev-master@dev",
+		"afragen/singleton": "dev-master@dev",
+		"afragen/wp-dismiss-notice": "*",
+		"freemius/wordpress-sdk": "^2.11"
+	},
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.0.0"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"mcaskill/composer-exclude-files": true
+		}
+	},
+	"autoload": {
+		"psr-4": {
+			"Fragen\\Git_Updater\\": "src/Git_Updater/"
+		}
+	},
+	"scripts": {
+		"wpcs": [
+			"vendor/bin/phpcbf .; vendor/bin/phpcs ."
+		]
+	}
 }
