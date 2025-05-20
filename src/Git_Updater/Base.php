@@ -238,6 +238,8 @@ class Base {
 			'RequiresWP'    => 'Requires WP',
 			'ReleaseAsset'  => 'Release Asset',
 			'PrimaryBranch' => 'Primary Branch',
+			'PluginID'      => 'Plugin ID',
+			'ThemeID'       => 'Theme ID',
 		];
 
 		$uri_types = [

@@ -4,6 +4,7 @@
 * remove deprecated hooks from v10 and earlier
 * add error checking to `parse_contents_response()`
 * update Freemius/wordpress-sdk
+* add support for `Plugin ID` and `Theme ID` headers for FAIR
 
 #### 12.14.0 / 2025-02-26
 * make sure proper release asset headers are added even if access token not set

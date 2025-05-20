@@ -189,6 +189,7 @@ class Theme {
 
 			$git_theme['type']           = 'theme';
 			$git_theme['git']            = $repo_parts['git_server'];
+			$git_theme['id']             = $header['id'];
 			$git_theme['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
 			$git_theme['theme_uri']      = $header['owner_repo'];
 			$git_theme['enterprise']     = $header['enterprise_uri'];
@@ -314,6 +315,7 @@ class Theme {
 			return $result;
 		}
 
+		$response->id           = $theme->id;
 		$response->slug         = $theme->slug;
 		$response->name         = $theme->name;
 		$response->homepage     = $theme->homepage;

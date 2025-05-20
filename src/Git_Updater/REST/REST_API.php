@@ -450,6 +450,7 @@ class REST_API {
 		}
 
 		$repo_api_data = [
+			'id'                => $repo_data->id,
 			'name'              => $repo_data->name,
 			'slug'              => $repo_data->slug,
 			'git'               => $repo_data->git,
