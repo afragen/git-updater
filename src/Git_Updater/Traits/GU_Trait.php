@@ -129,18 +129,6 @@ trait GU_Trait {
 		/**
 		 * Allow filtering of cache timeout for repo information.
 		 *
-		 * @since 8.7.1
-		 *
-		 * @param string      $timeout  Timeout value used with strtotime().
-		 * @param string      $id       Data Identifier.
-		 * @param mixed       $response Data to be stored.
-		 * @param string|bool $repo     Repo name or false.
-		 */
-		$timeout = apply_filters_deprecated( 'github_updater_repo_cache_timeout', [ $timeout, $id, $response, $repo ], '10.0.0', 'gu_repo_cache_timeout' );
-
-		/**
-		 * Allow filtering of cache timeout for repo information.
-		 *
 		 * @since 10.0.0
 		 *
 		 * @param string      $timeout  Timeout value used with strtotime().
@@ -214,14 +202,6 @@ trait GU_Trait {
 		 */
 		$remote_is_newer = apply_filters( 'gu_remote_is_newer', $remote_is_newer, $type );
 
-		/**
-		 * Filter $remote_is_newer if you use another method to test for updates.
-		 *
-		 * @param bool      $remote_is_newer
-		 * @param \stdClass $type            Plugin/Theme data.
-		 */
-		$remote_is_newer = $remote_is_newer ?: apply_filters_deprecated( 'github_updater_remote_is_newer', [ $remote_is_newer, $type ], '10.0.0', 'gu_remote_is_newer' );
-
 		return $remote_is_newer && $wp_version_ok && $php_version_ok;
 	}
 
@@ -282,9 +262,7 @@ trait GU_Trait {
 		$transient_key = 'theme' === $type ? $repo->slug : $transient_key;
 
 		$overrides = apply_filters( 'gu_override_dot_org', [] );
-		$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
-
-		$override = in_array( $transient_key, $overrides, true );
+		$override  = in_array( $transient_key, $overrides, true );
 
 		// Set $override if set in Skip Updates plugin.
 		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
@@ -621,6 +599,7 @@ trait GU_Trait {
 		$header['ci_job']         = false;
 		$header['release_asset']  = false;
 		$header['primary_branch'] = false;
+		$header['did']            = null;
 
 		if ( ! empty( $header['host'] ) ) {
 			if ( 'GitHub' === $header_parts[0] && ! str_contains( $header['host'], 'github.com' ) ) {
@@ -654,6 +633,9 @@ trait GU_Trait {
 		}
 		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? true === (bool) $headers['ReleaseAsset'] : $header['release_asset'];
 		$header['primary_branch'] = ! $header['primary_branch'] && ! empty( $headers['PrimaryBranch'] ) ? $headers['PrimaryBranch'] : 'master';
+
+		$header['did'] = ! empty( $headers['PluginID'] ) ? $headers['PluginID'] : '';
+		$header['did'] = ! empty( $headers['ThemeID'] ) ? $headers['ThemeID'] : $header['did'];
 
 		return $header;
 	}
@@ -750,8 +732,6 @@ trait GU_Trait {
 
 		// Check if filter set elsewhere.
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
-
 		if ( $disable_wp_cron ) {
 			$options['bypass_background_processing'] = '1';
 		}

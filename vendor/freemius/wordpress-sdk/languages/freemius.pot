@@ -1,4 +1,4 @@
-# Copyright (C) 2024 freemius
+# Copyright (C) 2025 freemius
 # This file is distributed under the same license as the freemius package.
 msgid ""
 msgstr ""
@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Freemius Team <admin@freemius.com>\n"
 "Last-Translator: Vova Feldman <vova@freemius.com>\n"
-"POT-Creation-Date: 2024-10-20 12:05+0000\n"
+"POT-Creation-Date: 2025-05-11 06:56+0000\n"
 "Report-Msgid-Bugs-To: https://github.com/Freemius/wordpress-sdk/issues\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: get_text_inline;get_text_x_inline:1,2c;$this->get_text_inline;$this->get_text_x_inline:1,2c;$this->_fs->get_text_inline;$this->_fs->get_text_x_inline:1,2c;$this->fs->get_text_inline;$this->fs->get_text_x_inline:1,2c;$fs->get_text_inline;$fs->get_text_x_inline:1,2c;$this->_parent->get_text_inline;$this->_parent->get_text_x_inline:1,2c;fs_text_inline;fs_echo_inline;fs_esc_js_inline;fs_esc_attr_inline;fs_esc_attr_echo_inline;fs_esc_html_inline;fs_esc_html_echo_inline;fs_text_x_inline:1,2c;fs_echo_x_inline:1,2c;fs_esc_attr_x_inline:1,2c;fs_esc_js_x_inline:1,2c;fs_esc_js_echo_x_inline:1,2c;fs_esc_html_x_inline:1,2c;fs_esc_html_echo_x_inline:1,2c\n"
@@ -17,832 +17,832 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: includes/class-freemius.php:1790, templates/account.php:943
+#: includes/class-freemius.php:1821, templates/account.php:943
 msgid "An update to a Beta version will replace your installed version of %s with the latest Beta release - use with caution, and not on production sites. You have been warned."
 msgstr ""
 
-#: includes/class-freemius.php:1797
+#: includes/class-freemius.php:1828
 msgid "Would you like to proceed with the update?"
 msgstr ""
 
-#: includes/class-freemius.php:2022
+#: includes/class-freemius.php:2053
 msgid "Freemius SDK couldn't find the plugin's main file. Please contact sdk@freemius.com with the current error."
 msgstr ""
 
-#: includes/class-freemius.php:2024, includes/fs-plugin-info-dialog.php:1513
+#: includes/class-freemius.php:2055, includes/fs-plugin-info-dialog.php:1513
 msgid "Error"
 msgstr ""
 
-#: includes/class-freemius.php:2470
+#: includes/class-freemius.php:2501
 msgid "I found a better %s"
 msgstr ""
 
-#: includes/class-freemius.php:2472
+#: includes/class-freemius.php:2503
 msgid "What's the %s's name?"
 msgstr ""
 
-#: includes/class-freemius.php:2478
+#: includes/class-freemius.php:2509
 msgid "It's a temporary %s - I'm troubleshooting an issue"
 msgstr ""
 
-#: includes/class-freemius.php:2480
+#: includes/class-freemius.php:2511
 msgid "Deactivation"
 msgstr ""
 
-#: includes/class-freemius.php:2481
+#: includes/class-freemius.php:2512
 msgid "Theme Switch"
 msgstr ""
 
-#: includes/class-freemius.php:2490, templates/forms/resend-key.php:24, templates/forms/user-change.php:29
+#: includes/class-freemius.php:2521, templates/forms/resend-key.php:24, templates/forms/user-change.php:29
 msgid "Other"
 msgstr ""
 
-#: includes/class-freemius.php:2498
+#: includes/class-freemius.php:2529
 msgid "I no longer need the %s"
 msgstr ""
 
-#: includes/class-freemius.php:2505
+#: includes/class-freemius.php:2536
 msgid "I only needed the %s for a short period"
 msgstr ""
 
-#: includes/class-freemius.php:2511
+#: includes/class-freemius.php:2542
 msgid "The %s broke my site"
 msgstr ""
 
-#: includes/class-freemius.php:2518
+#: includes/class-freemius.php:2549
 msgid "The %s suddenly stopped working"
 msgstr ""
 
-#: includes/class-freemius.php:2528
+#: includes/class-freemius.php:2559
 msgid "I can't pay for it anymore"
 msgstr ""
 
-#: includes/class-freemius.php:2530
+#: includes/class-freemius.php:2561
 msgid "What price would you feel comfortable paying?"
 msgstr ""
 
-#: includes/class-freemius.php:2536
+#: includes/class-freemius.php:2567
 msgid "I don't like to share my information with you"
 msgstr ""
 
-#: includes/class-freemius.php:2557
+#: includes/class-freemius.php:2588
 msgid "The %s didn't work"
 msgstr ""
 
-#: includes/class-freemius.php:2567
+#: includes/class-freemius.php:2598
 msgid "I couldn't understand how to make it work"
 msgstr ""
 
-#: includes/class-freemius.php:2575
+#: includes/class-freemius.php:2606
 msgid "The %s is great, but I need specific feature that you don't support"
 msgstr ""
 
-#: includes/class-freemius.php:2577
+#: includes/class-freemius.php:2608
 msgid "What feature?"
 msgstr ""
 
-#: includes/class-freemius.php:2581
+#: includes/class-freemius.php:2612
 msgid "The %s is not working"
 msgstr ""
 
-#: includes/class-freemius.php:2583
+#: includes/class-freemius.php:2614
 msgid "Kindly share what didn't work so we can fix it for future users..."
 msgstr ""
 
-#: includes/class-freemius.php:2587
+#: includes/class-freemius.php:2618
 msgid "It's not what I was looking for"
 msgstr ""
 
-#: includes/class-freemius.php:2589
+#: includes/class-freemius.php:2620
 msgid "What you've been looking for?"
 msgstr ""
 
-#: includes/class-freemius.php:2593
+#: includes/class-freemius.php:2624
 msgid "The %s didn't work as expected"
 msgstr ""
 
-#: includes/class-freemius.php:2595
+#: includes/class-freemius.php:2626
 msgid "What did you expect?"
 msgstr ""
 
 #. translators: %s: License type (e.g. you have a professional license)
-#: includes/class-freemius.php:4517
+#: includes/class-freemius.php:4549
 msgid "You have purchased a %s license."
 msgstr ""
 
-#: includes/class-freemius.php:4521
+#: includes/class-freemius.php:4553
 msgid " The %s's %sdownload link%s, license key, and installation instructions have been sent to %s. If you can't find the email after 5 min, please check your spam box."
 msgstr ""
 
-#: includes/class-freemius.php:4531, includes/class-freemius.php:20889, includes/class-freemius.php:24610
+#: includes/class-freemius.php:4563, includes/class-freemius.php:21006, includes/class-freemius.php:24736
 msgctxt "interjection expressing joy or exuberance"
 msgid "Yee-haw"
 msgstr ""
 
-#: includes/class-freemius.php:4545
+#: includes/class-freemius.php:4577
 msgctxt "addonX cannot run without pluginY"
 msgid "%s cannot run without %s."
 msgstr ""
 
-#: includes/class-freemius.php:4546
+#: includes/class-freemius.php:4578
 msgctxt "addonX cannot run..."
 msgid "%s cannot run without the plugin."
 msgstr ""
 
-#: includes/class-freemius.php:4548, includes/class-freemius.php:5745, includes/class-freemius.php:13477, includes/class-freemius.php:14228, includes/class-freemius.php:17997, includes/class-freemius.php:18117, includes/class-freemius.php:18294, includes/class-freemius.php:20620, includes/class-freemius.php:21736, includes/class-freemius.php:22772, includes/class-freemius.php:22902, includes/class-freemius.php:23045, templates/add-ons.php:57
+#: includes/class-freemius.php:4580, includes/class-freemius.php:5808, includes/class-freemius.php:13562, includes/class-freemius.php:14323, includes/class-freemius.php:18112, includes/class-freemius.php:18232, includes/class-freemius.php:18409, includes/class-freemius.php:20737, includes/class-freemius.php:21860, includes/class-freemius.php:22896, includes/class-freemius.php:23026, includes/class-freemius.php:23169, templates/add-ons.php:57
 msgctxt "exclamation"
 msgid "Oops"
 msgstr ""
 
-#: includes/class-freemius.php:4827
+#: includes/class-freemius.php:4859
 msgid "There was an unexpected API error while processing your request. Please try again in a few minutes and if it still doesn't work, contact the %s's author with the following:"
 msgstr ""
 
 #. translators: %s: License type (e.g. you have a professional license)
-#: includes/class-freemius.php:5437
+#: includes/class-freemius.php:5500
 msgid "You have a %s license."
 msgstr ""
 
-#: includes/class-freemius.php:5410
+#: includes/class-freemius.php:5473
 msgid "Premium %s version was successfully activated."
 msgstr ""
 
-#: includes/class-freemius.php:5422, includes/class-freemius.php:7434
+#: includes/class-freemius.php:5485, includes/class-freemius.php:7508
 msgctxt "Used to express elation, enthusiasm, or triumph (especially in electronic communication)."
 msgid "W00t"
 msgstr ""
 
-#: includes/class-freemius.php:5728
+#: includes/class-freemius.php:5791
 msgid "%s free trial was successfully cancelled. Since the add-on is premium only it was automatically deactivated. If you like to use it in the future, you'll have to purchase a license."
 msgstr ""
 
-#: includes/class-freemius.php:5732
+#: includes/class-freemius.php:5795
 msgid "%s is a premium only add-on. You have to purchase a license first before activating the plugin."
 msgstr ""
 
-#: includes/class-freemius.php:5741, templates/add-ons.php:186, templates/account/partials/addon.php:386
+#: includes/class-freemius.php:5804, templates/add-ons.php:186, templates/account/partials/addon.php:386
 msgid "More information about %s"
 msgstr ""
 
-#: includes/class-freemius.php:5742
+#: includes/class-freemius.php:5805
 msgid "Purchase License"
 msgstr ""
 
 #. translators: %3$s: What the user is expected to receive via email (e.g.: "the installation instructions" or "a license key")
-#: includes/class-freemius.php:6747
+#: includes/class-freemius.php:6821
 msgid "You should receive %3$s for %1$s to your mailbox at %2$s in the next 5 minutes."
 msgstr ""
 
-#: includes/class-freemius.php:6756
+#: includes/class-freemius.php:6830
 msgctxt "Part of the message telling the user what they should receive via email."
 msgid "a license key"
 msgstr ""
 
 #. translators: %s: activation link (e.g.: <a>Click here</a>)
-#: includes/class-freemius.php:6764
+#: includes/class-freemius.php:6838
 msgid "%s to activate the license once you get it."
 msgstr ""
 
-#: includes/class-freemius.php:6772
+#: includes/class-freemius.php:6846
 msgctxt "Part of an activation link message."
 msgid "Click here"
 msgstr ""
 
-#: includes/class-freemius.php:6750
+#: includes/class-freemius.php:6824
 msgctxt "Part of the message telling the user what they should receive via email."
 msgid "the installation instructions"
 msgstr ""
 
-#: includes/class-freemius.php:6779
+#: includes/class-freemius.php:6853
 msgctxt "Part of the message that tells the user to check their spam folder for a specific email."
 msgid "the product's support email address"
 msgstr ""
 
-#: includes/class-freemius.php:6785
+#: includes/class-freemius.php:6859
 msgid "If you didn't get the email, try checking your spam folder or search for emails from %4$s."
 msgstr ""
 
-#: includes/class-freemius.php:6787
+#: includes/class-freemius.php:6861
 msgid "Thanks for upgrading."
 msgstr ""
 
-#: includes/class-freemius.php:6738
+#: includes/class-freemius.php:6812
 msgid "You should receive a confirmation email for %1$s to your mailbox at %2$s. Please make sure you click the button in that email to %3$s."
 msgstr ""
 
-#: includes/class-freemius.php:6741
+#: includes/class-freemius.php:6815
 msgid "start the trial"
 msgstr ""
 
-#: includes/class-freemius.php:6742, templates/connect.php:208
+#: includes/class-freemius.php:6816, templates/connect.php:208
 msgid "complete the opt-in"
 msgstr ""
 
-#: includes/class-freemius.php:6744
+#: includes/class-freemius.php:6818
 msgid "Thanks!"
 msgstr ""
 
-#: includes/class-freemius.php:6923
+#: includes/class-freemius.php:6997
 msgid "You are just one step away - %s"
 msgstr ""
 
-#: includes/class-freemius.php:6926
+#: includes/class-freemius.php:7000
 msgctxt "%s - plugin name. As complete \"PluginX\" activation now"
 msgid "Complete \"%s\" Activation Now"
 msgstr ""
 
-#: includes/class-freemius.php:7008
+#: includes/class-freemius.php:7082
 msgid "We made a few tweaks to the %s, %s"
 msgstr ""
 
-#: includes/class-freemius.php:7012
+#: includes/class-freemius.php:7086
 msgid "Opt in to make \"%s\" better!"
 msgstr ""
 
-#: includes/class-freemius.php:7433
+#: includes/class-freemius.php:7507
 msgid "The upgrade of %s was successfully completed."
 msgstr ""
 
-#: includes/class-freemius.php:10196, includes/class-fs-plugin-updater.php:1142, includes/class-fs-plugin-updater.php:1364, includes/class-fs-plugin-updater.php:1357, templates/auto-installation.php:32
+#: includes/class-freemius.php:10280, includes/class-fs-plugin-updater.php:1126, includes/class-fs-plugin-updater.php:1348, includes/class-fs-plugin-updater.php:1341, templates/auto-installation.php:32
 msgid "Add-On"
 msgstr ""
 
-#: includes/class-freemius.php:10198, templates/account.php:407, templates/account.php:415, templates/debug.php:458, templates/debug.php:678
+#: includes/class-freemius.php:10282, templates/account.php:407, templates/account.php:415, templates/debug.php:476, templates/debug.php:711
 msgid "Plugin"
 msgstr ""
 
-#: includes/class-freemius.php:10199, templates/account.php:408, templates/account.php:416, templates/debug.php:458, templates/debug.php:678, templates/forms/deactivation/form.php:107
+#: includes/class-freemius.php:10283, templates/account.php:408, templates/account.php:416, templates/debug.php:476, templates/debug.php:711, templates/forms/deactivation/form.php:107
 msgid "Theme"
 msgstr ""
 
-#: includes/class-freemius.php:13284
+#: includes/class-freemius.php:13368
 msgid "An unknown error has occurred while trying to toggle the license's white-label mode."
 msgstr ""
 
-#: includes/class-freemius.php:13298
+#: includes/class-freemius.php:13382
 msgid "Your %s license was flagged as white-labeled to hide sensitive information from the WP Admin (e.g. your email, license key, prices, billing address & invoices). If you ever wish to revert it back, you can easily do it through your %s. If this was a mistake you can also %s."
 msgstr ""
 
-#: includes/class-freemius.php:13303, templates/account/partials/disconnect-button.php:84
+#: includes/class-freemius.php:13387, templates/account/partials/disconnect-button.php:84
 msgid "User Dashboard"
 msgstr ""
 
-#: includes/class-freemius.php:13304
+#: includes/class-freemius.php:13388
 msgid "revert it now"
 msgstr ""
 
-#: includes/class-freemius.php:13362
+#: includes/class-freemius.php:13446
 msgid "An unknown error has occurred while trying to set the user's beta mode."
 msgstr ""
 
-#: includes/class-freemius.php:13448
+#: includes/class-freemius.php:13533
 msgid "Invalid new user ID or email address."
 msgstr ""
 
-#: includes/class-freemius.php:13478
+#: includes/class-freemius.php:13563
 msgid "Sorry, we could not complete the email update. Another user with the same email is already registered."
 msgstr ""
 
-#: includes/class-freemius.php:13479
+#: includes/class-freemius.php:13564
 msgid "If you would like to give up the ownership of the %s's account to %s click the Change Ownership button."
 msgstr ""
 
-#: includes/class-freemius.php:13486
+#: includes/class-freemius.php:13571
 msgid "Change Ownership"
 msgstr ""
 
-#: includes/class-freemius.php:14095
+#: includes/class-freemius.php:14190
 msgid "Invalid site details collection."
 msgstr ""
 
-#: includes/class-freemius.php:14217
+#: includes/class-freemius.php:14312
 msgid "We can't see any active licenses associated with that email address, are you sure it's the right address?"
 msgstr ""
 
-#: includes/class-freemius.php:14215
+#: includes/class-freemius.php:14310
 msgid "We couldn't find your email address in the system, are you sure it's the right address?"
 msgstr ""
 
-#: includes/class-freemius.php:14521
+#: includes/class-freemius.php:14616
 msgid "Account is pending activation. Please check your email and click the link to activate your account and then submit the affiliate form again."
 msgstr ""
 
-#: includes/class-freemius.php:14647, templates/forms/premium-versions-upgrade-handler.php:46
+#: includes/class-freemius.php:14742, templates/forms/premium-versions-upgrade-handler.php:46
 msgid "Renew your license now"
 msgstr ""
 
-#: includes/class-freemius.php:14635, templates/forms/premium-versions-upgrade-handler.php:47
+#: includes/class-freemius.php:14730, templates/forms/premium-versions-upgrade-handler.php:47
 msgid "Buy a license now"
 msgstr ""
 
-#: includes/class-freemius.php:14651
+#: includes/class-freemius.php:14746
 msgid "%s to access version %s security & feature updates, and support."
 msgstr ""
 
-#: includes/class-freemius.php:17337
+#: includes/class-freemius.php:17452
 msgid "%s opt-in was successfully completed."
 msgstr ""
 
-#: includes/class-freemius.php:17361, includes/class-freemius.php:21346
+#: includes/class-freemius.php:17476, includes/class-freemius.php:21463
 msgid "Your trial has been successfully started."
 msgstr ""
 
-#: includes/class-freemius.php:17351
+#: includes/class-freemius.php:17466
 msgid "Your account was successfully activated with the %s plan."
 msgstr ""
 
-#: includes/class-freemius.php:17995, includes/class-freemius.php:18115, includes/class-freemius.php:18292
+#: includes/class-freemius.php:18110, includes/class-freemius.php:18230, includes/class-freemius.php:18407
 msgid "Couldn't activate %s."
 msgstr ""
 
-#: includes/class-freemius.php:17996, includes/class-freemius.php:18116, includes/class-freemius.php:18293
+#: includes/class-freemius.php:18111, includes/class-freemius.php:18231, includes/class-freemius.php:18408
 msgid "Please contact us with the following message:"
 msgstr ""
 
-#: includes/class-freemius.php:18112, templates/forms/data-debug-mode.php:162
+#: includes/class-freemius.php:18227, templates/forms/data-debug-mode.php:162
 msgid "An unknown error has occurred."
 msgstr ""
 
-#: includes/class-freemius.php:18654, includes/class-freemius.php:24166
+#: includes/class-freemius.php:18769, includes/class-freemius.php:24292
 msgid "Upgrade"
 msgstr ""
 
-#: includes/class-freemius.php:18662
+#: includes/class-freemius.php:18777
 msgid "Pricing"
 msgstr ""
 
-#: includes/class-freemius.php:18660
+#: includes/class-freemius.php:18775
 msgid "Start Trial"
 msgstr ""
 
-#: includes/class-freemius.php:18742, includes/class-freemius.php:18744
+#: includes/class-freemius.php:18859, includes/class-freemius.php:18861
 msgid "Affiliation"
 msgstr ""
 
-#: includes/class-freemius.php:18772, includes/class-freemius.php:18774, templates/account.php:260, templates/debug.php:425
+#: includes/class-freemius.php:18889, includes/class-freemius.php:18891, templates/account.php:260, templates/debug.php:439
 msgid "Account"
 msgstr ""
 
-#: includes/class-freemius.php:18800, includes/class-freemius.php:18789, includes/class-freemius.php:18791, includes/customizer/class-fs-customizer-support-section.php:60
+#: includes/class-freemius.php:18917, includes/class-freemius.php:18906, includes/class-freemius.php:18908, includes/customizer/class-fs-customizer-support-section.php:60
 msgid "Contact Us"
 msgstr ""
 
-#: includes/class-freemius.php:18814, includes/class-freemius.php:18816, includes/class-freemius.php:24180, templates/account.php:130, templates/account/partials/addon.php:49
+#: includes/class-freemius.php:18931, includes/class-freemius.php:18933, includes/class-freemius.php:24306, templates/account.php:130, templates/account/partials/addon.php:49
 msgid "Add-Ons"
 msgstr ""
 
-#: includes/class-freemius.php:18849
+#: includes/class-freemius.php:18966
 msgctxt "ASCII arrow left icon"
 msgid "&#x2190;"
 msgstr ""
 
-#: includes/class-freemius.php:18849
+#: includes/class-freemius.php:18966
 msgctxt "ASCII arrow right icon"
 msgid "&#x27a4;"
 msgstr ""
 
-#: includes/class-freemius.php:18867
+#: includes/class-freemius.php:18984
 msgctxt "noun"
 msgid "Pricing"
 msgstr ""
 
-#: includes/class-freemius.php:19083, includes/customizer/class-fs-customizer-support-section.php:67
+#: includes/class-freemius.php:19200, includes/customizer/class-fs-customizer-support-section.php:67
 msgid "Support Forum"
 msgstr ""
 
-#: includes/class-freemius.php:20114
+#: includes/class-freemius.php:20231
 msgid "Your email has been successfully verified - you are AWESOME!"
 msgstr ""
 
-#: includes/class-freemius.php:20115
+#: includes/class-freemius.php:20232
 msgctxt "a positive response"
 msgid "Right on"
 msgstr ""
 
-#: includes/class-freemius.php:20621
+#: includes/class-freemius.php:20738
 msgid "seems like the key you entered doesn't match our records."
 msgstr ""
 
-#: includes/class-freemius.php:20645
+#: includes/class-freemius.php:20762
 msgid "Debug mode was successfully enabled and will be automatically disabled in 60 min. You can also disable it earlier by clicking the \"Stop Debug\" link."
 msgstr ""
 
-#: includes/class-freemius.php:20880
+#: includes/class-freemius.php:20997
 msgid "Your %s Add-on plan was successfully upgraded."
 msgstr ""
 
 #. translators: %s:product name, e.g. Facebook add-on was successfully...
-#: includes/class-freemius.php:20882
+#: includes/class-freemius.php:20999
 msgid "%s Add-on was successfully purchased."
 msgstr ""
 
-#: includes/class-freemius.php:20885
+#: includes/class-freemius.php:21002
 msgid "Download the latest version"
 msgstr ""
 
-#: includes/class-freemius.php:21003
+#: includes/class-freemius.php:21120
 msgid "It seems like one of the authentication parameters is wrong. Update your Public Key, Secret Key & User ID, and try again."
 msgstr ""
 
-#: includes/class-freemius.php:21003, includes/class-freemius.php:21416, includes/class-freemius.php:21517, includes/class-freemius.php:21604
+#: includes/class-freemius.php:21120, includes/class-freemius.php:21533, includes/class-freemius.php:21641, includes/class-freemius.php:21728
 msgid "Error received from the server:"
 msgstr ""
 
-#: includes/class-freemius.php:21244, includes/class-freemius.php:21522, includes/class-freemius.php:21575, includes/class-freemius.php:21682
+#: includes/class-freemius.php:21361, includes/class-freemius.php:21646, includes/class-freemius.php:21699, includes/class-freemius.php:21806
 msgctxt "something somebody says when they are thinking about what you have just said."
 msgid "Hmm"
 msgstr ""
 
-#: includes/class-freemius.php:21257
+#: includes/class-freemius.php:21374
 msgid "It looks like you are still on the %s plan. If you did upgrade or change your plan, it's probably an issue on our side - sorry."
 msgstr ""
 
-#: includes/class-freemius.php:21258, templates/account.php:132, templates/add-ons.php:250, templates/account/partials/addon.php:51
+#: includes/class-freemius.php:21375, templates/account.php:132, templates/add-ons.php:250, templates/account/partials/addon.php:51
 msgctxt "trial period"
 msgid "Trial"
 msgstr ""
 
-#: includes/class-freemius.php:21263
+#: includes/class-freemius.php:21380
 msgid "I have upgraded my account but when I try to Sync the License, the plan remains %s."
 msgstr ""
 
-#: includes/class-freemius.php:21267, includes/class-freemius.php:21325
+#: includes/class-freemius.php:21384, includes/class-freemius.php:21442
 msgid "Please contact us here"
 msgstr ""
 
-#: includes/class-freemius.php:21295
+#: includes/class-freemius.php:21412
 msgid "Your plan was successfully changed to %s."
 msgstr ""
 
-#: includes/class-freemius.php:21311
+#: includes/class-freemius.php:21428
 msgid "Your license has expired. You can still continue using the free %s forever."
 msgstr ""
 
 #. translators: %1$s: product title; %2$s, %3$s: wrapping HTML anchor element; %4$s: 'plugin', 'theme', or 'add-on'.
-#: includes/class-freemius.php:21313
+#: includes/class-freemius.php:21430
 msgid "Your license has expired. %1$sUpgrade now%2$s to continue using the %3$s without interruptions."
 msgstr ""
 
-#: includes/class-freemius.php:21321
+#: includes/class-freemius.php:21438
 msgid "Your license has been cancelled. If you think it's a mistake, please contact support."
 msgstr ""
 
-#: includes/class-freemius.php:21334
+#: includes/class-freemius.php:21451
 msgid "Your license has expired. You can still continue using all the %s features, but you'll need to renew your license to continue getting updates and support."
 msgstr ""
 
-#: includes/class-freemius.php:21360
+#: includes/class-freemius.php:21477
 msgid "Your free trial has expired. You can still continue using all our free features."
 msgstr ""
 
 #. translators: %1$s: product title; %2$s, %3$s: wrapping HTML anchor element; %4$s: 'plugin', 'theme', or 'add-on'.
-#: includes/class-freemius.php:21362
+#: includes/class-freemius.php:21479
 msgid "Your free trial has expired. %1$sUpgrade now%2$s to continue using the %3$s without interruptions."
 msgstr ""
 
-#: includes/class-freemius.php:21408
+#: includes/class-freemius.php:21525
 msgid "Your server is blocking the access to Freemius' API, which is crucial for %1$s synchronization. Please contact your host to whitelist the following domains:%2$s"
 msgstr ""
 
-#: includes/class-freemius.php:21410
+#: includes/class-freemius.php:21527
 msgid "Show error details"
 msgstr ""
 
-#: includes/class-freemius.php:21513
+#: includes/class-freemius.php:21637
 msgid "It looks like the license could not be activated."
 msgstr ""
 
-#: includes/class-freemius.php:21555
+#: includes/class-freemius.php:21679
 msgid "Your license was successfully activated."
 msgstr ""
 
-#: includes/class-freemius.php:21579
+#: includes/class-freemius.php:21703
 msgid "It looks like your site currently doesn't have an active license."
 msgstr ""
 
-#: includes/class-freemius.php:21603
+#: includes/class-freemius.php:21727
 msgid "It looks like the license deactivation failed."
 msgstr ""
 
-#: includes/class-freemius.php:21632
+#: includes/class-freemius.php:21756
 msgid "Your %s license was successfully deactivated."
 msgstr ""
 
-#: includes/class-freemius.php:21633
+#: includes/class-freemius.php:21757
 msgid "Your license was successfully deactivated, you are back to the %s plan."
 msgstr ""
 
-#: includes/class-freemius.php:21636
+#: includes/class-freemius.php:21760
 msgid "O.K"
 msgstr ""
 
-#: includes/class-freemius.php:21689
+#: includes/class-freemius.php:21813
 msgid "Seems like we are having some temporary issue with your subscription cancellation. Please try again in few minutes."
 msgstr ""
 
-#: includes/class-freemius.php:21698
+#: includes/class-freemius.php:21822
 msgid "Your subscription was successfully cancelled. Your %s plan license will expire in %s."
 msgstr ""
 
-#: includes/class-freemius.php:21741
+#: includes/class-freemius.php:21865
 msgid "You are already running the %s in a trial mode."
 msgstr ""
 
-#: includes/class-freemius.php:21753
+#: includes/class-freemius.php:21877
 msgid "You already utilized a trial before."
 msgstr ""
 
-#: includes/class-freemius.php:21792
+#: includes/class-freemius.php:21916
 msgid "None of the %s's plans supports a trial period."
 msgstr ""
 
-#: includes/class-freemius.php:21768
+#: includes/class-freemius.php:21892
 msgid "Plan %s do not exist, therefore, can't start a trial."
 msgstr ""
 
-#: includes/class-freemius.php:21780
+#: includes/class-freemius.php:21904
 msgid "Plan %s does not support a trial period."
 msgstr ""
 
-#: includes/class-freemius.php:21854
+#: includes/class-freemius.php:21978
 msgid "It looks like you are not in trial mode anymore so there's nothing to cancel :)"
 msgstr ""
 
-#: includes/class-freemius.php:21890
+#: includes/class-freemius.php:22014
 msgid "Seems like we are having some temporary issue with your trial cancellation. Please try again in few minutes."
 msgstr ""
 
-#: includes/class-freemius.php:21909
+#: includes/class-freemius.php:22033
 msgid "Your %s free trial was successfully cancelled."
 msgstr ""
 
-#: includes/class-freemius.php:22256
+#: includes/class-freemius.php:22380
 msgid "Seems like you got the latest release."
 msgstr ""
 
-#: includes/class-freemius.php:22257
+#: includes/class-freemius.php:22381
 msgid "You are all good!"
 msgstr ""
 
-#: includes/class-freemius.php:22239
+#: includes/class-freemius.php:22363
 msgid "Version %s was released."
 msgstr ""
 
-#: includes/class-freemius.php:22239
+#: includes/class-freemius.php:22363
 msgid "Please download %s."
 msgstr ""
 
-#: includes/class-freemius.php:22246
+#: includes/class-freemius.php:22370
 msgid "the latest %s version here"
 msgstr ""
 
-#: includes/class-freemius.php:22251
+#: includes/class-freemius.php:22375
 msgid "New"
 msgstr ""
 
-#: includes/class-freemius.php:22660
+#: includes/class-freemius.php:22784
 msgid "Verification mail was just sent to %s. If you can't find it after 5 min, please check your spam box."
 msgstr ""
 
-#: includes/class-freemius.php:22800
+#: includes/class-freemius.php:22924
 msgid "Site successfully opted in."
 msgstr ""
 
-#: includes/class-freemius.php:22801, includes/class-freemius.php:23876
+#: includes/class-freemius.php:22925, includes/class-freemius.php:24000
 msgid "Awesome"
 msgstr ""
 
-#: includes/class-freemius.php:22827
+#: includes/class-freemius.php:22951
 msgid "Diagnostic data will no longer be sent from %s to %s."
 msgstr ""
 
-#: includes/class-freemius.php:22817
+#: includes/class-freemius.php:22941
 msgid "Sharing diagnostic data with %s helps to provide functionality that's more relevant to your website, avoid WordPress or PHP version incompatibilities that can break your website, and recognize which languages & regions the plugin should be translated and tailored to."
 msgstr ""
 
-#: includes/class-freemius.php:22818
+#: includes/class-freemius.php:22942
 msgid "Thank you!"
 msgstr ""
 
-#: includes/class-freemius.php:22987
+#: includes/class-freemius.php:23111
 msgid "A confirmation email was just sent to %s. You must confirm the update within the next 4 hours. If you cannot find the email, please check your spam folder."
 msgstr ""
 
-#: includes/class-freemius.php:22985
+#: includes/class-freemius.php:23109
 msgid "A confirmation email was just sent to %s. The email owner must confirm the update within the next 4 hours."
 msgstr ""
 
-#: includes/class-freemius.php:22999
+#: includes/class-freemius.php:23123
 msgid "Thanks for confirming the ownership change. An email was just sent to %s for final approval."
 msgstr ""
 
-#: includes/class-freemius.php:23005
+#: includes/class-freemius.php:23129
 msgid "%s is the new owner of the account."
 msgstr ""
 
-#: includes/class-freemius.php:23007
+#: includes/class-freemius.php:23131
 msgctxt "as congratulations"
 msgid "Congrats"
 msgstr ""
 
-#: includes/class-freemius.php:23029
+#: includes/class-freemius.php:23153
 msgid "Your name was successfully updated."
 msgstr ""
 
-#: includes/class-freemius.php:23024
+#: includes/class-freemius.php:23148
 msgid "Please provide your full name."
 msgstr ""
 
 #. translators: %s: User's account property (e.g. email address, name)
-#: includes/class-freemius.php:23094
+#: includes/class-freemius.php:23218
 msgid "You have successfully updated your %s."
 msgstr ""
 
-#: includes/class-freemius.php:23158
+#: includes/class-freemius.php:23282
 msgid "Is this your client's site? %s if you wish to hide sensitive info like your email, license key, prices, billing address & invoices from the WP Admin."
 msgstr ""
 
-#: includes/class-freemius.php:23161
+#: includes/class-freemius.php:23285
 msgid "Click here"
 msgstr ""
 
-#: includes/class-freemius.php:23198
+#: includes/class-freemius.php:23322
 msgid "Bundle"
 msgstr ""
 
-#: includes/class-freemius.php:23271
+#: includes/class-freemius.php:23395
 msgid "Just letting you know that the add-ons information of %s is being pulled from an external server."
 msgstr ""
 
-#: includes/class-freemius.php:23272
+#: includes/class-freemius.php:23396
 msgctxt "advance notice of something that will need attention."
 msgid "Heads up"
 msgstr ""
 
-#: includes/class-freemius.php:23916
+#: includes/class-freemius.php:24040
 msgctxt "exclamation"
 msgid "Hey"
 msgstr ""
 
-#: includes/class-freemius.php:23916
+#: includes/class-freemius.php:24040
 msgid "How do you like %s so far? Test all our %s premium features with a %d-day free trial."
 msgstr ""
 
-#: includes/class-freemius.php:23924
+#: includes/class-freemius.php:24048
 msgid "No commitment for %s days - cancel anytime!"
 msgstr ""
 
-#: includes/class-freemius.php:23925
+#: includes/class-freemius.php:24049
 msgid "No credit card required"
 msgstr ""
 
-#: includes/class-freemius.php:23932, templates/forms/trial-start.php:53
+#: includes/class-freemius.php:24056, templates/forms/trial-start.php:53
 msgctxt "call to action"
 msgid "Start free trial"
 msgstr ""
 
-#: includes/class-freemius.php:24009
+#: includes/class-freemius.php:24135
 msgid "Hey there, did you know that %s has an affiliate program? If you like the %s you can become our ambassador and earn some cash!"
 msgstr ""
 
-#: includes/class-freemius.php:24018
+#: includes/class-freemius.php:24144
 msgid "Learn more"
 msgstr ""
 
-#: includes/class-freemius.php:24204, templates/account.php:569, templates/account.php:721, templates/connect.php:211, templates/connect.php:439, includes/managers/class-fs-clone-manager.php:1295, templates/forms/license-activation.php:27, templates/account/partials/addon.php:326
+#: includes/class-freemius.php:24330, templates/account.php:569, templates/account.php:721, templates/connect.php:211, templates/connect.php:442, includes/managers/class-fs-clone-manager.php:1305, templates/forms/license-activation.php:27, templates/account/partials/addon.php:326
 msgid "Activate License"
 msgstr ""
 
-#: includes/class-freemius.php:24205, templates/account.php:663, templates/account.php:720, templates/account/partials/addon.php:327, templates/account/partials/site.php:273
+#: includes/class-freemius.php:24331, templates/account.php:663, templates/account.php:720, templates/account/partials/addon.php:327, templates/account/partials/site.php:273
 msgid "Change License"
 msgstr ""
 
-#: includes/class-freemius.php:24320, includes/class-freemius.php:24314, templates/account/partials/site.php:49, templates/account/partials/site.php:170
+#: includes/class-freemius.php:24446, includes/class-freemius.php:24440, templates/account/partials/site.php:49, templates/account/partials/site.php:170
 msgid "Opt In"
 msgstr ""
 
-#: includes/class-freemius.php:24312, templates/account/partials/site.php:170
+#: includes/class-freemius.php:24438, templates/account/partials/site.php:170
 msgid "Opt Out"
 msgstr ""
 
-#: includes/class-freemius.php:24578
+#: includes/class-freemius.php:24704
 msgid "Please follow these steps to complete the upgrade"
 msgstr ""
 
 #. translators: %s: Plan title
-#: includes/class-freemius.php:24582
+#: includes/class-freemius.php:24708
 msgid "Download the latest %s version"
 msgstr ""
 
-#: includes/class-freemius.php:24586
+#: includes/class-freemius.php:24712
 msgid "Upload and activate the downloaded version"
 msgstr ""
 
-#: includes/class-freemius.php:24588
+#: includes/class-freemius.php:24714
 msgid "How to upload and activate?"
 msgstr ""
 
-#: includes/class-freemius.php:24555
+#: includes/class-freemius.php:24681
 msgid " The paid version of %1$s is already installed. Please activate it to start benefiting the %2$s features. %3$s"
 msgstr ""
 
-#: includes/class-freemius.php:24565
+#: includes/class-freemius.php:24691
 msgid "Activate %s features"
 msgstr ""
 
-#: includes/class-freemius.php:24623
+#: includes/class-freemius.php:24749
 msgid "Your plan was successfully upgraded."
 msgstr ""
 
-#: includes/class-freemius.php:24624
+#: includes/class-freemius.php:24750
 msgid "Your plan was successfully activated."
 msgstr ""
 
-#: includes/class-freemius.php:24733
+#: includes/class-freemius.php:24859
 msgid "%sClick here%s to choose the sites where you'd like to activate the license on."
 msgstr ""
 
-#: includes/class-freemius.php:24902
+#: includes/class-freemius.php:25028
 msgid "Auto installation only works for opted-in users."
 msgstr ""
 
-#: includes/class-freemius.php:24912, includes/class-freemius.php:24945, includes/class-fs-plugin-updater.php:1336, includes/class-fs-plugin-updater.php:1350
+#: includes/class-freemius.php:25038, includes/class-freemius.php:25071, includes/class-fs-plugin-updater.php:1320, includes/class-fs-plugin-updater.php:1334
 msgid "Invalid module ID."
 msgstr ""
 
-#: includes/class-freemius.php:24953, includes/class-fs-plugin-updater.php:1371
+#: includes/class-freemius.php:25079, includes/class-fs-plugin-updater.php:1355
 msgid "Premium add-on version already installed."
 msgstr ""
 
-#: includes/class-freemius.php:24921, includes/class-fs-plugin-updater.php:1372
+#: includes/class-freemius.php:25047, includes/class-fs-plugin-updater.php:1356
 msgid "Premium version already active."
 msgstr ""
 
-#: includes/class-freemius.php:24928
+#: includes/class-freemius.php:25054
 msgid "You do not have a valid license to access the premium version."
 msgstr ""
 
-#: includes/class-freemius.php:24935
+#: includes/class-freemius.php:25061
 msgid "Plugin is a \"Serviceware\" which means it does not have a premium code version."
 msgstr ""
 
-#: includes/class-freemius.php:25313
+#: includes/class-freemius.php:25439
 msgid "View paid features"
 msgstr ""
 
-#: includes/class-freemius.php:25628
+#: includes/class-freemius.php:25754
 msgid "Thank you so much for using our products!"
 msgstr ""
 
-#: includes/class-freemius.php:25629
+#: includes/class-freemius.php:25755
 msgid "You've already opted-in to our usage-tracking, which helps us keep improving them."
 msgstr ""
 
-#: includes/class-freemius.php:25648
+#: includes/class-freemius.php:25774
 msgid "%s and its add-ons"
 msgstr ""
 
-#: includes/class-freemius.php:25657
+#: includes/class-freemius.php:25783
 msgid "Products"
 msgstr ""
 
-#: includes/class-freemius.php:25617
+#: includes/class-freemius.php:25743
 msgid "Thank you so much for using %s and its add-ons!"
 msgstr ""
 
-#: includes/class-freemius.php:25618
+#: includes/class-freemius.php:25744
 msgid "Thank you so much for using %s!"
 msgstr ""
 
-#: includes/class-freemius.php:25624
+#: includes/class-freemius.php:25750
 msgid "You've already opted-in to our usage-tracking, which helps us keep improving the %s."
 msgstr ""
 
-#: includes/class-freemius.php:25664, templates/connect.php:312
+#: includes/class-freemius.php:25790, templates/connect.php:312
 msgid "Yes"
 msgstr ""
 
-#: includes/class-freemius.php:25665, templates/connect.php:313
+#: includes/class-freemius.php:25791, templates/connect.php:313
 msgid "send me security & feature updates, educational content and offers."
 msgstr ""
 
-#: includes/class-freemius.php:25666, templates/connect.php:318
+#: includes/class-freemius.php:25792, templates/connect.php:318
 msgid "No"
 msgstr ""
 
-#: includes/class-freemius.php:25668, templates/connect.php:320
+#: includes/class-freemius.php:25794, templates/connect.php:320
 msgid "do %sNOT%s send me security & feature updates, educational content and offers."
 msgstr ""
 
-#: includes/class-freemius.php:25678
+#: includes/class-freemius.php:25804
 msgid "Due to the new %sEU General Data Protection Regulation (GDPR)%s compliance requirements it is required that you provide your explicit consent, again, confirming that you are onboard :-)"
 msgstr ""
 
-#: includes/class-freemius.php:25680, templates/connect.php:327
+#: includes/class-freemius.php:25806, templates/connect.php:327
 msgid "Please let us know if you'd like us to contact you for security & feature updates, educational content, and occasional offers:"
 msgstr ""
 
-#: includes/class-freemius.php:25970
+#: includes/class-freemius.php:26096
 msgid "License key is empty."
 msgstr ""
 
@@ -870,15 +870,15 @@ msgstr ""
 msgid "Important Upgrade Notice:"
 msgstr ""
 
-#: includes/class-fs-plugin-updater.php:1401
+#: includes/class-fs-plugin-updater.php:1385
 msgid "Installing plugin: %s"
 msgstr ""
 
-#: includes/class-fs-plugin-updater.php:1442
+#: includes/class-fs-plugin-updater.php:1426
 msgid "Unable to connect to the filesystem. Please confirm your credentials."
 msgstr ""
 
-#: includes/class-fs-plugin-updater.php:1624
+#: includes/class-fs-plugin-updater.php:1608
 msgid "The remote plugin package does not contain a folder with the desired slug and renaming did not work."
 msgstr ""
 
@@ -926,7 +926,7 @@ msgstr ""
 msgid "Activate this add-on"
 msgstr ""
 
-#: includes/fs-plugin-info-dialog.php:790, templates/connect.php:436
+#: includes/fs-plugin-info-dialog.php:790, templates/connect.php:439
 msgid "Activate Free Version"
 msgstr ""
 
@@ -1060,7 +1060,7 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: includes/fs-plugin-info-dialog.php:1315, templates/account.php:121, templates/debug.php:291, templates/debug.php:328, templates/debug.php:577, templates/account/partials/addon.php:41
+#: includes/fs-plugin-info-dialog.php:1315, templates/account.php:121, templates/debug.php:300, templates/debug.php:342, templates/debug.php:601, templates/account/partials/addon.php:41
 msgctxt "product version"
 msgid "Version"
 msgstr ""
@@ -1276,7 +1276,7 @@ msgstr ""
 msgid "Free"
 msgstr ""
 
-#: templates/account.php:135, templates/debug.php:471, includes/customizer/class-fs-customizer-upsell-control.php:110, templates/account/partials/addon.php:54
+#: templates/account.php:135, templates/debug.php:490, includes/customizer/class-fs-customizer-upsell-control.php:110, templates/account/partials/addon.php:54
 msgctxt "as product pricing plan"
 msgid "Plan"
 msgstr ""
@@ -1322,19 +1322,19 @@ msgctxt "as synchronize"
 msgid "Sync"
 msgstr ""
 
-#: templates/account.php:385, templates/debug.php:634
+#: templates/account.php:385, templates/debug.php:663
 msgid "Name"
 msgstr ""
 
-#: templates/account.php:391, templates/debug.php:635
+#: templates/account.php:391, templates/debug.php:664
 msgid "Email"
 msgstr ""
 
-#: templates/account.php:398, templates/debug.php:469, templates/debug.php:684
+#: templates/account.php:398, templates/debug.php:488, templates/debug.php:718
 msgid "User ID"
 msgstr ""
 
-#: templates/account.php:416, templates/account.php:734, templates/account.php:785, templates/debug.php:326, templates/debug.php:463, templates/debug.php:574, templates/debug.php:633, templates/debug.php:682, templates/debug.php:761, templates/account/payments.php:35, templates/debug/logger.php:21
+#: templates/account.php:416, templates/account.php:734, templates/account.php:785, templates/debug.php:340, templates/debug.php:482, templates/debug.php:598, templates/debug.php:662, templates/debug.php:716, templates/debug.php:799, templates/account/payments.php:35, templates/debug/logger.php:21
 msgid "ID"
 msgstr ""
 
@@ -1346,11 +1346,11 @@ msgstr ""
 msgid "No ID"
 msgstr ""
 
-#: templates/account.php:431, templates/debug.php:333, templates/debug.php:472, templates/debug.php:578, templates/debug.php:637, templates/account/partials/site.php:228
+#: templates/account.php:431, templates/debug.php:347, templates/debug.php:491, templates/debug.php:602, templates/debug.php:666, templates/account/partials/site.php:228
 msgid "Public Key"
 msgstr ""
 
-#: templates/account.php:437, templates/debug.php:473, templates/debug.php:579, templates/debug.php:638, templates/account/partials/site.php:241
+#: templates/account.php:437, templates/debug.php:492, templates/debug.php:603, templates/debug.php:667, templates/account/partials/site.php:241
 msgid "Secret Key"
 msgstr ""
 
@@ -1359,7 +1359,7 @@ msgctxt "as secret encryption key missing"
 msgid "No Secret"
 msgstr ""
 
-#: templates/account.php:494, templates/debug.php:690, templates/account/partials/site.php:262
+#: templates/account.php:494, templates/debug.php:724, templates/account/partials/site.php:262
 msgid "License Key"
 msgstr ""
 
@@ -1425,7 +1425,7 @@ msgstr ""
 msgid "Search by address"
 msgstr ""
 
-#: templates/account.php:735, templates/debug.php:466
+#: templates/account.php:735, templates/debug.php:485
 msgid "Address"
 msgstr ""
 
@@ -1615,61 +1615,65 @@ msgstr ""
 msgid "Can't find your license key?"
 msgstr ""
 
-#: templates/connect.php:359, templates/connect.php:689, templates/forms/deactivation/retry-skip.php:20
+#: templates/connect.php:340
+msgid "A user has not yet been associated with the license, which is necessary to prevent unauthorized activation. To assign the license to your user, you agree to share your WordPress user's full name and email address."
+msgstr ""
+
+#: templates/connect.php:362, templates/connect.php:692, templates/forms/deactivation/retry-skip.php:20
 msgctxt "verb"
 msgid "Skip"
 msgstr ""
 
-#: templates/connect.php:362
+#: templates/connect.php:365
 msgid "Delegate to Site Admins"
 msgstr ""
 
-#: templates/connect.php:362
+#: templates/connect.php:365
 msgid "If you click it, this decision will be delegated to the sites administrators."
 msgstr ""
 
-#: templates/connect.php:391
+#: templates/connect.php:394
 msgid "License issues?"
 msgstr ""
 
-#: templates/connect.php:420
+#: templates/connect.php:423
 msgid "This will allow %s to"
 msgstr ""
 
-#: templates/connect.php:415
+#: templates/connect.php:418
 msgid "For delivery of security & feature updates, and license management, %s needs to"
 msgstr ""
 
-#: templates/connect.php:438
+#: templates/connect.php:441
 msgid "Have a license key?"
 msgstr ""
 
-#: templates/connect.php:435
+#: templates/connect.php:438
 msgid "Don't have a license key?"
 msgstr ""
 
-#: templates/connect.php:446
+#: templates/connect.php:449
 msgid "Freemius is our licensing and software updates engine"
 msgstr ""
 
-#: templates/connect.php:449
+#: templates/connect.php:452
 msgid "Privacy Policy"
 msgstr ""
 
-#: templates/connect.php:454
+#: templates/connect.php:457
 msgid "Terms of Service"
 msgstr ""
 
-#: templates/connect.php:452
+#: templates/connect.php:455
 msgid "License Agreement"
 msgstr ""
 
-#: templates/connect.php:875
+#: templates/connect.php:879
 msgctxt "as in the process of sending an email"
 msgid "Sending email"
 msgstr ""
 
-#: templates/connect.php:876
+#: templates/connect.php:880
 msgctxt "as activating plugin"
 msgid "Activating"
 msgstr ""
@@ -1706,7 +1710,7 @@ msgctxt "timer for auto-disabling debug"
 msgid "Auto off in:"
 msgstr ""
 
-#: templates/debug.php:117, templates/debug.php:338, templates/debug.php:474, templates/debug.php:639
+#: templates/debug.php:117, templates/debug.php:352, templates/debug.php:493, templates/debug.php:668
 msgid "Actions"
 msgstr ""
 
@@ -1746,196 +1750,196 @@ msgstr ""
 msgid "Set DB Option"
 msgstr ""
 
-#: templates/debug.php:270
+#: templates/debug.php:274
 msgid "Key"
 msgstr ""
 
-#: templates/debug.php:271
+#: templates/debug.php:275
 msgid "Value"
 msgstr ""
 
-#: templates/debug.php:287
+#: templates/debug.php:295
 msgctxt "as software development kit versions"
 msgid "SDK Versions"
 msgstr ""
 
-#: templates/debug.php:292
+#: templates/debug.php:301
 msgid "SDK Path"
 msgstr ""
 
-#: templates/debug.php:293, templates/debug.php:332
+#: templates/debug.php:302, templates/debug.php:346
 msgid "Module Path"
 msgstr ""
 
-#: templates/debug.php:294
+#: templates/debug.php:303
 msgid "Is Active"
 msgstr ""
 
-#: templates/debug.php:322, templates/debug/plugins-themes-sync.php:35
+#: templates/debug.php:335, templates/debug/plugins-themes-sync.php:35
 msgid "Plugins"
 msgstr ""
 
-#: templates/debug.php:322, templates/debug/plugins-themes-sync.php:56
+#: templates/debug.php:335, templates/debug/plugins-themes-sync.php:56
 msgid "Themes"
 msgstr ""
 
-#: templates/debug.php:327, templates/debug.php:468, templates/debug.php:576, templates/debug/scheduled-crons.php:80
+#: templates/debug.php:341, templates/debug.php:487, templates/debug.php:600, templates/debug/scheduled-crons.php:91
 msgid "Slug"
 msgstr ""
 
-#: templates/debug.php:329, templates/debug.php:575
+#: templates/debug.php:343, templates/debug.php:599
 msgid "Title"
 msgstr ""
 
-#: templates/debug.php:330
+#: templates/debug.php:344
 msgctxt "as application program interface"
 msgid "API"
 msgstr ""
 
-#: templates/debug.php:331
+#: templates/debug.php:345
 msgid "Freemius State"
 msgstr ""
 
-#: templates/debug.php:335
+#: templates/debug.php:349
 msgid "Network Blog"
 msgstr ""
 
-#: templates/debug.php:336
+#: templates/debug.php:350
 msgid "Network User"
 msgstr ""
 
-#: templates/debug.php:382
+#: templates/debug.php:396
 msgctxt "as connection was successful"
 msgid "Connected"
 msgstr ""
 
-#: templates/debug.php:384
+#: templates/debug.php:398
 msgctxt "as connection blocked"
 msgid "Blocked"
 msgstr ""
 
-#: templates/debug.php:385
+#: templates/debug.php:399
 msgctxt "API connectivity state is unknown"
 msgid "Unknown"
 msgstr ""
 
-#: templates/debug.php:421
+#: templates/debug.php:435
 msgid "Simulate Trial Promotion"
 msgstr ""
 
-#: templates/debug.php:433
+#: templates/debug.php:447
 msgid "Simulate Network Upgrade"
 msgstr ""
 
 #. translators: %s: 'plugin' or 'theme'
-#: templates/debug.php:457
+#: templates/debug.php:475
 msgid "%s Installs"
 msgstr ""
 
-#: templates/debug.php:459
+#: templates/debug.php:477
 msgctxt "like websites"
 msgid "Sites"
 msgstr ""
 
-#: templates/debug.php:465, templates/account/partials/site.php:156
+#: templates/debug.php:484, templates/account/partials/site.php:156
 msgid "Blog ID"
 msgstr ""
 
-#: templates/debug.php:470
+#: templates/debug.php:489
 msgid "License ID"
 msgstr ""
 
-#: templates/debug.php:556, templates/debug.php:662, templates/account/partials/addon.php:440
+#: templates/debug.php:575, templates/debug.php:691, templates/account/partials/addon.php:440
 msgctxt "verb"
 msgid "Delete"
 msgstr ""
 
-#: templates/debug.php:570
+#: templates/debug.php:593
 msgid "Add Ons of module %s"
 msgstr ""
 
-#: templates/debug.php:629
+#: templates/debug.php:657
 msgid "Users"
 msgstr ""
 
-#: templates/debug.php:636
+#: templates/debug.php:665
 msgid "Verified"
 msgstr ""
 
-#: templates/debug.php:678
+#: templates/debug.php:711
 msgid "%s Licenses"
 msgstr ""
 
-#: templates/debug.php:683
+#: templates/debug.php:717
 msgid "Plugin ID"
 msgstr ""
 
-#: templates/debug.php:685
+#: templates/debug.php:719
 msgid "Plan ID"
 msgstr ""
 
-#: templates/debug.php:686
+#: templates/debug.php:720
 msgid "Quota"
 msgstr ""
 
-#: templates/debug.php:687
+#: templates/debug.php:721
 msgid "Activated"
 msgstr ""
 
-#: templates/debug.php:688
+#: templates/debug.php:722
 msgid "Blocking"
 msgstr ""
 
-#: templates/debug.php:689, templates/debug.php:760, templates/debug/logger.php:22
+#: templates/debug.php:723, templates/debug.php:798, templates/debug/logger.php:22
 msgid "Type"
 msgstr ""
 
-#: templates/debug.php:691
+#: templates/debug.php:725
 msgctxt "as expiration date"
 msgid "Expiration"
 msgstr ""
 
-#: templates/debug.php:719
+#: templates/debug.php:757
 msgid "Debug Log"
 msgstr ""
 
-#: templates/debug.php:723
+#: templates/debug.php:761
 msgid "All Types"
 msgstr ""
 
-#: templates/debug.php:730
+#: templates/debug.php:768
 msgid "All Requests"
 msgstr ""
 
-#: templates/debug.php:735, templates/debug.php:764, templates/debug/logger.php:25
+#: templates/debug.php:773, templates/debug.php:802, templates/debug/logger.php:25
 msgid "File"
 msgstr ""
 
-#: templates/debug.php:736, templates/debug.php:762, templates/debug/logger.php:23
+#: templates/debug.php:774, templates/debug.php:800, templates/debug/logger.php:23
 msgid "Function"
 msgstr ""
 
-#: templates/debug.php:737
+#: templates/debug.php:775
 msgid "Process ID"
 msgstr ""
 
-#: templates/debug.php:738
+#: templates/debug.php:776
 msgid "Logger"
 msgstr ""
 
-#: templates/debug.php:739, templates/debug.php:763, templates/debug/logger.php:24
+#: templates/debug.php:777, templates/debug.php:801, templates/debug/logger.php:24
 msgid "Message"
 msgstr ""
 
-#: templates/debug.php:741
+#: templates/debug.php:779
 msgid "Filter"
 msgstr ""
 
-#: templates/debug.php:749
+#: templates/debug.php:787
 msgid "Download"
 msgstr ""
 
-#: templates/debug.php:765, templates/debug/logger.php:26
+#: templates/debug.php:803, templates/debug/logger.php:26
 msgid "Timestamp"
 msgstr ""
 
@@ -1961,117 +1965,117 @@ msgstr ""
 msgid "Requests"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:839
+#: includes/managers/class-fs-clone-manager.php:849
 msgid "Invalid clone resolution action."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1024
+#: includes/managers/class-fs-clone-manager.php:1034
 msgid "products"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1211
+#: includes/managers/class-fs-clone-manager.php:1221
 msgid "The products below have been placed into safe mode because we noticed that %2$s is an exact copy of %3$s:%1$s"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1212
+#: includes/managers/class-fs-clone-manager.php:1222
 msgid "The products below have been placed into safe mode because we noticed that %2$s is an exact copy of these sites:%3$s%1$s"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1205
+#: includes/managers/class-fs-clone-manager.php:1215
 msgid "%1$s has been placed into safe mode because we noticed that %2$s is an exact copy of %3$s."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1238
+#: includes/managers/class-fs-clone-manager.php:1248
 msgid "the above-mentioned sites"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1251
+#: includes/managers/class-fs-clone-manager.php:1261
 msgid "Is %2$s a duplicate of %4$s?"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1252
+#: includes/managers/class-fs-clone-manager.php:1262
 msgid "Yes, %2$s is a duplicate of %4$s for the purpose of testing, staging, or development."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1257
+#: includes/managers/class-fs-clone-manager.php:1267
 msgid "Long-Term Duplicate"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1262
+#: includes/managers/class-fs-clone-manager.php:1272
 msgid "Duplicate Website"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1268
+#: includes/managers/class-fs-clone-manager.php:1278
 msgid "Is %2$s the new home of %4$s?"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1270
+#: includes/managers/class-fs-clone-manager.php:1280
 msgid "Yes, %%2$s is replacing %%4$s. I would like to migrate my %s from %%4$s to %%2$s."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1271, templates/forms/subscription-cancellation.php:52
+#: includes/managers/class-fs-clone-manager.php:1281, templates/forms/subscription-cancellation.php:52
 msgid "license"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1271
+#: includes/managers/class-fs-clone-manager.php:1281
 msgid "data"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1277
+#: includes/managers/class-fs-clone-manager.php:1287
 msgid "Migrate License"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1278
+#: includes/managers/class-fs-clone-manager.php:1288
 msgid "Migrate"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1284
+#: includes/managers/class-fs-clone-manager.php:1294
 msgid "Is %2$s a new website?"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1285
+#: includes/managers/class-fs-clone-manager.php:1295
 msgid "Yes, %2$s is a new and different website that is separate from %4$s."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1287
+#: includes/managers/class-fs-clone-manager.php:1297
 msgid "It requires license activation."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1294
+#: includes/managers/class-fs-clone-manager.php:1304
 msgid "New Website"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1319
+#: includes/managers/class-fs-clone-manager.php:1329
 msgctxt "Clone resolution admin notice products list label"
 msgid "Products"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1408
+#: includes/managers/class-fs-clone-manager.php:1418
 msgid "You marked this website, %s, as a temporary duplicate of %s."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1409
+#: includes/managers/class-fs-clone-manager.php:1419
 msgid "You marked this website, %s, as a temporary duplicate of these sites"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1423
+#: includes/managers/class-fs-clone-manager.php:1433
 msgid "%s automatic security & feature updates and paid functionality will keep working without interruptions until %s (or when your license expires, whatever comes first)."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1426
+#: includes/managers/class-fs-clone-manager.php:1436
 msgctxt "\"The <product_label>\", e.g.: \"The plugin\""
 msgid "The %s's"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1429
+#: includes/managers/class-fs-clone-manager.php:1439
 msgid "The following products'"
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1437
+#: includes/managers/class-fs-clone-manager.php:1447
 msgid "If this is a long term duplicate, to keep automatic updates and paid functionality after %s, please %s."
 msgstr ""
 
-#: includes/managers/class-fs-clone-manager.php:1439
+#: includes/managers/class-fs-clone-manager.php:1449
 msgid "activate a license here"
 msgstr ""
 
@@ -2301,16 +2305,16 @@ msgid "Log"
 msgstr ""
 
 #. translators: %s: time period (e.g. In "2 hours")
-#: templates/debug/plugins-themes-sync.php:18, templates/debug/scheduled-crons.php:91
+#: templates/debug/plugins-themes-sync.php:18, templates/debug/scheduled-crons.php:102
 msgid "In %s"
 msgstr ""
 
 #. translators: %s: time period (e.g. "2 hours" ago)
-#: templates/debug/plugins-themes-sync.php:20, templates/debug/scheduled-crons.php:93
+#: templates/debug/plugins-themes-sync.php:20, templates/debug/scheduled-crons.php:104
 msgid "%s ago"
 msgstr ""
 
-#: templates/debug/plugins-themes-sync.php:21, templates/debug/scheduled-crons.php:74
+#: templates/debug/plugins-themes-sync.php:21, templates/debug/scheduled-crons.php:76
 msgctxt "seconds"
 msgid "sec"
 msgstr ""
@@ -2323,27 +2327,27 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
-#: templates/debug/plugins-themes-sync.php:29, templates/debug/scheduled-crons.php:84
+#: templates/debug/plugins-themes-sync.php:29, templates/debug/scheduled-crons.php:95
 msgid "Last"
 msgstr ""
 
-#: templates/debug/scheduled-crons.php:76
+#: templates/debug/scheduled-crons.php:86, templates/debug/scheduled-crons.php:83
 msgid "Scheduled Crons"
 msgstr ""
 
-#: templates/debug/scheduled-crons.php:81
+#: templates/debug/scheduled-crons.php:92
 msgid "Module"
 msgstr ""
 
-#: templates/debug/scheduled-crons.php:82
+#: templates/debug/scheduled-crons.php:93
 msgid "Module Type"
 msgstr ""
 
-#: templates/debug/scheduled-crons.php:83
+#: templates/debug/scheduled-crons.php:94
 msgid "Cron Type"
 msgstr ""
 
-#: templates/debug/scheduled-crons.php:85
+#: templates/debug/scheduled-crons.php:96
 msgid "Next"
 msgstr ""
 

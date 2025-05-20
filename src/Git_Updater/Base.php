@@ -138,21 +138,6 @@ class Base {
 	 * @return bool
 	 */
 	public function load() {
-		/**
-		 * Filters whether to hide settings.
-		 *
-		 * @since 10.0.0
-		 * @param bool
-		 */
-		$hide_settings = (bool) apply_filters( 'gu_hide_settings', false );
-
-		/**
-		 * Filters whether to hide settings.
-		 *
-		 * @return bool
-		 */
-		$hide_settings = $hide_settings ?: (bool) apply_filters_deprecated( 'github_updater_hide_settings', [ false ], '10.0.0', 'gu_hide_settings' );
-
 		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
 			Singleton::get_instance( 'Settings', $this )->run();
 			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
@@ -173,13 +158,6 @@ class Base {
 		}
 
 		if ( isset( $_POST['_wpnonce'], $_POST['gu_refresh_cache'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'gu_refresh_cache' ) ) {
-			/**
-			 * Fires later in cycle when Refreshing Cache.
-			 *
-			 * @since 6.0.0
-			 */
-			do_action_deprecated( 'ghu_refresh_transients', [], '10.0.0', 'gu_refresh_transients' );
-
 			/**
 			 * Fires later in cycle when Refreshing Cache.
 			 *
@@ -239,13 +217,6 @@ class Base {
 		 */
 		$config = apply_filters( 'gu_set_options', [] );
 
-		/**
-		 * Filter the plugin options.
-		 *
-		 * @return null|array
-		 */
-		$config = empty( $config ) ? apply_filters_deprecated( 'github_updater_set_options', [ [] ], '6.1.0', 'gu_set_options' ) : $config;
-
 		foreach ( array_keys( self::$git_servers ) as $git ) {
 			unset( $config[ "{$git}_access_token" ], $config[ "{$git}_enterprise_token" ] );
 		}
@@ -267,6 +238,8 @@ class Base {
 			'RequiresWP'    => 'Requires WP',
 			'ReleaseAsset'  => 'Release Asset',
 			'PrimaryBranch' => 'Primary Branch',
+			'PluginID'      => 'Plugin ID',
+			'ThemeID'       => 'Theme ID',
 		];
 
 		$uri_types = [
@@ -319,13 +292,6 @@ class Base {
 		 * @param bool
 		 */
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-
-		/**
-		 * Exit if bypassing wp-cron.
-		 *
-		 * @return bool
-		 */
-		$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
 
 		if ( $disable_wp_cron && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
 			return;
@@ -400,6 +366,7 @@ class Base {
 		$this->$type->contributors   = [];
 		$this->$type->downloaded     = 0;
 		$this->$type->last_updated   = '';
+		$this->$type->added          = '';
 		$this->$type->rating         = 0;
 		$this->$type->num_ratings    = 0;
 		$this->$type->transient      = [];
@@ -700,21 +667,6 @@ class Base {
 		 * @param string $type Type being passed, plugin|theme'.
 		 */
 		$additions = apply_filters( 'gu_additions', null, [], $type );
-
-		/**
-		 * Filter to add plugins not containing appropriate header line.
-		 * Insert repositories added via Git Updater Additions plugin.
-		 *
-		 * @since   5.4.0
-		 * @access  public
-		 * @link https://github.com/afragen/git-updater-additions
-		 *
-		 * @param array        Listing of plugins/themes to add.
-		 *                     Default null.
-		 * @param array        Listing of all plugins/themes.
-		 * @param string $type Type being passed, plugin|theme'.
-		 */
-		$additions = null === $additions ? apply_filters_deprecated( 'github_updater_additions', [ null, [], $type ], '10.0.0', 'gu_additions' ) : $additions;
 
 		foreach ( (array) $additions as $slug => $headers ) {
 			if ( $slug === $file ) {

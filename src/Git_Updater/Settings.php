@@ -150,14 +150,6 @@ class Settings {
 		/**
 		 * Filter settings tabs.
 		 *
-		 * @since 8.0.0
-		 * @param array $tabs Array of default tabs.
-		 */
-		$settings_tabs = apply_filters_deprecated( 'github_updater_add_settings_tabs', [ $tabs ], '10.0.0', '' );
-
-		/**
-		 * Filter settings tabs.
-		 *
 		 * @since 10.0.0
 		 * @param array $tabs Array of default tabs.
 		 */
@@ -177,17 +169,6 @@ class Settings {
 		$gits       = $this->get_running_git_servers();
 		$git_subtab = [];
 		$gu_subtabs = [];
-
-		/**
-		 * Filter subtabs to be able to add subtab from git API class.
-		 *
-		 * @since 8.0.0
-		 *
-		 * @param array $gu_subtabs Array of added subtabs.
-		 *
-		 * @return array $subtabs Array of subtabs.
-		 */
-		$gu_subtabs = apply_filters_deprecated( 'github_updater_add_settings_subtabs', [ $gu_subtabs ], '10.0.0', 'gu_add_settings_subtabs' );
 
 		/**
 		 * Filter subtabs to be able to add subtab from git API class.
@@ -338,17 +319,6 @@ class Settings {
 			/**
 			 * Action hook to add admin page data to appropriate $tab.
 			 *
-			 * @since 8.0.0
-			 *
-			 * @param string $tab    Name of tab.
-			 * @param string $action Save action for appropriate WordPress installation.
-			 *                       Single site or Multisite.
-			 */
-			do_action_deprecated( 'github_updater_add_admin_page', [ $tab, $action ], 'gu_add_admin_page' );
-
-			/**
-			 * Action hook to add admin page data to appropriate $tab.
-			 *
 			 * @since 10.0.0
 			 *
 			 * @param string $tab    Name of tab.
@@ -437,28 +407,6 @@ class Settings {
 			]
 		);
 
-		add_settings_field(
-			'deprecated_error_logging',
-			null,
-			[ $this, 'token_callback_checkbox' ],
-			'git_updater_install_settings',
-			'git_updater_settings',
-			[
-				'id'    => 'deprecated_error_logging',
-				'title' => esc_html__( 'Display `deprecated hook` messaging in debug.log', 'git-updater' ),
-				'class' => defined( 'WP_DEBUG' ) && WP_DEBUG ? '' : 'hidden',
-			]
-		);
-
-		/**
-		 * Hook to add Git API settings.
-		 *
-		 * @since 8.0.0
-		 *
-		 * @param array $auth_required Array containing authorization needs of git APIs.
-		 */
-		do_action_deprecated( 'github_updater_add_settings', [ static::$auth_required ], '10.0.0', 'gu_add_settings' );
-
 		/**
 		 * Hook to add Git API settings.
 		 *
@@ -508,15 +456,6 @@ class Settings {
 			 */
 			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
 
-			/**
-			 * Filter repo settings fields.
-			 *
-			 * @param array
-			 * @param \stdClass $token Repository object.
-			 * @param string $token->git Name of git host, eg. GitHub.
-			 */
-			$repo_setting_field = empty( $repo_setting_field ) ? apply_filters_deprecated( 'github_updater_add_repo_setting_field', [ [], $token, $token->git ], '10.0.0', 'gu_add_repo_setting_field' ) : $repo_setting_field;
-
 			if ( empty( $repo_setting_field ) ) {
 				continue;
 			}
@@ -563,7 +502,6 @@ class Settings {
 			'db_version',
 			'branch_switch',
 			'bypass_background_processing',
-			'deprecated_error_logging',
 		];
 
 		foreach ( $running_servers as $server ) {
@@ -631,14 +569,6 @@ class Settings {
 		 * @return array
 		 */
 		$overrides = apply_filters( 'gu_override_dot_org', [] );
-
-		/**
-		 * Filter to return array of overrides to dot org.
-		 *
-		 * @since 8.5.0
-		 * @return array
-		 */
-		$overrides = empty( $overrides ) ? apply_filters_deprecated( 'github_updater_override_dot_org', [ [] ], '10.0.0', 'gu_override_dot_org' ) : $overrides;
 
 		// Show plugins/themes skipped using Skip Updates plugin.
 		$skip_updates = get_site_option( 'skip_updates', [] );
@@ -716,13 +646,6 @@ class Settings {
 		/**
 		 * Save $options in add-on classes.
 		 *
-		 * @since 8.0.0
-		 */
-		do_action_deprecated( 'github_updater_update_settings', [ $_POST ], '10.0.0', 'gu_update_settings' );
-
-		/**
-		 * Save $options in add-on classes.
-		 *
 		 * @since 10.0.0
 		 */
 		do_action( 'gu_update_settings', $_POST );
@@ -768,18 +691,10 @@ class Settings {
 		/**
 		 * Filter to add to $option_page array.
 		 *
-		 * @since 8.0.0
-		 * @return array
-		 */
-		$option_page = apply_filters_deprecated( 'github_updater_save_redirect', [ [ 'git_updater' ] ], '10.0.0', 'gu_save_redirect' );
-
-		/**
-		 * Filter to add to $option_page array.
-		 *
 		 * @since 10.0.0
 		 * @return array
 		 */
-		$option_page = 1 === count( $option_page ) ? apply_filters( 'gu_save_redirect', [ 'git_updater' ] ) : $option_page;
+		$option_page = apply_filters( 'gu_save_redirect', [ 'git_updater' ] );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$is_option_page = isset( $_POST['option_page'] ) && in_array( $_POST['option_page'], $option_page, true );

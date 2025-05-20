@@ -407,14 +407,6 @@ class API {
 		 */
 		$always_fetch = (bool) apply_filters( 'gu_always_fetch_update', false );
 
-		/**
-		 * Filters the return value of exit_no_update.
-		 *
-		 * @since 6.0.0
-		 * @return bool `true` will exit this function early, default will not.
-		 */
-		$always_fetch = $always_fetch ?: (bool) apply_filters_deprecated( 'ghu_always_fetch_update', [ false ], '10.0.0', 'gu_always_fetch_update' );
-
 		if ( $always_fetch ) {
 			return false;
 		}
@@ -538,6 +530,7 @@ class API {
 	 */
 	protected function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
+		$this->type->added        = $this->type->repo_meta['added'] ?? '';
 		$this->type->is_private   = $this->type->repo_meta['private'];
 	}
 
@@ -587,6 +580,15 @@ class API {
 			unset( $readme['upgrade_notice'] );
 		} else {
 			$this->type->upgrade_notice = $readme['upgrade_notice'];
+		}
+
+		// Properly format tags.
+		if ( ! empty( $readme['tags'] ) ) {
+			foreach ( $readme['tags'] as $key => $tag ) {
+				unset( $readme['tags'][ $key ] );
+				$key                    = strtolower( str_replace( ' ', '-', $tag ) );
+				$readme['tags'][ $key ] = $tag;
+			}
 		}
 		$this->type->readme_tags = $readme['tags'];
 

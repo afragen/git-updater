@@ -309,6 +309,7 @@ HTML;
              */
             afterLicenseUserDataLoaded = function () {
                 if (
+                    false !== otherLicenseOwnerID &&
                     null !== otherLicenseOwnerID &&
                     otherLicenseOwnerID != <?php echo $fs->is_registered() ? $fs->get_user()->id : 'null' ?>
                 ) {

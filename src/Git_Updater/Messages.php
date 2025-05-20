@@ -76,8 +76,6 @@ class Messages {
 					break;
 				case 'waiting':
 					$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
-					$disable_wp_cron = $disable_wp_cron ?: (bool) apply_filters_deprecated( 'github_updater_disable_wpcron', [ false ], '10.0.0', 'gu_disable_wpcron' );
-
 					if ( ! $disable_wp_cron ) {
 						add_action( is_multisite() ? 'network_admin_notices' : 'admin_notices', [ $this, 'waiting' ] );
 					}
@@ -208,45 +206,6 @@ class Messages {
 			</p>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Log and error message when using deprecated filters.
-	 *
-	 * @uses `_deprecated_hook`.
-	 *
-	 * @param string $hook        The hook that was called.
-	 * @param string $replacement The hook that should be used as a replacement.
-	 * @param string $version     The version of WordPress that deprecated the argument used.
-	 * @param string $message     A message regarding the change.
-	 *
-	 * @return void
-	 */
-	public function deprecated_error_message( $hook, $replacement, $version, $message ) {
-		$options = $this->get_class_vars( 'Base', 'options' );
-		if ( ! isset( $options['deprecated_error_logging'] ) ) {
-			return;
-		}
-		if ( $replacement ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log(
-				sprintf(
-					'%1$s is **deprecated** since version %2$s! Use %3$s instead.',
-					$hook,
-					$version,
-					$replacement
-				) . '&nbsp;' . $message
-			);
-		} else {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log(
-				sprintf(
-					'%1$s is **deprecated** since version %2$s with no alternative available.',
-					$hook,
-					$version
-				) . '&nbsp;' . $message
-			);
-		}
 	}
 
 	/**

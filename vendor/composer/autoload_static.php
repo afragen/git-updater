@@ -6,14 +6,14 @@ namespace Composer\Autoload;
 
 class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
 {
+    public static $files = array (
+        '8d50dc88e56bace65e1e72f6017983ed' => __DIR__ . '/..' . '/freemius/wordpress-sdk/start.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'P' => 
         array (
             'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 57,
-        ),
-        'M' => 
-        array (
-            'McAskill\\Composer\\' => 18,
         ),
         'F' => 
         array (
@@ -25,10 +25,6 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
         array (
             0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
-        ),
-        'McAskill\\Composer\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
         ),
         'Fragen\\Git_Updater\\' => 
         array (

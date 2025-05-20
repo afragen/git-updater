@@ -2,8 +2,8 @@
     "packages": [
         {
             "name": "afragen/singleton",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "1.0.5",
+            "version_normalized": "1.0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
@@ -19,7 +19,6 @@
                 "php": ">=5.6.5"
             },
             "time": "2024-11-19T17:40:31+00:00",
-            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -46,7 +45,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/singleton/issues",
-                "source": "https://github.com/afragen/singleton/tree/master"
+                "source": "https://github.com/afragen/singleton/tree/1.0.5"
             },
             "install-path": "../afragen/singleton"
         },
@@ -281,17 +280,17 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.11.0",
-            "version_normalized": "2.11.0.0",
+            "version": "2.12.0",
+            "version_normalized": "2.12.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "9ad5477e4f0a39999b96bb21d0327bc6841d4590"
+                "reference": "db6f35a2b3d318a53330409dbeab49156ee76dd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/9ad5477e4f0a39999b96bb21d0327bc6841d4590",
-                "reference": "9ad5477e4f0a39999b96bb21d0327bc6841d4590",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/db6f35a2b3d318a53330409dbeab49156ee76dd8",
+                "reference": "db6f35a2b3d318a53330409dbeab49156ee76dd8",
                 "shasum": ""
             },
             "require": {
@@ -306,7 +305,7 @@
                 "szepeviktor/phpstan-wordpress": "^1.3",
                 "wp-coding-standards/wpcs": "^2.3"
             },
-            "time": "2025-02-09T07:06:24+00:00",
+            "time": "2025-05-11T07:07:09+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -331,84 +330,29 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.11.0"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.12.0"
             },
             "install-path": "../freemius/wordpress-sdk"
         },
         {
-            "name": "mcaskill/composer-exclude-files",
-            "version": "v4.0.1",
-            "version_normalized": "4.0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mcaskill/composer-plugin-exclude-files.git",
-                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/ed68fc7d6da2146ed2c32c92904587c9e03c985a",
-                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a",
-                "shasum": ""
-            },
-            "require": {
-                "composer-plugin-api": "^2.3",
-                "php": "^7.2.5 || ^8.0"
-            },
-            "require-dev": {
-                "composer/composer": "^2.3",
-                "phpstan/phpstan": "^1.11",
-                "symfony/phpunit-bridge": "^7.1"
-            },
-            "time": "2024-12-03T21:08:26+00:00",
-            "type": "composer-plugin",
-            "extra": {
-                "class": "McAskill\\Composer\\ExcludeFilePlugin",
-                "branch-alias": {
-                    "dev-main": "4.x-dev"
-                }
-            },
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "McAskill\\Composer\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Chauncey McAskill",
-                    "email": "chauncey@mcaskill.ca"
-                }
-            ],
-            "description": "Exclude files from autoload_files.php",
-            "support": {
-                "issues": "https://github.com/mcaskill/composer-plugin-exclude-files/issues",
-                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v4.0.1"
-            },
-            "install-path": "../mcaskill/composer-exclude-files"
-        },
-        {
             "name": "phpcsstandards/phpcsextra",
-            "version": "1.2.1",
-            "version_normalized": "1.2.1.0",
+            "version": "1.3.0",
+            "version_normalized": "1.3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSExtra.git",
-                "reference": "11d387c6642b6e4acaf0bd9bf5203b8cca1ec489"
+                "reference": "46d08eb86eec622b96c466adec3063adfed280dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSExtra/zipball/11d387c6642b6e4acaf0bd9bf5203b8cca1ec489",
-                "reference": "11d387c6642b6e4acaf0bd9bf5203b8cca1ec489",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSExtra/zipball/46d08eb86eec622b96c466adec3063adfed280dd",
+                "reference": "46d08eb86eec622b96c466adec3063adfed280dd",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4",
                 "phpcsstandards/phpcsutils": "^1.0.9",
-                "squizlabs/php_codesniffer": "^3.8.0"
+                "squizlabs/php_codesniffer": "^3.12.1"
             },
             "require-dev": {
                 "php-parallel-lint/php-console-highlighter": "^1.0",
@@ -417,7 +361,7 @@
                 "phpcsstandards/phpcsdevtools": "^1.2.1",
                 "phpunit/phpunit": "^4.5 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
             },
-            "time": "2023-12-08T16:49:07+00:00",
+            "time": "2025-04-20T23:35:32+00:00",
             "type": "phpcodesniffer-standard",
             "extra": {
                 "branch-alias": {
@@ -467,6 +411,10 @@
                 {
                     "url": "https://opencollective.com/php_codesniffer",
                     "type": "open_collective"
+                },
+                {
+                    "url": "https://thanks.dev/u/gh/phpcsstandards",
+                    "type": "thanks_dev"
                 }
             ],
             "install-path": "../phpcsstandards/phpcsextra"
@@ -564,17 +512,17 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.11.3",
-            "version_normalized": "3.11.3.0",
+            "version": "3.13.0",
+            "version_normalized": "3.13.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "ba05f990e79cbe69b9f35c8c1ac8dca7eecc3a10"
+                "reference": "65ff2489553b83b4597e89c3b8b721487011d186"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/ba05f990e79cbe69b9f35c8c1ac8dca7eecc3a10",
-                "reference": "ba05f990e79cbe69b9f35c8c1ac8dca7eecc3a10",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/65ff2489553b83b4597e89c3b8b721487011d186",
+                "reference": "65ff2489553b83b4597e89c3b8b721487011d186",
                 "shasum": ""
             },
             "require": {
@@ -586,7 +534,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.3.4"
             },
-            "time": "2025-01-23T17:04:15+00:00",
+            "time": "2025-05-11T03:36:00+00:00",
             "bin": [
                 "bin/phpcbf",
                 "bin/phpcs"
@@ -643,7 +591,7 @@
                     "type": "open_collective"
                 },
                 {
-                    "url": "https://thanks.dev/phpcsstandards",
+                    "url": "https://thanks.dev/u/gh/phpcsstandards",
                     "type": "thanks_dev"
                 }
             ],
@@ -722,7 +670,6 @@
     "dev": true,
     "dev-package-names": [
         "dealerdirect/phpcodesniffer-composer-installer",
-        "mcaskill/composer-exclude-files",
         "phpcsstandards/phpcsextra",
         "phpcsstandards/phpcsutils",
         "squizlabs/php_codesniffer",

@@ -74,13 +74,6 @@ class Init {
 		add_action( 'init', [ $this->base, 'background_update' ] );
 		add_action( 'init', [ $this->base, 'set_options_filter' ] );
 
-		add_action( 'deprecated_hook_run', [ new Messages(), 'deprecated_error_message' ], 10, 4 );
-
-		// `wp_get_environment_type()` added in WordPress 5.5.
-		if ( function_exists( 'wp_get_environment_type' ) && 'development' === wp_get_environment_type() ) {
-			add_filter( 'deprecated_hook_trigger_error', '__return_false' );
-		}
-
 		// Load hook for adding authentication headers for download packages.
 		add_filter(
 			'upgrader_pre_download',
@@ -111,16 +104,6 @@ class Init {
 		}
 
 		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
-
-		/**
-		 * Filter $admin_pages to be able to adjust the pages where Git Updater runs.
-		 *
-		 * @since 8.0.0
-		 * @deprecated 9.1.0
-		 *
-		 * @param array $admin_pages Default array of admin pages where Git Updater runs.
-		 */
-		apply_filters_deprecated( 'github_updater_add_admin_pages', [ null ], '9.1.0' );
 
 		return $can_user_update;
 	}

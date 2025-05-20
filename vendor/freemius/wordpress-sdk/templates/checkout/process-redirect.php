@@ -51,16 +51,36 @@
 
         $loader.show();
 
-        switch ( action ) {
-            case 'install':
-                processInstall( data );
-                break;
-            case 'pending_activation':
-                processPendingActivation( data );
-                break;
-            default:
-                syncLicense( data );
-                break;
+        // This remains compatible with the same filter in /templates/checkout/frame.php.
+        // You can return a promise to make the successive redirection wait until your own processing is completed.
+        // However for most cases, we recommend sending a beacon request {https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon}
+        var processPurchaseEvent = (<?php echo $fs->apply_filters('checkout/purchaseCompleted', 'function (data) {
+            console.log("checkout", "purchaseCompleted");
+        }'); ?>)(data.purchaseData);
+
+        if (typeof Promise !== 'undefined' && processPurchaseEvent instanceof Promise) {
+            processPurchaseEvent.finally(function () {
+                finishProcessing(action, data);
+            });
+        } else {
+            finishProcessing(action, data);
+        }
+
+        function finishProcessing(action, data) {
+            switch ( action ) {
+                case 'install':
+                    processInstall( data );
+                    break;
+                case 'pending_activation':
+                    processPendingActivation( data );
+                    break;
+                case 'return_without_sync':
+                    goToAccount();
+                    break;
+                default:
+                    syncLicense( data );
+                    break;
+            }
         }
 
         function processInstall( data ) {
@@ -100,6 +120,10 @@
             }
 
             window.location.href = redirectUrl.toString();
+        }
+
+        function goToAccount() {
+            window.location.href = <?php echo wp_json_encode( $fs->get_account_url() ) ?>;
         }
     });
 </script>
