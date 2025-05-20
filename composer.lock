@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b161e0a061f68a9b1ee08093853c061",
+    "content-hash": "228905b6b0d3f20f01801b3605820957",
     "packages": [
         {
             "name": "afragen/singleton",
-            "version": "dev-master",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
@@ -23,7 +23,6 @@
             "require": {
                 "php": ">=5.6.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -49,7 +48,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/singleton/issues",
-                "source": "https://github.com/afragen/singleton/tree/master"
+                "source": "https://github.com/afragen/singleton/tree/1.0.5"
             },
             "time": "2024-11-19T17:40:31+00:00"
         },
@@ -649,7 +648,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "afragen/singleton": 20,
         "afragen/wordpress-plugin-readme-parser": 20
     },
     "prefer-stable": true,

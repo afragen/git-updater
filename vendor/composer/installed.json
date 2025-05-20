@@ -2,8 +2,8 @@
     "packages": [
         {
             "name": "afragen/singleton",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "1.0.5",
+            "version_normalized": "1.0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
@@ -19,7 +19,6 @@
                 "php": ">=5.6.5"
             },
             "time": "2024-11-19T17:40:31+00:00",
-            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -46,7 +45,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/singleton/issues",
-                "source": "https://github.com/afragen/singleton/tree/master"
+                "source": "https://github.com/afragen/singleton/tree/1.0.5"
             },
             "install-path": "../afragen/singleton"
         },
