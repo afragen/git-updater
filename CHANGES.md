@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.15.0 / 2025-05-20
 * update to correct format of readme tags
 * add correctly formated date/time for `update-api` REST endpoint
 * remove deprecated hooks from v10 and earlier
