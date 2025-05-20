@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "228905b6b0d3f20f01801b3605820957",
+    "content-hash": "7dc634c42b87662ac1c8056742fb478c",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -54,7 +54,7 @@
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
-            "version": "dev-master",
+            "version": "1.2024.12.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
@@ -70,7 +70,6 @@
                 "erusev/parsedown": "^1.7",
                 "php": ">=5.4"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -95,7 +94,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
-                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
+                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/1.2024.12.10"
             },
             "time": "2024-12-10T23:43:17+00:00"
         },
@@ -647,9 +646,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "afragen/wordpress-plugin-readme-parser": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

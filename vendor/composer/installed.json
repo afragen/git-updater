@@ -51,8 +51,8 @@
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "1.2024.12.10",
+            "version_normalized": "1.2024.12.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
@@ -69,7 +69,6 @@
                 "php": ">=5.4"
             },
             "time": "2024-12-10T23:43:17+00:00",
-            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -95,7 +94,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
-                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/master"
+                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/1.2024.12.10"
             },
             "install-path": "../afragen/wordpress-plugin-readme-parser"
         },

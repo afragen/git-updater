@@ -30,7 +30,7 @@
 	"prefer-stable": true,
 	"require": {
 		"php": ">=8.0",
-		"afragen/wordpress-plugin-readme-parser": "dev-master@dev",
+		"afragen/wordpress-plugin-readme-parser": "^1",
 		"afragen/singleton": "^1.0",
 		"afragen/wp-dismiss-notice": "*",
 		"freemius/wordpress-sdk": "^2.11"
