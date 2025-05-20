@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 12.15.1 / 2025-05-20
+* update stability of composer requirements
+
 #### 12.15.0 / 2025-05-20
 * update to correct format of readme tags
 * add correctly formated date/time for `update-api` REST endpoint
