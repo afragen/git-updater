@@ -2,22 +2,22 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.13.0\n"
+"Project-Id-Version: Git Updater 12.15.0\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-02-21T22:21:10+00:00\n"
+"POT-Creation-Date: 2025-05-20T21:21:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
 
 #. Plugin Name of the plugin
 #: git-updater.php
-#: src/Git_Updater/Settings.php:176
-#: src/Git_Updater/Settings.php:309
+#: src/Git_Updater/Settings.php:168
+#: src/Git_Updater/Settings.php:290
 msgid "Git Updater"
 msgstr ""
 
@@ -123,35 +123,35 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:452
+#: src/Git_Updater/API/GitHub_API.php:451
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:459
+#: src/Git_Updater/API/GitHub_API.php:458
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:475
+#: src/Git_Updater/API/GitHub_API.php:474
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:502
+#: src/Git_Updater/API/GitHub_API.php:501
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:509
+#: src/Git_Updater/API/GitHub_API.php:508
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:522
+#: src/Git_Updater/API/GitHub_API.php:521
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:536
+#: src/Git_Updater/API/GitHub_API.php:535
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:550
+#: src/Git_Updater/API/GitHub_API.php:549
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -163,39 +163,41 @@ msgstr ""
 msgid "Enter plugin or theme slug."
 msgstr ""
 
-#: src/Git_Updater/Base.php:732
+#: src/Git_Updater/Base.php:684
 msgid "Updates via Git Updater"
 msgstr ""
 
 #. translators: %1: opening tag, %2: closing tag
 #: src/Git_Updater/Bootstrap.php:66
+#, php-format
 msgid "Git Updater is missing required composer dependencies. %1$sLearn more.%2$s"
 msgstr ""
 
 #. translators: 1: branch name, 2: jQuery dropdown, 3: closing tag
-#: src/Git_Updater/Branch.php:323
-#: src/Git_Updater/Branch.php:425
+#: src/Git_Updater/Branch.php:311
+#: src/Git_Updater/Branch.php:405
+#, php-format
 msgid "Current branch is `%1$s`, try %2$sanother version%3$s"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:331
+#: src/Git_Updater/Branch.php:319
 msgid "Choose a Version"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:374
-#: src/Git_Updater/Branch.php:532
+#: src/Git_Updater/Branch.php:354
+#: src/Git_Updater/Branch.php:485
 msgid "No previous tags to rollback to."
 msgstr ""
 
-#: src/Git_Updater/Branch.php:378
+#: src/Git_Updater/Branch.php:358
 msgid "Install"
 msgstr ""
 
-#: src/Git_Updater/Branch.php:464
+#: src/Git_Updater/Branch.php:434
 msgid "Switch to branch "
 msgstr ""
 
-#: src/Git_Updater/Branch.php:524
+#: src/Git_Updater/Branch.php:477
 msgid "Switch to release "
 msgstr ""
 
@@ -223,11 +225,13 @@ msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
 #: src/Git_Updater/Install.php:360
+#, php-format
 msgid "Git Updater Install %s"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
 #: src/Git_Updater/Install.php:368
+#, php-format
 msgid "%s URI"
 msgstr ""
 
@@ -256,43 +260,45 @@ msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
 
-#: src/Git_Updater/Messages.php:126
-#: src/Git_Updater/Messages.php:170
-#: src/Git_Updater/Messages.php:190
+#: src/Git_Updater/Messages.php:124
+#: src/Git_Updater/Messages.php:168
+#: src/Git_Updater/Messages.php:188
 msgid "Git Updater Error Code:"
 msgstr ""
 
 #. translators: %1$s: git server, %2$s: wait time
-#: src/Git_Updater/Messages.php:133
+#: src/Git_Updater/Messages.php:131
+#, php-format
 msgid "%1$s API&#8217;s rate limit will reset in %2$s minutes."
 msgstr ""
 
 #. translators: %1$s: git server, %2$s: GitHub personal access token URL
-#: src/Git_Updater/Messages.php:140
+#: src/Git_Updater/Messages.php:138
+#, php-format
 msgid "It looks like you are running into %1$s API rate limits. Be sure and configure a <a href=\"%2$s\">Personal Access Token</a> to avoid this issue."
 msgstr ""
 
-#: src/Git_Updater/Messages.php:174
+#: src/Git_Updater/Messages.php:172
 msgid "There is probably an access token or password error on the Git Updater Settings page."
 msgstr ""
 
-#: src/Git_Updater/Messages.php:205
+#: src/Git_Updater/Messages.php:203
 msgid "Git Updater Information"
 msgstr ""
 
-#: src/Git_Updater/Messages.php:207
+#: src/Git_Updater/Messages.php:205
 msgid "Please be patient while WP-Cron finishes making API calls."
 msgstr ""
 
-#: src/Git_Updater/Messages.php:265
+#: src/Git_Updater/Messages.php:224
 msgid "Please consider purchasing a Git Updater license for authenticated API requests and to support continued development."
 msgstr ""
 
-#: src/Git_Updater/Messages.php:267
+#: src/Git_Updater/Messages.php:226
 msgid "Only $19.99 for an unlimited yearly license."
 msgstr ""
 
-#: src/Git_Updater/Messages.php:269
+#: src/Git_Updater/Messages.php:228
 msgid "Purchase from Store"
 msgstr ""
 
@@ -315,102 +321,103 @@ msgstr ""
 
 #. translators: %s: Link to Git Remote Updater repository
 #: src/Git_Updater/Remote_Management.php:152
+#, php-format
 msgid "The <a href=\"%s\">Git Remote Updater</a> plugin was specifically created to make the remote management of Git Updater supported plugins and themes much simpler. You will need the Site URL and REST API key to use with Git Remote Updater settings."
 msgstr ""
 
 #. translators: 1: home URL, 2: REST API key
 #: src/Git_Updater/Remote_Management.php:162
+#, php-format
 msgid "Site URL: %1$s<br> REST API key: %2$s"
 msgstr ""
 
 #. translators: 1: Link to wiki, 2: RESTful API URL
 #: src/Git_Updater/Remote_Management.php:173
+#, php-format
 msgid "Please refer to the <a href=\"%s\">Git Updater Knowledge Base</a> for complete list of attributes."
 msgstr ""
 
 #. translators: link to REST API endpoint for updating
 #: src/Git_Updater/Remote_Management.php:183
+#, php-format
 msgid "REST API endpoints for webhook updating begin at: %s"
 msgstr ""
 
 #. translators: link to REST API endpoint for branch resetting
 #: src/Git_Updater/Remote_Management.php:193
+#, php-format
 msgid "REST API endpoints for webhook branch resetting begin at: %s"
 msgstr ""
 
 #: src/Git_Updater/Settings.php:148
-#: src/Git_Updater/Settings.php:847
+#: src/Git_Updater/Settings.php:762
 msgid "Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:251
-#: src/Git_Updater/Settings.php:411
+#: src/Git_Updater/Settings.php:232
+#: src/Git_Updater/Settings.php:381
 msgid "Git Updater Settings"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:252
+#: src/Git_Updater/Settings.php:233
 msgctxt "Menu item"
 msgid "Git Updater"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:333
+#: src/Git_Updater/Settings.php:314
 msgid "Refresh Cache"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:378
+#: src/Git_Updater/Settings.php:348
 msgid "Settings saved."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:380
+#: src/Git_Updater/Settings.php:350
 msgid "Cache refreshed."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:424
+#: src/Git_Updater/Settings.php:394
 msgid "Enable Branch Switching"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:436
+#: src/Git_Updater/Settings.php:406
 msgid "Bypass WP-Cron Background Processing for Debugging"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:448
-msgid "Display `deprecated hook` messaging in debug.log"
-msgstr ""
-
-#: src/Git_Updater/Settings.php:498
-#: src/Git_Updater/Settings.php:914
+#: src/Git_Updater/Settings.php:446
+#: src/Git_Updater/Settings.php:829
 msgid "Name not available"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:612
+#: src/Git_Updater/Settings.php:550
 msgid "Check to enable."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:651
+#: src/Git_Updater/Settings.php:581
 msgid "Overridden Plugins and Themes"
 msgstr ""
 
-#: src/Git_Updater/Settings.php:652
+#: src/Git_Updater/Settings.php:582
 msgid "The following plugins or themes might exist on wp.org, but any updates will be downloaded from their respective git repositories."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:881
+#: src/Git_Updater/Settings.php:796
 msgid "This is a private repository."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:882
+#: src/Git_Updater/Settings.php:797
 msgid "This repository has not connected to the API or was unable to connect."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:883
+#: src/Git_Updater/Settings.php:798
 msgid "This repository is hosted on WordPress.org."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:884
+#: src/Git_Updater/Settings.php:799
 msgid "This repository has been ignored and does not connect to the API."
 msgstr ""
 
-#: src/Git_Updater/Settings.php:928
+#: src/Git_Updater/Settings.php:843
 msgid "Installed Plugins and Themes"
 msgstr ""
 
@@ -432,46 +439,53 @@ msgstr ""
 
 #. translators: %s: The function name.
 #: src/Git_Updater/Shim.php:125
+#, php-format
 msgid "%s expects a non-empty string."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:389
-#: src/Git_Updater/Theme.php:517
+#: src/Git_Updater/Theme.php:388
+#: src/Git_Updater/Theme.php:516
+#, php-format
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:401
+#: src/Git_Updater/Theme.php:400
+#, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:405
+#: src/Git_Updater/Theme.php:404
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:410
-#: src/Git_Updater/Theme.php:528
+#: src/Git_Updater/Theme.php:409
+#: src/Git_Updater/Theme.php:527
+#, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:415
-#: src/Git_Updater/Theme.php:533
+#: src/Git_Updater/Theme.php:414
+#: src/Git_Updater/Theme.php:532
+#, php-format
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:540
+#: src/Git_Updater/Theme.php:539
+#, php-format
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:546
+#: src/Git_Updater/Theme.php:545
+#, php-format
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:689
+#: src/Git_Updater/Traits/GU_Trait.php:671
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
