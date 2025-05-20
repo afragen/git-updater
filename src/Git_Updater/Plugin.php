@@ -173,7 +173,7 @@ class Plugin {
 
 			$git_plugin['type']           = 'plugin';
 			$git_plugin['git']            = $repo_parts['git_server'];
-			$git_plugin['id']             = $header['id'];
+			$git_plugin['did']            = $header['did'];
 			$git_plugin['uri']            = "{$header['base_uri']}/{$header['owner_repo']}";
 			$git_plugin['enterprise']     = $header['enterprise_uri'];
 			$git_plugin['enterprise_api'] = $header['enterprise_api'];
@@ -301,7 +301,7 @@ class Plugin {
 			return $result;
 		}
 
-		$response->id          = $plugin->id;
+		$response->did         = $plugin->did;
 		$response->slug        = $plugin->slug;
 		$response->plugin_name = $plugin->name;
 		$response->name        = $plugin->name;

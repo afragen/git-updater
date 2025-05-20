@@ -599,7 +599,7 @@ trait GU_Trait {
 		$header['ci_job']         = false;
 		$header['release_asset']  = false;
 		$header['primary_branch'] = false;
-		$header['id']             = null;
+		$header['did']            = null;
 
 		if ( ! empty( $header['host'] ) ) {
 			if ( 'GitHub' === $header_parts[0] && ! str_contains( $header['host'], 'github.com' ) ) {
@@ -634,8 +634,8 @@ trait GU_Trait {
 		$header['release_asset']  = ! $header['release_asset'] && ! empty( $headers['ReleaseAsset'] ) ? true === (bool) $headers['ReleaseAsset'] : $header['release_asset'];
 		$header['primary_branch'] = ! $header['primary_branch'] && ! empty( $headers['PrimaryBranch'] ) ? $headers['PrimaryBranch'] : 'master';
 
-		$header['id'] = ! empty( $headers['PluginID'] ) ? $headers['PluginID'] : '';
-		$header['id'] = ! empty( $headers['ThemeID'] ) ? $headers['ThemeID'] : $header['id'];
+		$header['did'] = ! empty( $headers['PluginID'] ) ? $headers['PluginID'] : '';
+		$header['did'] = ! empty( $headers['ThemeID'] ) ? $headers['ThemeID'] : $header['did'];
 
 		return $header;
 	}
