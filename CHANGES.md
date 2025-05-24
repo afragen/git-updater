@@ -1,4 +1,5 @@
 #### [unreleased]
+* change callback from `new REST_API()` to `$this`
 
 #### 12.15.1 / 2025-05-20
 * update stability of composer requirements

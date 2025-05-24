@@ -48,7 +48,7 @@ class REST_API {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 
 		// Deprecated AJAX request.
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
