@@ -328,6 +328,8 @@ class Base {
 			$this->add_assets( $repo_api );
 		}
 
+		do_action( 'get_remote_repo_meta', $repo, $repo_api );
+
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'];
 		// Return data if being called from Git Updater REST API.

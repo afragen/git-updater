@@ -1,6 +1,7 @@
 #### [unreleased]
 * change callback from `new REST_API()` to `$this`
 * collect `Author URI` from headers.
+* add action hook to `Base::get_remote_repo_meta`
 
 #### 12.15.1 / 2025-05-20
 * update stability of composer requirements
