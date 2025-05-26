@@ -207,6 +207,7 @@ class Theme {
 				$git_theme['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
 				$git_theme['local_version']           = strtolower( $theme['Version'] );
 				$git_theme['author']                  = $theme['Author'];
+				$git_theme['author_uri']              = $theme['AuthorURI'];
 				$git_theme['name']                    = $theme['Name'];
 				$git_theme['homepage']                = $theme['ThemeURI'];
 				$git_theme['sections']['description'] = $theme['Description'];

@@ -461,6 +461,7 @@ class REST_API {
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
+			'author_uri'        => explode( ',', str_replace( ' ', '', $repo_data->author_uri ) ),
 			'contributors'      => $repo_data->contributors,
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,
