@@ -14,7 +14,6 @@
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
  * Version:           12.15.1.3
  * Author:            Andy Fragen
- * Author URI:        https://thefragens.com, andy@thefragens.com
  * License:           MIT
  * Domain Path:       /languages
  * Text Domain:       git-updater
