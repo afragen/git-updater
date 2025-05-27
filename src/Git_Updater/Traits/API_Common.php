@@ -58,14 +58,23 @@ trait API_Common {
 			return '';
 		}
 		if ( 'github' === $git ) {
-			$assets = $response->assets ?? [];
-			foreach ( $assets as $asset ) {
-				if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
-					$response = $asset->url;
-					break;
+			if ( str_contains( $request, 'latest' ) ) {
+				$assets = $response->assets ?? [];
+				foreach ( $assets as $asset ) {
+					if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
+						$response = $asset->url;
+						break;
+					}
 				}
+				$response = is_string( $response ) ? $response : '';
+			} else {
+				$release_assets = [];
+				foreach ( $response as $release ) {
+					$release_assets[ $release->tag_name ] = $release->assets[0]->url;
+				}
+
+				return $release_assets;
 			}
-			$response = is_string( $response ) ? $response : '';
 		}
 
 		/**
@@ -427,6 +436,46 @@ trait API_Common {
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
+
+		return $response;
+	}
+
+	/**
+	 * Get API release assets.
+	 *
+	 * @param  string $git     Name of API, eg 'github'.
+	 * @param  string $request Query for API->api().
+	 * @return string $response Release asset URI.
+	 */
+	final public function get_api_release_assets( $git, $request ) {
+		$this->response = $this->get_repo_cache( $this->type->slug );
+		$response       = $this->response['release_assets'] ?? false;
+
+		if ( $response && $this->exit_no_update( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
+			self::$method = 'release_asset';
+			$response     = $this->api( $request );
+			$response     = $this->parse_release_asset( $git, $request, $response );
+
+			if ( ! $response && ! is_wp_error( $response ) ) {
+				$response          = new \stdClass();
+				$response->message = 'No release assets found';
+			}
+		}
+
+		if ( $response && ! isset( $this->response['release_assets'] ) ) {
+			$this->type->release_assets = $response;
+			$this->set_repo_cache( 'release_assets', $response );
+		}
+
+		if ( $this->validate_response( $response ) ) {
+			return false;
+		}
+
+		$this->type->release_assets = $response;
 
 		return $response;
 	}
