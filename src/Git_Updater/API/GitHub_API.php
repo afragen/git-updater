@@ -100,12 +100,21 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Return the GitHub release asset URL.
+	 * Return the latest GitHub release asset URL.
 	 *
 	 * @return string|bool
 	 */
 	public function get_release_asset() {
 		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+	}
+
+	/**
+	 * Return array of release assets.
+	 *
+	 * @return array
+	 */
+	public function get_release_assets() {
+		return $this->get_api_release_assets( 'github', '/repos/:owner/:repo/releases' );
 	}
 
 	/**
@@ -142,6 +151,7 @@ class GitHub_API extends API implements API_Interface {
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
+			$this->get_release_assets();
 			$release_asset = $this->get_release_asset();
 
 			if ( empty( $this->response['release_asset_download'] ) ) {
