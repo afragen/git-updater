@@ -82,11 +82,9 @@ class Bootstrap {
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
 		require_once __DIR__ . '/Shim.php';
-		( new GU_Freemius() )->init();
 		( new REST_API() )->load_hooks();
 		( new Additions_Bootstrap( $this->file ) )->run();
 		( new Init() )->run();
-		( new Messages() )->create_error_message( 'get_license' );
 
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();

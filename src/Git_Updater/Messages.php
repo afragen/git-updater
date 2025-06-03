@@ -65,15 +65,6 @@ class Messages {
 						]
 					);
 					break;
-				case 'get_license':
-					add_action(
-						is_multisite() ? 'network_admin_notices' : 'admin_notices',
-						[
-							$this,
-							'get_license',
-						]
-					);
-					break;
 				case 'waiting':
 					$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 					if ( ! $disable_wp_cron ) {
@@ -203,29 +194,6 @@ class Messages {
 				<?php esc_html_e( 'Git Updater Information', 'git-updater' ); ?>
 				<br>
 				<?php esc_html_e( 'Please be patient while WP-Cron finishes making API calls.', 'git-updater' ); ?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Generate information message to purchase.
-	 */
-	public function get_license() {
-		if ( ( ! gu_fs()->is_not_paying() )
-			|| ! \WP_Dismiss_Notice::is_admin_notice_active( 'license-3' )
-		) {
-			return;
-		}
-
-		?>
-		<div data-dismissible="license-5" class="notice-info notice is-dismissible">
-			<p>
-				<?php esc_html_e( 'Please consider purchasing a Git Updater license for authenticated API requests and to support continued development.', 'git-updater' ); ?>
-				<br>
-				<?php esc_html_e( 'Only $19.99 for an unlimited yearly license.', 'git-updater' ); ?>
-				<br><br>
-				<a class="button primary-button regular" href="https://git-updater.com/store/"><?php esc_html_e( 'Purchase from Store', 'git-updater' ); ?></a>
 			</p>
 		</div>
 		<?php

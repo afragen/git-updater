@@ -32,8 +32,7 @@
 		"php": ">=8.0",
 		"afragen/wordpress-plugin-readme-parser": "^1",
 		"afragen/singleton": "^1.0",
-		"afragen/wp-dismiss-notice": "*",
-		"freemius/wordpress-sdk": "^2.11"
+		"afragen/wp-dismiss-notice": "*"
 	},
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3.0.0"
