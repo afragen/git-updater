@@ -3,6 +3,7 @@
 * collect `Author URI` from headers.
 * add action hook to `Base::get_remote_repo_meta`
 * get all versions of release assets, similar to tags/rollbacks
+* add compatibility check for AspireUpdate and FAIR Package Manager
 
 #### 12.15.1 / 2025-05-20
 * update stability of composer requirements
