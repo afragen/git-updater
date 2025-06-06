@@ -90,6 +90,9 @@ class Bootstrap {
 
 		// Initialize time dissmissible admin notices.
 		new \WP_Dismiss_Notice();
+
+		// Check for update API redirect.
+		add_action( 'init', fn() => $this->check_update_api_redirect(), 0 );
 	}
 
 	/**
@@ -147,6 +150,23 @@ class Bootstrap {
 			if ( \is_wp_error( $result ) ) {
 				return $result;
 			}
+		}
+	}
+
+	/**
+	 * Check for API redirects from AspireUpdate or FAIR Package Manager.
+	 *
+	 * Run appropriate filter to redefine update API.
+	 *
+	 * @return void
+	 */
+	public function check_update_api_redirect() {
+		if ( class_exists( '\AspireUpdate\Admin_Settings' ) ) {
+			add_filter( 'gu_api_domain', fn () => \AspireUpdate\Admin_Settings::get_instance()->get_setting( 'api_host' ) );
+		}
+
+		if ( function_exists( '\Fair\Default_Repo\get_default_repo_domain' ) ) {
+			add_filter( 'gu_api_domain', fn () => \FAIR\Default_Repo\get_default_repo_domain() );
 		}
 	}
 }
