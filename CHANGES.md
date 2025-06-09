@@ -1,5 +1,6 @@
 #### [unreleased]
 * add DID
+* update rollback sort
 
 #### 12.16.0 / 2025-06-09
 * change callback from `new REST_API()` to `$this`
