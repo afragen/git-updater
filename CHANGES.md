@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.16.0 / 2025-06-09
 * change callback from `new REST_API()` to `$this`
 * collect `Author URI` from headers.
 * add action hook to `Base::get_remote_repo_meta`
