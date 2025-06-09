@@ -191,6 +191,7 @@ class Plugin {
 				$git_plugin['local_path']              = trailingslashit( dirname( $paths[ $slug ] ) );
 				$git_plugin['local_version']           = strtolower( $plugin['Version'] );
 				$git_plugin['author']                  = $plugin['Author'];
+				$git_plugin['author_uri']              = $plugin['AuthorURI'];
 				$git_plugin['name']                    = $plugin['Name'];
 				$git_plugin['homepage']                = $plugin['PluginURI'];
 				$git_plugin['sections']['description'] = $plugin['Description'];

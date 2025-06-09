@@ -48,7 +48,7 @@ class REST_API {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'rest_api_init', [ new REST_API(), 'register_endpoints' ] );
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 
 		// Deprecated AJAX request.
 		add_action( 'wp_ajax_git-updater-update', [ Singleton::get_instance( 'REST\Rest_Update', $this ), 'process_request' ] );
@@ -461,6 +461,7 @@ class REST_API {
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
+			'author_uri'        => property_exists( $repo_data, 'author_uri' ) ? $repo_data->author_uri : '',
 			'contributors'      => $repo_data->contributors,
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,
@@ -473,7 +474,7 @@ class REST_API {
 			'branch'            => $repo_data->branch,
 			'download_link'     => $download ? $repo_data->download_link : '',
 			'tags'              => $repo_data->readme_tags ?? [],
-			'versions'          => ! $repo_data->release_asset ? $repo_data->rollback : [],
+			'versions'          => $repo_data->release_asset ? $repo_data->release_assets : $repo_data->rollback,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
@@ -485,6 +486,7 @@ class REST_API {
 			'homepage'          => $repo_data->homepage,
 			'external'          => 'xxx',
 		];
+		uksort( $repo_api_data['versions'], 'version_compare' );
 
 		$repo_cache = $this->get_repo_cache( $slug );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
