@@ -22,7 +22,7 @@
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.9
  * Requires PHP:      8.0
- * Plugin ID:
+ * Plugin ID:         did:plc:afjf7gsjzsqmgc7dlhb553mv
  */
 
 namespace Fragen\Git_Updater;
