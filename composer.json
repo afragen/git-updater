@@ -33,7 +33,7 @@
 		"afragen/wordpress-plugin-readme-parser": "^1",
 		"afragen/singleton": "^1.0",
 		"afragen/wp-dismiss-notice": "*",
-		"freemius/wordpress-sdk": "^2.11"
+		"freemius/wordpress-sdk": "^2.12"
 	},
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3.0.0"
