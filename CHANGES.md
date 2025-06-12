@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 12.16.1 / 2025-07-12
+* add DID
+* update rollback sort
+* update banner image
+
 #### 12.16.0 / 2025-06-09
 * change callback from `new REST_API()` to `$this`
 * collect `Author URI` from headers.
