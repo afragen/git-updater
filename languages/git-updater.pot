@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.15.0\n"
+"Project-Id-Version: Git Updater 12.16.0\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-20T21:21:10+00:00\n"
+"POT-Creation-Date: 2025-06-12T23:05:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -123,35 +123,35 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:451
+#: src/Git_Updater/API/GitHub_API.php:461
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:458
+#: src/Git_Updater/API/GitHub_API.php:468
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:474
+#: src/Git_Updater/API/GitHub_API.php:484
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:501
+#: src/Git_Updater/API/GitHub_API.php:511
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:508
+#: src/Git_Updater/API/GitHub_API.php:518
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:521
+#: src/Git_Updater/API/GitHub_API.php:531
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:535
+#: src/Git_Updater/API/GitHub_API.php:545
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:549
+#: src/Git_Updater/API/GitHub_API.php:559
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -163,7 +163,7 @@ msgstr ""
 msgid "Enter plugin or theme slug."
 msgstr ""
 
-#: src/Git_Updater/Base.php:684
+#: src/Git_Updater/Base.php:686
 msgid "Updates via Git Updater"
 msgstr ""
 
@@ -444,44 +444,44 @@ msgid "%s expects a non-empty string."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:388
-#: src/Git_Updater/Theme.php:516
+#: src/Git_Updater/Theme.php:389
+#: src/Git_Updater/Theme.php:517
 #, php-format
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: %s: theme version
-#: src/Git_Updater/Theme.php:400
+#: src/Git_Updater/Theme.php:401
 #, php-format
 msgid "View version %s details."
 msgstr ""
 
-#: src/Git_Updater/Theme.php:404
+#: src/Git_Updater/Theme.php:405
 msgid "Automatic update is unavailable for this theme."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:409
-#: src/Git_Updater/Theme.php:527
+#: src/Git_Updater/Theme.php:410
+#: src/Git_Updater/Theme.php:528
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: src/Git_Updater/Theme.php:414
-#: src/Git_Updater/Theme.php:532
+#: src/Git_Updater/Theme.php:415
+#: src/Git_Updater/Theme.php:533
 #, php-format
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: src/Git_Updater/Theme.php:539
+#: src/Git_Updater/Theme.php:540
 #, php-format
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: src/Git_Updater/Theme.php:545
+#: src/Git_Updater/Theme.php:546
 #, php-format
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
