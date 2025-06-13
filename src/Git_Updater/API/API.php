@@ -461,7 +461,7 @@ class API {
 
 		list($tags, $rollback) = $parsed_tags;
 		usort( $tags, 'version_compare' );
-		krsort( $rollback );
+		uksort( $rollback, 'version_compare' );
 
 		$newest_tag     = array_slice( $tags, -1, 1, true );
 		$newest_tag_key = key( $newest_tag );
