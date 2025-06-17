@@ -1,4 +1,5 @@
 #### [unreleased]
+* don't rename on activation if slug contains DID
 
 #### 12.16.1 / 2025-06-12
 * add DID
