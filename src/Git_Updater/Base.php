@@ -527,6 +527,10 @@ class Base {
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
+		if ( basename( $new_source ) === $slug ) {
+			return $new_source;
+		}
+
 		if ( ! array_key_exists( $slug, (array) $config ) && ! isset( self::$options['remote_install'] ) ) {
 			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
 			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
