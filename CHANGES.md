@@ -1,6 +1,6 @@
 #### [unreleased]
 
-#### 12.16.1 / 2025-07-12
+#### 12.16.1 / 2025-06-12
 * add DID
 * update rollback sort
 * update banner image
