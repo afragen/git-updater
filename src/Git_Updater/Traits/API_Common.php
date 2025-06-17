@@ -70,7 +70,7 @@ trait API_Common {
 			} else {
 				$release_assets = [];
 				foreach ( $response as $release ) {
-					$release_assets[ $release->tag_name ] = $release->assets[0]->url;
+					$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
 				}
 
 				return $release_assets;
