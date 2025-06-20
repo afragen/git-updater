@@ -429,14 +429,14 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string                           $source        File path of $source.
-	 * @param string                           $remote_source File path of $remote_source.
-	 * @param \Plugin_Upgrader|\Theme_Upgrader $upgrader      An Upgrader object.
-	 * @param array                            $hook_extra    Array of hook data.
+	 * @param string       $source        File path of $source.
+	 * @param string       $remote_source File path of $remote_source.
+	 * @param \WP_Upgrader $upgrader      An Upgrader object.
+	 * @param array        $hook_extra    Array of hook data.
 	 *
 	 * @return string|\WP_Error
 	 */
-	public function upgrader_source_selection( string $source, string $remote_source, \Plugin_Upgrader|\Theme_Upgrader $upgrader, $hook_extra = [] ) {
+	public function upgrader_source_selection( string $source, string $remote_source, \WP_Upgrader $upgrader, $hook_extra = [] ) {
 		global $wp_filesystem;
 
 		$slug            = null;
