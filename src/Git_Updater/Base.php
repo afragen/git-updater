@@ -15,6 +15,12 @@ use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Branch;
+use Plugin_Upgrader;
+use ReflectionClass;
+use stdClass;
+use Theme_Upgrader;
+use WP_Error;
+use WP_Upgrader;
 
 /*
  * Exit if called directly.
@@ -77,28 +83,28 @@ class Base {
 	 * Stores the object calling Basic_Auth_Loader.
 	 *
 	 * @access public
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	public $caller;
 
 	/**
 	 * Store details of all repositories that are installed.
 	 *
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	protected $config;
 
 	/**
 	 * Holds plugin data.
 	 *
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	protected $plugin;
 
 	/**
 	 * Holds theme data.
 	 *
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	protected $theme;
 
@@ -121,7 +127,7 @@ class Base {
 		 * @since 10.0.0
 		 * @param array static::$git_servers Array of git servers.
 		 */
-		static::$git_servers = \apply_filters( 'gu_git_servers', static::$git_servers );
+		static::$git_servers = apply_filters( 'gu_git_servers', static::$git_servers );
 
 		/**
 		 * Filter to add installed APIs.
@@ -129,7 +135,7 @@ class Base {
 		 * @since 10.0.0
 		 * @param array static::$installed_apis Array of installed APIs.
 		 */
-		static::$installed_apis = \apply_filters( 'gu_installed_apis', static::$installed_apis );
+		static::$installed_apis = apply_filters( 'gu_installed_apis', static::$installed_apis );
 	}
 
 	/**
@@ -277,9 +283,9 @@ class Base {
 	 * Get remote repo meta data for plugins or themes.
 	 * Calls remote APIs for data.
 	 *
-	 * @param \stdClass $repo Repo object.
+	 * @param stdClass $repo Repo object.
 	 *
-	 * @return bool|\stdClass
+	 * @return bool|stdClass
 	 */
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
@@ -349,7 +355,7 @@ class Base {
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( $this->$type->slug ) ) {
-			$this->$type       = new \stdClass();
+			$this->$type       = new stdClass();
 			$this->$type->slug = '';
 		} elseif ( ! isset( self::$options[ $this->$type->slug ] ) ) {
 			self::$options[ $this->$type->slug ] = '';
@@ -429,14 +435,14 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string       $source        File path of $source.
-	 * @param string       $remote_source File path of $remote_source.
-	 * @param \WP_Upgrader $upgrader      An Upgrader object.
-	 * @param array        $hook_extra    Array of hook data.
+	 * @param string      $source        File path of $source.
+	 * @param string      $remote_source File path of $remote_source.
+	 * @param WP_Upgrader $upgrader      An Upgrader object.
+	 * @param array       $hook_extra    Array of hook data.
 	 *
-	 * @return string|\WP_Error
+	 * @return string|WP_Error
 	 */
-	public function upgrader_source_selection( string $source, string $remote_source, \WP_Upgrader $upgrader, $hook_extra = [] ) {
+	public function upgrader_source_selection( string $source, string $remote_source, WP_Upgrader $upgrader, $hook_extra = [] ) {
 		global $wp_filesystem;
 
 		$slug            = null;
@@ -448,7 +454,7 @@ class Base {
 		/*
 		 * Rename plugins.
 		 */
-		if ( $upgrader instanceof \Plugin_Upgrader ) {
+		if ( $upgrader instanceof Plugin_Upgrader ) {
 			$upgrader_object = Singleton::get_instance( 'Plugin', $this );
 			if ( isset( $hook_extra['plugin'] ) ) {
 				$slug       = dirname( $hook_extra['plugin'] );
@@ -462,7 +468,7 @@ class Base {
 		/*
 		 * Rename themes.
 		 */
-		if ( $upgrader instanceof \Theme_Upgrader ) {
+		if ( $upgrader instanceof Theme_Upgrader ) {
 			$upgrader_object = Singleton::get_instance( 'Theme', $this );
 			if ( isset( $hook_extra['theme'] ) ) {
 				$slug       = $hook_extra['theme'];
@@ -525,7 +531,7 @@ class Base {
 	 * @return string $new_source
 	 */
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
-		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		if ( basename( $new_source ) === $slug ) {
 			return $new_source;

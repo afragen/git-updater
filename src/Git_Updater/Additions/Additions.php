@@ -18,7 +18,7 @@ use Fragen\Singleton;
  * Add repos without required headers to Git Updater.
  * Uses JSON config data file and companion plugin.
  *
- * @uses \Fragen\Singleton
+ * @uses Fragen\Singleton
  */
 class Additions {
 	use \Fragen\Git_Updater\Traits\GU_Trait;
@@ -57,7 +57,7 @@ class Additions {
 	 * Add Git Updater headers to plugins/themes via a filter hooks.
 	 *
 	 * @access public
-	 * @uses   \Fragen\Git_Updater\Additions::add_to_git_updater()
+	 * @uses   Fragen\Git_Updater\Additions::add_to_git_updater()
 	 *
 	 * @param array  $config The repo config.
 	 * @param array  $repos  The repos to pull from.

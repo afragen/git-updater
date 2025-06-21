@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Branch;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -149,7 +150,7 @@ class Plugin {
 			);
 
 			$key = array_pop( $key );
-			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
+			if ( null === $key || ! array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
 
@@ -279,9 +280,9 @@ class Plugin {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param bool      $result   Default false.
-	 * @param string    $action   The type of information being requested from the Plugin Installation API.
-	 * @param \stdClass $response Plugin API arguments.
+	 * @param bool     $result   Default false.
+	 * @param string   $action   The type of information being requested from the Plugin Installation API.
+	 * @param stdClass $response Plugin API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -333,14 +334,14 @@ class Plugin {
 	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param \stdClass $transient Plugin update transient.
+	 * @param stdClass $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.
-		if ( ! \is_object( $transient ) ) {
-			$transient = new \stdClass();
+		if ( ! is_object( $transient ) ) {
+			$transient = new stdClass();
 		}
 
 		/**

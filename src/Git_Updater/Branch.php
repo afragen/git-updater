@@ -12,6 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -74,7 +75,7 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass $repo Repository object.
+	 * @param stdClass $repo Repository object.
 	 *
 	 * @return mixed
 	 */
@@ -90,8 +91,8 @@ class Branch {
 	/**
 	 * Update transient for rollback or branch switch.
 	 *
-	 * @param string    $type plugin|theme.
-	 * @param \stdClass $repo Repo object.
+	 * @param string   $type plugin|theme.
+	 * @param stdClass $repo Repo object.
 	 *
 	 * @return array $rollback Rollback transient.
 	 */
@@ -293,7 +294,7 @@ class Branch {
 	/**
 	 * Display rollback/branch switcher for theme single site installation.
 	 *
-	 * @param \stdClass $theme Theme object.
+	 * @param stdClass $theme Theme object.
 	 *
 	 * @return string
 	 */

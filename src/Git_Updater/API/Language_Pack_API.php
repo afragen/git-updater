@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater\API;
 
+use stdClass;
+
 /**
  * Class Language_Pack_API
  */
@@ -18,7 +20,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type Object of repository data.
+	 * @param stdClass $type Object of repository data.
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
@@ -82,10 +84,10 @@ class Language_Pack_API extends API {
 		 * Filter to set API specific Language Pack response.
 		 *
 		 * @since 10.0.0
-		 * @param \stdClass $response Object of Language Pack API response.
-		 * @param string    $git      Name of git host.
-		 * @param array     $headers  Array of repo headers.
-		 * @param \stdClass Current class object.
+		 * @param stdClass $response Object of Language Pack API response.
+		 * @param string   $git      Name of git host.
+		 * @param array    $headers  Array of repo headers.
+		 * @param stdClass Current class object.
 		 */
 		$response = apply_filters( 'gu_get_language_pack_json', $response, $git, $headers, $this );
 
@@ -99,9 +101,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string    $git     Name of API, eg 'github'.
-	 * @param \stdClass $locale  Locale.
-	 * @param array     $headers Array of headers.
+	 * @param string   $git     Name of API, eg 'github'.
+	 * @param stdClass $locale  Locale.
+	 * @param array    $headers Array of headers.
 	 *
 	 * @return null|string
 	 */
@@ -119,10 +121,10 @@ class Language_Pack_API extends API {
 		 * @since 10.0.0
 		 * @param null|string $package URL to language pack.
 		 * @param string      $git     Name of git host.
-		 * @param \stdClass   $locale  Object of language pack data.
+		 * @param stdClass    $locale  Object of language pack data.
 		 * @param array       $headers Array of repository headers.
 		 */
-		$package = \apply_filters( 'gu_post_process_language_pack_package', $package, $git, $locale, $headers );
+		$package = apply_filters( 'gu_post_process_language_pack_package', $package, $git, $locale, $headers );
 
 		return $package;
 	}
