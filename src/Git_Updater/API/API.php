@@ -14,6 +14,8 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\API_Common;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
+use stdClass;
+use WP_Error;
 
 /*
  * Exit if called directly.
@@ -61,7 +63,7 @@ class API {
 	/**
 	 * Holds 'plugin'|'theme' or plugin|theme object information for API classes.
 	 *
-	 * @var string|\stdClass
+	 * @var string|stdClass
 	 */
 	public $type;
 
@@ -76,7 +78,7 @@ class API {
 	/**
 	 * Variable to hold AWS redirect URL.
 	 *
-	 * @var string|\WP_Error $redirect
+	 * @var string|WP_Error $redirect
 	 */
 	protected $redirect;
 
@@ -117,8 +119,8 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array     $fields Array of settings fields.
-	 * @param \stdClass $repo   Object of repo data.
+	 * @param array    $fields Array of settings fields.
+	 * @param stdClass $repo   Object of repo data.
 	 *
 	 * @return array
 	 */
@@ -133,14 +135,14 @@ class API {
 	/**
 	 * Get repo's API.
 	 *
-	 * @param string         $git  'github'.
-	 * @param bool|\stdClass $repo Repository object.
+	 * @param string        $git  'github'.
+	 * @param bool|stdClass $repo Repository object.
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 */
 	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
-		$repo     = $repo ?: new \stdClass();
+		$repo     = $repo ?: new stdClass();
 
 		if ( 'github' === $git ) {
 			$repo_api = new GitHub_API( $repo );
@@ -150,13 +152,13 @@ class API {
 		 * Filter git host API object.
 		 *
 		 * @since 10.0.0
-		 * @param null|\stdClass $repo_api Git API object.
-		 * @param string         $git      Name of git host.
-		 * @param \stdClass      $repo     Repository object.
+		 * @param null|stdClass $repo_api Git API object.
+		 * @param string        $git      Name of git host.
+		 * @param stdClass      $repo     Repository object.
 		 *
-		 * @return \stdClass
+		 * @return stdClass
 		 */
-		$repo_api = \apply_filters( 'gu_get_repo_api', $repo_api, $git, $repo );
+		$repo_api = apply_filters( 'gu_get_repo_api', $repo_api, $git, $repo );
 
 		return $repo_api;
 	}
@@ -183,7 +185,7 @@ class API {
 	 *
 	 * @param string $url The URL to send the request to.
 	 *
-	 * @return boolean|\stdClass
+	 * @return boolean|stdClass
 	 */
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );
@@ -241,8 +243,8 @@ class API {
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 		if ( 'file' === self::$method && isset( $response['timeout'] ) && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$response_body = \json_decode( wp_remote_retrieve_body( $response ) );
-			if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
+			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
+			if ( null !== $response_body && property_exists( $response_body, 'message' ) ) {
 				$log_message = "Git Updater Error: {$this->type->name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				error_log( $log_message );
@@ -254,7 +256,7 @@ class API {
 		 *
 		 * @since 10.0.0
 		 * @param string $response HTTP remote response body.
-		 * @param \stdClass $this Current API object.
+		 * @param stdClass $this Current API object.
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
@@ -287,7 +289,7 @@ class API {
 		 * @since 10.0.0
 		 * @param array $arr Array of base git host data.
 		 */
-		$arr = \apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
+		$arr = apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
 
 		return $arr;
 	}
@@ -330,7 +332,7 @@ class API {
 		 *
 		 * @since 10.0.0
 		 * @param array     $type          Array or git host data.
-		 * @param \stdClass $this->type    Repo object.
+		 * @param stdClass $this->type    Repo object.
 		 * @param bool      $download_link Boolean is this a download link.
 		 * @param string    $endpoint      Endpoint to URL.
 		 */
@@ -350,7 +352,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @return bool|int|mixed|string|\WP_Error
+	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
 		$this->response = $this->get_repo_cache( $this->type->slug );
@@ -425,7 +427,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @param \stdClass $response The response.
+	 * @param stdClass $response The response.
 	 *
 	 * @return bool true if invalid
 	 */
@@ -477,8 +479,8 @@ class API {
 	/**
 	 * Get local file info if no update available. Save API calls.
 	 *
-	 * @param \stdClass $repo Repo data.
-	 * @param string    $file Filename.
+	 * @param stdClass $repo Repo data.
+	 * @param string   $file Filename.
 	 *
 	 * @return null|string
 	 */
@@ -605,7 +607,7 @@ class API {
 	 * @param string $asset Release asset URI from git host.
 	 * @param bool   $aws   Release asset hosted on AWS.
 	 *
-	 * @return string|bool|\stdClass Release asset URI from AWS.
+	 * @return string|bool|stdClass Release asset URI from AWS.
 	 */
 	public function get_release_asset_redirect( $asset, $aws = false ) {
 		$rest = false;

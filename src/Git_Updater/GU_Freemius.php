@@ -10,6 +10,10 @@
 
 namespace Fragen\Git_Updater;
 
+use Freemius;
+use FS_Plugin_Updater;
+use stdClass;
+
 /*
  * Exit if called directly.
  */
@@ -34,7 +38,7 @@ class GU_Freemius {
 			/**
 			 * Create a helper function for easy SDK access.
 			 *
-			 * @return \stdClass
+			 * @return stdClass
 			 */
 			function gu_fs() {
 				global $gu_fs;
@@ -162,12 +166,12 @@ class GU_Freemius {
 	 * Remove FS_Plugin_Updater hooks.
 	 * Allow Git Updater to use it's own update code for itself.
 	 *
-	 * @param \Freemius $gu_fs Freemius object.
+	 * @param Freemius $gu_fs Freemius object.
 	 *
 	 * @return void
 	 */
-	public function remove_fs_plugin_updater_hooks( \Freemius $gu_fs ) {
-		$FS_Plugin_Updater = \FS_Plugin_Updater::instance( $gu_fs );
+	public function remove_fs_plugin_updater_hooks( Freemius $gu_fs ) {
+		$FS_Plugin_Updater = FS_Plugin_Updater::instance( $gu_fs );
 		$plugin_name       = 'git-updater/git-updater.php';
 
 		// Bypass Freemius update-core.php dialog.

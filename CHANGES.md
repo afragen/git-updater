@@ -1,5 +1,6 @@
 #### [unreleased]
 * don't rename on activation if slug contains DID
+* un-escape stuff, more uses of `use`
 
 #### 12.16.1 / 2025-06-12
 * add DID

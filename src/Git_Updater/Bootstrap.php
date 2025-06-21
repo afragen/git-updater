@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 use Fragen\Git_Updater\Additions\Bootstrap as Additions_Bootstrap;
 use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Traits\GU_Trait;
+use WP_Dismiss_Notice;
 
 /*
  * Exit if called directly.
@@ -59,7 +60,7 @@ class Bootstrap {
 	 */
 	public function deactivate_die() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		\deactivate_plugins( plugin_basename( $this->file ) );
+		deactivate_plugins( plugin_basename( $this->file ) );
 
 		$message = sprintf(
 			/* translators: %1: opening tag, %2: closing tag */
@@ -89,7 +90,7 @@ class Bootstrap {
 		( new Messages() )->create_error_message( 'get_license' );
 
 		// Initialize time dissmissible admin notices.
-		new \WP_Dismiss_Notice();
+		new WP_Dismiss_Notice();
 
 		// Check for update API redirect.
 		add_action( 'init', fn() => $this->check_update_api_redirect(), 0 );
@@ -103,8 +104,8 @@ class Bootstrap {
 	public function remove_cron_events() {
 		$crons = [ 'gu_get_remote_plugin', 'gu_get_remote_theme' ];
 		foreach ( $crons as $cron ) {
-			$timestamp = \wp_next_scheduled( $cron );
-			\wp_unschedule_event( $timestamp, $cron );
+			$timestamp = wp_next_scheduled( $cron );
+			wp_unschedule_event( $timestamp, $cron );
 		}
 	}
 
