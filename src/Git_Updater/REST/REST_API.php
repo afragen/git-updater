@@ -468,6 +468,7 @@ class REST_API {
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
 			'author_uri'        => property_exists( $repo_data, 'author_uri' ) ? $repo_data->author_uri : '',
+			'license'           => property_exists( $repo_data, 'license' ) ? $repo_data->license : '',
 			'contributors'      => $repo_data->contributors,
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,

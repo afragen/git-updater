@@ -196,7 +196,7 @@ class Plugin {
 				$git_plugin['name']                    = $plugin['Name'];
 				$git_plugin['homepage']                = $plugin['PluginURI'];
 				$git_plugin['sections']['description'] = $plugin['Description'];
-
+				$git_plugin['license']                 = $plugin['License'];
 			}
 
 			$git_plugin['broken']           = ( empty( $header['owner'] ) || empty( $header['repo'] ) );

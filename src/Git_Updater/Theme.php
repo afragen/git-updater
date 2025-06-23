@@ -210,6 +210,7 @@ class Theme {
 				$git_theme['author']                  = $theme['Author'];
 				$git_theme['author_uri']              = $theme['AuthorURI'];
 				$git_theme['name']                    = $theme['Name'];
+				$git_theme['license']                 = $theme['License'];
 				$git_theme['homepage']                = $theme['ThemeURI'];
 				$git_theme['sections']['description'] = $theme['Description'];
 			}
