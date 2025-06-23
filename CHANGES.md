@@ -1,5 +1,4 @@
 #### [unreleased]
-* don't rename on activation if slug contains DID
 * un-escape stuff, more uses of `use`
 * add `License` header info
 
