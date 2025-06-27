@@ -20,6 +20,7 @@
  * Domain Path:       /languages
  * Text Domain:       git-updater
  * Network:           true
+ * Update URI:        afragen/git-updater
  * GitHub Plugin URI: https://github.com/afragen/git-updater
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.9
