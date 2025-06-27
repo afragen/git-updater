@@ -1,6 +1,7 @@
 #### [unreleased]
 * un-escape stuff, more uses of `use`
 * add `License` header info
+* add `Update URI` header info
 
 #### 12.16.1 / 2025-06-12
 * add DID
