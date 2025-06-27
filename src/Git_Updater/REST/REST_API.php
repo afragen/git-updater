@@ -462,6 +462,7 @@ class REST_API {
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'url'               => $repo_data->uri,
+			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
 			'release_asset'     => $repo_data->release_asset,
