@@ -213,6 +213,7 @@ class Theme {
 				$git_theme['license']                 = $theme['License'];
 				$git_theme['homepage']                = $theme['ThemeURI'];
 				$git_theme['sections']['description'] = $theme['Description'];
+				$git_theme['update_uri']              = $theme['UpdateURI'];
 			}
 
 			$git_theme['broken']  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
