@@ -32,6 +32,9 @@ namespace Fragen\Git_Updater;
 use Fragen\Git_Updater\API\Zipfile_API;
 use Fragen\Git_Updater\Additions\Additions;
 
+const PLUGIN_FILE = __FILE__;
+const PLUGIN_DIR  = __DIR__;
+
 /*
  * Exit if called directly.
  * PHP version check and exit.

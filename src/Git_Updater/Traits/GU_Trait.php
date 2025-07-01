@@ -16,6 +16,8 @@ use ReflectionObject;
 use stdClass;
 use WP_Error;
 
+use const Fragen\Git_Updater\PLUGIN_FILE;
+
 /**
  * Trait GU_Trait
  */

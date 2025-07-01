@@ -29,38 +29,13 @@ class Bootstrap {
 	use GU_Trait;
 
 	/**
-	 * Holds main plugin file.
-	 *
-	 * @var string
-	 */
-	protected $file;
-
-	/**
-	 * Holds main plugin directory.
-	 *
-	 * @var string
-	 */
-	protected $dir;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param  string $file Main plugin file.
-	 * @return void
-	 */
-	public function __construct( $file ) {
-		$this->file = $file;
-		$this->dir  = dirname( $file );
-	}
-
-	/**
 	 * Deactivate plugin and die as composer autoloader not loaded.
 	 *
 	 * @return void
 	 */
 	public function deactivate_die() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		deactivate_plugins( plugin_basename( $this->file ) );
+		deactivate_plugins( plugin_basename( PLUGIN_FILE ) );
 
 		$message = sprintf(
 			/* translators: %1: opening tag, %2: closing tag */
@@ -78,14 +53,14 @@ class Bootstrap {
 	 * @return void
 	 */
 	public function run() {
-		register_deactivation_hook( $this->file, [ $this, 'remove_cron_events' ] );
+		register_deactivation_hook( PLUGIN_FILE, [ $this, 'remove_cron_events' ] );
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( [ 'git-updater-pro/git-updater-pro.php', 'git-updater-additions/git-updater-additions.php' ] );
 
 		require_once __DIR__ . '/Shim.php';
 		( new GU_Freemius() )->init();
 		( new REST_API() )->load_hooks();
-		( new Additions_Bootstrap( $this->file ) )->run();
+		( new Additions_Bootstrap() )->run();
 		( new Init() )->run();
 		( new Messages() )->create_error_message( 'get_license' );
 
