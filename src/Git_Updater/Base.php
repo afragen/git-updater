@@ -533,7 +533,7 @@ class Base {
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
-		if ( null !== $config[ $slug ]->slug_did ) {
+		if ( null !== $config[ $slug ]->slug_did && plugin_basename( PLUGIN_FILE ) === $config[ $slug ]->slug_did ) {
 			return trailingslashit( $remote_source ) . $config[ $slug ]->slug_did;
 		}
 
