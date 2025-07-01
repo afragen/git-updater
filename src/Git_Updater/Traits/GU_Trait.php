@@ -792,4 +792,31 @@ trait GU_Trait {
 
 		return $result;
 	}
+
+	/**
+	 * Return shortened DID withou `did:plc|web'.
+	 *
+	 * @param  string $did Full DID.
+	 *
+	 * @return string|void
+	 */
+	final public function get_short_did( $did ) {
+		if ( ! empty( $did ) ) {
+			return '-' . (string) explode( ':', $did )[2];
+		}
+	}
+	/**
+	 * Return slug without DID.
+	 *
+	 * @param  string $slug Current slug.
+	 * @param  string $did  Full DID.
+	 *
+	 * @return string|void
+	 */
+	final public function get_only_slug( $slug, $did ) {
+		if ( ! empty( $did ) ) {
+			$slug = str_replace( '-' . (string) $this->get_short_did( $did ), '', $slug );
+		}
+		return $slug;
+	}
 }
