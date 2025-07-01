@@ -459,6 +459,7 @@ class REST_API {
 			'did'               => $repo_data->did,
 			'name'              => $repo_data->name,
 			'slug'              => $repo_data->slug,
+			'slug_did'          => $repo_data->slug_did,
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'url'               => $repo_data->uri,
