@@ -53,17 +53,17 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 // Check for composer autoloader.
 if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
 	require_once __DIR__ . '/src/Git_Updater/Bootstrap.php';
-	( new Bootstrap( __FILE__ ) )->deactivate_die();
+	( new Bootstrap() )->deactivate_die();
 }
 
-register_activation_hook( __FILE__, [ new Bootstrap( __FILE__ ), 'rename_on_activation' ] );
+register_activation_hook( __FILE__, [ new Bootstrap(), 'rename_on_activation' ] );
 
 ( new Zipfile_API() )->load_hooks();
 
 add_action(
 	'plugins_loaded',
 	function () {
-		( new Bootstrap( __FILE__ ) )->run();
+		( new Bootstrap() )->run();
 	}
 );
 
