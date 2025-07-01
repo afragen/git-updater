@@ -120,7 +120,7 @@ class Bootstrap {
 			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
 		}
 
-		if ( $slug && 'git-updater/git-updater.php' !== $slug ) {
+		if ( $slug && $this->gu_plugin_name !== $this->get_didless_slug( $slug ) ) {
 			require_once __DIR__ . '/Shim.php';
 			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater', true );
 			if ( is_wp_error( $result ) ) {

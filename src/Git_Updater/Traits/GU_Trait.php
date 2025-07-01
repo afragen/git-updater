@@ -804,7 +804,10 @@ trait GU_Trait {
 	 */
 	final public function get_short_did( $did ) {
 		if ( ! empty( $did ) ) {
-			return '-' . (string) explode( ':', $did )[2];
+			if ( str_contains( $did, ':' ) ) {
+				$did = (string) explode( ':', $did )[2];
+			}
+			return $did;
 		}
 	}
 	/**
@@ -815,9 +818,13 @@ trait GU_Trait {
 	 *
 	 * @return string|void
 	 */
-	final public function get_only_slug( $slug, $did ) {
+	final public function get_didless_slug( $slug, $did = '' ) {
+		if ( empty( $did ) ) {
+			$did = get_file_data( PLUGIN_FILE, [ 'PluginID' => 'Plugin ID' ] )['PluginID'];
+			$did = $this->get_short_did( $did );
+		}
 		if ( ! empty( $did ) ) {
-			$slug = str_replace( '-' . (string) $this->get_short_did( $did ), '', $slug );
+			$slug = str_replace( '-' . $this->get_short_did( $did ), '', $slug );
 		}
 		return $slug;
 	}
