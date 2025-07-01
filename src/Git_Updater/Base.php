@@ -539,7 +539,7 @@ class Base {
 
 		if ( ! array_key_exists( $slug, (array) $config ) && ! isset( self::$options['remote_install'] ) ) {
 			$repo         = $this->get_repo_slugs( $slug, $upgrader_object );
-			$repo['slug'] = isset( $repo['slug'] ) ? $repo['slug'] : $slug;
+			$repo['slug'] = $repo['slug'] ?? $slug;
 			$slug         = $slug === $repo['slug'] ? $slug : $repo['slug'];
 			$new_source   = trailingslashit( $remote_source ) . $slug;
 		}
