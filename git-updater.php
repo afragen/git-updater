@@ -56,7 +56,7 @@ if ( ! class_exists( 'Fragen\Git_Updater\Bootstrap' ) ) {
 	( new Bootstrap() )->deactivate_die();
 }
 
-register_activation_hook( __FILE__, [ new Bootstrap(), 'rename_on_activation' ] );
+register_activation_hook( PLUGIN_FILE, [ new Bootstrap(), 'rename_on_activation' ] );
 
 ( new Zipfile_API() )->load_hooks();
 
