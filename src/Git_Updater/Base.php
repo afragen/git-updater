@@ -532,6 +532,7 @@ class Base {
 	 */
 	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
 		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+		$slug   = $this->get_didless_slug( $slug );
 
 		if ( isset( $config[ $slug ]->slug_did, $config[ $slug ]->local_path )
 			&& null !== $config[ $slug ]->slug_did
