@@ -20,7 +20,6 @@ use Plugin_Upgrader;
 use Theme_Installer_Skin;
 use Theme_Upgrader;
 
-
 /*
  * Exit if called directly.
  */
