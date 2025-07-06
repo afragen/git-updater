@@ -834,6 +834,7 @@ trait GU_Trait {
 					$did      = get_file_data( $filepath, [ 'ThemeID' => 'Theme ID' ] )['ThemeID'];
 					break;
 				default:
+					return plugin_basename( basename( $slug ) );
 			}
 		}
 		$did = $this->get_did_parts( $did );
