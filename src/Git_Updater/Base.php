@@ -499,7 +499,7 @@ class Base {
 			self::$options['remote_install'] = true;
 		}
 
-		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
+		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug, $hook_extra );
 
 		if ( basename( dirname( $source ) ) === basename( $new_source ) ) {
 			$new_source = $source;
@@ -527,12 +527,21 @@ class Base {
 	 * @param string       $remote_source   File path of $remote_source.
 	 * @param Plugin|Theme $upgrader_object An Upgrader object.
 	 * @param string       $slug            Repository slug.
+	 * @param array        $hook_extra      Array of hook data.
 	 *
 	 * @return string $new_source
 	 */
-	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
+	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug, $hook_extra ) {
 		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
-		$slug   = $this->get_didless_slug( $slug );
+		if ( $upgrader_object instanceof Plugin && str_contains( $hook_extra['plugin'], $slug ) ) {
+			$file = trailingslashit( WP_PLUGIN_DIR ) . $hook_extra['plugin'];
+			$type = 'plugin';
+		}
+		if ( $upgrader_object instanceof Theme && str_contains( $hook_extra['theme'], $slug ) ) {
+			$file = ABSPATH . 'wp-content/themes/' . $slug . '.style.css';
+			$type = 'theme';
+		}
+		$slug = $this->get_slug_without_did_id( $type, $file );
 
 		if ( isset( $config[ $slug ]->slug_did, $config[ $slug ]->local_path )
 			&& null !== $config[ $slug ]->slug_did

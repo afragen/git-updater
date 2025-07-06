@@ -796,36 +796,52 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Return shortened DID withou `did:plc|web'.
+	 * Return method specific id, part after `did:plc|web'.
 	 *
-	 * @param  string $did Full DID.
+	 * @param  string $id Full DID.
 	 *
-	 * @return string|void
+	 * @return string|WP_Error
 	 */
-	final public function get_short_did( $did ) {
-		if ( ! empty( $did ) ) {
-			if ( str_contains( $did, ':' ) ) {
-				$did = (string) explode( ':', $did )[2];
-			}
-			return $did;
+	final public function get_did_parts( $id ) {
+		$parts = explode( ':', $id, 3 );
+		if ( count( $parts ) !== 3 ) {
+			return new WP_Error( 'fair.packages.validate_did.not_uri', __( 'DID could not be parsed as a URI.', 'git-updater' ) );
 		}
+
+		return [
+			'method' => $parts[1],
+			'id'     => $parts[2],
+		];
 	}
+
 	/**
-	 * Return slug without DID.
+	 * Return plugin file path without DID.
 	 *
-	 * @param  string $slug Current slug.
+	 * @param  string $plugin Filepath or plugin basename.
 	 * @param  string $did  Full DID.
 	 *
-	 * @return string|void
+	 * @return string
 	 */
-	final public function get_didless_slug( $slug, $did = '' ) {
+	final public function get_slug_without_did_id( $type, $slug, $did = '' ) {
 		if ( empty( $did ) ) {
-			$did = get_file_data( PLUGIN_FILE, [ 'PluginID' => 'Plugin ID' ] )['PluginID'];
-			$did = $this->get_short_did( $did );
+			switch ( $type ) {
+				case 'plugin':
+					$filepath = trailingslashit( WP_PLUGIN_DIR ) . plugin_basename( $slug );
+					$did      = get_file_data( $filepath, [ 'PluginID' => 'Plugin ID' ] )['PluginID'];
+					break;
+				case 'theme':
+					$filepath = ABSPATH . 'wp-content/themes/' . $slug . '/style.css';
+					$did      = get_file_data( $filepath, [ 'ThemeID' => 'Theme ID' ] )['ThemeID'];
+					break;
+				default:
+			}
 		}
-		if ( ! empty( $did ) ) {
-			$slug = str_replace( '-' . $this->get_short_did( $did ), '', $slug );
+		$did = $this->get_did_parts( $did );
+		if ( is_wp_error( $did ) ) {
+			return plugin_basename( basename( $slug ) );
 		}
+		$slug = str_replace( '-' . $did['id'], '', $slug );
+
 		return $slug;
 	}
 }
