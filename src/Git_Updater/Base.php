@@ -531,17 +531,9 @@ class Base {
 	 *
 	 * @return string $new_source
 	 */
-	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug, $hook_extra ) {
-		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
-		if ( $upgrader_object instanceof Plugin && str_contains( $hook_extra['plugin'], $slug ) ) {
-			$file = trailingslashit( WP_PLUGIN_DIR ) . $hook_extra['plugin'];
-			$type = 'plugin';
-		}
-		if ( $upgrader_object instanceof Theme && str_contains( $hook_extra['theme'], $slug ) ) {
-			$file = ABSPATH . 'wp-content/themes/' . $slug . '.style.css';
-			$type = 'theme';
-		}
-		$slug = $this->get_slug_without_did_id( $type, $file );
+	private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
+		$config = $upgrader_object instanceof Plugin ? $upgrader_object->get_plugin_configs() : [];
+		$config = $upgrader_object instanceof Theme ? $upgrader_object->get_theme_configs() : $config;
 
 		if ( isset( $config[ $slug ]->slug_did, $config[ $slug ]->local_path )
 			&& null !== $config[ $slug ]->slug_did
