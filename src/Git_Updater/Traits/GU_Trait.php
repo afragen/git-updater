@@ -813,36 +813,4 @@ trait GU_Trait {
 			'id'     => $parts[2],
 		];
 	}
-
-	/**
-	 * Return plugin file path without DID.
-	 *
-	 * @param  string $plugin Filepath or plugin basename.
-	 * @param  string $did  Full DID.
-	 *
-	 * @return string
-	 */
-	final public function get_slug_without_did_id( $type, $slug, $did = '' ) {
-		if ( empty( $did ) ) {
-			switch ( $type ) {
-				case 'plugin':
-					$filepath = trailingslashit( WP_PLUGIN_DIR ) . plugin_basename( $slug );
-					$did      = get_file_data( $filepath, [ 'PluginID' => 'Plugin ID' ] )['PluginID'];
-					break;
-				case 'theme':
-					$filepath = ABSPATH . 'wp-content/themes/' . $slug . '/style.css';
-					$did      = get_file_data( $filepath, [ 'ThemeID' => 'Theme ID' ] )['ThemeID'];
-					break;
-				default:
-					return plugin_basename( basename( $slug ) );
-			}
-		}
-		$did = $this->get_did_parts( $did );
-		if ( is_wp_error( $did ) ) {
-			return plugin_basename( basename( $slug ) );
-		}
-		$slug = str_replace( '-' . $did['id'], '', $slug );
-
-		return $slug;
-	}
 }
