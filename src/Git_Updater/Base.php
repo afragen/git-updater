@@ -535,11 +535,11 @@ class Base {
 		$config = $upgrader_object instanceof Plugin ? $upgrader_object->get_plugin_configs() : [];
 		$config = $upgrader_object instanceof Theme ? $upgrader_object->get_theme_configs() : $config;
 
-		if ( isset( $config[ $slug ]->slug_did, $config[ $slug ]->local_path )
-			&& null !== $config[ $slug ]->slug_did
-			&& plugin_basename( $config[ $slug ]->local_path ) === $config[ $slug ]->slug_did
-		) {
-			return trailingslashit( $remote_source ) . $config[ $slug ]->slug_did;
+		$parts      = explode( '-', $slug );
+		$maybe_did  = array_pop( $parts );
+		$maybe_slug = implode( '-', $parts );
+		if ( isset( $config[ $maybe_slug ] ) && $config[ $maybe_slug ]->slug_did === $maybe_slug . '-' . $maybe_did ) {
+			return trailingslashit( $remote_source ) . $config[ $maybe_slug ]->slug_did;
 		}
 
 		if ( basename( $new_source ) === $slug ) {
