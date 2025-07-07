@@ -2,8 +2,8 @@
 * un-escape stuff, more uses of `use`
 * add `License` header info
 * add `Update URI` header info
-* add `get_short_did()` to get short DID without `did:plc:`
-* add `get_didless_slug()` to strip did from slug if present
+* add `get_did_parts()` to get short DID without `did:plc:`
+* simplify check for `rename_on_activation()`
 
 #### 12.16.1 / 2025-06-12
 * add DID
