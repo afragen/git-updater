@@ -499,7 +499,7 @@ class Base {
 			self::$options['remote_install'] = true;
 		}
 
-		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug, $hook_extra );
+		$new_source = $this->fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug );
 
 		if ( basename( dirname( $source ) ) === basename( $new_source ) ) {
 			$new_source = $source;
