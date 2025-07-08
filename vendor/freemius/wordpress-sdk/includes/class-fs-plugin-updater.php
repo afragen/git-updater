@@ -548,12 +548,7 @@
 
             if ( ! isset( $this->_update_details ) ) {
                 // Get plugin's newest update.
-                $new_version = $this->_fs->get_update(
-                    false,
-                    fs_request_get_bool( 'force-check' ),
-                    FS_Plugin_Updater::UPDATES_CHECK_CACHE_EXPIRATION,
-                    $this->_fs->get_plugin_version()
-                );
+                $new_version = $this->_fs->get_update( false, fs_request_get_bool( 'force-check' ) );
 
                 $this->_update_details = false;
 
@@ -704,16 +699,8 @@
                 );
             }
 
-            if ( $this->_fs->is_premium() ) {
-                $latest_tag = $this->_fs->_fetch_latest_version( $this->_fs->get_id(), false );
-
-                if (
-                    isset( $latest_tag->readme ) &&
-                    isset( $latest_tag->readme->upgrade_notice ) &&
-                    ! empty( $latest_tag->readme->upgrade_notice )
-                ) {
-                    $update->upgrade_notice = $latest_tag->readme->upgrade_notice;
-                }
+            if ( $this->_fs->is_premium() && ! empty( $new_version->upgrade_notice ) ) {
+                $update->upgrade_notice = $new_version->upgrade_notice;
             }
 
             $update->{$this->_fs->get_module_type()} = $this->_fs->get_plugin_basename();

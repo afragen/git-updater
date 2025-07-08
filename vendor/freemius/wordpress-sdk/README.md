@@ -93,7 +93,7 @@ if ( ! function_exists( 'my_prefix_fs' ) ) {
 
 ## Usage example
 
-You can call anySDK methods by prefixing them with the shortcode function for your particular plugin/theme (specified when completing the SDK integration form in the Developer Dashboard):
+You can call any SDK methods by prefixing them with the shortcode function for your particular plugin/theme (specified when completing the SDK integration form in the Developer Dashboard):
 
 ```php
 <?php my_prefix_fs()->get_upgrade_url(); ?>
@@ -110,9 +110,9 @@ Or when calling Freemius multiple times in a scope, it's recommended to use it w
 
 There are many other SDK methods available that you can use to enhance the functionality of your WordPress product. Some of the more common use-cases are covered in the [Freemius SDK Gists](https://freemius.com/help/documentation/wordpress-sdk/gists/) documentation.
 
-## Adding license based logic examples
+## Adding license-based logic examples
 
-Add marketing content to encourage your users to upgrade for your paid version:
+Add marketing content that encourages your users to upgrade to a paid version:
 
 ```php
 <?php
@@ -139,7 +139,7 @@ Add logic which will only be available in your premium plugin version:
 ?>
 ```
 
-To add a function which will only be available in your premium plugin version, simply add __premium_only as the suffix of the function name. Just make sure that all lines that call that method directly or by hooks, are also wrapped in premium only logic:
+To add a function which will only be available in your premium plugin version, add `__premium_only` as the suffix of the function name. Ensure that all lines that call that method directly or by hooks, are also wrapped in premium only logic:
 
 ```php
 <?php
@@ -234,7 +234,7 @@ Add logic for specified paid plan:
 ## Excluding files and folders from the free plugin version
 There are [two ways](https://freemius.com/help/documentation/wordpress-sdk/software-licensing/#excluding_files_and_folders_from_the_free_plugin_version) to exclude files from your free version. 
 
-1. Add `__premium_only` just before the file extension. For example, functions__premium_only.php will be only included in the premium plugin version. This works for all types of files, not only PHP.
+1. Add `__premium_only` just before the file extension. For example, functions__premium_only.php will be included only in the premium plugin version. This works for all types of files, not only PHP.
 2. Add `@fs_premium_only` a special meta tag to the plugin's main PHP file header. Example:
 ```php
 <?php
@@ -261,7 +261,10 @@ There are [two ways](https://freemius.com/help/documentation/wordpress-sdk/softw
 ```
 In the example plugin header above, the file `/lib/functions.php` and the directory `/premium-files/` will be removed from the free plugin version.
 
-# WordPress.org Compliance
+## Hooks: Actions and Filters
+Similar to WordPress’ filters and actions hooks, the Freemius WordPress SDK provides a [collection of filters and actions](https://freemius.com/help/documentation/wordpress-sdk/filters-actions-hooks/) that enable you to customize and extend its functionality in your WordPress plugins or themes.
+
+## WordPress.org Compliance
 Based on [WordPress.org Guidelines](https://wordpress.org/plugins/about/guidelines/) you are not allowed to submit a plugin that has premium code in it:
 > All code hosted by WordPress.org servers must be free and fully-functional. If you want to sell advanced features for a plugin (such as a "pro" version), then you must sell and serve that code from your own site, we will not host it on our servers.
 
