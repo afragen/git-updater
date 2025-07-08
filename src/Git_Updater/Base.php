@@ -527,7 +527,6 @@ class Base {
 	 * @param string       $remote_source   File path of $remote_source.
 	 * @param Plugin|Theme $upgrader_object An Upgrader object.
 	 * @param string       $slug            Repository slug.
-	 * @param array        $hook_extra      Array of hook data.
 	 *
 	 * @return string $new_source
 	 */
@@ -535,11 +534,13 @@ class Base {
 		$config = $upgrader_object instanceof Plugin ? $upgrader_object->get_plugin_configs() : [];
 		$config = $upgrader_object instanceof Theme ? $upgrader_object->get_theme_configs() : $config;
 
-		$parts      = explode( '-', $slug );
-		$maybe_did  = array_pop( $parts );
-		$maybe_slug = implode( '-', $parts );
-		if ( isset( $config[ $maybe_slug ] ) && $config[ $maybe_slug ]->slug_did === $maybe_slug . '-' . $maybe_did ) {
-			return trailingslashit( $remote_source ) . $config[ $maybe_slug ]->slug_did;
+		$parts          = explode( '-', $slug );
+		$maybe_did_hash = array_pop( $parts );
+		$maybe_slug     = implode( '-', $parts );
+		if ( isset( $config[ $maybe_slug ], $config[ $maybe_slug ]->slug_did ) ) {
+			if ( $maybe_did_hash === $this->get_did_hash( $config[ $slug ]->did ) ) {
+				return trailingslashit( $remote_source ) . $config[ $maybe_slug ]->slug_did;
+			}
 		}
 
 		if ( basename( $new_source ) === $slug ) {
