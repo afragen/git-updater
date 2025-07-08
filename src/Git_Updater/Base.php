@@ -538,7 +538,7 @@ class Base {
 		$maybe_did_hash = array_pop( $parts );
 		$maybe_slug     = implode( '-', $parts );
 		if ( isset( $config[ $maybe_slug ], $config[ $maybe_slug ]->slug_did ) ) {
-			if ( $maybe_did_hash === $this->get_did_hash( $config[ $slug ]->did ) ) {
+			if ( $maybe_did_hash === $this->get_did_hash( $config[ $maybe_slug ]->did ) ) {
 				return trailingslashit( $remote_source ) . $config[ $maybe_slug ]->slug_did;
 			}
 		}
