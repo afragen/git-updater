@@ -197,7 +197,7 @@ class Theme {
 			$git_theme['enterprise_api'] = $header['enterprise_api'];
 			$git_theme['owner']          = $header['owner'];
 			$git_theme['slug']           = $header['repo'];
-			$git_theme['slug_did']       = $git_theme['did'] ? $git_theme['slug'] . '-' . $this->get_did_parts( $git_theme['did'] )['id'] : null;
+			$git_theme['slug_did']       = $git_theme['did'] ? $git_theme['slug'] . '-' . $this->get_did_hash( $git_theme['did'] ) : null;
 			$git_theme['file']           = "{$header['repo']}/style.css";
 			$git_theme['branch']         = $branch;
 			$git_theme['primary_branch'] = $header['primary_branch'];

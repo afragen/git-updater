@@ -180,7 +180,7 @@ class Plugin {
 			$git_plugin['enterprise_api'] = $header['enterprise_api'];
 			$git_plugin['owner']          = $header['owner'];
 			$git_plugin['slug']           = $header['repo'];
-			$git_plugin['slug_did']       = $git_plugin['did'] ? $git_plugin['slug'] . '-' . $this->get_did_parts( $git_plugin['did'] )['id'] : null;
+			$git_plugin['slug_did']       = $git_plugin['did'] ? $git_plugin['slug'] . '-' . $this->get_did_hash( $git_plugin['did'] ) : null;
 			$git_plugin['file']           = $slug;
 			$git_plugin['branch']         = $branch;
 			$git_plugin['primary_branch'] = $header['primary_branch'];
