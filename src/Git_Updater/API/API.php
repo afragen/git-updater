@@ -332,10 +332,10 @@ class API {
 		 * Filter API URL type for git host.
 		 *
 		 * @since 10.0.0
-		 * @param array     $type          Array or git host data.
+		 * @param array    $type          Array or git host data.
 		 * @param stdClass $this->type    Repo object.
-		 * @param bool      $download_link Boolean is this a download link.
-		 * @param string    $endpoint      Endpoint to URL.
+		 * @param bool     $download_link Boolean is this a download link.
+		 * @param string   $endpoint      Endpoint to URL.
 		 */
 		$type = apply_filters( 'gu_api_url_type', $type, $this->type, $download_link, $endpoint );
 
