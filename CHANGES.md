@@ -2,8 +2,9 @@
 * un-escape stuff, more uses of `use`
 * add `License` header info
 * add `Update URI` header info
-* add `get_did_parts()` to get short DID without `did:plc:`
+* add `get_did_hash()` to get hash of DID
 * simplify check for `rename_on_activation()`
+* update `freemius/wordpress-sdk`
 
 #### 12.16.1 / 2025-06-12
 * add DID
