@@ -796,21 +796,13 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Return method specific id, part after `did:plc|web'.
+	 * Get hash of DID.
 	 *
-	 * @param  string $id Full DID.
+	 * @param  string $did DID.
 	 *
-	 * @return string|WP_Error
+	 * @return string
 	 */
-	final public function get_did_parts( $id ) {
-		$parts = explode( ':', $id, 3 );
-		if ( count( $parts ) !== 3 ) {
-			return new WP_Error( 'fair.packages.validate_did.not_uri', __( 'DID could not be parsed as a URI.', 'git-updater' ) );
-		}
-
-		return [
-			'method' => $parts[1],
-			'id'     => $parts[2],
-		];
+	final public function get_did_hash( $did ): string {
+		return substr( hash( 'sha256', $did ), 0, 6 );
 	}
 }
