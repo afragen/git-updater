@@ -120,11 +120,15 @@ class Bootstrap {
 			update_site_option( 'git_updater', array_merge( $options, [ 'current_branch_git-updater' => 'develop' ] ) );
 		}
 
-		$hook   = current_action();
-		$file   = str_replace( 'activate_', '', $hook );
-		$gu_did = $this->get_class_vars( 'Plugin', 'config' )['git-updater']->slug_did;
+		// Strip hash from slug and re-make file.
+		$hook       = current_action();
+		$file       = str_replace( 'activate_', '', $hook );
+		$file       = explode( '/', $file, 2 );
+		$slug_parts = explode( '-', $file[0] );
+		array_pop( $slug_parts );
+		$slug = implode( '-', $slug_parts );
 
-		if ( $slug && ! in_array( dirname( $file ), [ 'git-updater', $gu_did ], true ) ) {
+		if ( $slug && 'git-updater/git-updater.php' !== $slug . '/' . $file[1] ) {
 			require_once __DIR__ . '/Shim.php';
 			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater', true );
 			if ( is_wp_error( $result ) ) {
