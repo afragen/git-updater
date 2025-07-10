@@ -3,6 +3,7 @@
 * add `License` header info
 * add `Update URI` header info
 * add `get_did_hash()` to get hash of DID
+* add `get_file_without_did_hash()`
 * simplify check for `rename_on_activation()`
 * update `freemius/wordpress-sdk`
 
