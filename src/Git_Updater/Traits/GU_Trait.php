@@ -805,4 +805,21 @@ trait GU_Trait {
 	final public function get_did_hash( $did ): string {
 		return substr( hash( 'sha256', $did ), 0, 6 );
 	}
+
+	/**
+	 * Return plugin file without DID hash.
+	 *
+	 * Assumes pattern of <slug>-<hash>.
+	 *
+	 * @param string $did DID.
+	 * @param string $plugin Plugin basename.
+	 *
+	 * @return string
+	 */
+	final public function get_file_without_did_hash( $did, $plugin ): string {
+		list( $slug, $file ) = explode( '/', $plugin, 2 );
+		$slug                = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
+
+		return $slug . '/' . $file;
+	}
 }
