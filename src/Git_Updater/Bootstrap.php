@@ -123,11 +123,6 @@ class Bootstrap {
 		// Strip hash from slug and re-make file.
 		$hook = current_action();
 		$file = str_replace( 'activate_', '', $hook );
-		// $file       = explode( '/', $file, 2 );
-		// $slug_parts = explode( '-', $file[0] );
-		// array_pop( $slug_parts );
-		// $slug = implode( '-', $slug_parts );
-
 		$file = $this->get_file_without_did_hash( 'did:plc:afjf7gsjzsqmgc7dlhb553mv', $file );
 
 		if ( $slug && 'git-updater/git-updater.php' !== $file ) {
