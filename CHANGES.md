@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.17.0 / 2025-07-14
 * un-escape stuff, more uses of `use`
 * add `License` header info
 * add `Update URI` header info
