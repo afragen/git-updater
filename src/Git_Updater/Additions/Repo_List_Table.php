@@ -12,6 +12,8 @@
 
 namespace Fragen\Git_Updater\Additions;
 
+use WP_List_Table;
+
 /*
  * Exit if called directly.
  * PHP version check and exit.
@@ -28,7 +30,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * Class Site_List_Table
  */
-class Repo_List_Table extends \WP_List_Table {
+class Repo_List_Table extends WP_List_Table {
 	/**
 	 * Holds site options.
 	 *
@@ -275,7 +277,7 @@ class Repo_List_Table extends \WP_List_Table {
 	public function process_bulk_action() {
 		// Detect when a bulk action is being triggered...
 		if ( ! isset( $_REQUEST['_wpnonce_row_action_delete'] )
-				|| ! \wp_verify_nonce( \sanitize_key( \wp_unslash( $_REQUEST['_wpnonce_row_action_delete'] ) ), 'delete_row_item' )
+				|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['_wpnonce_row_action_delete'] ) ), 'delete_row_item' )
 			) {
 			return;
 		}

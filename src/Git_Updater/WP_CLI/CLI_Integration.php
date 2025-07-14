@@ -15,6 +15,9 @@ use WP_CLI_Command;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Branch;
 use Fragen\Git_Updater\Install;
+use Plugin_Installer_Skin;
+use stdClass;
+use Theme_Installer_Skin;
 
 // Add WP-CLI commands.
 $class = new CLI_Integration();
@@ -221,7 +224,7 @@ class CLI_Integration extends WP_CLI_Command {
 			WP_CLI::error( $response->errors['http_request_failed'][0] );
 			exit;
 		}
-		if ( 200 === \wp_remote_retrieve_response_code( $response ) ) {
+		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			WP_CLI::success( $response['body'] );
 		} else {
 			WP_CLI::warning( 'Branch switching resulted in an error.' );
@@ -292,7 +295,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
  * Class GitHub_Upgrader_CLI_Plugin_Installer_Skin
  */
 // phpcs:ignore
-class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
+class CLI_Plugin_Installer_Skin extends Plugin_Installer_Skin {
 
 	/** Skin feeback. */
 	public function header() {
@@ -305,7 +308,7 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
 	/**
 	 * Skin error.
 	 *
-	 * @param \stdClass $errors Error object.
+	 * @param stdClass $errors Error object.
 	 *
 	 * @return void
 	 */
@@ -331,7 +334,7 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
  * Class GitHub_Upgrader_CLI_Theme_Installer_Skin
  */
 // phpcs:ignore
-class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
+class CLI_Theme_Installer_Skin extends Theme_Installer_Skin {
 	/** Skin header. */
 	public function header() {
 	}

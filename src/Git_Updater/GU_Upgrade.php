@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use WP_Error;
 
 /**
  * Exit if called directly.
@@ -90,6 +91,6 @@ final class GU_Upgrade {
 			delete_site_option( 'github_updater' );
 		}
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		\deactivate_plugins( 'github-updater/git-updater.php' );
+		deactivate_plugins( 'github-updater/git-updater.php' );
 	}
 }

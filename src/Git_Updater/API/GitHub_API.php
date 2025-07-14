@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -30,7 +31,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $type plugin|theme.
+	 * @param stdClass $type plugin|theme.
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
@@ -253,9 +254,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param stdClass|array $response Response from API call.
 	 *
-	 * @return \stdClass|array $arr Array of tag numbers, object is error.
+	 * @return stdClass|array $arr Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -278,7 +279,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of meta variables.
 	 */
@@ -307,7 +308,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param stdClass|array $response Response from API call.
 	 *
 	 * @return array $arr Array of changes in base64.
 	 */
@@ -331,7 +332,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of branch data.
 	 *
-	 * @param \stdClass $response API response.
+	 * @param stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
@@ -352,7 +353,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse release asset API response.
 	 *
-	 * @param \stdClass $response API response.
+	 * @param stdClass $response API response.
 	 *
 	 * @return void
 	 */
@@ -368,8 +369,8 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type Array of repo data.
+	 * @param stdClass|array $response  Response from API call.
+	 * @param array          $repo_type Array of repo data.
 	 *
 	 * @return array
 	 */
@@ -398,7 +399,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote root files/dirs.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param stdClass|array $response Response from API call.
 	 *
 	 * @return array
 	 */
@@ -423,9 +424,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote assets directory.
 	 *
-	 * @param \stdClass|array $response Response from API call.
+	 * @param stdClass|array $response Response from API call.
 	 *
-	 * @return \stdClass|array
+	 * @return stdClass|array
 	 */
 	protected function parse_asset_dir_response( $response ) {
 		$assets = [];

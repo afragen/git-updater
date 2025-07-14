@@ -11,6 +11,8 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use WP_Dismiss_Notice;
+use WP_Error;
 
 /*
  * Exit if called directly.
@@ -35,7 +37,7 @@ class Messages {
 	/**
 	 * Display message when API returns other than 200 or 404.
 	 *
-	 * @param string|\WP_Error $type Error type.
+	 * @param string|WP_Error $type Error type.
 	 *
 	 * @return bool
 	 */
@@ -106,7 +108,7 @@ class Messages {
 			) {
 				$_ratelimit = true;
 				$git_server = $this->get_class_vars( 'Base', 'git_servers' )[ $repo['git'] ];
-				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'ratelimit-error-1' ) ) {
+				if ( ! WP_Dismiss_Notice::is_admin_notice_active( 'ratelimit-error-1' ) ) {
 					return;
 				} ?>
 				<div data-dismissible="ratelimit-error-1" class="notice-error notice is-dismissible">
@@ -149,7 +151,7 @@ class Messages {
 		foreach ( (array) $error_code as $repo ) {
 			if ( ( ! $_authentication && isset( $repo['code'] ) ) && in_array( $repo['code'], [ 401, 404 ], true ) ) {
 				$_authentication = true;
-				if ( ! \WP_Dismiss_Notice::is_admin_notice_active( 'authentication-error-1' ) ) {
+				if ( ! WP_Dismiss_Notice::is_admin_notice_active( 'authentication-error-1' ) ) {
 					return;
 				}
 				?>

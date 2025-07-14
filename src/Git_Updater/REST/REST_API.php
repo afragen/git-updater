@@ -10,9 +10,15 @@
 
 namespace Fragen\Git_Updater\REST;
 
+use Exception;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Additions\Additions;
 use Fragen\Singleton;
+use stdClass;
+use UnexpectedValueException;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * Exit if called directly.
@@ -66,7 +72,7 @@ class REST_API {
 			'test',
 			[
 				'show_in_index'       => true,
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'test' ],
 				'permission_callback' => '__return_true',
 			]
@@ -77,7 +83,7 @@ class REST_API {
 			'namespace',
 			[
 				'show_in_index'       => true,
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_namespace' ],
 				'permission_callback' => '__return_true',
 			]
@@ -88,7 +94,7 @@ class REST_API {
 			'repos',
 			[
 				'show_in_index'       => false,
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_remote_repo_data' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
@@ -108,7 +114,7 @@ class REST_API {
 				[
 					[
 						'show_in_index'       => true,
-						'methods'             => \WP_REST_Server::READABLE,
+						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => [ $this, 'get_api_data' ],
 						'permission_callback' => '__return_true',
 						'args'                => [
@@ -121,7 +127,7 @@ class REST_API {
 					],
 					[
 						'show_in_index'       => false,
-						'methods'             => \WP_REST_Server::CREATABLE,
+						'methods'             => WP_REST_Server::CREATABLE,
 						'callback'            => [ $this, 'get_api_data' ],
 						'permission_callback' => '__return_true',
 						'args'                => [
@@ -142,14 +148,14 @@ class REST_API {
 			[
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_additions_api_data' ],
 					'permission_callback' => '__return_true',
 					'args'                => [],
 				],
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'get_additions_api_data' ],
 					'permission_callback' => '__return_true',
 					'args'                => [],
@@ -163,14 +169,14 @@ class REST_API {
 			[
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_additions_data' ],
 					'permission_callback' => '__return_true',
 					'args'                => [],
 				],
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'get_additions_data' ],
 					'permission_callback' => '__return_true',
 					'args'                => [],
@@ -215,7 +221,7 @@ class REST_API {
 			[
 				[
 					'show_in_index'       => true,
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'flush_repo_cache' ],
 					'permission_callback' => '__return_true',
 					'args'                => [
@@ -228,7 +234,7 @@ class REST_API {
 				],
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'flush_repo_cache' ],
 					'permission_callback' => '__return_true',
 					'args'                => [
@@ -248,14 +254,14 @@ class REST_API {
 			[
 				[
 					'show_in_index'       => true,
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ new REST_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ new REST_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
@@ -268,7 +274,7 @@ class REST_API {
 			'reset-branch',
 			[
 				'show_in_index'       => true,
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'reset_branch' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
@@ -293,7 +299,7 @@ class REST_API {
 			'github-updater/v1',
 			'test',
 			[
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'deprecated' ],
 				'permission_callback' => '__return_true',
 			]
@@ -303,7 +309,7 @@ class REST_API {
 			'github-updater/v1',
 			'repos',
 			[
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'deprecated' ],
 				'permission_callback' => '__return_true',
 			]
@@ -314,14 +320,14 @@ class REST_API {
 			[
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ new REST_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ new REST_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
@@ -364,11 +370,11 @@ class REST_API {
 	/**
 	 * Get repo data for Git Remote Updater.
 	 *
-	 * @param \WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request $request REST API response.
 	 *
 	 * @return array
 	 */
-	public function get_remote_repo_data( \WP_REST_Request $request ) {
+	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
@@ -420,11 +426,11 @@ class REST_API {
 	 *
 	 * Returns data consistent with `plugins_api()` or `themes_api()` request.
 	 *
-	 * @param \WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
-	public function get_api_data( \WP_REST_Request $request ) {
+	public function get_api_data( WP_REST_Request $request ) {
 		$slug     = $request->get_param( 'slug' );
 		$download = $request->get_param( 'download' );
 		$download = 'false' === $download || '0' === $download ? false : true;
@@ -453,15 +459,18 @@ class REST_API {
 			'did'               => $repo_data->did,
 			'name'              => $repo_data->name,
 			'slug'              => $repo_data->slug,
+			'slug_did'          => $repo_data->slug_did,
 			'git'               => $repo_data->git,
 			'type'              => $repo_data->type,
 			'url'               => $repo_data->uri,
+			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
-			'author_uri'        => property_exists( $repo_data, 'author_uri' ) ? $repo_data->author_uri : '',
+			'author_uri'        => $repo_data->author_uri ?? '',
+			'license'           => $repo_data->license ?? '',
 			'contributors'      => $repo_data->contributors,
 			'requires'          => $repo_data->requires,
 			'tested'            => $repo_data->tested,
@@ -528,11 +537,11 @@ class REST_API {
 	/**
 	 * Get Additions plugin|theme API data.
 	 *
-	 * @param \WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request $request REST API response.
 	 *
 	 * @return array
 	 */
-	public function get_additions_api_data( \WP_REST_Request $request ) {
+	public function get_additions_api_data( WP_REST_Request $request ) {
 		$api_data   = [];
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
@@ -577,9 +586,9 @@ class REST_API {
 	/**
 	 * Flush individual repository cache.
 	 *
-	 * @param \WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 */
 	public function flush_repo_cache( $request ) {
 		$slug = $request->get_param( 'slug' );
@@ -603,19 +612,19 @@ class REST_API {
 	/**
 	 * Reset branch of plugin/theme by removing from saved options.
 	 *
-	 * @param \WP_REST_Request $request REST API response.
+	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @throws \UnexpectedValueException Under multiple bad or missing params.
+	 * @throws UnexpectedValueException Under multiple bad or missing params.
 	 * @return void
 	 */
-	public function reset_branch( \WP_REST_Request $request ) {
+	public function reset_branch( WP_REST_Request $request ) {
 		$rest_update = new Rest_Update();
 		$start       = microtime( true );
 
 		try {
 			// Test for API key and exit if incorrect.
 			if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
-				throw new \UnexpectedValueException( 'Bad API key. No branch reset for you.' );
+				throw new UnexpectedValueException( 'Bad API key. No branch reset for you.' );
 			}
 
 			$plugin_slug = $request->get_param( 'plugin' );
@@ -624,7 +633,7 @@ class REST_API {
 			$slug        = ! empty( $plugin_slug ) ? $plugin_slug : $theme_slug;
 
 			if ( ( empty( $plugin_slug ) && empty( $theme_slug ) ) || ! isset( $options[ $slug ] ) ) {
-				throw new \UnexpectedValueException( 'No plugin or theme specified for branch reset.' );
+				throw new UnexpectedValueException( 'No plugin or theme specified for branch reset.' );
 			}
 
 			$this->set_repo_cache( 'current_branch', '', $slug );
@@ -639,7 +648,7 @@ class REST_API {
 			];
 			$rest_update->log_exit( $response, 200 );
 
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			$response = [
 				'success'      => false,
 				'messages'     => $e->getMessage(),

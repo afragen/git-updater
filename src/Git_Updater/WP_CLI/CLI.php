@@ -68,7 +68,7 @@ class CLI extends WP_CLI_Command {
 		$api_key   = get_site_option( 'git_updater_api_key' );
 		$api_url   = add_query_arg(
 			[ 'key' => $api_key ],
-			\home_url( "wp-json/$namespace/update/" )
+			home_url( "wp-json/$namespace/update/" )
 		);
 
 		WP_CLI::success( 'Git Updater REST API key has been reset.' );

@@ -11,6 +11,8 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Git_Updater\Readme_Parser;
+use Parsedown;
+use stdClass;
 
 /**
  * Trait API_Common
@@ -70,7 +72,7 @@ trait API_Common {
 			} else {
 				$release_assets = [];
 				foreach ( $response as $release ) {
-					$release_assets[ $release->tag_name ] = $release->assets[0]->url;
+					$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
 				}
 
 				return $release_assets;
@@ -81,10 +83,10 @@ trait API_Common {
 		 * Filter release asset response.
 		 *
 		 * @since 10.0.0
-		 * @param \stdClass $response API response.
-		 * @param string    $git      Name of git host.
-		 * @param string    $request  Schema of API REST endpoint.
-		 * @param \stdClass $this     Class object.
+		 * @param stdClass $response API response.
+		 * @param string   $git      Name of git host.
+		 * @param string   $request  Schema of API REST endpoint.
+		 * @param stdClass $this     Class object.
 		 */
 		$response = apply_filters( 'gu_parse_release_asset', $response, $git, $request, $this );
 
@@ -143,7 +145,7 @@ trait API_Common {
 			$response     = $this->api( $request );
 
 			if ( ! $response || is_wp_error( $response ) ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No tags found';
 			}
 
@@ -193,7 +195,7 @@ trait API_Common {
 			$response = $this->decode_response( $git, $response );
 
 			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No changelog found';
 				$this->set_repo_cache( 'changes', $response );
 			}
@@ -204,7 +206,7 @@ trait API_Common {
 		}
 
 		if ( ! isset( $this->response['changes'] ) ) {
-			$parser   = new \Parsedown();
+			$parser   = new Parsedown();
 			$response = $parser->text( $response );
 			$this->set_repo_cache( 'changes', $response );
 		}
@@ -255,7 +257,7 @@ trait API_Common {
 			$response = $this->decode_response( $git, $response );
 
 			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No readme found';
 				$this->set_repo_cache( 'readme', $response );
 			}
@@ -340,7 +342,7 @@ trait API_Common {
 			$error = is_wp_error( $response ) ? true : $error;
 
 			if ( $error ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No assets found';
 			}
 
@@ -380,8 +382,8 @@ trait API_Common {
 			 * Filter API branch response.
 			 *
 			 * @since 10.0.0
-			 * @param array|\stdClass $response
-			 * @param string          $git      Name of API, eg 'github'.
+			 * @param array|stdClass $response
+			 * @param string         $git      Name of API, eg 'github'.
 			 */
 			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
@@ -424,7 +426,7 @@ trait API_Common {
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No release asset found';
 			}
 		}
@@ -461,7 +463,7 @@ trait API_Common {
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
 			if ( ! $response && ! is_wp_error( $response ) ) {
-				$response          = new \stdClass();
+				$response          = new stdClass();
 				$response->message = 'No release assets found';
 			}
 		}

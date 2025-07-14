@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use stdClass;
 
 /**
  * Class Add_Ons
@@ -28,13 +29,12 @@ class Add_Ons {
 		'git-updater-bitbucket',
 		'git-updater-gitlab',
 		'git-updater-gitea',
-		'git-updater-collections',
 	];
 
 	/**
 	 * Stored repo data.
 	 *
-	 * @var \stdClass
+	 * @var stdClass
 	 */
 	protected $response;
 

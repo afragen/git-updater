@@ -15,6 +15,10 @@ use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
 use Fragen\Git_Updater\WP_CLI\CLI_Plugin_Installer_Skin;
 use Fragen\Git_Updater\WP_CLI\CLI_Theme_Installer_Skin;
+use Plugin_Installer_Skin;
+use Plugin_Upgrader;
+use Theme_Installer_Skin;
+use Theme_Upgrader;
 
 /*
  * Exit if called directly.
@@ -266,7 +270,7 @@ class Install {
 	 * @param string $type 'plugin' | 'theme'.
 	 * @param string $url  URL of the repository to be installed.
 	 *
-	 * @return bool|\Plugin_Upgrader|\Theme_Upgrader
+	 * @return bool|Plugin_Upgrader|Theme_Upgrader
 	 */
 	private function get_upgrader( $type, $url ) {
 		$nonce    = wp_nonce_url( $url );
@@ -278,8 +282,8 @@ class Install {
 			// Create a new instance of Plugin_Upgrader.
 			$skin     = static::is_wp_cli()
 				? new CLI_Plugin_Installer_Skin()
-				: new \Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
-			$upgrader = new \Plugin_Upgrader( $skin );
+				: new Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
+			$upgrader = new Plugin_Upgrader( $skin );
 		}
 
 		if ( 'theme' === $type ) {
@@ -288,8 +292,8 @@ class Install {
 			// Create a new instance of Theme_Upgrader.
 			$skin     = static::is_wp_cli()
 				? new CLI_Theme_Installer_Skin()
-				: new \Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme' ) );
-			$upgrader = new \Theme_Upgrader( $skin );
+				: new Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme' ) );
+			$upgrader = new Theme_Upgrader( $skin );
 			add_filter(
 				'install_theme_complete_actions',
 				[

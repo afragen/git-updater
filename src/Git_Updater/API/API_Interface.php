@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater\API;
 
+use stdClass;
+
 /**
  * Interface API_Interface
  */
@@ -107,9 +109,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass|array $response API response.
+	 * @param stdClass|array $response API response.
 	 *
-	 * @return array|\stdClass Array of tag numbers, object is error.
+	 * @return array|stdClass Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response );
 
@@ -118,9 +120,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass|array $response API response.
+	 * @param stdClass|array $response API response.
 	 *
-	 * @return array|\stdClass Array of meta variables.
+	 * @return array|stdClass Array of meta variables.
 	 */
 	public function parse_meta_response( $response );
 
@@ -129,9 +131,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass|array $response API response.
+	 * @param stdClass|array $response API response.
 	 *
-	 * @return array|\stdClass $arr Array of changes in base64, object if error.
+	 * @return array|stdClass $arr Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response );
 
@@ -140,7 +142,7 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass $response API response.
+	 * @param stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
