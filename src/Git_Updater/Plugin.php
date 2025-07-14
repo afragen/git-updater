@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Branch;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -149,7 +150,7 @@ class Plugin {
 			);
 
 			$key = array_pop( $key );
-			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
+			if ( null === $key || ! array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
 
@@ -179,6 +180,7 @@ class Plugin {
 			$git_plugin['enterprise_api'] = $header['enterprise_api'];
 			$git_plugin['owner']          = $header['owner'];
 			$git_plugin['slug']           = $header['repo'];
+			$git_plugin['slug_did']       = $git_plugin['did'] ? $git_plugin['slug'] . '-' . $this->get_did_hash( $git_plugin['did'] ) : null;
 			$git_plugin['file']           = $slug;
 			$git_plugin['branch']         = $branch;
 			$git_plugin['primary_branch'] = $header['primary_branch'];
@@ -195,7 +197,8 @@ class Plugin {
 				$git_plugin['name']                    = $plugin['Name'];
 				$git_plugin['homepage']                = $plugin['PluginURI'];
 				$git_plugin['sections']['description'] = $plugin['Description'];
-
+				$git_plugin['license']                 = $plugin['License'];
+				$git_plugin['update_uri']              = $plugin['UpdateURI'];
 			}
 
 			$git_plugin['broken']           = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
@@ -279,9 +282,9 @@ class Plugin {
 	/**
 	 * Put changelog in plugins_api, return WP.org data as appropriate
 	 *
-	 * @param bool      $result   Default false.
-	 * @param string    $action   The type of information being requested from the Plugin Installation API.
-	 * @param \stdClass $response Plugin API arguments.
+	 * @param bool     $result   Default false.
+	 * @param string   $action   The type of information being requested from the Plugin Installation API.
+	 * @param stdClass $response Plugin API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -333,14 +336,14 @@ class Plugin {
 	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param \stdClass $transient Plugin update transient.
+	 * @param stdClass $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.
-		if ( ! \is_object( $transient ) ) {
-			$transient = new \stdClass();
+		if ( ! is_object( $transient ) ) {
+			$transient = new stdClass();
 		}
 
 		/**

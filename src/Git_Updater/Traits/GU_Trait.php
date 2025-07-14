@@ -11,7 +11,12 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
-use Fragen\Git_Updater\Readme_Parser;
+use ReflectionClass;
+use ReflectionObject;
+use stdClass;
+use WP_Error;
+
+use const Fragen\Git_Updater\PLUGIN_FILE;
 
 /**
  * Trait GU_Trait
@@ -156,7 +161,7 @@ trait GU_Trait {
 	 */
 	final public function get_class_vars( $class_name, $name ) {
 		$class          = Singleton::get_instance( $class_name, $this );
-		$reflection_obj = new \ReflectionObject( $class );
+		$reflection_obj = new ReflectionObject( $class );
 		if ( ! $reflection_obj->hasProperty( $name ) ) {
 			return false;
 		}
@@ -178,16 +183,16 @@ trait GU_Trait {
 	/**
 	 * Function to check if plugin or theme object is able to be updated.
 	 *
-	 * @param \stdClass $type Repo object.
+	 * @param stdClass $type Repo object.
 	 *
 	 * @return bool
 	 */
 	final public function can_update_repo( $type ) {
 		$wp_version_ok   = ! empty( $type->requires )
-			? \is_wp_version_compatible( $type->requires )
+			? is_wp_version_compatible( $type->requires )
 			: true;
 		$php_version_ok  = ! empty( $type->requires_php )
-			? \is_php_version_compatible( $type->requires_php )
+			? is_php_version_compatible( $type->requires_php )
 			: true;
 		$remote_is_newer = isset( $type->remote_version, $type->local_version )
 			? version_compare( $type->remote_version, $type->local_version, '>' )
@@ -197,8 +202,8 @@ trait GU_Trait {
 		 * Filter $remote_is_newer if you use another method to test for updates.
 		 *
 		 * @since 10.0.0
-		 * @param bool      $remote_is_newer
-		 * @param \stdClass $type            Plugin/Theme data.
+		 * @param bool     $remote_is_newer
+		 * @param stdClass $type            Plugin/Theme data.
 		 */
 		$remote_is_newer = apply_filters( 'gu_remote_is_newer', $remote_is_newer, $type );
 
@@ -229,7 +234,7 @@ trait GU_Trait {
 	 * Test for whether remote_version is set ( default = 0.0.0 ) or
 	 * a repo option is set/not empty.
 	 *
-	 * @param \stdClass $repo Repository.
+	 * @param stdClass $repo Repository.
 	 *
 	 * @return bool
 	 */
@@ -247,8 +252,8 @@ trait GU_Trait {
 	/**
 	 * Do we override dot org updates?
 	 *
-	 * @param string    $type (plugin|theme).
-	 * @param \stdClass $repo Repository object.
+	 * @param string   $type (plugin|theme).
+	 * @param stdClass $repo Repository object.
 	 *
 	 * @return bool
 	 */
@@ -265,7 +270,7 @@ trait GU_Trait {
 		$override  = in_array( $transient_key, $overrides, true );
 
 		// Set $override if set in Skip Updates plugin.
-		if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
+		if ( ! $override && class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
 			$skip_updates = get_site_option( 'skip_updates', [] );
 			foreach ( $skip_updates as $skip ) {
 				if ( $repo->file === $skip['slug'] ) {
@@ -334,7 +339,7 @@ trait GU_Trait {
 	 * Check to see if wp-cron/background updating has finished.
 	 * Or not managed by Git Updater.
 	 *
-	 * @param null|\stdClass $repo Repo object.
+	 * @param null|stdClass $repo Repo object.
 	 *
 	 * @return bool true when waiting for background job to finish.
 	 */
@@ -430,7 +435,7 @@ trait GU_Trait {
 		 * @since 10.0.0
 		 * @param array $repos Array of repo data.
 		 */
-		$repos = \apply_filters( 'gu_get_repo_parts', $repos, $type );
+		$repos = apply_filters( 'gu_get_repo_parts', $repos, $type );
 
 		if ( array_key_exists( $repo, $repos['types'] ) ) {
 			$arr['type']       = $repos['types'][ $repo ];
@@ -475,7 +480,7 @@ trait GU_Trait {
 		}
 
 		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
-		$config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
+		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		foreach ( (array) $config as $repo ) {
 			// Check repo slug or directory name for match.
@@ -514,6 +519,7 @@ trait GU_Trait {
 			'Description'     => 'Description',
 			'Author'          => 'Author',
 			'AuthorURI'       => 'Author URI',
+			'License'         => 'License',
 			'TextDomain'      => 'Text Domain',
 			'DomainPath'      => 'Domain Path',
 			'Network'         => 'Network',
@@ -530,6 +536,7 @@ trait GU_Trait {
 			'Author'      => 'Author',
 			'AuthorURI'   => 'Author URI',
 			'Version'     => 'Version',
+			'License'     => 'License',
 			'Template'    => 'Template',
 			'Status'      => 'Status',
 			'Tags'        => 'Tags',
@@ -669,7 +676,7 @@ trait GU_Trait {
 		$overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
 		if ( $overdue ) {
 			$error_msg = esc_html__( 'There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue.', 'git-updater' );
-			$error     = new \WP_Error( 'git_updater_cron_error', $error_msg );
+			$error     = new WP_Error( 'git_updater_cron_error', $error_msg );
 			Singleton::get_instance( 'Fragen\Git_Updater\Messages', $this )->create_error_message( $error );
 		}
 	}
@@ -742,7 +749,7 @@ trait GU_Trait {
 	/**
 	 * Get WP and PHP requirements from main plugin/theme file.
 	 *
-	 * @param \stdClass $repo Repository object.
+	 * @param stdClass $repo Repository object.
 	 *
 	 * @return array
 	 */
@@ -786,5 +793,33 @@ trait GU_Trait {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get hash of DID.
+	 *
+	 * @param  string $did DID.
+	 *
+	 * @return string
+	 */
+	final public function get_did_hash( $did ): string {
+		return substr( hash( 'sha256', $did ), 0, 6 );
+	}
+
+	/**
+	 * Return plugin file without DID hash.
+	 *
+	 * Assumes pattern of <slug>-<hash>.
+	 *
+	 * @param string $did DID.
+	 * @param string $plugin Plugin basename.
+	 *
+	 * @return string
+	 */
+	final public function get_file_without_did_hash( $did, $plugin ): string {
+		list( $slug, $file ) = explode( '/', $plugin, 2 );
+		$slug                = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
+
+		return $slug . '/' . $file;
 	}
 }

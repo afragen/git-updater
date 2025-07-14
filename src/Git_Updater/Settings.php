@@ -12,6 +12,7 @@ namespace Fragen\Git_Updater;
 
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -134,7 +135,7 @@ class Settings {
 		 * @since 10.0.0
 		 * @param array static::$auth_required Array of authentication requirements.
 		 */
-		static::$auth_required = \apply_filters( 'gu_settings_auth_required', static::$auth_required );
+		static::$auth_required = apply_filters( 'gu_settings_auth_required', static::$auth_required );
 	}
 
 	/**
@@ -451,7 +452,7 @@ class Settings {
 			 * @since 10.0.0
 			 *
 			 * @param array
-			 * @param \stdClass $token Repository object.
+			 * @param stdClass $token Repository object.
 			 * @param string $token->git Name of git host, eg. GitHub.
 			 */
 			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
@@ -575,7 +576,7 @@ class Settings {
 		foreach ( $skip_updates as $skip_update ) {
 			$overrides[] = $skip_update['slug'];
 		}
-		$overrides = \array_unique( $overrides );
+		$overrides = array_unique( $overrides );
 
 		if ( ! empty( $overrides ) ) {
 			echo '<h4>' . esc_html__( 'Overridden Plugins and Themes', 'git-updater' ) . '</h4>';

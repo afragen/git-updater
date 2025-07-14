@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater;
 
 use Fragen\Git_Updater\Traits\GU_Trait;
+use WP_Error;
 
 /**
  * Exit if called directly.
@@ -91,21 +92,21 @@ final class GU_Upgrade {
 			delete_site_option( 'github_updater' );
 		}
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		\deactivate_plugins( 'github-updater/git-updater.php' );
+		deactivate_plugins( 'github-updater/git-updater.php' );
 	}
 
 	/**
 	 * Check for deletion of cron event.
 	 *
-	 * @param null|bool|\WP_Error $pre       Value to return instead. Default null to continue unscheduling the event.
-	 * @param int                 $timestamp Timestamp for when to run the event.
-	 * @param string              $hook      Action hook, the execution of which will be unscheduled.
+	 * @param null|bool|WP_Error $pre       Value to return instead. Default null to continue unscheduling the event.
+	 * @param int                $timestamp Timestamp for when to run the event.
+	 * @param string             $hook      Action hook, the execution of which will be unscheduled.
 	 *
-	 * @return null|bool|\WP_Error
+	 * @return null|bool|WP_Error
 	 */
 	public function pre_unschedule_event( $pre, $timestamp, $hook ) {
 		if ( 'gu_delete_access_tokens' === $hook ) {
-			$days = ( \wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
+			$days = ( wp_next_scheduled( 'gu_delete_access_tokens' ) - time() ) / \DAY_IN_SECONDS;
 			if ( $days > 29 ) {
 				$this->flush_tokens();
 			}

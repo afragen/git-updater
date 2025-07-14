@@ -10,6 +10,8 @@
 
 namespace Fragen\Git_Updater\REST;
 
+use WP_Upgrader_Skin;
+
 /*
  * Exit if called directly.
  */
@@ -26,7 +28,7 @@ require_once ABSPATH . 'wp-admin/includes/file.php';
  * Extends WP_Upgrader_Skin and collects outputed messages for later
  * processing, rather than printing them out.
  */
-class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
+class Rest_Upgrader_Skin extends WP_Upgrader_Skin {
 	/**
 	 * Holds messages.
 	 *

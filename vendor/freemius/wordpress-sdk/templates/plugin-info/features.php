@@ -33,7 +33,6 @@
 
 		// Add support as a feature.
 		if ( ! empty( $plan->support_email ) ||
-		     ! empty( $plan->support_skype ) ||
 		     ! empty( $plan->support_phone ) ||
 		     true === $plan->is_success_manager
 		) {

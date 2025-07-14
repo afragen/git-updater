@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Branch;
+use stdClass;
 
 /*
  * Exit if called directly.
@@ -121,7 +122,7 @@ class Theme {
 
 		$paths = array_map(
 			function ( $theme ) {
-				$filepath = \file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
+				$filepath = file_exists( "{$theme->theme_root}/{$theme->stylesheet}/style.css" )
 					? "{$theme->theme_root}/{$theme->stylesheet}/style.css"
 					: null;
 
@@ -165,7 +166,7 @@ class Theme {
 			);
 
 			$key = array_pop( $key );
-			if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
+			if ( null === $key || ! array_key_exists( $key, $all_headers ) ) {
 				continue;
 			}
 
@@ -196,6 +197,7 @@ class Theme {
 			$git_theme['enterprise_api'] = $header['enterprise_api'];
 			$git_theme['owner']          = $header['owner'];
 			$git_theme['slug']           = $header['repo'];
+			$git_theme['slug_did']       = $git_theme['did'] ? $git_theme['slug'] . '-' . $this->get_did_hash( $git_theme['did'] ) : null;
 			$git_theme['file']           = "{$header['repo']}/style.css";
 			$git_theme['branch']         = $branch;
 			$git_theme['primary_branch'] = $header['primary_branch'];
@@ -209,8 +211,10 @@ class Theme {
 				$git_theme['author']                  = $theme['Author'];
 				$git_theme['author_uri']              = $theme['AuthorURI'];
 				$git_theme['name']                    = $theme['Name'];
+				$git_theme['license']                 = $theme['License'];
 				$git_theme['homepage']                = $theme['ThemeURI'];
 				$git_theme['sections']['description'] = $theme['Description'];
+				$git_theme['update_uri']              = $theme['UpdateURI'];
 			}
 
 			$git_theme['broken']  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );
@@ -293,9 +297,9 @@ class Theme {
 	/**
 	 * Put changelog in themes_api, return WP.org data as appropriate.
 	 *
-	 * @param bool      $result   Default false.
-	 * @param string    $action   The type of information being requested from the Theme Installation API.
-	 * @param \stdClass $response Theme API arguments.
+	 * @param bool     $result   Default false.
+	 * @param string   $action   The type of information being requested from the Theme Installation API.
+	 * @param stdClass $response Theme API arguments.
 	 *
 	 * @return mixed
 	 */
@@ -479,7 +483,7 @@ class Theme {
 	 *
 	 * @access protected
 	 *
-	 * @param \stdClass $theme Theme object.
+	 * @param stdClass $theme Theme object.
 	 *
 	 * @return string (content buffer)
 	 */
@@ -563,12 +567,12 @@ class Theme {
 	 *
 	 * @param array $transient Theme update transient.
 	 *
-	 * @return array|\stdClass
+	 * @return array|stdClass
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.
-		if ( ! \is_object( $transient ) ) {
-			$transient = new \stdClass();
+		if ( ! is_object( $transient ) ) {
+			$transient = new stdClass();
 		}
 
 		/**
