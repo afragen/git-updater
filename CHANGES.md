@@ -1,4 +1,5 @@
 #### [unreleased]
+* add remote data for `did`, `slug_hash` if added via `Additions`
 
 #### 12.17.0 / 2025-07-14
 * un-escape stuff, more uses of `use`
