@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 12.17.2 / 2025-07-26
+* update `GU_Freemius` for FAIR installation
+
 #### 12.17.1 / 2025-07-20
 * add remote data for `did`, `slug_hash` if added via `Additions`
 * use `Bearer` for token with GitHub API
