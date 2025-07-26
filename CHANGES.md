@@ -1,4 +1,5 @@
 #### [unreleased]
+* update `GU_Freemius` for FAIR installation
 
 #### 12.17.1 / 2025-07-20
 * add remote data for `did`, `slug_hash` if added via `Additions`
