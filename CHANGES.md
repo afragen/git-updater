@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.17.2 / 2025-07-26
 * update `GU_Freemius` for FAIR installation
 
 #### 12.17.1 / 2025-07-20
