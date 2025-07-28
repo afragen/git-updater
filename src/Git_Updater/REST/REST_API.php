@@ -470,7 +470,7 @@ class REST_API {
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
 			'author_uri'        => $repo_data->author_uri ?? '',
-			'security'          => explode( '|', $repo_data->security, 3 ),
+			'security'          => $repo_data->security ?? '',
 			'license'           => $repo_data->license ?? '',
 			'contributors'      => $repo_data->contributors,
 			'requires'          => $repo_data->requires,
@@ -497,11 +497,6 @@ class REST_API {
 			'external'          => 'xxx',
 		];
 		uksort( $repo_api_data['versions'], 'version_compare' );
-		foreach ( $repo_api_data['security'] as $key => $value ) {
-			$keys                                       = [ 'name', 'email', 'uri' ];
-			$repo_api_data['security'][ $keys[ $key ] ] = $value;
-			unset( $repo_api_data['security'][ $key ] );
-		}
 
 		$repo_cache = $this->get_repo_cache( $slug );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;

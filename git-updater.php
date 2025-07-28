@@ -16,7 +16,7 @@
  * Version:           12.17.2.1
  * Author:            Andy Fragen
  * Author URI:        https://thefragens.com
- * Security:          Andy Fragen|andy@thefragens.com|https://git-updater.com
+ * Security:          andy+security@git-updater.com
  * License:           MIT
  * Domain Path:       /languages
  * Text Domain:       git-updater
