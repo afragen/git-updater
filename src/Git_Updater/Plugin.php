@@ -199,6 +199,7 @@ class Plugin {
 				$git_plugin['sections']['description'] = $plugin['Description'];
 				$git_plugin['license']                 = $plugin['License'];
 				$git_plugin['update_uri']              = $plugin['UpdateURI'];
+				$git_plugin['security']                = $plugin['Security'];
 			}
 
 			$git_plugin['broken']           = ( empty( $header['owner'] ) || empty( $header['repo'] ) );

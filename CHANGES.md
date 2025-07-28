@@ -1,4 +1,5 @@
 #### [unreleased]
+* add new `Security` header per schema `Security: name|email|uri`
 
 #### 12.17.2 / 2025-07-26
 * update `GU_Freemius` for FAIR installation
