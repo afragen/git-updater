@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.17.3 / 2025-07-31
 * add new `Security` header with value of email or URI
 
 #### 12.17.2 / 2025-07-26
