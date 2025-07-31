@@ -246,6 +246,7 @@ class Base {
 			'PrimaryBranch' => 'Primary Branch',
 			'PluginID'      => 'Plugin ID',
 			'ThemeID'       => 'Theme ID',
+			'Security'      => 'Security',
 		];
 
 		$uri_types = [

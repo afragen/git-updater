@@ -215,6 +215,7 @@ class Theme {
 				$git_theme['homepage']                = $theme['ThemeURI'];
 				$git_theme['sections']['description'] = $theme['Description'];
 				$git_theme['update_uri']              = $theme['UpdateURI'];
+				$git_theme['security']                = $theme['Security'];
 			}
 
 			$git_theme['broken']  = ( empty( $header['owner'] ) || empty( $header['repo'] ) );

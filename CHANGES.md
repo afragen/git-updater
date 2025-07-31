@@ -1,5 +1,15 @@
 #### [unreleased]
 
+#### 12.17.3 / 2025-07-31
+* add new `Security` header with value of email or URI
+
+#### 12.17.2 / 2025-07-26
+* update `GU_Freemius` for FAIR installation
+
+#### 12.17.1 / 2025-07-20
+* add remote data for `did`, `slug_hash` if added via `Additions`
+* use `Bearer` for token with GitHub API
+
 #### 12.17.0 / 2025-07-14
 * un-escape stuff, more uses of `use`
 * add `License` header info

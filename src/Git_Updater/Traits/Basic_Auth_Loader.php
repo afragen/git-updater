@@ -63,7 +63,7 @@ trait Basic_Auth_Loader {
 		}
 		if ( null !== $credentials['token'] ) {
 			if ( 'github' === $credentials['type'] ) {
-				$args['headers']['Authorization'] = 'token ' . $credentials['token'];
+				$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
 				$args['headers']['github']        = $credentials['slug'];
 			}
 
