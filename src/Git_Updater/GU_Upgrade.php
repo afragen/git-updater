@@ -74,7 +74,6 @@ final class GU_Upgrade {
 	 * Flush caches and delete cached options.
 	 */
 	private function delete_flush_cache() {
-		wp_cache_flush();
 		$this->delete_all_cached_data();
 	}
 
