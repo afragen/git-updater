@@ -13,9 +13,10 @@
  * Plugin ID:         did:plc:afjf7gsjzsqmgc7dlhb553mv
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           12.17.2
+ * Version:           12.17.3
  * Author:            Andy Fragen
  * Author URI:        https://thefragens.com
+ * Security:          andy+security@git-updater.com
  * License:           MIT
  * Domain Path:       /languages
  * Text Domain:       git-updater

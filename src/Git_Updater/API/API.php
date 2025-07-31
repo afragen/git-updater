@@ -525,6 +525,7 @@ class API {
 			$this->type->sections['description'] = $response['Description'];
 			$this->type->did                     = empty( $this->type->did ) ? $response['PluginID'] ?? ( $response['ThemeID'] ?? '' ) : '';
 			$this->type->slug_did                = ! empty( $this->type->did ) ? $this->type->slug . '-' . $this->get_did_hash( $this->type->did ) : null;
+			$this->type->security                = $response['Security'] ?? '';
 		}
 	}
 
