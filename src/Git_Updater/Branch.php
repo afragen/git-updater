@@ -331,8 +331,7 @@ class Branch {
 			}
 			if ( ! empty( $theme->rollback ) ) {
 				$rollback = array_keys( $theme->rollback );
-				usort( $rollback, 'version_compare' );
-				rsort( $rollback );
+				usort( $rollback, fn ( $a, $b ) => version_compare( ltrim( $b, 'v.' ), trim( $a, 'v.' ) ) );
 
 				/**
 				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
@@ -442,8 +441,7 @@ class Branch {
 
 		if ( ! empty( $rollback ) ) {
 			$rollback = array_keys( $rollback );
-			usort( $rollback, 'version_compare' );
-			rsort( $rollback );
+			usort( $rollback, fn ( $a, $b ) => version_compare( trim( $b, 'v.' ), trim( $a, 'v.' ) ) );
 
 			/**
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
