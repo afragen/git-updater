@@ -431,14 +431,9 @@ class REST_API {
 	 * @return array|WP_Error
 	 */
 	public function get_api_data( WP_REST_Request $request ) {
-		$slug     = $request->get_param( 'slug' );
-		$download = $request->get_param( 'download' );
-		$download = 'false' === $download || '0' === $download ? false : true;
+		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
-		}
-		if ( false === $download && true === $download ) {
-			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a boolean for `download`.' ];
 		}
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
@@ -482,7 +477,7 @@ class REST_API {
 			'short_description' => substr( strip_tags( trim( $repo_data->sections['description'] ) ), 0, 147 ) . '...',
 			'primary_branch'    => $repo_data->primary_branch,
 			'branch'            => $repo_data->branch,
-			'download_link'     => $download ? $repo_data->download_link : '',
+			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
 			'versions'          => $repo_data->release_asset ? $repo_data->release_assets : $repo_data->rollback,
 			'donate_link'       => $repo_data->donate_link,
@@ -509,7 +504,7 @@ class REST_API {
 		}
 
 		// Update release asset download link .
-		if ( $download && $repo_data->release_asset ) {
+		if ( $repo_data->release_asset ) {
 			if ( ( isset( $repo_cache['release_asset_download'] )
 				|| ! isset( $repo_cache['release_asset_redirect'] ) )
 				&& 'bitbucket' !== $repo_api_data['git']
