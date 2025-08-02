@@ -443,7 +443,7 @@ class Branch {
 		if ( ! empty( $rollback ) ) {
 			$rollback = array_keys( $rollback );
 			usort( $rollback, 'version_compare' );
-			krsort( $rollback );
+			rsort( $rollback );
 
 			/**
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
