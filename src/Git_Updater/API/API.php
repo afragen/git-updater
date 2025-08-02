@@ -466,9 +466,7 @@ class API {
 		usort( $tags, 'version_compare' );
 		uksort( $rollback, 'version_compare' );
 
-		$newest_tag     = array_slice( $tags, -1, 1, true );
-		$newest_tag_key = key( $newest_tag );
-		$newest_tag     = $tags[ $newest_tag_key ];
+		$newest_tag = end( $tags );
 
 		$this->type->newest_tag = $newest_tag;
 		$this->type->tags       = $tags;
