@@ -34,7 +34,7 @@ foreach ( $options as $option ) {
 }
 
 global $wpdb;
-$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix .'options';
+$table              = is_multisite() ? $wpdb->base_prefix . 'sitemeta' : $wpdb->base_prefix . 'options';
 $column             = is_multisite() ? 'meta_key' : 'option_name';
 $delete_string      = 'DELETE FROM ' . $table . ' WHERE ' . $column . ' LIKE %s LIMIT 1000';
 $get_options_string = 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' LIKE %s';
