@@ -345,7 +345,7 @@ class Branch {
 				// Still only return last tag if using release assets.
 				$rollback = 0 === $num_rollbacks || $theme->release_asset
 					? array_slice( $rollback, 0, 1 )
-					: array_splice( $rollback, 0, $num_rollbacks, true );
+					: array_splice( $rollback, 0, $num_rollbacks );
 
 				foreach ( $rollback as $tag ) {
 					echo '<option>' . esc_attr( $tag ) . '</option>';
@@ -456,7 +456,7 @@ class Branch {
 			// Still only return last tag if using release assets.
 			$rollback = 0 === $num_rollbacks || $data['release_asset']
 				? array_slice( $rollback, 0, 1 )
-				: array_splice( $rollback, 0, $num_rollbacks, true );
+				: array_splice( $rollback, 0, $num_rollbacks );
 
 			if ( $data['release_asset'] ) {
 				/**
