@@ -1,6 +1,7 @@
 #### [unreleased]
 * update cache delete and don't use `wp_cache_flush`
 * always show download link in REST endpoint
+* improved reverse sort for branch/tag versions
 
 #### 12.17.3 / 2025-07-31
 * add new `Security` header with value of email or URI
