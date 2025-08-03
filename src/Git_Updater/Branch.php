@@ -329,10 +329,8 @@ class Branch {
 					echo '<option>' . esc_attr( $branch ) . '</option>';
 				}
 			}
-			if ( ! empty( $theme->rollback ) ) {
-				$rollback = array_keys( $theme->rollback );
-				usort( $rollback, 'version_compare' );
-				krsort( $rollback );
+			if ( ! empty( $theme->tags ) ) {
+				uksort( $theme->tags, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), trim( $a, 'v' ) ) );
 
 				/**
 				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
@@ -342,16 +340,16 @@ class Branch {
 				 */
 				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
-				// Still only return last tag if using release assets.
-				$rollback = 0 === $num_rollbacks || $theme->release_asset
-					? array_slice( $rollback, 0, 1 )
-					: array_splice( $rollback, 0, $num_rollbacks, true );
+				$tag_keys = array_keys( $theme->tags );
+				$rollback = 0 === $num_rollbacks
+					? array_slice( $tag_keys, 0, 1 )
+					: array_splice( $tag_keys, 0, $num_rollbacks );
 
 				foreach ( $rollback as $tag ) {
 					echo '<option>' . esc_attr( $tag ) . '</option>';
 				}
 			}
-			if ( empty( $theme->rollback ) ) {
+			if ( empty( $theme->tags ) ) {
 				echo '<option>' . esc_html__( 'No previous tags to rollback to.', 'git-updater' ) . '</option></select></label>';
 			}
 			?>
@@ -373,7 +371,7 @@ class Branch {
 	 * @return void
 	 */
 	public function make_branch_switch_row( $data, $config ) {
-		$rollback = empty( $config[ $data['slug'] ]->rollback ) ? [] : $config[ $data['slug'] ]->rollback;
+		$rollback = empty( $config[ $data['slug'] ]->tags ) ? [] : $config[ $data['slug'] ]->tags;
 
 		// Make the branch switch row visually appear as if it is contained with the plugin/theme's row.
 		// We have to use JS for this because of the way:
@@ -441,9 +439,7 @@ class Branch {
 		}
 
 		if ( ! empty( $rollback ) ) {
-			$rollback = array_keys( $rollback );
-			usort( $rollback, 'version_compare' );
-			krsort( $rollback );
+			uksort( $rollback, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
 
 			/**
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
@@ -453,10 +449,10 @@ class Branch {
 			 */
 			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
-			// Still only return last tag if using release assets.
-			$rollback = 0 === $num_rollbacks || $data['release_asset']
-				? array_slice( $rollback, 0, 1 )
-				: array_splice( $rollback, 0, $num_rollbacks, true );
+			$rollback_keys = array_keys( $rollback );
+			$rollback      = 0 === $num_rollbacks
+				? array_slice( $rollback_keys, 0, 1 )
+				: array_splice( $rollback_keys, 0, $num_rollbacks );
 
 			if ( $data['release_asset'] ) {
 				/**

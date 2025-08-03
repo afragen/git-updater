@@ -103,10 +103,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return the latest GitHub release asset URL.
 	 *
-	 * @return string|bool
+	 * @return string|bool|void
 	 */
 	public function get_release_asset() {
-		return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
+		// return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
 	}
 
 	/**
@@ -152,12 +152,11 @@ class GitHub_API extends API implements API_Interface {
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
-			$this->get_release_assets();
-			$release_asset = $this->get_release_asset();
+			$release_assets = $this->get_release_assets();
+			$release_asset  = reset( $release_assets );
 
 			if ( empty( $this->response['release_asset_download'] ) ) {
-				$response = $this->api( $release_asset );
-				$this->parse_release_asset_response( $response );
+				$this->set_repo_cache( 'release_asset_download', $release_asset );
 			}
 			if ( ! empty( $this->response['release_asset_download'] ) ) {
 				return $this->response['release_asset_download'];
@@ -375,11 +374,10 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags     = [];
-		$rollback = [];
+		$tags = [];
 
 		foreach ( (array) $response as $tag ) {
-			$download_base    = implode(
+			$download_base = implode(
 				'/',
 				[
 					$repo_type['base_uri'],
@@ -389,11 +387,15 @@ class GitHub_API extends API implements API_Interface {
 					'zipball/',
 				]
 			);
-			$tags[]           = $tag;
-			$rollback[ $tag ] = $download_base . $tag;
+
+			// Ignore leading 'v' and skip anything with dash or words.
+			if ( ! preg_match( '/[^v]+[-a-z]+/', $tag ) ) {
+				$tags[ $tag ] = $download_base . $tag;
+			}
+			uksort( $tags, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
 		}
 
-		return [ $tags, $rollback ];
+		return $tags;
 	}
 
 	/**
