@@ -74,10 +74,11 @@ trait API_Common {
 				foreach ( $response as $release ) {
 					// Ignore leading 'v' and skip anything with dash or words.
 					if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
-					$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
-				}
+						$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
+					}
 				}
 
+				uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
 
 				return $release_assets;
 			}
