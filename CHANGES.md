@@ -3,6 +3,8 @@
 * always show download link in REST endpoint
 * improved reverse sort for branch/tag versions
 * get all release assets from GitHub API and pick release asset download from array, other APIs get latest release asset only
+* update `parse_tag()` and `sort_tags()`
+* update branch switching tags
 
 #### 12.17.3 / 2025-07-31
 * add new `Security` header with value of email or URI
