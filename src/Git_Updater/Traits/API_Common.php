@@ -77,7 +77,6 @@ trait API_Common {
 						$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
 					}
 				}
-
 				uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
 
 				return $release_assets;

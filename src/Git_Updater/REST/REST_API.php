@@ -479,7 +479,7 @@ class REST_API {
 			'branch'            => $repo_data->branch,
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
-			'versions'          => $repo_data->release_asset ? $repo_data->release_assets : $repo_data->rollback,
+			'versions'          => $repo_data->release_asset ? $repo_data->release_assets : $repo_data->tags,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
