@@ -367,7 +367,6 @@ class Base {
 		$this->$type->newest_tag     = '0.0.0';
 		$this->$type->download_link  = '';
 		$this->$type->tags           = [];
-		$this->$type->rollback       = [];
 		$this->$type->branches       = [];
 		$this->$type->requires       = '';
 		$this->$type->tested         = '';

@@ -453,26 +453,20 @@ class API {
 	/**
 	 * Sort tags and set object data.
 	 *
-	 * @param array $parsed_tags Array of tags.
+	 * @param array $tags Associative array of tags[ tag ].
 	 *
 	 * @return bool
 	 */
-	protected function sort_tags( $parsed_tags ) {
-		if ( empty( $parsed_tags ) ) {
+	protected function sort_tags( $tags ) {
+		if ( empty( $tags ) ) {
 			return false;
 		}
 
-		list($tags, $rollback) = $parsed_tags;
-		usort( $tags, 'version_compare' );
-		uksort( $rollback, 'version_compare' );
+		uksort( $tags, fn ( $a, $b ) => version_compare( trim( $b, 'v' ), trim( $a, 'v' ) ) );
 
-		$newest_tag     = array_slice( $tags, -1, 1, true );
-		$newest_tag_key = key( $newest_tag );
-		$newest_tag     = $tags[ $newest_tag_key ];
-
-		$this->type->newest_tag = $newest_tag;
+		$tag_keys               = array_keys( $tags );
+		$this->type->newest_tag = reset( $tag_keys );
 		$this->type->tags       = $tags;
-		$this->type->rollback   = $rollback;
 
 		return true;
 	}
