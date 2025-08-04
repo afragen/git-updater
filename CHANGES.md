@@ -1,8 +1,10 @@
 #### [unreleased]
+
+#### 12.18.0 / 2025-08-04
 * update cache delete and don't use `wp_cache_flush`
 * always show download link in REST endpoint
 * improved reverse sort for branch/tag versions
-* get all release assets from GitHub API and pick release asset download from array, other APIs get latest release asset only
+* get all release assets from GitHub API and pick release asset download from release assets array, other APIs get latest release asset only
 * update `parse_tag()` and `sort_tags()`
 * update branch switching tags
 
