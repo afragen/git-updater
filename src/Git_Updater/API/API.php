@@ -453,7 +453,7 @@ class API {
 	/**
 	 * Sort tags and set object data.
 	 *
-	 * @param array $tags Associative array of rollback[ tag ].
+	 * @param array $tags Associative array of tags[ tag ].
 	 *
 	 * @return bool
 	 */

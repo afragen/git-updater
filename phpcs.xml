@@ -9,7 +9,7 @@
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>
-    
+
     <file>.</file>
 
     <!-- Exclude these -->

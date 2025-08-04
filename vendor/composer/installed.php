@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'afragen/git-updater',
-        'pretty_version' => 'dev-develop',
-        'version' => 'dev-develop',
-        'reference' => '2c5865cca7eacdc4450bbfe17ab15a23798cbb96',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '950c6e265bea4f81dd688dfbb9cdc9b730b4f809',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'afragen/git-updater' => array(
-            'pretty_version' => 'dev-develop',
-            'version' => 'dev-develop',
-            'reference' => '2c5865cca7eacdc4450bbfe17ab15a23798cbb96',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '950c6e265bea4f81dd688dfbb9cdc9b730b4f809',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -47,9 +47,9 @@
             'dev_requirement' => false,
         ),
         'dealerdirect/phpcodesniffer-composer-installer' => array(
-            'pretty_version' => 'v1.1.1',
-            'version' => '1.1.1.0',
-            'reference' => '6e0fa428497bf560152ee73ffbb8af5c6a56b0dd',
+            'pretty_version' => 'v1.1.2',
+            'version' => '1.1.2.0',
+            'reference' => 'e9cf5e4bbf7eeaf9ef5db34938942602838fc2b1',
             'type' => 'composer-plugin',
             'install_path' => __DIR__ . '/../dealerdirect/phpcodesniffer-composer-installer',
             'aliases' => array(),
@@ -92,9 +92,9 @@
             'dev_requirement' => true,
         ),
         'wp-coding-standards/wpcs' => array(
-            'pretty_version' => '3.1.0',
-            'version' => '3.1.0.0',
-            'reference' => '9333efcbff231f10dfd9c56bb7b65818b4733ca7',
+            'pretty_version' => '3.2.0',
+            'version' => '3.2.0.0',
+            'reference' => 'd2421de7cec3274ae622c22c744de9a62c7925af',
             'type' => 'phpcodesniffer-standard',
             'install_path' => __DIR__ . '/../wp-coding-standards/wpcs',
             'aliases' => array(),
