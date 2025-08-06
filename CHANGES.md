@@ -1,5 +1,8 @@
 #### [unreleased]
 
+#### 12.18.1 / 2025-08-06
+* data check on release assets
+
 #### 12.18.0 / 2025-08-04
 * update cache delete and don't use `wp_cache_flush`
 * always show download link in REST endpoint
