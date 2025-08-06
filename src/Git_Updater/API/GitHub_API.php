@@ -153,7 +153,10 @@ class GitHub_API extends API implements API_Interface {
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
 			$release_assets = $this->get_release_assets();
-			$release_asset  = reset( $release_assets );
+			if ( ! $release_assets ) {
+				return '';
+			}
+			$release_asset = reset( $release_assets );
 
 			if ( empty( $this->response['release_asset_download'] ) ) {
 				$this->set_repo_cache( 'release_asset_download', $release_asset );
