@@ -1,4 +1,5 @@
 #### [unreleased]
+* setup for Gitea release assets
 
 #### 12.18.1 / 2025-08-06
 * data check on release assets

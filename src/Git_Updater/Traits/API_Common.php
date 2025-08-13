@@ -59,7 +59,7 @@ trait API_Common {
 		if ( is_wp_error( $response ) ) {
 			return '';
 		}
-		if ( 'github' === $git ) {
+		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			if ( str_contains( $request, 'latest' ) ) {
 				$assets = $response->assets ?? [];
 				foreach ( $assets as $asset ) {
