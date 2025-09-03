@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db648d6406506a8b5c9bd768e30fdec2",
+    "content-hash": "b3f66e1eb0cb724b714ffcebf87bed2d",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -342,6 +342,58 @@
             "time": "2025-07-17T20:45:56+00:00"
         },
         {
+            "name": "mcaskill/composer-exclude-files",
+            "version": "v4.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcaskill/composer-plugin-exclude-files.git",
+                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/ed68fc7d6da2146ed2c32c92904587c9e03c985a",
+                "reference": "ed68fc7d6da2146ed2c32c92904587c9e03c985a",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.3",
+                "php": "^7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.3",
+                "phpstan/phpstan": "^1.11",
+                "symfony/phpunit-bridge": "^7.1"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "McAskill\\Composer\\ExcludeFilePlugin",
+                "branch-alias": {
+                    "dev-main": "4.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "McAskill\\Composer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chauncey McAskill",
+                    "email": "chauncey@mcaskill.ca"
+                }
+            ],
+            "description": "Exclude files from autoload_files.php",
+            "support": {
+                "issues": "https://github.com/mcaskill/composer-plugin-exclude-files/issues",
+                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v4.0.1"
+            },
+            "time": "2024-12-03T21:08:26+00:00"
+        },
+        {
             "name": "phpcsstandards/phpcsextra",
             "version": "1.4.0",
             "source": {
@@ -425,16 +477,16 @@
         },
         {
             "name": "phpcsstandards/phpcsutils",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
-                "reference": "65355670ac17c34cd235cf9d3ceae1b9252c4dad"
+                "reference": "f7eb16f2fa4237d5db9e8fed8050239bee17a9bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/65355670ac17c34cd235cf9d3ceae1b9252c4dad",
-                "reference": "65355670ac17c34cd235cf9d3ceae1b9252c4dad",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/f7eb16f2fa4237d5db9e8fed8050239bee17a9bd",
+                "reference": "f7eb16f2fa4237d5db9e8fed8050239bee17a9bd",
                 "shasum": ""
             },
             "require": {
@@ -514,7 +566,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-06-12T04:32:33+00:00"
+            "time": "2025-08-10T01:04:45+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",

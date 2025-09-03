@@ -1,5 +1,6 @@
 #### [unreleased]
 * setup for Gitea release assets
+* use `mcaskill/composer-exclude-files` to exclude autoload of `freemius/wordpress-sdk/start.php`
 
 #### 12.18.1 / 2025-08-06
 * data check on release assets
