@@ -295,12 +295,12 @@ class GitHub_API extends API implements API_Interface {
 		array_filter(
 			$response,
 			function ( $e ) use ( &$arr ) {
-				$arr['private']      = $e->private;
-				$arr['last_updated'] = $e->pushed_at;
-				$arr['added']        = $e->created_at;
-				$arr['watchers']     = $e->watchers;
-				$arr['forks']        = $e->forks;
-				$arr['open_issues']  = $e->open_issues;
+				$arr['private']      = $e->private ?? false;
+				$arr['last_updated'] = $e->pushed_at ?? '';
+				$arr['added']        = $e->created_at ?? '';
+				$arr['watchers']     = $e->watchers ?? 0;
+				$arr['forks']        = $e->forks ?? 0;
+				$arr['open_issues']  = $e->open_issues ?? 0;
 			}
 		);
 
