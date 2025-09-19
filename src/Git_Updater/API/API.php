@@ -384,8 +384,10 @@ class API {
 				return false;
 			}
 
-			$body     = json_decode( wp_remote_retrieve_body( $response ) );
-			$response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' ) ? 'not in dot org' : 'in dot org';
+			$body             = json_decode( wp_remote_retrieve_body( $response ) );
+			$invalid_response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' );
+			$added_to_mirror  = isset( $body->ac_origin ) && 'wp_org' === $body->ac_origin;
+			$response         = $invalid_response || ! $added_to_mirror ? 'not in dot org' : 'in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
