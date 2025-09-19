@@ -75,6 +75,12 @@
 		 * @var string Support phone.
 		 */
 		public $support_phone;
+        /**
+         * @var string Support skype username.
+         *
+         * @deprecated 2.12.1
+         */
+        public $support_skype = '';
 		/**
 		 * @var bool Is personal success manager supported with the plan.
 		 */
