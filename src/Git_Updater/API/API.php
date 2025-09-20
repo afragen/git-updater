@@ -573,9 +573,9 @@ class API {
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
+		$this->type->requires     = empty( $this->type->requires ) ? $readme['requires'] : $this->type->requires;
+		$this->type->requires_php = empty( $this->type->requires_php ) ? $readme['requires_php'] : $this->type->requires_php;
 		$this->type->tested       = $readme['tested'] ?? '';
-		$this->type->requires     = $readme['requires'] ?? '';
-		$this->type->requires_php = $readme['requires_php'] ?? '';
 		$this->type->donate_link  = $readme['donate_link'] ?? '';
 		$this->type->contributors = $readme['contributors'] ?? [];
 		if ( empty( $readme['upgrade_notice'] ) ) {
