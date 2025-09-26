@@ -4,6 +4,7 @@
 * harden `parse_meta_response()`
 * modify dot org check for package added to mirror like AspireCloud
 * don't overwrite `requires` and `requires_php` data from readme.txt if already exists
+* correctly parse for multiple release assets per release
 
 #### 12.18.1 / 2025-08-06
 * data check on release assets

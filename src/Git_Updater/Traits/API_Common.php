@@ -74,6 +74,14 @@ trait API_Common {
 				foreach ( $response as $release ) {
 					// Ignore leading 'v' and skip anything with dash or words.
 					if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
+						if ( count( $release->assets ) > 1 ) {
+							foreach ( $release->assets as $asset ) {
+								if ( str_starts_with( $asset->name, $this->type->slug ) ) {
+									$release_assets[ $release->tag_name ] = $asset->url;
+									continue 2;
+								}
+							}
+						}
 						$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
 					}
 				}
