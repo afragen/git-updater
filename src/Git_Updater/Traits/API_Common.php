@@ -61,34 +61,25 @@ trait API_Common {
 		}
 		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			if ( str_contains( $request, 'latest' ) ) {
-				$assets = $response->assets ?? [];
-				foreach ( $assets as $asset ) {
-					if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
-						$response = $asset->url;
-						break;
-					}
-				}
-				$response = is_string( $response ) ? $response : '';
-			} else {
-				$release_assets = [];
-				foreach ( $response as $release ) {
-					// Ignore leading 'v' and skip anything with dash or words.
-					if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
-						if ( count( $release->assets ) > 1 ) {
-							foreach ( $release->assets as $asset ) {
-								if ( str_starts_with( $asset->name, $this->type->slug ) ) {
-									$release_assets[ $release->tag_name ] = $asset->url;
-									continue 2;
-								}
-							}
-						}
-						$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
-					}
-				}
-				uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
-
-				return $release_assets;
+				// Convert single $response to array of releases.
+				$release = $response;
+				$response = [];
+				$response[] = $release ?? [];
 			}
+			$release_assets = [];
+			foreach ( $response as $release ) {
+				// Ignore leading 'v' and skip anything with dash or words.
+				if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
+					foreach ( $release->assets as $asset ) {
+						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
+							$release_assets[ $release->tag_name ] = $asset->url;
+							continue 2;
+						}
+					}
+				}
+			}
+			uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
+			$response = $release_assets;
 		}
 
 		/**
