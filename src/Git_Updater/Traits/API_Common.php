@@ -435,15 +435,16 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
-			$this->type->release_assets = $response;
+			$this->type->release_assets[ $this->type->newest_tag ] = $response;
 			$this->set_repo_cache( 'release_asset', $response );
+			$this->set_repo_cache( 'release_asset_download', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		$this->type->release_assets = $response;
+		$this->type->release_assets[ $this->type->newest_tag ] = $response;
 
 		return $response;
 	}

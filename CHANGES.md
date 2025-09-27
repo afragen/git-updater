@@ -7,6 +7,7 @@
 * correctly parse for multiple release assets per release
 * update POT GitHub Action
 * refactor `add_accept_header()`
+* set `release_assets` and `release_asset_download` for latest release asset
 
 
 #### 12.18.1 / 2025-08-06
