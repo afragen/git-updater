@@ -491,7 +491,9 @@ class REST_API {
 			'homepage'          => $repo_data->homepage,
 			'external'          => 'xxx',
 		];
-		uksort( $repo_api_data['versions'], 'version_compare' );
+		if ( ! is_wp_error( $repo_api_data['versions'] ) ) {
+			uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
+		}
 
 		$repo_cache = $this->get_repo_cache( $slug );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
