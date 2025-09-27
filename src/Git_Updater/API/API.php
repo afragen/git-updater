@@ -641,7 +641,10 @@ class API {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
-			$args         = $this->add_auth_header( [], $asset );
+			$args = $this->add_auth_header( [], $asset );
+			if ( empty( $args ) ) {
+				return false;
+			}
 			$octet_stream = [ 'accept' => 'application/octet-stream' ];
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			$args['headers'] = array_merge( $args['headers'], $octet_stream );
