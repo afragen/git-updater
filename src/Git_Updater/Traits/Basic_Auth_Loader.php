@@ -304,14 +304,14 @@ trait Basic_Auth_Loader {
 			$args['headers'] = [];
 		}
 		foreach ( $args['headers'] as $key => $value ) {
-			if ( in_array( $key, [ 'github','gist','bitbucket','gitlab','gitea' ], true ) ) {
+			if ( in_array( $key, $this->get_running_git_servers(), true ) ) {
 				$repo_cache = $this->get_repo_cache( $value );
+				if ( 'github' === $key && isset( $repo_cache['release_asset_download'] ) ) {
+					$octet_stream    = [ 'Accept' => 'application/octet-stream' ];
+					$args['headers'] = array_merge( $args['headers'], $octet_stream );
+				}
 				unset( $args['headers'][ $key ] );
 			}
-		}
-		if ( isset( $repo_cache['release_asset_download'] ) ) {
-			$octet_stream    = [ 'Accept' => 'application/octet-stream' ];
-			$args['headers'] = array_merge( $args['headers'], $octet_stream );
 		}
 
 		return $args;
