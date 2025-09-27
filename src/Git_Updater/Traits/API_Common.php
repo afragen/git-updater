@@ -413,7 +413,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string $response Release asset URI.
+	 * @return string|array $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
 		$this->response = $this->get_repo_cache( $this->type->slug );
@@ -435,12 +435,15 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->type->release_assets = $response;
 			$this->set_repo_cache( 'release_asset', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
+
+		$this->type->release_assets = $response;
 
 		return $response;
 	}
@@ -450,7 +453,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string $response Release asset URI.
+	 * @return array $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
 		$this->response = $this->get_repo_cache( $this->type->slug );
