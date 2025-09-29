@@ -53,34 +53,33 @@ trait API_Common {
 	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  string $request  Query to API->api().
 	 * @param  mixed  $response API response.
-	 * @return string $response Release asset download link.
+	 * @return array|string|WP_Error $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
 		if ( is_wp_error( $response ) ) {
 			return '';
 		}
-		if ( 'github' === $git ) {
+		if ( in_array( $git, [ 'github', 'gitea' ], true ) ) {
 			if ( str_contains( $request, 'latest' ) ) {
-				$assets = $response->assets ?? [];
-				foreach ( $assets as $asset ) {
-					if ( 1 === count( $assets ) || str_starts_with( $asset->name, $this->type->slug ) ) {
-						$response = $asset->url;
-						break;
-					}
-				}
-				$response = is_string( $response ) ? $response : '';
-			} else {
-				$release_assets = [];
-				foreach ( $response as $release ) {
-					// Ignore leading 'v' and skip anything with dash or words.
-					if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
-						$release_assets[ $release->tag_name ] = $release->assets[0]->url ?? '';
-					}
-				}
-				uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
-
-				return $release_assets;
+				// Convert single $response to array of releases.
+				$release    = $response;
+				$response   = [];
+				$response[] = $release ?? [];
 			}
+			$release_assets = [];
+			foreach ( $response as $release ) {
+				// Ignore leading 'v' and skip anything with dash or words.
+				if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
+					foreach ( $release->assets as $asset ) {
+						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
+							$release_assets[ $release->tag_name ] = $asset->url;
+							continue 2;
+						}
+					}
+				}
+			}
+			uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
+			$response = $release_assets;
 		}
 
 		/**
@@ -414,7 +413,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string $response Release asset URI.
+	 * @return string|array $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
 		$this->response = $this->get_repo_cache( $this->type->slug );
@@ -436,12 +435,16 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+			$this->type->release_assets[ $this->type->newest_tag ] = $response;
 			$this->set_repo_cache( 'release_asset', $response );
+			$this->set_repo_cache( 'release_asset_download', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
+
+		$this->type->release_assets[ $this->type->newest_tag ] = $response;
 
 		return $response;
 	}
@@ -451,7 +454,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string $response Release asset URI.
+	 * @return array $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
 		$this->response = $this->get_repo_cache( $this->type->slug );

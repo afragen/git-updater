@@ -384,8 +384,10 @@ class API {
 				return false;
 			}
 
-			$body     = json_decode( wp_remote_retrieve_body( $response ) );
-			$response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' ) ? 'not in dot org' : 'in dot org';
+			$body             = json_decode( wp_remote_retrieve_body( $response ) );
+			$invalid_response = ! $body || ! property_exists( $body, 'name' ) || property_exists( $body, 'error' );
+			$added_to_mirror  = isset( $body->ac_origin ) && 'wp_org' === $body->ac_origin;
+			$response         = $invalid_response || ! $added_to_mirror ? 'not in dot org' : 'in dot org';
 
 			$this->set_repo_cache( 'dot_org', $response );
 		}
@@ -571,9 +573,9 @@ class API {
 			$readme['tested'] = implode( '.', $tested_arr );
 		}
 
+		$this->type->requires     = empty( $this->type->requires ) ? $readme['requires'] : $this->type->requires;
+		$this->type->requires_php = empty( $this->type->requires_php ) ? $readme['requires_php'] : $this->type->requires_php;
 		$this->type->tested       = $readme['tested'] ?? '';
-		$this->type->requires     = $readme['requires'] ?? '';
-		$this->type->requires_php = $readme['requires_php'] ?? '';
 		$this->type->donate_link  = $readme['donate_link'] ?? '';
 		$this->type->contributors = $readme['contributors'] ?? [];
 		if ( empty( $readme['upgrade_notice'] ) ) {
@@ -639,7 +641,10 @@ class API {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
-			$args         = $this->add_auth_header( [], $asset );
+			$args = $this->add_auth_header( [], $asset );
+			if ( empty( $args ) ) {
+				return false;
+			}
 			$octet_stream = [ 'accept' => 'application/octet-stream' ];
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
 			$args['headers'] = array_merge( $args['headers'], $octet_stream );

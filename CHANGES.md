@@ -1,5 +1,17 @@
 #### [unreleased]
 
+#### 12.19.0 / 2025-09-29
+* setup for Gitea release assets
+* use `mcaskill/composer-exclude-files` to exclude autoload of `freemius/wordpress-sdk/start.php`
+* harden `parse_meta_response()`
+* modify dot org check for package added to mirror like AspireCloud
+* don't overwrite `requires` and `requires_php` data from readme.txt if already exists
+* correctly parse for multiple release assets per release
+* update POT GitHub Action
+* refactor `add_accept_header()`
+* set `release_assets` and `release_asset_download` for latest release asset
+
+
 #### 12.18.1 / 2025-08-06
 * data check on release assets
 

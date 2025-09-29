@@ -8839,8 +8839,13 @@
                      isset( $site_active_plugins[ $basename ] )
                 ) {
                     // Plugin was site level activated.
-                    $site_active_plugins_cache->plugins[ $basename ]              = $network_plugins[ $basename ];
-                    $site_active_plugins_cache->plugins[ $basename ]['is_active'] = true;
+                    $site_active_plugins_cache->plugins[ $basename ] = array(
+                        'slug'           => $network_plugins[ $basename ]['slug'],
+                        'version'        => $network_plugins[ $basename ]['Version'],
+                        'title'          => $network_plugins[ $basename ]['Name'],
+                        'is_active'      => $is_active,
+                        'is_uninstalled' => false,
+                    );
                 } else if ( isset( $site_active_plugins_cache->plugins[ $basename ] ) &&
                             ! isset( $site_active_plugins[ $basename ] )
                 ) {
@@ -15777,6 +15782,10 @@
         function get_site_info( $site = null, $load_registration = false ) {
             $this->_logger->entrance();
 
+            $fs_hook_snapshot = new FS_Hook_Snapshot();
+            // Remove all filters from `switch_blog`.
+            $fs_hook_snapshot->remove( 'switch_blog' );
+
             $switched = false;
 
             $registration_date = null;
@@ -15835,6 +15844,9 @@
             if ( $switched ) {
                 restore_current_blog();
             }
+
+            // Add the filters back to `switch_blog`.
+            $fs_hook_snapshot->restore( 'switch_blog' );
 
             return $info;
         }
@@ -23505,7 +23517,7 @@
                         $params['plugin_public_key'] = $this->get_public_key();
                     }
 
-                    $result = $api->get( 'pricing.json?' . http_build_query( $params ) );
+                    $result = $api->get( $this->add_show_pending( 'pricing.json?' . http_build_query( $params ) ) );
                     break;
                 case 'start_trial':
                     $trial_plan_id = fs_request_get( 'plan_id' );
@@ -24686,23 +24698,39 @@
                     $this->get_premium_slug() :
                     $this->premium_plugin_basename();
 
-                return sprintf(
-                /* translators: %1$s: Product title; %2$s: Plan title */
-                    $this->get_text_inline( ' The paid version of %1$s is already installed. Please activate it to start benefiting the %2$s features. %3$s', 'activate-premium-version' ),
-                    sprintf( '<em>%s</em>', esc_html( $this->get_plugin_title() ) ),
-                    $plan_title,
-                    sprintf(
-                        '<a style="margin-left: 10px;" href="%s"><button class="button button-primary">%s</button></a>',
-                        ( $this->is_theme() ?
-                            wp_nonce_url( 'themes.php?action=activate&amp;stylesheet=' . $premium_theme_slug_or_plugin_basename, 'switch-theme_' . $premium_theme_slug_or_plugin_basename ) :
-                            wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $premium_theme_slug_or_plugin_basename, 'activate-plugin_' . $premium_theme_slug_or_plugin_basename ) ),
-                        esc_html( sprintf(
-                        /* translators: %s: Plan title */
-                            $this->get_text_inline( 'Activate %s features', 'activate-x-features' ),
-                            $plan_title
-                        ) )
-                    )
-                );
+                if ( is_admin() ) {
+                    return sprintf(
+                        /* translators: %1$s: Product title; %2$s: Plan title */
+                        $this->get_text_inline( ' The paid version of %1$s is already installed. Please activate it to start benefiting from the %2$s features. %3$s', 'activate-premium-version' ),
+                        sprintf( '<em>%s</em>', esc_html( $this->get_plugin_title() ) ),
+                        $plan_title,
+                        sprintf(
+                            '<a style="margin-left: 10px;" href="%s"><button class="button button-primary">%s</button></a>',
+                            ( $this->is_theme() ?
+                                wp_nonce_url( 'themes.php?action=activate&amp;stylesheet=' . $premium_theme_slug_or_plugin_basename, 'switch-theme_' . $premium_theme_slug_or_plugin_basename ) :
+                                wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $premium_theme_slug_or_plugin_basename, 'activate-plugin_' . $premium_theme_slug_or_plugin_basename ) ),
+                            esc_html( sprintf(
+                            /* translators: %s: Plan title */
+                                $this->get_text_inline( 'Activate %s features', 'activate-x-features' ),
+                                $plan_title
+                            ) )
+                        )
+                    );
+                } else {
+                    return sprintf(
+                        /* translators: %1$s: Product title; %3$s: Plan title */
+                        $this->get_text_inline( ' The paid version of %1$s is already installed. Please navigate to the %2$s to activate it and start benefiting from the %3$s features.', 'activate-premium-version-plugins-page' ),
+                        sprintf( '<em>%s</em>', esc_html( $this->get_plugin_title() ) ),
+                        sprintf(
+                            '<a href="%s">%s</a>',
+                            admin_url( $this->is_theme() ? 'themes.php' : 'plugins.php' ),
+                            ( $this->is_theme() ?
+                                $this->get_text_inline( 'Themes page', 'themes-page' ) :
+                                $this->get_text_inline( 'Plugins page', 'plugins-page' ) )
+                        ),
+                        $plan_title
+                    );
+                }
             } else {
                 // @since 1.2.1.5 The free version is auto deactivated.
                 $deactivation_step = version_compare( $this->version, '1.2.1.5', '<' ) ?

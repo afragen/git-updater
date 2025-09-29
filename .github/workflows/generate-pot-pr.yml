@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - master
+      - develop
 
 jobs:
   generate-pot:
@@ -52,7 +53,7 @@ jobs:
           wp i18n make-pot . "./languages/${{ github.event.repository.name }}.pot" --headers='{"Report-Msgid-Bugs-To":"https://github.com/${{ github.event.repository.full_name }}/issues"}'
 
       - name: Check if there are changes
-        run: echo "CHANGES_DETECTED=$([[ -z $(git status --porcelain) ]] && echo "0" || echo "1")" >> $GITHUB_ENV
+        run: echo "CHANGES_DETECTED=$([[ -z $(git diff --ignore-matching-lines='^"POT-Creation-Date|^"Project-Id-Version') ]] && echo "0" || echo "1")" >> $GITHUB_ENV
 
       - name: Commit changes
         if: env.CHANGES_DETECTED == 1
