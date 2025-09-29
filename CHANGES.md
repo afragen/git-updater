@@ -1,4 +1,5 @@
 #### [unreleased]
+* move tag sort outside of loop
 
 #### 12.19.0 / 2025-09-29
 * setup for Gitea release assets
