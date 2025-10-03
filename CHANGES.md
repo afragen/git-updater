@@ -1,5 +1,6 @@
 #### [unreleased]
 * move tag sort outside of loop
+* use auth key for REST endpoint to flush repository cache for possible abuse
 
 #### 12.19.0 / 2025-09-29
 * setup for Gitea release assets

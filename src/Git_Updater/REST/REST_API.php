@@ -225,11 +225,17 @@ class REST_API {
 					'callback'            => [ $this, 'flush_repo_cache' ],
 					'permission_callback' => '__return_true',
 					'args'                => [
+						'key'  => [
+							'default'           => null,
+							'required'          => true,
+							'validate_callback' => 'sanitize_text_field',
+						],
 						'slug' => [
 							'default'           => false,
 							'required'          => true,
 							'validate_callback' => 'sanitize_title_with_dashes',
 						],
+
 					],
 				],
 				[
@@ -589,6 +595,11 @@ class REST_API {
 	 * @return stdClass
 	 */
 	public function flush_repo_cache( $request ) {
+		// Test for API key and exit if incorrect.
+		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
+			return [ 'error' => 'Bad API key. No flush for you.' ];
+		}
+
 		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
