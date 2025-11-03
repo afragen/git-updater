@@ -1,6 +1,7 @@
 #### [unreleased]
 * move tag sort outside of loop
 * use auth key for REST endpoint to flush repository cache for possible abuse
+* added `Screenshots` section to plugin modal
 
 #### 12.19.0 / 2025-09-29
 * setup for Gitea release assets
@@ -12,7 +13,6 @@
 * update POT GitHub Action
 * refactor `add_accept_header()`
 * set `release_assets` and `release_asset_download` for latest release asset
-
 
 #### 12.18.1 / 2025-08-06
 * data check on release assets

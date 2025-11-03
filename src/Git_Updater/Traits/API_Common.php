@@ -271,7 +271,7 @@ trait API_Common {
 		}
 
 		if ( ! isset( $this->response['readme'] ) ) {
-			$parser   = new Readme_Parser( $response );
+			$parser   = new Readme_Parser( $response, $this->type->slug );
 			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
 		}

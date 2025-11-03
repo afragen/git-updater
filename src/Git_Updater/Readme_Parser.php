@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use Parsedown;
+use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
  * Exit if called directly.
@@ -25,6 +26,26 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Readme_Parser
  */
 class Readme_Parser extends Parser {
+	use GU_Trait;
+
+	/**
+	 * Repository assets.
+	 *
+	 * @var array
+	 */
+	private $assets;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $readme Readme contents.
+	 * @param string $slug   Repository slug.
+	 */
+	public function __construct( $readme, $slug ) {
+		$this->assets = $this->get_repo_cache( $slug )['assets'];
+		parent::__construct( $readme );
+	}
+
 	/**
 	 * Parse text into markdown.
 	 *
@@ -56,6 +77,7 @@ class Readme_Parser extends Parser {
 		$data = $this->readme_section_as_h4( 'changelog', $data );
 		$data = $this->readme_section_as_h4( 'description', $data );
 		$data = $this->readme_section_as_h4( 'installation', $data );
+		$data = $this->screenshots_as_list( $data );
 
 		return $data;
 	}
@@ -129,6 +151,34 @@ class Readme_Parser extends Parser {
 		$replace = '<h4>$1</h4>';
 
 		$data['sections'][ $section ] = preg_replace( $pattern, $replace, $data['sections'][ $section ] );
+
+		return $data;
+	}
+
+	/**
+	 * Create ordered list for screenshots.
+	 *
+	 * @param  array $data Array of parsed readme data.
+	 *
+	 * @return array
+	 */
+	public function screenshots_as_list( $data ) {
+		if ( empty( $data['screenshots'] ) ) {
+			return $data;
+		}
+		$assets      = (array) $this->assets;
+		$screenshots = array_filter( $assets, fn( $url, $file ) => str_starts_with( $file, 'screenshot-' ), ARRAY_FILTER_USE_BOTH );
+
+		$data['sections']['screenshots'] = '<ol>';
+		foreach ( $data['screenshots'] as $file_num => $caption ) {
+			foreach ( $screenshots as $file => $url ) {
+				if ( str_starts_with( $file, 'screenshot-' . $file_num ) ) {
+					$data['sections']['screenshots'] .= "<li><a href=\"{$url}\"><img src=\"{$url}\" alt=\"{$caption}\"></a><p>{$caption}</p></li>";
+					break;
+				}
+			}
+		}
+		$data['sections']['screenshots'] .= '</ol>';
 
 		return $data;
 	}
