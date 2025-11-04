@@ -166,6 +166,8 @@ class Readme_Parser extends Parser {
 		if ( empty( $data['screenshots'] ) ) {
 			return $data;
 		}
+
+		unset( $data['sections']['screenshots'] );
 		$assets      = (array) $this->assets;
 		$screenshots = array_filter( $assets, fn( $url, $file ) => str_starts_with( $file, 'screenshot-' ), ARRAY_FILTER_USE_BOTH );
 
