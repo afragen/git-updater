@@ -172,8 +172,11 @@ class Readme_Parser extends Parser {
 		$data['sections']['screenshots'] = '<ol>';
 		foreach ( $data['screenshots'] as $file_num => $caption ) {
 			foreach ( $screenshots as $file => $url ) {
+				$url     = esc_url( $url );
+				$alt     = esc_attr( $caption );
+				$caption = esc_html( $caption );
 				if ( str_starts_with( $file, 'screenshot-' . $file_num ) ) {
-					$data['sections']['screenshots'] .= "<li><a href=\"{$url}\"><img src=\"{$url}\" alt=\"{$caption}\"></a><p>{$caption}</p></li>";
+					$data['sections']['screenshots'] .= "<li><a href=\"{$url}\"><img src=\"{$url}\" alt=\"{$alt}\"></a><p>{$caption}</p></li>";
 					break;
 				}
 			}
