@@ -481,8 +481,8 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_assets'] ) ) {
-			$this->type->release_assets = $response['assets'];
-			$this->type->created_at     = $response['created_at'];
+			$this->type->release_assets = $response['assets'] ?? $response;
+			$this->type->created_at     = $response['created_at'] ?? [];
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 
@@ -490,8 +490,8 @@ trait API_Common {
 			return false;
 		}
 
-		$this->type->release_assets = $response['assets'];
-		$this->type->created_at     = $response['created_at'];
+		$this->type->release_assets = $response['assets'] ?? $response;
+		$this->type->created_at     = $response['created_at'] ?? [];
 
 		return $response;
 	}
