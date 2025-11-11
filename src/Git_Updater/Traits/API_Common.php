@@ -73,13 +73,18 @@ trait API_Common {
 					foreach ( $release->assets as $asset ) {
 						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
 							$release_assets[ $release->tag_name ] = $asset->url;
+							$created_at[ $release->tag_name ]     = $asset->created_at;
 							continue 2;
 						}
 					}
 				}
 			}
 			uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
-			$response = $release_assets;
+			uksort( $created_at, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
+			$response = [
+				'assets'     => $release_assets,
+				'created_at' => $created_at,
+			];
 		}
 
 		/**
@@ -476,7 +481,8 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_assets'] ) ) {
-			$this->type->release_assets = $response;
+			$this->type->release_assets = $response['assets'] ?? $response;
+			$this->type->created_at     = $response['created_at'] ?? [];
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 
@@ -484,7 +490,8 @@ trait API_Common {
 			return false;
 		}
 
-		$this->type->release_assets = $response;
+		$this->type->release_assets = $response['assets'] ?? $response;
+		$this->type->created_at     = $response['created_at'] ?? [];
 
 		return $response;
 	}

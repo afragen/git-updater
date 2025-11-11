@@ -456,6 +456,8 @@ class REST_API {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
+		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
+
 		$repo_api_data = [
 			'did'               => $repo_data->did,
 			'name'              => $repo_data->name,
@@ -486,10 +488,11 @@ class REST_API {
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
 			'versions'          => $repo_data->release_asset ? $repo_data->release_assets : $repo_data->tags,
+			'created_at'        => $repo_data->created_at,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
-			'last_updated'      => gmdate( 'Y-m-d h:ia T', strtotime( $repo_data->last_updated ) ),
+			'last_updated'      => gmdate( 'Y-m-d h:ia T', strtotime( $last_updated ) ),
 			'added'             => gmdate( 'Y-m-d', strtotime( $repo_data->added ) ),
 			'num_ratings'       => $repo_data->num_ratings,
 			'rating'            => $repo_data->rating,

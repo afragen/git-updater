@@ -373,6 +373,7 @@ class Base {
 		$this->$type->donate_link    = '';
 		$this->$type->contributors   = [];
 		$this->$type->downloaded     = 0;
+		$this->$type->created_at     = [];
 		$this->$type->last_updated   = '';
 		$this->$type->added          = '';
 		$this->$type->rating         = 0;
