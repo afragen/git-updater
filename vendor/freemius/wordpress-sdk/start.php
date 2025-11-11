@@ -15,7 +15,7 @@
 	 *
 	 * @var string
 	 */
-	$this_sdk_version = '2.12.2';
+	$this_sdk_version = '2.13.0';
 
 	#region SDK Selection Logic --------------------------------------------------------------------
 
@@ -446,6 +446,7 @@
 	 *      fs_plugin_icon_{plugin_slug}
 	 *      fs_show_trial_{plugin_slug}
 	 *      fs_is_pricing_page_visible_{plugin_slug}
+	 *      fs_checkout/parameters_{plugin_slug}
 	 *
 	 * --------------------------------------------------------
 	 *
@@ -453,6 +454,8 @@
 	 *
 	 *      fs_after_license_loaded_{plugin_slug}
 	 *      fs_after_license_change_{plugin_slug}
+	 *      fs_after_license_activation_{plugin_slug}
+	 *      fs_after_license_deactivation_{plugin_slug}
 	 *      fs_after_plans_sync_{plugin_slug}
 	 *
 	 *      fs_after_account_details_{plugin_slug}

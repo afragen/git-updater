@@ -12,7 +12,36 @@
 
 	class FS_Checkout_Manager {
 
-		# region Singleton
+        /**
+         * Allowlist of query parameters for checkout.
+         */
+        private $_allowed_custom_params = array(
+            // currency
+            'currency'                      => true,
+            'default_currency'              => true,
+            // cart
+            'always_show_renewals_amount'   => true,
+            'annual_discount'               => true,
+            'billing_cycle'                 => true,
+            'billing_cycle_selector'        => true,
+            'bundle_discount'               => true,
+            'maximize_discounts'            => true,
+            'multisite_discount'            => true,
+            'show_inline_currency_selector' => true,
+            'show_monthly'                  => true,
+            // appearance
+            'form_position'                 => true,
+            'is_bundle_collapsed'           => true,
+            'layout'                        => true,
+            'refund_policy_position'        => true,
+            'show_refund_badge'             => true,
+            'show_reviews'                  => true,
+            'show_upsells'                  => true,
+            'title'                         => true,
+        );
+
+
+        # region Singleton
 
 		/**
 		 * @var FS_Checkout_Manager
@@ -153,7 +182,12 @@
 				( $fs->is_theme() && current_user_can( 'install_themes' ) )
 			);
 
-			return array_merge( $context_params, $_GET, array(
+            $filtered_params = $fs->apply_filters('checkout/parameters', $context_params);
+
+            // Allowlist only allowed query params.
+            $filtered_params = array_intersect_key($filtered_params, $this->_allowed_custom_params);
+
+            return array_merge( $context_params, $filtered_params, $_GET, array(
 				// Current plugin version.
 				'plugin_version' => $fs->get_plugin_version(),
 				'sdk_version'    => WP_FS__SDK_VERSION,

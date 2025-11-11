@@ -3,6 +3,7 @@
 * use auth key for REST endpoint to flush repository cache for possible abuse
 * added `Screenshots` section to plugin modal
 * get `created_at` per release asset
+* update `freemius/wordpress-sdk`
 
 #### 12.19.0 / 2025-09-29
 * setup for Gitea release assets
