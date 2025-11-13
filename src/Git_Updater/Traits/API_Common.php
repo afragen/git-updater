@@ -481,8 +481,11 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_assets'] ) ) {
-			$this->type->release_assets = $response['assets'] ?? $response;
-			$this->type->created_at     = $response['created_at'] ?? [];
+			// If response is object it means no release assets found.
+			if ( is_array( $response ) ) {
+				$this->type->release_assets = $response['assets'] ?? $response;
+				$this->type->created_at     = $response['created_at'] ?? [];
+			}
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 
