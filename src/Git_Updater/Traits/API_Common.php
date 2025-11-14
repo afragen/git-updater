@@ -400,11 +400,8 @@ trait API_Common {
 			}
 
 			if ( $response ) {
-				$branches             = $this->parse_branch_response( $response );
-				$this->type->branches = (array) $branches;
+				$branches = $this->parse_branch_response( $response );
 				$this->set_repo_cache( 'branches', (array) $branches );
-
-				return true;
 			}
 		}
 
@@ -440,7 +437,6 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_asset'] ) ) {
-			$this->type->release_assets[ $this->type->newest_tag ] = $response;
 			$this->set_repo_cache( 'release_asset', $response );
 			$this->set_repo_cache( 'release_asset_download', $response );
 		}
@@ -481,11 +477,6 @@ trait API_Common {
 		}
 
 		if ( $response && ! isset( $this->response['release_assets'] ) ) {
-			// If response is object it means no release assets found.
-			if ( is_array( $response ) ) {
-				$this->type->release_assets = $response['assets'] ?? $response;
-				$this->type->created_at     = $response['created_at'] ?? [];
-			}
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 
