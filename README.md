@@ -5,7 +5,7 @@
 ![WordPress Tests](https://github.com/afragen/git-updater/workflows/WordPress%20Tests/badge.svg)
 
 * Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/git-updater/graphs/contributors)
-* Tags: plugin, theme, update, github, language pack
+* Tags: packages, update, github, language pack
 * Requires at least: 5.9
 * Requires PHP: 8.0
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)

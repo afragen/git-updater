@@ -2,7 +2,7 @@
 
 Contributors: afragen
 Donate link: https://thefragens.com/git-updater-donate
-Tags: plugin, theme, language pack, updater
+Tags: packages, language pack, updater
 Requires at least: 5.9
 Requires PHP: 8.0
 Tested up to: 6.9
