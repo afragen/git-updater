@@ -4,6 +4,7 @@
 * added `Screenshots` section to plugin modal
 * get `created_at` per release asset
 * update `freemius/wordpress-sdk`
+* Cache Add-Ons for 7 days
 
 #### 12.19.0 / 2025-09-29
 * setup for Gitea release assets
