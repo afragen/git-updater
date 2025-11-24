@@ -558,7 +558,6 @@ class API {
 		} else {
 			$readme['sections']['other_notes'] .= $readme['remaining_content'];
 		}
-		unset( $readme['sections']['screenshots'] );
 		$readme['sections']   = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
 		$this->type->sections = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
 

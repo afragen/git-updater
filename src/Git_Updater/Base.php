@@ -320,10 +320,10 @@ class Base {
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
 				$repo_api->get_repo_contents();
+				$repo_api->get_repo_assets();
 				$repo_api->get_remote_readme();
 				$repo_api->get_remote_changes( '' );
 				$repo_api->get_repo_meta();
-				$repo_api->get_repo_assets();
 				if ( ! empty( self::$options['branch_switch'] ) ) {
 					$repo_api->get_remote_branches();
 				}
@@ -373,6 +373,7 @@ class Base {
 		$this->$type->donate_link    = '';
 		$this->$type->contributors   = [];
 		$this->$type->downloaded     = 0;
+		$this->$type->created_at     = [];
 		$this->$type->last_updated   = '';
 		$this->$type->added          = '';
 		$this->$type->rating         = 0;

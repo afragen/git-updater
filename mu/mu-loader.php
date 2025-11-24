@@ -33,9 +33,9 @@ class MU_Loader {
 	/**
 	 * Holds array of plugin files.
 	 *
-	 * @var $plugin_files
+	 * @var array
 	 */
-	private static $plugin_files = [ 'git-updater/git-updater.php' ];
+	private static $plugin_files = [ 'git-updater/git-updater.php', 'git-updater-f27e06/git-updater.php' ];
 
 	/**
 	 * Let's get going.

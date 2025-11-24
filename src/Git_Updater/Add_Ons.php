@@ -202,7 +202,7 @@ class Add_Ons {
 				$api_results[ $addon ] = $response;
 			}
 			if ( count( $api_results ) === count( self::$addons ) ) {
-				$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+24 hours' );
+				$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+7 days' );
 			}
 		}
 
