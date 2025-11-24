@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.20.0 / 2025-11-24
 * move tag sort outside of loop
 * use auth key for REST endpoint to flush repository cache for possible abuse
 * added `Screenshots` section to plugin modal
