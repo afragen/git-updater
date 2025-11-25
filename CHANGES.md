@@ -1,4 +1,5 @@
 #### [unreleased]
+* update actions/checkout
 
 #### 12.20.0 / 2025-11-24
 * move tag sort outside of loop
