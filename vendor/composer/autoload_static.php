@@ -7,39 +7,39 @@ namespace Composer\Autoload;
 class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
 {
     public static $prefixLengthsPsr4 = array (
-        'P' => 
+        'P' =>
         array (
             'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 57,
         ),
-        'M' => 
+        'M' =>
         array (
             'McAskill\\Composer\\' => 18,
         ),
-        'F' => 
+        'F' =>
         array (
             'Fragen\\Git_Updater\\' => 19,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
+        'PHPCSStandards\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' =>
         array (
             0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
         ),
-        'McAskill\\Composer\\' => 
+        'McAskill\\Composer\\' =>
         array (
             0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
         ),
-        'Fragen\\Git_Updater\\' => 
+        'Fragen\\Git_Updater\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src/Git_Updater',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'P' => 
+        'P' =>
         array (
-            'Parsedown' => 
+            'Parsedown' =>
             array (
                 0 => __DIR__ . '/..' . '/erusev/parsedown',
             ),
