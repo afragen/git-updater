@@ -1,4 +1,5 @@
 #### [unreleased]
+* set a variable default
 * update actions/checkout
 
 #### 12.20.0 / 2025-11-24

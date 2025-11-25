@@ -67,6 +67,7 @@ trait API_Common {
 				$response[] = $release ?? [];
 			}
 			$release_assets = [];
+			$created_at     = [];
 			foreach ( $response as $release ) {
 				// Ignore leading 'v' and skip anything with dash or words.
 				if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
