@@ -11,11 +11,12 @@
  * Plugin Name:       MU Loader
  * Plugin URI:        https://gist.github.com/afragen/9117fd930d9be16be8a5f450b809dfa8
  * Description:       An mu-plugin to load plugins as a must-use plugins. Disables normal plugin activation and deletion.
- * Version:           0.5.0
+ * Version:           0.8.0
  * Author:            WordPress Upgrade/Install Team
  * License:           MIT
+ * Text Domain:       mu-loader
  * GitHub Plugin URI: https://gist.github.com/afragen/9117fd930d9be16be8a5f450b809dfa8
- * Requires PHP:      8.0
+ * Requires PHP:      7.4
  * Requires WP:       5.9
  */
 
@@ -33,6 +34,8 @@ class MU_Loader {
 	/**
 	 * Holds array of plugin files.
 	 *
+	 * Add filepath to array, 'my-plugin/my-plugin.php'.
+	 *
 	 * @var array
 	 */
 	private static $plugin_files = [ 'git-updater/git-updater.php', 'git-updater-f27e06/git-updater.php' ];
@@ -44,14 +47,16 @@ class MU_Loader {
 	 * @return void
 	 */
 	public function run() {
-		foreach ( static::$plugin_files as $plugin_file ) {
+		foreach ( static::$plugin_files as $key => $plugin_file ) {
 			$plugin_filepath = trailingslashit( WP_PLUGIN_DIR ) . $plugin_file;
 			if ( file_exists( $plugin_filepath ) ) {
 				require $plugin_filepath;
 				$this->load_hooks( $plugin_file );
+			} else {
+				unset( static::$plugin_files[ $key ] );
 			}
 		}
-		add_filter( 'option_active_plugins', [ $this, 'set_as_active' ] );
+		add_filter( 'option_active_plugins', [ $this, 'set_as_active' ], 10, 1 );
 	}
 
 	/**
@@ -68,6 +73,7 @@ class MU_Loader {
 		add_filter( 'plugin_action_links_' . $plugin_file, [ $this, 'mu_plugin_active' ] );
 		add_action( 'after_plugin_row_' . $plugin_file, [ $this, 'after_plugin_row_updates' ] );
 		add_action( 'after_plugin_row_meta', [ $this, 'display_as_mu_plugin' ], 10, 1 );
+		add_action( 'plugins_list', [ $this, 'put_in_mu_plugin_tab' ], 10, 1 );
 	}
 
 	/**
@@ -93,7 +99,7 @@ class MU_Loader {
 		if ( in_array( $plugin_file, (array) static::$plugin_files, true ) ) {
 			printf(
 				'<br><span style="color:#a7aaad;">%s</span>',
-				esc_html__( 'Activated as mu-plugin', 'mu-loader' )
+				esc_html__( 'Activated as Must-Use plugin', 'mu-loader' )
 			);
 		}
 	}
@@ -120,6 +126,24 @@ class MU_Loader {
 		$active_plugins = array_merge( $active_plugins, static::$plugin_files );
 
 		return array_unique( $active_plugins );
+	}
+
+	/**
+	 * Move plugins to Must-Use tab.
+	 *
+	 * @param array $tabs Array of plugin tabs.
+	 * @return array
+	 */
+	public function put_in_mu_plugin_tab( $tabs ) {
+		foreach ( static::$plugin_files as $plugin_file ) {
+			if ( ! isset( $tabs['all'][ $plugin_file ] ) ) {
+				continue;
+			}
+			$tabs['mustuse'][ $plugin_file ] = $tabs['all'][ $plugin_file ];
+			unset( $tabs['all'][ $plugin_file ] );
+			unset( $tabs['active'][ $plugin_file ] );
+		}
+		return $tabs;
 	}
 }
 

@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 12.20.1 / 2025-11-26
+* initialize `$created_at` variable, possibly fixes PHP Error
+* update actions/checkout
+* update mu-loader.php
+
 #### 12.20.0 / 2025-11-24
 * move tag sort outside of loop
 * use auth key for REST endpoint to flush repository cache for possible abuse

@@ -2,14 +2,14 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.19.0\n"
+"Project-Id-Version: Git Updater 12.20.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-27T18:48:33+00:00\n"
+"POT-Creation-Date: 2025-11-25T23:40:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -128,35 +128,35 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:467
+#: src/Git_Updater/API/GitHub_API.php:468
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:474
+#: src/Git_Updater/API/GitHub_API.php:475
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:490
+#: src/Git_Updater/API/GitHub_API.php:491
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:517
+#: src/Git_Updater/API/GitHub_API.php:518
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:524
+#: src/Git_Updater/API/GitHub_API.php:525
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:537
+#: src/Git_Updater/API/GitHub_API.php:538
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:551
+#: src/Git_Updater/API/GitHub_API.php:552
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:565
+#: src/Git_Updater/API/GitHub_API.php:566
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -168,7 +168,7 @@ msgstr ""
 msgid "Enter plugin or theme slug."
 msgstr ""
 
-#: src/Git_Updater/Base.php:706
+#: src/Git_Updater/Base.php:707
 msgid "Updates via Git Updater"
 msgstr ""
 
