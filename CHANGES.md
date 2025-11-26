@@ -1,5 +1,7 @@
 #### [unreleased]
-* initialize `$created_at` variable
+
+#### 12.20.1 / 2025-11-26
+* initialize `$created_at` variable, possibly fixes PHP Error
 * update actions/checkout
 * update mu-loader.php
 
