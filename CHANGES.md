@@ -1,5 +1,5 @@
 #### [unreleased]
-* set a variable default
+* initialize `$created_at` variable
 * update actions/checkout
 * update mu-loader.php
 
