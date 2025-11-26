@@ -1,6 +1,7 @@
 #### [unreleased]
 * set a variable default
 * update actions/checkout
+* update mu-loader.php
 
 #### 12.20.0 / 2025-11-24
 * move tag sort outside of loop
