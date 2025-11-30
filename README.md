@@ -22,15 +22,13 @@ A simple plugin to enable automatic updates to your GitHub hosted WordPress plug
 
 This plugin was originally designed to simply update any GitHub hosted WordPress plugin or theme. Your plugin or theme **must** contain a header in the style.css header or in the plugin's header denoting the location on GitHub. The format is as follows.
 
-    GitHub Plugin URI: afragen/git-updater
     GitHub Plugin URI: https://github.com/afragen/git-updater
 
 or
 
-    GitHub Theme URI: afragen/test-child
     GitHub Theme URI: https://github.com/afragen/test-child
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
+...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI format is `https://github.com/<owner>/<repo>`. You **should not** include any extensions like `.git`.
 
 ### API Plugins
 
