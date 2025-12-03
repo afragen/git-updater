@@ -517,7 +517,7 @@ class REST_API {
 		// Update release asset download link .
 		if ( $repo_data->release_asset ) {
 			if ( ( isset( $repo_cache['release_asset_download'] )
-				|| ! isset( $repo_cache['release_asset_redirect'] ) )
+				&& ! isset( $repo_cache['release_asset_redirect'] ) )
 				&& 'bitbucket' !== $repo_api_data['git']
 			) {
 				$repo_api_data['download_link'] = $repo_cache['release_asset_download'];

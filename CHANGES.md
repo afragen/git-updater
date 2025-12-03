@@ -1,5 +1,6 @@
 #### [unreleased]
 * harden REST API data for versions if relesase_assets and tags are empty -- this can happen if too many tags are created that aren't semver format
+* update REST API conditional for setting release asset download link
 
 #### 12.20.1 / 2025-11-26
 * initialize `$created_at` variable, possibly fixes PHP Error
