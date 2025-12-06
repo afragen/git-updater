@@ -7,7 +7,6 @@
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  *
- * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
  * @phpcs:disable WordPress.Security.NonceVerification.Missing
  * @phpcs:disable Squiz.PHP.DisallowMultipleAssignments.Found
  */

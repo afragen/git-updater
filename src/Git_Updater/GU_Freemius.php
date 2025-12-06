@@ -6,6 +6,8 @@
  * @license  MIT
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
+ *
+ * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
  */
 
 namespace Fragen\Git_Updater;
@@ -98,8 +100,6 @@ class GU_Freemius {
 		$gu_fs->add_filter( 'is_submenu_visible', [ $this, 'is_submenu_visible' ], 10, 2 );
 		$gu_fs->add_filter( 'permission_list', [ $this, 'permission_list' ] );
 		$gu_fs->add_action( 'after_uninstall', [ $this, 'uninstall_cleanup' ] );
-
-		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		// $gu_fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
 
 		// Hide all Freemius menus with filter.
