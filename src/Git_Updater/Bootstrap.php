@@ -135,17 +135,13 @@ class Bootstrap {
 	}
 
 	/**
-	 * Check for API redirects from AspireUpdate or FAIR Package Manager.
+	 * Check for API redirects from FAIR Package Manager.
 	 *
 	 * Run appropriate filter to redefine update API.
 	 *
 	 * @return void
 	 */
 	public function check_update_api_redirect() {
-		if ( class_exists( '\AspireUpdate\Admin_Settings' ) ) {
-			add_filter( 'gu_api_domain', fn () => \AspireUpdate\Admin_Settings::get_instance()->get_setting( 'api_host' ) );
-		}
-
 		if ( function_exists( '\Fair\Default_Repo\get_default_repo_domain' ) ) {
 			add_filter( 'gu_api_domain', fn () => \FAIR\Default_Repo\get_default_repo_domain() );
 		}
