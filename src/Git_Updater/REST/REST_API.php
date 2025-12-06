@@ -458,6 +458,13 @@ class REST_API {
 
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
 
+		// Get versions from release assets or tags. Limit to 20.
+		if ( $repo_data->release_asset ) {
+			$versions = $repo_data->release_assets ?? [];
+		} else {
+			$versions = $repo_data->tags ?? [];
+		}
+
 		$repo_api_data = [
 			'did'               => $repo_data->did,
 			'name'              => $repo_data->name,
@@ -487,7 +494,7 @@ class REST_API {
 			'branch'            => $repo_data->branch,
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
-			'versions'          => $repo_data->release_asset ? ( $repo_data->release_assets ?? ( $repo_data->tags ?? [] ) ) : $repo_data->tags,
+			'versions'          => $versions,
 			'created_at'        => $repo_data->created_at,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
