@@ -464,6 +464,7 @@ class REST_API {
 		} else {
 			$versions = $repo_data->tags ?? [];
 		}
+		$versions = array_slice( (array) $versions, 0, 20, true );
 
 		$repo_api_data = [
 			'did'               => $repo_data->did,
