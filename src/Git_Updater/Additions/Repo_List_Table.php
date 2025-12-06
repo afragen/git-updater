@@ -9,9 +9,7 @@
  * @source  List Table Example Plugin by Matt van Andel
  *          Copyright 2015, GPL2
  *
- * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
  * @phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
- * @phpcs:disable WordPress.Security.NonceVerification.Recommended
  * @phpcs:disable WordPress.Security.ValidatedSanitizedInput
  */
 
