@@ -3,6 +3,7 @@
 * update REST API conditional for setting release asset download link
 * add guard for missing/empty assets in `Readme_Parser`
 * move some `phpcs:disable` to package header
+* update to `erusev/parsedown": "dev-master#0b274ac959624e6c6d647e9c9b6c2d20da242004"` for PHP 8.5 compliance, thanks @thefrosty
 
 #### 12.20.1 / 2025-11-26
 * initialize `$created_at` variable, possibly fixes PHP Error
