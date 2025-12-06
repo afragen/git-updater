@@ -6,6 +6,9 @@
  * @license  MIT
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
+ *
+ * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
+ * @phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
  */
 
 namespace Fragen\Git_Updater\Traits;
