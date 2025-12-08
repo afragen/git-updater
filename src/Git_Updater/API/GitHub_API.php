@@ -6,6 +6,8 @@
  * @license  MIT
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
+ *
+ * @phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
  */
 
 namespace Fragen\Git_Updater\API;

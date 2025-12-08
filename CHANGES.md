@@ -1,5 +1,14 @@
 #### [unreleased]
 
+#### 12.20.2 / 2025-12-08
+* harden REST API data for versions if relesase_assets and tags are empty -- this can happen if too many tags are created that aren't semver format
+* limit REST API to return last 20 versions
+* update REST API conditional logic for setting release asset download link
+* add guard for missing/empty assets in `Readme_Parser`
+* move some `phpcs:disable` to package header
+* update to `erusev/parsedown": "dev-master#0b274ac959624e6c6d647e9c9b6c2d20da242004"` for PHP 8.5 compliance, thanks @thefrosty
+* standardize to `composer lint` and `composer format`
+
 #### 12.20.1 / 2025-11-26
 * initialize `$created_at` variable, possibly fixes PHP Error
 * update actions/checkout

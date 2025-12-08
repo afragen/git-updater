@@ -6,6 +6,8 @@
  * @license  MIT
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
+ *
+ * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
  */
 
 namespace Fragen\Git_Updater;

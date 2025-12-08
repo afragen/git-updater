@@ -6,6 +6,9 @@
  * @license  MIT
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
+ *
+ * @phpcs:disable WordPress.Security.NonceVerification.Missing
+ * @phpcs:disable Squiz.PHP.DisallowMultipleAssignments.Found
  */
 
 namespace Fragen\Git_Updater;
@@ -156,7 +159,6 @@ class Install {
 			$this->set_install_post_data( $config );
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
 			if ( empty( $_POST['git_updater_branch'] ) ) {
 				$_POST['git_updater_branch'] = 'master';
@@ -175,10 +177,8 @@ class Install {
 			$headers                   = $this->parse_header_uri( sanitize_text_field( wp_unslash( $_POST['git_updater_repo'] ) ) );
 			$_POST['git_updater_repo'] = $headers['owner_repo'];
 
-			self::$install = $this->sanitize( $_POST );
-			// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+			self::$install         = $this->sanitize( $_POST );
 			self::$install['repo'] = self::$install['git_updater_install_repo'] = $headers['repo'];
-			// phpcs:enable
 
 			/*
 			 * Create GitHub endpoint.
@@ -315,7 +315,6 @@ class Install {
 	 */
 	public function create_form( $type ) {
 		// Bail if installing.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
 			return;
 		}

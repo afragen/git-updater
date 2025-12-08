@@ -169,9 +169,7 @@ trait API_Common {
 		}
 
 		$tags = $this->parse_tags( $response, $repo_type );
-		$this->sort_tags( $tags );
-
-		return true;
+		return $this->sort_tags( $tags );
 	}
 
 	/**

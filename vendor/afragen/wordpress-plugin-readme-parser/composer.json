@@ -23,7 +23,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=5.4",
-    "erusev/parsedown": "^1.7"
+    "erusev/parsedown": "dev-master#0b274ac959624e6c6d647e9c9b6c2d20da242004"
   },
   "autoload": {
     "classmap": [

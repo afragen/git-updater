@@ -42,7 +42,7 @@ class Readme_Parser extends Parser {
 	 * @param string $slug   Repository slug.
 	 */
 	public function __construct( $readme, $slug ) {
-		$this->assets = $this->get_repo_cache( $slug )['assets'];
+		$this->assets = $this->get_repo_cache( $slug )['assets'] ?? [];
 		parent::__construct( $readme );
 	}
 
@@ -167,8 +167,12 @@ class Readme_Parser extends Parser {
 			return $data;
 		}
 
+		$assets = (array) $this->assets;
+		if ( empty( $assets ) ) {
+			return $data;
+		}
+
 		unset( $data['sections']['screenshots'] );
-		$assets      = (array) $this->assets;
 		$screenshots = array_filter( $assets, fn( $url, $file ) => str_starts_with( $file, 'screenshot-' ), ARRAY_FILTER_USE_BOTH );
 
 		$data['sections']['screenshots'] = '<ol>';

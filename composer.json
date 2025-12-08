@@ -31,6 +31,7 @@
 	"require": {
 		"php": ">=8.0",
 		"afragen/wordpress-plugin-readme-parser": "^1",
+		"erusev/parsedown": "dev-master#0b274ac959624e6c6d647e9c9b6c2d20da242004",
 		"afragen/singleton": "^1.0",
 		"afragen/wp-dismiss-notice": "*",
 		"freemius/wordpress-sdk": "^2.12"
@@ -56,8 +57,7 @@
 		}
 	},
 	"scripts": {
-		"wpcs": [
-			"vendor/bin/phpcbf .; vendor/bin/phpcs ."
-		]
+		"lint": "@php ./vendor/bin/phpcs .",
+		"format": "@php ./vendor/bin/phpcbf ."
 	}
 }
