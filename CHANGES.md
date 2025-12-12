@@ -1,5 +1,6 @@
 #### [unreleased]
 * remove `git_updater_plugin_updates` and `git_updater_theme_updates` options, see [#1119](https://github.com/afragen/git-updater/issues/1119)
+* add `gu_plugin_name()` to return plugin name, slug or slug-didhash
 
 #### 12.20.2 / 2025-12-08
 * harden REST API data for versions if relesase_assets and tags are empty -- this can happen if too many tags are created that aren't semver format

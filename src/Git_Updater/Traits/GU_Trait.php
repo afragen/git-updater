@@ -28,9 +28,11 @@ trait GU_Trait {
 	/**
 	 * Holds the plugin basename.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	private $gu_plugin_name = 'git-updater/git-updater.php';
+	final public function gu_plugin_name() : string {
+		return is_plugin_active( 'git-updater/git-updater.php' ) ? 'git-updater/git-updater.php' : 'git-updater-f27e06/git-updater.php';
+	}
 
 	/**
 	 * Checks to see if a heartbeat is resulting in activity.

@@ -83,7 +83,7 @@ class Add_Ons {
 			wp_enqueue_script( 'updates' );
 			wp_enqueue_script(
 				'ajax-activate',
-				plugin_dir_url( $this->gu_plugin_name ) . '/js/ajax-activate.js',
+				plugin_dir_url( $this->gu_plugin_name() ) . '/js/ajax-activate.js',
 				[ 'updates' ],
 				self::get_plugin_version(),
 				[ 'in_footer' => true ]
@@ -124,7 +124,7 @@ class Add_Ons {
 		) {
 			wp_enqueue_script(
 				'ajax-activate',
-				plugin_dir_url( $this->gu_plugin_name ) . '/js/ajax-activate.js',
+				plugin_dir_url( $this->gu_plugin_name() ) . '/js/ajax-activate.js',
 				[ 'updates' ],
 				self::get_plugin_version(),
 				[ 'in_footer' => true ]
