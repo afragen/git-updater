@@ -457,8 +457,15 @@ class REST_API {
 		add_filter( 'gu_disable_wpcron', '__return_false' );
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
-		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
-			return (object) [ 'error' => 'API data response is incorrect.' ];
+		$api_data_incorrect_error  = (object) [ 'error' => 'API data response is incorrect.' ];
+		if ( ! is_object( $repo_data ) ) {
+			$repo_data_type                   = gettype( $repo_data );
+			$api_data_incorrect_error->error .= " Object expected, {$repo_data_type} returned.";
+			return $api_data_incorrect_error;
+		}
+		if ( '0.0.0' === $repo_data->remote_version ) {
+			$api_data_incorrect_error->error .= ' The remote version is "0.0.0".';
+			return $api_data_incorrect_error;
 		}
 
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
