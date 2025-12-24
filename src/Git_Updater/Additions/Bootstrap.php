@@ -3,7 +3,7 @@
  * Git Updater Additions
  *
  * @author    Andy Fragen
- * @license   MIT
+ * @license   GPL-3.0-or-later
  * @link      https://github.com/afragen/git-updater-additions
  * @package   git-updater-additions
  */

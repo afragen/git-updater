@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -17,7 +17,7 @@
  * Author:            Andy Fragen
  * Author URI:        https://thefragens.com
  * Security:          andy+security@git-updater.com
- * License:           MIT
+ * License:           GPL-3.0-or-later
  * Domain Path:       /languages
  * Text Domain:       git-updater
  * Network:           true

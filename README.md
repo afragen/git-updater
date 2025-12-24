@@ -10,7 +10,7 @@
 * Requires PHP: 8.0
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>
-* License: MIT
+* License: GPL-3.0-or-later
 
 A simple plugin to enable automatic updates to your GitHub hosted WordPress plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
 

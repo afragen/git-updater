@@ -7,7 +7,7 @@ Requires at least: 5.9
 Requires PHP: 8.0
 Tested up to: 6.9
 Stable tag: master
-License: MIT
+License: GPL-3.0-or-later
 
 ## Description
 
