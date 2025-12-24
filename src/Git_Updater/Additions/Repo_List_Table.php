@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author  Andy Fragen
- * @license MIT
+ * @license GPL-3.0-or-later
  * @link    https://github.com/afragen/git-updater
  * @package git-updater
  * @source  List Table Example Plugin by Matt van Andel
