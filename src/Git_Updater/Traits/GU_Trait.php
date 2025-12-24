@@ -30,7 +30,7 @@ trait GU_Trait {
 	 *
 	 * @return string
 	 */
-	final public function gu_plugin_name() : string {
+	final public function gu_plugin_name(): string {
 		return is_plugin_active( 'git-updater/git-updater.php' ) ? 'git-updater/git-updater.php' : 'git-updater-f27e06/git-updater.php';
 	}
 

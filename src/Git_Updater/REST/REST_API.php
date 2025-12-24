@@ -390,11 +390,11 @@ class REST_API {
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
 
 		wp_update_plugins();
-		$current = get_site_transient( 'update_plugins' );
+		$current        = get_site_transient( 'update_plugins' );
 		$plugin_updates = $current->response ?? [];
 
 		wp_update_themes();
-		$current = get_site_transient( 'update_themes' );
+		$current       = get_site_transient( 'update_themes' );
 		$theme_updates = $current->response ?? [];
 
 		$site    = $request->get_header( 'host' );
