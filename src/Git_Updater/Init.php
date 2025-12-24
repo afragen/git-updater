@@ -103,7 +103,7 @@ class Init {
 			return true;
 		}
 
-		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
+		$can_user_update = current_user_can( 'manage_options' );
 
 		return $can_user_update;
 	}
