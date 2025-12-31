@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.21.0 / 2025-12-31 🎆
 * remove `git_updater_plugin_updates` and `git_updater_theme_updates` options, see [#1119](https://github.com/afragen/git-updater/issues/1119)
 * add `gu_plugin_name()` to return plugin name, slug or slug-didhash
 * change `can_update()` check to `manage_options` for `DISALLOW_FILE_MODS` constant
