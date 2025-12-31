@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -13,11 +13,11 @@
  * Plugin ID:         did:plc:afjf7gsjzsqmgc7dlhb553mv
  * Plugin URI:        https://git-updater.com
  * Description:       A plugin to automatically update GitHub hosted plugins, themes, and language packs. Additional API plugins available for Bitbucket, GitLab, Gitea, and Gist.
- * Version:           12.20.2
+ * Version:           12.21.0
  * Author:            Andy Fragen
  * Author URI:        https://thefragens.com
  * Security:          andy+security@git-updater.com
- * License:           MIT
+ * License:           GPL-3.0-or-later
  * Domain Path:       /languages
  * Text Domain:       git-updater
  * Network:           true

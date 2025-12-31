@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -105,8 +105,8 @@ class Settings {
 
 		add_filter(
 			is_multisite()
-			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name
-			: 'plugin_action_links_' . $this->gu_plugin_name,
+			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name()
+			: 'plugin_action_links_' . $this->gu_plugin_name(),
 			[ $this, 'plugin_action_links' ]
 		);
 

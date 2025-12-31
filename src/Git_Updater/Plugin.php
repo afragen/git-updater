@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -425,9 +425,6 @@ class Plugin {
 				) {
 					$transient->response[ $plugin->file ] = ( new Branch() )->set_rollback_transient( 'plugin', $plugin );
 				}
-		}
-		if ( property_exists( $transient, 'response' ) ) {
-			update_site_option( 'git_updater_plugin_updates', $transient->response );
 		}
 
 		return $transient;

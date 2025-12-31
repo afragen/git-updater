@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -389,8 +389,13 @@ class REST_API {
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );
 
-		$plugin_updates = get_site_option( 'git_updater_plugin_updates' );
-		$theme_updates  = get_site_option( 'git_updater_theme_updates' );
+		wp_update_plugins();
+		$current        = get_site_transient( 'update_plugins' );
+		$plugin_updates = $current->response ?? [];
+
+		wp_update_themes();
+		$current       = get_site_transient( 'update_themes' );
+		$theme_updates = $current->response ?? [];
 
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(

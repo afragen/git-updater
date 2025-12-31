@@ -1,15 +1,15 @@
 # Copyright (C) 2025 Andy Fragen
-# This file is distributed under the MIT.
+# This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.20.0.1\n"
+"Project-Id-Version: Git Updater 12.20.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-11-25T23:40:43+00:00\n"
+"POT-Creation-Date: 2025-12-31T19:57:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -41,42 +41,42 @@ msgstr ""
 msgid "https://thefragens.com"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:213
+#: src/Git_Updater/Additions/Repo_List_Table.php:214
 msgid "Slug"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:214
+#: src/Git_Updater/Additions/Repo_List_Table.php:215
 msgid "URL"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:215
+#: src/Git_Updater/Additions/Repo_List_Table.php:216
 #: src/Git_Updater/Additions/Settings.php:230
 msgid "Primary Branch"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:216
+#: src/Git_Updater/Additions/Repo_List_Table.php:217
 #: src/Git_Updater/Additions/Settings.php:244
 msgid "Release Asset"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:217
+#: src/Git_Updater/Additions/Repo_List_Table.php:218
 #: src/Git_Updater/Additions/Settings.php:257
 msgid "Private Package"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:218
+#: src/Git_Updater/Additions/Repo_List_Table.php:219
 msgid "Type"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:264
+#: src/Git_Updater/Additions/Repo_List_Table.php:265
 msgid "Delete"
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:295
+#: src/Git_Updater/Additions/Repo_List_Table.php:296
 msgid "Items would go to edit when we write that code."
 msgstr ""
 
-#: src/Git_Updater/Additions/Repo_List_Table.php:447
+#: src/Git_Updater/Additions/Repo_List_Table.php:446
 msgid "Addition Packages List Table"
 msgstr ""
 
@@ -128,35 +128,35 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:468
+#: src/Git_Updater/API/GitHub_API.php:471
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:475
+#: src/Git_Updater/API/GitHub_API.php:478
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:491
+#: src/Git_Updater/API/GitHub_API.php:494
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:518
+#: src/Git_Updater/API/GitHub_API.php:521
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:525
+#: src/Git_Updater/API/GitHub_API.php:528
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:538
+#: src/Git_Updater/API/GitHub_API.php:541
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:552
+#: src/Git_Updater/API/GitHub_API.php:555
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:566
+#: src/Git_Updater/API/GitHub_API.php:569
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
@@ -206,61 +206,61 @@ msgstr ""
 msgid "Switch to release "
 msgstr ""
 
-#: src/Git_Updater/Install.php:109
-#: src/Git_Updater/Install.php:329
+#: src/Git_Updater/Install.php:112
+#: src/Git_Updater/Install.php:328
 msgid "Install Plugin"
 msgstr ""
 
-#: src/Git_Updater/Install.php:112
-#: src/Git_Updater/Install.php:332
+#: src/Git_Updater/Install.php:115
+#: src/Git_Updater/Install.php:331
 msgid "Install Theme"
 msgstr ""
 
-#: src/Git_Updater/Install.php:168
+#: src/Git_Updater/Install.php:170
 msgid "A repository URI is required."
 msgstr ""
 
-#: src/Git_Updater/Install.php:349
+#: src/Git_Updater/Install.php:348
 msgid "Plugin"
 msgstr ""
 
-#: src/Git_Updater/Install.php:352
+#: src/Git_Updater/Install.php:351
 msgid "Theme"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:364
+#: src/Git_Updater/Install.php:363
 #, php-format
 msgid "Git Updater Install %s"
 msgstr ""
 
 #. translators: variable is 'Plugin' or 'Theme'
-#: src/Git_Updater/Install.php:372
+#: src/Git_Updater/Install.php:371
 #, php-format
 msgid "%s URI"
 msgstr ""
 
-#: src/Git_Updater/Install.php:380
+#: src/Git_Updater/Install.php:379
 msgid "Repository Branch"
 msgstr ""
 
-#: src/Git_Updater/Install.php:388
+#: src/Git_Updater/Install.php:387
 msgid "Remote Repository Host"
 msgstr ""
 
-#: src/Git_Updater/Install.php:423
+#: src/Git_Updater/Install.php:422
 msgid "URI is case sensitive."
 msgstr ""
 
-#: src/Git_Updater/Install.php:438
+#: src/Git_Updater/Install.php:437
 msgid "Enter branch name or leave empty for `master`"
 msgstr ""
 
-#: src/Git_Updater/Install.php:486
+#: src/Git_Updater/Install.php:485
 msgid "Activate"
 msgstr ""
 
-#: src/Git_Updater/Install.php:498
+#: src/Git_Updater/Install.php:497
 msgctxt "This refers to a network activation in a multisite installation"
 msgid "Network Enable"
 msgstr ""
@@ -491,6 +491,6 @@ msgstr ""
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:684
+#: src/Git_Updater/Traits/GU_Trait.php:688
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""

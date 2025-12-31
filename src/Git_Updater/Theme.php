@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -651,9 +651,6 @@ class Theme {
 			) {
 				$transient->response[ $theme->slug ] = ( new Branch() )->set_rollback_transient( 'theme', $theme );
 			}
-		}
-		if ( property_exists( $transient, 'response' ) ) {
-			update_site_option( 'git_updater_theme_updates', $transient->response );
 		}
 
 		return $transient;

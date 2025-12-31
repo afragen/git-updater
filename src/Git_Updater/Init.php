@@ -3,7 +3,7 @@
  * Git Updater
  *
  * @author   Andy Fragen
- * @license  MIT
+ * @license  GPL-3.0-or-later
  * @link     https://github.com/afragen/git-updater
  * @package  git-updater
  */
@@ -95,6 +95,9 @@ class Init {
 	/**
 	 * Checks current user capabilities.
 	 *
+	 * Use 'manage_options' capability so when DISALLOW_FILE_MODS is true,
+	 * Git Updater can still function.
+	 *
 	 * @return bool
 	 */
 	public function can_update() {
@@ -103,8 +106,6 @@ class Init {
 			return true;
 		}
 
-		$can_user_update = current_user_can( 'update_plugins' ) && current_user_can( 'update_themes' );
-
-		return $can_user_update;
+		return current_user_can( 'manage_options' );
 	}
 }
