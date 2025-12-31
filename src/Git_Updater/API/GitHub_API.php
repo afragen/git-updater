@@ -415,6 +415,7 @@ class GitHub_API extends API implements API_Interface {
 		$files = [];
 		$dirs  = [];
 		foreach ( $response as $content ) {
+			$content = (object) $content;
 			if ( property_exists( $content, 'type' ) && 'file' === $content->type ) {
 				$files[] = $content->name;
 			}
