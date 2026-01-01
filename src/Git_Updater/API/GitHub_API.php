@@ -158,7 +158,7 @@ class GitHub_API extends API implements API_Interface {
 			if ( ! $release_assets ) {
 				return '';
 			}
-			$release_assets['assets'] = $release_assets['assets'];
+			$release_assets['assets'] = $release_assets['assets'] ?? [];
 			$release_asset            = reset( $release_assets['assets'] );
 
 			/*
