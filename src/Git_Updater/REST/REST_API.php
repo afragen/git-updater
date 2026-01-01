@@ -446,6 +446,7 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
+		$beta_rc    = null !== $request->get_param( 'beta-rc' );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
@@ -463,9 +464,15 @@ class REST_API {
 
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
 
+		$last_updated = $beta_rc && ! empty( $repo_data->dev_created_at ) ? reset( $repo_data->dev_created_at ) : $last_updated;
+
 		// Get versions from release assets or tags. Limit to 20.
 		if ( $repo_data->release_asset ) {
-			$versions = $repo_data->release_assets ?? [];
+			if ( $beta_rc ) {
+				$versions = $repo_data->dev_release_assets ?? [];
+			} else {
+				$versions = $repo_data->release_assets ?? [];
+			}
 		} else {
 			$versions = $repo_data->tags ?? [];
 		}
@@ -482,6 +489,7 @@ class REST_API {
 			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
+			'beta_rc'           => $beta_rc,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
@@ -501,7 +509,7 @@ class REST_API {
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
 			'versions'          => $versions,
-			'created_at'        => $repo_data->created_at,
+			'created_at'        => $beta_rc ? $repo_data->dev_created_at : $repo_data->created_at,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,

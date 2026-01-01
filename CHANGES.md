@@ -1,5 +1,6 @@
 #### [unreleased]
 * added `gu_dev_release_asset` filter for dev release assets
+* added `beta-rc` query arg for dev release assets when using `update-api` REST endpoint
 
 #### 12.21.0 / 2025-12-31 🎆
 * remove `git_updater_plugin_updates` and `git_updater_theme_updates` options, see [#1119](https://github.com/afragen/git-updater/issues/1119)
