@@ -1,15 +1,15 @@
-# Copyright (C) 2025 Andy Fragen
+# Copyright (C) 2026 Andy Fragen
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.20.2.3\n"
+"Project-Id-Version: Git Updater 12.21.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-31T19:57:25+00:00\n"
+"POT-Creation-Date: 2026-01-01T01:05:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -128,35 +128,35 @@ msgstr ""
 msgid "Add-Ons"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:471
+#: src/Git_Updater/API/GitHub_API.php:485
 msgid "GitHub Personal Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:478
+#: src/Git_Updater/API/GitHub_API.php:492
 msgid "GitHub.com Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:494
+#: src/Git_Updater/API/GitHub_API.php:508
 msgid "GitHub Private Settings"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:521
+#: src/Git_Updater/API/GitHub_API.php:535
 msgid "Enter your GitHub Access Token. Leave empty for public repositories."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:528
+#: src/Git_Updater/API/GitHub_API.php:542
 msgid "Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits."
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:541
+#: src/Git_Updater/API/GitHub_API.php:555
 msgid "GitHub Access Token"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:555
+#: src/Git_Updater/API/GitHub_API.php:569
 msgid "GitHub"
 msgstr ""
 
-#: src/Git_Updater/API/GitHub_API.php:569
+#: src/Git_Updater/API/GitHub_API.php:583
 msgid "Enter GitHub Access Token for private GitHub repositories."
 msgstr ""
 
