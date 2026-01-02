@@ -549,9 +549,8 @@ class REST_API {
 			}
 		}
 
-		if ( ! $repo_api_data['is_private']
-			&& ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
-		) {
+		$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
+		if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
 			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
 		}
 
