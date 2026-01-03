@@ -451,6 +451,18 @@ class REST_API {
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
 
+		// Don't allow non-shared repos via this API. Set via Additions tab.
+		$additions = get_site_option( 'git_updater_additions', [] );
+		foreach ( $additions as $addition ) {
+			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( $addition_slug === $slug ) {
+				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
+					return (object) [ 'error' => 'Specified repo is not shared.' ];
+				}
+			}
+		}
+
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
 			return (object) [ 'error' => 'Specified repo does not exist.' ];
 		}
