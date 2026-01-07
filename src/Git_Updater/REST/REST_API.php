@@ -506,6 +506,7 @@ class REST_API {
 			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
+			'dev_channel'       => $channel,
 			'use_dev_channel'   => $channel && $use_channel,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
