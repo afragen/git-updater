@@ -474,13 +474,18 @@ class REST_API {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
+		// Is dev channel more current than stable?
+		$current_asset_version     = isset( $repo_data->release_assets ) ? array_key_first( $repo_data->release_assets ) : '';
+		$current_dev_asset_version = isset( $repo_data->dev_release_assets ) ? array_key_first( $repo_data->dev_release_assets ) : '';
+		$use_channel               = version_compare( $current_asset_version, $current_dev_asset_version, '<' );
+
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
 
-		$last_updated = $channel && ! empty( $repo_data->dev_created_at ) ? reset( $repo_data->dev_created_at ) : $last_updated;
+		$last_updated = $channel && $use_channel && ! empty( $repo_data->dev_created_at ) ? reset( $repo_data->dev_created_at ) : $last_updated;
 
 		// Get versions from release assets or tags. Limit to 20.
 		if ( $repo_data->release_asset ) {
-			if ( $channel ) {
+			if ( $channel && $use_channel ) {
 				$versions = $repo_data->dev_release_assets ?? [];
 			} else {
 				$versions = $repo_data->release_assets ?? [];
@@ -501,7 +506,7 @@ class REST_API {
 			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
-			'dev_channel'       => $channel,
+			'use_dev_channel'   => $channel && $use_channel,
 			'release_asset'     => $repo_data->release_asset,
 			'version'           => $repo_data->remote_version,
 			'author'            => $repo_data->author,
@@ -521,7 +526,7 @@ class REST_API {
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
 			'versions'          => $versions,
-			'created_at'        => $channel ? $repo_data->dev_created_at : $repo_data->created_at,
+			'created_at'        => $channel && $use_channel ? $repo_data->dev_created_at : $repo_data->created_at,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
