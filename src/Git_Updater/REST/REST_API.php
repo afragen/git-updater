@@ -474,9 +474,13 @@ class REST_API {
 			return (object) [ 'error' => 'API data response is incorrect.' ];
 		}
 
+		// Get release assets and dev release assets.
+		$release_assets     = $repo_data->release_assets ?? [];
+		$dev_release_assets = $repo_data->dev_release_assets ?? [];
+
 		// Is dev channel more current than stable?
-		$current_asset_version     = isset( $repo_data->release_assets ) ? array_key_first( $repo_data->release_assets ) : '';
-		$current_dev_asset_version = isset( $repo_data->dev_release_assets ) ? array_key_first( $repo_data->dev_release_assets ) : '';
+		$current_asset_version     = array_key_first( $release_assets ) ?? '';
+		$current_dev_asset_version = array_key_first( $dev_release_assets ) ?? '';
 		$use_channel               = version_compare( $current_asset_version, $current_dev_asset_version, '<' );
 
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
@@ -485,11 +489,7 @@ class REST_API {
 
 		// Get versions from release assets or tags. Limit to 20.
 		if ( $repo_data->release_asset ) {
-			if ( $channel && $use_channel ) {
-				$versions = $repo_data->dev_release_assets ?? [];
-			} else {
-				$versions = $repo_data->release_assets ?? [];
-			}
+			$versions = $channel && $use_channel ? $dev_release_assets : $release_assets;
 		} else {
 			$versions = $repo_data->tags ?? [];
 		}
