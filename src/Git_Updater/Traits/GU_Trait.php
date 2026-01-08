@@ -832,4 +832,19 @@ trait GU_Trait {
 
 		return $slug . '/' . $file;
 	}
+
+	/**
+	 * Get GitHub API rate limit headers.
+	 *
+	 * @return array
+	 */
+	final public function get_github_rate_limit_headers(): array {
+		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], 'https://api.github.com/rate_limit' );
+
+		$response = wp_remote_head( 'https://api.github.com/rate_limit', $auth_header );
+		$headers  = wp_remote_retrieve_headers( $response );
+		$headers  = $headers->getAll();
+
+		return $headers;
+	}
 }
