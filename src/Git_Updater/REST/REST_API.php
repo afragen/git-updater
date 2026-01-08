@@ -471,7 +471,11 @@ class REST_API {
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
-			return (object) [ 'error' => 'API data response is incorrect.' ];
+			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
+			return (object) [
+				'error'      => 'API data response is incorrect.',
+				'rate_limit' => $rate_limit,
+			];
 		}
 
 		// Get release assets and dev release assets.
