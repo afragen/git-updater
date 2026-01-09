@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Git Updater 12.21.0.1\n"
+"Project-Id-Version: Git Updater 12.21.0.5\n"
 "Report-Msgid-Bugs-To: https://github.com/afragen/git-updater/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-01T06:49:46+00:00\n"
+"POT-Creation-Date: 2026-01-09T16:41:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater\n"
@@ -491,6 +491,6 @@ msgstr ""
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
 
-#: src/Git_Updater/Traits/GU_Trait.php:688
+#: src/Git_Updater/Traits/GU_Trait.php:693
 msgid "There may be a problem with WP-Cron. A Git Updater WP-Cron event is overdue."
 msgstr ""
