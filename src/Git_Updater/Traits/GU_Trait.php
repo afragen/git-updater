@@ -842,8 +842,9 @@ trait GU_Trait {
 		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], 'https://api.github.com/rate_limit' );
 
 		$response = wp_remote_head( 'https://api.github.com/rate_limit', $auth_header );
-		$headers  = wp_remote_retrieve_headers( $response );
-		$headers  = $headers->getAll();
+		if ( is_wp_error( $response ) ) {
+			return $response->get_error_messages();
+		}
 
 		return $headers;
 	}
