@@ -192,6 +192,11 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function can_update_repo( $type ) {
+		if ( apply_filters( 'gu_dev_release_asset', false, $type ) ) {
+			$release_asset_version = array_key_first( $type->dev_release_assets ) ?? '';
+			$release_asset_version = ltrim( $release_asset_version, 'v' );
+			$type->remote_version  = $release_asset_version ?: $type->remote_version;
+		}
 		$wp_version_ok   = ! empty( $type->requires )
 			? is_wp_version_compatible( $type->requires )
 			: true;
