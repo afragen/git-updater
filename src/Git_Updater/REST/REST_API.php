@@ -487,6 +487,13 @@ class REST_API {
 		$current_dev_asset_version = array_key_first( $dev_release_assets ) ?? '';
 		$use_channel               = version_compare( $current_asset_version, $current_dev_asset_version, '<' );
 
+		// Set remote version based on channel selection.
+		$remote_version = $repo_data->remote_version;
+		if ( $repo_data->release_asset & $channel && $use_channel ) {
+			$remote_version = $current_dev_asset_version;
+			$remote_version = ltrim( $remote_version, 'v' );
+		}
+
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
 
 		$last_updated = $channel && $use_channel && ! empty( $repo_data->dev_created_at ) ? reset( $repo_data->dev_created_at ) : $last_updated;
@@ -513,7 +520,7 @@ class REST_API {
 			'dev_channel'       => $channel,
 			'use_dev_channel'   => $channel && $use_channel,
 			'release_asset'     => $repo_data->release_asset,
-			'version'           => $repo_data->remote_version,
+			'version'           => $remote_version,
 			'author'            => $repo_data->author,
 			'author_uri'        => $repo_data->author_uri ?? '',
 			'security'          => $repo_data->security ?? '',
