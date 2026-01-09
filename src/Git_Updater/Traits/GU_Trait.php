@@ -850,7 +850,7 @@ trait GU_Trait {
 		$response    = wp_remote_head( 'https://api.github.com/rate_limit', $auth_header );
 
 		if ( is_wp_error( $response ) ) {
-			return $response->get_error_messages();
+			return $response;
 		}
 
 		$headers = wp_remote_retrieve_headers( $response );
