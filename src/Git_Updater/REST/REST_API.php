@@ -489,7 +489,7 @@ class REST_API {
 
 		// Set remote version based on channel selection.
 		$remote_version = $repo_data->remote_version;
-		if ( $repo_data->release_asset & $channel && $use_channel ) {
+		if ( $repo_data->release_asset && $channel && $use_channel ) {
 			$remote_version = $current_dev_asset_version;
 			$remote_version = ltrim( $remote_version, 'v' );
 		}
