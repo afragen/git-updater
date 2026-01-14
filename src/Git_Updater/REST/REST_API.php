@@ -446,9 +446,22 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
+		$channel    = null !== $request->get_param( 'channel' );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_repos   = array_merge( $gu_plugins, $gu_themes );
+
+		// Don't allow non-shared repos via this API. Set via Additions tab.
+		$additions = get_site_option( 'git_updater_additions', [] );
+		foreach ( $additions as $addition ) {
+			$addition_slug = str_contains( $addition['type'], 'plugin' ) ? dirname( $addition['slug'] ) : $addition['slug'];
+
+			if ( $addition_slug === $slug ) {
+				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
+					return (object) [ 'error' => 'Specified repo is not shared.' ];
+				}
+			}
+		}
 
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
 			return (object) [ 'error' => 'Specified repo does not exist.' ];
@@ -458,14 +471,36 @@ class REST_API {
 		$repo_data = Singleton::get_instance( 'Fragen\Git_Updater\Base', $this )->get_remote_repo_meta( $gu_repos[ $slug ] );
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
-			return (object) [ 'error' => 'API data response is incorrect.' ];
+			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
+			return (object) [
+				'error'      => 'API data response is incorrect.',
+				'rate_limit' => $rate_limit,
+			];
+		}
+
+		// Get release assets and dev release assets.
+		$release_assets     = $repo_data->release_assets ?? [];
+		$dev_release_assets = $repo_data->dev_release_assets ?? [];
+
+		// Is dev channel more current than stable?
+		$current_asset_version     = array_key_first( $release_assets ) ?? '';
+		$current_dev_asset_version = array_key_first( $dev_release_assets ) ?? '';
+		$use_channel               = version_compare( $current_asset_version, $current_dev_asset_version, '<' );
+
+		// Set remote version based on channel selection.
+		$remote_version = $repo_data->remote_version;
+		if ( $repo_data->release_asset && $channel && $use_channel ) {
+			$remote_version = $current_dev_asset_version;
+			$remote_version = ltrim( $remote_version, 'v' );
 		}
 
 		$last_updated = ! empty( $repo_data->created_at ) ? reset( $repo_data->created_at ) : $repo_data->last_updated;
 
+		$last_updated = $channel && $use_channel && ! empty( $repo_data->dev_created_at ) ? reset( $repo_data->dev_created_at ) : $last_updated;
+
 		// Get versions from release assets or tags. Limit to 20.
 		if ( $repo_data->release_asset ) {
-			$versions = $repo_data->release_assets ?? [];
+			$versions = $channel && $use_channel ? $dev_release_assets : $release_assets;
 		} else {
 			$versions = $repo_data->tags ?? [];
 		}
@@ -482,8 +517,10 @@ class REST_API {
 			'update_uri'        => $repo_data->update_uri ?? '',
 			'is_private'        => $repo_data->is_private,
 			'dot_org'           => $repo_data->dot_org,
+			'dev_channel'       => $channel,
+			'use_dev_channel'   => $channel && $use_channel,
 			'release_asset'     => $repo_data->release_asset,
-			'version'           => $repo_data->remote_version,
+			'version'           => $remote_version,
 			'author'            => $repo_data->author,
 			'author_uri'        => $repo_data->author_uri ?? '',
 			'security'          => $repo_data->security ?? '',
@@ -501,7 +538,7 @@ class REST_API {
 			'download_link'     => $repo_data->download_link ?? '',
 			'tags'              => $repo_data->readme_tags ?? [],
 			'versions'          => $versions,
-			'created_at'        => $repo_data->created_at,
+			'created_at'        => $channel && $use_channel ? $repo_data->dev_created_at : $repo_data->created_at,
 			'donate_link'       => $repo_data->donate_link,
 			'banners'           => $repo_data->banners,
 			'icons'             => $repo_data->icons,
@@ -541,9 +578,8 @@ class REST_API {
 			}
 		}
 
-		if ( ! $repo_api_data['is_private']
-			&& ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true )
-		) {
+		$private_or_token = $repo_api_data['is_private'] || ! empty( $this->get_class_vars( 'API\API', 'options' )[ $slug ] );
+		if ( ! $private_or_token && ! in_array( $repo_api_data['git'], [ 'gitlab', 'gitea' ], true ) ) {
 			unset( $repo_api_data['auth_header']['headers']['Authorization'] );
 		}
 

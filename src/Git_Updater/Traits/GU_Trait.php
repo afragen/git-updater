@@ -192,6 +192,11 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function can_update_repo( $type ) {
+		if ( isset( $type->dev_release_assets ) && apply_filters( 'gu_dev_release_asset', false, $type ) ) {
+			$release_asset_version = array_key_first( $type->dev_release_assets ) ?? '';
+			$release_asset_version = ltrim( $release_asset_version, 'v' );
+			$type->remote_version  = $release_asset_version ?: $type->remote_version;
+		}
 		$wp_version_ok   = ! empty( $type->requires )
 			? is_wp_version_compatible( $type->requires )
 			: true;
@@ -831,5 +836,33 @@ trait GU_Trait {
 		$slug                = str_replace( '-' . $this->get_did_hash( $did ), '', $slug );
 
 		return $slug . '/' . $file;
+	}
+
+	/**
+	 * Get GitHub API rate limit headers.
+	 *
+	 * Display ratelimit reset time in minutes.
+	 *
+	 * @return array|WP_Error
+	 */
+	final public function get_github_rate_limit_headers() {
+		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], 'https://api.github.com/rate_limit' );
+		$response    = wp_remote_head( 'https://api.github.com/rate_limit', $auth_header );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$headers = wp_remote_retrieve_headers( $response );
+		$data    = $headers->getAll();
+		if ( isset( $data['x-ratelimit-reset'] ) ) {
+			$reset = (int) $data['x-ratelimit-reset'];
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			$data['x-ratelimit-reset'] = date( 'i', $reset - time() ) . ' minutes';
+		} else {
+			$data['x-ratelimit-reset'] = '60 minutes';
+		}
+
+		return $data;
 	}
 }

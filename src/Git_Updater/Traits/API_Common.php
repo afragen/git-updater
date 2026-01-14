@@ -66,8 +66,10 @@ trait API_Common {
 				$response   = [];
 				$response[] = $release ?? [];
 			}
-			$release_assets = [];
-			$created_at     = [];
+			$release_assets     = [];
+			$created_at         = [];
+			$dev_release_assets = [];
+			$dev_created_at     = [];
 			foreach ( $response as $release ) {
 				// Ignore leading 'v' and skip anything with dash or words.
 				if ( ! preg_match( '/[^v]+[-a-z]+/', $release->tag_name ) ) {
@@ -79,12 +81,26 @@ trait API_Common {
 						}
 					}
 				}
+				// Dev releases.
+				if ( preg_match( '/[^v]+(?:nightly|alpha|beta|RC){1}[0-9]{0,}/', $release->tag_name ) ) {
+					foreach ( $release->assets as $asset ) {
+						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
+							$dev_release_assets[ $release->tag_name ] = $asset->url;
+							$dev_created_at[ $release->tag_name ]     = $asset->created_at;
+							continue 2;
+						}
+					}
+				}
 			}
 			uksort( $release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
 			uksort( $created_at, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
+			uksort( $dev_release_assets, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
+			uksort( $dev_created_at, fn ( $a, $b ) => version_compare( ltrim( $b, 'v' ), ltrim( $a, 'v' ) ) );
 			$response = [
-				'assets'     => $release_assets,
-				'created_at' => $created_at,
+				'assets'         => $release_assets,
+				'created_at'     => $created_at,
+				'dev_assets'     => $dev_release_assets,
+				'dev_created_at' => $dev_created_at,
 			];
 		}
 
@@ -483,8 +499,10 @@ trait API_Common {
 			return false;
 		}
 
-		$this->type->release_assets = $response['assets'] ?? $response;
-		$this->type->created_at     = $response['created_at'] ?? [];
+		$this->type->release_assets     = $response['assets'] ?? $response;
+		$this->type->created_at         = $response['created_at'] ?? [];
+		$this->type->dev_release_assets = $response['dev_assets'] ?? [];
+		$this->type->dev_created_at     = $response['dev_created_at'] ?? [];
 
 		return $response;
 	}
