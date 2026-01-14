@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.22.0 / 2026-01-13
 * added `gu_dev_release_asset` filter for dev release assets
 * added `channel` query arg for dev release assets when using `update-api` REST endpoint
 * send a saved access token with `update-api` REST API if one exists
