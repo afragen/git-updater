@@ -1,4 +1,5 @@
 #### [unreleased]
+* guard on `ReflectionProptery::setAccessible()` deprecated for PHP 8.5 and included in PHP 8.1+
 
 #### 12.22.0 / 2026-01-13
 * added `gu_dev_release_asset` filter for dev release assets
