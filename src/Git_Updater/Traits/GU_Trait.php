@@ -147,6 +147,14 @@ trait GU_Trait {
 		 */
 		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
+		// Merge with existing cache if it exists and is an array.
+		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
+		$existing_cache = get_site_option( $cache_key, [] );
+		$this->response = array_merge(
+			is_array( $existing_cache ) ? $existing_cache : [],
+			(array) $this->response
+		);
+
 		$this->response['timeout'] = strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
