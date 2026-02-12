@@ -1,4 +1,5 @@
 #### [unreleased]
+* add guard to release asset development download link in REST API
 
 #### 12.23.0 / 2020-02-11
 * guard on `ReflectionProptery::setAccessible()` deprecated for PHP 8.5 and included in PHP 8.1+
