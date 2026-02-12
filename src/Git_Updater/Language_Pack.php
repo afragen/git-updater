@@ -67,8 +67,8 @@ class Language_Pack {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ] );
-		add_filter( 'site_transient_update_themes', [ $this, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_plugins', [ __CLASS__, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_themes', [ __CLASS__, 'update_site_transient' ] );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class Language_Pack {
 	 *
 	 * @return mixed
 	 */
-	public function update_site_transient( $transient ) {
+	public static function update_site_transient( $transient ) {
 		$locales = get_available_languages();
 		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
 		$repos   = [];
@@ -88,11 +88,11 @@ class Language_Pack {
 		}
 
 		if ( 'site_transient_update_plugins' === current_filter() ) {
-			$repos        = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
+			$repos        = Singleton::get_instance( 'Plugin', new Base() )->get_plugin_configs();
 			$translations = wp_get_installed_translations( 'plugins' );
 		}
 		if ( 'site_transient_update_themes' === current_filter() ) {
-			$repos        = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
+			$repos        = Singleton::get_instance( 'Theme', new Base() )->get_theme_configs();
 			$translations = wp_get_installed_translations( 'themes' );
 		}
 

@@ -82,7 +82,7 @@ trait API_Common {
 					}
 				}
 				// Dev releases.
-				if ( preg_match( '/[^v]+(?:nightly|alpha|beta|RC){1}[0-9]{0,}/', $release->tag_name ) ) {
+				if ( preg_match( '/[^v]+(?:nightly|alpha|beta|RC){1}[0-9]{0,}/i', $release->tag_name ) ) {
 					foreach ( $release->assets as $asset ) {
 						if ( str_starts_with( $asset->name, $this->type->slug ) ) {
 							$dev_release_assets[ $release->tag_name ] = $asset->url;
