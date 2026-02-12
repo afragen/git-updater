@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.23.0 / 2020-02-11
 * guard on `ReflectionProptery::setAccessible()` deprecated for PHP 8.5 and included in PHP 8.1+
 * case-insensitive matching for `alpha|beta|RC`
 * make `Language_Pack::update_site_transient()` a static
