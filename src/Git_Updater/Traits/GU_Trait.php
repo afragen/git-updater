@@ -155,7 +155,7 @@ trait GU_Trait {
 			(array) $this->response
 		);
 
-		$this->response['timeout'] = strtotime( $timeout );
+		$this->response['timeout'] = $this->response['timeout'] ?? strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
 		update_site_option( $cache_key, $this->response );
