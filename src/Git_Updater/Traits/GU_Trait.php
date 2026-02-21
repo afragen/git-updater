@@ -484,7 +484,6 @@ trait GU_Trait {
 	 */
 	final protected function get_repo_slugs( string $slug, $upgrader_object = null ): array {
 		$arr = [];
-		// $slug = (string) $slug;
 
 		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
 		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
