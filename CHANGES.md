@@ -1,6 +1,7 @@
 #### [unreleased]
 * update erusev/parsedown to 1.8
 * keep same cache timeout during cache set
+* remove soft match in `get_repo_slugs()`
 
 #### 12.23.1 / 2026-02-12
 * add guard to release asset development download link in REST API

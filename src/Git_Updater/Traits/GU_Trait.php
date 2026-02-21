@@ -482,12 +482,9 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	final protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$slug   = (string) $slug;
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
+	final protected function get_repo_slugs( string $slug, $upgrader_object = null ): array {
+		$arr = [];
+		// $slug = (string) $slug;
 
 		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
 		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
@@ -502,7 +499,6 @@ trait GU_Trait {
 			$upgrader_object = $this;
 		}
 
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		foreach ( (array) $config as $repo ) {
@@ -516,11 +512,6 @@ trait GU_Trait {
 			if ( in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
-			}
-
-			// Soft match, there may still be an exact $slug match.
-			if ( in_array( $rename, $slug_check, true ) ) {
-				// $arr['slug'] = $repo->slug;
 			}
 		}
 
