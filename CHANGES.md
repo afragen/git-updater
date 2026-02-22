@@ -2,6 +2,8 @@
 * update erusev/parsedown to 1.8
 * remove soft match in `get_repo_slugs()`
 * add guard to `set_readme_info()`
+* add function to check timeout validity
+* re-use valid cache timeout
 
 #### 12.23.1 / 2026-02-12
 * add guard to release asset development download link in REST API
