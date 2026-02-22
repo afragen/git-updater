@@ -1,6 +1,5 @@
 #### [unreleased]
 * update erusev/parsedown to 1.8
-* keep same cache timeout during cache set
 * remove soft match in `get_repo_slugs()`
 * add guard to `set_readme_info()`
 
