@@ -552,6 +552,11 @@ class API {
 			$readme['sections'][ $section ] = $value;
 		}
 
+		// Exit if readme is invalid.
+		if ( ! is_array( $readme ) ) {
+			return false;
+		}
+
 		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;
 		if ( empty( $readme['sections']['other_notes'] ) ) {
 			unset( $readme['sections']['other_notes'] );
