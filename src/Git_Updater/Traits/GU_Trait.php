@@ -158,7 +158,9 @@ trait GU_Trait {
 		// Merge with existing cache if it exists and is an array.
 		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
 		$existing_cache = $this->get_repo_cache( $cache_key ) ?: [];
-		$this->response = array_merge( $existing_cache, (array) $this->response );
+		if ( $this->is_cache_timeout_valid( $existing_cache['timeout'] ?? 0 ) ) {
+			$this->response = array_merge( $existing_cache, (array) $this->response );
+		}
 
 		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
 		$this->response['timeout'] = ( isset( $this->response['timeout'] )
