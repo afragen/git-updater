@@ -87,6 +87,20 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Get cache key.
+	 *
+	 * @param  string|bool $repo Repo name or false.
+	 *
+	 * @return string
+	 */
+	final public function get_cache_key( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = $this->type->slug ?? 'ghu';
+		}
+		return 'ghu-' . md5( $repo );
+	}
+
+	/**
 	 * Returns repo cached data.
 	 *
 	 * @access protected
@@ -96,10 +110,7 @@ trait GU_Trait {
 	 * @return array|bool The repo cache. False if expired.
 	 */
 	final public function get_repo_cache( $repo = false ) {
-		if ( ! $repo ) {
-			$repo = $this->type->slug ?? 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
+		$cache_key = $this->get_cache_key( $repo );
 		$cache     = get_site_option( $cache_key );
 
 		if ( isset( $cache['timeout'] ) && ! $this->cache_timeout_valid( $cache['timeout'] ) ) {
@@ -128,11 +139,8 @@ trait GU_Trait {
 		}
 		$this->response = property_exists( $this, 'response' ) && is_array( $this->response ) ? $this->response : [];
 
-		$hours = $this->get_class_vars( 'API\API', 'hours' );
-		if ( ! $repo ) {
-			$repo = $this->type->slug ?? 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
+		$hours     = $this->get_class_vars( 'API\API', 'hours' );
+		$cache_key = $this->get_cache_key( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
 		/**
@@ -149,11 +157,8 @@ trait GU_Trait {
 
 		// Merge with existing cache if it exists and is an array.
 		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
-		$existing_cache = get_site_option( $cache_key, [] );
-		$this->response = array_merge(
-			is_array( $existing_cache ) ? $existing_cache : [],
-			(array) $this->response
-		);
+		$existing_cache = $this->get_repo_cache( $cache_key ) ?: [];
+		$this->response = array_merge( $existing_cache, (array) $this->response );
 
 		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
 		$this->response['timeout'] = ( isset( $this->response['timeout'] ) && $this->cache_timeout_valid( $this->response['timeout'] ) )
