@@ -113,7 +113,7 @@ trait GU_Trait {
 		$cache_key = $this->get_cache_key( $repo );
 		$cache     = get_site_option( $cache_key );
 
-		if ( isset( $cache['timeout'] ) && ! $this->cache_timeout_valid( $cache['timeout'] ) ) {
+		if ( isset( $cache['timeout'] ) && ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
 			return false;
 		}
 
@@ -161,9 +161,10 @@ trait GU_Trait {
 		$this->response = array_merge( $existing_cache, (array) $this->response );
 
 		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
-		$this->response['timeout'] = ( isset( $this->response['timeout'] ) && $this->cache_timeout_valid( $this->response['timeout'] ) )
-			? $this->response['timeout']
-			: strtotime( $timeout );
+		$this->response['timeout'] = ( isset( $this->response['timeout'] )
+			&& $this->is_cache_timeout_valid( $this->response['timeout'] ) )
+				? $this->response['timeout']
+				: strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
 		update_site_option( $cache_key, $this->response );
@@ -178,7 +179,7 @@ trait GU_Trait {
 	 *
 	 * @return bool true if cache timeout is valid, false if expired.
 	 */
-	final public function cache_timeout_valid( int $timestamp ): bool {
+	final public function is_cache_timeout_valid( int $timestamp ): bool {
 		return ! empty( $timestamp ) && time() < $timestamp;
 	}
 
