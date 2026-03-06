@@ -5,6 +5,7 @@
 * add function to check timeout validity
 * re-use valid cache timeout
 * refactor getting cache key to `get_cache_key()`
+* ensure newest tag present in release assets array
 
 #### 12.23.1 / 2026-02-12
 * add guard to release asset development download link in REST API

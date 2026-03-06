@@ -499,6 +499,11 @@ trait API_Common {
 			return false;
 		}
 
+		// Ensure newest tag is in assets array, even if empty, to prevent errors.
+		if ( ! array_key_exists( $this->type->newest_tag, $response['assets'] ) ) {
+			$response['assets'] = array_merge( [ $this->type->newest_tag => '' ], $response['assets'] );
+		}
+
 		$this->type->release_assets     = $response['assets'] ?? $response;
 		$this->type->created_at         = $response['created_at'] ?? [];
 		$this->type->dev_release_assets = $response['dev_assets'] ?? [];
