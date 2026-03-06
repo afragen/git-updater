@@ -499,9 +499,9 @@ trait API_Common {
 			return false;
 		}
 
-		// Ensure remote version is in assets array, even if empty, to prevent errors.
-		if ( ! array_key_exists( $this->type->remote_version, $response['assets'] ) ) {
-			$response['assets'] = array_merge( [ $this->type->remote_version => '' ], $response['assets'] );
+		// Ensure newest tag is in assets array, even if empty, to prevent errors.
+		if ( ! array_key_exists( $this->type->newest_tag, $response['assets'] ) ) {
+			$response['assets'] = array_merge( [ $this->type->newest_tag => '' ], $response['assets'] );
 		}
 
 		$this->type->release_assets     = $response['assets'] ?? $response;
