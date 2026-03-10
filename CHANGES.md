@@ -8,6 +8,7 @@
 * ensure newest tag present in release assets array
 * check to see `$existing_cache` timeout is valid
 * update `Language_API` to correctly get credentials
+* add missing API values for packages as Additions
 
 #### 12.23.1 / 2026-02-12
 * add guard to release asset development download link in REST API
