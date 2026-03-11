@@ -394,20 +394,19 @@ class GitHub_API extends API implements API_Interface {
 	 * @return array
 	 */
 	protected function parse_tags( $response, $repo_type ) {
-		$tags = [];
+		$tags          = [];
+		$download_base = implode(
+			'/',
+			[
+				$repo_type['base_uri'],
+				'repos',
+				$this->type->owner,
+				$this->type->slug,
+				'zipball/',
+			]
+		);
 
 		foreach ( (array) $response as $tag ) {
-			$download_base = implode(
-				'/',
-				[
-					$repo_type['base_uri'],
-					'repos',
-					$this->type->owner,
-					$this->type->slug,
-					'zipball/',
-				]
-			);
-
 			// Ignore leading 'v' and skip anything with dash or words.
 			if ( ! preg_match( '/[^v]+[-a-z]+/', $tag ) ) {
 				$tags[ $tag ] = $download_base . $tag;

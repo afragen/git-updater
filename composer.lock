@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7f85e658bae77b084825298e933f4e3",
+    "content-hash": "47a5f05743273ab201ef12cff137285c",
     "packages": [
         {
             "name": "afragen/singleton",
@@ -54,21 +54,21 @@
         },
         {
             "name": "afragen/wordpress-plugin-readme-parser",
-            "version": "1.2025.12.6",
+            "version": "1.2026.02.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "1fbb311ef5f31f0e1e2d8978f187c81c22b351c5"
+                "reference": "3aa1130df558eb5f7c61eca77ceb141b2e9573c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/1fbb311ef5f31f0e1e2d8978f187c81c22b351c5",
-                "reference": "1fbb311ef5f31f0e1e2d8978f187c81c22b351c5",
+                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/3aa1130df558eb5f7c61eca77ceb141b2e9573c7",
+                "reference": "3aa1130df558eb5f7c61eca77ceb141b2e9573c7",
                 "shasum": ""
             },
             "require": {
-                "erusev/parsedown": "dev-master#0b274ac959624e6c6d647e9c9b6c2d20da242004",
-                "php": ">=5.4"
+                "erusev/parsedown": "^1.8",
+                "php": ">=7.1"
             },
             "type": "library",
             "autoload": {
@@ -94,9 +94,9 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
-                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/1.2025.12.6"
+                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/1.2026.02.16"
             },
-            "time": "2025-12-06T17:41:45+00:00"
+            "time": "2026-02-16T18:45:01+00:00"
         },
         {
             "name": "afragen/wp-dismiss-notice",
@@ -142,16 +142,16 @@
         },
         {
             "name": "erusev/parsedown",
-            "version": "dev-master",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/erusev/parsedown.git",
-                "reference": "0b274ac959624e6c6d647e9c9b6c2d20da242004"
+                "reference": "96baaad00f71ba04d76e45b4620f54d3beabd6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/erusev/parsedown/zipball/0b274ac959624e6c6d647e9c9b6c2d20da242004",
-                "reference": "0b274ac959624e6c6d647e9c9b6c2d20da242004",
+                "url": "https://api.github.com/repos/erusev/parsedown/zipball/96baaad00f71ba04d76e45b4620f54d3beabd6f7",
+                "reference": "96baaad00f71ba04d76e45b4620f54d3beabd6f7",
                 "shasum": ""
             },
             "require": {
@@ -161,7 +161,6 @@
             "require-dev": {
                 "phpunit/phpunit": "^7.5|^8.5|^9.6"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -187,9 +186,15 @@
             ],
             "support": {
                 "issues": "https://github.com/erusev/parsedown/issues",
-                "source": "https://github.com/erusev/parsedown/tree/master"
+                "source": "https://github.com/erusev/parsedown/tree/1.8.0"
             },
-            "time": "2025-08-31T07:57:44+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/erusev",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-02-16T11:41:01+00:00"
         },
         {
             "name": "freemius/wordpress-sdk",
@@ -717,9 +722,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "erusev/parsedown": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

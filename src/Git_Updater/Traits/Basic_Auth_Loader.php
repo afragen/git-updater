@@ -125,9 +125,10 @@ trait Basic_Auth_Loader {
 		$slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
 		$type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-		// Set $type for Language Packs.
-		if ( $type instanceof Language_Pack_API ) {
-			$type = $type->type->git;
+		// Set type/slug for Language Packs.
+		if ( $this instanceof Language_Pack_API ) {
+			$type = $this->type->git;
+			$slug = $slug ?: $this->type->slug;
 		}
 
 		if ( 'github' === $type || $this instanceof GitHub_API ) {

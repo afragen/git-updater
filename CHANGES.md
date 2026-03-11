@@ -1,5 +1,17 @@
 #### [unreleased]
 
+#### 12.24.0 / 2026-03-11
+* update erusev/parsedown to 1.8
+* remove soft match in `get_repo_slugs()`
+* add guard to `set_readme_info()`
+* add function to check timeout validity
+* re-use valid cache timeout
+* refactor getting cache key to `get_cache_key()`
+* ensure newest tag present in release assets array
+* check to see `$existing_cache` timeout is valid
+* update `Language_API` to correctly get credentials
+* add missing API values for packages as Additions
+
 #### 12.23.1 / 2026-02-12
 * add guard to release asset development download link in REST API
 * fix potential race condition when saving cache to multi-server/clustered environments [#1133](https://github.com/afragen/git-updater/issues/1133), thanks @Ipstenu

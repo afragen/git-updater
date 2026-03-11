@@ -516,12 +516,14 @@ class API {
 			$this->type->name                    = $response['Name'];
 			$this->type->local_version           = strtolower( $response['Version'] );
 			$this->type->author                  = $response['Author'];
+			$this->type->author_uri              = $response['AuthorURI'] ?? '';
 			$this->type->homepage                = $response['PluginURI'] ?? '';
 			$this->type->homepage                = $response['ThemeURI'] ?? $this->type->homepage;
 			$this->type->sections['description'] = $response['Description'];
 			$this->type->did                     = empty( $this->type->did ) ? $response['PluginID'] ?? ( $response['ThemeID'] ?? '' ) : '';
 			$this->type->slug_did                = ! empty( $this->type->did ) ? $this->type->slug . '-' . $this->get_did_hash( $this->type->did ) : null;
 			$this->type->security                = $response['Security'] ?? '';
+			$this->type->license                 = $response['License'] ?? '';
 		}
 	}
 
@@ -550,6 +552,11 @@ class API {
 				continue;
 			}
 			$readme['sections'][ $section ] = $value;
+		}
+
+		// Exit if readme is invalid.
+		if ( ! is_array( $readme ) ) {
+			return false;
 		}
 
 		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;

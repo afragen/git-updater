@@ -87,6 +87,20 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Get cache key.
+	 *
+	 * @param  string|bool $repo Repo name or false.
+	 *
+	 * @return string
+	 */
+	final public function get_cache_key( $repo = false ) {
+		if ( ! $repo ) {
+			$repo = $this->type->slug ?? 'ghu';
+		}
+		return 'ghu-' . md5( $repo );
+	}
+
+	/**
 	 * Returns repo cached data.
 	 *
 	 * @access protected
@@ -96,13 +110,10 @@ trait GU_Trait {
 	 * @return array|bool The repo cache. False if expired.
 	 */
 	final public function get_repo_cache( $repo = false ) {
-		if ( ! $repo ) {
-			$repo = $this->type->slug ?? 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
+		$cache_key = $this->get_cache_key( $repo );
 		$cache     = get_site_option( $cache_key );
 
-		if ( empty( $cache['timeout'] ) || time() > $cache['timeout'] ) {
+		if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 			return false;
 		}
 
@@ -128,11 +139,8 @@ trait GU_Trait {
 		}
 		$this->response = property_exists( $this, 'response' ) && is_array( $this->response ) ? $this->response : [];
 
-		$hours = $this->get_class_vars( 'API\API', 'hours' );
-		if ( ! $repo ) {
-			$repo = $this->type->slug ?? 'ghu';
-		}
-		$cache_key = 'ghu-' . md5( $repo );
+		$hours     = $this->get_class_vars( 'API\API', 'hours' );
+		$cache_key = $this->get_cache_key( $repo );
 		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
 		/**
@@ -149,18 +157,31 @@ trait GU_Trait {
 
 		// Merge with existing cache if it exists and is an array.
 		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
-		$existing_cache = get_site_option( $cache_key, [] );
-		$this->response = array_merge(
-			is_array( $existing_cache ) ? $existing_cache : [],
-			(array) $this->response
-		);
+		$existing_cache = $this->get_repo_cache( $cache_key ) ?: [];
+		if ( $this->is_cache_timeout_valid( $existing_cache['timeout'] ?? 0 ) ) {
+			$this->response = array_merge( $existing_cache, (array) $this->response );
+		}
 
-		$this->response['timeout'] = strtotime( $timeout );
+		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
+		$this->response['timeout'] = $this->is_cache_timeout_valid( $this->response['timeout'] ?? 0 )
+			? $this->response['timeout']
+			: strtotime( $timeout );
 		$this->response[ $id ]     = $response;
 
 		update_site_option( $cache_key, $this->response );
 
 		return true;
+	}
+
+	/**
+	 * Check if current cache timeout is valid.
+	 *
+	 * @param int $timestamp Cache timeout timestamp.
+	 *
+	 * @return bool true if cache timeout is valid, false if expired.
+	 */
+	final public function is_cache_timeout_valid( int $timestamp ): bool {
+		return ! empty( $timestamp ) && time() < $timestamp;
 	}
 
 	/**
@@ -482,12 +503,8 @@ trait GU_Trait {
 	 *
 	 * @return array
 	 */
-	final protected function get_repo_slugs( $slug, $upgrader_object = null ) {
-		$arr    = [];
-		$slug   = (string) $slug;
-		$rename = explode( '-', $slug );
-		array_pop( $rename );
-		$rename = implode( '-', $rename );
+	final protected function get_repo_slugs( string $slug, $upgrader_object = null ): array {
+		$arr = [];
 
 		// For AJAX install, not from Install tab, slug is correct. Refer to Add-Ons.
 		if ( ( ! isset( $_POST['git_updater_repo'] ) && isset( $_POST['action'] ) )
@@ -502,7 +519,6 @@ trait GU_Trait {
 			$upgrader_object = $this;
 		}
 
-		$rename = isset( $upgrader_object->config[ $slug ] ) ? $slug : $rename;
 		$config = $this->get_class_vars( ( new ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
 
 		foreach ( (array) $config as $repo ) {
@@ -516,11 +532,6 @@ trait GU_Trait {
 			if ( in_array( $slug, $slug_check, true ) ) {
 				$arr['slug'] = $repo->slug;
 				break;
-			}
-
-			// Soft match, there may still be an exact $slug match.
-			if ( in_array( $rename, $slug_check, true ) ) {
-				// $arr['slug'] = $repo->slug;
 			}
 		}
 
