@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.24.0 / 2026-03-11
 * update erusev/parsedown to 1.8
 * remove soft match in `get_repo_slugs()`
 * add guard to `set_readme_info()`
