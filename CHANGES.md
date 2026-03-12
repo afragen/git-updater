@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix `flush-repo-cache` REST endpoint, was getting caught in `$existing_cache`
 
 #### 12.24.0 / 2026-03-11
 * update erusev/parsedown to 1.8
