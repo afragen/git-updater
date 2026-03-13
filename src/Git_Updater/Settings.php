@@ -110,7 +110,8 @@ class Settings {
 			[ $this, 'plugin_action_links' ]
 		);
 
-		if ( $this->is_current_page( [ 'options.php', 'options-general.php', 'settings.php', 'edit.php' ] ) ) {
+		$settings_pages = is_multisite() ? [ 'settings.php', 'edit.php' ] : [ 'options.php', 'options-general.php' ];
+		if ( $this->is_current_page( $settings_pages ) ) {
 			add_action( 'admin_init', [ $this, 'update_settings' ] );
 			add_action( 'admin_init', [ $this, 'page_init' ] );
 

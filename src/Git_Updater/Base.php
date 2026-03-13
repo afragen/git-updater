@@ -149,6 +149,10 @@ class Base {
 			Singleton::get_instance( 'Add_Ons', $this )->load_hooks();
 		}
 
+		if ( ! static::should_run_on_current_page() ) {
+			return false;
+		}
+
 		// Run Git Updater upgrade functions.
 		( new GU_Upgrade() )->run();
 
