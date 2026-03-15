@@ -3,6 +3,7 @@
 * added `should_run_on_current_page()` and check pages for loading certain parts of plugin
 * update `$slug` initialization in `Base::upgrader_source_selection()` as `get_repo_slugs()` now with type checking
 * fix language pack installation, use `https://raw.githubusercontent.com` as base uri for downloading
+* remove type hint for `$source` in `Base::upgrader_source_selection()` as it can be `WP_Error`
 
 #### 12.24.0 / 2026-03-11
 * update erusev/parsedown to 1.8
