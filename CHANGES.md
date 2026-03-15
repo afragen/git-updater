@@ -2,6 +2,7 @@
 * fix `flush-repo-cache` REST endpoint, was getting caught in `$existing_cache`
 * added `should_run_on_current_page()` and check pages for loading certain parts of plugin
 * update `$slug` initialization in `Base::upgrader_source_selection()` as `get_repo_slugs()` now with type checking
+* fix language pack installation, use `https://raw.githubusercontent.com` as base uri for downloading
 
 #### 12.24.0 / 2026-03-11
 * update erusev/parsedown to 1.8
