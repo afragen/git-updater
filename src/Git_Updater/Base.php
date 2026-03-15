@@ -450,9 +450,9 @@ class Base {
 	public function upgrader_source_selection( string $source, string $remote_source, WP_Upgrader $upgrader, $hook_extra = [] ) {
 		global $wp_filesystem;
 
-		$slug            = null;
+		$slug            = '';
 		$repo            = null;
-		$new_source      = null;
+		$new_source      = '';
 		$upgrader_object = null;
 		$remote_source   = $wp_filesystem->wp_content_dir() . 'upgrade/';
 
