@@ -112,7 +112,7 @@ class Language_Pack_API extends API {
 		if ( 'github' === $git ) {
 			$headers['base_uri'] = 'https://raw.githubusercontent.com';
 			$headers['uri']      = $headers['base_uri'] . '/' . $headers['owner_repo'];
-			$package             = [ $headers['uri'], $this->type->primary_branch ? $this->type->primary_branch : 'master' ];
+			$package             = [ $headers['uri'], $this->type->primary_branch ?? 'master' ];
 			$package             = implode( '/', $package ) . $locale->package;
 		}
 
