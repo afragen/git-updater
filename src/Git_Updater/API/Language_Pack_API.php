@@ -108,12 +108,12 @@ class Language_Pack_API extends API {
 	 * @return null|string
 	 */
 	private function process_language_pack_package( $git, $locale, $headers ) {
-		$package = null;
+		$package        = null;
+		$primary_branch = $this->type->primary_branch ?? 'master';
 		if ( 'github' === $git ) {
-			$headers['base_uri'] = 'https://raw.githubusercontent.com';
-			$headers['uri']      = $headers['base_uri'] . '/' . $headers['owner_repo'];
-			$package             = [ $headers['uri'], $this->type->primary_branch ?? 'master' ];
-			$package             = implode( '/', $package ) . $locale->package;
+			$headers['uri'] = $headers['base_uri'] . '/' . $headers['owner_repo'];
+			$package        = [ $headers['uri'], "raw/refs/heads/{$primary_branch}" ];
+			$package        = implode( '/', $package ) . $locale->package;
 		}
 
 		/**
