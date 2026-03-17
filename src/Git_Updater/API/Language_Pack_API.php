@@ -73,7 +73,7 @@ class Language_Pack_API extends API {
 	 */
 	private function get_language_pack_json( $git, $headers, $response ) {
 		if ( 'github' === $git ) {
-			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+			$response = $this->api( '/repos/' . $headers['owner_repo'] . '/contents/language-pack.json' );
 			$response = isset( $response->content )
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 				? json_decode( base64_decode( $response->content ) )
