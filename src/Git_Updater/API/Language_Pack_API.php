@@ -111,9 +111,8 @@ class Language_Pack_API extends API {
 		$package        = null;
 		$primary_branch = $this->type->primary_branch ?? 'master';
 		if ( 'github' === $git ) {
-			$headers['uri'] = $headers['base_uri'] . '/' . $headers['owner_repo'];
-			$package        = [ $headers['uri'], "raw/refs/heads/{$primary_branch}" ];
-			$package        = implode( '/', $package ) . $locale->package;
+			$package = [ $headers['uri'], "raw/refs/heads/{$primary_branch}" ];
+			$package = implode( '/', $package ) . $locale->package;
 		}
 
 		/**
