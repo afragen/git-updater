@@ -73,7 +73,7 @@ class Language_Pack_API extends API {
 	 */
 	private function get_language_pack_json( $git, $headers, $response ) {
 		if ( 'github' === $git ) {
-			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+			$response = $this->api( '/repos/' . $headers['owner_repo'] . '/contents/language-pack.json' );
 			$response = isset( $response->content )
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 				? json_decode( base64_decode( $response->content ) )
@@ -108,11 +108,11 @@ class Language_Pack_API extends API {
 	 * @return null|string
 	 */
 	private function process_language_pack_package( $git, $locale, $headers ) {
-		$package = null;
+		$package        = null;
+		$primary_branch = $this->type->primary_branch ?? 'master';
 		if ( 'github' === $git ) {
-			$package = [ $headers['uri'], 'blob/master' ];
+			$package = [ $headers['uri'], "raw/refs/heads/{$primary_branch}" ];
 			$package = implode( '/', $package ) . $locale->package;
-			$package = add_query_arg( [ 'raw' => 'true' ], $package );
 		}
 
 		/**

@@ -67,8 +67,8 @@ class Language_Pack {
 		$headers = $this->parse_header_uri( $this->repo->languages );
 		$this->repo_api->get_language_pack( $headers );
 
-		add_filter( 'site_transient_update_plugins', [ __CLASS__, 'update_site_transient' ] );
-		add_filter( 'site_transient_update_themes', [ __CLASS__, 'update_site_transient' ] );
+		add_filter( 'site_transient_update_plugins', [ __CLASS__, 'update_site_transient' ], 15, 1 );
+		add_filter( 'site_transient_update_themes', [ __CLASS__, 'update_site_transient' ], 15, 1 );
 	}
 
 	/**
