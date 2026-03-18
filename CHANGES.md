@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.24.1 / 2026-03-18
 * fix `flush-repo-cache` REST endpoint, was getting caught in `$existing_cache`
 * added `should_run_on_current_page()` and check pages for loading certain parts of plugin
 * update `$slug` initialization in `Base::upgrader_source_selection()` as `get_repo_slugs()` now with type checking
