@@ -5,7 +5,9 @@
 	 * @license     https://www.gnu.org/licenses/gpl-3.0.html GNU General Public License Version 3
 	 * @since       2.9.0
 	 */
-
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
 	/**
 	 * @var array    $VARS
 	 * @var Freemius $fs

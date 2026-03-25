@@ -1,4 +1,5 @@
 #### [unreleased]
+* update freemius/wordpress-sdk
 
 #### 12.24.1 / 2026-03-18
 * fix `flush-repo-cache` REST endpoint, was getting caught in `$existing_cache`

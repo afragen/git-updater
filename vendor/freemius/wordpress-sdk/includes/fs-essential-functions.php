@@ -10,6 +10,9 @@
 	 * @license     https://www.gnu.org/licenses/gpl-3.0.html GNU General Public License Version 3
 	 * @since       1.1.5
 	 */
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
 
 	if ( ! function_exists( 'fs_normalize_path' ) ) {
 		if ( function_exists( 'wp_normalize_path' ) ) {

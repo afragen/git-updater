@@ -6,6 +6,9 @@
      * @package   Freemius
      * @since     2.6.2
      */
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
 
     class FS_DebugManager {
 

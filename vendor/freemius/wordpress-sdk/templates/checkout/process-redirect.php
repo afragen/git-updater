@@ -25,7 +25,6 @@
 	$fs_checkout->verify_checkout_redirect_nonce( $fs );
 
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'json2' );
 	fs_enqueue_local_script( 'fs-form', 'jquery.form.js', array( 'jquery' ) );
 
 	$action = fs_request_get( '_fs_checkout_action' );
