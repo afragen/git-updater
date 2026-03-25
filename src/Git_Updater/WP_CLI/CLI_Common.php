@@ -29,7 +29,8 @@ class CLI_Common {
 
 		$ghu_options = $wpdb->get_results( $wpdb->prepare( $get_options_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 		foreach ( $ghu_options as $option ) {
-			delete_site_option( $option->option_name );
+			$option_name = is_multisite() ? $option->meta_key : $option->option_name;
+			delete_site_option( $option_name );
 		}
 
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
