@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk
 * fix delete_all_cached_data() for multisite thanks Eileen Mack
 
