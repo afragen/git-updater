@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 12.24.2 / 2026-03-25
+* update freemius/wordpress-sdk
+* fix delete_all_cached_data() for multisite thanks Eileen Mack
+
 #### 12.24.1 / 2026-03-18
 * fix `flush-repo-cache` REST endpoint, was getting caught in `$existing_cache`
 * added `should_run_on_current_page()` and check pages for loading certain parts of plugin

@@ -6558,10 +6558,7 @@
             $next_schedule = $this->next_sync_cron();
 
             // The event is properly scheduled, so no need to reschedule it.
-            if (
-                is_numeric( $next_schedule ) &&
-                $next_schedule > time()
-            ) {
+            if ( is_numeric( $next_schedule ) ) {
                 return;
             }
 
@@ -7098,7 +7095,6 @@
          */
         function _enqueue_connect_essentials() {
             wp_enqueue_script( 'jquery' );
-            wp_enqueue_script( 'json2' );
 
             fs_enqueue_local_script( 'postmessage', 'nojquery.ba-postmessage.js' );
             fs_enqueue_local_script( 'fs-postmessage', 'postmessage.js' );
@@ -17436,7 +17432,7 @@
                 FS_User_Lock::instance()->unlock();
             }
 
-            if ( 1 < count( $installs ) ) {
+            if ( 1 < count( $installs ) || fs_is_network_admin() ) {
                 // Only network level opt-in can have more than one install.
                 $is_network_level_opt_in = true;
             }

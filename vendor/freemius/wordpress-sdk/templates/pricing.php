@@ -11,7 +11,6 @@
 	}
 
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'json2' );
 	fs_enqueue_local_script( 'postmessage', 'nojquery.ba-postmessage.js' );
 	fs_enqueue_local_script( 'fs-postmessage', 'postmessage.js' );
 	fs_enqueue_local_style( 'fs_common', '/admin/common.css' );
