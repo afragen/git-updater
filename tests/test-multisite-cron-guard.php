@@ -23,12 +23,12 @@ class Test_Multisite_Cron_Guard extends \WP_UnitTestCase {
 	use Fragen\Git_Updater\Traits\GU_Trait;
 
 	/**
-	 * Clean up cron events and filters after each test.
+	 * Clean up cron events and hooks after each test.
 	 */
 	public function tear_down() {
 		wp_clear_scheduled_hook( 'gu_delete_access_tokens' );
-		wp_clear_scheduled_hook( 'gu_test_cron_action' );
-		remove_all_filters( 'cron_request' );
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 		parent::tear_down();
 	}
 
@@ -41,45 +41,31 @@ class Test_Multisite_Cron_Guard extends \WP_UnitTestCase {
 	/**
 	 * On a single site, delete_all_cached_data() should call wp_cron().
 	 *
-	 * We verify by hooking into the 'cron_request' filter, which fires
-	 * inside spawn_cron() when wp_cron() reaches the point of spawning
-	 * the loopback request. In the test environment there is no HTTP
-	 * server, so we short-circuit the request and just record that the
-	 * code path was reached.
+	 * wp_cron() defers actual work to _wp_cron() via the 'shutdown' action
+	 * (or 'wp_loaded' when ALTERNATE_WP_CRON is set). We verify the guard
+	 * allowed wp_cron() to run by checking that _wp_cron was hooked.
 	 */
 	public function test_delete_all_cached_data_calls_wp_cron_on_single_site() {
 		if ( is_multisite() ) {
 			$this->markTestSkipped( 'Single-site test — skipped under multisite.' );
 		}
 
-		$spawn_attempted = false;
-		add_filter(
-			'cron_request',
-			function ( $cron_request ) use ( &$spawn_attempted ) {
-				$spawn_attempted = true;
-				// Return a blocking request with a very short timeout to
-				// prevent an actual HTTP call in the test environment.
-				$cron_request['args']['blocking'] = false;
-				$cron_request['args']['timeout']  = 0.01;
-				return $cron_request;
-			},
-			9999
-		);
-
-		// Schedule an event in the past so wp_cron() has something to process.
-		wp_schedule_single_event( time() - 1, 'gu_test_cron_action' );
-
-		// Clear the spawn-cron lock so wp_cron() doesn't bail early.
-		delete_transient( 'doing_cron' );
+		// Remove any pre-existing _wp_cron hook so we can detect a fresh add.
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 
 		$result = $this->delete_all_cached_data();
 
 		$this->assertTrue( $result, 'delete_all_cached_data() should return true.' );
-		$this->assertTrue( $spawn_attempted, 'wp_cron() should attempt to spawn cron on single-site.' );
+		$this->assertTrue(
+			has_action( 'shutdown', '_wp_cron' ) !== false
+			|| has_action( 'wp_loaded', '_wp_cron' ) !== false,
+			'wp_cron() should hook _wp_cron on single-site.'
+		);
 
 		// Clean up.
-		wp_clear_scheduled_hook( 'gu_test_cron_action' );
-		remove_all_filters( 'cron_request' );
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 	}
 
 	/**
@@ -96,28 +82,21 @@ class Test_Multisite_Cron_Guard extends \WP_UnitTestCase {
 		// Ensure we're on the main site.
 		switch_to_blog( get_main_site_id() );
 
-		$spawn_attempted = false;
-		add_filter(
-			'cron_request',
-			function ( $cron_request ) use ( &$spawn_attempted ) {
-				$spawn_attempted = true;
-				$cron_request['args']['blocking'] = false;
-				$cron_request['args']['timeout']  = 0.01;
-				return $cron_request;
-			},
-			9999
-		);
-
-		wp_schedule_single_event( time() - 1, 'gu_test_cron_action' );
-		delete_transient( 'doing_cron' );
+		// Remove any pre-existing _wp_cron hook so we can detect a fresh add.
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 
 		$result = $this->delete_all_cached_data();
 
 		$this->assertTrue( $result, 'delete_all_cached_data() should return true.' );
-		$this->assertTrue( $spawn_attempted, 'wp_cron() should attempt to spawn cron on the main site.' );
+		$this->assertTrue(
+			has_action( 'shutdown', '_wp_cron' ) !== false
+			|| has_action( 'wp_loaded', '_wp_cron' ) !== false,
+			'wp_cron() should hook _wp_cron on the main site.'
+		);
 
-		wp_clear_scheduled_hook( 'gu_test_cron_action' );
-		remove_all_filters( 'cron_request' );
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 		restore_current_blog();
 	}
 
@@ -138,28 +117,19 @@ class Test_Multisite_Cron_Guard extends \WP_UnitTestCase {
 
 		$this->assertFalse( is_main_site(), 'Should be on a subsite.' );
 
-		$spawn_attempted = false;
-		add_filter(
-			'cron_request',
-			function ( $cron_request ) use ( &$spawn_attempted ) {
-				$spawn_attempted = true;
-				$cron_request['args']['blocking'] = false;
-				$cron_request['args']['timeout']  = 0.01;
-				return $cron_request;
-			},
-			9999
-		);
-
-		wp_schedule_single_event( time() - 1, 'gu_test_cron_action' );
-		delete_transient( 'doing_cron' );
+		// Remove any pre-existing _wp_cron hook so we can detect a fresh add.
+		remove_action( 'shutdown', '_wp_cron' );
+		remove_action( 'wp_loaded', '_wp_cron', 20 );
 
 		$result = $this->delete_all_cached_data();
 
 		$this->assertTrue( $result, 'delete_all_cached_data() should still return true.' );
-		$this->assertFalse( $spawn_attempted, 'wp_cron() should NOT attempt to spawn cron on a subsite.' );
+		$this->assertFalse(
+			has_action( 'shutdown', '_wp_cron' ) !== false
+			|| has_action( 'wp_loaded', '_wp_cron' ) !== false,
+			'wp_cron() should NOT hook _wp_cron on a subsite.'
+		);
 
-		wp_clear_scheduled_hook( 'gu_test_cron_action' );
-		remove_all_filters( 'cron_request' );
 		restore_current_blog();
 	}
 
