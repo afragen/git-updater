@@ -293,7 +293,9 @@ trait GU_Trait {
 
 		$wpdb->query( $wpdb->prepare( $delete_string, [ '%ghu-%' ] ) ); // phpcs:ignore
 
-		wp_cron();
+		if ( ! is_multisite() || is_main_site() ) {
+			wp_cron();
+		}
 
 		return true;
 	}
