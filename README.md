@@ -30,6 +30,20 @@ or
 
 ...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI format is `https://github.com/<owner>/<repo>`. You **should not** include any extensions like `.git`.
 
+### GitHub OAuth Token Flow
+
+Git Updater can initiate a GitHub OAuth authorization flow from the GitHub settings tab and save the returned token as `github_access_token`.
+
+To enable OAuth, define credentials in `wp-config.php` (or provide them via the `gu_github_oauth_credentials` filter):
+
+```php
+define( 'GU_GITHUB_OAUTH_CLIENT_ID', 'your-client-id' );
+define( 'GU_GITHUB_OAUTH_CLIENT_SECRET', 'your-client-secret' ); // Optional when using PKCE-only app config.
+define( 'GU_GITHUB_OAUTH_SCOPE', 'repo' ); // Optional, defaults to repo.
+```
+
+After setting credentials, use **Authorize via GitHub OAuth** on the GitHub tab in Git Updater settings.
+
 ### API Plugins
 
 API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins are available for a one-click install from the **Add-Ons** tab.
