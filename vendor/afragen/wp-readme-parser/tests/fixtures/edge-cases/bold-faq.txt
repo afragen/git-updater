@@ -1,0 +1,22 @@
+=== Bold FAQ Plugin ===
+Tags: utility
+Requires at least: 6.0
+Tested up to: 6.5
+Stable tag: 1.0.0
+License: MIT
+
+Tests FAQ parsing with bold-style headings.
+
+== Description ==
+
+A plugin with bold-style FAQ headings.
+
+== Frequently Asked Questions ==
+
+**Does this use bold headings?**
+
+Yes, questions are wrapped in double asterisks instead of = signs.
+
+**What about multiple questions?**
+
+Each bold line is treated as a new FAQ entry.

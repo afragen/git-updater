@@ -1,0 +1,20 @@
+=== Markdown Heading Plugin ===
+Contributors: devuser
+Tags: blocks, editor
+Requires at least: 6.2
+Tested up to: 6.5
+Requires PHP: 8.0
+Stable tag: 2.0.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Uses ## Markdown-style section headings instead of == WordPress-style ==.
+
+## Description
+
+Full description here using Markdown headings.
+
+## Changelog
+
+### 2.0.0
+* Big rewrite.

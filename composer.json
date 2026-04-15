@@ -29,9 +29,8 @@
 	},
 	"prefer-stable": true,
 	"require": {
-		"php": ">=8.0",
-		"afragen/wordpress-plugin-readme-parser": "^1",
-		"erusev/parsedown": "^1.8",
+		"php": ">=8.1",
+		"afragen/wp-readme-parser": "^1.0",
 		"afragen/singleton": "^1.0",
 		"afragen/wp-dismiss-notice": "*",
 		"freemius/wordpress-sdk": "^2.12"
