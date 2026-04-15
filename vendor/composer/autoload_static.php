@@ -17,6 +17,7 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         ),
         'F' =>
         array (
+            'Fragen\\WP_Readme_Parser\\' => 24,
             'Fragen\\Git_Updater\\' => 19,
         ),
     );
@@ -29,6 +30,10 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         'McAskill\\Composer\\' =>
         array (
             0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
+        ),
+        'Fragen\\WP_Readme_Parser\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/afragen/wp-readme-parser/src',
         ),
         'Fragen\\Git_Updater\\' =>
         array (
@@ -102,7 +107,6 @@ class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
         'PHPCSUtils\\Utils\\UseStatements' => __DIR__ . '/..' . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/UseStatements.php',
         'PHPCSUtils\\Utils\\Variables' => __DIR__ . '/..' . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/Variables.php',
         'WP_Dismiss_Notice' => __DIR__ . '/..' . '/afragen/wp-dismiss-notice/wp-dismiss-notice.php',
-        'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => __DIR__ . '/..' . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

@@ -61,5 +61,4 @@ return array(
     'PHPCSUtils\\Utils\\UseStatements' => $vendorDir . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/UseStatements.php',
     'PHPCSUtils\\Utils\\Variables' => $vendorDir . '/phpcsstandards/phpcsutils/PHPCSUtils/Utils/Variables.php',
     'WP_Dismiss_Notice' => $vendorDir . '/afragen/wp-dismiss-notice/wp-dismiss-notice.php',
-    'WordPressdotorg\\Plugin_Directory\\Readme\\Parser' => $vendorDir . '/afragen/wordpress-plugin-readme-parser/class-parser.php',
 );

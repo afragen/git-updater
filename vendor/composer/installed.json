@@ -50,55 +50,6 @@
             "install-path": "../afragen/singleton"
         },
         {
-            "name": "afragen/wordpress-plugin-readme-parser",
-            "version": "1.2026.02.16",
-            "version_normalized": "1.2026.02.16",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/afragen/wordpress-plugin-readme-parser.git",
-                "reference": "3aa1130df558eb5f7c61eca77ceb141b2e9573c7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wordpress-plugin-readme-parser/zipball/3aa1130df558eb5f7c61eca77ceb141b2e9573c7",
-                "reference": "3aa1130df558eb5f7c61eca77ceb141b2e9573c7",
-                "shasum": ""
-            },
-            "require": {
-                "erusev/parsedown": "^1.8",
-                "php": ">=7.1"
-            },
-            "time": "2026-02-16T18:45:01+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "classmap": [
-                    "class-parser.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "WordPress.org",
-                    "homepage": "https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme"
-                }
-            ],
-            "description": "A clone of the current WordPress.org Plugin Readme Parser, class-parser.php",
-            "keywords": [
-                "parser",
-                "readme",
-                "wordpress"
-            ],
-            "support": {
-                "issues": "https://github.com/afragen/wordpress-plugin-readme-parser/issues",
-                "source": "https://github.com/afragen/wordpress-plugin-readme-parser/tree/1.2026.02.16"
-            },
-            "install-path": "../afragen/wordpress-plugin-readme-parser"
-        },
-        {
             "name": "afragen/wp-dismiss-notice",
             "version": "0.3.7",
             "version_normalized": "0.3.7.0",
@@ -142,6 +93,49 @@
                 "source": "https://github.com/afragen/wp-dismiss-notice"
             },
             "install-path": "../afragen/wp-dismiss-notice"
+        },
+        {
+            "name": "afragen/wp-readme-parser",
+            "version": "1.0.0",
+            "version_normalized": "1.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/afragen/wp-readme-parser.git",
+                "reference": "4e817e1af35ce2f675b8db9c6ba4f916ef241d7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/4e817e1af35ce2f675b8db9c6ba4f916ef241d7b",
+                "reference": "4e817e1af35ce2f675b8db9c6ba4f916ef241d7b",
+                "shasum": ""
+            },
+            "require": {
+                "erusev/parsedown": "^1.8",
+                "php": ">=8.1 <8.6"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.59",
+                "phpstan/phpstan": "^1.11 || ^2.0",
+                "phpunit/phpunit": "^10.5 || ^11.5 || ^12.0 || ^13.0"
+            },
+            "time": "2026-04-15T23:15:43+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Fragen\\WP_Readme_Parser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A PHP library for parsing WordPress plugin readme.txt files into structured data.",
+            "support": {
+                "issues": "https://github.com/afragen/wp-readme-parser/issues",
+                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.0"
+            },
+            "install-path": "../afragen/wp-readme-parser"
         },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",

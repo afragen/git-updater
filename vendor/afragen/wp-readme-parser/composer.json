@@ -1,0 +1,41 @@
+{
+    "name": "fragen/wp-readme-parser",
+    "description": "A PHP library for parsing WordPress plugin readme.txt files into structured data.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1 <8.6",
+        "erusev/parsedown": "^1.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.5 || ^12.0 || ^13.0",
+        "phpstan/phpstan": "^1.11 || ^2.0",
+        "friendsofphp/php-cs-fixer": "^3.59"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fragen\\WP_Readme_Parser\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Fragen\\WP_Readme_Parser\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test":     "vendor/bin/phpunit --no-coverage",
+        "test:cov": "vendor/bin/phpunit --coverage-text",
+        "stan":     "vendor/bin/phpstan analyse --no-progress",
+        "cs":       "vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "cs:fix":   "vendor/bin/php-cs-fixer fix",
+        "check":    ["@cs", "@stan", "@test"]
+    },
+    "scripts-descriptions": {
+        "test":     "Run the test suite.",
+        "test:cov": "Run the test suite with a coverage report.",
+        "stan":     "Run PHPStan static analysis.",
+        "cs":       "Check code style without making changes.",
+        "cs:fix":   "Fix code style violations automatically.",
+        "check":    "Run cs, stan, and tests in sequence."
+    }
+}

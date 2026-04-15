@@ -25,7 +25,7 @@
  * GitHub Plugin URI: https://github.com/afragen/git-updater
  * GitHub Languages:  https://github.com/afragen/git-updater-translations
  * Requires at least: 5.9
- * Requires PHP:      8.0
+ * Requires PHP:      8.1
  */
 
 namespace Fragen\Git_Updater;

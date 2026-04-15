@@ -1,4 +1,6 @@
 #### [unreleased]
+* use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
+* update requirements to PHP 8.1 for new parser due to testing
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk

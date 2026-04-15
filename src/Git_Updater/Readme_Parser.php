@@ -11,8 +11,7 @@
 
 namespace Fragen\Git_Updater;
 
-use WordPressdotorg\Plugin_Directory\Readme\Parser;
-use Parsedown;
+use Fragen\WP_Readme_Parser\Parser;
 use Fragen\Git_Updater\Traits\GU_Trait;
 
 /*
@@ -44,23 +43,6 @@ class Readme_Parser extends Parser {
 	public function __construct( $readme, $slug ) {
 		$this->assets = $this->get_repo_cache( $slug )['assets'] ?? [];
 		parent::__construct( $readme );
-	}
-
-	/**
-	 * Parse text into markdown.
-	 *
-	 * @param string $text Text to process.
-	 *
-	 * @return string
-	 */
-	protected function parse_markdown( $text ) {
-		static $markdown = null;
-
-		if ( null === $markdown ) {
-			$markdown = new Parsedown();
-		}
-
-		return $markdown->text( $text );
 	}
 
 	/**
@@ -190,56 +172,5 @@ class Readme_Parser extends Parser {
 		$data['sections']['screenshots'] .= '</ol>';
 
 		return $data;
-	}
-
-	/**
-	 * Replace parent method as some users don't have `mb_strrpos()`.
-	 *
-	 * @access protected
-	 *
-	 * @param string $desc   Description.
-	 * @param int    $length Number of characters.
-	 * @param string $type   The type of the length, 'char' or 'words'.
-	 *
-	 * @return string
-	 */
-	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
-		if ( is_string( $length ) ) {
-			$length = $this->maximum_field_lengths[ $length ] ?? $length;
-		}
-
-		if ( 'words' === $type ) {
-			// Split by whitespace, capturing it so we can put it back together.
-			$pieces = preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
-
-			$word_count_with_spaces = $length * 2;
-
-			if ( count( $pieces ) < $word_count_with_spaces ) {
-				return $desc;
-			}
-
-			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
-
-			return implode( '', $pieces ) . ' &hellip;';
-		}
-
-		// Apply the length restriction without counting html entities.
-		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
-
-		if ( $str_length > $length ) {
-			$desc = mb_substr( $desc, 0, $length ) . ' &hellip;';
-
-			// If not a full sentence, and one ends within 20% of the end, trim it to that.
-			if ( function_exists( 'mb_strrpos' ) ) {
-				$pos = mb_strrpos( $desc, '.' );
-			} else {
-				$pos = strrpos( $desc, '.' );
-			}
-			if ( $pos > ( 0.8 * $length ) && '.' !== mb_substr( $desc, -1 ) ) {
-				$desc = mb_substr( $desc, 0, $pos + 1 );
-			}
-		}
-
-		return trim( $desc );
 	}
 }

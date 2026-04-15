@@ -1,0 +1,10 @@
+=== Screenshots Assets Plugin ===
+License: MIT
+
+Plugin with screenshots for asset URL testing.
+
+== Screenshots ==
+
+1. The dashboard overview.
+2. The settings panel.
+3. The widget area.
