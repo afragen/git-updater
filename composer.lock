@@ -96,16 +96,16 @@
         },
         {
             "name": "afragen/wp-readme-parser",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-readme-parser.git",
-                "reference": "4e817e1af35ce2f675b8db9c6ba4f916ef241d7b"
+                "reference": "76b417362120b4b8c1ab84fd2488587c81436561"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/4e817e1af35ce2f675b8db9c6ba4f916ef241d7b",
-                "reference": "4e817e1af35ce2f675b8db9c6ba4f916ef241d7b",
+                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/76b417362120b4b8c1ab84fd2488587c81436561",
+                "reference": "76b417362120b4b8c1ab84fd2488587c81436561",
                 "shasum": ""
             },
             "require": {
@@ -130,9 +130,9 @@
             "description": "A PHP library for parsing WordPress plugin readme.txt files into structured data.",
             "support": {
                 "issues": "https://github.com/afragen/wp-readme-parser/issues",
-                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.0"
+                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.1"
             },
-            "time": "2026-04-15T23:15:43+00:00"
+            "time": "2026-04-18T00:22:52+00:00"
         },
         {
             "name": "erusev/parsedown",

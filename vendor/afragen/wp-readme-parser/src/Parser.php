@@ -26,7 +26,7 @@ use Fragen\WP_Readme_Parser\Contracts\MarkdownConverterInterface;
  * https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/
  *
  * Differences from a WordPress-native environment:
- *  - HTML sanitization via symfony/html-sanitizer (replaces wp_kses).
+ *  - HTML sanitization via native santizer (replaces wp_kses).
  *  - Markdown via erusev/parsedown (replaces the internal WP.org Markdown class).
  *  - Contributor slugs validated by format only; no live WordPress.org DB lookup.
  *  - The WP_CORE_STABLE_BRANCH upper-bound check on "Tested up to" is not enforced.

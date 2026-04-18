@@ -32,12 +32,10 @@ The library has a single entry point: `src/Parser.php`. It accepts input (file p
 - `MarkdownConverterInterface` — `toHtml(string $markdown): string`
 
 **Default adapters** (`src/Adapters/`):
-- `SymfonyHtmlSanitizerAdapter` — wraps `symfony/html-sanitizer`
-- `ParsedownAdapter` — wraps `erusev/parsedown`
+- `NativeHtmlSanitizerAdapter` — HTML sanitization via PHP's built-in `DOMDocument`; enforces the WP.org `wp_kses()` element/attribute allowlist with no third-party dependencies. Dangerous elements (`script`, `style`, `iframe`, `object`, `embed`, `form`, `input`, `button`, `select`, `textarea`) are dropped with their content; unknown elements are stripped but their text content is preserved.
+- `ParsedownAdapter` — wraps `erusev/parsedown` (safe mode off so raw HTML passes through to the sanitizer)
 
-**Parsing flow**: `Parser::__construct()` resolves input → parses headers → parses sections → renders Markdown → sanitizes HTML. All parsed data is stored as public properties on the `Parser` instance.
-
-**`parseData()`** applies a second pipeline on top of raw parsing: contributor expansion (adds profile/avatar URLs), FAQ re-rendered as `<h4>`, changelog headings promoted to `<h4>`, and screenshots rendered as a linked `<ol>`.
+**Parsing flow**: `Parser::__construct()` resolves input → parses headers → parses sections → renders Markdown → sanitizes HTML. All parsed data is stored as public properties on the `Parser` instance. There is no `parseData()` method; post-processing belongs to consuming applications (e.g. `git-updater/Readme_Parser`).
 
 ## Tests
 
@@ -49,4 +47,4 @@ Tests live in `tests/` and extend `ParserTestCase`, which provides three factory
 
 Test suites are split by concern: `SectionParsingTest`, `NameAndHeaderParsingTest`, `LicenseValidationTest`, `VersionSanitizationTest`, `SecurityTest`, `HtmlAndMarkdownTest`, `EdgeCasesTest`, `GitUpdaterHelpersTest`.
 
-CI runs PHP 8.2–8.5 (matrix), PHPStan, and PHP CS Fixer. Coverage is uploaded from the PHP 8.5 job only.
+CI runs PHP 8.1–8.5 (matrix), PHPStan, and PHP CS Fixer. Coverage is uploaded from the PHP 8.5 job only.
