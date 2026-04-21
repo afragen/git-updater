@@ -493,8 +493,9 @@ class GitHub_API extends API implements API_Interface {
 			'git_updater_github_install_settings',
 			'github_access_token',
 			[
-				'id'    => 'github_access_token',
-				'token' => true,
+				'id'        => 'github_access_token',
+				'token'     => true,
+				'token_url' => 'https://github.com/settings/tokens/new',
 			]
 		);
 

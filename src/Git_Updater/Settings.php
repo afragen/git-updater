@@ -609,6 +609,9 @@ class Settings {
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
 			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+			<?php if ( ! empty( $args['token_url'] ) ) : ?>
+				&nbsp;<a href="<?php echo esc_url( $args['token_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Generate token', 'git-updater' ); ?></a>
+			<?php endif; ?>
 		</label>
 		<?php
 	}
