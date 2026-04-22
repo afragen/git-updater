@@ -327,17 +327,17 @@ class Base {
 				$repo_api->get_repo_assets();
 				$repo_api->get_remote_readme();
 				$repo_api->get_remote_changes( '' );
-				$repo_api->get_repo_meta();
+				$repo_api->get_remote_tag();
 				if ( ! empty( self::$options['branch_switch'] ) ) {
 					$repo_api->get_remote_branches();
 				}
+				$repo_api->get_repo_meta();
 			}
-			$repo_api->get_remote_tag();
-			$repo->download_link = $repo_api->construct_download_link();
-			$language_pack       = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
+			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
-			$this->add_assets( $repo_api );
 		}
+		$repo->download_link = $repo_api->construct_download_link();
+		$this->add_assets( $repo_api );
 
 		do_action( 'get_remote_repo_meta', $repo, $repo_api );
 
