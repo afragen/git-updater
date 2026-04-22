@@ -224,6 +224,8 @@ class API {
 			}
 
 			// If we made it this far API data must be OK, save to avoid extra call above.
+			$response['url'] = $url;
+			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
 			$this->set_repo_cache( md5( $url ), $response );
 		}
 
