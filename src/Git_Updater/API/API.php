@@ -528,6 +528,10 @@ class API {
 			$this->type->security                = $response['Security'] ?? '';
 			$this->type->license                 = $response['License'] ?? '';
 		}
+
+		$this->set_repo_cache( 'file_info', $this->type );
+
+		return true;
 	}
 
 	/**
