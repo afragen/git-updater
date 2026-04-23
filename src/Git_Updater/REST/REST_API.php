@@ -658,7 +658,7 @@ class REST_API {
 		if ( ! $slug ) {
 			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
-		$flush   = $this->set_repo_cache( $slug, false, $slug, false, true );
+		$flush   = $this->set_repo_cache( $slug, false, $slug, false );
 		$message = $flush
 			? [
 				'success' => true,

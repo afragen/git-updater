@@ -150,12 +150,10 @@ trait GU_Trait {
 	 * @param string|bool $repo     Repo name or false.
 	 * @param string|bool $timeout  Timeout for cache.
 	 *                              Default is $hours (12 hours).
-	 * @param bool        $flush    Whether to flush existing cache or merge with it.
-	 *                              Default false (merge). Set true to flush.
 	 *
 	 * @return bool
 	 */
-	final public function set_repo_cache( $id, $response, $repo = false, $timeout = false, $flush = false ) {
+	final public function set_repo_cache( $id, $response, $repo = false, $timeout = false ) {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
@@ -176,15 +174,6 @@ trait GU_Trait {
 		 * @param string|bool $repo     Repo name or false.
 		 */
 		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
-
-		// Merge with existing cache if it exists, is an array, and not flushing.
-		// Prevents overwriting other data stored in cache when multiple requests are made before cache expires.
-		if ( ! $flush ) {
-			$existing_cache = $this->get_repo_cache( $cache_key ) ?: [];
-			if ( $this->is_cache_timeout_valid( $existing_cache['timeout'] ?? 0 ) ) {
-				$this->response = array_merge( $existing_cache, (array) $this->response );
-			}
-		}
 
 		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
 		$this->response['timeout'] = $this->is_cache_timeout_valid( $this->response['timeout'] ?? 0 )
