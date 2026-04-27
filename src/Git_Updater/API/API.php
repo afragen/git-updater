@@ -198,6 +198,7 @@ class API {
 		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
 		$response = $response && $cached && isset( $response['error_cache'] ) ? $response['error_cache'] : $response;
 		if ( ! $response ) {
+			error_log( "Git Updater API: Requesting URL: {$url}" );
 			$response = ! $response
 				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
 				: $response;
@@ -226,7 +227,9 @@ class API {
 			// If we made it this far API data must be OK, save to avoid extra call above.
 			$response['url'] = $url;
 			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
-			$this->set_repo_cache( md5( $url ), $response );
+
+			// Set transient with md5 hash of URL and response for use in other API calls to avoid extra calls. Added to cache via next call to set_repo_cache.
+			set_site_transient( 'gu_api_url', [ md5( $url ) => $response ], 30 );
 		}
 
 		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
@@ -528,8 +531,6 @@ class API {
 			$this->type->security                = $response['Security'] ?? '';
 			$this->type->license                 = $response['License'] ?? '';
 		}
-
-		$this->set_repo_cache( 'file_info', $this->type );
 
 		return true;
 	}

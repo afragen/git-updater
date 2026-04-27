@@ -138,6 +138,9 @@ trait API_Common {
 
 		if ( $response && is_string( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
+
+			// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
+			$this->maybe_extend_repo_cache( $response, $this->type );
 			$this->set_repo_cache( $this->type->slug, $response );
 			$this->set_repo_cache( 'repo', $this->type->slug );
 		}

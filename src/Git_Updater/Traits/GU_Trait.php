@@ -181,7 +181,14 @@ trait GU_Trait {
 			: strtotime( $timeout );
 		$cache[ $id ]     = $response;
 
-		update_site_option( $cache_key, $this->response );
+		// Store md5 hash of URL and response.
+		$md5_url = get_site_transient( 'gu_api_url' );
+		if ( $md5_url ) {
+			$key           = key( $md5_url );
+			$cache[ $key ] = $md5_url[ $key ];
+		}
+
+		update_site_option( $cache_key, $cache );
 
 		return true;
 	}
@@ -195,6 +202,31 @@ trait GU_Trait {
 	 */
 	final public function is_cache_timeout_valid( int $timestamp ): bool {
 		return ! empty( $timestamp ) && time() < $timestamp;
+	}
+
+	/**
+	 * Maybe extend API cached data and set new timeout if remote version
+	 * is same as cached remote version?
+	 *
+	 * Use presence of 'meta' in cache to determine if cache data is present and complete.
+	 * If not present, do not extend or set timeout to avoid saving incomplete data.
+	 *
+	 * @param array    $remote_headers Remote headers data array.
+	 * @param stdClass $repo    Repo data object.
+	 *
+	 * @return void
+	 */
+	final public function maybe_extend_repo_cache( $remote_headers, $repo ): void {
+		$cache_key = $this->get_cache_key( $repo->slug ?? false );
+		$cache     = get_site_option( $cache_key );
+		if ( isset( $cache['repo'] ) && version_compare( $remote_headers['Version'], $cache[ $cache['repo'] ]['Version'] ?? '', '==' ) ) {
+			if ( isset( $cache['meta'] ) && ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
+				error_log( 'Extending cache timeout for ' . $cache['repo'] );
+				$hours            = $this->get_class_vars( 'API\API', 'hours' );
+				$cache['timeout'] = strtotime( '+' . $hours . ' hours' );
+				update_site_option( $cache_key, $cache );
+			}
+		}
 	}
 
 	/**
