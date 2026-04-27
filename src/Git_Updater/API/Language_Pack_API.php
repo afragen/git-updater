@@ -24,9 +24,8 @@ class Language_Pack_API extends API {
 	 */
 	public function __construct( $type ) {
 		parent::__construct();
-		self::$method   = 'translation';
-		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		self::$method = 'translation';
+		$this->type   = $type;
 	}
 
 	/**
@@ -37,7 +36,8 @@ class Language_Pack_API extends API {
 	 * @return bool When invalid response.
 	 */
 	public function get_language_pack( $headers ) {
-		$response = ! empty( $this->response['languages'] ) ? $this->response['languages'] : false;
+		$cache    = $this->get_repo_cache();
+		$response = ! empty( $cache['languages'] ) ? $cache['languages'] : false;
 
 		if ( ! $response ) {
 			$response = $this->get_language_pack_json( $this->type->git, $headers, $response );

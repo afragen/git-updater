@@ -37,8 +37,7 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
-		$this->type     = $type;
-		$this->response = [];
+		$this->type = $type;
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -151,6 +150,8 @@ class GitHub_API extends API implements API_Interface {
 		self::$method       = 'download_link';
 		$download_link_base = $this->get_api_url( '/repos/:owner/:repo/zipball/', true );
 		$endpoint           = '';
+		$cache_key          = $this->get_cache_key( $this->type->slug ?? false );
+		$cache              = get_site_option( $cache_key );
 
 		// Release asset.
 		if ( $this->use_release_asset( $branch_switch ) ) {
@@ -175,11 +176,11 @@ class GitHub_API extends API implements API_Interface {
 				}
 			}
 
-			if ( empty( $this->response['release_asset_download'] ) ) {
+			if ( empty( $cache['release_asset_download'] ) ) {
 				$this->set_repo_cache( 'release_asset_download', $release_asset );
 			}
-			if ( ! empty( $this->response['release_asset_download'] ) ) {
-				return $this->response['release_asset_download'];
+			if ( ! empty( $cache['release_asset_download'] ) ) {
+				return $cache['release_asset_download'];
 			}
 
 			return $this->get_release_asset_redirect( $release_asset, true );

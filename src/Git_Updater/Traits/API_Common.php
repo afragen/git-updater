@@ -127,8 +127,8 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_info( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response[ $this->type->slug ] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache[ $this->type->slug ] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'file';
@@ -160,9 +160,9 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$repo_type      = $this->return_repo_type();
-		$response       = $this->response['tags'] ?? false;
+		$cache     = $this->get_repo_cache( $this->type->slug );
+		$repo_type = $this->return_repo_type();
+		$response  = $cache['tags'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'tags';
@@ -197,10 +197,10 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
-		$changelogs     = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['changes'] ?? false;
-		$changelogs     = ! empty( $this->response['contents'] ) ? array_intersect( $this->response['contents']['files'], $changelogs ) : $changelogs;
+		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
+		$cache      = $this->get_repo_cache( $this->type->slug );
+		$response   = $cache['changes'] ?? false;
+		$changelogs = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $changelogs ) : $changelogs;
 
 		if ( ! $response ) {
 			self::$method = 'changes';
@@ -227,7 +227,7 @@ trait API_Common {
 			return false;
 		}
 
-		if ( ! isset( $this->response['changes'] ) ) {
+		if ( ! isset( $cache['changes'] ) ) {
 			$parser   = new Parsedown();
 			$response = $parser->text( $response );
 			$this->set_repo_cache( 'changes', $response );
@@ -247,10 +247,10 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		$readmes        = [ 'readme.txt', 'README.md', 'readme.md' ];
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['readme'] ?? false;
-		$readmes        = ! empty( $this->response['contents'] ) ? array_intersect( $this->response['contents']['files'], $readmes ) : $readmes;
+		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['readme'] ?? false;
+		$readmes  = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
 
 		// Use readme.txt if it exists.
 		$readme_txt = array_filter(
@@ -289,7 +289,7 @@ trait API_Common {
 			return false;
 		}
 
-		if ( ! isset( $this->response['readme'] ) ) {
+		if ( ! isset( $cache['readme'] ) ) {
 			$parser   = new Readme_Parser( $response, $this->type->slug );
 			$response = $parser->parse_data();
 			$this->set_repo_cache( 'readme', $response );
@@ -309,8 +309,8 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_repo_meta( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['meta'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['meta'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'meta';
@@ -341,10 +341,10 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
-		$assets         = [ '.wordpress-org', 'assets' ];
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['assets'] ?? false;
-		$assets         = ! empty( $this->response['contents'] ) ? array_intersect( (array) $this->response['contents']['dirs'], $assets ) : $assets;
+		$assets   = [ '.wordpress-org', 'assets' ];
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['assets'] ?? false;
+		$assets   = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
 
 		if ( ! $response ) {
 			self::$method = 'assets';
@@ -388,9 +388,9 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_branches( $git, $request ) {
-		$branches       = [];
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['branches'] ?? false;
+		$branches = [];
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['branches'] ?? false;
 
 		if ( $this->exit_no_update( $response, true ) ) {
 			return false;
@@ -432,8 +432,8 @@ trait API_Common {
 	 * @return string|array $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['release_asset'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['release_asset'] ?? false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -450,7 +450,7 @@ trait API_Common {
 			}
 		}
 
-		if ( $response && ! isset( $this->response['release_asset'] ) ) {
+		if ( $response && ! isset( $cache['release_asset'] ) ) {
 			$this->set_repo_cache( 'release_asset', $response );
 			$this->set_repo_cache( 'release_asset_download', $response );
 		}
@@ -472,8 +472,8 @@ trait API_Common {
 	 * @return array $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['release_assets'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['release_assets'] ?? false;
 
 		if ( $response && $this->exit_no_update( $response ) ) {
 			return false;
@@ -490,7 +490,7 @@ trait API_Common {
 			}
 		}
 
-		if ( $response && ! isset( $this->response['release_assets'] ) ) {
+		if ( $response && ! isset( $cache['release_assets'] ) ) {
 			$this->set_repo_cache( 'release_assets', $response );
 		}
 
@@ -520,8 +520,8 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_contents( $git, $request ) {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['contents'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['contents'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'contents';

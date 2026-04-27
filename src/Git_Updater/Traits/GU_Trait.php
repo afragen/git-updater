@@ -157,11 +157,11 @@ trait GU_Trait {
 		if ( is_wp_error( $response ) ) {
 			return false;
 		}
-		$this->response = property_exists( $this, 'response' ) && is_array( $this->response ) ? $this->response : [];
-
-		$hours     = $this->get_class_vars( 'API\API', 'hours' );
 		$cache_key = $this->get_cache_key( $repo );
-		$timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
+		$cache     = get_site_option( $cache_key, [] );
+
+		$hours   = $this->get_class_vars( 'API\API', 'hours' );
+		$timeout = $timeout ? $timeout : '+' . $hours . ' hours';
 
 		/**
 		 * Allow filtering of cache timeout for repo information.
@@ -176,10 +176,10 @@ trait GU_Trait {
 		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
 		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
-		$this->response['timeout'] = $this->is_cache_timeout_valid( $this->response['timeout'] ?? 0 )
-			? $this->response['timeout']
+		$cache['timeout'] = $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 )
+			? $cache['timeout']
 			: strtotime( $timeout );
-		$this->response[ $id ]     = $response;
+		$cache[ $id ]     = $response;
 
 		update_site_option( $cache_key, $this->response );
 

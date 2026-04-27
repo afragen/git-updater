@@ -358,8 +358,8 @@ class API {
 	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$this->response = $this->get_repo_cache( $this->type->slug );
-		$response       = $this->response['dot_org'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug );
+		$response = $cache['dot_org'] ?? false;
 
 		/**
 		 * Filter hook to set an API domain for updating.
@@ -627,20 +627,22 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
+		$cache_key = $this->get_cache_key( $this->type->slug ?? false );
+		$cache     = get_site_option( $cache_key );
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
-		if ( $aws && ( time() - strtotime( '-12 hours', $this->response['timeout'] ) ) >= 300 ) {
-			unset( $this->response['release_asset'] );
-			unset( $this->response['release_asset_redirect'] );
+		if ( $aws && ( time() - strtotime( '-12 hours', $cache['timeout'] ) ) >= 300 ) {
+			unset( $cache['release_asset'] );
+			unset( $cache['release_asset_redirect'] );
 		}
 
-		$response = $this->response['release_asset_redirect'] ?? false;
+		$response = $cache['release_asset_redirect'] ?? false;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['key'] ) ) {
 			$slug = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : false;
 			$slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
-			$rest = $slug === $this->response['repo'];
+			$rest = $slug === $cache['repo'];
 		}
 		// phpcs:enable
 
