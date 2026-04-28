@@ -126,7 +126,7 @@ trait API_Common {
 	 *
 	 * @return bool
 	 */
-	final public function get_remote_api_info( $git, $request ) {
+	final public function get_remote_api_info( $git, $request ): bool {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache[ $this->type->slug ] ?? false;
 
