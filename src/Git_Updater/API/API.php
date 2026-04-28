@@ -506,9 +506,9 @@ class API {
 	 * Set repo object file info.
 	 *
 	 * @param array $response Repo data.
-	 * @return bool
+	 * @return void
 	 */
-	protected function set_file_info( $response ): bool {
+	protected function set_file_info( $response ): void {
 		$this->type->transient        = $response;
 		$this->type->remote_version   = ! empty( $response['Version'] ) ? strtolower( $response['Version'] ) : $this->type->remote_version;
 		$this->type->requires_php     = ! empty( $response['RequiresPHP'] ) ? $response['RequiresPHP'] : false;
@@ -531,8 +531,6 @@ class API {
 			$this->type->security                = $response['Security'] ?? '';
 			$this->type->license                 = $response['License'] ?? '';
 		}
-
-		return true;
 	}
 
 	/**
