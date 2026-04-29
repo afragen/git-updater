@@ -181,13 +181,6 @@ trait GU_Trait {
 			: strtotime( $timeout );
 		$cache[ $id ]     = $response;
 
-		// Store md5 hash of URL and response.
-		$md5_url = get_site_transient( 'gu_api_url' );
-		if ( $md5_url ) {
-			$key           = key( $md5_url );
-			$cache[ $key ] = $md5_url[ $key ];
-		}
-
 		update_site_option( $cache_key, $cache );
 
 		return true;
