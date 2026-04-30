@@ -328,9 +328,7 @@ class Base {
 				$repo_api->get_remote_readme();
 				$repo_api->get_remote_changes( '' );
 				$repo_api->get_remote_tag();
-				if ( ! empty( self::$options['branch_switch'] ) ) {
-					$repo_api->get_remote_branches();
-				}
+				$repo_api->get_remote_branches();
 				$repo_api->get_repo_meta();
 			}
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
