@@ -231,7 +231,7 @@ class Branch {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_asset']     = filter_var( $repo->release_asset, FILTER_VALIDATE_BOOLEAN );
 		$branch_switch_data['primary_branch']    = $repo->primary_branch;
 
 		/*
@@ -278,7 +278,7 @@ class Branch {
 		$branch_switch_data['id']                = $id;
 		$branch_switch_data['branch']            = $branch;
 		$branch_switch_data['branches']          = $branches;
-		$branch_switch_data['release_asset']     = $repo->release_asset;
+		$branch_switch_data['release_asset']     = filter_var( $repo->release_asset, FILTER_VALIDATE_BOOLEAN );
 		$branch_switch_data['primary_branch']    = $repo->primary_branch;
 
 		/*
