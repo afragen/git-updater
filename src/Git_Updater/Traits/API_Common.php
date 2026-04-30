@@ -221,7 +221,7 @@ trait API_Common {
 			}
 			$response = $this->decode_response( $git, $response );
 
-			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
+			if ( ! is_string( $response ) || is_wp_error( $response ) || empty( $response ) ) {
 				$response          = new stdClass();
 				$response->message = 'No changelog found';
 				$this->set_repo_cache( 'changes', $response );
