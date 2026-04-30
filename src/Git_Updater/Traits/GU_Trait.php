@@ -205,9 +205,10 @@ trait GU_Trait {
 	 * @param array    $remote_headers Remote headers data array.
 	 * @param stdClass $repo    Repo data object.
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	final public function maybe_extend_repo_cache( $remote_headers, $repo ): void {
+	final public function maybe_extend_repo_cache( $remote_headers, $repo ): bool {
+		$return    = false;
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
 
@@ -217,10 +218,14 @@ trait GU_Trait {
 					error_log( 'Extending cache timeout for ' . $cache['repo'] );
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );
+					$return = true;
 				}
 			}
+			$return = true;
 		}
+		return $return;
 	}
+
 
 	/**
 	 * Getter for class variables.

@@ -150,7 +150,9 @@ trait API_Common {
 		$this->set_repo_cache( 'repo', $this->type->slug, false, 0 );
 
 		// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
-		$this->maybe_extend_repo_cache( $response, $this->type );
+		if ( $this->maybe_extend_repo_cache( $response, $this->type ) ) {
+			return false;
+		}
 
 		return true;
 	}
