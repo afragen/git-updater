@@ -138,9 +138,6 @@ trait API_Common {
 
 		if ( $response && is_string( $response ) ) {
 			$response = $this->get_file_headers( $response, $this->type->type );
-
-			// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
-			$this->maybe_extend_repo_cache( $response, $this->type );
 		}
 
 		if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -149,9 +146,11 @@ trait API_Common {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-		$this->set_repo_cache( $this->type->slug, $response, false, 0);
+		$this->set_repo_cache( $this->type->slug, $response, false, 0 );
 		$this->set_repo_cache( 'repo', $this->type->slug, false, 0 );
 
+		// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
+		$this->maybe_extend_repo_cache( $response, $this->type );
 
 		return true;
 	}

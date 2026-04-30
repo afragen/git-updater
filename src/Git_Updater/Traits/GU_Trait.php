@@ -209,13 +209,15 @@ trait GU_Trait {
 	 */
 	final public function maybe_extend_repo_cache( $remote_headers, $repo ): void {
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
-		$cache     = get_site_option( $cache_key );
+		$cache     = get_site_option( $cache_key, [] );
+
 		if ( isset( $cache['repo'] ) && version_compare( $remote_headers['Version'], $cache[ $cache['repo'] ]['Version'] ?? '', '==' ) ) {
-			if ( isset( $cache['meta'] ) && ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
-				error_log( 'Extending cache timeout for ' . $cache['repo'] );
-				$hours            = $this->get_class_vars( 'API\API', 'hours' );
-				$cache['timeout'] = strtotime( '+' . $hours . ' hours' );
-				update_site_option( $cache_key, $cache );
+			if ( isset( $cache['meta'] ) ) {
+				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
+					error_log( 'Extending cache timeout for ' . $cache['repo'] );
+					$cache['timeout'] = strtotime( '+6 hours' );
+					update_site_option( $cache_key, $cache );
+				}
 			}
 		}
 	}
