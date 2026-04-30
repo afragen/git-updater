@@ -36,7 +36,7 @@ class Language_Pack_API extends API {
 	 * @return bool When invalid response.
 	 */
 	public function get_language_pack( $headers ) {
-		$cache    = $this->get_repo_cache();
+		$cache    = $this->get_repo_cache( false, false );
 		$response = ! empty( $cache['languages'] ) ? $cache['languages'] : false;
 
 		if ( ! $response ) {

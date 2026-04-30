@@ -227,9 +227,7 @@ class API {
 			// If we made it this far API data must be OK, save to avoid extra call above.
 			$response['url'] = $url;
 			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
-
-			// Set transient with md5 hash of URL and response for use in other API calls to avoid extra calls. Added to cache via next call to set_repo_cache.
-			set_site_transient( 'gu_api_url', [ md5( $url ) => $response ], 30 );
+			$this->set_repo_cache( md5( $url ), $response, false, 0 );
 		}
 
 		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
@@ -361,7 +359,7 @@ class API {
 	 * @return bool|int|mixed|string|WP_Error
 	 */
 	protected function get_dot_org_data() {
-		$cache    = $this->get_repo_cache( $this->type->slug );
+		$cache    = $this->get_repo_cache( $this->type->slug, false );
 		$response = $cache['dot_org'] ?? false;
 
 		/**
@@ -626,8 +624,7 @@ class API {
 		if ( ! $asset ) {
 			return false;
 		}
-		$cache_key = $this->get_cache_key( $this->type->slug ?? false );
-		$cache     = get_site_option( $cache_key );
+		$cache = $this->get_repo_cache( $this->type->slug ?? false, false );
 
 		// Unset release asset url if older than 5 min to account for AWS expiration.
 		if ( $aws && ( time() - strtotime( '-12 hours', $cache['timeout'] ) ) >= 300 ) {

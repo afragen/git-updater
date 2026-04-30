@@ -302,7 +302,7 @@ class Rest_Update {
 			$slug      = $theme ? $theme : $slug;
 			$file      = $plugin ? $plugin . '.php' : 'style.css';
 			$options   = $this->get_class_vars( 'Base', 'options' );
-			$cache     = $this->get_repo_cache( $slug );
+			$cache     = $this->get_repo_cache( $slug, false );
 			$cache_key = 'ghu-' . md5( $slug );
 
 			$cache['current_branch'] = $current_branch;
@@ -396,7 +396,7 @@ class Rest_Update {
 	 * @return string
 	 */
 	private function get_primary_branch( $slug ) {
-		$cache          = $this->get_repo_cache( $slug );
+		$cache          = $this->get_repo_cache( $slug, false );
 		$primary_branch = $cache[ $slug ]['PrimaryBranch'] ?? 'master';
 
 		return $primary_branch;

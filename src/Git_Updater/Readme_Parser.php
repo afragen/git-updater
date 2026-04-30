@@ -41,7 +41,7 @@ class Readme_Parser extends Parser {
 	 * @param string $slug   Repository slug.
 	 */
 	public function __construct( $readme, $slug ) {
-		$this->assets = $this->get_repo_cache( $slug )['assets'] ?? [];
+		$this->assets = $this->get_repo_cache( $slug, false )['assets'] ?? [];
 		parent::__construct( $readme );
 	}
 

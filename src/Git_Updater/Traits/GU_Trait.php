@@ -126,14 +126,15 @@ trait GU_Trait {
 	 * @access protected
 	 *
 	 * @param string|bool $repo Repo name or false.
+	 * @param bool        $timeout false to always return cache, true to use timeout.
 	 *
 	 * @return array|bool The repo cache. False if expired.
 	 */
-	final public function get_repo_cache( $repo = false ) {
+	final public function get_repo_cache( $repo = false, $timeout = true ) {
 		$cache_key = $this->get_cache_key( $repo );
-		$cache     = get_site_option( $cache_key );
+		$cache     = get_site_option( $cache_key, [] );
 
-		if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
+		if ( $timeout && ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 			return false;
 		}
 
@@ -438,7 +439,7 @@ trait GU_Trait {
 				Singleton::get_instance( $git_class, $this );
 			}
 
-			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug ) : null;
+			$cache = isset( $repo->slug ) ? $this->get_repo_cache( $repo->slug, false ) : [];
 
 			// Probably not managed by Git Updater if $cache is empty.
 			return empty( $cache );
@@ -458,7 +459,7 @@ trait GU_Trait {
 		$repos = apply_filters( 'gu_config_pre_process', $repos );
 
 		foreach ( $repos as $git_repo ) {
-			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug );
+			$caches[ $git_repo->slug ] = $this->get_repo_cache( $git_repo->slug, false );
 		}
 		$waiting = array_filter(
 			$caches,

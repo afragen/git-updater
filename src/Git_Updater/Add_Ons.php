@@ -181,7 +181,7 @@ class Add_Ons {
 	 * @return array An array of API results.
 	 */
 	public function get_addon_api_results() {
-		$api_results = $this->get_repo_cache( 'gu_addon_api_results' );
+		$api_results = $this->get_repo_cache( 'gu_addon_api_results', false );
 
 		if ( false === $api_results ) {
 			$api_results = [];

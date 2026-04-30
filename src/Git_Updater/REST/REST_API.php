@@ -554,7 +554,7 @@ class REST_API {
 			uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 		}
 
-		$repo_cache = $this->get_repo_cache( $slug );
+		$repo_cache = $this->get_repo_cache( $slug, false );
 		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
 
 		// Add HTTP headers.
