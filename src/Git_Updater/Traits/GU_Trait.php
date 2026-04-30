@@ -176,10 +176,7 @@ trait GU_Trait {
 		 */
 		$timeout = apply_filters( 'gu_repo_cache_timeout', $timeout, $id, $response, $repo );
 
-		// Set timeout for cache. Use existing timeout if valid, otherwise set new timeout.
-		$cache['timeout'] = $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 )
-			? $cache['timeout']
-			: strtotime( $timeout );
+		$cache['timeout'] = $cache['timeout'] ?? strtotime( $timeout );
 		$cache[ $id ]     = $response;
 
 		update_site_option( $cache_key, $cache );
