@@ -68,14 +68,6 @@ class API {
 	public $type;
 
 	/**
-	 * Variable to hold all repository remote info.
-	 *
-	 * @access public
-	 * @var array
-	 */
-	public $response = [];
-
-	/**
 	 * Variable to hold AWS redirect URL.
 	 *
 	 * @var string|WP_Error $redirect

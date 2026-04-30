@@ -49,20 +49,6 @@ class Branch {
 	protected $tag;
 
 	/**
-	 * Holds current repo cache.
-	 *
-	 * @var array|bool
-	 */
-	protected $cache;
-
-	/**
-	 * Holds data to be stored.
-	 *
-	 * @var string[]
-	 */
-	protected $response;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
