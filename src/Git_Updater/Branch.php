@@ -140,17 +140,17 @@ class Branch {
 			return;
 		}
 
-		$tag_array    = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
-		$in_tag_array = $tag_array && in_array( $rollback, $this->cache['tags'], true );
+		$tag_array    = isset( $cache['tags'] ) && is_array( $cache['tags'] );
+		$in_tag_array = $tag_array && in_array( $rollback, $cache['tags'], true );
 		if ( $in_tag_array ) {
-			$current_branch = $this->cache[ $repo ]['PrimaryBranch'] ?? 'master';
+			$current_branch = $cache[ $repo ]['PrimaryBranch'] ?? 'master';
 		}
 
-		if ( ! $in_tag_array && isset( $_GET['action'], $this->cache['branches'] )
+		if ( ! $in_tag_array && isset( $_GET['action'], $cache['branches'] )
 			&& in_array( $_GET['action'], [ 'upgrade-plugin', 'upgrade-theme' ], true )
 		) {
 			// phpcs:enable
-			$current_branch = array_key_exists( $rollback, $this->cache['branches'] )
+			$current_branch = array_key_exists( $rollback, $cache['branches'] )
 				? sanitize_text_field( $rollback )
 				: 'master';
 		}
