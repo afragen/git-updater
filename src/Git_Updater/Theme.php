@@ -117,8 +117,9 @@ class Theme {
 	 */
 	protected function get_theme_meta() {
 		$this->delete_current_theme_cache();
-		$git_themes = [];
-		$themes     = wp_get_themes( [ 'errors' => null ] );
+		$all_headers = [];
+		$git_themes  = [];
+		$themes      = wp_get_themes( [ 'errors' => null ] );
 
 		$paths = array_map(
 			function ( $theme ) {
