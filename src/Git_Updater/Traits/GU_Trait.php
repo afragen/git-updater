@@ -216,11 +216,13 @@ trait GU_Trait {
 					error_log( 'Extending cache timeout for ' . $cache['repo'] );
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );
-					$return = true;
 				}
+				$return = true;
+			} else {
+				$return = false;
 			}
-			$return = true;
 		}
+
 		return $return;
 	}
 
