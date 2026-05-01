@@ -652,7 +652,7 @@ class REST_API {
 		}
 		$cache_key = $this->get_cache_key( $slug );
 		$flush     = delete_site_option( $cache_key );
-		$message = $flush
+		$message   = $flush
 			? [
 				'success' => true,
 				$slug     => "Repository cache for $slug has been flushed.",
