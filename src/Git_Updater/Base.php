@@ -334,6 +334,8 @@ class Base {
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}
+
+		$this->populate_api_data( $repo, $repo_api );
 		$repo->download_link = $repo_api->construct_download_link();
 		$this->add_assets( $repo_api );
 

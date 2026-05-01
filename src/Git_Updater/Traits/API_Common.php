@@ -166,9 +166,8 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
-		$cache     = $this->get_repo_cache( $this->type->slug, false );
-		$repo_type = $this->return_repo_type();
-		$response  = $cache['tags'] ?? false;
+		$cache    = $this->get_repo_cache( $this->type->slug, false );
+		$response = $cache['tags'] ?? false;
 
 		if ( ! $response ) {
 			self::$method = 'tags';
@@ -189,8 +188,7 @@ trait API_Common {
 			return false;
 		}
 
-		$tags = $this->parse_tags( $response, $repo_type );
-		return $this->sort_tags( $tags );
+		return true;
 	}
 
 	/**
@@ -238,8 +236,6 @@ trait API_Common {
 			$response = $parser->text( $response );
 			$this->set_repo_cache( 'changes', $response );
 		}
-
-		$this->type->sections['changelog'] = $response;
 
 		return true;
 	}
@@ -301,8 +297,6 @@ trait API_Common {
 			$this->set_repo_cache( 'readme', $response );
 		}
 
-		$this->set_readme_info( $response );
-
 		return true;
 	}
 
@@ -331,9 +325,6 @@ trait API_Common {
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
-
-		$this->type->repo_meta = $response;
-		$this->add_meta_repo_object();
 
 		return true;
 	}
@@ -425,8 +416,6 @@ trait API_Common {
 			}
 		}
 
-		$this->type->branches = (array) $response;
-
 		return true;
 	}
 
@@ -465,8 +454,6 @@ trait API_Common {
 			return false;
 		}
 
-		$this->type->release_assets[ $this->type->newest_tag ] = $response;
-
 		return $response;
 	}
 
@@ -503,16 +490,6 @@ trait API_Common {
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
-
-		// Ensure newest tag is in assets array, even if empty, to prevent errors.
-		if ( ! array_key_exists( $this->type->newest_tag, $response['assets'] ) ) {
-			$response['assets'] = array_merge( [ $this->type->newest_tag => '' ], $response['assets'] );
-		}
-
-		$this->type->release_assets     = $response['assets'] ?? $response;
-		$this->type->created_at         = $response['created_at'] ?? [];
-		$this->type->dev_release_assets = $response['dev_assets'] ?? [];
-		$this->type->dev_created_at     = $response['dev_created_at'] ?? [];
 
 		return $response;
 	}

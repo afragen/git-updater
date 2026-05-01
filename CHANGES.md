@@ -4,8 +4,10 @@
 * add `maybe_extend_repo_cache()` to update the timeout if the remote and cached version numbers are same, should avoid API calls for current data
 * update `(get|set)_repo_cache()`
 * fix wp-cron and multisite
+* more efficient use of cache
 * decrease data stored with API request response
 * fix `Release Asset` header to save as boolean
+* add `populate_api_data()` to populate even when API requests are skipped
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk

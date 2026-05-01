@@ -14,6 +14,7 @@ namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionObject;
 use stdClass;
 use WP_Error;
@@ -226,6 +227,105 @@ trait GU_Trait {
 		return $return;
 	}
 
+	/**
+	 * Populate API data from cache.
+	 *
+	 * Data now populates via cache even when API is not available.
+	 *
+	 * @param  stdClass $repo     Repository object.
+	 * @param  stdClass $repo_api Repository API object.
+	 *
+	 * @return stdClass
+	 */
+	final public function populate_api_data( $repo, $repo_api ) {
+		$cache             = $this->get_repo_cache( $repo->slug, false );
+		$validate_response = $this->get_reflection_method( $repo_api, 'validate_response' );
+		$cached_data       = [
+			'tags'           => $cache['tags'] ?? false,
+			'changes'        => $cache['changes'] ?? false,
+			'readme'         => $cache['readme'] ?? false,
+			'meta'           => $cache['meta'] ?? false,
+			'branches'       => $cache['branches'] ?? false,
+			'release_asset'  => $cache['release_asset'] ?? false,
+			'release_assets' => $cache['release_assets'] ?? false,
+		];
+		foreach ( $cached_data as $key => $value ) {
+			switch ( $key ) {
+				case 'tags':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$return_repo_type = $this->get_reflection_method( $repo_api, 'return_repo_type' );
+					$repo_type        = $return_repo_type->invoke( $repo_api );
+
+					$parse_tags = $this->get_reflection_method( $repo_api, 'parse_tags' );
+					$tags       = $parse_tags->invoke( $repo_api, $value, $repo_type );
+
+					$sort_tags = $this->get_reflection_method( $repo_api, 'sort_tags' );
+					$sort_tags->invoke( $repo_api, $tags );
+					break;
+				case 'changes':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->sections['changelog'] = $value;
+					break;
+				case 'readme':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$set_readme_info = $this->get_reflection_method( $repo_api, 'set_readme_info' );
+					$set_readme_info->invoke( $repo_api, $value );
+					break;
+				case 'meta':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->repo_meta      = $value;
+					$add_repo_meta_object = $this->get_reflection_method( $repo_api, 'add_meta_repo_object' );
+					$add_repo_meta_object->invoke( $repo_api );
+					break;
+				case 'branches':
+					$repo->branches = ! $value ? [] : (array) $value;
+					break;
+				case 'release_asset':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					$repo->release_assets[ $repo->newest_tag ] = $value;
+					break;
+				case 'release_assets':
+					if ( $validate_response->invoke( $repo_api, $value ) ) {
+						break;
+					}
+					if ( ! array_key_exists( $repo->newest_tag, $value['assets'] ) ) {
+						$value['assets'] = array_merge( [ $repo->newest_tag => '' ], $value['assets'] );
+					}
+					$repo->release_assets     = $value['assets'] ?? $value;
+					$repo->created_at         = $value['created_at'] ?? [];
+					$repo->dev_release_assets = $value['dev_assets'] ?? [];
+					$repo->dev_created_at     = $value['dev_created_at'] ?? [];
+					break;
+			}
+		}
+
+		return $repo;
+	}
+
+	/**
+	 * Get reflection method.
+	 *
+	 * @param object|string $obj    Class object or name.
+	 * @param string|null   $method Method name.
+	 *
+	 * @return ReflectionMethod
+	 */
+	final public function get_reflection_method( $obj, $method ): ReflectionMethod {
+		$reflection_method = new ReflectionMethod( $obj, $method );
+		( PHP_VERSION_ID < 80100 ) && $reflection_method->setAccessible( true );
+
+		return $reflection_method;
+	}
 
 	/**
 	 * Getter for class variables.
