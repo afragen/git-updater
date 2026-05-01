@@ -37,7 +37,7 @@ class Branch {
 	/**
 	 * Holds Git Updater Base class object.
 	 *
-	 * @var Fragen\Git_Updater\Base
+	 * @var \Fragen\Git_Updater\Base
 	 */
 	protected $base;
 
@@ -322,7 +322,7 @@ class Branch {
 				 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 				 *
 				 * @since 10.0.0
-				 * @param int Number of rollbacks. Zero implies value not set.
+				 * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
 				 */
 				$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 
@@ -431,7 +431,7 @@ class Branch {
 			 * Filter to return the number of tagged releases (rollbacks) in branch switching.
 			 *
 			 * @since 10.0.0
-			 * @param int Number of rollbacks. Zero implies value not set.
+			 * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
 			 */
 			$num_rollbacks = absint( apply_filters( 'gu_number_rollbacks', 0 ) );
 

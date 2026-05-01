@@ -358,7 +358,7 @@ class API {
 		 * Filter hook to set an API domain for updating.
 		 *
 		 * @since 12.6.0
-		 * @param string Default is 'api.wordpress.org'.
+		 * @param string $api_domain Default is 'api.wordpress.org'.
 		 */
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 

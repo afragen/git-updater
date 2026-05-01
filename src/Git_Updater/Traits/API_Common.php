@@ -53,7 +53,7 @@ trait API_Common {
 	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  string $request  Query to API->api().
 	 * @param  mixed  $response API response.
-	 * @return array|string|WP_Error $response Release asset download link.
+	 * @return array|string|\WP_Error $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
 		if ( is_wp_error( $response ) ) {

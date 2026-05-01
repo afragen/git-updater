@@ -377,6 +377,7 @@ class REST_API {
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
 			return [ 'error' => 'Bad API key. No repo data for you.' ];
 		}
+		$slugs      = [];
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
 		$gu_themes  = Singleton::get_instance( 'Fragen\Git_Updater\Theme', $this )->get_theme_configs();
 		$gu_tokens  = array_merge( $gu_plugins, $gu_themes );

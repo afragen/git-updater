@@ -451,7 +451,7 @@ class Settings {
 			 *
 			 * @since 10.0.0
 			 *
-			 * @param array
+			 * @param array $settings_fields Repo settings fields.
 			 * @param stdClass $token Repository object.
 			 * @param string $token->git Name of git host, eg. GitHub.
 			 */

@@ -106,6 +106,7 @@ class Plugin {
 
 		$plugins     = get_plugins();
 		$git_plugins = [];
+		$paths       = [];
 
 		array_map(
 			function ( $plugin ) use ( &$paths ) {

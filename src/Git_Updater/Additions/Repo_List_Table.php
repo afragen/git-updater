@@ -112,8 +112,8 @@ class Repo_List_Table extends WP_List_Table {
 	 * For more detailed insight into how columns are handled, take a look at
 	 * WP_List_Table::single_row_columns()
 	 *
-	 * @param  array $item        A singular item (one full row's worth of data).
-	 * @param  array $column_name The name/slug of the column to be processed.
+	 * @param  array  $item        A singular item (one full row's worth of data).
+	 * @param  string $column_name The name/slug of the column to be processed.
 	 * @return string Text or HTML to be placed inside the column <td>
 	 **************************************************************************/
 	public function column_default( $item, $column_name ) {
@@ -304,7 +304,7 @@ class Repo_List_Table extends WP_List_Table {
 	 * $this->set_pagination_args(), although the following properties and methods
 	 * are frequently interacted with here...
 	 *
-	 * @global WPDB $wpdb
+	 * @global \WPDB $wpdb
 	 * @uses $this->_column_headers
 	 * @uses $this->items
 	 * @uses $this->get_columns()

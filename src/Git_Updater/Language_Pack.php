@@ -79,9 +79,10 @@ class Language_Pack {
 	 * @return mixed
 	 */
 	public static function update_site_transient( $transient ) {
-		$locales = get_available_languages();
-		$locales = ! empty( $locales ) ? $locales : [ get_locale() ];
-		$repos   = [];
+		$locales      = get_available_languages();
+		$locales      = ! empty( $locales ) ? $locales : [ get_locale() ];
+		$translations = [];
+		$repos        = [];
 
 		if ( ! isset( $transient->translations ) ) {
 			return $transient;

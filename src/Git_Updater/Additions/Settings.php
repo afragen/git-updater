@@ -17,7 +17,7 @@ class Settings {
 	/**
 	 * Holds the values for additions settings.
 	 *
-	 * @var array $option_remote
+	 * @var array $options_additions
 	 */
 	public static $options_additions;
 
@@ -319,7 +319,7 @@ class Settings {
 	/**
 	 * Dropdown callback.
 	 *
-	 * @param arra $args Data passed from add_settings_field().
+	 * @param array $args Data passed from add_settings_field().
 	 *
 	 * @return void
 	 */

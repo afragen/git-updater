@@ -135,9 +135,9 @@ class Add_Ons {
 	/**
 	 * Filters the plugins API result for an add-on.
 	 *
-	 * @param object|WP_Error $result Response object or WP_Error.
-	 * @param string          $action The action being taken.
-	 * @param object          $args   API arguments.
+	 * @param object|\WP_Error $result Response object or WP_Error.
+	 * @param string           $action The action being taken.
+	 * @param object           $args   API arguments.
 	 * @return array|object The original result or the modified result as an object.
 	 */
 	public function plugins_api( $result, $action, $args ) {

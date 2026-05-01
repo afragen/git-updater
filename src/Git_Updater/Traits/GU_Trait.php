@@ -374,7 +374,7 @@ trait GU_Trait {
 		 * Filter hook to completely ignore any updates from dot org when using Git Updater.
 		 *
 		 * @since 12.6.0
-		 * @param bool Default is false. Do not ignore updates from dot org.
+		 * @param bool $return_default Default is false. Do not ignore updates from dot org.
 		 */
 		return ! $dot_org_master || $override || apply_filters( 'gu_ignore_dot_org', false );
 	}
@@ -544,8 +544,8 @@ trait GU_Trait {
 	 * Set array with normal repo names.
 	 * Fix name even if installed without renaming originally, eg <repo>-master
 	 *
-	 * @param string            $slug            Repo slug.
-	 * @param Base|Plugin|Theme $upgrader_object Upgrader object.
+	 * @param string                                                                        $slug            Repo slug.
+	 * @param \Fragen\Git_Updater\Base|\Fragen\Git_Updater\Plugin|\Fragen\Git_Updater\Theme $upgrader_object Upgrader object.
 	 *
 	 * @return array
 	 */
@@ -856,7 +856,7 @@ trait GU_Trait {
 	 * @since 10.10.0
 	 * @uses `upgrader_install_package_result` filter
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 * @global \WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param array|WP_Error $result Result from WP_Upgrader::install_package().
 

@@ -295,7 +295,7 @@ class Base {
 	public function get_remote_repo_meta( $repo ) {
 		// Exit if non-privileged user and bypassing wp-cron.
 
-		/**
+		/*
 		 * Exit if bypassing wp-cron.
 		 *
 		 * @since 10.0.0
@@ -392,7 +392,7 @@ class Base {
 	/**
 	 * Add assets from remote repo.
 	 *
-	 * @param GitHub_API|Bitbucket_API|GitLab_API|Gitea_API $repo API object.
+	 * @param stdClass $repo API object.
 	 *
 	 * @return void
 	 */
@@ -687,9 +687,9 @@ class Base {
 		 * @access  public
 		 * @link https://github.com/afragen/git-updater-additions
 		 *
-		 * @param array        Listing of plugins/themes to add.
-		 *                     Default null.
-		 * @param array        Listing of all plugins/themes.
+		 * @param array $additions Listing of plugins/themes to add.
+		 *                         Default null.
+		 * @param array $all_repos Listing of all plugins/themes.
 		 * @param string $type Type being passed, plugin|theme'.
 		 */
 		$additions = apply_filters( 'gu_additions', null, [], $type );
