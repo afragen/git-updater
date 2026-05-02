@@ -548,7 +548,6 @@ class REST_API {
 		}
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
-		Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->response = $repo_cache;
 
 		// Add HTTP headers.
 		if ( $repo_api_data['download_link'] ) {
