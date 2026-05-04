@@ -37,7 +37,9 @@
 	},
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3.0.0",
-		"mcaskill/composer-exclude-files": "^4.0"
+		"mcaskill/composer-exclude-files": "^4.0",
+		"phpstan/phpstan": "^2.0",
+		"szepeviktor/phpstan-wordpress": "^0.7"
 	},
 	"extra": {
 		"exclude-from-files": [
@@ -57,6 +59,8 @@
 	},
 	"scripts": {
 		"lint": "@php ./vendor/bin/phpcs .",
-		"format": "@php ./vendor/bin/phpcbf ."
+		"format": "@php ./vendor/bin/phpcbf .",
+		"phpstan": "@php ./vendor/bin/phpstan analyse --memory-limit=512M",
+		"phpstan-baseline": "@php ./vendor/bin/phpstan analyse --generate-baseline --memory-limit=512M"
 	}
 }

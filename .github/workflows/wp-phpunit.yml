@@ -66,3 +66,26 @@ jobs:
       - name: PHPUnit tests (multisite)
         run: |
           WP_MULTISITE=1 phpunit --config=phpunit.xml
+
+  phpstan:
+    runs-on: ubuntu-latest
+    name: PHPStan Static Analysis
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Composer install
+        run: composer install --optimize-autoloader --prefer-dist
+
+      - name: PHPStan
+        run: composer phpstan
