@@ -8,3 +8,17 @@ vendor/squizlabs
 vendor/wp-coding-standards
 vendor/phpcsstandards
 vendor/mcaskill
+vendor/phpunit
+vendor/yoast
+vendor/sebastian
+vendor/phar-io
+vendor/myclabs
+vendor/theseer
+vendor/doctrine
+vendor/phpstan
+vendor/nikic
+vendor/szepeviktor
+vendor/php-stubs
+
+node_modules/
+package-lock.json
