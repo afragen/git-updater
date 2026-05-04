@@ -8,6 +8,7 @@
 * decrease data stored with API request response
 * fix `Release Asset` header to save as boolean
 * add `populate_api_data()` to populate even when API requests are skipped
+* set `error_code` to its own cached state outside the main repo cache
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk

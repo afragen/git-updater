@@ -185,11 +185,11 @@ class API {
 		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
-		$response = $this->get_repo_cache( $this->type->slug );
-		$cached   = isset( $response['error_cache'] );
-		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
-		$response = $response && $cached && isset( $response['error_cache'] ) ? $response['error_cache'] : $response;
-		if ( ! $response ) {
+		$response    = $this->get_repo_cache( $this->type->slug );
+		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
+		$cached      = isset( $error_cache['error_cache'] );
+		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
+		if ( ! $response && ! $cached ) {
 			$response = ! $response
 				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
 				: $response;
@@ -212,13 +212,17 @@ class API {
 					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
 				}
 				$response['timeout'] = ! $timeout ? $response['timeout'] : $timeout;
-				$this->set_repo_cache( 'error_cache', $response, false, "+{$timeout} minutes" );
+				$this->set_repo_cache( 'error_cache', $response, $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
 			// If we made it this far API data must be OK, save to avoid extra call above.
 			$response['url'] = $url;
 			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
 			$this->set_repo_cache( md5( $url ), $response, false, 0 );
+		}
+
+		if ( $cached && ! $response ) {
+			return false;
 		}
 
 		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
