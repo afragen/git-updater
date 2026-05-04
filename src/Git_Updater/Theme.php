@@ -574,9 +574,9 @@ class Theme {
 	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param stdClass $transient Theme update transient.
+	 * @param mixed $transient Theme update transient.
 	 *
-	 * @return stdClass
+	 * @return mixed
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.

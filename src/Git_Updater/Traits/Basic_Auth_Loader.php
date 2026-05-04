@@ -106,7 +106,7 @@ trait Basic_Auth_Loader {
 		$api_domain = apply_filters( 'gu_api_domain', 'api.wordpress.org' );
 
 		$credentials = [
-			'api.wordpress' => isset( $headers['host'] ) === $api_domain ? $headers['host'] : false,
+			'api.wordpress' => isset( $headers['host'] ) && $headers['host'] === $api_domain ? $headers['host'] : false,
 			'isset'         => false,
 			'token'         => null,
 			'type'          => null,
@@ -176,11 +176,11 @@ trait Basic_Auth_Loader {
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
-		$slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
-
+		$slug_raw = isset( $_REQUEST['slug'] ) ? wp_unslash( $_REQUEST['slug'] ) : false;
 		// Some installers, like TGMPA, pass an array.
-		$slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
+		$slug_raw = is_array( $slug_raw ) ? array_pop( $slug_raw ) : $slug_raw;
+		$slug     = $slug_raw ? sanitize_text_field( (string) $slug_raw ) : false;
+		$slug     = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
 
 		$slug = str_contains( $slug, '/' ) ? dirname( $slug ) : $slug;
 

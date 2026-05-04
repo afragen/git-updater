@@ -342,7 +342,7 @@ class Plugin {
 	/**
 	 * Hook into site_transient_update_plugins to update from GitHub.
 	 *
-	 * @param stdClass $transient Plugin update transient.
+	 * @param mixed $transient Plugin update transient.
 	 *
 	 * @return mixed
 	 */

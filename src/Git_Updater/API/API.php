@@ -179,7 +179,7 @@ class API {
 	 *
 	 * @param string $url The URL to send the request to.
 	 *
-	 * @return boolean|stdClass
+	 * @return boolean|stdClass|\WP_Error
 	 */
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );
@@ -192,9 +192,7 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
 		if ( ! $response && ! $cached ) {
-			$response = ! $response
-				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
-				: $response;
+			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
 			$allowed_codes = [ 200 ];
@@ -206,7 +204,7 @@ class API {
 			}
 
 			// Cache HTTP API error code for 60 minutes.
-			if ( ! in_array( $code, $allowed_codes, true ) && ! $cached ) {
+			if ( ! in_array( $code, $allowed_codes, true ) ) {
 				$timeout = 60;
 
 				// Set timeout to GitHub rate limit reset.
@@ -431,7 +429,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @param stdClass $response The response.
+	 * @param mixed $response The response.
 	 *
 	 * @return bool true if invalid
 	 */
@@ -555,11 +553,6 @@ class API {
 				continue;
 			}
 			$readme['sections'][ $section ] = $value;
-		}
-
-		// Exit if readme is invalid.
-		if ( ! is_array( $readme ) ) {
-			return false;
 		}
 
 		$readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;

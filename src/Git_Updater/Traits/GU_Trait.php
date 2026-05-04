@@ -295,6 +295,7 @@ trait GU_Trait {
 					$repo->branches = ! $value ? [] : (array) $value;
 					break;
 				case 'release_asset':
+
 					if ( $validate_response->invoke( $repo_api, $value ) ) {
 						break;
 					}
@@ -328,7 +329,6 @@ trait GU_Trait {
 	 */
 	final public function get_reflection_method( $obj, $method ): ReflectionMethod {
 		$reflection_method = new ReflectionMethod( $obj, $method );
-		( PHP_VERSION_ID < 80100 ) && $reflection_method->setAccessible( true );
 
 		return $reflection_method;
 	}
@@ -348,7 +348,6 @@ trait GU_Trait {
 			return false;
 		}
 		$property = $reflection_obj->getProperty( $name );
-		( PHP_VERSION_ID < 80100 ) && $property->setAccessible( true );
 
 		return $property->getValue( $class );
 	}
@@ -448,8 +447,8 @@ trait GU_Trait {
 	/**
 	 * Do we override dot org updates?
 	 *
-	 * @param string   $type (plugin|theme).
-	 * @param stdClass $repo Repository object.
+	 * @param string               $type (plugin|theme).
+	 * @param array<string,mixed>|stdClass $repo Repository object.
 	 *
 	 * @return bool
 	 */

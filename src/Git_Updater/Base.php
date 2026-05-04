@@ -678,7 +678,7 @@ class Base {
 	 * @param  bool   $add_padding Whether or not to adding padding to the icon.
 	 *                             When used in row meta, icon should not have padding;
 	 *                             when used in branch switching row, icon should have padding.
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_git_icon( $file, $add_padding ) {
 		$type     = str_contains( current_filter(), 'plugin' ) ? 'plugin' : 'theme';

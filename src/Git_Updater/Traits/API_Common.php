@@ -21,7 +21,7 @@ trait API_Common {
 	/**
 	 * Holds loose class method name.
 	 *
-	 * @var null
+	 * @var string|null
 	 */
 	protected static $method;
 
@@ -178,10 +178,8 @@ trait API_Common {
 				$response->message = 'No tags found';
 			}
 
-			if ( $response ) {
-				$response = $this->parse_tag_response( $response );
-				$this->set_repo_cache( 'tags', $response );
-			}
+			$response = $this->parse_tag_response( $response );
+			$this->set_repo_cache( 'tags', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -220,7 +218,7 @@ trait API_Common {
 			}
 			$response = $this->decode_response( $git, $response );
 
-			if ( ! is_string( $response ) || is_wp_error( $response ) || empty( $response ) ) {
+			if ( ! is_string( $response ) || empty( $response ) ) {
 				$response          = new stdClass();
 				$response->message = 'No changelog found';
 				$this->set_repo_cache( 'changes', $response );
@@ -280,7 +278,7 @@ trait API_Common {
 			}
 			$response = $this->decode_response( $git, $response );
 
-			if ( ! is_string( $response ) || is_wp_error( $response ) ) {
+			if ( ! is_string( $response ) ) {
 				$response          = new stdClass();
 				$response->message = 'No readme found';
 				$this->set_repo_cache( 'readme', $response );
@@ -406,7 +404,7 @@ trait API_Common {
 			 */
 			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
-			if ( $this->validate_response( $response ) || is_scalar( $response ) ) {
+			if ( $this->validate_response( $response ) ) {
 				return false;
 			}
 
@@ -439,7 +437,7 @@ trait API_Common {
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
-			if ( ! $response && ! is_wp_error( $response ) ) {
+			if ( ! $response ) {
 				$response          = new stdClass();
 				$response->message = 'No release asset found';
 			}
@@ -477,7 +475,7 @@ trait API_Common {
 			$response     = $this->api( $request );
 			$response     = $this->parse_release_asset( $git, $request, $response );
 
-			if ( ! $response && ! is_wp_error( $response ) ) {
+			if ( ! $response ) {
 				$response          = new stdClass();
 				$response->message = 'No release assets found';
 			}

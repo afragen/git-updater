@@ -446,7 +446,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote assets directory.
 	 *
-	 * @param stdClass|array<string, mixed> $response Response from API call.
+	 * @param stdClass|array<string, mixed>|\WP_Error $response Response from API call.
 	 *
 	 * @return stdClass|array<string, string>
 	 */

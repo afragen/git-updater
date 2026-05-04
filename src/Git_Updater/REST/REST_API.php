@@ -543,9 +543,7 @@ class REST_API {
 			'homepage'          => $repo_data->homepage,
 			'external'          => 'xxx',
 		];
-		if ( ! is_wp_error( $repo_api_data['versions'] ) ) {
-			uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
-		}
+		uksort( $repo_api_data['versions'], fn ( $a, $b ) => version_compare( $b, $a ) );
 
 		$repo_cache = $this->get_repo_cache( $slug, false );
 
