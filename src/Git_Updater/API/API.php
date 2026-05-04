@@ -190,7 +190,6 @@ class API {
 		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
 		$response = $response && $cached && isset( $response['error_cache'] ) ? $response['error_cache'] : $response;
 		if ( ! $response ) {
-			error_log( "Git Updater API: Requesting URL: {$url}" );
 			$response = ! $response
 				? wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) )
 				: $response;
