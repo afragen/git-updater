@@ -9,6 +9,7 @@
 * fix `Release Asset` header to save as boolean
 * add `populate_api_data()` to populate even when API requests are skipped
 * set `error_code` to its own cached state outside the main repo cache
+* fix Add_Ons cache to use dedicated repo key with proper timeout handling
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk
