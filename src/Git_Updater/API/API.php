@@ -35,21 +35,21 @@ class API {
 	/**
 	 * Holds HTTP error code from API call.
 	 *
-	 * @var array ( $this->type->slug => $code )
+	 * @var array<string, mixed>
 	 */
 	protected static $error_code = [];
 
 	/**
 	 * Holds site options.
 	 *
-	 * @var array $options
+	 * @var array<string, mixed>
 	 */
 	protected static $options;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array $extra_headers
+	 * @var array<string, string>
 	 */
 	protected static $extra_headers;
 
@@ -77,7 +77,7 @@ class API {
 	/**
 	 * Default args to pass to wp_remote_get().
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected $default_http_get_args = [
 		'sslverify'     => true,
@@ -97,6 +97,7 @@ class API {
 	 * Add data in Settings page.
 	 *
 	 * @param object $git Git API object.
+	 * @return void
 	 */
 	public function settings_hook( $git ) {
 		add_action(
@@ -111,10 +112,10 @@ class API {
 	/**
 	 * Add data to the setting_field in Settings.
 	 *
-	 * @param array    $fields Array of settings fields.
-	 * @param stdClass $repo   Object of repo data.
+	 * @param array<string, mixed> $fields Array of settings fields.
+	 * @param stdClass             $repo   Object of repo data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function add_setting_field( $fields, $repo ) {
 		if ( ! empty( $fields ) ) {
@@ -159,6 +160,7 @@ class API {
 	 * Add Install settings fields.
 	 *
 	 * @param object $git Git API from caller.
+	 * @return void
 	 */
 	public function add_install_fields( $git ) {
 		add_action(
@@ -270,7 +272,7 @@ class API {
 	 *
 	 * @access protected
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	protected function return_repo_type() {
 		$arr         = [];
@@ -396,8 +398,8 @@ class API {
 	/**
 	 * Test to exit early if no update available, saves API calls.
 	 *
-	 * @param array|bool $response API response.
-	 * @param bool       $branch   Branch name.
+	 * @param array<string, mixed>|bool $response API response.
+	 * @param bool                      $branch   Branch name.
 	 *
 	 * @return bool
 	 */
@@ -453,7 +455,7 @@ class API {
 	/**
 	 * Sort tags and set object data.
 	 *
-	 * @param array $tags Associative array of tags[ tag ].
+	 * @param array<string, mixed> $tags Associative array of tags[ tag ].
 	 *
 	 * @return bool
 	 */
@@ -498,7 +500,7 @@ class API {
 	/**
 	 * Set repo object file info.
 	 *
-	 * @param array $response Repo data.
+	 * @param array<string, mixed> $response Repo data.
 	 * @return void
 	 */
 	protected function set_file_info( $response ): void {
@@ -530,6 +532,7 @@ class API {
 	 * Add remote data to type object.
 	 *
 	 * @access protected
+	 * @return void
 	 */
 	protected function add_meta_repo_object() {
 		$this->type->last_updated = $this->type->repo_meta['last_updated'];
@@ -541,7 +544,7 @@ class API {
 	 * Set data from readme.txt.
 	 * Prefer changelog from CHANGES.md.
 	 *
-	 * @param array $readme Array of parsed readme.txt data.
+	 * @param array<string, mixed> $readme Array of parsed readme.txt data.
 	 *
 	 * @return bool
 	 */

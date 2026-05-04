@@ -44,21 +44,21 @@ class Plugin {
 	/**
 	 * Hold config array.
 	 *
-	 * @var array
+	 * @var array<string, stdClass>
 	 */
 	private $config;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private static $extra_headers;
 
 	/**
 	 * Holds options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private static $options;
 
@@ -89,7 +89,7 @@ class Plugin {
 	/**
 	 * Returns an array of configurations for the known plugins.
 	 *
-	 * @return array
+	 * @return array<string, stdClass>
 	 */
 	public function get_plugin_configs() {
 		return $this->config;
@@ -98,7 +98,7 @@ class Plugin {
 	/**
 	 * Get details of Git-sourced plugins from those that are installed.
 	 *
-	 * @return array Indexed array of associative arrays of plugin details.
+	 * @return array<string, stdClass> Indexed array of associative arrays of plugin details.
 	 */
 	protected function get_plugin_meta() {
 		// Ensure get_plugins() function is available.
@@ -231,6 +231,8 @@ class Plugin {
 	/**
 	 * Get remote plugin meta to populate $config plugin objects.
 	 * Calls to remote APIs to get data.
+	 *
+	 * @return void
 	 */
 	public function get_remote_plugin_meta() {
 		$plugins = [];
@@ -275,6 +277,8 @@ class Plugin {
 
 	/**
 	 * Load pre-update filters.
+	 *
+	 * @return void
 	 */
 	public function load_pre_filters() {
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );

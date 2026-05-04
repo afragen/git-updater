@@ -109,9 +109,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param stdClass|array $response API response.
+	 * @param stdClass|array<string, mixed> $response API response.
 	 *
-	 * @return array|stdClass Array of tag numbers, object is error.
+	 * @return list<string>|stdClass
 	 */
 	public function parse_tag_response( $response );
 
@@ -120,9 +120,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param stdClass|array $response API response.
+	 * @param stdClass|array<string, mixed> $response API response.
 	 *
-	 * @return array|stdClass Array of meta variables.
+	 * @return array<string, mixed>|stdClass
 	 */
 	public function parse_meta_response( $response );
 
@@ -131,9 +131,9 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param stdClass|array $response API response.
+	 * @param stdClass|array<string, mixed> $response API response.
 	 *
-	 * @return array|stdClass $arr Array of changes in base64, object if error.
+	 * @return array<string, string>|stdClass
 	 */
 	public function parse_changelog_response( $response );
 
@@ -144,23 +144,23 @@ interface API_Interface {
 	 *
 	 * @param stdClass $response API response.
 	 *
-	 * @return array Array of branch data.
+	 * @return array<string, array<string, string>>
 	 */
 	public function parse_branch_response( $response );
 
 	/**
 	 * Add values for individual repo add_setting_field().
 	 *
-	 * @return mixed
+	 * @return array<string, mixed>
 	 */
 	public function add_repo_setting_field();
 
 	/**
 	 * Add settings for each API.
 	 *
-	 * @param array $auth_required Array of what needs authentication.
+	 * @param array<string, bool> $auth_required Array of what needs authentication.
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public function add_settings( $auth_required );
 
@@ -168,16 +168,17 @@ interface API_Interface {
 	 * Add remote install settings fields.
 	 *
 	 * @param string $type plugin|theme.
+	 * @return void
 	 */
 	public function add_install_settings_fields( $type );
 
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers Array of headers.
-	 * @param array $install Array of install data.
+	 * @param array<string, string> $headers Array of headers.
+	 * @param array<string, mixed>  $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return array<string, mixed>
 	 */
 	public function remote_install( $headers, $install );
 }

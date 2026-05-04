@@ -53,7 +53,7 @@ trait API_Common {
 	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  string $request  Query to API->api().
 	 * @param  mixed  $response API response.
-	 * @return array|string|\WP_Error $response Release asset download link.
+	 * @return array<string, mixed>|string|\WP_Error $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
 		if ( is_wp_error( $response ) ) {
@@ -424,7 +424,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string|array $response Release asset URI.
+	 * @return string|array<string, mixed> $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );
@@ -462,7 +462,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return array $response Release asset URI.
+	 * @return array<string, mixed> $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );

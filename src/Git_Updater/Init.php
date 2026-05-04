@@ -47,6 +47,8 @@ class Init {
 
 	/**
 	 * Let's get going.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		if ( ! static::is_heartbeat() ) {
@@ -68,6 +70,8 @@ class Init {
 	/**
 	 * Load relevant action/filter hooks.
 	 * Use 'init' hook for user capabilities.
+	 *
+	 * @return void
 	 */
 	protected function load_hooks() {
 		add_action( 'init', [ $this->base, 'load' ] );

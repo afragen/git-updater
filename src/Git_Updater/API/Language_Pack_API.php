@@ -31,7 +31,7 @@ class Language_Pack_API extends API {
 	/**
 	 * Get/process Language Packs.
 	 *
-	 * @param array $headers Array of headers of Language Pack.
+	 * @param array<string, string> $headers Array of headers of Language Pack.
 	 *
 	 * @return bool When invalid response.
 	 */
@@ -65,9 +65,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string $git      (github).
-	 * @param array  $headers  Array of headers.
-	 * @param mixed  $response API response.
+	 * @param string               $git      (github).
+	 * @param array<string, string> $headers  Array of headers.
+	 * @param mixed                $response API response.
 	 *
 	 * @return array|bool|mixed
 	 */
@@ -101,9 +101,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Process $package for update transient.
 	 *
-	 * @param string   $git     Name of API, eg 'github'.
-	 * @param stdClass $locale  Locale.
-	 * @param array    $headers Array of headers.
+	 * @param string                $git     Name of API, eg 'github'.
+	 * @param stdClass              $locale  Locale.
+	 * @param array<string, string> $headers Array of headers.
 	 *
 	 * @return null|string
 	 */

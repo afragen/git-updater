@@ -58,6 +58,8 @@ class Language_Pack {
 
 	/**
 	 * Do the Language Pack integration.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		if ( null === $this->repo ) {

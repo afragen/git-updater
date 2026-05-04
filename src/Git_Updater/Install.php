@@ -42,7 +42,7 @@ class Install {
 	/**
 	 * Class options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $install = [];
 
@@ -105,6 +105,8 @@ class Install {
 
 	/**
 	 * Adds Install tabs to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [];
@@ -134,6 +136,7 @@ class Install {
 	 * @uses 'gu_add_admin_page' action hook
 	 *
 	 * @param string $tab Name of tab.
+	 * @return void
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'git_updater_install_plugin' === $tab ) {
@@ -149,8 +152,8 @@ class Install {
 	/**
 	 * Install remote plugin or theme.
 	 *
-	 * @param string $type   plugin|theme.
-	 * @param array  $config Array of data.
+	 * @param string                    $type   plugin|theme.
+	 * @param array<string, mixed>|null $config Array of data.
 	 *
 	 * @return bool
 	 */
@@ -228,7 +231,7 @@ class Install {
 	/**
 	 * Save options set during installation.
 	 *
-	 * @param  array $install_options Array of options from remote install process.
+	 * @param  array<string, mixed> $install_options Array of options from remote install process.
 	 * @return void
 	 */
 	private function save_options_on_install( $install_options ) {
@@ -239,7 +242,8 @@ class Install {
 	/**
 	 * Set remote install data into $_POST.
 	 *
-	 * @param array $config Data for a remote install.
+	 * @param array<string, mixed>|null $config Data for a remote install.
+	 * @return void
 	 */
 	private function set_install_post_data( $config ) {
 		if ( ! isset( $config['uri'] ) ) {
@@ -312,6 +316,7 @@ class Install {
 	 * Create Install Plugin or Install Theme page.
 	 *
 	 * @param string $type (plugin|theme).
+	 * @return void
 	 */
 	public function create_form( $type ) {
 		// Bail if installing.
@@ -339,6 +344,7 @@ class Install {
 	 * Add settings sections.
 	 *
 	 * @param string $type plugin|theme.
+	 * @return void
 	 */
 	public function register_settings( $type ) {
 		$repo_type = null;
@@ -412,6 +418,8 @@ class Install {
 
 	/**
 	 * Repo setting.
+	 *
+	 * @return void
 	 */
 	public function get_repo() {
 		?>
@@ -427,6 +435,8 @@ class Install {
 
 	/**
 	 * Branch setting.
+	 *
+	 * @return void
 	 */
 	public function branch() {
 		?>
@@ -442,6 +452,8 @@ class Install {
 
 	/**
 	 * API setting.
+	 *
+	 * @return void
 	 */
 	public function install_api() {
 		?>
@@ -462,9 +474,9 @@ class Install {
 	/**
 	 * Fix activation links after theme installation, no method to get proper theme name.
 	 *
-	 * @param array $install_actions Array of theme actions.
+	 * @param array<string, mixed> $install_actions Array of theme actions.
 	 *
-	 * @return mixed
+	 * @return array<string, mixed>
 	 */
 	public function install_theme_complete_actions( $install_actions ) {
 		if ( isset( $install_actions['preview'] ) ) {

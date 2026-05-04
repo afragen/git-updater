@@ -337,7 +337,7 @@ class REST_API {
 	/**
 	 * Return deprecation notice.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function deprecated() {
 		$namespace = self::$namespace;
@@ -359,7 +359,7 @@ class REST_API {
 	/**
 	 * Return current REST namespace.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function get_namespace() {
 		return [ 'namespace' => self::$namespace ];
@@ -370,7 +370,7 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_remote_repo_data( WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
@@ -432,7 +432,7 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array|WP_Error
+	 * @return array<string, mixed>|WP_Error
 	 */
 	public function get_api_data( WP_REST_Request $request ) {
 		$slug = $request->get_param( 'slug' );
@@ -589,7 +589,7 @@ class REST_API {
 	 *
 	 * @param WP_REST_Request $request REST API response.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_additions_api_data( WP_REST_Request $request ) {
 		$api_data   = [];
@@ -618,7 +618,7 @@ class REST_API {
 	/**
 	 * Get Additions data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_additions_data() {
 		$additions = get_site_option( 'git_updater_additions', [] );

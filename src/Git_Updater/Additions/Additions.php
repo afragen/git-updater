@@ -27,7 +27,7 @@ class Additions {
 	 * Holds array of plugin/theme headers to add to Git Updater.
 	 *
 	 * @access public
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	public $add_to_git_updater;
 
@@ -36,9 +36,9 @@ class Additions {
 	 *
 	 * @access public
 	 *
-	 * @param string $config The repo config.
-	 * @param array  $repos  The repos to pull from.
-	 * @param string $type   The plugin type ('plugin' or 'theme').
+	 * @param array<int, array<string, mixed>> $config The repo config.
+	 * @param array<string, mixed>             $repos  The repos to pull from.
+	 * @param string                           $type   The plugin type ('plugin' or 'theme').
 	 *
 	 * @return bool
 	 */
@@ -59,9 +59,9 @@ class Additions {
 	 * @access public
 	 * @uses   Fragen\Git_Updater\Additions::add_to_git_updater()
 	 *
-	 * @param array  $config The repo config.
-	 * @param array  $repos  The repos to pull from.
-	 * @param string $type   The plugin type ('plugin' or 'theme').
+	 * @param array<int, array<string, mixed>> $config The repo config.
+	 * @param array<string, mixed>             $repos  The repos to pull from.
+	 * @param string                           $type   The plugin type ('plugin' or 'theme').
 	 *
 	 * @return void
 	 */
@@ -114,7 +114,7 @@ class Additions {
 	/**
 	 * Add home_url() as element of addition
 	 *
-	 * @param array $config Array of config data.
+	 * @param array<int, array<string, mixed>> $config Array of config data.
 	 *
 	 * @return void
 	 */
@@ -134,9 +134,9 @@ class Additions {
 	 * Remove duplicate $options to unique values.
 	 * Caches created in Fragen\Git_Updater\Federation::load_additions().
 	 *
-	 * @param array $options Array of Additions options.
+	 * @param array<int, array<string, mixed>> $options Array of Additions options.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function deduplicate( $options ) {
 		if ( empty( $options ) ) {

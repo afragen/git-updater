@@ -49,7 +49,7 @@ parameters:
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Git_Updater/API/API.php
@@ -151,19 +151,13 @@ parameters:
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_asset\(\) should return array\|string but returns false\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_asset\(\) should return array\<string, mixed\>\|string but returns false\.$#'
 			identifier: return.type
 			count: 2
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_assets\(\) should return array but returns false\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_assets\(\) should return array\<string, mixed\> but returns false\.$#'
 			identifier: return.type
 			count: 2
 			path: src/Git_Updater/API/API.php
@@ -175,7 +169,7 @@ parameters:
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:parse_release_asset\(\) should return array\|string\|WP_Error but returns stdClass\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:parse_release_asset\(\) should return array\<string, mixed\>\|string\|WP_Error but returns stdClass\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/API/API.php
@@ -295,43 +289,37 @@ parameters:
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Call to function is_wp_error\(\) with array\|stdClass will always evaluate to false\.$#'
+			message: '#^Call to function is_wp_error\(\) with array\<string, mixed\>\|stdClass will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_assets\(\) should return array but returns bool\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_assets\(\) should return array\<string, mixed\> but returns bool\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_contents\(\) should return array but returns bool\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_contents\(\) should return array\<string, mixed\> but returns bool\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:parse_branch_response\(\) should return array but returns stdClass\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:parse_branch_response\(\) should return array\<string, array\<string, string\>\> but returns stdClass\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:ratelimit_reset\(\) should return int but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Git_Updater/API/GitHub_API.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:ratelimit_reset\(\) should return int but returns string\.$#'
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:ratelimit_reset\(\) should return int\|void but returns string\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/API/GitHub_API.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\|stdClass\)\: bool\)\|null, Closure\(mixed\)\: void given\.$#'
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string, mixed\>\|stdClass\)\: bool\)\|null, Closure\(mixed\)\: void given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Git_Updater/API/GitHub_API.php
@@ -409,12 +397,6 @@ parameters:
 			path: src/Git_Updater/Add_Ons.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Add_Ons\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Add_Ons.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -469,32 +451,20 @@ parameters:
 			path: src/Git_Updater/Additions/Additions.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Additions\\Additions\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Additions/Additions.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
 			path: src/Git_Updater/Additions/Additions.php
 
 		-
-			message: '#^Parameter \#1 \$config of method Fragen\\Git_Updater\\Additions\\Additions\:\:add_headers\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Git_Updater/Additions/Additions.php
-
-		-
-			message: '#^Parameter \#1 \$config of method Fragen\\Git_Updater\\Additions\\Additions\:\:add_source\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Git_Updater/Additions/Additions.php
-
-		-
 			message: '#^Call to function is_array\(\) with string\|null will always evaluate to false\.$#'
 			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Additions/Repo_List_Table.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Additions\\Repo_List_Table\:\:get_bulk_actions\(\) should return array\<string, string\> but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: src/Git_Updater/Additions/Repo_List_Table.php
 
@@ -507,6 +477,12 @@ parameters:
 		-
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
+			count: 1
+			path: src/Git_Updater/Additions/Settings.php
+
+		-
+			message: '#^Parameter \#1 \$options of method Fragen\\Git_Updater\\Additions\\Additions\:\:deduplicate\(\) expects array\<int, array\<string, mixed\>\>, array\<string, mixed\> given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Git_Updater/Additions/Settings.php
 
@@ -535,7 +511,7 @@ parameters:
 			path: src/Git_Updater/Base.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
+			message: '#^Action callback returns array\<string, mixed\>\|WP_Error but should not return anything\.$#'
 			identifier: return.void
 			count: 1
 			path: src/Git_Updater/Base.php
@@ -579,12 +555,6 @@ parameters:
 		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
-			count: 1
-			path: src/Git_Updater/Base.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\Base\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Git_Updater/Base.php
 
@@ -691,12 +661,6 @@ parameters:
 			path: src/Git_Updater/Bootstrap.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Bootstrap\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Bootstrap.php
-
-		-
 			message: '#^Method Fragen\\Git_Updater\\Bootstrap\:\:rename_on_activation\(\) should return bool\|void but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
@@ -741,12 +705,6 @@ parameters:
 		-
 			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
 			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\Branch\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Git_Updater/Branch.php
 
@@ -841,12 +799,6 @@ parameters:
 			path: src/Git_Updater/GU_Freemius.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\GU_Freemius\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/GU_Freemius.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -909,12 +861,6 @@ parameters:
 		-
 			message: '#^Function gu_fs not found\.$#'
 			identifier: function.notFound
-			count: 1
-			path: src/Git_Updater/GU_Upgrade.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\GU_Upgrade\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Git_Updater/GU_Upgrade.php
 
@@ -997,12 +943,6 @@ parameters:
 			path: src/Git_Updater/Init.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Init\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Init.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1065,12 +1005,6 @@ parameters:
 		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
-			count: 1
-			path: src/Git_Updater/Install.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\Install\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Git_Updater/Install.php
 
@@ -1159,8 +1093,8 @@ parameters:
 			path: src/Git_Updater/Language_Pack.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Language_Pack\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
+			message: '#^Method Fragen\\Git_Updater\\Language_Pack\:\:run\(\) with return type void returns false but should not return anything\.$#'
+			identifier: return.void
 			count: 1
 			path: src/Git_Updater/Language_Pack.php
 
@@ -1225,12 +1159,6 @@ parameters:
 			path: src/Git_Updater/Messages.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Messages\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Messages.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1285,12 +1213,6 @@ parameters:
 			path: src/Git_Updater/Plugin.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Plugin\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Plugin.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1309,7 +1231,7 @@ parameters:
 			path: src/Git_Updater/Plugin.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array given\.$#'
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array\<string, string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Git_Updater/Plugin.php
@@ -1387,25 +1309,25 @@ parameters:
 			path: src/Git_Updater/REST/REST_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/REST/REST_API.php
-
-		-
 			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:flush_repo_cache\(\) should return stdClass but returns array\<string, string\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/REST/REST_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\|WP_Error but returns object\{error\: string, rate_limit\: array\|WP_Error\}&stdClass\.$#'
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_additions_data\(\) should return array\<string, mixed\> but returns array\<int, array\<string, mixed\>\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Git_Updater/REST/REST_API.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\|WP_Error but returns object\{error\: string\}&stdClass\.$#'
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\<string, mixed\>\|WP_Error but returns object\{error\: string, rate_limit\: array\<string, mixed\>\|WP_Error\}&stdClass\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\<string, mixed\>\|WP_Error but returns object\{error\: string\}&stdClass\.$#'
 			identifier: return.type
 			count: 3
 			path: src/Git_Updater/REST/REST_API.php
@@ -1501,12 +1423,6 @@ parameters:
 			path: src/Git_Updater/REST/Rest_Update.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\REST\\Rest_Update\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/REST/Rest_Update.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1573,7 +1489,7 @@ parameters:
 			path: src/Git_Updater/REST/Rest_Update.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(array\)\: mixed\)\|null, ''strip_tags'' given\.$#'
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(array\<int, string\>\)\: mixed\)\|null, ''strip_tags'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Git_Updater/REST/Rest_Upgrader_Skin.php
@@ -1623,12 +1539,6 @@ parameters:
 		-
 			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
 			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Readme_Parser.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\Readme_Parser\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Git_Updater/Readme_Parser.php
 
@@ -1693,12 +1603,6 @@ parameters:
 			path: src/Git_Updater/Remote_Management.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Remote_Management\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Remote_Management.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1759,12 +1663,6 @@ parameters:
 			path: src/Git_Updater/Settings.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Settings\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Settings.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1779,12 +1677,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$auth_required Array of authentication requirements\.\)\: Unexpected token "static", expected variable at offset 90 on line 5$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Settings.php
-
-		-
-			message: '#^Parameter \#1 \$subtab of method Fragen\\Git_Updater\\Settings\:\:add_hidden_settings_sections\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Git_Updater/Settings.php
 
@@ -1831,8 +1723,8 @@ parameters:
 			path: src/Git_Updater/Theme.php
 
 		-
-			message: '#^Call to function is_object\(\) with array will always evaluate to false\.$#'
-			identifier: function.impossibleType
+			message: '#^Call to function is_object\(\) with stdClass will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Git_Updater/Theme.php
 
@@ -1855,12 +1747,6 @@ parameters:
 			path: src/Git_Updater/Theme.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Theme\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Git_Updater/Theme.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1879,7 +1765,7 @@ parameters:
 			path: src/Git_Updater/Theme.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array given\.$#'
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array\<string, string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Git_Updater/Theme.php
@@ -1894,12 +1780,6 @@ parameters:
 			message: '#^Call to function is_wp_error\(\) with stdClass will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 2
-			path: src/Git_Updater/WP_CLI/CLI_Integration.php
-
-		-
-			message: '#^Cannot use array destructuring on string\.$#'
-			identifier: offsetAccess.nonArray
-			count: 1
 			path: src/Git_Updater/WP_CLI/CLI_Integration.php
 
 		-

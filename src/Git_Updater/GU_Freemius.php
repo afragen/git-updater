@@ -34,7 +34,7 @@ class GU_Freemius {
 	/**
 	 * Freemius integration.
 	 *
-	 * @return array|void
+	 * @return void
 	 */
 	public function init() {
 		if ( ! function_exists( 'gu_fs' ) ) {
@@ -143,9 +143,9 @@ class GU_Freemius {
 	/**
 	 * Set extensions default to true.
 	 *
-	 * @param array $permissions Array of opt-in permissions.
+	 * @param array<int, array<string, mixed>> $permissions Array of opt-in permissions.
 	 *
-	 * @return array
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function permission_list( $permissions ) {
 		foreach ( $permissions as $key => $permission ) {

@@ -30,7 +30,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Repository assets.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private $assets;
 
@@ -48,7 +48,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Return parsed readme.txt as array.
 	 *
-	 * @return array $data
+	 * @return array<string, mixed> $data
 	 */
 	public function parse_data() {
 		$data = [];
@@ -67,9 +67,9 @@ class Readme_Parser extends Parser {
 	/**
 	 * Sanitize contributors.
 	 *
-	 * @param array $users Array of users.
+	 * @param array<int, string> $users Array of users.
 	 *
-	 * @return array
+	 * @return array<int, string>
 	 */
 	protected function sanitize_contributors( $users ) {
 		return $users;
@@ -78,9 +78,9 @@ class Readme_Parser extends Parser {
 	/**
 	 * Create contributor data.
 	 *
-	 * @param array $users Array of users.
+	 * @param array<int, string> $users Array of users.
 	 *
-	 * @return array $contributors
+	 * @return array<string, mixed> $contributors
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
@@ -100,9 +100,9 @@ class Readme_Parser extends Parser {
 	/**
 	 * Converts FAQ from dictionary list to h4 style.
 	 *
-	 * @param array $data Array of parsed readme data.
+	 * @param array<string, mixed> $data Array of parsed readme data.
 	 *
-	 * @return array $data
+	 * @return array<string, mixed> $data
 	 */
 	public function faq_as_h4( $data ) {
 		if ( empty( $data['faq'] ) ) {
@@ -120,10 +120,10 @@ class Readme_Parser extends Parser {
 	/**
 	 * Converts wp.org readme section items to h4 style.
 	 *
-	 * @param string $section Readme section.
-	 * @param array  $data    Array of parsed readme data.
+	 * @param string               $section Readme section.
+	 * @param array<string, mixed> $data    Array of parsed readme data.
 	 *
-	 * @return array $data
+	 * @return array<string, mixed> $data
 	 */
 	public function readme_section_as_h4( $section, $data ) {
 		if ( empty( $data['sections'][ $section ] ) || str_contains( $data['sections'][ $section ], '<h4>' ) ) {
@@ -140,9 +140,9 @@ class Readme_Parser extends Parser {
 	/**
 	 * Create ordered list for screenshots.
 	 *
-	 * @param  array $data Array of parsed readme data.
+	 * @param  array<string, mixed> $data Array of parsed readme data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function screenshots_as_list( $data ) {
 		if ( empty( $data['screenshots'] ) ) {

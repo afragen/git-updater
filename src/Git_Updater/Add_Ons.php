@@ -40,6 +40,8 @@ class Add_Ons {
 
 	/**
 	 * Load needed action/filter hooks.
+	 *
+	 * @return void
 	 */
 	public function load_hooks() {
 		add_action( 'admin_init', [ $this, 'addons_page_init' ] );
@@ -51,6 +53,8 @@ class Add_Ons {
 
 	/**
 	 * Adds Remote Management tab to Settings page.
+	 *
+	 * @return void
 	 */
 	public function add_settings_tabs() {
 		$install_tabs = [ 'git_updater_addons' => esc_html__( 'Add-Ons', 'git-updater' ) ];
@@ -76,6 +80,7 @@ class Add_Ons {
 	 * @uses 'gu_add_admin_page' action hook
 	 *
 	 * @param string $tab    Tab name.
+	 * @return void
 	 */
 	public function add_admin_page( $tab ) {
 		if ( 'git_updater_addons' === $tab ) {
@@ -95,6 +100,8 @@ class Add_Ons {
 
 	/**
 	 * Settings for Add Ons.
+	 *
+	 * @return void
 	 */
 	public function addons_page_init() {
 		register_setting(
@@ -138,7 +145,7 @@ class Add_Ons {
 	 * @param object|\WP_Error $result Response object or WP_Error.
 	 * @param string           $action The action being taken.
 	 * @param object           $args   API arguments.
-	 * @return array|object The original result or the modified result as an object.
+	 * @return array<string, mixed>|object The original result or the modified result as an object.
 	 */
 	public function plugins_api( $result, $action, $args ) {
 		if ( isset( $args->slug ) && in_array( $args->slug, static::$addons, true ) ) {
@@ -178,7 +185,7 @@ class Add_Ons {
 	 *
 	 * The results are cached.
 	 *
-	 * @return array An array of API results.
+	 * @return array<string, mixed> An array of API results.
 	 */
 	public function get_addon_api_results() {
 		$api_results = $this->get_repo_cache( 'gu_addon_api_results', false );

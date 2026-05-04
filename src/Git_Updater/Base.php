@@ -44,28 +44,28 @@ class Base {
 	/**
 	 * Variable for holding extra theme and plugin headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	public static $extra_headers = [];
 
 	/**
 	 * Holds the values to be used in the fields callbacks.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	public static $options;
 
 	/**
 	 * Holds git server types.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	public static $git_servers = [ 'github' => 'GitHub' ];
 
 	/**
 	 * Holds extra repo header types.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	protected static $extra_repo_headers = [
 		'Languages' => 'Languages',
@@ -75,7 +75,7 @@ class Base {
 	/**
 	 * Holds an array of installed git APIs.
 	 *
-	 * @var array
+	 * @var array<string, bool>
 	 */
 	public static $installed_apis = [ 'github_api' => true ];
 
@@ -119,6 +119,8 @@ class Base {
 
 	/**
 	 * Set boolean for installed API classes.
+	 *
+	 * @return void
 	 */
 	protected function set_installed_apis() {
 		/**
@@ -184,6 +186,8 @@ class Base {
 
 	/**
 	 * Performs actual plugin metadata fetching.
+	 *
+	 * @return void
 	 */
 	public function get_meta_plugins() {
 		Singleton::get_instance( 'Plugin', $this )->get_remote_plugin_meta();
@@ -191,6 +195,8 @@ class Base {
 
 	/**
 	 * Performs actual theme metadata fetching.
+	 *
+	 * @return void
 	 */
 	public function get_meta_themes() {
 		Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
@@ -200,6 +206,8 @@ class Base {
 	 * Run background processes.
 	 * Piggyback on built-in update function to get metadata.
 	 * Set update transients for remote management.
+	 *
+	 * @return void
 	 */
 	public function background_update() {
 		add_action( 'wp_update_plugins', [ $this, 'get_meta_plugins' ] );
@@ -216,6 +224,7 @@ class Base {
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
+	 * @return void
 	 */
 	public function set_options_filter() {
 		/**
@@ -241,7 +250,7 @@ class Base {
 	/**
 	 * Make and return extra headers.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function add_extra_headers() {
 		$gu_extra_headers = [
@@ -276,7 +285,8 @@ class Base {
 	/**
 	 * Runs on wp-cron job to get remote repo meta in background.
 	 *
-	 * @param array $batches Cron event args, array of repo objects.
+	 * @param array<int, stdClass> $batches Cron event args, array of repo objects.
+	 * @return void
 	 */
 	public function run_cron_batch( array $batches ) {
 		foreach ( $batches as $repo ) {
@@ -357,6 +367,7 @@ class Base {
 	 * Set default values for plugin/theme.
 	 *
 	 * @param string $type (plugin|theme).
+	 * @return void
 	 */
 	protected function set_defaults( $type ) {
 		if ( ! isset( $this->$type->slug ) ) {
@@ -444,7 +455,7 @@ class Base {
 	 * @param string      $source        File path of $source.
 	 * @param string      $remote_source File path of $remote_source.
 	 * @param WP_Upgrader $upgrader      An Upgrader object.
-	 * @param array       $hook_extra    Array of hook data.
+	 * @param array<string, mixed> $hook_extra    Array of hook data.
 	 *
 	 * @return string|WP_Error
 	 */
@@ -571,7 +582,7 @@ class Base {
 	 * @param string $type            plugin|theme.
 	 * @param bool   $branch_switcher Boolean for using branch switcher, default is false.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
 		global $wp_version;
@@ -645,10 +656,10 @@ class Base {
 	/**
 	 * Add git host based icons.
 	 *
-	 * @param array  $links Row meta action links.
+	 * @param array<int, string> $links Row meta action links.
 	 * @param string $file  Plugin or theme file.
 	 *
-	 * @return array $links
+	 * @return array<int, string> $links
 	 */
 	public function row_meta_icons( $links, $file ) {
 		$icon = $this->get_git_icon( $file, false );

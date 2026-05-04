@@ -36,9 +36,10 @@ class CLI extends WP_CLI_Command {
 	 *
 	 *     wp git-updater cache delete
 	 *
-	 * @param array $args Array of arguments.
+	 * @param array<int, string> $args Array of arguments.
 	 *
 	 * @subcommand cache
+	 * @return void
 	 */
 	public function cache( $args ) {
 		list($action) = $args;
@@ -60,6 +61,7 @@ class CLI extends WP_CLI_Command {
 	 *     wp git-updater reset-api-key
 	 *
 	 * @subcommand reset-api-key
+	 * @return void
 	 */
 	public function reset_api_key() {
 		delete_site_option( 'git_updater_api_key' );

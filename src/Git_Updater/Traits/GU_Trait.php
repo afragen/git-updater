@@ -65,6 +65,8 @@ trait GU_Trait {
 
 	/**
 	 * Load site options.
+	 *
+	 * @return void
 	 */
 	final public function load_options() {
 		Singleton::get_instance( 'Fragen\Git_Updater\GU_Upgrade', $this )->convert_ghu_options_to_gu_options();
@@ -76,7 +78,7 @@ trait GU_Trait {
 	/**
 	 * Check current page.
 	 *
-	 * @param  array $pages Array of pages.
+	 * @param  list<string> $pages Array of pages.
 	 * @return bool
 	 */
 	final public function is_current_page( array $pages ) {
@@ -127,7 +129,7 @@ trait GU_Trait {
 	 * @param string|bool $repo Repo name or false.
 	 * @param bool        $timeout false to always return cache, true to use timeout.
 	 *
-	 * @return array|bool The repo cache. False if expired.
+	 * @return array<string, mixed>|false The repo cache. False if expired.
 	 */
 	final public function get_repo_cache( $repo = false, $timeout = true ) {
 		$cache_key = $this->get_cache_key( $repo );
@@ -201,8 +203,8 @@ trait GU_Trait {
 	 * Use presence of 'meta' in cache to determine if cache data is present and complete.
 	 * If not present, do not extend or set timeout to avoid saving incomplete data.
 	 *
-	 * @param array    $remote_headers Remote headers data array.
-	 * @param stdClass $repo    Repo data object.
+	 * @param array<string, string> $remote_headers Remote headers data array.
+	 * @param stdClass              $repo           Repo data object.
 	 *
 	 * @return bool
 	 */
@@ -349,7 +351,7 @@ trait GU_Trait {
 	/**
 	 * Returns static class variable $error_code.
 	 *
-	 * @return array self::$error_code
+	 * @return array<string, mixed>
 	 */
 	final public function get_error_codes() {
 		return $this->get_class_vars( 'API\API', 'error_code' );
@@ -481,9 +483,9 @@ trait GU_Trait {
 	/**
 	 * Sanitize each setting field as needed.
 	 *
-	 * @param array $input Contains all settings fields as array keys.
+	 * @param array<string, string> $input Contains all settings fields as array keys.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final public function sanitize( $input ) {
 		$new_input = [];
@@ -498,7 +500,7 @@ trait GU_Trait {
 	 * Return an array of the running git servers.
 	 *
 	 * @access public
-	 * @return array $gits
+	 * @return array<int, string>
 	 */
 	final public function get_running_git_servers() {
 		$plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
@@ -579,7 +581,7 @@ trait GU_Trait {
 	 *
 	 * @param string $repo_header Repo URL.
 	 *
-	 * @return array $header
+	 * @return array<string, string|null>
 	 */
 	final protected function parse_header_uri( $repo_header ) {
 		$header_parts         = parse_url( $repo_header );
@@ -646,7 +648,7 @@ trait GU_Trait {
 	 * @param string                                                                        $slug            Repo slug.
 	 * @param \Fragen\Git_Updater\Base|\Fragen\Git_Updater\Plugin|\Fragen\Git_Updater\Theme $upgrader_object Upgrader object.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final protected function get_repo_slugs( string $slug, $upgrader_object = null ): array {
 		$arr = [];
@@ -688,7 +690,7 @@ trait GU_Trait {
 	 *
 	 * @param string $type plugin|theme.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	final public function get_headers( $type ) {
 		$default_plugin_headers = [
@@ -734,10 +736,10 @@ trait GU_Trait {
 	/**
 	 * Take remote file contents as string or array and parse and reduce headers.
 	 *
-	 * @param string|array $contents File contents or array of file headers.
-	 * @param string       $type     plugin|theme.
+	 * @param string|array<string, string> $contents File contents or array of file headers.
+	 * @param string                       $type     plugin|theme.
 	 *
-	 * @return array $all_headers Reduced array of all headers.
+	 * @return array<string, string>
 	 */
 	final public function get_file_headers( $contents, $type ) {
 		$all_headers = [];
@@ -770,11 +772,11 @@ trait GU_Trait {
 	/**
 	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
-	 * @param array $header       Array of repo data.
-	 * @param array $headers      Array of repo header data.
-	 * @param array $header_parts Array of header parts.
+	 * @param array<string, mixed>  $header       Array of repo data.
+	 * @param array<string, mixed>  $headers      Array of repo header data.
+	 * @param array<int, string>    $header_parts Array of header parts.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	final public function parse_extra_headers( $header, $headers, $header_parts ) {
 		$extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
@@ -896,8 +898,8 @@ trait GU_Trait {
 	 * Check if a filter effecting a checkbox is set elsewhere.
 	 * Adds value '-1' without saving so that checkbox is checked and disabled.
 	 *
-	 * @param  array $options Site options.
-	 * @return array
+	 * @param  array<string, mixed> $options Site options.
+	 * @return array<string, mixed>
 	 */
 	private function modify_options( $options ) {
 		// Remove any inadvertently saved options with value -1.
@@ -930,7 +932,7 @@ trait GU_Trait {
 	 *
 	 * @param stdClass $repo Repository object.
 	 *
-	 * @return array
+	 * @return array<string, string|null>
 	 */
 	final protected function get_repo_requirements( $repo ) {
 		$requires      = [
@@ -957,9 +959,9 @@ trait GU_Trait {
 	 *
 	 * @global \WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array|WP_Error $result Result from WP_Upgrader::install_package().
-
-	 * @return bool
+	 * @param array<string, mixed>|WP_Error $result Result from WP_Upgrader::install_package().
+	 *
+	 * @return array<string, mixed>|WP_Error
 	 */
 	final public function delete_upgrade_source( $result ) {
 		global $wp_filesystem;
@@ -1007,7 +1009,7 @@ trait GU_Trait {
 	 *
 	 * Display ratelimit reset time in minutes.
 	 *
-	 * @return array|WP_Error
+	 * @return array<string, mixed>|WP_Error
 	 */
 	final public function get_github_rate_limit_headers() {
 		$auth_header = Singleton::get_instance( 'Fragen\Git_Updater\API\API', $this )->add_auth_header( [], 'https://api.github.com/rate_limit' );

@@ -46,21 +46,21 @@ class Theme {
 	/**
 	 * Hold config array.
 	 *
-	 * @var array
+	 * @var array<string, stdClass>
 	 */
 	private $config;
 
 	/**
 	 * Holds extra headers.
 	 *
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private static $extra_headers;
 
 	/**
 	 * Holds options.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private static $options;
 
@@ -91,7 +91,7 @@ class Theme {
 	/**
 	 * Returns an array of configurations for the known themes.
 	 *
-	 * @return array
+	 * @return array<string, stdClass>
 	 */
 	public function get_theme_configs() {
 		return $this->config;
@@ -103,6 +103,7 @@ class Theme {
 	 * This action results in the extra headers not being added.
 	 *
 	 * @link https://github.com/afragen/github-updater/issues/586
+	 * @return void
 	 */
 	private function delete_current_theme_cache() {
 		$cache_hash = md5( get_stylesheet_directory() );
@@ -113,7 +114,7 @@ class Theme {
 	 * Get details of Git-sourced themes from those that are installed.
 	 * Populates variable array.
 	 *
-	 * @return array Indexed array of associative arrays of theme details.
+	 * @return array<string, stdClass> Indexed array of associative arrays of theme details.
 	 */
 	protected function get_theme_meta() {
 		$this->delete_current_theme_cache();
@@ -238,6 +239,8 @@ class Theme {
 	/**
 	 * Get remote theme meta to populate $config theme objects.
 	 * Calls to remote APIs to get data.
+	 *
+	 * @return void
 	 */
 	public function get_remote_theme_meta() {
 		$themes = [];
@@ -287,6 +290,8 @@ class Theme {
 
 	/**
 	 * Load pre-update filters.
+	 *
+	 * @return void
 	 */
 	public function load_pre_filters() {
 		if ( ! is_multisite() ) {
@@ -346,10 +351,11 @@ class Theme {
 	 * Add custom theme update row, from /wp-admin/includes/update.php
 	 * Display update details or rollback links for multisite installation.
 	 *
-	 * @param string $theme_key Theme slug.
-	 * @param array  $theme     Array of theme data.
+	 * @param string               $theme_key Theme slug.
+	 * @param array<string, mixed> $theme     Array of theme data.
 	 *
 	 * @author Seth Carstens
+	 * @return void
 	 */
 	public function wp_theme_update_row( $theme_key, $theme ) {
 		$current = get_site_transient( 'update_themes' );
@@ -437,6 +443,7 @@ class Theme {
 	 * @author @grappler
 	 *
 	 * @param string $theme_key Theme slug.
+	 * @return void
 	 */
 	public function remove_after_theme_row( $theme_key ) {
 		$themes = $this->get_theme_configs();
@@ -451,9 +458,9 @@ class Theme {
 	 *
 	 * @author Seth Carstens
 	 *
-	 * @param array $prepared_themes Array of prepared themes.
+	 * @param array<string, mixed> $prepared_themes Array of prepared themes.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function customize_theme_update_html( $prepared_themes ) {
 		foreach ( (array) $this->config as $theme ) {
@@ -567,9 +574,9 @@ class Theme {
 	 * Hook into site_transient_update_themes to update.
 	 * Finds newest tag and compares to current tag.
 	 *
-	 * @param array $transient Theme update transient.
+	 * @param stdClass $transient Theme update transient.
 	 *
-	 * @return array|stdClass
+	 * @return stdClass
 	 */
 	public function update_site_transient( $transient ) {
 		// needed to fix PHP 7.4 warning.

@@ -3,7 +3,7 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
-    level: 5
+    level: 6
     bootstrapFiles:
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
     paths:

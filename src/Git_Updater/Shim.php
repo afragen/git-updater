@@ -114,6 +114,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string $dir The path to the directory for which the opcode cache is to be cleared.
+	 * @return void
 	 */
 	function wp_opcache_invalidate_directory( $dir ) {
 		global $wp_filesystem;

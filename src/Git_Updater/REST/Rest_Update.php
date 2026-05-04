@@ -49,7 +49,7 @@ class Rest_Update {
 	/**
 	 * Holds sanitized $_REQUEST.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $request;
 
@@ -79,6 +79,7 @@ class Rest_Update {
 	 * @param string $tag         Plugin tag/branch.
 	 *
 	 * @throws UnexpectedValueException Plugin not found or not updatable.
+	 * @return void
 	 */
 	public function update_plugin( $plugin_slug, $tag = 'master' ) {
 		$plugin           = null;
@@ -157,6 +158,7 @@ class Rest_Update {
 	 * @param string $tag        Theme tag/branch.
 	 *
 	 * @throws UnexpectedValueException Theme not found or not updatable.
+	 * @return void
 	 */
 	public function update_theme( $theme_slug, $tag = 'master' ) {
 		$theme = null;
@@ -217,6 +219,8 @@ class Rest_Update {
 
 	/**
 	 * Is there an error?
+	 *
+	 * @return bool
 	 */
 	public function is_error() {
 		return $this->upgrader_skin->error;
@@ -224,6 +228,8 @@ class Rest_Update {
 
 	/**
 	 * Get messages during update.
+	 *
+	 * @return array<int, string>
 	 */
 	public function get_messages() {
 		return $this->upgrader_skin->messages;
@@ -240,6 +246,7 @@ class Rest_Update {
 	 * @param WP_REST_Request|null $request Request data from update webhook.
 	 *
 	 * @throws UnexpectedValueException Under multiple bad or missing params.
+	 * @return void
 	 */
 	public function process_request( $request = null ) {
 		$args = $this->process_request_data( $request );
@@ -331,9 +338,9 @@ class Rest_Update {
 	/**
 	 * Process request data from REST API or RESTful endpoint.
 	 *
-	 * @param WP_REST_Request|array $request Request data from update webhook.
+	 * @param WP_REST_Request|array<string, mixed>|null $request Request data from update webhook.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function process_request_data( $request = null ) {
 		if ( $request instanceof WP_REST_Request ) {
@@ -404,6 +411,8 @@ class Rest_Update {
 
 	/**
 	 * Sets the source of the webhook to $_GET variable.
+	 *
+	 * @return void
 	 */
 	private function get_webhook_source() {
 		switch ( $_SERVER ) {
@@ -432,8 +441,9 @@ class Rest_Update {
 	 * 128 == JSON_PRETTY_PRINT
 	 * 64 == JSON_UNESCAPED_SLASHES
 	 *
-	 * @param array $response Response array.
-	 * @param int   $code     Response code.
+	 * @param array<string, mixed> $response Response array.
+	 * @param int                  $code     Response code.
+	 * @return void
 	 */
 	public function log_exit( $response, $code ) {
 		$json_encode_flags = 128 | 64;

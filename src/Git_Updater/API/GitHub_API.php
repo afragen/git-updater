@@ -113,7 +113,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return array of release assets.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_release_assets() {
 		return $this->get_api_release_assets( 'github', '/repos/:owner/:repo/releases' );
@@ -122,7 +122,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of repository assets.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_repo_assets() {
 		return $this->get_remote_api_assets( 'github', '/repos/:owner/:repo/contents/:path' );
@@ -131,7 +131,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of files at repo root.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_repo_contents() {
 		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );
@@ -248,10 +248,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Calculate and store time until rate limit reset.
 	 *
-	 * @param array  $response HTTP headers.
-	 * @param string $repo     Repo name.
+	 * @param array<string, mixed> $response HTTP headers.
+	 * @param string               $repo     Repo name.
 	 *
-	 * @return int
+	 * @return int|void
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		$headers = wp_remote_retrieve_headers( $response );
@@ -273,9 +273,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
-	 * @param stdClass|array $response Response from API call.
+	 * @param stdClass|array<string, mixed> $response Response from API call.
 	 *
-	 * @return stdClass|array $arr Array of tag numbers, object is error.
+	 * @return stdClass|list<string>
 	 */
 	public function parse_tag_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -298,9 +298,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of meta variables.
 	 *
-	 * @param stdClass|array $response Response from API call.
+	 * @param stdClass|array<string, mixed> $response Response from API call.
 	 *
-	 * @return array $arr Array of meta variables.
+	 * @return array<string, mixed>
 	 */
 	public function parse_meta_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -327,9 +327,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array with changelog in base64.
 	 *
-	 * @param stdClass|array $response Response from API call.
+	 * @param stdClass|array<string, mixed> $response Response from API call.
 	 *
-	 * @return array $arr Array of changes in base64.
+	 * @return array<string, string>
 	 */
 	public function parse_changelog_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -353,7 +353,7 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @param stdClass $response API response.
 	 *
-	 * @return array Array of branch data.
+	 * @return array<string, array<string, string>>
 	 */
 	public function parse_branch_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -388,10 +388,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param stdClass|array $response  Response from API call.
-	 * @param array          $repo_type Array of repo data.
+	 * @param stdClass|array<string, mixed> $response  Response from API call.
+	 * @param array<string, mixed>          $repo_type Array of repo data.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	protected function parse_tags( $response, $repo_type ) {
 		$tags          = [];
@@ -420,9 +420,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote root files/dirs.
 	 *
-	 * @param stdClass|array $response Response from API call.
+	 * @param stdClass|array<string, mixed> $response Response from API call.
 	 *
-	 * @return array
+	 * @return array{files: list<string>, dirs: list<string>}
 	 */
 	protected function parse_contents_response( $response ) {
 		$files = [];
@@ -446,9 +446,9 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse remote assets directory.
 	 *
-	 * @param stdClass|array $response Response from API call.
+	 * @param stdClass|array<string, mixed> $response Response from API call.
 	 *
-	 * @return stdClass|array
+	 * @return stdClass|array<string, string>
 	 */
 	protected function parse_asset_dir_response( $response ) {
 		$assets = [];
@@ -474,7 +474,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add settings for GitHub Personal Access Token.
 	 *
-	 * @param array $auth_required Array of authentication data.
+	 * @param array<string, bool> $auth_required Array of authentication data.
 	 *
 	 * @return void
 	 */
@@ -514,7 +514,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add values for individual repo add_setting_field().
 	 *
-	 * @return mixed
+	 * @return array<string, mixed>
 	 */
 	public function add_repo_setting_field() {
 		$setting_field['page']            = 'git_updater_github_install_settings';
@@ -529,6 +529,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Print the GitHub text.
+	 *
+	 * @return void
 	 */
 	public function print_section_github_info() {
 		esc_html_e( 'Enter your GitHub Access Token. Leave empty for public repositories.', 'git-updater' );
@@ -536,6 +538,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Print the GitHub Personal Access Token text.
+	 *
+	 * @return void
 	 */
 	public function print_section_github_access_token() {
 		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
@@ -547,6 +551,7 @@ class GitHub_API extends API implements API_Interface {
 	 * Add remote install settings fields.
 	 *
 	 * @param string $type plugin|theme.
+	 * @return void
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -560,6 +565,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Add subtab to Settings page.
+	 *
+	 * @return void
 	 */
 	private function add_settings_subtab() {
 		add_filter(
@@ -572,6 +579,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * GitHub Access Token for remote install.
+	 *
+	 * @return void
 	 */
 	public function github_access_token() {
 		?>
@@ -588,10 +597,10 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers Array of headers.
-	 * @param array $install Array of install data.
+	 * @param array<string, string> $headers Array of headers.
+	 * @param array<string, mixed>  $install Array of install data.
 	 *
-	 * @return mixed
+	 * @return array<string, mixed>
 	 */
 	public function remote_install( $headers, $install ) {
 		$options['github_access_token'] = static::$options['github_access_token'] ?? null;

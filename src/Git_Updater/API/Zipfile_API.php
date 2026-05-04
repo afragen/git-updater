@@ -42,9 +42,9 @@ class Zipfile_API {
 	/**
 	 * Add API as git server.
 	 *
-	 * @param array $git_servers Array of git servers.
+	 * @param array<string, string> $git_servers Array of git servers.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function set_git_servers( $git_servers ) {
 		return array_merge( $git_servers, [ 'zipfile' => 'Zipfile' ] );
@@ -53,9 +53,9 @@ class Zipfile_API {
 	/**
 	 * Add API data to $installed_apis.
 	 *
-	 * @param array $installed_apis Array of installed APIs.
+	 * @param array<string, bool> $installed_apis Array of installed APIs.
 	 *
-	 * @return array
+	 * @return array<string, bool>
 	 */
 	public function set_installed_apis( $installed_apis ) {
 		return array_merge( $installed_apis, [ 'zipfile_api' => true ] );
@@ -64,10 +64,10 @@ class Zipfile_API {
 	/**
 	 * Set remote installation data for specific API.
 	 *
-	 * @param array $install Array of remote installation data.
-	 * @param array $headers Array of repository header data.
+	 * @param array<string, mixed>  $install Array of remote installation data.
+	 * @param array<string, string> $headers Array of repository header data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function set_remote_install_data( $install, $headers ) {
 		if ( 'zipfile' === $install['git_updater_api'] ) {
@@ -81,6 +81,7 @@ class Zipfile_API {
 	 * Add remote install settings fields.
 	 *
 	 * @param string $type plugin|theme.
+	 * @return void
 	 */
 	public function add_install_settings_fields( $type ) {
 		add_settings_field(
@@ -94,6 +95,8 @@ class Zipfile_API {
 
 	/**
 	 * Set repo slug for remote install.
+	 *
+	 * @return void
 	 */
 	public function zipfile_slug() {
 		?>
@@ -110,10 +113,10 @@ class Zipfile_API {
 	/**
 	 *  Add remote install feature, create endpoint.
 	 *
-	 * @param array $headers Array of headers.
-	 * @param array $install Array of install data.
+	 * @param array<string, string> $headers Array of headers.
+	 * @param array<string, mixed>  $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return array<string, mixed>
 	 */
 	public function remote_install( $headers, $install ) {
 		$install['download_link']            = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];

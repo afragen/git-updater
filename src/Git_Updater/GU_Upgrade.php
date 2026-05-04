@@ -35,6 +35,8 @@ final class GU_Upgrade {
 
 	/**
 	 * Run update check against db_version.
+	 *
+	 * @return void
 	 */
 	public function run() {
 		$options    = $this->get_class_vars( 'Base', 'options' );
@@ -58,7 +60,7 @@ final class GU_Upgrade {
 	/**
 	 * Save $db_version on update.
 	 *
-	 * @param array $options Array of Git Updater options.
+	 * @param array<string, mixed> $options Array of Git Updater options.
 	 *
 	 * @return void
 	 */
@@ -72,6 +74,8 @@ final class GU_Upgrade {
 
 	/**
 	 * Flush caches and delete cached options.
+	 *
+	 * @return void
 	 */
 	private function delete_flush_cache() {
 		$this->delete_all_cached_data();

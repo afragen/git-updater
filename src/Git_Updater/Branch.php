@@ -30,7 +30,7 @@ class Branch {
 	/**
 	 * Holds Git Updater options
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	protected static $options;
 
@@ -80,7 +80,7 @@ class Branch {
 	 * @param string   $type plugin|theme.
 	 * @param stdClass $repo Repo object.
 	 *
-	 * @return array $rollback Rollback transient.
+	 * @return array<string, mixed>|stdClass $rollback Rollback transient.
 	 */
 	public function set_rollback_transient( $type, $repo ) {
 		$repo_api = Singleton::get_instance( 'API\API', $this )->get_repo_api( $repo->git, $repo );
@@ -166,7 +166,8 @@ class Branch {
 	 *
 	 * @access public
 	 *
-	 * @param array $install Array of install data.
+	 * @param array<string, mixed> $install Array of install data.
+	 * @return void
 	 */
 	public function set_branch_on_install( $install ) {
 		$this->set_repo_cache( 'current_branch', $install['git_updater_branch'], $install['repo'] );
@@ -351,8 +352,8 @@ class Branch {
 	/**
 	 * Make branch switch row.
 	 *
-	 * @param array $data   Parameters for creating branch switching row.
-	 * @param array $config Array of repo objects.
+	 * @param array<string, mixed>  $data   Parameters for creating branch switching row.
+	 * @param array<string, stdClass> $config Array of repo objects.
 	 *
 	 * @return void
 	 */

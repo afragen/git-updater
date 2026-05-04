@@ -107,6 +107,8 @@ class Messages {
 	/**
 	 * Create error message for 403 error.
 	 * GitHub uses 403 error as API rate limit max out.
+	 *
+	 * @return void
 	 */
 	public function show_ratelimit_error_message() {
 		$_ratelimit = false;
@@ -153,6 +155,8 @@ class Messages {
 	 * Create error message or 401 (Authentication Error) error.
 	 * Usually 401 as private repo with no token set or incorrect user/pass.
 	 * GitHub uses a 404 error as an authentication error.
+	 *
+	 * @return void
 	 */
 	public function show_authentication_error_message() {
 		$_authentication = false;
@@ -181,6 +185,8 @@ class Messages {
 
 	/**
 	 * Generate error message for WP_Error.
+	 *
+	 * @return void
 	 */
 	public function show_wp_error() {
 		?>
@@ -197,6 +203,8 @@ class Messages {
 
 	/**
 	 * Generate information message when waiting for WP-Cron to finish.
+	 *
+	 * @return void
 	 */
 	public function waiting() {
 		?>
@@ -212,6 +220,8 @@ class Messages {
 
 	/**
 	 * Generate information message to purchase.
+	 *
+	 * @return void
 	 */
 	public function get_license() {
 		if ( ( ! gu_fs()->is_not_paying() )
