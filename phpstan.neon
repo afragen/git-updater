@@ -4,6 +4,8 @@ includes:
 
 parameters:
     level: 5
+    bootstrapFiles:
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
     paths:
         - src
         - git-updater.php

@@ -1,2 +1,1915 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^@param stdClass\|null \$repo_api does not accept actual type of parameter\: Fragen\\Git_Updater\\API\\GitHub_API\|null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\API\\API\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to an undefined method Fragen\\Git_Updater\\API\\API\:\:parse_asset_dir_response\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to an undefined method Fragen\\Git_Updater\\API\\API\:\:parse_branch_response\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to an undefined method Fragen\\Git_Updater\\API\\API\:\:parse_contents_response\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to an undefined method Fragen\\Git_Updater\\API\\API\:\:parse_meta_response\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to an undefined method Fragen\\Git_Updater\\API\\API\:\:parse_tag_response\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_scalar\(\) with array\|stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with ''''\|''0''\|array\{\} will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with 0\|0\.0\|''''\|''0''\|array\{\}\|bool\|stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with stdClass\|true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Cannot call method add_endpoints\(\) on stdClass\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Cannot call method add_repo_setting_field\(\) on stdClass\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:api\(\) should return bool\|stdClass but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_asset\(\) should return array\|string but returns false\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_api_release_assets\(\) should return array but returns false\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:get_local_info\(\) should return string\|null but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\API\:\:parse_release_asset\(\) should return array\|string\|WP_Error but returns stdClass\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 3
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Offset ''timeout'' does not exist on array\{headers\: WpOrg\\Requests\\Utility\\CaseInsensitiveDictionary, body\: string, response\: array\{code\: int, message\: string\}, cookies\: array\<int, WP_Http_Cookie\>, filename\: string\|null, http_response\: WP_HTTP_Requests_Response\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Offset non\-falsy\-string does not exist on string\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Offset non\-falsy\-string on string in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(bool `true` will exit this function early, default will not\.\)\: Unexpected token "`true`", expected variable at offset 94 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this     Class object\.\)\: Unexpected token "\$this", expected variable at offset 239 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this Current API object\.\)\: Unexpected token "\$this", expected variable at offset 148 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this\-\>type    Repo object\.\)\: Unexpected token "\$this", expected variable at offset 148 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_body expects array\|WP_Error, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Parameter \#1 \$response of method Fragen\\Git_Updater\\API\\API\:\:validate_response\(\) expects stdClass, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: ''readme\.txt'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Parameter \#4 \$timeout of method Fragen\\Git_Updater\\API\\API\:\:set_repo_cache\(\) expects bool\|string, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 4
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Static property Fragen\\Git_Updater\\API\\API\:\:\$method \(null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 10
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''file'' and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between bool and string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Variable \$response in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Git_Updater/API/API.php
+
+		-
+			message: '#^Argument of an invalid type stdClass supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with array\|stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_assets\(\) should return array but returns bool\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:get_repo_contents\(\) should return array but returns bool\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:parse_branch_response\(\) should return array but returns stdClass\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:ratelimit_reset\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\API\\GitHub_API\:\:ratelimit_reset\(\) should return int but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\|stdClass\)\: bool\)\|null, Closure\(mixed\)\: void given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^Static property Fragen\\Git_Updater\\API\\API\:\:\$method \(null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Git_Updater/API/GitHub_API.php
+
+		-
+			message: '#^@param stdClass \$obj does not accept actual type of parameter\: \$this\(Fragen\\Git_Updater\\API\\Language_Pack_API\)\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Git_Updater/API/Language_Pack_API.php
+
+		-
+			message: '#^Static property Fragen\\Git_Updater\\API\\API\:\:\$method \(null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Git_Updater/API/Language_Pack_API.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Add_Ons\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Add_Ons\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Add_Ons\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Add_Ons\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Add_Ons\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Add_Ons.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Additions\\Additions\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Additions\\Additions\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Additions\\Additions\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Additions\\Additions\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Additions\\Additions\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Parameter \#1 \$config of method Fragen\\Git_Updater\\Additions\\Additions\:\:add_headers\(\) expects array, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Parameter \#1 \$config of method Fragen\\Git_Updater\\Additions\\Additions\:\:add_source\(\) expects array, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Additions/Additions.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|null will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Additions/Repo_List_Table.php
+
+		-
+			message: '#^Parameter \#1 \$args of method WP_List_Table\:\:set_pagination_args\(\) expects array\{total_items\?\: int, total_pages\?\: int, per_page\?\: int\}, array\{total_items\: int\<1, max\>, per_page\: int\<1, max\>, total_pages\: float\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Additions/Repo_List_Table.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Git_Updater/Additions/Settings.php
+
+		-
+			message: '#^Parameter \#3 \$args of function register_setting expects array\{type\?\: string, label\?\: string, description\?\: string, sanitize_callback\?\: callable\(\)\: mixed, show_in_rest\?\: array\|bool, default\?\: mixed\}, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Additions/Settings.php
+
+		-
+			message: '#^@param array \$additions does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Base\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Base\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Call to function is_null\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Base\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Base\:\:get_remote_repo_meta\(\) should return bool\|stdClass but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$git_servers Array of git servers\.\)\: Unexpected token "static", expected variable at offset 85 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$installed_apis Array of installed APIs\.\)\: Unexpected token "static", expected variable at offset 81 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Parameter \#1 \$repo of class Fragen\\Git_Updater\\Language_Pack constructor expects Fragen\\Git_Updater\\Plugin\|Fragen\\Git_Updater\\Theme, stdClass given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between bool and string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Bootstrap\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Bootstrap\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Bootstrap\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Bootstrap\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Call to new WP_Dismiss_Notice\(\) on a separate line has no effect\.$#'
+			identifier: new.resultUnused
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Function FAIR\\Default_Repo\\get_default_repo_domain not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Bootstrap\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Bootstrap\:\:rename_on_activation\(\) should return bool\|void but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Bootstrap.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Branch\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Branch\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Branch\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(/stdClass \$repo\)\: Unexpected token "/stdClass", expected type at offset 221 on line 8$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(string    \$this\-\>tag     Branch or tag for rollback\.\)\: Unexpected token "\$this", expected variable at offset 259 on line 9$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Branch.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\GU_Freemius\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\GU_Freemius\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\GU_Freemius\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\GU_Freemius\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Call to static method instance\(\) on an unknown class FS_Plugin_Updater\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'
+			identifier: function.inner
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\GU_Freemius\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Parameter \$gu_fs of method Fragen\\Git_Updater\\GU_Freemius\:\:remove_fs_plugin_updater_hooks\(\) has invalid type Freemius\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Git_Updater/GU_Freemius.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\GU_Upgrade\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\GU_Upgrade\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 8
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\GU_Upgrade\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\GU_Upgrade\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\GU_Upgrade\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Parameter \#2 \$version2 of function version_compare expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Property Fragen\\Git_Updater\\GU_Upgrade\:\:\$db_version \(int\) does not accept default value of type string\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: src/Git_Updater/GU_Upgrade.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Init\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Init\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Init\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Init\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between bool and string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Init.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Install\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Install\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Install\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Install\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array self\:\:\$install Array of installation data\.\)\: Unexpected token "self", expected variable at offset 100 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Parameter \#3 \$callback of function add_settings_section expects callable\(\)\: mixed, array\{\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between bool and string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Install.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Language_Pack\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Language_Pack\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Plugin\|Fragen\\Git_Updater\\Theme\:\:\$languages\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Language_Pack\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Language_Pack\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Language_Pack\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Language_Pack.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Messages\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Messages\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Messages\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Messages\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Function gu_fs not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Messages\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Git_Updater/Messages.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Plugin\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Call to function is_object\(\) with stdClass will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Plugin\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array \$this\-\>config Array of repository objects\.\)\: Unexpected token "\$this", expected variable at offset 72 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(int\|string\)\: bool\)\|null, Closure\(mixed\)\: \(int\|string\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Variable \$all_headers might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/Plugin.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\REST\\REST_API\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\REST\\REST_API\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\REST\\REST_API\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\REST\\REST_API\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with array will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Class Fragen\\Git_Updater\\REST\\Rest_Update referenced with incorrect case\: Fragen\\Git_Updater\\REST\\REST_Update\.$#'
+			identifier: class.nameCase
+			count: 4
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:flush_repo_cache\(\) should return stdClass but returns array\<string, string\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\|WP_Error but returns object\{error\: string, rate_limit\: array\|WP_Error\}&stdClass\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\REST_API\:\:get_api_data\(\) should return array\|WP_Error but returns object\{error\: string\}&stdClass\.$#'
+			identifier: return.type
+			count: 3
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/REST/REST_API.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\REST\\Rest_Update\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\REST\\Rest_Update\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\REST\\Rest_Update\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\REST\\Rest_Update\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$branch\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$committish\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$key\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$plugin\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$tag\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function compact\(\) contains possibly undefined variable \$theme\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\REST\\Rest_Update\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Parameter \#2 \$redirect of function activate_plugin expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$branch might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$committish might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$current_branch might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$deprecated might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$key might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$override might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$plugin might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$tag might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Variable \$theme might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
+			path: src/Git_Updater/REST/Rest_Update.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(array\)\: mixed\)\|null, ''strip_tags'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/REST/Rest_Upgrader_Skin.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Readme_Parser\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Readme_Parser\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Readme_Parser\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Readme_Parser\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Readme_Parser\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Readme_Parser.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Remote_Management\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Remote_Management\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Remote_Management\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Remote_Management\:\:\$options\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Remote_Management\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of function uniqid expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Remote_Management.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Settings\:\:\$base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Settings\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Access to an undefined static property Fragen\\Git_Updater\\Settings\:\:\$extra_headers\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Instanceof between \$this\(Fragen\\Git_Updater\\Settings\) and Fragen\\Git_Updater\\Messages will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Settings\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$auth_required Array of authentication requirements\.\)\: Unexpected token "static", expected variable at offset 90 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Parameter \#1 \$subtab of method Fragen\\Git_Updater\\Settings\:\:add_hidden_settings_sections\(\) expects array, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Parameter \#2 \$repo of method Fragen\\Git_Updater\\Settings\:\:override_dot_org\(\) expects stdClass, array\<string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Parameter \#2 \$title of function add_settings_field expects string, null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Unsafe access to private property Fragen\\Git_Updater\\Settings\:\:\$git_hosts through static\:\:\.$#'
+			identifier: staticClassAccess.privateProperty
+			count: 2
+			path: src/Git_Updater/Settings.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Git_Updater/Shim.php
+
+		-
+			message: '#^Access to an undefined property Fragen\\Git_Updater\\Theme\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 7
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Call to function is_array\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Call to function is_object\(\) with array will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Method Fragen\\Git_Updater\\Theme\:\:delete_upgrade_source\(\) should return bool but returns array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(array \$this\-\>config Array of repository objects\.\)\: Unexpected token "\$this", expected variable at offset 72 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(array\<string\>\)\: bool\)\|null, Closure\(mixed\)\: array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(int\|string\)\: bool\)\|null, Closure\(mixed\)\: \(int\|string\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Theme.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with stdClass will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 2
+			path: src/Git_Updater/WP_CLI/CLI_Integration.php
+
+		-
+			message: '#^Cannot use array destructuring on string\.$#'
+			identifier: offsetAccess.nonArray
+			count: 1
+			path: src/Git_Updater/WP_CLI/CLI_Integration.php
+
+		-
+			message: '#^Parameter \#1 \$errors \(stdClass\) of method Fragen\\Git_Updater\\WP_CLI\\CLI_Plugin_Installer_Skin\:\:error\(\) should be compatible with parameter \$errors \(string\|WP_Error\) of method WP_Upgrader_Skin\:\:error\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: src/Git_Updater/WP_CLI/CLI_Integration.php
+
+		-
+			message: '#^Parameter \#1 \$errors \(stdClass\) of method Fragen\\Git_Updater\\WP_CLI\\CLI_Theme_Installer_Skin\:\:error\(\) should be compatible with parameter \$errors \(string\|WP_Error\) of method WP_Upgrader_Skin\:\:error\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: src/Git_Updater/WP_CLI/CLI_Integration.php
