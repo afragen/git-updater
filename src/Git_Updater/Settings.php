@@ -509,7 +509,7 @@ class Settings {
 	/**
 	 * Check current saved options and unset if repos not present.
 	 *
-	 * @param array<string, mixed>  $gu_options_keys Array of options keys.
+	 * @param array<string, mixed>    $gu_options_keys Array of options keys.
 	 * @param array<string, stdClass> $gu_tokens       Array of Git Updater repos.
 	 * @return void
 	 */

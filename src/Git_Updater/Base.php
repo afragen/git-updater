@@ -224,6 +224,7 @@ class Base {
 	 * Hook requires return of associative element array.
 	 * $key === repo-name and $value === token
 	 * e.g.  array( 'repo-name' => 'access_token' );
+	 *
 	 * @return void
 	 */
 	public function set_options_filter() {
@@ -452,9 +453,9 @@ class Base {
 	 *
 	 * @since WordPress 4.4.0 The $hook_extra parameter became available.
 	 *
-	 * @param string      $source        File path of $source.
-	 * @param string      $remote_source File path of $remote_source.
-	 * @param WP_Upgrader $upgrader      An Upgrader object.
+	 * @param string               $source        File path of $source.
+	 * @param string               $remote_source File path of $remote_source.
+	 * @param WP_Upgrader          $upgrader      An Upgrader object.
 	 * @param array<string, mixed> $hook_extra    Array of hook data.
 	 *
 	 * @return string|WP_Error
@@ -657,7 +658,7 @@ class Base {
 	 * Add git host based icons.
 	 *
 	 * @param array<int, string> $links Row meta action links.
-	 * @param string $file  Plugin or theme file.
+	 * @param string             $file  Plugin or theme file.
 	 *
 	 * @return array<int, string> $links
 	 */

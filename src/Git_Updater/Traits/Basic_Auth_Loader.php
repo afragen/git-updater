@@ -167,10 +167,10 @@ trait Basic_Auth_Loader {
 	/**
 	 * Get $slug for authentication header credentials.
 	 *
-	 * @param array<string, mixed>  $headers Array of headers from parse_url().
-	 * @param array<string, mixed>  $repos   Array of repositories.
-	 * @param string                $url     URL being called by API.
-	 * @param array<string, mixed>  $options Array of site options.
+	 * @param array<string, mixed> $headers Array of headers from parse_url().
+	 * @param array<string, mixed> $repos   Array of repositories.
+	 * @param string               $url     URL being called by API.
+	 * @param array<string, mixed> $options Array of site options.
 	 *
 	 * @return bool|string
 	 */

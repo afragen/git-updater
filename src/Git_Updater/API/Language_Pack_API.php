@@ -65,9 +65,9 @@ class Language_Pack_API extends API {
 	/**
 	 * Get language-pack.json from appropriate host.
 	 *
-	 * @param string               $git      (github).
+	 * @param string                $git      (github).
 	 * @param array<string, string> $headers  Array of headers.
-	 * @param mixed                $response API response.
+	 * @param mixed                 $response API response.
 	 *
 	 * @return array|bool|mixed
 	 */

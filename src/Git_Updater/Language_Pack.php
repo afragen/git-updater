@@ -63,7 +63,7 @@ class Language_Pack {
 	 */
 	public function run() {
 		if ( null === $this->repo ) {
-			return false;
+			return;
 		}
 
 		$headers = $this->parse_header_uri( $this->repo->languages );

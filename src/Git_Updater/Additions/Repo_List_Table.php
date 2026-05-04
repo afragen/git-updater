@@ -112,8 +112,8 @@ class Repo_List_Table extends WP_List_Table {
 	 * For more detailed insight into how columns are handled, take a look at
 	 * WP_List_Table::single_row_columns()
 	 *
-	 * @param  array<string, mixed>  $item        A singular item (one full row's worth of data).
-	 * @param  string $column_name The name/slug of the column to be processed.
+	 * @param  array<string, mixed> $item        A singular item (one full row's worth of data).
+	 * @param  string               $column_name The name/slug of the column to be processed.
 	 * @return string Text or HTML to be placed inside the column <td>
 	 **************************************************************************/
 	public function column_default( $item, $column_name ) {
@@ -265,7 +265,7 @@ class Repo_List_Table extends WP_List_Table {
 			'delete' => esc_html__( 'Delete', 'git-updater' ),
 		];
 
-		// return $actions;
+		return $actions;
 	}
 
 	/** ************************************************************************

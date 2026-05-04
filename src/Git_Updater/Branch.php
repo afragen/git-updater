@@ -352,7 +352,7 @@ class Branch {
 	/**
 	 * Make branch switch row.
 	 *
-	 * @param array<string, mixed>  $data   Parameters for creating branch switching row.
+	 * @param array<string, mixed>    $data   Parameters for creating branch switching row.
 	 * @param array<string, stdClass> $config Array of repo objects.
 	 *
 	 * @return void

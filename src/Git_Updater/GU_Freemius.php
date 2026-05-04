@@ -31,6 +31,7 @@ if ( ! defined( 'WPINC' ) ) {
 class GU_Freemius {
 	use GU_Trait;
 
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	/**
 	 * Freemius integration.
 	 *
@@ -114,6 +115,7 @@ class GU_Freemius {
 			define( 'FS__RESOLVE_CLONE_AS', 'long_term_duplicate' );
 		}
 	}
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 
 	/**
 	 * Add custom plugin icon to update notice.

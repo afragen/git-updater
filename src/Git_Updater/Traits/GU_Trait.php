@@ -78,7 +78,7 @@ trait GU_Trait {
 	/**
 	 * Check current page.
 	 *
-	 * @param  list<string> $pages Array of pages.
+	 * @param  string[] $pages Array of pages.
 	 * @return bool
 	 */
 	final public function is_current_page( array $pages ) {
@@ -772,9 +772,9 @@ trait GU_Trait {
 	/**
 	 * Parse Enterprise, Languages, Release Asset, and CI Job headers for plugins and themes.
 	 *
-	 * @param array<string, mixed>  $header       Array of repo data.
-	 * @param array<string, mixed>  $headers      Array of repo header data.
-	 * @param array<int, string>    $header_parts Array of header parts.
+	 * @param array<string, mixed> $header       Array of repo data.
+	 * @param array<string, mixed> $headers      Array of repo header data.
+	 * @param array<int, string>   $header_parts Array of header parts.
 	 *
 	 * @return array<string, mixed>
 	 */
