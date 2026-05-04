@@ -22,3 +22,4 @@ vendor/php-stubs
 
 node_modules/
 package-lock.json
+.phpunit.result.cache
