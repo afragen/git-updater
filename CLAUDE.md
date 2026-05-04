@@ -46,7 +46,12 @@ Tests use `@wordpress/env` (wp-env) — a Docker-based WordPress environment. Th
 
 The `WP_TESTS_PHPUNIT_POLYFILLS_PATH` is passed explicitly in the npm scripts to point to the vendored `yoast/phpunit-polyfills`.
 
-PHPStan is configured at level 5 (`phpstan.neon`) with pre-existing errors tracked in `phpstan-baseline.neon`. The baseline should be regenerated with `composer phpstan-baseline` when intentional changes alter the error set.
+PHPStan is configured at level 6 (`phpstan.neon`) with pre-existing errors tracked in `phpstan-baseline.neon`. The baseline should be regenerated with `composer phpstan-baseline` when intentional changes alter the error set.
+
+All `missingType.iterableValue` and `missingType.return` errors have been resolved across the codebase. When adding new methods or properties, follow the established PHPDoc conventions:
+- Use specific array value types: `array<string, mixed>`, `array<int, string>`, `array<string, stdClass>`, etc. — never bare `array`
+- Add `@return void` to every method that returns nothing
+- Repo config collections are typed `array<string, stdClass>`; option arrays are `array<string, mixed>`
 
 ## Architecture
 
