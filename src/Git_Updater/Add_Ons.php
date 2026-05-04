@@ -188,31 +188,33 @@ class Add_Ons {
 	 * @return array<string, mixed> An array of API results.
 	 */
 	public function get_addon_api_results() {
-		$api_results = $this->get_repo_cache( 'gu_addon_api_results', false );
+		$cache = $this->get_repo_cache( 'gu_addon_api_results' );
 
-		if ( false === $api_results ) {
-			$api_results = [];
-			$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
-
-			foreach ( self::$addons as $addon ) {
-				$response = wp_remote_post( "{$api_url}{$addon}" );
-
-				if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
-					continue;
-				}
-
-				$response = json_decode( wp_remote_retrieve_body( $response ), true );
-				if ( isset( $response['error'] ) ) {
-					continue;
-				}
-
-				$api_results[ $addon ] = $response;
-			}
-			if ( count( $api_results ) === count( self::$addons ) ) {
-				$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+7 days' );
-			}
+		if ( false !== $cache && isset( $cache['gu_addon_api_results'] ) ) {
+			return $cache['gu_addon_api_results'];
 		}
 
-		return isset( $api_results['timeout'] ) ? $api_results['gu_addon_api_results'] : $api_results;
+		$api_results = [];
+		$api_url     = 'https://git-updater.com/wp-json/git-updater/v1/plugins-api/?slug=';
+
+		foreach ( self::$addons as $addon ) {
+			$response = wp_remote_post( "{$api_url}{$addon}" );
+
+			if ( 200 !== wp_remote_retrieve_response_code( $response ) || is_wp_error( $response ) ) {
+				continue;
+			}
+
+			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( isset( $response['error'] ) ) {
+				continue;
+			}
+
+			$api_results[ $addon ] = $response;
+		}
+		if ( count( $api_results ) === count( self::$addons ) ) {
+			$this->set_repo_cache( 'gu_addon_api_results', $api_results, 'gu_addon_api_results', '+7 days' );
+		}
+
+		return $api_results;
 	}
 }
