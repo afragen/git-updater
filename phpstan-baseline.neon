@@ -463,12 +463,6 @@ parameters:
 			path: src/Git_Updater/Additions/Repo_List_Table.php
 
 		-
-			message: '#^Method Fragen\\Git_Updater\\Additions\\Repo_List_Table\:\:get_bulk_actions\(\) should return array\<string, string\> but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Git_Updater/Additions/Repo_List_Table.php
-
-		-
 			message: '#^Parameter \#1 \$args of method WP_List_Table\:\:set_pagination_args\(\) expects array\{total_items\?\: int, total_pages\?\: int, per_page\?\: int\}, array\{total_items\: int\<1, max\>, per_page\: int\<1, max\>, total_pages\: float\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1089,12 +1083,6 @@ parameters:
 		-
 			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
 			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Language_Pack.php
-
-		-
-			message: '#^Method Fragen\\Git_Updater\\Language_Pack\:\:run\(\) with return type void returns false but should not return anything\.$#'
-			identifier: return.void
 			count: 1
 			path: src/Git_Updater/Language_Pack.php
 
