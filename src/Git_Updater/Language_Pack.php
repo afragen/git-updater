@@ -13,6 +13,7 @@ namespace Fragen\Git_Updater;
 use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\API\Language_Pack_API;
+use stdClass;
 
 /**
  * Exit if called directly.
@@ -28,9 +29,9 @@ class Language_Pack {
 	use GU_Trait;
 
 	/**
-	 * Variable containing the plugin/theme object.
+	 * Variable containing the plugin/theme repo data object.
 	 *
-	 * @var Plugin|Theme
+	 * @var stdClass
 	 */
 	protected $repo;
 
@@ -44,7 +45,7 @@ class Language_Pack {
 	/**
 	 * Language_Pack constructor.
 	 *
-	 * @param Plugin|Theme      $repo Plugin/Theme object.
+	 * @param stdClass          $repo Plugin/Theme repo data object.
 	 * @param Language_Pack_API $api  Language_Pack_API object.
 	 */
 	public function __construct( $repo, Language_Pack_API $api ) {

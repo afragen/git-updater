@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\Base;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionObject;
@@ -21,8 +22,21 @@ use WP_Error;
 
 /**
  * Trait GU_Trait
+ *
+ * @property-static array<string, string> $extra_headers Extra plugin/theme file headers.
+ * @property-static array<string, mixed>  $options       Plugin options array.
  */
 trait GU_Trait {
+
+	/**
+	 * @var Base
+	 */
+	protected $base;
+
+	/**
+	 * @var stdClass
+	 */
+	public $type;
 
 	/**
 	 * Holds the plugin basename.
