@@ -127,7 +127,7 @@ class Base {
 		 * Filter to add active git servers.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$git_servers Array of git servers.
+		 * @param array<string, string> $git_servers Array of git servers.
 		 */
 		static::$git_servers = apply_filters( 'gu_git_servers', static::$git_servers );
 
@@ -135,7 +135,7 @@ class Base {
 		 * Filter to add installed APIs.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$installed_apis Array of installed APIs.
+		 * @param array<string, string> $installed_apis Array of installed APIs.
 		 */
 		static::$installed_apis = apply_filters( 'gu_installed_apis', static::$installed_apis );
 	}

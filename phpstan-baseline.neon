@@ -7,12 +7,6 @@ parameters:
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/API/API.php
-
-		-
 			message: '#^Access to an undefined property Fragen\\Git_Updater\\API\\API\:\:\$base\.$#'
 			identifier: property.notFound
 			count: 1
@@ -121,18 +115,6 @@ parameters:
 			path: src/Git_Updater/API/API.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 2
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -195,36 +177,6 @@ parameters:
 		-
 			message: '#^Offset non\-falsy\-string on string in empty\(\) does not exist\.$#'
 			identifier: empty.offset
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool `true` will exit this function early, default will not\.\)\: Unexpected token "`true`", expected variable at offset 94 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this     Class object\.\)\: Unexpected token "\$this", expected variable at offset 239 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this Current API object\.\)\: Unexpected token "\$this", expected variable at offset 148 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/API/API.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(stdClass \$this\-\>type    Repo object\.\)\: Unexpected token "\$this", expected variable at offset 148 on line 6$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Git_Updater/API/API.php
 
@@ -379,20 +331,8 @@ parameters:
 			path: src/Git_Updater/Add_Ons.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Add_Ons.php
-
-		-
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: src/Git_Updater/Add_Ons.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
 			count: 1
 			path: src/Git_Updater/Add_Ons.php
 
@@ -439,18 +379,6 @@ parameters:
 			path: src/Git_Updater/Additions/Additions.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Additions/Additions.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Additions/Additions.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -488,6 +416,12 @@ parameters:
 
 		-
 			message: '#^@param array \$additions does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^@param array\<string, string\> \$installed_apis does not accept actual type of parameter\: array\<string, bool\>\.$#'
 			identifier: parameter.phpDocType
 			count: 1
 			path: src/Git_Updater/Base.php
@@ -535,18 +469,6 @@ parameters:
 			path: src/Git_Updater/Base.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Base.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Base.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -565,26 +487,14 @@ parameters:
 			path: src/Git_Updater/Base.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/Base.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$git_servers Array of git servers\.\)\: Unexpected token "static", expected variable at offset 85 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Base.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$installed_apis Array of installed APIs\.\)\: Unexpected token "static", expected variable at offset 81 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Base.php
-
-		-
 			message: '#^Parameter \#1 \$repo of class Fragen\\Git_Updater\\Language_Pack constructor expects Fragen\\Git_Updater\\Plugin\|Fragen\\Git_Updater\\Theme, stdClass given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Git_Updater/Base.php
+
+		-
+			message: '#^Static property Fragen\\Git_Updater\\Base\:\:\$installed_apis \(array\<string, bool\>\) does not accept array\<string, string\>\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Git_Updater/Base.php
 
@@ -637,18 +547,6 @@ parameters:
 			path: src/Git_Updater/Bootstrap.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Bootstrap.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Bootstrap.php
-
-		-
 			message: '#^Function FAIR\\Default_Repo\\get_default_repo_domain not found\.$#'
 			identifier: function.notFound
 			count: 1
@@ -691,38 +589,8 @@ parameters:
 			path: src/Git_Updater/Branch.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(/stdClass \$repo\)\: Unexpected token "/stdClass", expected type at offset 221 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Branch.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(string    \$this\-\>tag     Branch or tag for rollback\.\)\: Unexpected token "\$this", expected variable at offset 259 on line 9$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Git_Updater/Branch.php
 
@@ -766,18 +634,6 @@ parameters:
 			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
 			identifier: smaller.alwaysFalse
 			count: 2
-			path: src/Git_Updater/GU_Freemius.php
-
-		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/GU_Freemius.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
 			path: src/Git_Updater/GU_Freemius.php
 
 		-
@@ -838,18 +694,6 @@ parameters:
 			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
 			identifier: smaller.alwaysFalse
 			count: 2
-			path: src/Git_Updater/GU_Upgrade.php
-
-		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/GU_Upgrade.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
 			path: src/Git_Updater/GU_Upgrade.php
 
 		-
@@ -919,18 +763,6 @@ parameters:
 			path: src/Git_Updater/Init.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Init.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Init.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -985,18 +817,6 @@ parameters:
 			path: src/Git_Updater/Install.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Install.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Install.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -1005,18 +825,6 @@ parameters:
 		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: src/Git_Updater/Install.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Git_Updater/Install.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array self\:\:\$install Array of installation data\.\)\: Unexpected token "self", expected variable at offset 100 on line 5$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Git_Updater/Install.php
 
@@ -1075,18 +883,6 @@ parameters:
 			path: src/Git_Updater/Language_Pack.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Language_Pack.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Language_Pack.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1126,18 +922,6 @@ parameters:
 			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
 			identifier: smaller.alwaysFalse
 			count: 2
-			path: src/Git_Updater/Messages.php
-
-		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Messages.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
 			path: src/Git_Updater/Messages.php
 
 		-
@@ -1189,33 +973,9 @@ parameters:
 			path: src/Git_Updater/Plugin.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Plugin.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Plugin.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
-			path: src/Git_Updater/Plugin.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/Plugin.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array \$this\-\>config Array of repository objects\.\)\: Unexpected token "\$this", expected variable at offset 72 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 2
 			path: src/Git_Updater/Plugin.php
 
 		-
@@ -1282,18 +1042,6 @@ parameters:
 			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
 			identifier: smaller.alwaysFalse
 			count: 2
-			path: src/Git_Updater/REST/REST_API.php
-
-		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/REST/REST_API.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
 			path: src/Git_Updater/REST/REST_API.php
 
 		-
@@ -1396,18 +1144,6 @@ parameters:
 			message: '#^Comparison operation "\<" between int\<80100, 80599\> and 80100 is always false\.$#'
 			identifier: smaller.alwaysFalse
 			count: 2
-			path: src/Git_Updater/REST/Rest_Update.php
-
-		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/REST/Rest_Update.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
 			path: src/Git_Updater/REST/Rest_Update.php
 
 		-
@@ -1519,18 +1255,6 @@ parameters:
 			path: src/Git_Updater/Readme_Parser.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Readme_Parser.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Readme_Parser.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1573,20 +1297,8 @@ parameters:
 			path: src/Git_Updater/Remote_Management.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Remote_Management.php
-
-		-
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: src/Git_Updater/Remote_Management.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
 			count: 1
 			path: src/Git_Updater/Remote_Management.php
 
@@ -1633,18 +1345,6 @@ parameters:
 			path: src/Git_Updater/Settings.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Settings.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Settings.php
-
-		-
 			message: '#^Instanceof between \$this\(Fragen\\Git_Updater\\Settings\) and Fragen\\Git_Updater\\Messages will always evaluate to false\.$#'
 			identifier: instanceof.alwaysFalse
 			count: 1
@@ -1658,12 +1358,6 @@ parameters:
 
 		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/Settings.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array static\:\:\$auth_required Array of authentication requirements\.\)\: Unexpected token "static", expected variable at offset 90 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Git_Updater/Settings.php
@@ -1723,33 +1417,9 @@ parameters:
 			path: src/Git_Updater/Theme.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/Git_Updater/Theme.php
-
-		-
-			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
-			identifier: phpstanWP.wpConstant.fetch
-			count: 1
-			path: src/Git_Updater/Theme.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
-			path: src/Git_Updater/Theme.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Git_Updater/Theme.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array \$this\-\>config Array of repository objects\.\)\: Unexpected token "\$this", expected variable at offset 72 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 2
 			path: src/Git_Updater/Theme.php
 
 		-

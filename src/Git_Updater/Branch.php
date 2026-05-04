@@ -96,8 +96,8 @@ class Branch {
 		 * @since 10.0.0
 		 *
 		 * @param string    $download_link Download URL.
-		 * @param /stdClass $repo
-		 * @param string    $this->tag     Branch or tag for rollback.
+		 * @param stdClass  $repo
+		 * @param string    $tag           Branch or tag for rollback.
 		 */
 		$download_link = apply_filters( 'gu_post_construct_download_link', $download_link, $repo, $this->tag );
 

@@ -241,7 +241,7 @@ class Plugin {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 
@@ -356,7 +356,7 @@ class Plugin {
 		 * Filter repositories.
 		 *
 		 * @since 10.2.0
-		 * @param array $this->config Array of repository objects.
+		 * @param array<string, stdClass> $config Array of repository objects.
 		 */
 		$config = apply_filters( 'gu_config_pre_process', $this->config );
 

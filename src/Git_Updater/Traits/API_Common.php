@@ -111,7 +111,7 @@ trait API_Common {
 		 * @param stdClass $response API response.
 		 * @param string   $git      Name of git host.
 		 * @param string   $request  Schema of API REST endpoint.
-		 * @param stdClass $this     Class object.
+		 * @param static   $instance Class object.
 		 */
 		$response = apply_filters( 'gu_parse_release_asset', $response, $git, $request, $this );
 

@@ -55,15 +55,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Checks to see if DOING_AJAX.
-	 *
-	 * @return bool
-	 */
-	final public static function is_doing_ajax() {
-		return defined( 'DOING_AJAX' ) && \DOING_AJAX;
-	}
-
-	/**
 	 * Load site options.
 	 *
 	 * @return void
@@ -430,10 +421,10 @@ trait GU_Trait {
 	 * @return bool
 	 */
 	final public function is_private( $repo ) {
-		if ( ! isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
+		if ( ! isset( $repo->remote_version ) && ! wp_doing_ajax() ) {
 			return true;
 		}
-		if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
+		if ( isset( $repo->remote_version ) && ! wp_doing_ajax() ) {
 			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->slug ] );
 		}
 
@@ -624,7 +615,8 @@ trait GU_Trait {
 		 * Filter repo parts from other git hosts.
 		 *
 		 * @since 10.0.0
-		 * @param array $repos Array of repo data.
+		 * @param array  $repos Array of repo data.
+		 * @param string $type  Repository type string.
 		 */
 		$repos = apply_filters( 'gu_get_repo_parts', $repos, $type );
 

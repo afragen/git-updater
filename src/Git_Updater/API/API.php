@@ -257,7 +257,7 @@ class API {
 		 *
 		 * @since 10.0.0
 		 * @param string $response HTTP remote response body.
-		 * @param stdClass $this Current API object.
+		 * @param static $instance Current API object.
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
@@ -288,7 +288,8 @@ class API {
 		 * Filter to add git hosts API data.
 		 *
 		 * @since 10.0.0
-		 * @param array $arr Array of base git host data.
+		 * @param array    $arr  Array of base git host data.
+		 * @param stdClass $type Repo type object.
 		 */
 		$arr = apply_filters( 'gu_api_repo_type_data', $arr, $this->type );
 
@@ -333,7 +334,7 @@ class API {
 		 *
 		 * @since 10.0.0
 		 * @param array    $type          Array or git host data.
-		 * @param stdClass $this->type    Repo object.
+		 * @param stdClass $repo          Repo object.
 		 * @param bool     $download_link Boolean is this a download link.
 		 * @param string   $endpoint      Endpoint to URL.
 		 */
@@ -408,7 +409,7 @@ class API {
 		 * Filters the return value of exit_no_update.
 		 *
 		 * @since 10.0.0
-		 * @param bool `true` will exit this function early, default will not.
+		 * @param bool $always_fetch True will exit this function early, false (default) will not.
 		 */
 		$always_fetch = (bool) apply_filters( 'gu_always_fetch_update', false );
 

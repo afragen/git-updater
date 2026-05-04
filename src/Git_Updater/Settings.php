@@ -139,7 +139,7 @@ class Settings {
 		 * Filters authentication required array.
 		 *
 		 * @since 10.0.0
-		 * @param array static::$auth_required Array of authentication requirements.
+		 * @param array<string, mixed> $auth_required Array of authentication requirements.
 		 */
 		static::$auth_required = apply_filters( 'gu_settings_auth_required', static::$auth_required );
 	}
@@ -376,7 +376,7 @@ class Settings {
 	 * @return void
 	 */
 	public function page_init() {
-		if ( static::is_doing_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			return;
 		}
 

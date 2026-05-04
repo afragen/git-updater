@@ -55,7 +55,7 @@ class Messages {
 			return false;
 		}
 
-		if ( is_admin() && ! static::is_doing_ajax() ) {
+		if ( is_admin() && ! wp_doing_ajax() ) {
 			switch ( $type ) {
 				case is_wp_error( $type ):
 					self::$error_message = $type->get_error_message();

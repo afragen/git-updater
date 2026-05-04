@@ -196,7 +196,7 @@ class Install {
 			 * Filter to create git host specific endpoint.
 			 *
 			 * @since 10.0.0
-			 * @param array self::$install Array of installation data.
+			 * @param array<string, mixed> $install Array of installation data.
 			 * @param array $headers Array of repo header data.
 			 */
 			self::$install = apply_filters( 'gu_install_remote_install', self::$install, $headers );
