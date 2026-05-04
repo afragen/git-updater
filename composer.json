@@ -38,6 +38,8 @@
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3.0.0",
 		"mcaskill/composer-exclude-files": "^4.0",
+		"phpunit/phpunit": "^9.0",
+		"yoast/phpunit-polyfills": "^1.1",
 		"phpstan/phpstan": "^2.0",
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"php-stubs/wp-cli-stubs": "^2.0"
@@ -61,8 +63,15 @@
 	"scripts": {
 		"lint": "@php ./vendor/bin/phpcs .",
 		"format": "@php ./vendor/bin/phpcbf .",
-		"test": "phpunit --config=phpunit.xml",
-		"test-ms": "WP_MULTISITE=1 phpunit --config=phpunit.xml",
+		"test": [
+			"@putenv WP_TESTS_PHPUNIT_POLYFILLS_PATH=vendor/yoast/phpunit-polyfills",
+			"@php ./vendor/bin/phpunit --config=phpunit.xml"
+		],
+		"test-ms": [
+			"@putenv WP_TESTS_PHPUNIT_POLYFILLS_PATH=vendor/yoast/phpunit-polyfills",
+			"@putenv WP_MULTISITE=1",
+			"@php ./vendor/bin/phpunit --config=phpunit.xml"
+		],
 		"phpstan": "@php ./vendor/bin/phpstan analyse --memory-limit=1G",
 		"phpstan-baseline": "@php ./vendor/bin/phpstan analyse --generate-baseline --memory-limit=1G"
 	}
