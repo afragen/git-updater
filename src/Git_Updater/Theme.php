@@ -271,13 +271,13 @@ class Theme {
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
 					add_action(
-					"after_theme_row_{$theme->slug}",
-					function ( $theme_key ) {
-						( new Branch() )->multisite_branch_switcher( $theme_key );
-					},
-					15,
-					1
-				);
+						"after_theme_row_{$theme->slug}",
+						function ( $theme_key ) {
+							( new Branch() )->multisite_branch_switcher( $theme_key );
+						},
+						15,
+						1
+					);
 				}
 			}
 		}

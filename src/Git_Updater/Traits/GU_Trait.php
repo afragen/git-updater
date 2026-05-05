@@ -26,11 +26,15 @@ use WP_Error;
 trait GU_Trait {
 
 	/**
+	 * Holds the Base class instance.
+	 *
 	 * @var Base
 	 */
 	protected $base;
 
 	/**
+	 * Holds the repo type object.
+	 *
 	 * @var stdClass
 	 */
 	public $type;
@@ -292,7 +296,6 @@ trait GU_Trait {
 					$repo->branches = ! $value ? [] : (array) $value;
 					break;
 				case 'release_asset':
-
 					if ( $validate_response->invoke( $repo_api, $value ) ) {
 						break;
 					}
@@ -444,7 +447,7 @@ trait GU_Trait {
 	/**
 	 * Do we override dot org updates?
 	 *
-	 * @param string               $type (plugin|theme).
+	 * @param string                       $type (plugin|theme).
 	 * @param array<string,mixed>|stdClass $repo Repository object.
 	 *
 	 * @return bool

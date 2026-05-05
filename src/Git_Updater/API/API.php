@@ -222,9 +222,12 @@ class API {
 			}
 
 			// If we made it this far API data must be OK, save to avoid extra call above.
-			$cache_entry = [ 'url' => $url, 'body' => wp_remote_retrieve_body( $response ) ];
+			$cache_entry = [
+				'url'  => $url,
+				'body' => wp_remote_retrieve_body( $response ),
+			];
 			$this->set_repo_cache( md5( $url ), $cache_entry, false, false );
-			$response    = $cache_entry;
+			$response = $cache_entry;
 		}
 
 		if ( $cached && ! $response ) {
