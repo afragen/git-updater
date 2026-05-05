@@ -22,9 +22,6 @@ use WP_Error;
 
 /**
  * Trait GU_Trait
- *
- * @property-static array<string, string> $extra_headers Extra plugin/theme file headers.
- * @property-static array<string, mixed>  $options       Plugin options array.
  */
 trait GU_Trait {
 
@@ -438,7 +435,7 @@ trait GU_Trait {
 			return true;
 		}
 		if ( isset( $repo->remote_version ) && ! wp_doing_ajax() ) {
-			return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->slug ] );
+			return ( '0.0.0' === $repo->remote_version ) || ! empty( Base::$options[ $repo->slug ] );
 		}
 
 		return false;
@@ -733,7 +730,7 @@ trait GU_Trait {
 			'UpdateURI'   => 'Update URI',
 		];
 
-		$all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
+		$all_headers = array_merge( ${"default_{$type}_headers"}, Base::$extra_headers );
 
 		return $all_headers;
 	}

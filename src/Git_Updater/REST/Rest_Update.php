@@ -249,8 +249,15 @@ class Rest_Update {
 	 * @return void
 	 */
 	public function process_request( $request = null ) {
-		$args = $this->process_request_data( $request );
-		extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		$args       = $this->process_request_data( $request );
+		$key        = $args['key'] ?? false;
+		$plugin     = $args['plugin'] ?? false;
+		$theme      = $args['theme'] ?? false;
+		$tag        = $args['tag'] ?? 'master';
+		$committish = $args['committish'] ?? false;
+		$branch     = $args['branch'] ?? false;
+		$override   = $args['override'] ?? false;
+		$deprecated = $args['deprecated'] ?? '';
 
 		$start = microtime( true );
 		try {
@@ -344,11 +351,15 @@ class Rest_Update {
 	 */
 	public function process_request_data( $request = null ) {
 		if ( $request instanceof WP_REST_Request ) {
-			$params        = $request->get_params();
-			$slug          = $params['plugin'] ?: $params['theme'];
-			$params['tag'] = $params['tag'] ?: $this->get_primary_branch( $slug );
-			extract( $params ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-			$override   = false === $override ? false : true;
+			$params     = $request->get_params();
+			$slug       = $params['plugin'] ?: $params['theme'];
+			$key        = $params['key'] ?? false;
+			$plugin     = $params['plugin'] ?? false;
+			$theme      = $params['theme'] ?? false;
+			$tag        = $params['tag'] ?: $this->get_primary_branch( $slug );
+			$committish = $params['committish'] ?? false;
+			$branch     = $params['branch'] ?? false;
+			$override   = ! empty( $params['override'] );
 			$deprecated = strpos( $request->get_route(), ( new REST_API() )::$namespace ) ? false : true;
 			if ( $deprecated ) {
 				$this->upgrader_skin->feedback( ( new REST_API() )->deprecated()['error'] );
