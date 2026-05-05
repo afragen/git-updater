@@ -891,7 +891,7 @@ trait GU_Trait {
 		$current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
 
 		$need_release_asset = $switch_master_tag || $current_master_noswitch;
-		$use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
+		$use_release_asset  = ( $this->type->release_asset ?? false ) && '0.0.0' !== ( $this->type->newest_tag ?? '0.0.0' )
 			&& $need_release_asset;
 
 		return $use_release_asset;

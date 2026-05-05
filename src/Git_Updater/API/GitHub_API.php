@@ -80,7 +80,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return bool|void
 	 */
 	public function get_remote_readme() {
-		$this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/:readme' );
+		return $this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/:readme' );
 	}
 
 	/**
