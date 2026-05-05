@@ -143,7 +143,7 @@ class Base {
 	/**
 	 * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
 	 *
-	 * @return bool
+	 * @return void
 	 */
 	public function load() {
 		if ( Singleton::get_instance( 'Init', $this )->can_update() ) {
@@ -152,7 +152,7 @@ class Base {
 		}
 
 		if ( ! static::should_run_on_current_page() ) {
-			return false;
+			return;
 		}
 
 		// Run Git Updater upgrade functions.
@@ -180,8 +180,6 @@ class Base {
 
 		$this->get_meta_plugins();
 		$this->get_meta_themes();
-
-		return true;
 	}
 
 	/**

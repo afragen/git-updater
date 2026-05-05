@@ -26,6 +26,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class API
+ *
+ * @method mixed                                       parse_tag_response( mixed $response )
+ * @method array<string, mixed>                        parse_meta_response( mixed $response )
+ * @method array<string, array<string, string>>        parse_branch_response( mixed $response )
+ * @method array{files: list<string>, dirs: list<string>} parse_contents_response( mixed $response )
+ * @method stdClass|array<string, string>              parse_asset_dir_response( mixed $response )
  */
 class API {
 	use API_Common;
@@ -212,14 +218,13 @@ class API {
 				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
 					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
 				}
-				$response['timeout'] = ! $timeout ? $response['timeout'] : $timeout;
-				$this->set_repo_cache( 'error_cache', $response, $this->type->slug . '_error', "+{$timeout} minutes" );
+				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
 			// If we made it this far API data must be OK, save to avoid extra call above.
-			$response['url'] = $url;
-			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
-			$this->set_repo_cache( md5( $url ), $response, false, false );
+			$cache_entry = [ 'url' => $url, 'body' => wp_remote_retrieve_body( $response ) ];
+			$this->set_repo_cache( md5( $url ), $cache_entry, false, false );
+			$response    = $cache_entry;
 		}
 
 		if ( $cached && ! $response ) {
@@ -241,8 +246,8 @@ class API {
 		}
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
-		if ( 'file' === self::$method && isset( $response['timeout'] ) && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
+		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$response_body = is_array( $response ) ? json_decode( wp_remote_retrieve_body( $response ) ) : null;
 			if ( null !== $response_body && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
 				$log_message = "Git Updater Error: {$name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
@@ -255,13 +260,15 @@ class API {
 		 * Filter HTTP GET remote response body.
 		 *
 		 * @since 10.0.0
-		 * @param string $response HTTP remote response body.
-		 * @param static $instance Current API object.
+		 * @param array<string, mixed> $response HTTP remote response array.
+		 * @param static               $instance Current API object.
 		 */
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
-		$response = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : $response;
-		$body     = wp_remote_retrieve_body( $response );
+		if ( ! empty( $response[ md5( $url ) ] ) && is_array( $response[ md5( $url ) ] ) ) {
+			$response = $response[ md5( $url ) ];
+		}
+		$body = wp_remote_retrieve_body( $response );
 
 		return is_null( json_decode( $body ) ) ? $body : json_decode( $body );
 	}
