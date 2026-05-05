@@ -367,7 +367,7 @@ class Install {
 			$type,
 			/* translators: variable is 'Plugin' or 'Theme' */
 			sprintf( esc_html__( 'Git Updater Install %s', 'git-updater' ), $repo_type ),
-			[],
+			'__return_false',
 			'git_updater_install_' . $type
 		);
 

@@ -122,7 +122,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of repository assets.
 	 *
-	 * @return array<string, mixed>
+	 * @return bool
 	 */
 	public function get_repo_assets() {
 		return $this->get_remote_api_assets( 'github', '/repos/:owner/:repo/contents/:path' );
@@ -131,7 +131,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of files at repo root.
 	 *
-	 * @return array<string, mixed>
+	 * @return bool
 	 */
 	public function get_repo_contents() {
 		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );
@@ -251,12 +251,12 @@ class GitHub_API extends API implements API_Interface {
 	 * @param array<string, mixed> $response HTTP headers.
 	 * @param string               $repo     Repo name.
 	 *
-	 * @return int|void
+	 * @return string|void
 	 */
 	public static function ratelimit_reset( $response, $repo ) {
 		$headers = wp_remote_retrieve_headers( $response );
 		if ( empty( $headers ) ) {
-			return 60;
+			return '60';
 		}
 		$data = $headers->getAll();
 		if ( isset( $data['x-ratelimit-reset'] ) ) {
@@ -309,7 +309,7 @@ class GitHub_API extends API implements API_Interface {
 		$arr      = [];
 		$response = [ $response ];
 
-		array_filter(
+		array_walk(
 			$response,
 			function ( $e ) use ( &$arr ) {
 				$arr['private']      = $e->private ?? false;
@@ -338,7 +338,7 @@ class GitHub_API extends API implements API_Interface {
 		$arr      = [];
 		$response = [ $response ];
 
-		array_filter(
+		array_walk(
 			$response,
 			function ( $e ) use ( &$arr ) {
 				$arr['changes'] = $e->content;
@@ -351,16 +351,16 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of branch data.
 	 *
-	 * @param stdClass $response API response.
+	 * @param array<int, stdClass>|stdClass $response API response.
 	 *
 	 * @return array<string, array<string, string>>
 	 */
 	public function parse_branch_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
-			return $response;
+			return [];
 		}
 		$branches = [];
-		foreach ( $response as $branch ) {
+		foreach ( (array) $response as $branch ) {
 			$branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
 			$branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
 			$branches[ $branch->name ]['commit_api']  = $branch->commit->url;

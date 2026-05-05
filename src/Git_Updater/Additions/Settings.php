@@ -17,7 +17,7 @@ class Settings {
 	/**
 	 * Holds the values for additions settings.
 	 *
-	 * @var array<string, mixed> $options_additions
+	 * @var array<int, array<string, mixed>> $options_additions
 	 */
 	public static $options_additions;
 
@@ -66,7 +66,7 @@ class Settings {
 			}
 		);
 
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab, $action ) {
 				$this->add_admin_page( $tab, $action );
@@ -187,8 +187,7 @@ class Settings {
 	public function additions_page_init() {
 		register_setting(
 			'git_updater_additions',
-			'git_updater_additions',
-			null
+			'git_updater_additions'
 		);
 
 		add_settings_section(

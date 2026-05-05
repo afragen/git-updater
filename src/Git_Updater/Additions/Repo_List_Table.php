@@ -410,7 +410,7 @@ class Repo_List_Table extends WP_List_Table {
 			[
 				'total_items' => $total_items,  // WE have to calculate the total number of items.
 				'per_page'    => $per_page,  // WE have to determine how many items to show on a page.
-				'total_pages' => ceil( $total_items / $per_page ), // WE have to calculate the total number of pages.
+				'total_pages' => (int) ceil( $total_items / $per_page ), // WE have to calculate the total number of pages.
 			]
 		);
 	}

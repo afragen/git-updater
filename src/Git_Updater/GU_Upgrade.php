@@ -29,7 +29,7 @@ final class GU_Upgrade {
 	/**
 	 * DB version.
 	 *
-	 * @var int
+	 * @var string
 	 */
 	private $db_version = '12.24.2'; // TODO: change number.
 

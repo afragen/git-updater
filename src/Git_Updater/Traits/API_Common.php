@@ -53,7 +53,7 @@ trait API_Common {
 	 * @param  string $git      Name of API, eg 'github'.
 	 * @param  string $request  Query to API->api().
 	 * @param  mixed  $response API response.
-	 * @return array<string, mixed>|string|\WP_Error $response Release asset download link.
+	 * @return array<string, mixed>|string|\WP_Error|stdClass $response Release asset download link.
 	 */
 	private function parse_release_asset( $git, $request, $response ) {
 		if ( is_wp_error( $response ) ) {
@@ -146,8 +146,8 @@ trait API_Common {
 
 		$response['dot_org'] = $this->get_dot_org_data();
 		$this->set_file_info( $response );
-		$this->set_repo_cache( $this->type->slug, $response, false, 0 );
-		$this->set_repo_cache( 'repo', $this->type->slug, false, 0 );
+		$this->set_repo_cache( $this->type->slug, $response, false, false );
+		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
 		// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
 		if ( $this->maybe_extend_repo_cache( $response, $this->type ) ) {
@@ -257,7 +257,7 @@ trait API_Common {
 			$readmes,
 			function ( $readme ) {
 				if ( 'readme.txt' === $readme ) {
-					return $readme;
+					return true;
 				}
 			}
 		);
@@ -422,7 +422,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return string|array<string, mixed> $response Release asset URI.
+	 * @return string|array<string, mixed>|false $response Release asset URI.
 	 */
 	final public function get_api_release_asset( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );
@@ -460,7 +460,7 @@ trait API_Common {
 	 *
 	 * @param  string $git     Name of API, eg 'github'.
 	 * @param  string $request Query for API->api().
-	 * @return array<string, mixed> $response Release asset URI.
+	 * @return array<string, mixed>|false $response Release asset URI.
 	 */
 	final public function get_api_release_assets( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );

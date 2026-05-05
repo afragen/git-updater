@@ -81,7 +81,7 @@ class Init {
 		// Load hook for adding authentication headers for download packages.
 		add_filter(
 			'upgrader_pre_download',
-			function () {
+			function (): false {
 				add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
 				return false; // upgrader_pre_download filter default return value.
 			}

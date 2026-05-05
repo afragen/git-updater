@@ -253,14 +253,14 @@ class REST_API {
 				[
 					'show_in_index'       => true,
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
@@ -319,14 +319,14 @@ class REST_API {
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
 				[
 					'show_in_index'       => false,
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ new REST_Update(), 'process_request' ],
+					'callback'            => [ new Rest_Update(), 'process_request' ],
 					'permission_callback' => '__return_true',
 					'args'                => $update_args,
 				],
@@ -437,7 +437,7 @@ class REST_API {
 	public function get_api_data( WP_REST_Request $request ) {
 		$slug = $request->get_param( 'slug' );
 		if ( ! $slug ) {
-			return (object) [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
+			return [ 'error' => 'The REST request likely has an invalid query argument. It requires a `slug`.' ];
 		}
 		$channel    = null !== $request->get_param( 'channel' );
 		$gu_plugins = Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $this )->get_plugin_configs();
@@ -451,13 +451,13 @@ class REST_API {
 
 			if ( $addition_slug === $slug ) {
 				if ( isset( $addition['private_package'] ) && true === (bool) $addition['private_package'] ) {
-					return (object) [ 'error' => 'Specified repo is not shared.' ];
+					return [ 'error' => 'Specified repo is not shared.' ];
 				}
 			}
 		}
 
 		if ( ! array_key_exists( $slug, $gu_repos ) ) {
-			return (object) [ 'error' => 'Specified repo does not exist.' ];
+			return [ 'error' => 'Specified repo does not exist.' ];
 		}
 
 		add_filter( 'gu_disable_wpcron', '__return_false' );
@@ -465,7 +465,7 @@ class REST_API {
 
 		if ( ! is_object( $repo_data ) || '0.0.0' === $repo_data->remote_version ) {
 			$rate_limit = 'github' === $repo_data->git ? $this->get_github_rate_limit_headers() : [];
-			return (object) [
+			return [
 				'error'      => 'API data response is incorrect.',
 				'rate_limit' => $rate_limit,
 			];
@@ -616,7 +616,7 @@ class REST_API {
 	/**
 	 * Get Additions data.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_additions_data() {
 		$additions = get_site_option( 'git_updater_additions', [] );
@@ -641,7 +641,7 @@ class REST_API {
 	public function flush_repo_cache( $request ) {
 		// Test for API key and exit if incorrect.
 		if ( $this->get_class_vars( 'Remote_Management', 'api_key' ) !== $request->get_param( 'key' ) ) {
-			return [ 'error' => 'Bad API key. No flush for you.' ];
+			return (object) [ 'error' => 'Bad API key. No flush for you.' ];
 		}
 
 		$slug = $request->get_param( 'slug' );

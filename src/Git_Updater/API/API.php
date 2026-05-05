@@ -131,7 +131,7 @@ class API {
 	 * @param string        $git  'github'.
 	 * @param bool|stdClass $repo Repository object.
 	 *
-	 * @return stdClass
+	 * @return GitHub_API|null
 	 */
 	public function get_repo_api( $git, $repo = false ) {
 		$repo_api = null;
@@ -145,9 +145,9 @@ class API {
 		 * Filter git host API object.
 		 *
 		 * @since 10.0.0
-		 * @param null|stdClass $repo_api Git API object.
-		 * @param string        $git      Name of git host.
-		 * @param stdClass      $repo     Repository object.
+		 * @param GitHub_API|null $repo_api Git API object.
+		 * @param string          $git      Name of git host.
+		 * @param stdClass        $repo     Repository object.
 		 *
 		 * @return stdClass
 		 */
@@ -192,6 +192,7 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
 		if ( ! $response && ! $cached ) {
+			error_log( "Git Updater: Making API call to {$url}" );
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
 			$code          = (int) wp_remote_retrieve_response_code( $response );
@@ -218,7 +219,7 @@ class API {
 			// If we made it this far API data must be OK, save to avoid extra call above.
 			$response['url'] = $url;
 			unset( $response['headers'], $response['response'], $response['cookies'], $response['filename'], $response['http_response'] );
-			$this->set_repo_cache( md5( $url ), $response, false, 0 );
+			$this->set_repo_cache( md5( $url ), $response, false, false );
 		}
 
 		if ( $cached && ! $response ) {
@@ -481,7 +482,7 @@ class API {
 	 * @return null|string
 	 */
 	public function get_local_info( $repo, $file ) {
-		$response = false;
+		$response = null;
 
 		if ( get_site_transient( 'gu_refresh_cache' ) ) {
 			return $response;
@@ -490,7 +491,8 @@ class API {
 		if ( is_dir( $repo->local_path )
 			&& file_exists( $repo->local_path . $file )
 		) {
-			$response = file_get_contents( $repo->local_path . $file );
+			$contents = file_get_contents( $repo->local_path . $file );
+			$response = false !== $contents ? $contents : null;
 		}
 
 		return $response;

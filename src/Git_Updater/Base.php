@@ -75,7 +75,7 @@ class Base {
 	/**
 	 * Holds an array of installed git APIs.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, bool|string>
 	 */
 	public static $installed_apis = [ 'github_api' => true ];
 
@@ -135,7 +135,7 @@ class Base {
 		 * Filter to add installed APIs.
 		 *
 		 * @since 10.0.0
-		 * @param array<string, string> $installed_apis Array of installed APIs.
+		 * @param array<string, bool|string> $installed_apis Array of installed APIs.
 		 */
 		static::$installed_apis = apply_filters( 'gu_installed_apis', static::$installed_apis );
 	}
@@ -316,7 +316,7 @@ class Base {
 		$disable_wp_cron = (bool) apply_filters( 'gu_disable_wpcron', false );
 
 		if ( $disable_wp_cron && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
-			return;
+			return false;
 		}
 
 		$file = 'style.css';
@@ -531,7 +531,7 @@ class Base {
 		}
 
 		// Clean up $new_source directory.
-		add_action( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 1 );
+		add_filter( 'upgrader_install_package_result', [ $this, 'delete_upgrade_source' ], 10, 1 );
 
 		return trailingslashit( $new_source );
 	}
@@ -701,10 +701,10 @@ class Base {
 		 * @access  public
 		 * @link https://github.com/afragen/git-updater-additions
 		 *
-		 * @param array $additions Listing of plugins/themes to add.
-		 *                         Default null.
-		 * @param array $all_repos Listing of all plugins/themes.
-		 * @param string $type Type being passed, plugin|theme'.
+		 * @param array|null $additions Listing of plugins/themes to add.
+		 *                              Default null.
+		 * @param array      $all_repos Listing of all plugins/themes.
+		 * @param string     $type      Type being passed, plugin|theme'.
 		 */
 		$additions = apply_filters( 'gu_additions', null, [], $type );
 

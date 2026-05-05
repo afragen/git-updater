@@ -144,7 +144,7 @@ class Rest_Update {
 		$upgrader->upgrade( $plugin->file );
 
 		if ( $is_plugin_active ) {
-			$activate = is_multisite() ? activate_plugin( $plugin->file, null, true ) : activate_plugin( $plugin->file );
+			$activate = is_multisite() ? activate_plugin( $plugin->file, '', true ) : activate_plugin( $plugin->file );
 			if ( ! $activate ) {
 				$this->upgrader_skin->messages[] = 'Plugin reactivated successfully.';
 			}
@@ -259,7 +259,8 @@ class Rest_Update {
 		$override   = $args['override'] ?? false;
 		$deprecated = $args['deprecated'] ?? '';
 
-		$start = microtime( true );
+		$start          = microtime( true );
+		$current_branch = 'master';
 		try {
 			if ( ! $key
 				|| get_site_option( 'git_updater_api_key' ) !== $key
@@ -278,6 +279,7 @@ class Rest_Update {
 			$this->get_webhook_source();
 			$tag            = $committish ? $committish : $tag;
 			$current_branch = $this->get_local_branch( $plugin, $theme );
+			$remote_branch  = null;
 
 			if ( ! ( 0 === preg_match( self::$version_number_regex, $tag ) ) ) {
 				$remote_branch = 'master';

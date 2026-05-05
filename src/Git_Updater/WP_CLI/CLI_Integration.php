@@ -312,7 +312,7 @@ class CLI_Plugin_Installer_Skin extends Plugin_Installer_Skin {
 	/**
 	 * Skin error.
 	 *
-	 * @param stdClass $errors Error object.
+	 * @param string|\WP_Error $errors Error object.
 	 *
 	 * @return void
 	 */
@@ -350,7 +350,7 @@ class CLI_Theme_Installer_Skin extends Theme_Installer_Skin {
 	/**
 	 * Skin error.
 	 *
-	 * @param \stdClass $errors Error object.
+	 * @param string|\WP_Error $errors Error object.
 	 *
 	 * @return void
 	 */

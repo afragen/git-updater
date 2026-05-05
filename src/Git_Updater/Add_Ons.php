@@ -64,13 +64,13 @@ class Add_Ons {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab ) {
 				$this->add_admin_page( $tab );
 			},
 			10,
-			2
+			1
 		);
 	}
 

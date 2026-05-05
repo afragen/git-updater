@@ -126,7 +126,7 @@ class Messages {
 					<p>
 						<?php
 						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
-						echo ' ' . esc_attr( $repo['code'] );
+						echo ' ' . esc_attr( (string) $repo['code'] );
 						?>
 						<br>
 						<?php
@@ -172,7 +172,7 @@ class Messages {
 					<p>
 						<?php
 						esc_html_e( 'Git Updater Error Code:', 'git-updater' );
-						echo ' ' . esc_attr( $repo['code'] );
+						echo ' ' . esc_attr( (string) $repo['code'] );
 						?>
 						<br>
 						<?php esc_html_e( 'There is probably an access token or password error on the Git Updater Settings page.', 'git-updater' ); ?>

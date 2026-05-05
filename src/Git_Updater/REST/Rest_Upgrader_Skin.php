@@ -47,8 +47,8 @@ class Rest_Upgrader_Skin extends WP_Upgrader_Skin {
 	 * Overrides the feedback method.
 	 * Adds the feedback string to the messages array.
 	 *
-	 * @param string             $message  Message.
-	 * @param array<int, string> ...$args Array of args.
+	 * @param string $message  Message.
+	 * @param string ...$args Array of args.
 	 * @return void
 	 */
 	public function feedback( $message, ...$args ) {

@@ -1,4 +1,5 @@
 #### [unreleased]
+* fix PHPStan Tier 3 continued: reduce baseline from 72 to 19 errors across API, Base, Plugin, Theme, REST, Init, Install, Settings, and trait files
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.1 for new parser due to testing
 * add `maybe_extend_repo_cache()` to update the timeout if the remote and cached version numbers are same, should avoid API calls for current data
@@ -10,6 +11,9 @@
 * add `populate_api_data()` to populate even when API requests are skipped
 * set `error_code` to its own cached state outside the main repo cache
 * fix Add_Ons cache to use dedicated repo key with proper timeout handling
+* fix `GitHub_API::get_remote_readme()` missing return statement
+* fix `GU_Trait::use_release_asset()` undefined property PHP 8.x warnings via null coalescing
+* add PHPUnit tests for Tier 1/2 PHPStan changes covering API caching, auth, trait methods, and branch/tag/changelog API paths
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk

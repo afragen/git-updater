@@ -183,8 +183,6 @@ class Settings {
 		 * @since 10.0.0
 		 *
 		 * @param array $gu_subtabs Array of added subtabs.
-		 *
-		 * @return array $subtabs Array of subtabs.
 		 */
 		$gu_subtabs = apply_filters( 'gu_add_settings_subtabs', $gu_subtabs );
 
@@ -207,9 +205,9 @@ class Settings {
 	 */
 	private function load_api_subtabs() {
 		$show_tabs = [ 'github' => 'GitHub' ];
-		foreach ( array_keys( static::$git_hosts ) as $git ) {
+		foreach ( array_keys( self::$git_hosts ) as $git ) {
 			if ( is_plugin_active( "git-updater-{$git}/git-updater-{$git}.php" ) ) {
-				$show_tabs[ $git ] = static::$git_hosts[ $git ];
+				$show_tabs[ $git ] = self::$git_hosts[ $git ];
 			}
 		}
 		add_filter(
@@ -402,7 +400,7 @@ class Settings {
 
 		add_settings_field(
 			'branch_switch',
-			null,
+			'',
 			[ $this, 'token_callback_checkbox' ],
 			'git_updater_install_settings',
 			'git_updater_settings',
@@ -414,7 +412,7 @@ class Settings {
 
 		add_settings_field(
 			'bypass_background_processing',
-			null,
+			'',
 			[ $this, 'token_callback_checkbox' ],
 			'git_updater_install_settings',
 			'git_updater_settings',
@@ -469,9 +467,9 @@ class Settings {
 			 *
 			 * @since 10.0.0
 			 *
-			 * @param array $settings_fields Repo settings fields.
-			 * @param stdClass $token Repository object.
-			 * @param string $token->git Name of git host, eg. GitHub.
+			 * @param array    $settings_fields Repo settings fields.
+			 * @param stdClass $token           Repository object.
+			 * @param string   $git             Name of git host, eg. GitHub.
 			 */
 			$repo_setting_field = apply_filters( 'gu_add_repo_setting_field', [], $token, $token->git );
 
@@ -482,7 +480,7 @@ class Settings {
 			$setting_field             = array_merge( $setting_field, $repo_setting_field );
 			$setting_field['callback'] = $token->slug;
 
-			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : null;
+			$title = 'token_callback_checkbox' !== $setting_field['callback_method'][1] ? $setting_field['title'] : '';
 
 			add_settings_field(
 				$setting_field['id'],

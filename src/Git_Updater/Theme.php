@@ -145,7 +145,7 @@ class Theme {
 			function ( $repo ) {
 				foreach ( $repo as $key => $value ) {
 					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'theme' ) && ! empty( $value ) ) {
-						return $this->get_file_headers( $repo, 'theme' );
+						return (bool) $this->get_file_headers( $repo, 'theme' );
 					}
 				}
 			}
@@ -162,7 +162,7 @@ class Theme {
 				array_keys( $theme ),
 				function ( $key ) use ( $theme ) {
 					if ( false !== stripos( $key, 'themeuri' ) && ! empty( $theme[ $key ] ) & 'ThemeURI' !== $key ) {
-						return $key;
+						return true;
 					}
 				}
 			);
@@ -270,7 +270,14 @@ class Theme {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 1 );
 				if ( ! $this->tag ) {
 					add_action( "after_theme_row_{$theme->slug}", [ $this, 'wp_theme_update_row' ], 10, 2 );
-					add_action( "after_theme_row_{$theme->slug}", [ new Branch(), 'multisite_branch_switcher' ], 15, 1 );
+					add_action(
+					"after_theme_row_{$theme->slug}",
+					function ( $theme_key ) {
+						( new Branch() )->multisite_branch_switcher( $theme_key );
+					},
+					15,
+					1
+				);
 				}
 			}
 		}

@@ -40,7 +40,7 @@ class Remote_Management {
 	 */
 	public function ensure_api_key_is_set() {
 		if ( ! self::$api_key ) {
-			update_site_option( 'git_updater_api_key', md5( uniqid( wp_rand(), true ) ) );
+			update_site_option( 'git_updater_api_key', md5( uniqid( (string) wp_rand(), true ) ) );
 		}
 	}
 
@@ -67,7 +67,7 @@ class Remote_Management {
 				return array_merge( $tabs, $install_tabs );
 			}
 		);
-		add_filter(
+		add_action(
 			'gu_add_admin_page',
 			function ( $tab, $action ) {
 				$this->add_admin_page( $tab, $action );

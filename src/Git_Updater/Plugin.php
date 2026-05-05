@@ -128,7 +128,7 @@ class Plugin {
 			function ( $repo ) {
 				foreach ( $repo as $key => $value ) {
 					if ( in_array( $key, array_keys( self::$extra_headers ), true ) && false !== stripos( $key, 'plugin' ) && ! empty( $value ) ) {
-						return $this->get_file_headers( $repo, 'plugin' );
+						return (bool) $this->get_file_headers( $repo, 'plugin' );
 					}
 				}
 			}
@@ -145,7 +145,7 @@ class Plugin {
 				array_keys( $plugin ),
 				function ( $key ) use ( $plugin ) {
 					if ( false !== stripos( $key, 'pluginuri' ) && ! empty( $plugin[ $key ] && 'PluginURI' !== $key ) ) {
-						return $key;
+						return true;
 					}
 				}
 			);
@@ -258,7 +258,14 @@ class Plugin {
 			if ( 'init' === current_filter()
 				&& ( ! is_multisite() || is_network_admin() )
 			) {
-				add_action( "after_plugin_row_{$plugin->file}", [ new Branch(), 'plugin_branch_switcher' ], 15, 1 );
+				add_action(
+					"after_plugin_row_{$plugin->file}",
+					function ( $plugin_file ) {
+						( new Branch() )->plugin_branch_switcher( $plugin_file );
+					},
+					15,
+					1
+				);
 			}
 		}
 

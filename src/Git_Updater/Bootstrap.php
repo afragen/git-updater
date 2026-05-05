@@ -64,8 +64,8 @@ class Bootstrap {
 		( new Init() )->run();
 		( new Messages() )->create_error_message( 'get_license' );
 
-		// Initialize time dissmissible admin notices.
-		new WP_Dismiss_Notice();
+		// Initialize time dismissible admin notices.
+		$_ = new WP_Dismiss_Notice();
 
 		// Check for update API redirect.
 		add_action( 'init', fn() => $this->check_update_api_redirect(), 0 );
@@ -94,7 +94,7 @@ class Bootstrap {
 	 *
 	 * `rename()` causes activation to fail.
 	 *
-	 * @return void|bool
+	 * @return void|bool|\WP_Error
 	 */
 	public function rename_on_activation() {
 		global $wp_filesystem;

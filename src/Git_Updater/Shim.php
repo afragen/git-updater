@@ -119,7 +119,7 @@ if ( ! function_exists( 'wp_opcache_invalidate_directory' ) ) {
 	function wp_opcache_invalidate_directory( $dir ) {
 		global $wp_filesystem;
 
-		if ( ! is_string( $dir ) || '' === trim( $dir ) ) {
+		if ( '' === trim( $dir ) ) {
 			if ( WP_DEBUG ) {
 				$error_message = sprintf(
 				/* translators: %s: The function name. */
