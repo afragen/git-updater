@@ -1,4 +1,5 @@
 #### [unreleased]
+* add 45 PHPUnit tests for `GitHub_API`: all parse methods (`parse_tag_response`, `parse_meta_response`, `parse_changelog_response`, `parse_branch_response`, `parse_release_asset_response`, protected `parse_tags`/`parse_contents_response`/`parse_asset_dir_response`), `construct_download_link`, `add_endpoints`, `ratelimit_reset`, and `remote_install`
 * add integration test infrastructure: fixture plugin, wp-env config, and PHPUnit test classes for plugin/theme config discovery, HTTP-mocked remote meta, REST API dispatch, `Rest_Update::process_request_data()`, and `REST_API::get_remote_repo_data()` / `get_api_data()` valid and error paths
 * add `composer test-coverage` script, HTML coverage report via `phpunit.xml`, and `coverage-html/` to `.gitignore`
 * add `composer wp-env-start` and `composer wp-env-stop` scripts
