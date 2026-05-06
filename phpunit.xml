@@ -12,6 +12,7 @@
 		</include>
 		<exclude>
 			<directory suffix=".php">./src/Git_Updater/WP_CLI</directory>
+			<file>./src/Git_Updater/GU_Freemius.php</file>
 		</exclude>
 		<report>
 			<html outputDirectory="coverage-html"/>
