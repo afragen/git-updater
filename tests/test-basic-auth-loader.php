@@ -172,4 +172,106 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
 		$this->assertFalse( $slug );
 	}
+
+	// -------------------------------------------------------------------------
+	// unset_release_asset_auth()
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When the URL contains an S3 hostname, the Authorization header is removed
+	 * because S3 uses query-string auth and an Authorization header conflicts.
+	 */
+	public function test_unset_release_asset_auth_removes_authorization_for_s3_url(): void {
+		$args = [ 'headers' => [ 'Authorization' => 'Bearer token123' ] ];
+		$url  = 'https://github-releases.s3.amazonaws.com/12345/release.zip';
+
+		$result = $this->api->unset_release_asset_auth( $args, $url );
+
+		$this->assertArrayNotHasKey( 'Authorization', $result['headers'] );
+	}
+
+	/**
+	 * When the URL contains the GitHub objects CDN, the Authorization header
+	 * is removed (same S3-backed storage).
+	 */
+	public function test_unset_release_asset_auth_removes_authorization_for_github_objects_url(): void {
+		$args = [ 'headers' => [ 'Authorization' => 'Bearer token123' ] ];
+		$url  = 'https://objects.githubusercontent.com/github-production-release-asset/release.zip';
+
+		$result = $this->api->unset_release_asset_auth( $args, $url );
+
+		$this->assertArrayNotHasKey( 'Authorization', $result['headers'] );
+	}
+
+	/**
+	 * For a regular GitHub API URL the Authorization header is preserved.
+	 */
+	public function test_unset_release_asset_auth_preserves_authorization_for_api_url(): void {
+		$args = [ 'headers' => [ 'Authorization' => 'Bearer token123' ] ];
+		$url  = 'https://api.github.com/repos/owner/repo/releases/assets/1';
+
+		$result = $this->api->unset_release_asset_auth( $args, $url );
+
+		$this->assertArrayHasKey( 'Authorization', $result['headers'] );
+		$this->assertSame( 'Bearer token123', $result['headers']['Authorization'] );
+	}
+
+	/**
+	 * When there is no Authorization header, unset_release_asset_auth() returns
+	 * the args unchanged regardless of URL.
+	 */
+	public function test_unset_release_asset_auth_no_op_when_no_authorization_header(): void {
+		$args = [ 'headers' => [ 'Accept' => 'application/octet-stream' ] ];
+		$url  = 'https://github-releases.s3.amazonaws.com/release.zip';
+
+		$result = $this->api->unset_release_asset_auth( $args, $url );
+
+		$this->assertSame( $args, $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_accept_header()
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When headers is not set at all, add_accept_header() initialises it to an
+	 * empty array and returns args without error.
+	 */
+	public function test_add_accept_header_initialises_missing_headers_key(): void {
+		$args   = [];
+		$result = $this->api->add_accept_header( $args );
+		$this->assertArrayHasKey( 'headers', $result );
+		$this->assertIsArray( $result['headers'] );
+	}
+
+	/**
+	 * When headers is already an array, add_accept_header() returns it
+	 * without introducing unexpected keys when no git-server header is present.
+	 */
+	public function test_add_accept_header_returns_args_unchanged_for_non_git_headers(): void {
+		$args   = [ 'headers' => [ 'Accept' => 'application/json' ] ];
+		$result = $this->api->add_accept_header( $args );
+		$this->assertArrayHasKey( 'Accept', $result['headers'] );
+		$this->assertSame( 'application/json', $result['headers']['Accept'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// download_package()
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When args['filename'] is null, download_package() must NOT attempt to
+	 * add auth or accept headers (it short-circuits) and still removes itself
+	 * from the http_request_args filter.
+	 */
+	public function test_download_package_skips_processing_when_filename_is_null(): void {
+		add_filter( 'http_request_args', [ $this->api, 'download_package' ], 10, 2 );
+
+		$args   = [ 'filename' => null, 'headers' => [] ];
+		$result = $this->api->download_package( $args, 'https://example.com/release.zip' );
+
+		$this->assertSame( $args, $result );
+		// Confirm filter was removed (calling again would be a no-op if it was removed).
+		$this->assertFalse( has_filter( 'http_request_args', [ $this->api, 'download_package' ] ) );
+	}
 }

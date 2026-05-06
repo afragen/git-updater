@@ -147,3 +147,24 @@ WordPress core's `wp_update_plugins()` does `json_decode($body, true)` then dire
 
 ### Fixture plugin path in `.wp-env.json`
 Plugin paths must be prefixed with `./` (e.g. `"./tests/fixtures/plugins/test-gu-plugin"`). Without the prefix, wp-env treats the string as a `owner/repo` GitHub slug and fails with "repository not found".
+
+### Trait test pattern: use `GitHub_API`, not trait-on-test-class
+Methods that call `get_class_vars()` (e.g. `set_repo_cache`, `get_error_codes`) rely on `Singleton::get_instance('API\API', ...)` resolving relative to the caller's namespace. When called from a global-namespace test class the resolution fails. Always instantiate `GitHub_API` and call trait methods through it.
+
+### `get_remote_api_info()` success path requires dot_org cache pre-seeding
+`get_remote_api_info()` (called via `GitHub_API::get_remote_info()`) invokes `get_dot_org_data()`, which hits `api.wordpress.org` unless the main cache already contains a `dot_org` key. Pre-seed it in the test:
+```php
+update_site_option( $this->api->get_cache_key('test-plugin'), [
+    'dot_org' => 'not in dot org',
+    'timeout' => strtotime('+12 hours'),
+] );
+```
+
+### `parse_release_asset()` does not guard against `false`
+`parse_release_asset()` checks `is_wp_error($response)` but not `false`. If `api()` returns `false` (via error cache) the subsequent `foreach($response as $release)` throws a TypeError. When testing failure paths for `get_release_assets()`, use a `WP_Error` mock via `pre_http_request` rather than seeding the error cache:
+```php
+add_filter('pre_http_request', fn() => new WP_Error('http_request_failed', 'Connection refused'), 10, 3);
+```
+
+### Cron scheduling in tests: use past timestamps
+`wp_get_ready_cron_jobs()` only returns events with a timestamp ≤ `time()`. Scheduling with `time() + HOUR_IN_SECONDS` (future) makes the event invisible. Use `time() - HOUR_IN_SECONDS` (1 hour ago) — past-due but within the 24-hour `is_cron_overdue()` window, so no error is triggered.
