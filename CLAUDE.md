@@ -122,3 +122,28 @@ All plugin options are stored in a single site option `git_updater` (an array). 
 ### Coding standards
 
 PHPCS uses the `WordPress` ruleset with several exclusions defined in `phpcs.xml`. Notable: short array syntax (`[]`) is enforced, file naming and variable naming WordPress conventions are relaxed, and some Squiz control structure rules are disabled.
+
+## Testing gotchas
+
+### REST API test setup
+Always use `rest_get_server()` — never instantiate `WP_REST_Server` directly or call `register_endpoints()` manually. WordPress enforces that `register_rest_route()` is called inside the `rest_api_init` hook. `rest_get_server()` fires that hook automatically. Reset between tests with `$GLOBALS['wp_rest_server'] = null` before calling `rest_get_server()`.
+
+### Composer platform pin
+`composer.json` pins `"platform": {"php": "8.2"}`. Do not change this. Without it, Composer running on PHP 8.3+ resolves `doctrine/instantiator` 2.1.0, which uses typed class constants (`private const string …`) — PHP 8.3+ syntax — causing a parse error in the PHP 8.2 wp-env container that silently fails all tests in the affected file.
+
+### HTTP mocking with `pre_http_request`
+Mock all outbound HTTP via the `pre_http_request` filter (not `wp_remote_get` stubs). Return a `WP_Error` to short-circuit, or a properly structured response array: `['response' => ['code' => 200], 'body' => '...', 'headers' => []]`. Convenience helper `http_response(string $body, int $code = 200)` is available in `WP_Http_TestCase`-derived test classes.
+
+### Error cache contamination
+Any non-200 HTTP response from `API::api()` writes a 60-minute error cache entry (`ghu-<md5(slug_error)>` site option). Subsequent calls within that window return `false` immediately without hitting the network. In tests: ensure mocks return 200 for all paths, or delete the error site option in `tear_down()`.
+
+### `convertNoticesToExceptions` is on
+`phpunit.xml` sets `convertNoticesToExceptions="true"`. Undefined array key accesses (PHP 8 notices) fail tests immediately. Always initialise array keys before access, or use `isset()` / `??` guards.
+
+### api.wordpress.org update-check mocks
+WordPress core's `wp_update_plugins()` does `json_decode($body, true)` then directly accesses `$response['plugins']`. Return the correct structure to avoid undefined-key failures:
+- Plugins: `{"plugins": [], "translations": [], "no_update": []}`
+- Themes: `{"themes": [], "translations": [], "no_update": []}`
+
+### Fixture plugin path in `.wp-env.json`
+Plugin paths must be prefixed with `./` (e.g. `"./tests/fixtures/plugins/test-gu-plugin"`). Without the prefix, wp-env treats the string as a `owner/repo` GitHub slug and fails with "repository not found".
