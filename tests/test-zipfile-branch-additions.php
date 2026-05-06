@@ -39,6 +39,67 @@ class Test_Zipfile_API extends WP_UnitTestCase {
 		$this->api = new Zipfile_API();
 	}
 
+	public function tear_down(): void {
+		remove_all_filters( 'gu_git_servers' );
+		remove_all_filters( 'gu_installed_apis' );
+		remove_all_filters( 'gu_install_remote_install' );
+		parent::tear_down();
+	}
+
+	// -------------------------------------------------------------------------
+	// load_hooks()
+	// -------------------------------------------------------------------------
+
+	public function test_load_hooks_registers_git_servers_filter(): void {
+		$this->api->load_hooks();
+		$this->assertNotFalse( has_filter( 'gu_git_servers', [ $this->api, 'set_git_servers' ] ) );
+	}
+
+	public function test_load_hooks_registers_installed_apis_filter(): void {
+		$this->api->load_hooks();
+		$this->assertNotFalse( has_filter( 'gu_installed_apis', [ $this->api, 'set_installed_apis' ] ) );
+	}
+
+	public function test_load_hooks_registers_remote_install_filter(): void {
+		$this->api->load_hooks();
+		$this->assertNotFalse( has_filter( 'gu_install_remote_install', [ $this->api, 'set_remote_install_data' ] ) );
+	}
+
+	public function test_load_hooks_filters_are_applied_when_filters_run(): void {
+		$this->api->load_hooks();
+
+		$servers = apply_filters( 'gu_git_servers', [] );
+		$this->assertArrayHasKey( 'zipfile', $servers );
+
+		$apis = apply_filters( 'gu_installed_apis', [] );
+		$this->assertArrayHasKey( 'zipfile_api', $apis );
+	}
+
+	// -------------------------------------------------------------------------
+	// zipfile_slug()
+	// -------------------------------------------------------------------------
+
+	public function test_zipfile_slug_outputs_input_element_with_correct_id(): void {
+		ob_start();
+		$this->api->zipfile_slug();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'id="zipfile_slug"', $output );
+	}
+
+	public function test_zipfile_slug_outputs_input_element_with_correct_name(): void {
+		ob_start();
+		$this->api->zipfile_slug();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'name="zipfile_slug"', $output );
+	}
+
+	public function test_zipfile_slug_outputs_placeholder(): void {
+		ob_start();
+		$this->api->zipfile_slug();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'my-repo-slug', $output );
+	}
+
 	// -------------------------------------------------------------------------
 	// set_git_servers()
 	// -------------------------------------------------------------------------
