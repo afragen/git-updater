@@ -31,7 +31,11 @@ npm test
 composer test-ms       # delegates to: npm run test:multisite
 npm run test:multisite
 
+# Run PHPUnit tests with code coverage (requires Xdebug — installed automatically on wp-env start)
+npm run test:coverage
+
 # Start/stop wp-env Docker environment
+# Note: afterStart lifecycle script installs Xdebug into the tests-cli container
 npm run wp-env start
 npm run wp-env stop
 

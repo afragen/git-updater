@@ -6,6 +6,12 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
+	<coverage>
+		<include>
+			<directory suffix=".php">./src/Git_Updater</directory>
+		</include>
+	</coverage>
+
 	<testsuites>
 		<testsuite name="tests">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
