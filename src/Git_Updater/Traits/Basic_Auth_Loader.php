@@ -176,8 +176,8 @@ trait Basic_Auth_Loader {
 	 */
 	private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$slug_raw = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
-		// Some installers, like TGMPA, pass an array.
+		$slug_raw = isset( $_REQUEST['slug'] ) ? wp_unslash( $_REQUEST['slug'] ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// Some installers, like TGMPA, pass an array — check before sanitizing.
 		$slug_raw = is_array( $slug_raw ) ? array_pop( $slug_raw ) : $slug_raw;
 		$slug     = $slug_raw ? sanitize_text_field( (string) $slug_raw ) : false;
 		$slug     = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
