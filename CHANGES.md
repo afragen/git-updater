@@ -1,4 +1,9 @@
 #### [unreleased]
+* add integration test infrastructure: fixture plugin, wp-env config, and PHPUnit test classes for plugin/theme config discovery, HTTP-mocked remote meta, REST API dispatch, `Rest_Update::process_request_data()`, and `REST_API::get_remote_repo_data()` / `get_api_data()` valid and error paths
+* add `composer test-coverage` script, HTML coverage report via `phpunit.xml`, and `coverage-html/` to `.gitignore`
+* add `composer wp-env-start` and `composer wp-env-stop` scripts
+* fix `bin/install-xdebug.sh` to use `sudo` for `apk`/`pecl`/`tee` calls and correct `phpversion()` quoting
+* pin Composer platform to PHP 8.2 to prevent incompatible transitive dependencies (e.g. `doctrine/instantiator` 2.1.0) from being resolved on newer local PHP versions
 * fix PHPStan Tier 3 continued: reduce baseline from 72 to 9 errors — fix Base::load() void return, add @method tags to API class for parse_* methods, refactor api() type pipeline
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.1 for new parser due to testing

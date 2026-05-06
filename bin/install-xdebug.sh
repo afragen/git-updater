@@ -14,7 +14,7 @@ if [ -f "$XDEBUG_SO" ] && grep -q "zend_extension" "$XDEBUG_INI" 2>/dev/null; th
 fi
 
 echo "Installing Xdebug..."
-apk add --no-cache $PHPIZE_DEPS linux-headers >/dev/null 2>&1
-pecl install xdebug >/dev/null 2>&1
-printf 'zend_extension=xdebug.so\n[xdebug]\nxdebug.mode=coverage\n' > "$XDEBUG_INI"
-echo "Xdebug installed: $(php -r 'echo phpversion(\"xdebug\");')"
+sudo apk add --no-cache $PHPIZE_DEPS linux-headers >/dev/null 2>&1
+sudo pecl install xdebug >/dev/null 2>&1
+printf 'zend_extension=xdebug.so\n[xdebug]\nxdebug.mode=coverage\n' | sudo tee "$XDEBUG_INI" >/dev/null
+echo "Xdebug installed: $(php -r "echo phpversion('xdebug');")"

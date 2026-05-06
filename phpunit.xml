@@ -10,6 +10,9 @@
 		<include>
 			<directory suffix=".php">./src/Git_Updater</directory>
 		</include>
+		<report>
+			<html outputDirectory="coverage-html"/>
+		</report>
 	</coverage>
 
 	<testsuites>

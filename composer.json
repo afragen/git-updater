@@ -50,6 +50,9 @@
 		]
 	},
 	"config": {
+		"platform": {
+			"php": "8.2"
+		},
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true,
 			"mcaskill/composer-exclude-files": true
@@ -63,8 +66,11 @@
 	"scripts": {
 		"lint": "@php ./vendor/bin/phpcs .",
 		"format": "@php ./vendor/bin/phpcbf .",
+		"wp-env-start": "npm run wp-env start",
+		"wp-env-stop": "npm run wp-env stop",
 		"test": "npm test",
 		"test-ms": "npm run test:multisite",
+		"test-coverage": "npm run test:coverage && open coverage-html/index.html",
 		"phpstan": "@php ./vendor/bin/phpstan analyse --memory-limit=1G",
 		"phpstan-baseline": "@php ./vendor/bin/phpstan analyse --generate-baseline --memory-limit=1G"
 	}
