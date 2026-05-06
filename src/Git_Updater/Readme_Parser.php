@@ -129,7 +129,7 @@ class Readme_Parser extends Parser {
 		if ( empty( $data['sections'][ $section ] ) || str_contains( $data['sections'][ $section ], '<h4>' ) ) {
 			return $data;
 		}
-		$pattern = '~<p>=(.*)=</p>~';
+		$pattern = '~<p>=(.*?)=</p>~';
 		$replace = '<h4>$1</h4>';
 
 		$data['sections'][ $section ] = preg_replace( $pattern, $replace, $data['sections'][ $section ] );
