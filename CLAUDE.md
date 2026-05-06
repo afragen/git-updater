@@ -168,3 +168,22 @@ add_filter('pre_http_request', fn() => new WP_Error('http_request_failed', 'Conn
 
 ### Cron scheduling in tests: use past timestamps
 `wp_get_ready_cron_jobs()` only returns events with a timestamp ≤ `time()`. Scheduling with `time() + HOUR_IN_SECONDS` (future) makes the event invisible. Use `time() - HOUR_IN_SECONDS` (1 hour ago) — past-due but within the 24-hour `is_cron_overdue()` window, so no error is triggered.
+
+### `get_api_release_asset()` is commented out in GitHub_API
+`GitHub_API::get_release_asset()` has its body commented out; calling it is a no-op. The underlying trait method `get_api_release_asset()` is `final public` and can be invoked directly in tests:
+```php
+$this->api->get_api_release_asset( 'github', '/repos/test-owner/test-plugin/releases/latest' );
+```
+
+### Dev-release tag format for `parse_release_asset()`
+The dev-release regex `/[^v]+(?:nightly|alpha|beta|RC){1}[0-9]{0,}/i` requires at least one non-`v` character *before* the keyword. A bare `beta1` does not match; use `1.0.0-beta1`, `2.0.0-nightly20240601`, etc.
+
+### Testing cache-hit paths: `seed_main_cache()` helper pattern
+Pre-populate the main site option to drive the cached branch without HTTP. Merge with a future timeout so `get_repo_cache()` doesn't reject the entry:
+```php
+update_site_option(
+    $this->api->get_cache_key( 'test-plugin' ),
+    array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
+);
+```
+Methods that use `get_repo_cache($slug, false)` (ignore timeout) also read stale entries, so the timeout value doesn't matter for those callers.
