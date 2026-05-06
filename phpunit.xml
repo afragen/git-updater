@@ -6,10 +6,13 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
-	<coverage>
+	<coverage processUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./src/Git_Updater</directory>
 		</include>
+		<exclude>
+			<directory suffix=".php">./src/Git_Updater/WP_CLI</directory>
+		</exclude>
 		<report>
 			<html outputDirectory="coverage-html"/>
 		</report>
