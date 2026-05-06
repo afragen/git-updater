@@ -16,6 +16,7 @@
 * add PHPUnit tests for Tier 1/2 PHPStan changes covering API caching, auth, trait methods, and branch/tag/changelog API paths
 * add comprehensive PHPUnit tests for GU_Trait and API methods: is_wp_cli, is_current_page, should_run_on_current_page, get_cache_key, is_cache_timeout_valid, can_update_repo, parse_header_uri, get_did_hash, get_file_without_did_hash, use_release_asset, get_headers, sort_tags, return_repo_type, get_api_url, parse_extra_headers
 * fix `Basic_Auth_Loader::get_slug_for_credentials()` array slug check order — `is_array()` must precede `sanitize_text_field()` so TGMPA array slugs are not silently discarded
+* borrow function from FAIR Connect to sort plugins_api modal tabs in correct order
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk

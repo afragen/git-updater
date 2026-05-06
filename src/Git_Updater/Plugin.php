@@ -14,6 +14,7 @@ use Fragen\Singleton;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Branch;
 use stdClass;
+use WP_Error;
 
 /*
  * Exit if called directly.
@@ -289,6 +290,7 @@ class Plugin {
 	 */
 	public function load_pre_filters() {
 		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 99, 3 );
+		add_filter( 'plugins_api_result', [ $this, 'sort_sections_in_api' ], 15, 1 );
 		add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ], 15, 1 );
 	}
 
@@ -344,6 +346,34 @@ class Plugin {
 		$response->num_ratings       = $plugin->num_ratings;
 
 		return $response;
+	}
+
+	/**
+	 * Sort plugin modal tabs.
+	 *
+	 * Based on standard tab listing order.
+	 *
+	 * @param object|WP_Error $res Response object or WP_Error.
+	 * @return object|WP_Error
+	 */
+	public function sort_sections_in_api( $res ) {
+		$ordered_sections = [
+			'description',
+			'installation',
+			'faq',
+			'screenshots',
+			'changelog',
+			'upgrade_notice',
+			'security',
+			'other_notes',
+			'reviews',
+		];
+		if ( property_exists( $res, 'sections' ) && is_array( $res->sections ) ) {
+			$properly_ordered = array_merge( array_fill_keys( $ordered_sections, '' ), $res->sections );
+			$res->sections    = array_filter( $properly_ordered );
+		}
+
+		return $res;
 	}
 
 	/**
