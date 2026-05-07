@@ -264,3 +264,21 @@ When called with `null`, the method merges Plugin and Theme configs then iterate
 
 ### `get_github_rate_limit_headers()` — mock with `CaseInsensitiveDictionary` as headers value
 `get_github_rate_limit_headers()` calls `wp_remote_retrieve_headers($response)->getAll()`. When short-circuited via `pre_http_request`, the filter must return an array whose `headers` key is a `WpOrg\Requests\Utility\CaseInsensitiveDictionary` instance. Use `new CaseInsensitiveDictionary(['x-ratelimit-reset' => (string)(time() + 300)])` for the reset-time test and `new CaseInsensitiveDictionary([])` for the 60-minute default test. Import with `use WpOrg\Requests\Utility\CaseInsensitiveDictionary;`.
+
+### `get_repo_slugs()` dirname match — use `ReflectionProperty` to inject synthetic `$config`
+`Plugin::$config` and `Theme::$config` are both declared `private`. To inject a synthetic entry where `dirname($repo->file)` differs from `$repo->slug` (the `-master` suffix scenario), use `ReflectionProperty`:
+```php
+$ref      = new ReflectionProperty( get_class( $obj ), 'config' );
+$ref->setAccessible( true );
+$original = $ref->getValue( $obj );
+$ref->setValue( $obj, [ 'my-plugin' => (object) [ 'slug' => 'my-plugin', 'file' => 'my-plugin-master/my-plugin.php' ] ] );
+try {
+    $result = $this->invoke_get_repo_slugs( 'my-plugin-master', $obj );
+} finally {
+    $ref->setValue( $obj, $original );
+}
+```
+The same pattern applies when the Theme Singleton's config is empty (fixture theme not discovered by `get_theme_meta()` in the test env) — inject a minimal `['test-gu-theme' => (object)['slug' => 'test-gu-theme', 'file' => 'test-gu-theme/style.css']]` and restore in `finally`.
+
+### `get_repo_slugs()` AJAX path — mock via `wp_doing_ajax` filter + real nonce
+`wp_doing_ajax()` applies the `wp_doing_ajax` filter, so `add_filter('wp_doing_ajax', '__return_true')` mocks AJAX context without defining `DOING_AJAX`. `check_ajax_referer('updates')` is satisfied by placing `wp_create_nonce('updates')` in `$_REQUEST['_ajax_nonce']` — works with user_id=0 (no logged-in user required). Unset `$_POST['action']`, `$_POST['git_updater_repo']`, and `$_REQUEST['_ajax_nonce']` in `tear_down()`. The nonce must be created fresh each test because `wp_create_nonce` is time-sensitive.
