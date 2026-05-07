@@ -6,6 +6,7 @@
  * - Theme::get_theme_configs()       — returns an array
  * - Theme::load_pre_filters()        — filters registered (single-site vs multisite)
  * - Theme::themes_api()              — non-info action; unknown slug; background-wait skip; dot_org skip; populated response
+ * - Theme::wp_theme_update_row()     — no output when theme not in transient response; unavailable msg; update-now link
  * - Theme::remove_after_theme_row()  — removes wp_theme_update_row for known theme; ignores unknown
  * - Theme::append_theme_actions_content() — empty when no transient; HTML with update link; HTML without package
  * - Theme::customize_theme_update_html()  — skips missing slugs; sets 'update' key on hasUpdate; appends to description
@@ -259,6 +260,104 @@ class Test_Theme_Themes_API_Filter extends WP_UnitTestCase {
 		$result = $theme->themes_api( false, 'theme_information', $response );
 		$this->assertStringContainsString( 'Description text.', $result->description );
 		$this->assertStringContainsString( 'Changelog text.', $result->description );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Theme_Wp_Theme_Update_Row
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Wp_Theme_Update_Row
+ *
+ * Tests Theme::wp_theme_update_row(), which echoes HTML directly.
+ * The "with response" cases require _get_list_table() (WP admin context);
+ * those tests load the necessary admin includes and skip gracefully if unavailable.
+ */
+class Test_Theme_Wp_Theme_Update_Row extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
+		if ( ! class_exists( 'WP_Plugins_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-plugins-list-table.php';
+		}
+		if ( ! function_exists( '_get_list_table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'update_themes' );
+		parent::tear_down();
+	}
+
+	public function test_produces_no_output_when_transient_is_absent(): void {
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertSame( '', $output );
+	}
+
+	public function test_produces_no_output_when_theme_key_absent_from_response(): void {
+		$update           = new stdClass();
+		$update->response = [ 'other-theme' => [ 'new_version' => '2.0.0', 'package' => '' ] ];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertSame( '', $output );
+	}
+
+	public function test_outputs_unavailable_message_when_package_is_empty(): void {
+		if ( ! function_exists( '_get_list_table' ) ) {
+			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
+		}
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => '',
+				'url'         => '',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '2.0.0', $output );
+		$this->assertStringContainsString( 'unavailable', strtolower( $output ) );
+	}
+
+	public function test_outputs_update_now_link_when_package_is_set(): void {
+		if ( ! function_exists( '_get_list_table' ) ) {
+			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
+		}
+		$update           = new stdClass();
+		$update->response = [
+			'test-gu-theme' => [
+				'new_version' => '2.0.0',
+				'package'     => 'https://example.com/test-gu-theme.zip',
+				'url'         => '',
+			],
+		];
+		set_site_transient( 'update_themes', $update );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $this->make_theme_obj() ] );
+		ob_start();
+		$theme->wp_theme_update_row( 'test-gu-theme', [ 'Name' => 'Test GU Theme' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '2.0.0', $output );
+		$this->assertStringContainsString( 'update', strtolower( $output ) );
 	}
 }
 

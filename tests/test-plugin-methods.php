@@ -3,6 +3,7 @@
  * Tests for Plugin class methods.
  *
  * Covers:
+ * - Plugin::get_plugin_configs()     — returns array; reflects injected config
  * - Plugin::sort_sections_in_api()   — sections ordering; empty value removal; unknown keys; non-section objects
  * - Plugin::load_pre_filters()       — three filters registered
  * - Plugin::plugins_api()            — non-info action; unknown slug; background-wait skip; dot_org skip; populated response
@@ -82,6 +83,53 @@ trait Plugin_Mock_Helper {
 		$ref->setAccessible( true );
 		$ref->setValue( $plugin, $config );
 		return $plugin;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Plugin_Get_Plugin_Configs
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Plugin_Get_Plugin_Configs
+ */
+class Test_Plugin_Get_Plugin_Configs extends WP_UnitTestCase {
+	use Plugin_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function test_returns_array(): void {
+		$plugin = new Plugin();
+		$this->assertIsArray( $plugin->get_plugin_configs() );
+	}
+
+	public function test_reflects_injected_config(): void {
+		$plugin_obj = $this->make_plugin_obj();
+		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$configs    = $plugin->get_plugin_configs();
+		$this->assertArrayHasKey( 'test-plugin', $configs );
+		$this->assertSame( 'test-plugin', $configs['test-plugin']->slug );
+	}
+
+	public function test_returns_empty_array_for_empty_config(): void {
+		$plugin = $this->plugin_with_config( [] );
+		$this->assertSame( [], $plugin->get_plugin_configs() );
+	}
+
+	public function test_returns_multiple_configs(): void {
+		$plugin_a = $this->make_plugin_obj( [ 'slug' => 'plugin-a' ] );
+		$plugin_b = $this->make_plugin_obj( [ 'slug' => 'plugin-b' ] );
+		$plugin   = $this->plugin_with_config( [
+			'plugin-a' => $plugin_a,
+			'plugin-b' => $plugin_b,
+		] );
+		$configs = $plugin->get_plugin_configs();
+		$this->assertCount( 2, $configs );
+		$this->assertArrayHasKey( 'plugin-a', $configs );
+		$this->assertArrayHasKey( 'plugin-b', $configs );
 	}
 }
 

@@ -197,6 +197,15 @@ Methods that use `get_repo_cache($slug, false)` (ignore timeout) also read stale
 ### Repo_List_Table requires WP_List_Table to be loaded
 `Repo_List_Table` extends `WP_List_Table`. The file-level guard loads it automatically when the class file is autoloaded, but as belt-and-suspenders add `require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php'` in `set_up()`. The constructor works in the tests-cli container without full admin context; `get_current_screen()` returns null but does not error.
 
+### `wp_theme_update_row()` echoes directly; requires WP_Plugins_List_Table
+`Theme::wp_theme_update_row()` echoes HTML directly — capture it with `ob_start()`/`ob_get_clean()`. It calls `$this->base->update_row_enclosure()` which internally calls `_get_list_table('WP_Plugins_List_Table')`. Load the needed admin includes in `set_up()`:
+```php
+require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-plugins-list-table.php';
+require_once ABSPATH . 'wp-admin/includes/template.php'; // defines _get_list_table
+```
+All three are available in the wp-env tests-cli container. The early-return path (when `$theme_key` is absent from `update_themes->response`) produces no output and needs no admin setup.
+
 ### `Additions::deduplicate()` reads plugin/theme cache with full timeout check
 `deduplicate()` calls `get_repo_cache('git_updater_repository_add_plugin')` and `get_repo_cache('git_updater_repository_add_theme')` with the default `$timeout = true`. Seed these site options with a future `timeout` key or the cache will be ignored: `update_site_option('ghu-' . md5('git_updater_repository_add_plugin'), ['git_updater_repository_add_plugin' => [...], 'timeout' => strtotime('+12 hours')])`.
 
