@@ -297,3 +297,42 @@ To exercise the `in_array($key, get_running_git_servers())` branch, pass `['head
 
 ### `Basic_Auth_Loader` Remote Install POST path — clean up `$_POST` in `tear_down()`
 `get_type_for_credentials()` reads `$_POST['git_updater_api']` and `$_POST['git_updater_repo']`. Always unset both in `tear_down()` to prevent cross-test contamination.
+
+### `waiting_for_background_update($repo)` — injecting `$base` when `$repo->git` is set
+The method reads `$this->base::$git_servers[$repo->git]` (line 547). `$this->base` is `null` on a bare `GitHub_API` instance because only `Plugin`, `Theme`, `Init`, and `Branch` constructors set it. To test the `$repo->git` branch from a `GitHub_API` instance, inject via `ReflectionProperty`:
+```php
+$rp = new ReflectionProperty( $this->api, 'base' );
+$rp->setAccessible( true );
+$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+```
+
+### `get_repo_slugs(slug, null)` — invoke on Plugin instance, not GitHub_API
+When `$upgrader_object = null`, the method sets `$upgrader_object = $this`. If `$this` is `GitHub_API` (no `$config`), `get_class_vars` returns `false` and `foreach ((array) false ...)` causes a TypeError. Invoke via reflection on a `Plugin` Singleton instead so `$this->plugin_obj->config` resolves cleanly:
+```php
+$rm     = $this->api->get_reflection_method( $this->plugin_obj, 'get_repo_slugs' );
+$result = $rm->invoke( $this->plugin_obj, 'nonexistent-slug', null );
+```
+
+### `Skip_Updates` plugin stub via `eval()` in `override_dot_org()` tests
+`override_dot_org()` checks `class_exists('\Fragen\Skip_Updates\Bootstrap')`. To cover that branch in tests, create a stub with `eval()` — PHP allows `namespace` declarations inside `eval`:
+```php
+private function ensure_skip_updates_stub(): void {
+    if ( ! class_exists( '\Fragen\Skip_Updates\Bootstrap' ) ) {
+        eval( 'namespace Fragen\\Skip_Updates; class Bootstrap {}' );
+    }
+}
+```
+The class_exists guard prevents "Cannot redeclare class" errors across test runs. The `skip_updates` site option controls which slugs are matched; delete it inline after each test.
+
+### `populate_api_data()` — tags cache holds version-string arrays, not raw API objects
+`$cache['tags']` stores the output of `parse_tag_response()` — an array of version name strings like `['1.0.0', '0.9.0']`. `parse_tags()` then iterates these and builds the download-URL map. Seed tags tests with string arrays:
+```php
+$this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ] ] );
+```
+
+### `populate_api_data()` meta case — pass `$this->api->type` as `$repo`
+`add_meta_repo_object()` reads `$this->type->repo_meta` from the `$repo_api` argument. The method sets `$repo->repo_meta = $value` on the `$repo` argument. For the assignment to reach `$repo_api->type->repo_meta`, pass `$this->api->type` as `$repo` so both point to the same object:
+```php
+$this->api->populate_api_data( $this->api->type, $this->api );
+$this->assertSame( '2024-01-01T00:00:00Z', $this->api->type->last_updated );
+```

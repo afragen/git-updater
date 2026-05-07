@@ -177,4 +177,43 @@ class Test_GUTrait extends \WP_UnitTestCase {
 		$this->assertSame( 'My Plugin', $headers['Name'] );
 		$this->assertSame( '2.0.0', $headers['Version'] );
 	}
+
+	// -------------------------------------------------------------------------
+	// override_dot_org() — Skip_Updates plugin paths (lines 468–474)
+	// -------------------------------------------------------------------------
+
+	private function ensure_skip_updates_stub(): void {
+		if ( ! class_exists( '\Fragen\Skip_Updates\Bootstrap' ) ) {
+			// phpcs:ignore Squiz.PHP.Eval.Discouraged
+			eval( 'namespace Fragen\\Skip_Updates; class Bootstrap {}' );
+		}
+	}
+
+	public function test_override_dot_org_skip_updates_returns_true_when_slug_matches(): void {
+		$this->ensure_skip_updates_stub();
+		update_site_option( 'skip_updates', [ [ 'slug' => 'my-plugin/my-plugin.php' ] ] );
+		$repo                 = new stdClass();
+		$repo->slug           = 'my-plugin';
+		$repo->file           = 'my-plugin/my-plugin.php';
+		$repo->dot_org        = true;
+		$repo->branch         = 'main';
+		$repo->primary_branch = 'main';
+		$result               = $this->override_dot_org( 'plugin', $repo );
+		delete_site_option( 'skip_updates' );
+		$this->assertTrue( $result );
+	}
+
+	public function test_override_dot_org_skip_updates_returns_false_when_slug_unmatched(): void {
+		$this->ensure_skip_updates_stub();
+		update_site_option( 'skip_updates', [ [ 'slug' => 'other-plugin/other.php' ] ] );
+		$repo                 = new stdClass();
+		$repo->slug           = 'my-plugin';
+		$repo->file           = 'my-plugin/my-plugin.php';
+		$repo->dot_org        = true;
+		$repo->branch         = 'main';
+		$repo->primary_branch = 'main';
+		$result               = $this->override_dot_org( 'plugin', $repo );
+		delete_site_option( 'skip_updates' );
+		$this->assertFalse( $result );
+	}
 }

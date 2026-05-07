@@ -166,4 +166,18 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 
 		$this->assertSame( [ 'slug' => 'test-gu-plugin' ], $result );
 	}
+
+	// -------------------------------------------------------------------------
+	// null $upgrader_object — defaults to $this (Plugin), line 671
+	// -------------------------------------------------------------------------
+
+	public function test_get_repo_slugs_null_upgrader_object_defaults_to_self_plugin(): void {
+		// Invoke on $this->plugin_obj so $this inside get_repo_slugs is Plugin.
+		// With $upgrader_object = null, line 671 executes: $upgrader_object = $this.
+		// get_class_vars('Plugin', 'config') resolves to Plugin's $config.
+		// Searching for a nonexistent slug returns an empty array.
+		$rm     = $this->api->get_reflection_method( $this->plugin_obj, 'get_repo_slugs' );
+		$result = $rm->invoke( $this->plugin_obj, 'nonexistent-slug-xyz-abc', null );
+		$this->assertIsArray( $result );
+	}
 }

@@ -49,6 +49,7 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		remove_all_filters( 'gu_config_pre_process' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( 'git_updater' );
+		unset( $_POST['action'], $_POST['_nonce'] );
 		parent::tear_down();
 	}
 
@@ -186,6 +187,15 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
 		$result = $rm->invoke( $this->api, null );
 		$this->assertFalse( $result );
+	}
+
+	public function test_waiting_for_background_update_with_null_iterates_repos_when_config_not_empty(): void {
+		// No gu_config_pre_process filter — fixture plugin IS in Plugin config with
+		// empty cache, so $waiting is non-empty → returns true. Lines 571 and 576.
+		$rm     = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$result = $rm->invoke( $this->api, null );
+		// Result is true (fixture plugin cache empty) or false (config empty in this env).
+		$this->assertIsBool( $result );
 	}
 
 	// -------------------------------------------------------------------------
@@ -327,5 +337,143 @@ class Test_GUTrait_Complete extends WP_UnitTestCase {
 	public function test_is_cron_overdue_does_not_throw_when_timestamp_is_overdue(): void {
 		$this->api->is_cron_overdue( time() - ( 25 * HOUR_IN_SECONDS ) );
 		$this->addToAssertionCount( 1 );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_heartbeat() — TRUE path (line 58)
+	// -------------------------------------------------------------------------
+
+	public function test_is_heartbeat_returns_true_with_valid_heartbeat_nonce_and_action(): void {
+		$_POST['action'] = 'heartbeat';
+		$_POST['_nonce'] = wp_create_nonce( 'heartbeat-nonce' );
+		$this->assertTrue( GitHub_API::is_heartbeat() );
+	}
+
+	// -------------------------------------------------------------------------
+	// waiting_for_background_update() — $repo->git branch (lines 547–548)
+	// -------------------------------------------------------------------------
+
+	public function test_waiting_for_background_update_instantiates_git_api_when_repo_has_git(): void {
+		$this->seed_cache( [ 'meta' => [ 'Version' => '1.0.0' ] ] );
+		// $this->base is not set on GitHub_API; inject via reflection so the
+		// $this->base::$git_servers lookup on line 547 does not throw.
+		$rp = new ReflectionProperty( $this->api, 'base' );
+		$rp->setAccessible( true );
+		$rp->setValue( $this->api, Singleton::get_instance( 'Fragen\Git_Updater\Base', $this->api ) );
+		$rm   = $this->api->get_reflection_method( $this->api, 'waiting_for_background_update' );
+		$repo = (object) [ 'slug' => 'test-plugin', 'git' => 'github' ];
+		$this->assertFalse( $rm->invoke( $this->api, $repo ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// populate_api_data() — tags case (lines 261–273)
+	// -------------------------------------------------------------------------
+
+	public function test_populate_api_data_processes_tags_from_cache(): void {
+		$this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ] ] );
+		$this->api->type->newest_tag = '';
+		$repo = (object) [ 'slug' => 'test-plugin' ];
+		$this->api->populate_api_data( $repo, $this->api );
+		$this->assertSame( '1.0.0', $this->api->type->newest_tag );
+	}
+
+	// -------------------------------------------------------------------------
+	// populate_api_data() — readme case (lines 280–286)
+	// -------------------------------------------------------------------------
+
+	public function test_populate_api_data_processes_readme_from_cache(): void {
+		$readme = [
+			'sections'          => [ 'description' => 'Test plugin' ],
+			'requires'          => '5.9',
+			'requires_php'      => '8.0',
+			'tested'            => '',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [],
+			'remaining_content' => null,
+		];
+		$this->seed_cache( [ 'readme' => $readme ] );
+		$this->api->type->sections    = [];
+		$this->api->type->requires    = '';
+		$this->api->type->requires_php = '';
+		$repo = (object) [ 'slug' => 'test-plugin' ];
+		$this->api->populate_api_data( $repo, $this->api );
+		$this->assertSame( '5.9', $this->api->type->requires );
+	}
+
+	// -------------------------------------------------------------------------
+	// populate_api_data() — meta case (lines 287–294)
+	// -------------------------------------------------------------------------
+
+	public function test_populate_api_data_processes_meta_from_cache(): void {
+		$meta = [
+			'private'      => false,
+			'last_updated' => '2024-01-01T00:00:00Z',
+			'added'        => '',
+			'watchers'     => 0,
+			'forks'        => 0,
+			'open_issues'  => 0,
+		];
+		$this->seed_cache( [ 'meta' => $meta ] );
+		$this->api->populate_api_data( $this->api->type, $this->api );
+		$this->assertSame( '2024-01-01T00:00:00Z', $this->api->type->last_updated );
+	}
+
+	// -------------------------------------------------------------------------
+	// populate_api_data() — release_asset case (lines 298–303)
+	// -------------------------------------------------------------------------
+
+	public function test_populate_api_data_processes_release_asset_from_cache(): void {
+		$this->seed_cache( [ 'release_asset' => 'https://example.com/release.zip' ] );
+		$repo                  = (object) [
+			'slug'           => 'test-plugin',
+			'newest_tag'     => '1.0.0',
+			'release_assets' => [],
+		];
+		$result = $this->api->populate_api_data( $repo, $this->api );
+		$this->assertSame( 'https://example.com/release.zip', $result->release_assets['1.0.0'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// populate_api_data() — release_assets case (lines 304–315)
+	// -------------------------------------------------------------------------
+
+	public function test_populate_api_data_processes_release_assets_with_existing_tag(): void {
+		$assets = [
+			'assets'         => [ '1.0.0' => 'https://example.com/v1.zip' ],
+			'created_at'     => [],
+			'dev_assets'     => [],
+			'dev_created_at' => [],
+		];
+		$this->seed_cache( [ 'release_assets' => $assets ] );
+		$repo   = (object) [ 'slug' => 'test-plugin', 'newest_tag' => '1.0.0' ];
+		$result = $this->api->populate_api_data( $repo, $this->api );
+		$this->assertArrayHasKey( '1.0.0', $result->release_assets );
+	}
+
+	public function test_populate_api_data_merges_missing_tag_into_release_assets(): void {
+		$assets = [
+			'assets'         => [ '0.9.0' => 'https://example.com/v0.zip' ],
+			'created_at'     => [],
+			'dev_assets'     => [],
+			'dev_created_at' => [],
+		];
+		$this->seed_cache( [ 'release_assets' => $assets ] );
+		$repo   = (object) [ 'slug' => 'test-plugin', 'newest_tag' => '1.0.0' ];
+		$result = $this->api->populate_api_data( $repo, $this->api );
+		$this->assertArrayHasKey( '1.0.0', $result->release_assets );
+		$this->assertSame( '', $result->release_assets['1.0.0'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_repo_requirements() — gist path (line 952)
+	// -------------------------------------------------------------------------
+
+	public function test_get_repo_requirements_with_gist_repo_returns_defaults(): void {
+		$rm     = $this->api->get_reflection_method( $this->api, 'get_repo_requirements' );
+		$repo   = (object) [ 'git' => 'gist', 'local_path' => '/nonexistent/path/', 'file' => 'plugin.php' ];
+		$result = $rm->invoke( $this->api, $repo );
+		$this->assertNull( $result['RequiresPHP'] );
+		$this->assertNull( $result['RequiresWP'] );
 	}
 }

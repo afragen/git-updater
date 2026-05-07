@@ -44,6 +44,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'wp_doing_ajax' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
 		wp_clear_scheduled_hook( 'gu_test_cron_hook_xyz' );
@@ -354,5 +355,51 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function test_get_error_codes_returns_array(): void {
 		$result = $this->api->get_error_codes();
 		$this->assertIsArray( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// maybe_extend_repo_cache() — expired timeout update (lines 225–226)
+	// -------------------------------------------------------------------------
+
+	public function test_maybe_extend_repo_cache_updates_timeout_when_expired_and_meta_present(): void {
+		$slug      = 'test-plugin';
+		$cache_key = $this->api->get_cache_key( $slug );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'    => $slug,
+				$slug     => [ 'Version' => '1.0.0' ],
+				'meta'    => [ 'last_updated' => '2024-01-01' ],
+				'timeout' => strtotime( '-1 hour' ),
+			]
+		);
+		$repo   = (object) [ 'slug' => $slug ];
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $repo );
+		$this->assertTrue( $result );
+		$cache = get_site_option( $cache_key );
+		$this->assertGreaterThan( time(), $cache['timeout'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// delete_upgrade_source() — filesystem delete path (lines 975–979)
+	// -------------------------------------------------------------------------
+
+	public function test_delete_upgrade_source_deletes_when_destination_name_is_set(): void {
+		WP_Filesystem();
+		$result   = [ 'destination_name' => 'nonexistent-upgrade-dir', 'source' => '/tmp/' ];
+		$returned = $this->api->delete_upgrade_source( $result );
+		$this->assertSame( $result, $returned );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_private() — AJAX path (line 444)
+	// -------------------------------------------------------------------------
+
+	public function test_is_private_returns_false_during_ajax(): void {
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$repo                 = new stdClass();
+		$repo->remote_version = '1.0.0';
+		$repo->slug           = 'test-plugin';
+		$this->assertFalse( $this->api->is_private( $repo ) );
 	}
 }
