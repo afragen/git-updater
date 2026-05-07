@@ -226,8 +226,8 @@ class Theme {
 
 			// Fix branch for .git VCS.
 			if ( isset( $git_theme['local_path'] ) && file_exists( $git_theme['local_path'] . '.git/HEAD' ) ) {
-				$git_branch           = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
-				$git_plugin['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
+				$git_branch          = implode( '/', array_slice( explode( '/', file_get_contents( $git_theme['local_path'] . '.git/HEAD' ) ), 2 ) );
+				$git_theme['branch'] = preg_replace( "/\r|\n/", '', $git_branch );
 			}
 
 			$git_themes[ $git_theme['slug'] ] = (object) $git_theme;

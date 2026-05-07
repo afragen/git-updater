@@ -228,3 +228,15 @@ add_filter( 'gu_additions', function( $value, $themes, $type ) { ... }, 10, 3 );
 
 ### `gu_disable_wpcron` path in `get_remote_theme/plugin_meta()` needs no HTTP mock
 `Base::get_remote_repo_meta()` has an early return: `if ($disable_wp_cron && !can_update()) return false`. In tests there is no admin user, so `can_update()` always returns false. When `gu_disable_wpcron` is true the method short-circuits before any HTTP call, so no `pre_http_request` mock is needed.
+
+### `get_theme_meta()` loop body requires at least one installed theme for `$all_headers` to be set
+`$all_headers = $this->get_headers('theme')` is set inside the `foreach ($paths as $slug => $path)` loop. When no themes are installed, `$paths` is empty and `$all_headers` stays `[]`. Injecting themes via `gu_additions` that reach the second loop will then always hit the `!array_key_exists($key, $all_headers)` continue branch regardless of the key. In wp-env, default WordPress themes are always installed, so `$all_headers` is populated. Tests relying on a non-continue loop path work in wp-env but may fail in bare environments.
+
+### `get_theme_meta()` branch migration: set `Base::$options` before constructing Theme
+`Theme::$options` (private static) is copied from `Base::$options` in the Theme constructor via `get_class_vars('Base', 'options')`, then `load_options()` resets `Base::$options` from the DB. To make `self::$options['current_branch_X']` available inside `get_theme_meta()` during construction, set `Base::$options['current_branch_X']` before `new Theme()`. The value persists in `Theme::$options` for the duration of that `get_theme_meta()` call.
+
+### Multisite `after_theme_row` actions added by `get_remote_theme_meta()`; clean up in `tear_down()`
+When `is_multisite()` is true, `get_remote_theme_meta()` adds `after_theme_row` and `after_theme_row_{slug}` actions for each theme in config. Add `remove_all_actions('after_theme_row')` and `remove_all_actions("after_theme_row_{slug}")` to `tear_down()` to prevent cross-test contamination.
+
+### `.git/HEAD` branch override bug in Theme.php (fixed)
+The original `.git/HEAD` detection block (lines 228–231) mistakenly wrote to `$git_plugin['branch']` instead of `$git_theme['branch']` — a copy-paste error from Plugin.php. Fixed: the branch is now correctly assigned to `$git_theme['branch']`. Tests for this path create a temporary `.git/HEAD` file in the fixture theme directory and clean it up in a `finally` block.

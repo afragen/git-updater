@@ -12,8 +12,10 @@
  * - Theme::customize_theme_update_html()  — skips missing slugs; sets 'update' key on hasUpdate; appends to description
  * - Theme::update_site_transient()   — non-object input; empty config; update/no_update paths;
  *                                      no_update not overwritten; dot_org override removal; release_asset branch package
- * - Theme::get_theme_meta()           — returns array; gu_additions filter receives 'theme' type; fixture theme discovered
- * - Theme::get_remote_theme_meta()   — load_pre_filters called; cron scheduled for uncached repos; no duplicate cron; gu_disable_wpcron prevents scheduling
+ * - Theme::get_theme_meta()           — returns array; gu_additions filter receives 'theme' type; fixture theme discovered;
+ *                                      null-key continue; branch migration; .git/HEAD branch override
+ * - Theme::get_remote_theme_meta()   — load_pre_filters called; cron scheduled for uncached repos; no duplicate cron;
+ *                                      gu_disable_wpcron prevents scheduling; multisite after_theme_row actions; tag suppresses update-row action
  *
  * Test_Theme_Config_Discovery requires the fixture theme to be mounted via .wp-env.json.
  * Skip message: Run `npm run wp-env start` after adding the theme fixture.
@@ -810,6 +812,86 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 		$slug = $result['test-gu-theme']->slug ?? null;
 		$this->assertSame( 'test-gu-theme', $slug );
 	}
+
+	public function test_theme_without_themeuri_key_is_skipped_via_continue(): void {
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				// A theme with no key containing 'themeuri' — triggers the null-key continue.
+				return [
+					'no-themeuri-theme' => [
+						'GitHubPluginURI' => 'https://github.com/owner/some-plugin',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		// Injected theme must be absent — the loop hit `continue` for it.
+		$this->assertArrayNotHasKey( 'no-themeuri-theme', $result );
+	}
+
+	public function test_branch_migration_removes_master_option_when_primary_branch_differs(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		// Simulate a legacy 'master' current_branch entry for the fixture theme whose
+		// style.css declares 'Primary Branch: main'.
+		Base::$options['current_branch_test-gu-theme'] = 'master';
+
+		// Theme constructor calls get_theme_meta(), which triggers the migration.
+		new Theme();
+
+		$options_ref = new ReflectionProperty( Theme::class, 'options' );
+		$options_ref->setAccessible( true );
+		$options = $options_ref->getValue( null );
+		$this->assertArrayNotHasKey( 'current_branch_test-gu-theme', $options );
+	}
+
+	public function test_git_head_file_overrides_branch_value(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		$theme_dir    = trailingslashit( get_theme_root() . '/test-gu-theme' );
+		$git_dir      = $theme_dir . '.git/';
+		$git_head     = $git_dir . 'HEAD';
+		$dir_created  = ! is_dir( $git_dir );
+		$file_created = ! file_exists( $git_head );
+
+		if ( $dir_created ) {
+			mkdir( $git_dir, 0755, true );
+		}
+		if ( $file_created ) {
+			file_put_contents( $git_head, "ref: refs/heads/feature-branch\n" );
+		}
+
+		try {
+			$theme = new Theme();
+			$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+			$rm->setAccessible( true );
+			$result = $rm->invoke( $theme );
+
+			$this->assertArrayHasKey( 'test-gu-theme', $result );
+			// After the bug-fix (git_plugin → git_theme), the branch is overridden from HEAD.
+			$this->assertSame( 'feature-branch', $result['test-gu-theme']->branch ?? null );
+		} finally {
+			if ( $file_created ) {
+				unlink( $git_head );
+			}
+			if ( $dir_created ) {
+				rmdir( $git_dir );
+			}
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -833,6 +915,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		remove_all_filters( 'wp_prepare_themes_for_js' );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_disable_wpcron' );
+		remove_all_actions( 'after_theme_row' );
+		remove_all_actions( 'after_theme_row_test-gu-theme' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
 		parent::tear_down();
@@ -913,6 +997,54 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		// Base::get_remote_repo_meta() short-circuits when gu_disable_wpcron && !can_update(),
 		// so no cron event should be scheduled.
 		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	/**
+	 * @group multisite
+	 */
+	public function test_multisite_adds_after_theme_row_actions(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite test — skipped under single-site.' );
+		}
+
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		$this->assertSame( 10, has_action( 'after_theme_row', [ $theme, 'remove_after_theme_row' ] ) );
+		$this->assertSame( 10, has_action( 'after_theme_row_test-gu-theme', [ $theme, 'wp_theme_update_row' ] ) );
+	}
+
+	/**
+	 * @group multisite
+	 */
+	public function test_multisite_skips_wp_theme_update_row_when_tag_is_set(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite test — skipped under single-site.' );
+		}
+
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+
+		// A truthy $tag suppresses the wp_theme_update_row action inside the multisite block.
+		$tag_ref = new ReflectionProperty( Theme::class, 'tag' );
+		$tag_ref->setAccessible( true );
+		$tag_ref->setValue( $theme, '1.0.0' );
+
+		$theme->get_remote_theme_meta();
+
+		$this->assertSame( 10, has_action( 'after_theme_row', [ $theme, 'remove_after_theme_row' ] ) );
+		$this->assertFalse( has_action( 'after_theme_row_test-gu-theme', [ $theme, 'wp_theme_update_row' ] ) );
 	}
 
 	/**
