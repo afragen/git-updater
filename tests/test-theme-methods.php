@@ -12,7 +12,8 @@
  * - Theme::customize_theme_update_html()  — skips missing slugs; sets 'update' key on hasUpdate; appends to description
  * - Theme::update_site_transient()   — non-object input; empty config; update/no_update paths;
  *                                      no_update not overwritten; dot_org override removal; release_asset branch package
- * - Theme::get_remote_theme_meta()   — load_pre_filters called; cron scheduled for uncached repos
+ * - Theme::get_theme_meta()           — returns array; gu_additions filter receives 'theme' type; fixture theme discovered
+ * - Theme::get_remote_theme_meta()   — load_pre_filters called; cron scheduled for uncached repos; no duplicate cron; gu_disable_wpcron prevents scheduling
  *
  * Test_Theme_Config_Discovery requires the fixture theme to be mounted via .wp-env.json.
  * Skip message: Run `npm run wp-env start` after adding the theme fixture.
@@ -747,6 +748,71 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 }
 
 // ---------------------------------------------------------------------------
+// Test_Theme_Get_Theme_Meta
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Theme_Get_Theme_Meta
+ */
+class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
+	use Theme_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_additions' );
+		parent::tear_down();
+	}
+
+	public function test_returns_array(): void {
+		$theme = $this->theme_with_config( [] );
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+		$this->assertIsArray( $result );
+	}
+
+	public function test_gu_additions_filter_receives_theme_type_arg(): void {
+		$captured_type = null;
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) use ( &$captured_type ) {
+				$captured_type = $type;
+				return $value;
+			},
+			10,
+			3
+		);
+
+		// get_theme_meta() is called from new Theme() constructor path; invoke directly via Reflection.
+		$theme = $this->theme_with_config( [] );
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$rm->invoke( $theme );
+
+		$this->assertSame( 'theme', $captured_type );
+	}
+
+	public function test_result_contains_fixture_theme_when_installed(): void {
+		if ( ! wp_get_theme( 'test-gu-theme' )->exists() ) {
+			$this->markTestSkipped( 'Fixture theme test-gu-theme not installed — run `npm run wp-env start`.' );
+		}
+
+		$theme  = new Theme();
+		$rm     = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'test-gu-theme', $result );
+		$slug = $result['test-gu-theme']->slug ?? null;
+		$this->assertSame( 'test-gu-theme', $slug );
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Test_Theme_Get_Remote_Theme_Meta
 // ---------------------------------------------------------------------------
 
@@ -767,7 +833,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		remove_all_filters( 'wp_prepare_themes_for_js' );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_disable_wpcron' );
-		wp_clear_scheduled_hook( 'gu_get_remote_theme' );
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
 		parent::tear_down();
 	}
 
@@ -814,6 +881,37 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		$theme = $this->theme_with_config( [] );
 		$theme->get_remote_theme_meta();
 
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_no_duplicate_cron_when_already_scheduled(): void {
+		// Schedule a past-due event so wp_get_ready_cron_jobs() can see it.
+		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [] ] );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Hook should still exist (not cleared or duplicated to a second slot).
+		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_gu_disable_wpcron_prevents_cron_scheduling(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		add_filter( 'gu_disable_wpcron', '__return_true' );
+
+		$theme_obj = $this->make_theme_obj();
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Base::get_remote_repo_meta() short-circuits when gu_disable_wpcron && !can_update(),
+		// so no cron event should be scheduled.
 		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
 	}
 

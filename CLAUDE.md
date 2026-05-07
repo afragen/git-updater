@@ -219,3 +219,12 @@ wp_unschedule_hook( 'gu_get_remote_plugin' );
 ```
 
 The `gu_get_remote_plugin` hook is bootstrapped at `init` time (via `Base::load()` → `get_meta_plugins()`) so it will always be present in the pre-test DB state.
+
+### `gu_additions` filter is called with 3 args; register with `add_filter(..., 10, 3)`
+`get_theme_meta()` applies the filter as `apply_filters('gu_additions', null, $themes, 'theme')`. A listener registered without specifying the accepted-arg count (default 1) will never receive the `$type` argument. Always pass the priority and count explicitly:
+```php
+add_filter( 'gu_additions', function( $value, $themes, $type ) { ... }, 10, 3 );
+```
+
+### `gu_disable_wpcron` path in `get_remote_theme/plugin_meta()` needs no HTTP mock
+`Base::get_remote_repo_meta()` has an early return: `if ($disable_wp_cron && !can_update()) return false`. In tests there is no admin user, so `can_update()` always returns false. When `gu_disable_wpcron` is true the method short-circuits before any HTTP call, so no `pre_http_request` mock is needed.
