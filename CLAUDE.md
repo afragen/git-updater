@@ -282,3 +282,18 @@ The same pattern applies when the Theme Singleton's config is empty (fixture the
 
 ### `get_repo_slugs()` AJAX path — mock via `wp_doing_ajax` filter + real nonce
 `wp_doing_ajax()` applies the `wp_doing_ajax` filter, so `add_filter('wp_doing_ajax', '__return_true')` mocks AJAX context without defining `DOING_AJAX`. `check_ajax_referer('updates')` is satisfied by placing `wp_create_nonce('updates')` in `$_REQUEST['_ajax_nonce']` — works with user_id=0 (no logged-in user required). Unset `$_POST['action']`, `$_POST['git_updater_repo']`, and `$_REQUEST['_ajax_nonce']` in `tear_down()`. The nonce must be created fresh each test because `wp_create_nonce` is time-sensitive.
+
+### `Basic_Auth_Loader` — testing private credential helpers via reflection
+`get_credentials()`, `get_slug_for_credentials()`, and `get_type_for_credentials()` are all `private`. Access them with `ReflectionMethod::invoke()`. Always call through a `GitHub_API` (or `Language_Pack_API`) instance — not a bare test class — so the `Singleton` namespace resolution works correctly.
+
+### `Basic_Auth_Loader::get_credentials()` Language_Pack_API branch
+`Language_Pack_API` extends `API` and can be instantiated directly: `new Language_Pack_API($type)`. Its constructor calls `parent::__construct()` (sets static options/headers from Base) then sets `$this->type = $type`. Use this to cover the `$this instanceof Language_Pack_API` branch in `get_credentials()` (lines 129–131).
+
+### `Basic_Auth_Loader::add_auth_header()` — control credentials via site option
+`get_credentials()` reads `get_site_option('git_updater')` directly (not `Base::$options`). To test the Bearer-token path: `update_site_option('git_updater', ['github_access_token' => 'test-token'])` and set `$_REQUEST['slug'] = 'the-slug'`. To test the no-token (type-only) path: leave the site option absent — `$token` resolves to `null`, triggering the `elseif` at line 79.
+
+### `Basic_Auth_Loader::add_accept_header()` — git-server header path
+To exercise the `in_array($key, get_running_git_servers())` branch, pass `['headers' => ['github' => $slug]]`. Pre-seed the repo cache with `update_site_option('ghu-' . md5($slug), ['release_asset_download' => 'https://...'])` (no timeout needed — `get_repo_cache($value, false)` ignores timeout) to trigger the `Accept: application/octet-stream` merge. Without the cache entry the `github` key is still unset but no Accept header is added.
+
+### `Basic_Auth_Loader` Remote Install POST path — clean up `$_POST` in `tear_down()`
+`get_type_for_credentials()` reads `$_POST['git_updater_api']` and `$_POST['git_updater_repo']`. Always unset both in `tear_down()` to prevent cross-test contamination.
