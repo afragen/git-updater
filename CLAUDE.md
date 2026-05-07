@@ -255,3 +255,12 @@ When `waiting_for_background_update($repo)` returns false (non-empty cache), `Ba
 
 ### `get_plugin_meta()` — Plugin-exclusive `gu_fix_repo_slug` filter modifies the result key
 `gu_fix_repo_slug` is applied at line 224 of Plugin.php after the repo object is assembled. The filter receives the full `$git_plugin` array; its returned `['slug']` value becomes the key in the `$git_plugins` result. There is no Theme equivalent. Always clean up with `remove_all_filters('gu_fix_repo_slug')` in `tear_down()`.
+
+### `get_repo_slugs()` — test via Plugin Singleton as upgrader_object, not null
+`get_repo_slugs(string $slug, $upgrader_object = null)` with `$upgrader_object = null` sets it to `$this` (GitHub_API). `GitHub_API` has no declared `$config` property so `get_class_vars('GitHub_API', 'config')` returns `false`, and `(array) false = [false]` causing a TypeError when the foreach tries `$repo->slug`. Instead, pass a real `Plugin` Singleton as the upgrader object: `Singleton::get_instance('Fragen\Git_Updater\Plugin', $this->api)`. For a nonexistent slug the loop finds no match and returns `[]`.
+
+### `waiting_for_background_update(null)` — use `gu_config_pre_process` filter to empty repos
+When called with `null`, the method merges Plugin and Theme configs then iterates. In the test environment the fixture plugin IS in Plugin config (with empty cache), so `$waiting` is non-empty and the method returns `true`. To test the false path, add `add_filter('gu_config_pre_process', '__return_empty_array')` before invoking, forcing `$repos = []` → `$waiting = []` → `false`. Clean up with `remove_all_filters('gu_config_pre_process')` in `tear_down()`.
+
+### `get_github_rate_limit_headers()` — mock with `CaseInsensitiveDictionary` as headers value
+`get_github_rate_limit_headers()` calls `wp_remote_retrieve_headers($response)->getAll()`. When short-circuited via `pre_http_request`, the filter must return an array whose `headers` key is a `WpOrg\Requests\Utility\CaseInsensitiveDictionary` instance. Use `new CaseInsensitiveDictionary(['x-ratelimit-reset' => (string)(time() + 300)])` for the reset-time test and `new CaseInsensitiveDictionary([])` for the 60-minute default test. Import with `use WpOrg\Requests\Utility\CaseInsensitiveDictionary;`.
