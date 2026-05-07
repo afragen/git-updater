@@ -10,6 +10,7 @@
  */
 
 use Fragen\Git_Updater\API\GitHub_API;
+use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
 
 class Test_Basic_Auth_Loader extends WP_UnitTestCase {
@@ -27,6 +28,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		unset( $_REQUEST['slug'], $_REQUEST['plugin'], $_REQUEST['plugins'], $_REQUEST['themes'] );
+		unset( $_POST['git_updater_api'], $_POST['git_updater_repo'] );
 		parent::tear_down();
 	}
 
@@ -64,6 +66,14 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	private function get_slug_for_credentials( array $headers, array $repos, string $url, array $options ) {
 		$rm = new ReflectionMethod( $this->api, 'get_slug_for_credentials' );
 		return $rm->invoke( $this->api, $headers, $repos, $url, $options );
+	}
+
+	/**
+	 * Invoke the private get_type_for_credentials() method via reflection.
+	 */
+	private function get_type_for_credentials( string $slug, array $repos, string $url ): string {
+		$rm = new ReflectionMethod( $this->api, 'get_type_for_credentials' );
+		return $rm->invoke( $this->api, $slug, $repos, $url );
 	}
 
 	// -------------------------------------------------------------------------
@@ -273,5 +283,261 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$this->assertSame( $args, $result );
 		// Confirm filter was removed (calling again would be a no-op if it was removed).
 		$this->assertFalse( has_filter( 'http_request_args', [ $this->api, 'download_package' ] ) );
+	}
+
+	/**
+	 * When args['filename'] is NOT null, download_package() must invoke
+	 * add_auth_header(), unset_release_asset_auth(), and add_accept_header()
+	 * (lines 40–42) and still remove itself from the filter.
+	 * Using a WordPress.org URL keeps add_auth_header() on its early-return
+	 * path so no actual credentials are needed.
+	 */
+	public function test_download_package_processes_headers_when_filename_is_set(): void {
+		add_filter( 'http_request_args', [ $this->api, 'download_package' ], 10, 2 );
+
+		$args   = [ 'filename' => '/tmp/pkg.zip', 'headers' => [] ];
+		$result = $this->api->download_package( $args, 'https://api.wordpress.org/plugins/info/1.0/' );
+
+		$this->assertIsArray( $result );
+		$this->assertFalse( has_filter( 'http_request_args', [ $this->api, 'download_package' ] ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_auth_header() — credential paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When a github_access_token is configured, add_auth_header() must inject
+	 * a Bearer Authorization header and a github slug header (lines 64–68, 77, 82).
+	 */
+	public function test_add_auth_header_adds_bearer_token_for_github_with_access_token(): void {
+		update_site_option( 'git_updater', [ 'github_access_token' => 'test-token' ] );
+		$_REQUEST['slug'] = 'test-plugin';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://api.github.com/repos/test-owner/test-plugin/contents/readme.txt'
+		);
+
+		$this->assertSame( 'Bearer test-token', $result['headers']['Authorization'] );
+		$this->assertSame( 'test-plugin', $result['headers']['github'] );
+	}
+
+	/**
+	 * When credentials have a type but no token, add_auth_header() must set the
+	 * git-server header keyed by type without an Authorization header
+	 * (lines 79–80, 82).
+	 */
+	public function test_add_auth_header_sets_type_header_when_no_token(): void {
+		// No github_access_token in options → token resolves to null.
+		$_REQUEST['slug'] = 'test-plugin';
+
+		$result = $this->api->add_auth_header(
+			[ 'headers' => [] ],
+			'https://api.github.com/repos/test-owner/test-plugin/contents/readme.txt'
+		);
+
+		$this->assertArrayNotHasKey( 'Authorization', $result['headers'] );
+		$this->assertSame( 'test-plugin', $result['headers']['github'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_credentials() — Language_Pack_API instanceof branch
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When get_credentials() is called on a Language_Pack_API instance,
+	 * it must override $type and $slug from $this->type (lines 130–131).
+	 */
+	public function test_get_credentials_overrides_slug_and_type_for_language_pack_api(): void {
+		$type     = $this->make_type(); // git='github', slug='test-plugin'
+		$lang_api = new Language_Pack_API( $type );
+		$rm       = new ReflectionMethod( $lang_api, 'get_credentials' );
+
+		$credentials = $rm->invoke(
+			$lang_api,
+			'https://api.github.com/repos/test-owner/test-plugin/contents/lang-pack.json'
+		);
+
+		// The Language_Pack_API branch sets $type from $this->type->git.
+		$this->assertSame( 'github', $credentials['type'] );
+		$this->assertTrue( $credentials['isset'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_slug_for_credentials() — bulk update and URL-path fallback paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When $_REQUEST['plugins'] is set and the URL contains one of the plugin
+	 * dirnames, get_slug_for_credentials() must return the matching slug
+	 * (lines 190, 197–205).
+	 */
+	public function test_get_slug_for_credentials_bulk_plugins_request_matches_url(): void {
+		$_REQUEST['plugins'] = 'my-plugin/my-plugin.php,other-plugin/other.php';
+
+		$result = $this->get_slug_for_credentials(
+			[ 'host' => 'api.github.com' ],
+			[],
+			'https://api.github.com/repos/owner/my-plugin/releases/latest',
+			[]
+		);
+
+		$this->assertSame( 'my-plugin', $result );
+	}
+
+	/**
+	 * When $_REQUEST['themes'] is set and the URL contains one of the theme
+	 * slugs, get_slug_for_credentials() must return the matching slug
+	 * (lines 192–194, 197–205).
+	 */
+	public function test_get_slug_for_credentials_bulk_themes_request_matches_url(): void {
+		$_REQUEST['themes'] = 'my-theme,other-theme';
+
+		$result = $this->get_slug_for_credentials(
+			[ 'host' => 'api.github.com' ],
+			[],
+			'https://api.github.com/repos/owner/my-theme/releases/latest',
+			[]
+		);
+
+		$this->assertSame( 'my-theme', $result );
+	}
+
+	/**
+	 * When no REQUEST slug is found and the URL path contains a segment that
+	 * matches a key in $repos, get_slug_for_credentials() must return that key
+	 * (lines 209–215).
+	 */
+	public function test_get_slug_for_credentials_matches_slug_from_url_path(): void {
+		$repos   = [ 'my-plugin' => (object) [ 'git' => 'github' ] ];
+		$headers = [ 'path' => '/repos/owner/my-plugin/contents/file.php' ];
+
+		$result = $this->get_slug_for_credentials(
+			$headers,
+			$repos,
+			'https://api.github.com/repos/owner/my-plugin/contents/file.php',
+			[]
+		);
+
+		$this->assertSame( 'my-plugin', $result );
+	}
+
+	/**
+	 * When a URL path segment matches $this->type->gist_id, the method must
+	 * return $this->type->slug (lines 217–221).
+	 */
+	public function test_get_slug_for_credentials_matches_via_gist_id(): void {
+		$type          = $this->make_type(); // slug='test-plugin'
+		$type->gist_id = 'abc123def';
+		$gist_api      = new GitHub_API( $type );
+		$rm            = new ReflectionMethod( $gist_api, 'get_slug_for_credentials' );
+
+		$result = $rm->invoke(
+			$gist_api,
+			[ 'path' => '/gists/abc123def/contents' ],
+			[],
+			'https://api.github.com/gists/abc123def/contents',
+			[]
+		);
+
+		$this->assertSame( 'test-plugin', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_type_for_credentials() — slug-in-repos, WP-CLI, Remote Install paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When the slug is present in $repos with a git property, the method returns
+	 * that repo's git type (line 242 — ternary true branch).
+	 */
+	public function test_get_type_for_credentials_uses_repo_git_type_for_known_slug(): void {
+		$repos  = [ 'my-plugin' => (object) [ 'git' => 'bitbucket' ] ];
+		$result = $this->get_type_for_credentials(
+			'my-plugin',
+			$repos,
+			'https://api.bitbucket.org/2.0/repositories/owner/my-plugin'
+		);
+
+		$this->assertSame( 'bitbucket', $result );
+	}
+
+	/**
+	 * When slug is empty and a repo's download_link matches the URL, the method
+	 * returns that repo's git type (lines 247–251 — WP-CLI path).
+	 */
+	public function test_get_type_for_credentials_uses_download_link_for_wpcli(): void {
+		$url   = 'https://api.github.com/repos/owner/my-plugin/zipball/main';
+		$repos = [ 'my-plugin' => (object) [ 'git' => 'github', 'download_link' => $url ] ];
+
+		$result = $this->get_type_for_credentials( '', $repos, $url );
+
+		$this->assertSame( 'github', $result );
+	}
+
+	/**
+	 * When $_POST contains git_updater_api and git_updater_repo and the URL
+	 * contains the repo basename, the method returns the POST-supplied type
+	 * (lines 257–260 — Remote Install path).
+	 */
+	public function test_get_type_for_credentials_uses_post_data_for_remote_install(): void {
+		$_POST['git_updater_api']  = 'gitlab';
+		$_POST['git_updater_repo'] = 'my-plugin.zip';
+		$url                       = 'https://gitlab.com/some/path/my-plugin.zip';
+
+		$result = $this->get_type_for_credentials( '', [], $url );
+
+		$this->assertSame( 'gitlab', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// unset_release_asset_auth() — X-Amz- check
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A URL containing 'X-Amz-' (signed S3 query string) must have its
+	 * Authorization header removed — covers the third item in $release_asset_parts.
+	 */
+	public function test_unset_release_asset_auth_removes_authorization_for_x_amz_url(): void {
+		$args = [ 'headers' => [ 'Authorization' => 'Bearer token123' ] ];
+		$url  = 'https://custom-bucket.example.com/asset.zip?X-Amz-Signature=abc123&X-Amz-Expires=3600';
+
+		$result = $this->api->unset_release_asset_auth( $args, $url );
+
+		$this->assertArrayNotHasKey( 'Authorization', $result['headers'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_accept_header() — git-server header handling
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When a 'github' header key is present and the repo cache contains
+	 * release_asset_download, add_accept_header() must merge an
+	 * Accept: application/octet-stream header and remove the 'github' key
+	 * (lines 308–314).
+	 */
+	public function test_add_accept_header_adds_octet_stream_for_github_release_asset(): void {
+		$slug      = 'test-plugin';
+		$cache_key = $this->api->get_cache_key( $slug );
+		update_site_option( $cache_key, [ 'release_asset_download' => 'https://cdn.example.com/release.zip' ] );
+
+		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => $slug ] ] );
+
+		$this->assertSame( 'application/octet-stream', $result['headers']['Accept'] );
+		$this->assertArrayNotHasKey( 'github', $result['headers'] );
+	}
+
+	/**
+	 * When a 'github' header key is present but the repo cache has no
+	 * release_asset_download entry, no Accept header is added and the
+	 * 'github' key is still removed (lines 308, 314 — false branch).
+	 */
+	public function test_add_accept_header_removes_github_header_without_release_asset(): void {
+		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => 'no-cache-slug' ] ] );
+
+		$this->assertArrayNotHasKey( 'Accept', $result['headers'] );
+		$this->assertArrayNotHasKey( 'github', $result['headers'] );
 	}
 }
