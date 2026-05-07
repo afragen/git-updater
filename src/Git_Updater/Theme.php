@@ -118,7 +118,7 @@ class Theme {
 	 */
 	protected function get_theme_meta() {
 		$this->delete_current_theme_cache();
-		$all_headers = [];
+		$all_headers = $this->get_headers( 'theme' );
 		$git_themes  = [];
 		$themes      = wp_get_themes( [ 'errors' => null ] );
 
@@ -136,7 +136,6 @@ class Theme {
 
 		$repos_arr = [];
 		foreach ( $paths as $slug => $path ) {
-			$all_headers        = $this->get_headers( 'theme' );
 			$repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'theme' );
 		}
 

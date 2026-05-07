@@ -892,6 +892,133 @@ class Test_Theme_Get_Theme_Meta extends WP_UnitTestCase {
 			}
 		}
 	}
+
+	public function test_theme_with_unknown_themeuri_key_is_skipped_via_array_key_exists(): void {
+		// 'CustomThemeURI' passes stripos('themeuri') but is absent from $all_headers.
+		// Exercises the ! array_key_exists branch at line 171 of Theme.php (the second continue condition).
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'custom-theme' => [
+						'CustomThemeURI' => 'https://github.com/owner/custom-theme',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayNotHasKey( 'custom-theme', $result );
+	}
+
+	public function test_theme_without_name_key_lacks_local_fields_in_result(): void {
+		// A gu_additions theme with a valid registered GitHubThemeURI but no 'Name' key.
+		// Exercises the isset($theme['Name']) === false path (lines 210–221 of Theme.php)
+		// and the consequent isset($git_theme['local_path']) === false path in the .git/HEAD block.
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'no-name-theme' => [
+						'GitHubThemeURI' => 'https://github.com/owner/no-name-theme',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'no-name-theme', $result );
+		$obj = $result['no-name-theme'];
+		$this->assertFalse( isset( $obj->local_path ) );
+		$this->assertFalse( isset( $obj->name ) );
+		$this->assertNotEmpty( $obj->branch );
+	}
+
+	public function test_non_empty_theme_id_produces_non_null_slug_did(): void {
+		// ThemeID header causes parse_extra_headers to set $header['did'], which makes slug_did non-null.
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) {
+				return [
+					'did-theme' => [
+						'GitHubThemeURI' => 'https://github.com/owner/did-theme',
+						'ThemeID'        => 'did:example:abc123',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( 'did-theme', $result );
+		$slug_did = $result['did-theme']->slug_did ?? null;
+		$this->assertNotNull( $slug_did );
+		$this->assertStringStartsWith( 'did-theme-', $slug_did );
+	}
+
+	public function test_real_theme_with_name_has_local_path_and_name(): void {
+		// gu_additions cannot include 'Name' with a foreign slug: line 210 of Theme.php dereferences
+		// $paths[$slug], which only contains slugs from wp_get_themes(). A foreign slug produces an
+		// undefined-key notice that convertNoticesToExceptions turns fatal.
+		// Fix: inject using a slug that IS in wp_get_themes() so $paths[$slug] is safe to access.
+		$installed = wp_get_themes( [ 'errors' => null ] );
+		if ( empty( $installed ) ) {
+			$this->markTestSkipped( 'No installed themes found.' );
+		}
+		$real_slug = array_key_first( $installed );
+
+		add_filter(
+			'gu_additions',
+			function ( $value, $themes, $type ) use ( $real_slug ) {
+				return [
+					$real_slug => [
+						'GitHubThemeURI' => 'https://github.com/owner/' . $real_slug,
+						'Name'           => 'Test Theme',
+						'Version'        => '1.0.0',
+						'Author'         => '',
+						'AuthorURI'      => '',
+						'License'        => '',
+						'ThemeURI'       => '',
+						'Description'    => '',
+						'UpdateURI'      => '',
+						'Security'       => '',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$theme = new Theme();
+		$rm    = new ReflectionMethod( $theme, 'get_theme_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $theme );
+
+		$this->assertArrayHasKey( $real_slug, $result );
+		$obj = $result[ $real_slug ];
+		$this->assertNotEmpty( $obj->local_path );
+		$this->assertNotEmpty( $obj->name );
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -915,10 +1042,13 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		remove_all_filters( 'wp_prepare_themes_for_js' );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_disable_wpcron' );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_actions( 'get_remote_repo_meta' );
 		remove_all_actions( 'after_theme_row' );
 		remove_all_actions( 'after_theme_row_test-gu-theme' );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_theme' );
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
 		parent::tear_down();
 	}
 
@@ -1045,6 +1175,75 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 
 		$this->assertSame( 10, has_action( 'after_theme_row', [ $theme, 'remove_after_theme_row' ] ) );
 		$this->assertFalse( has_action( 'after_theme_row_test-gu-theme', [ $theme, 'wp_theme_update_row' ] ) );
+	}
+
+	public function test_not_waiting_theme_triggers_direct_fetch_not_cron(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		// Seed a non-empty cache so waiting_for_background_update($repo) → get_repo_cache(slug, false)
+		// returns a non-empty array, making empty($cache) === false → not waiting → direct fetch.
+		update_site_option(
+			'ghu-' . md5( 'test-gu-theme' ),
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'dot_org' => false,
+			]
+		);
+
+		// Mock HTTP to prevent outbound calls and error-cache contamination.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( false !== strpos( $url, 'api.wordpress.org' ) ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => '{"themes":[],"translations":[],"no_update":[]}',
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200 ],
+					'body'     => '[]',
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Add the fields that Base::get_remote_repo_meta() → API::get_api_url() needs from the repo object.
+		$theme_obj = $this->make_theme_obj(
+			[
+				'owner'          => 'afragen',
+				'enterprise'     => null,
+				'enterprise_api' => null,
+				'slug_did'       => null,
+				'languages'      => null,
+				'ci_job'         => false,
+				'broken'         => false,
+				'is_private'     => false,
+				'update_uri'     => '',
+				'security'       => '',
+				'local_path'     => '',
+				'author_uri'     => '',
+				'license'        => '',
+			]
+		);
+
+		$action_called = false;
+		add_action( 'get_remote_repo_meta', function () use ( &$action_called ) {
+			$action_called = true;
+		}, 10, 2 );
+
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// Theme was processed directly (not queued) — no cron, and the action hook fired.
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+		$this->assertTrue( $action_called, 'get_remote_repo_meta action should fire for non-waiting theme' );
+		// load_pre_filters() was called at the end of get_remote_theme_meta().
+		$this->assertSame( 99, has_filter( 'themes_api', [ $theme, 'themes_api' ] ) );
 	}
 
 	/**

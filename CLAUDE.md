@@ -229,8 +229,8 @@ add_filter( 'gu_additions', function( $value, $themes, $type ) { ... }, 10, 3 );
 ### `gu_disable_wpcron` path in `get_remote_theme/plugin_meta()` needs no HTTP mock
 `Base::get_remote_repo_meta()` has an early return: `if ($disable_wp_cron && !can_update()) return false`. In tests there is no admin user, so `can_update()` always returns false. When `gu_disable_wpcron` is true the method short-circuits before any HTTP call, so no `pre_http_request` mock is needed.
 
-### `get_theme_meta()` loop body requires at least one installed theme for `$all_headers` to be set
-`$all_headers = $this->get_headers('theme')` is set inside the `foreach ($paths as $slug => $path)` loop. When no themes are installed, `$paths` is empty and `$all_headers` stays `[]`. Injecting themes via `gu_additions` that reach the second loop will then always hit the `!array_key_exists($key, $all_headers)` continue branch regardless of the key. In wp-env, default WordPress themes are always installed, so `$all_headers` is populated. Tests relying on a non-continue loop path work in wp-env but may fail in bare environments.
+### `get_theme_meta()` — `$all_headers` is set before the first loop
+`$all_headers = $this->get_headers('theme')` is set at the top of `get_theme_meta()`, before the `foreach ($paths as $slug => $path)` loop. This matches the Plugin pattern. `gu_additions` theme injection works correctly even in bare environments with no installed themes.
 
 ### `get_theme_meta()` branch migration: set `Base::$options` before constructing Theme
 `Theme::$options` (private static) is copied from `Base::$options` in the Theme constructor via `get_class_vars('Base', 'options')`, then `load_options()` resets `Base::$options` from the DB. To make `self::$options['current_branch_X']` available inside `get_theme_meta()` during construction, set `Base::$options['current_branch_X']` before `new Theme()`. The value persists in `Theme::$options` for the duration of that `get_theme_meta()` call.
@@ -240,3 +240,18 @@ When `is_multisite()` is true, `get_remote_theme_meta()` adds `after_theme_row` 
 
 ### `.git/HEAD` branch override bug in Theme.php (fixed)
 The original `.git/HEAD` detection block (lines 228–231) mistakenly wrote to `$git_plugin['branch']` instead of `$git_theme['branch']` — a copy-paste error from Plugin.php. Fixed: the branch is now correctly assigned to `$git_theme['branch']`. Tests for this path create a temporary `.git/HEAD` file in the fixture theme directory and clean it up in a `finally` block.
+
+### `get_theme_meta()` — `! array_key_exists($key, $all_headers)` vs `null === $key` continue branches
+Line 171 has two continue conditions: `null === $key` (no 'themeuri'-containing key found) and `! array_key_exists($key, $all_headers)` (key found but not a registered header). The `null` branch is triggered by a `gu_additions` theme whose array has no key matching `stripos($key, 'themeuri')`. The `! array_key_exists` branch is triggered by a `gu_additions` theme with a key that contains 'themeuri' (e.g. `'CustomThemeURI'`) but is NOT in the registered headers returned by `get_headers('theme')`. These are distinct test paths.
+
+### `get_theme_meta()` — `gu_additions` themes without a `'Name'` key skip `local_path` and `.git/HEAD`
+The block at lines 210–221 (setting `local_path`, `local_version`, `name`, etc.) only runs when `isset($theme['Name'])` is true. For `gu_additions` injected themes without `'Name'`, these fields are never set. Consequently `isset($git_theme['local_path'])` is false, and the `.git/HEAD` branch-override block (line 228) is also skipped. Additionally, accessing `$paths[$slug]` for gu_additions slugs that are not in `wp_get_themes()` would produce an undefined-key notice — so gu_additions themes should never include `'Name'`.
+
+### `get_theme_meta()` — ThemeID header → non-null `slug_did`
+`parse_extra_headers()` reads `$headers['ThemeID']` and sets `$header['did']`. When truthy, `$git_theme['slug_did']` is computed as `slug . '-' . get_did_hash(did)`. Inject a `gu_additions` theme with `'ThemeID' => 'did:example:abc'` to cover this path.
+
+### `get_remote_theme_meta()` — direct fetch when cache is warm; repo object needs `owner`, `enterprise`, `enterprise_api`
+When `waiting_for_background_update($repo)` returns false (non-empty cache), `Base::get_remote_repo_meta($repo)` is called directly. This eventually calls `API::api()` → `get_api_url()`, which reads `$this->type->owner`, `$this->type->enterprise`, and `$this->type->enterprise_api` from the repo object. These are not in `make_theme_obj()` defaults. Add them as overrides: `make_theme_obj(['owner' => 'afragen', 'enterprise' => null, 'enterprise_api' => null, ...])`. Detect the direct-fetch path via the `do_action('get_remote_repo_meta', ...)` hook that fires at the end of `get_remote_repo_meta()`; clean up with `remove_all_actions('get_remote_repo_meta')` in `tear_down()`.
+
+### `get_plugin_meta()` — Plugin-exclusive `gu_fix_repo_slug` filter modifies the result key
+`gu_fix_repo_slug` is applied at line 224 of Plugin.php after the repo object is assembled. The filter receives the full `$git_plugin` array; its returned `['slug']` value becomes the key in the `$git_plugins` result. There is no Theme equivalent. Always clean up with `remove_all_filters('gu_fix_repo_slug')` in `tear_down()`.

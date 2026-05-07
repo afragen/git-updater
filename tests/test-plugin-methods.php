@@ -134,6 +134,268 @@ class Test_Plugin_Get_Plugin_Configs extends WP_UnitTestCase {
 }
 
 // ---------------------------------------------------------------------------
+// Test_Plugin_Get_Plugin_Meta
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Plugin_Get_Plugin_Meta
+ *
+ * Covers Plugin::get_plugin_meta() branches.
+ * Tests that need the fixture plugin auto-skip when it is not installed.
+ *
+ * Note: unlike get_theme_meta(), $all_headers is computed once before the loop
+ * (line 121 of Plugin.php), so it is always populated regardless of whether
+ * any plugins are installed. gu_additions injection therefore works reliably
+ * for all branches in both single-plugin and empty-plugin environments.
+ */
+class Test_Plugin_Get_Plugin_Meta extends WP_UnitTestCase {
+	use Plugin_Mock_Helper;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_additions' );
+		remove_all_filters( 'gu_fix_repo_slug' );
+		parent::tear_down();
+	}
+
+	public function test_returns_array(): void {
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$this->assertIsArray( $rm->invoke( $plugin ) );
+	}
+
+	public function test_gu_additions_filter_receives_plugin_type_arg(): void {
+		$captured_type = null;
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) use ( &$captured_type ) {
+				$captured_type = $type;
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$rm->invoke( $plugin );
+
+		$this->assertSame( 'plugin', $captured_type );
+	}
+
+	public function test_plugin_without_pluginuri_key_is_skipped_via_null_key(): void {
+		// No key contains 'pluginuri' → array_pop returns null → null === $key continue.
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'no-uri-plugin/no-uri-plugin.php' => [
+						'GitHubThemeURI' => 'https://github.com/owner/no-uri-plugin',
+						'Version'        => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $plugin );
+
+		// parse_header_uri would yield 'no-uri-plugin'; loop must have hit continue before that.
+		$this->assertArrayNotHasKey( 'no-uri-plugin', $result );
+	}
+
+	public function test_plugin_with_unknown_pluginuri_key_is_skipped_via_array_key_exists(): void {
+		// 'CustomPluginURI' passes stripos('pluginuri') but is absent from $all_headers.
+		// Exercises the ! array_key_exists branch at line 155 of Plugin.php (second continue condition).
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'custom-plugin/custom-plugin.php' => [
+						'CustomPluginURI' => 'https://github.com/owner/custom-plugin',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $plugin );
+
+		$this->assertArrayNotHasKey( 'custom-plugin', $result );
+	}
+
+	public function test_plugin_without_name_key_lacks_local_fields_in_result(): void {
+		// A gu_additions plugin with a valid registered GitHubPluginURI but no 'Name' key.
+		// Exercises the isset($plugin['Name']) === false path (lines 194–205 of Plugin.php)
+		// and the consequent isset($git_plugin['local_path']) === false path in the .git/HEAD block.
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'no-name-plugin/no-name-plugin.php' => [
+						'GitHubPluginURI' => 'https://github.com/owner/no-name-plugin',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $plugin );
+
+		$this->assertArrayHasKey( 'no-name-plugin', $result );
+		$obj = $result['no-name-plugin'];
+		$this->assertFalse( isset( $obj->local_path ) );
+		$this->assertFalse( isset( $obj->name ) );
+		$this->assertNotEmpty( $obj->branch );
+	}
+
+	public function test_non_empty_plugin_id_produces_non_null_slug_did(): void {
+		// PluginID header causes parse_extra_headers to set $header['did'], making slug_did non-null.
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'did-plugin/did-plugin.php' => [
+						'GitHubPluginURI' => 'https://github.com/owner/did-plugin',
+						'PluginID'        => 'did:example:abc123',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $plugin );
+
+		$this->assertArrayHasKey( 'did-plugin', $result );
+		$slug_did = $result['did-plugin']->slug_did ?? null;
+		$this->assertNotNull( $slug_did );
+		$this->assertStringStartsWith( 'did-plugin-', $slug_did );
+	}
+
+	public function test_branch_migration_removes_master_option_when_primary_branch_differs(): void {
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'branch-plugin/branch-plugin.php' => [
+						'GitHubPluginURI' => 'https://github.com/owner/branch-plugin',
+						'PrimaryBranch'   => 'main',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		// Simulate a legacy 'master' current_branch entry for a plugin whose header
+		// declares 'PrimaryBranch: main'. Constructor calls get_plugin_meta() which triggers migration.
+		Base::$options['current_branch_branch-plugin'] = 'master';
+		new Plugin();
+
+		$options_ref = new ReflectionProperty( Plugin::class, 'options' );
+		$options_ref->setAccessible( true );
+		$options = $options_ref->getValue( null );
+		$this->assertArrayNotHasKey( 'current_branch_branch-plugin', $options );
+	}
+
+	public function test_gu_fix_repo_slug_filter_can_modify_slug(): void {
+		// gu_fix_repo_slug is Plugin-specific (no Theme equivalent).
+		// The filter receives $git_plugin array; its returned ['slug'] becomes the result key.
+		add_filter(
+			'gu_additions',
+			function ( $value, $plugins, $type ) {
+				return [
+					'original-plugin/original-plugin.php' => [
+						'GitHubPluginURI' => 'https://github.com/owner/original-plugin',
+						'Version'         => '1.0.0',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		add_filter(
+			'gu_fix_repo_slug',
+			function ( $git_plugin ) {
+				$git_plugin['slug'] = 'modified-slug';
+				return $git_plugin;
+			}
+		);
+
+		$plugin = new Plugin();
+		$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+		$rm->setAccessible( true );
+		$result = $rm->invoke( $plugin );
+
+		$this->assertArrayNotHasKey( 'original-plugin', $result );
+		$this->assertArrayHasKey( 'modified-slug', $result );
+	}
+
+	public function test_git_head_file_overrides_branch_value(): void {
+		if ( ! isset( ( new Plugin() )->get_plugin_configs()['test-gu-plugin'] ) ) {
+			$this->markTestSkipped( 'Fixture plugin test-gu-plugin not installed — run `npm run wp-env start`.' );
+		}
+
+		$plugin_dir   = trailingslashit( WP_PLUGIN_DIR . '/test-gu-plugin' );
+		$git_dir      = $plugin_dir . '.git/';
+		$git_head     = $git_dir . 'HEAD';
+		$dir_created  = ! is_dir( $git_dir );
+		$file_created = ! file_exists( $git_head );
+
+		if ( $dir_created ) {
+			mkdir( $git_dir, 0755, true );
+		}
+		if ( $file_created ) {
+			file_put_contents( $git_head, "ref: refs/heads/feature-branch\n" );
+		}
+
+		try {
+			$plugin = new Plugin();
+			$rm     = new ReflectionMethod( $plugin, 'get_plugin_meta' );
+			$rm->setAccessible( true );
+			$result = $rm->invoke( $plugin );
+
+			$this->assertArrayHasKey( 'test-gu-plugin', $result );
+			$this->assertSame( 'feature-branch', $result['test-gu-plugin']->branch ?? null );
+		} finally {
+			if ( $file_created ) {
+				unlink( $git_head );
+			}
+			if ( $dir_created ) {
+				rmdir( $git_dir );
+			}
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Test_Plugin_Sort_Sections_In_API
 // ---------------------------------------------------------------------------
 
