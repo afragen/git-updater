@@ -187,3 +187,26 @@ update_site_option(
 );
 ```
 Methods that use `get_repo_cache($slug, false)` (ignore timeout) also read stale entries, so the timeout value doesn't matter for those callers.
+
+### `get_addon_api_results()` uses `wp_remote_post`, interceptable via `pre_http_request`
+`Add_Ons::get_addon_api_results()` calls `wp_remote_post()` for each of the four add-on slugs. Mock all outbound HTTP via `add_filter('pre_http_request', ...)` — the filter intercepts POST requests too. Results are cached only when all four addons succeed (count check); partial results are returned but not cached. Cache key is `ghu-` + md5('gu_addon_api_results').
+
+### Additions\Settings has a static `$options_additions` property
+`Settings::$options_additions` is a static property populated in `__construct()` from `get_site_option('git_updater_additions', [])`. In tests, reset it before constructing: `Additions_Settings::$options_additions = []`. Set it directly on the class (not via site option) to drive `callback_checkbox()` checked-state tests.
+
+### Repo_List_Table requires WP_List_Table to be loaded
+`Repo_List_Table` extends `WP_List_Table`. The file-level guard loads it automatically when the class file is autoloaded, but as belt-and-suspenders add `require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php'` in `set_up()`. The constructor works in the tests-cli container without full admin context; `get_current_screen()` returns null but does not error.
+
+### `Additions::deduplicate()` reads plugin/theme cache with full timeout check
+`deduplicate()` calls `get_repo_cache('git_updater_repository_add_plugin')` and `get_repo_cache('git_updater_repository_add_theme')` with the default `$timeout = true`. Seed these site options with a future `timeout` key or the cache will be ignored: `update_site_option('ghu-' . md5('git_updater_repository_add_plugin'), ['git_updater_repository_add_plugin' => [...], 'timeout' => strtotime('+12 hours')])`.
+
+### Cron clearing after transaction rollback: bust the object cache first
+`wp_clear_scheduled_hook($hook)` and `wp_unschedule_hook($hook)` read the cron schedule from the WordPress object cache before writing. After a WP_UnitTestCase DB transaction rollback the object cache can be stale — the DB holds the original (bootstrap-scheduled) cron event but the cache reflects the cleared state written by the previous test's `tear_down()`. Calling `wp_clear_scheduled_hook` against a stale cache is a no-op that leaves the DB event in place.
+
+Always bust the cache before clearing cron hooks in `set_up()` and `tear_down()`:
+```php
+wp_cache_delete( 'cron', 'options' );
+wp_unschedule_hook( 'gu_get_remote_plugin' );
+```
+
+The `gu_get_remote_plugin` hook is bootstrapped at `init` time (via `Base::load()` → `get_meta_plugins()`) so it will always be present in the pre-test DB state.
