@@ -15,6 +15,7 @@
 * fix `Basic_Auth_Loader::get_slug_for_credentials()` array slug check order — `is_array()` must precede `sanitize_text_field()` so TGMPA array slugs are not silently discarded
 * borrow function from FAIR Connect to sort plugins_api modal tabs in correct order
 * add PHPStan level 6 testing and a whole mess of phpunit tests with load of help from Claude
+* consolidate cron task to eliminate potential duplication of API requests
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk
