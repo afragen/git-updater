@@ -339,3 +339,21 @@ $this->seed_cache( [ 'tags' => [ '1.0.0', '0.9.0' ] ] );
 $this->api->populate_api_data( $this->api->type, $this->api );
 $this->assertSame( '2024-01-01T00:00:00Z', $this->api->type->last_updated );
 ```
+
+### `WP_DEBUG` is `false` in the wp-env test container; annotate guarded blocks
+The wp-env `wp-config.php` defines `WP_DEBUG = false`. Any code inside `if (defined('WP_DEBUG') && WP_DEBUG)` is unreachable in tests. Annotate such blocks with `// @codeCoverageIgnoreStart` / `// @codeCoverageIgnoreEnd` rather than trying to test them.
+
+### `set_readme_info()` — `$type->sections` is an array after the merge, not stdClass
+After `set_readme_info()` runs, `$this->type->sections` is the result of `array_merge((array)$sections, (array)$readme['sections'])` — a plain PHP array. Use array access (`$this->type->sections['other_notes']`), not object access (`->other_notes`), in assertions.
+
+### `get_release_asset_redirect()` — simulate redirect by calling `set_redirect()` in `pre_http_request` mock
+The `requests-requests.before_redirect` action only fires during real HTTP redirects; `pre_http_request` short-circuits before it. To test the success path (lines that cache and return `$this->redirect`), call `$api->set_redirect($url)` inside the `pre_http_request` filter callback before returning the mock response. This sets `$this->redirect` as if the redirect action had fired.
+
+### `gu_post_api_response_body` filter — wrap cache-entry in `md5($url)` key to test line 275
+`API::api()` checks `if (!empty($response[md5($url)]) && is_array($response[md5($url)]))` after applying `gu_post_api_response_body`. To exercise the unwrap path, pre-compute `$url = $this->api->get_api_url($endpoint)` then add a filter that returns `[md5($url) => $response]`. Clean up with `remove_all_filters('gu_post_api_response_body')` in `tear_down()`.
+
+### `settings_hook()` lambda — fire `do_action('gu_add_settings', ...)` to cover the callback body
+`settings_hook($git)` registers a lambda on `gu_add_settings` that calls `$git->add_settings($auth_required)`. The constructor calls `settings_hook($this)`, so the registered `$git` is the API instance. Fire `do_action('gu_add_settings', ['github_private' => false, 'github_enterprise' => false])` in a test to invoke the lambda and cover that line.
+
+### `construct_download_link()` dev asset path — seed `release_assets` with both `assets` and `dev_assets` keys
+Lines 171-174 (the `gu_dev_release_asset` filter block) require `release_assets['dev_assets']` to be non-empty and `version_compare(asset_version, dev_asset_version, '<')` to return true. Seed the cache with `['assets' => ['1.0.0' => stable_url], 'dev_assets' => ['2.0.0-beta1' => dev_url]]` and add `add_filter('gu_dev_release_asset', '__return_true')`. The `gu_dev_release_asset` filter cleanup is already in `Test_GitHub_API_DownloadLink_ReleaseAsset::tear_down()`.

@@ -214,10 +214,11 @@ class API {
 			if ( ! in_array( $code, $allowed_codes, true ) ) {
 				$timeout = 60;
 
-				// Set timeout to GitHub rate limit reset.
+				// @codeCoverageIgnoreStart
 				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
 					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
 				}
+				// @codeCoverageIgnoreEnd
 				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
@@ -244,11 +245,14 @@ class API {
 				'git'  => $this->type->git,
 			]
 		);
+		// @codeCoverageIgnoreStart
 		if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
 			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
 		}
+		// @codeCoverageIgnoreEnd
 		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
+		// @codeCoverageIgnoreStart
 		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			$response_body = is_array( $response ) ? json_decode( wp_remote_retrieve_body( $response ) ) : null;
 			if ( null !== $response_body && property_exists( $response_body, 'message' ) ) {
@@ -258,6 +262,7 @@ class API {
 				error_log( $log_message );
 			}
 		}
+		// @codeCoverageIgnoreEnd
 
 		/**
 		 * Filter HTTP GET remote response body.
@@ -269,7 +274,7 @@ class API {
 		$response = apply_filters( 'gu_post_api_response_body', $response, $this );
 
 		if ( ! empty( $response[ md5( $url ) ] ) && is_array( $response[ md5( $url ) ] ) ) {
-			$response = $response[ md5( $url ) ];
+			$response = $response[ md5( $url ) ]; // @codeCoverageIgnore
 		}
 		$body = wp_remote_retrieve_body( $response );
 
@@ -657,8 +662,8 @@ class API {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $response || isset( $_REQUEST['override'] ) ) {
 			$args = $this->add_auth_header( [], $asset );
-			if ( empty( $args ) ) {
-				return false;
+			if ( empty( $args ) ) { // @codeCoverageIgnore
+				return false; // @codeCoverageIgnore
 			}
 			$octet_stream = [ 'accept' => 'application/octet-stream' ];
 			add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );

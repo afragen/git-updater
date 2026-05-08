@@ -538,6 +538,46 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$this->assertStringStartsWith( 'https://github.example.com/api/v3', $result );
 	}
 
+	public function test_add_endpoints_assets_method_adds_ref_query_arg(): void {
+		$this->set_static_method( 'assets' );
+		$result = $this->api->add_endpoints( $this->api, '/repos/owner/repo/contents/assets' );
+		$this->assertStringContainsString( 'ref=master', $result );
+	}
+
+	public function test_add_endpoints_changes_method_adds_ref_query_arg(): void {
+		$this->set_static_method( 'changes' );
+		$result = $this->api->add_endpoints( $this->api, '/repos/owner/repo/contents/CHANGES.md' );
+		$this->assertStringContainsString( 'ref=master', $result );
+	}
+
+	public function test_add_endpoints_release_asset_method_returns_endpoint_unchanged(): void {
+		$this->set_static_method( 'release_asset' );
+		$endpoint = '/repos/owner/repo/releases/latest';
+		$result   = $this->api->add_endpoints( $this->api, $endpoint );
+		$this->assertSame( $endpoint, $result );
+	}
+
+	public function test_add_endpoints_translation_method_returns_endpoint_unchanged(): void {
+		$this->set_static_method( 'translation' );
+		$endpoint = '/repos/owner/repo/releases';
+		$result   = $this->api->add_endpoints( $this->api, $endpoint );
+		$this->assertSame( $endpoint, $result );
+	}
+
+	public function test_add_endpoints_download_link_method_returns_endpoint_unchanged(): void {
+		$this->set_static_method( 'download_link' );
+		$endpoint = '/repos/owner/repo/zipball/master';
+		$result   = $this->api->add_endpoints( $this->api, $endpoint );
+		$this->assertSame( $endpoint, $result );
+	}
+
+	public function test_add_endpoints_default_method_returns_endpoint_unchanged(): void {
+		$this->set_static_method( 'unknown_method_xyz' );
+		$endpoint = '/repos/owner/repo';
+		$result   = $this->api->add_endpoints( $this->api, $endpoint );
+		$this->assertSame( $endpoint, $result );
+	}
+
 	// -------------------------------------------------------------------------
 	// ratelimit_reset()
 	// -------------------------------------------------------------------------
@@ -552,6 +592,22 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$result = GitHub_API::ratelimit_reset( $response, 'test-plugin' );
 
 		$this->assertSame( '60', $result );
+	}
+
+	public function test_ratelimit_reset_returns_wait_minutes_from_header(): void {
+		$reset_time = time() + 300; // 5 minutes from now
+		$response   = [
+			'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(
+				[ 'x-ratelimit-reset' => (string) $reset_time ]
+			),
+			'body'     => '',
+			'response' => [ 'code' => 403 ],
+		];
+
+		$result = GitHub_API::ratelimit_reset( $response, 'test-plugin' );
+
+		$this->assertIsString( $result );
+		$this->assertNotSame( '60', $result, 'Should not fall back to default when header is present.' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -642,5 +698,154 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$result = $this->api->remote_install( $headers, $install );
 
 		$this->assertSame( 'ghp_test_token', $result['options']['owner/repo'] );
+	}
+}
+
+/**
+ * Class Test_GitHub_API_DownloadLink_ReleaseAsset
+ *
+ * Release asset paths in construct_download_link().
+ */
+class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = $this->make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_post_construct_download_link' );
+		remove_all_filters( 'gu_dev_release_asset' );
+		add_filter( 'gu_always_fetch_update', '__return_false' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		parent::tear_down();
+	}
+
+	private function make_type(): stdClass {
+		$type                 = new stdClass();
+		$type->slug           = 'test-plugin';
+		$type->git            = 'github';
+		$type->type           = 'plugin';
+		$type->owner          = 'test-owner';
+		$type->branch         = 'master';
+		$type->primary_branch = 'master';
+		$type->enterprise     = false;
+		$type->enterprise_api = null;
+		$type->gist_id        = null;
+		$type->release_asset  = true;
+		$type->newest_tag     = '1.0.0';
+		$type->tags           = [ '1.0.0' => 'https://github.com/test-owner/test-plugin/zipball/1.0.0' ];
+		$type->branches       = (object) [ 'master' => [] ];
+		return $type;
+	}
+
+	private function seed_cache( array $data ): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
+		);
+	}
+
+	// -------------------------------------------------------------------------
+	// construct_download_link() — release asset paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When get_release_assets() returns false (no-update gate fires),
+	 * construct_download_link() returns an empty string.
+	 */
+	public function test_construct_download_link_returns_empty_when_release_assets_unavailable(): void {
+		// Seed release_assets with a message object so validate_response returns true → get_api_release_assets returns false.
+		$no_assets          = new stdClass();
+		$no_assets->message = 'No release assets found';
+		$this->seed_cache( [ 'release_assets' => $no_assets ] );
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( '', $result );
+	}
+
+	/**
+	 * When the cache already has a release_asset_download URL,
+	 * construct_download_link() returns it immediately.
+	 */
+	public function test_construct_download_link_returns_cached_release_asset_download(): void {
+		$cached_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$this->seed_cache(
+			[
+				'release_assets'         => [
+					'assets'     => [ '1.0.0' => $cached_url ],
+					'dev_assets' => [],
+				],
+				'release_asset_download' => $cached_url,
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		$this->assertSame( $cached_url, $result );
+	}
+
+	/**
+	 * When release_assets is in cache but release_asset_download is not,
+	 * construct_download_link() falls through to get_release_asset_redirect().
+	 * With asset=false (empty assets array), get_release_asset_redirect returns false.
+	 */
+	public function test_construct_download_link_calls_redirect_when_no_cached_download(): void {
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [],
+					'dev_assets' => [],
+				],
+			]
+		);
+
+		$result = $this->api->construct_download_link();
+
+		// get_release_asset_redirect(false, true) returns false when !$asset.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * When gu_dev_release_asset filter returns true and the dev asset version is
+	 * newer than the stable asset version, the dev asset URL is selected (lines 171-174).
+	 * The call ultimately returns false because get_release_asset_redirect() exits
+	 * via exit_no_update (no gu_always_fetch_update filter set).
+	 */
+	public function test_construct_download_link_uses_dev_asset_when_dev_release_asset_filter_true(): void {
+		$stable_url = 'https://github.com/test-owner/test-plugin/releases/download/v1.0.0/plugin.zip';
+		$dev_url    = 'https://github.com/test-owner/test-plugin/releases/download/v2.0.0-beta1/plugin-beta.zip';
+
+		$this->seed_cache(
+			[
+				'release_assets' => [
+					'assets'     => [ '1.0.0' => $stable_url ],
+					'dev_assets' => [ '2.0.0-beta1' => $dev_url ],
+				],
+			]
+		);
+
+		add_filter( 'gu_dev_release_asset', '__return_true' );
+
+		$result = $this->api->construct_download_link();
+
+		// exit_no_update fires inside get_release_asset_redirect() → returns false.
+		$this->assertFalse( $result );
 	}
 }

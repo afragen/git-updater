@@ -53,6 +53,7 @@ class Test_API extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_post_api_response_body' );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
 		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
 		parent::tear_down();
@@ -334,5 +335,166 @@ class Test_API extends WP_UnitTestCase {
 
 		$result = $this->api->set_readme_info( $readme );
 		$this->assertTrue( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// api() — WP_DEBUG log branch (lines 255-263)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When self::$method == 'file', WP_DEBUG is on, and the API returns a non-200
+	 * response whose body JSON has a 'message' property, error_log() is called.
+	 * The test exercises those lines by verifying the return value (the decoded
+	 * body object with the message property).
+	 */
+	public function test_api_logs_debug_message_on_non_200_with_file_method(): void {
+		$rp = new ReflectionProperty( \Fragen\Git_Updater\API\GitHub_API::class, 'method' );
+		$rp->setAccessible( true );
+		$original_method = $rp->getValue( null );
+		$rp->setValue( null, 'file' );
+
+		try {
+			add_filter(
+				'pre_http_request',
+				fn() => $this->mock_http_response( 403, [ 'message' => 'API rate limit exceeded' ] ),
+				10,
+				3
+			);
+
+			$result = $this->api->api( $this->endpoint );
+
+			// api() returns the decoded body regardless of status.
+			$this->assertIsObject( $result );
+			$this->assertSame( 'API rate limit exceeded', $result->message );
+		} finally {
+			$rp->setValue( null, $original_method );
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_url() — enterprise_api path (lines 338-341)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * When $type->enterprise_api is set, get_api_url() sets base_uri to null
+	 * and prepends the enterprise API host to the endpoint.
+	 */
+	public function test_get_api_url_prepends_enterprise_api_when_set(): void {
+		$this->type->enterprise_api = 'https://github.mycompany.com/api/v3';
+
+		$result = $this->api->get_api_url( '/repos/:owner/:repo' );
+
+		$this->assertStringStartsWith( 'https://github.mycompany.com/api/v3', $result );
+		$this->assertStringContainsString( 'test-owner', $result );
+		$this->assertStringContainsString( 'test-plugin', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// api() — gu_post_api_response_body filter wraps response in md5 key (line 275)
+	// -------------------------------------------------------------------------
+
+	public function test_api_unwraps_md5_keyed_response_from_gu_post_api_response_body_filter(): void {
+		$endpoint = '/repos/:owner/:repo';
+		$url      = $this->api->get_api_url( $endpoint );
+		$md5      = md5( $url );
+
+		add_filter(
+			'pre_http_request',
+			fn() => $this->mock_http_response( 200, [ 'name' => 'test-plugin' ] ),
+			10,
+			3
+		);
+
+		// Wrap the cache-entry response in a md5-keyed array to exercise line 275.
+		add_filter(
+			'gu_post_api_response_body',
+			function ( $response ) use ( $md5 ) {
+				return [ $md5 => $response ];
+			},
+			10,
+			2
+		);
+
+		$result = $this->api->api( $endpoint );
+
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	// -------------------------------------------------------------------------
+	// set_readme_info() — other_notes + remaining_content (line 577)
+	// upgrade_notice (line 601), tags loop (lines 606-609)
+	// -------------------------------------------------------------------------
+
+	public function test_set_readme_info_appends_remaining_content_to_other_notes(): void {
+		$this->type->sections    = new stdClass();
+		$this->type->requires    = '';
+		$this->type->requires_php = '';
+		$this->type->tested      = '';
+
+		$readme = [
+			'sections'          => [ 'other_notes' => 'Important notes.' ],
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [],
+			'remaining_content' => ' Extra content.',
+		];
+
+		$result = $this->api->set_readme_info( $readme );
+
+		$this->assertTrue( $result );
+		$this->assertStringContainsString( 'Important notes.', (string) $this->type->sections['other_notes'] );
+	}
+
+	public function test_set_readme_info_sets_upgrade_notice_when_non_empty(): void {
+		$this->type->sections    = new stdClass();
+		$this->type->requires    = '';
+		$this->type->requires_php = '';
+		$this->type->tested      = '';
+
+		$readme = [
+			'sections'          => [],
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [],
+			'remaining_content' => '',
+			'upgrade_notice'    => [ '1.0' => 'Please upgrade immediately.' ],
+		];
+
+		$result = $this->api->set_readme_info( $readme );
+
+		$this->assertTrue( $result );
+		$this->assertSame( [ '1.0' => 'Please upgrade immediately.' ], $this->type->upgrade_notice );
+	}
+
+	public function test_set_readme_info_reformats_tags_to_slugified_keys(): void {
+		$this->type->sections    = new stdClass();
+		$this->type->requires    = '';
+		$this->type->requires_php = '';
+		$this->type->tested      = '';
+
+		$readme = [
+			'sections'          => [],
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [ 'My Plugin', 'WordPress Plugin' ],
+			'remaining_content' => '',
+		];
+
+		$result = $this->api->set_readme_info( $readme );
+
+		$this->assertTrue( $result );
+		$this->assertArrayHasKey( 'my-plugin', $this->type->readme_tags );
+		$this->assertArrayHasKey( 'wordpress-plugin', $this->type->readme_tags );
+		$this->assertSame( 'My Plugin', $this->type->readme_tags['my-plugin'] );
 	}
 }

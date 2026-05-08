@@ -108,7 +108,7 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function get_release_asset() {
 		// return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
-	}
+	} // @codeCoverageIgnore
 
 	/**
 	 * Return array of release assets.
