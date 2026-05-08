@@ -646,7 +646,7 @@ class API {
 		}
 		// phpcs:enable
 
-		if ( $this->exit_no_update( $response )
+		if ( ! $response && $this->exit_no_update( $response )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&& ! isset( $_REQUEST['override'] ) && ! isset( $_REQUEST['rollback'] )
 			&& ! $rest

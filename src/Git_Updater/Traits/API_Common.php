@@ -387,7 +387,7 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['branches'] ?? false;
 
-		if ( $this->exit_no_update( $response, true ) ) {
+		if ( ! $response && $this->exit_no_update( $response, true ) ) {
 			return false;
 		}
 
@@ -428,7 +428,7 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_asset'] ?? false;
 
-		if ( $response && $this->exit_no_update( $response ) ) {
+		if ( ! $response && $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
@@ -466,7 +466,7 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_assets'] ?? false;
 
-		if ( $response && $this->exit_no_update( $response ) ) {
+		if ( ! $response && $this->exit_no_update( $response ) ) {
 			return false;
 		}
 
