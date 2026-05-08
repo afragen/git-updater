@@ -6,6 +6,8 @@
  * @package Git_Updater
  */
 
+ini_set( 'error_log', '/dev/null' );
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {

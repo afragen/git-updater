@@ -255,7 +255,7 @@ class API {
 		// @codeCoverageIgnoreStart
 		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			$response_body = is_array( $response ) ? json_decode( wp_remote_retrieve_body( $response ) ) : null;
-			if ( null !== $response_body && property_exists( $response_body, 'message' ) ) {
+			if ( null !== $response_body && is_object( $response_body ) && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
 				$log_message = "Git Updater Error: {$name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log

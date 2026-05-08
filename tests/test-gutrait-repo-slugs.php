@@ -70,8 +70,25 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_get_repo_slugs_matches_by_repo_slug(): void {
-		// Fixture plugin: GitHub Plugin URI → slug = 'test-gu-plugin'.
-		$result = $this->invoke_get_repo_slugs( 'test-gu-plugin', $this->plugin_obj );
+		// Inject a synthetic config so the test is independent of whether the
+		// fixture plugin is installed (CI runs without wp-env fixture mounts).
+		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
+		$ref->setAccessible( true );
+		$original = $ref->getValue( $this->plugin_obj );
+		$ref->setValue(
+			$this->plugin_obj,
+			[
+				'test-gu-plugin' => (object) [
+					'slug' => 'test-gu-plugin',
+					'file' => 'test-gu-plugin/test-gu-plugin.php',
+				],
+			]
+		);
+		try {
+			$result = $this->invoke_get_repo_slugs( 'test-gu-plugin', $this->plugin_obj );
+		} finally {
+			$ref->setValue( $this->plugin_obj, $original );
+		}
 		$this->assertSame( [ 'slug' => 'test-gu-plugin' ], $result );
 	}
 
@@ -160,9 +177,27 @@ class Test_GUTrait_Repo_Slugs extends WP_UnitTestCase {
 		$_POST['action']         = 'update-plugin'; // no 'install' substring
 		unset( $_POST['git_updater_repo'] );
 
-		// AJAX block fires but doesn't set $arr['slug']. Config loop then runs
-		// and finds the fixture plugin slug via C1.
-		$result = $this->invoke_get_repo_slugs( 'test-gu-plugin', $this->plugin_obj );
+		// Inject synthetic config so the config-loop C1 match works on CI
+		// (where the fixture plugin is not installed).
+		$ref      = new ReflectionProperty( get_class( $this->plugin_obj ), 'config' );
+		$ref->setAccessible( true );
+		$original = $ref->getValue( $this->plugin_obj );
+		$ref->setValue(
+			$this->plugin_obj,
+			[
+				'test-gu-plugin' => (object) [
+					'slug' => 'test-gu-plugin',
+					'file' => 'test-gu-plugin/test-gu-plugin.php',
+				],
+			]
+		);
+		try {
+			// AJAX block fires but doesn't set $arr['slug']. Config loop then runs
+			// and finds the plugin slug via C1.
+			$result = $this->invoke_get_repo_slugs( 'test-gu-plugin', $this->plugin_obj );
+		} finally {
+			$ref->setValue( $this->plugin_obj, $original );
+		}
 
 		$this->assertSame( [ 'slug' => 'test-gu-plugin' ], $result );
 	}

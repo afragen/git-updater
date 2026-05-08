@@ -523,7 +523,14 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$cache_key = $this->api->get_cache_key( $slug );
 		update_site_option( $cache_key, [ 'release_asset_download' => 'https://cdn.example.com/release.zip' ] );
 
+		// On CI no repos are installed, so get_running_git_servers() returns [].
+		// Force 'github' into the list so the foreach body executes.
+		add_filter( 'gu_running_git_servers', fn() => [ 'github' ] );
+
 		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => $slug ] ] );
+
+		remove_all_filters( 'gu_running_git_servers' );
+		delete_site_option( $cache_key );
 
 		$this->assertSame( 'application/octet-stream', $result['headers']['Accept'] );
 		$this->assertArrayNotHasKey( 'github', $result['headers'] );
@@ -535,7 +542,11 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 * 'github' key is still removed (lines 308, 314 — false branch).
 	 */
 	public function test_add_accept_header_removes_github_header_without_release_asset(): void {
+		add_filter( 'gu_running_git_servers', fn() => [ 'github' ] );
+
 		$result = $this->api->add_accept_header( [ 'headers' => [ 'github' => 'no-cache-slug' ] ] );
+
+		remove_all_filters( 'gu_running_git_servers' );
 
 		$this->assertArrayNotHasKey( 'Accept', $result['headers'] );
 		$this->assertArrayNotHasKey( 'github', $result['headers'] );
