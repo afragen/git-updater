@@ -47,7 +47,10 @@
 	"extra": {
 		"exclude-from-files": [
 			"freemius/wordpress-sdk/start.php",
-			"myclabs/deep-copy/src/DeepCopy/deep_copy.php"
+			"myclabs/deep-copy/src/DeepCopy/deep_copy.php",
+			"phpstan/phpstan/bootstrap.php",
+			"phpunit/phpunit/src/Framework/Assert/Functions.php",
+			"yoast/phpunit-polyfills/phpunitpolyfills-autoload.php"
 		]
 	},
 	"config": {
