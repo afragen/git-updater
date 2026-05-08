@@ -220,6 +220,9 @@ wp_unschedule_hook( 'gu_get_remote_plugin' );
 
 The `gu_get_remote_plugin` hook is bootstrapped at `init` time (via `Base::load()` → `get_meta_plugins()`) so it will always be present in the pre-test DB state.
 
+### `merge_and_reschedule_cron_batch()` replaces `is_cron_event_scheduled()` at scheduling sites
+`Plugin::get_remote_plugin_meta()` and `Theme::get_remote_theme_meta()` now call `merge_and_reschedule_cron_batch($hook, $repos)` instead of the old guard+schedule pattern. The helper reads `_get_cron_array()`, merges any existing scheduled batch's `args[0]` into the new array (keyed by slug, so deduplication is automatic), calls `wp_unschedule_hook($hook)` to clear old events, then schedules one new consolidated event. `is_cron_event_scheduled()` is retained for read-only queries but is no longer called at the scheduling sites. Tests that assert a cron event was scheduled should still bust the object cache first: `wp_cache_delete('cron', 'options')`.
+
 ### `gu_additions` filter is called with 3 args; register with `add_filter(..., 10, 3)`
 `get_theme_meta()` applies the filter as `apply_filters('gu_additions', null, $themes, 'theme')`. A listener registered without specifying the accepted-arg count (default 1) will never receive the `$type` argument. Always pass the priority and count explicitly:
 ```php

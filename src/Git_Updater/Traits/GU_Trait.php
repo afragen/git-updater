@@ -852,6 +852,31 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Merge any existing scheduled cron batch for $hook with $new_args, then
+	 * unschedule all existing events and schedule a single consolidated event.
+	 * This prevents duplicate events accumulating across page loads.
+	 *
+	 * @param string               $hook     Cron event hook name.
+	 * @param array<string, mixed> $new_args Keyed-by-slug repo array for this request.
+	 *
+	 * @return void
+	 */
+	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		$cron = _get_cron_array();
+		foreach ( (array) $cron as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				foreach ( $hooks[ $hook ] as $event ) {
+					$existing = $event['args'][0] ?? [];
+					$new_args = array_merge( $existing, $new_args );
+				}
+				wp_unschedule_hook( $hook );
+				break;
+			}
+		}
+		wp_schedule_single_event( time(), $hook, [ $new_args ] );
+	}
+
+	/**
 	 * Check to see if wp-cron event is overdue by 24 hours and report error message.
 	 *
 	 * @param int $timestamp WP-Cron event timestamp.

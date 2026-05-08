@@ -272,10 +272,8 @@ class Plugin {
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;
 
-		if ( $schedule_event && ! empty( $plugins ) ) {
-			if ( ! $disable_wp_cron && ! $this->is_cron_event_scheduled( 'gu_get_remote_plugin' ) ) {
-				wp_schedule_single_event( time(), 'gu_get_remote_plugin', [ $plugins ] );
-			}
+		if ( $schedule_event && ! empty( $plugins ) && ! $disable_wp_cron ) {
+			$this->merge_and_reschedule_cron_batch( 'gu_get_remote_plugin', $plugins );
 		}
 
 		if ( ! static::is_wp_cli() ) {
