@@ -1,12 +1,4 @@
 #### [unreleased]
-* add 15 PHPUnit tests for `Language_Pack_API` (API-fetch path, cache write, package URL construction, type/version population, `gu_post_process_language_pack_package` filter, `gu_get_language_pack_json` filter for non-GitHub hosts) and 7 tests for `Zipfile_API` (`load_hooks` filter registration, `zipfile_slug` HTML output)
-* add 45 PHPUnit tests for `GitHub_API`: all parse methods (`parse_tag_response`, `parse_meta_response`, `parse_changelog_response`, `parse_branch_response`, `parse_release_asset_response`, protected `parse_tags`/`parse_contents_response`/`parse_asset_dir_response`), `construct_download_link`, `add_endpoints`, `ratelimit_reset`, and `remote_install`
-* add integration test infrastructure: fixture plugin, wp-env config, and PHPUnit test classes for plugin/theme config discovery, HTTP-mocked remote meta, REST API dispatch, `Rest_Update::process_request_data()`, and `REST_API::get_remote_repo_data()` / `get_api_data()` valid and error paths
-* add `composer test-coverage` script, HTML coverage report via `phpunit.xml`, and `coverage-html/` to `.gitignore`
-* add `composer wp-env-start` and `composer wp-env-stop` scripts
-* fix `bin/install-xdebug.sh` to use `sudo` for `apk`/`pecl`/`tee` calls and correct `phpversion()` quoting
-* pin Composer platform to PHP 8.2 to prevent incompatible transitive dependencies (e.g. `doctrine/instantiator` 2.1.0) from being resolved on newer local PHP versions
-* fix PHPStan Tier 3 continued: reduce baseline from 72 to 9 errors — fix Base::load() void return, add @method tags to API class for parse_* methods, refactor api() type pipeline
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.1 for new parser due to testing
 * add `maybe_extend_repo_cache()` to update the timeout if the remote and cached version numbers are same, should avoid API calls for current data
@@ -20,10 +12,9 @@
 * fix Add_Ons cache to use dedicated repo key with proper timeout handling
 * fix `GitHub_API::get_remote_readme()` missing return statement
 * fix `GU_Trait::use_release_asset()` undefined property PHP 8.x warnings via null coalescing
-* add PHPUnit tests for Tier 1/2 PHPStan changes covering API caching, auth, trait methods, and branch/tag/changelog API paths
-* add comprehensive PHPUnit tests for GU_Trait and API methods: is_wp_cli, is_current_page, should_run_on_current_page, get_cache_key, is_cache_timeout_valid, can_update_repo, parse_header_uri, get_did_hash, get_file_without_did_hash, use_release_asset, get_headers, sort_tags, return_repo_type, get_api_url, parse_extra_headers
 * fix `Basic_Auth_Loader::get_slug_for_credentials()` array slug check order — `is_array()` must precede `sanitize_text_field()` so TGMPA array slugs are not silently discarded
 * borrow function from FAIR Connect to sort plugins_api modal tabs in correct order
+* add PHPStan level 6 testing and a whole mess of phpunit tests with load of help from Claude
 
 #### 12.24.2 / 2026-03-25
 * update freemius/wordpress-sdk
