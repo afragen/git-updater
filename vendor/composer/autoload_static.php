@@ -7,7 +7,6 @@ namespace Composer\Autoload;
 class ComposerStaticInita27e6a3df8c435e2b136f961f0442be2
 {
     public static $files = array (
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '7d3b315c4f303f2fc14aca642a738e50' => __DIR__ . '/..' . '/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php',

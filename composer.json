@@ -46,7 +46,8 @@
 	},
 	"extra": {
 		"exclude-from-files": [
-			"freemius/wordpress-sdk/start.php"
+			"freemius/wordpress-sdk/start.php",
+			"myclabs/deep-copy/src/DeepCopy/deep_copy.php"
 		]
 	},
 	"config": {
