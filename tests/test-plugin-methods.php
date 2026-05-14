@@ -927,6 +927,7 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
+		$GLOBALS['current_screen'] = null;
 		parent::tear_down();
 	}
 
@@ -1000,6 +1001,12 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 	public function test_registers_after_plugin_row_action_when_current_filter_is_init(): void {
 		$plugin_obj = $this->make_plugin_obj();
 		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+
+		// On multisite the guard `! is_multisite() || is_network_admin()` requires network-admin
+		// context; satisfy it by switching to a network-admin screen.
+		if ( is_multisite() ) {
+			set_current_screen( 'plugins-network' );
+		}
 
 		// Simulate the method being called from inside the 'init' hook.
 		$GLOBALS['wp_current_filter'][] = 'init';

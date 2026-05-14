@@ -445,3 +445,12 @@ if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
     }
 }
 ```
+
+### Multisite-only failures: `WP_Theme::get_allowed_on_network()` static cache
+CI runs both single-site and multisite suites; locally only single-site runs. On single-site, `WP_Theme::is_allowed('network')` returns `true` immediately. On multisite it calls `get_allowed_on_network()`, which uses a `static $allowed_themes` local variable. That cache is populated early in the test run, so `update_site_option('allowedthemes', ...)` in a test has no effect on it. Fix: use the `network_allowed_themes` filter (applied after the static cache) and clean up with `remove_all_filters('network_allowed_themes')` in `tear_down()`:
+```php
+add_filter( 'network_allowed_themes', fn( $themes ) => array_merge( $themes, [ 'my-theme' => true ] ) );
+```
+
+### Multisite-only failures: `Plugin::get_remote_plugin_meta()` `after_plugin_row` guard
+`get_remote_plugin_meta()` only registers `after_plugin_row_*` actions when `! is_multisite() || is_network_admin()`. On single-site the first clause is true; on multisite CI (not in network admin) both are false and the action is never registered. Fix: call `set_current_screen('plugins-network')` when `is_multisite()` is true to satisfy `is_network_admin()`, and reset with `$GLOBALS['current_screen'] = null` in `tear_down()`.
