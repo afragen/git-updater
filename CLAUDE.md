@@ -364,3 +364,32 @@ Lines 171-174 (the `gu_dev_release_asset` filter block) require `release_assets[
 
 ### Sub-cache methods respect the main timeout — no `timeout=false`
 `get_remote_api_tag()`, `get_remote_api_changes()`, `get_remote_api_readme()`, and `get_remote_api_assets()` all use `get_repo_cache($slug) ?: []` (respects timeout). When the main cache is expired these methods return `false` for their sub-key and make a fresh HTTP call. **Cache-hit tests for these methods must seed a future timeout** — tests using `seed_cache()` or `seed_main_cache()` already do this correctly. The `?: []` guard converts a `false` return (expired cache) to `[]` so that subsequent `$cache['key'] ?? false` array accesses are safe under `convertNoticesToExceptions`.
+
+### `Rest_Update` non-object transient branches — priority-15 filter insertion pattern
+`Rest_Update::update_plugin()` and `update_theme()` each register a closure at priority 15 on `site_transient_update_plugins` / `site_transient_update_themes`. Inside the closure, lines like `if (!is_object($current)) { $current = new stdClass(); ... }` guard against a false/null transient. However, `Plugin::update_site_transient()` and `Theme::update_site_transient()` are also registered at priority 15 (via `load_pre_filters()` during WordPress init) and run first — they convert `false` to `stdClass` before the source closure sees it. A priority-5 filter that returns `false` is overridden by the priority-15 Plugin/Theme filter.
+
+To cover lines 119-120 (plugin) and 192-193 (theme): delete the site transient, then add a `fn() => false` filter **also at priority 15** AFTER WordPress has already registered Plugin/Theme's filter but BEFORE `update_plugin()`/`update_theme()` registers the source closure. Registration order within the same priority determines execution order. The sequence becomes:
+1. Plugin/Theme filter (15, pos1): `false` → `stdClass`
+2. Test filter (15, pos2): `stdClass` → `false`
+3. Source closure (15, pos3): `false` → `!is_object` → guarded lines execute.
+
+```php
+delete_site_transient( 'update_plugins' );
+add_filter( 'site_transient_update_plugins', fn() => false, 15, 1 );
+// Then call update_plugin() — it registers the source closure at priority 15 pos3.
+```
+
+### `get_release_asset_redirect()` in REST context — use GitHub API URL, inject API singleton type
+When `REST_API::get_api_data()` calls `get_release_asset_redirect($repo_cache['release_asset'], true)` it reads `$this->type->slug` on the shared `API` singleton to look up the cache key. A bare `stdClass()` without `slug` resolves to `md5('')` — a wrong cache key. Inject the correct slug via `ReflectionProperty`:
+```php
+$api_singleton  = Singleton::get_instance( 'Fragen\Git_Updater\API\API', new REST_API() );
+$rp             = new ReflectionProperty( get_class( $api_singleton ), 'type' );
+$rp->setAccessible( true );
+$saved_type     = $rp->getValue( $api_singleton );
+$type_obj       = new stdClass();
+$type_obj->slug = 'test-gu-plugin';
+$rp->setValue( $api_singleton, $type_obj );
+// ... test ...
+$rp->setValue( $api_singleton, $saved_type ); // restore in finally/tear_down
+```
+Also: the `release_asset` value in the seeded cache must be a URL interceptable by `pre_http_request` — use a GitHub API URL (`https://api.github.com/repos/owner/repo/releases/assets/1234`) rather than `https://example.com/...`, since the mock only intercepts `api.github.com` requests.
