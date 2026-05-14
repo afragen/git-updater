@@ -393,3 +393,18 @@ $rp->setValue( $api_singleton, $type_obj );
 $rp->setValue( $api_singleton, $saved_type ); // restore in finally/tear_down
 ```
 Also: the `release_asset` value in the seeded cache must be a URL interceptable by `pre_http_request` — use a GitHub API URL (`https://api.github.com/repos/owner/repo/releases/assets/1234`) rather than `https://example.com/...`, since the mock only intercepts `api.github.com` requests.
+
+### `do_action('admin_enqueue_scripts')` in tests — call `set_current_screen()` first
+Firing the `admin_enqueue_scripts` action without a screen context causes WP Site Health (`class-wp-site-health.php`) to throw "Attempt to read property 'id' on null". Always call `set_current_screen('plugins')` (or the appropriate screen slug) before firing this action in tests.
+
+### `get_git_icon()` plugin-type path — call from inside a filter with 'plugin' in its name
+`get_git_icon()` calls `current_filter()` to determine type: if the filter name contains 'plugin', type='plugin'; otherwise type='theme'. When called directly (no active filter), `current_filter()` returns '' → type='theme'. To test the plugin path, wrap the call inside `apply_filters('plugin_action_links_gu_test', [])` so `current_filter()` returns a string containing 'plugin'.
+
+### `fix_misnamed_directory()` lines 566–571 — only reachable when `$new_source = ''`
+`new_source` is always set to `trailingslashit(remote_source) . $slug` before `fix_misnamed_directory()` is called, so `basename($new_source)` always equals `$slug` — meaning line 562's guard catches the slug match first. The ONLY way to reach lines 566–571 is when `$new_source = ''` (Plugin_Upgrader with no hook_extra and no AJAX sets slug='', new_source=''). In that case `basename('')=''` ≠ any non-empty slug → falls through to line 566. Test via `ReflectionMethod` calling `fix_misnamed_directory` directly with an empty `$new_source` string and a non-config slug.
+
+### `Base::$options` is a static property — restore in `tear_down()` after direct manipulation
+When tests set `Base::$options = [...]` directly (e.g. to test `set_defaults()` paths), restore it in `tear_down()`: `Base::$options = get_site_option('git_updater', [])`. Otherwise subsequent tests inherit the mutated static state.
+
+### `get_remote_repo_meta()` null-API early return — use `$repo->git = 'bitbucket'`
+`get_repo_api('bitbucket', $repo)` returns null when no Bitbucket add-on is installed (the Bitbucket API class is not registered via `gu_get_repo_api` filter). This is the simplest way to exercise the `$api === null → return false` branch at line 328 without installing any add-on plugin.
