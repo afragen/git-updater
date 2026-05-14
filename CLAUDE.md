@@ -411,3 +411,27 @@ When tests set `Base::$options = [...]` directly (e.g. to test `set_defaults()` 
 
 ### `upgrader_source_selection()` remote-install path — inject `Install::$install` via ReflectionProperty
 Lines 513–515 (the remote install source path) are only reachable when `$repo` is empty AND `Install::$install['git_updater_install_repo']` is set. `Install::$install` is `protected static`; set it via `ReflectionProperty::setValue(null, [...])`. Set `$_POST['git_updater_repo'] = '1'` to bypass the early return at line 502. Restore `Install::$install` in a `finally` block.
+
+### `do_action('init')` — unregister block binding sources added as side-effects
+When a test calls `do_action('init')`, ALL registered `init` callbacks fire — including the active theme's block bindings registration. `WP_Block_Bindings_Registry::register` throws a "doing it wrong" notice when a source is registered a second time; `WP_UnitTestCase` treats unexpected incorrect-usage notices as test failures. Snapshot the registered sources in `set_up()` and unregister any new ones in `tear_down()`:
+```php
+private array $pre_registered_bindings = [];
+
+public function set_up(): void {
+    parent::set_up();
+    if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
+        $this->pre_registered_bindings = array_keys(
+            WP_Block_Bindings_Registry::get_instance()->get_all_registered()
+        );
+    }
+}
+
+// In tear_down(), before parent::tear_down():
+if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
+    foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
+        if ( ! in_array( $name, $this->pre_registered_bindings, true ) ) {
+            unregister_block_bindings_source( $name );
+        }
+    }
+}
+```

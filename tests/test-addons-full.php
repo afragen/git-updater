@@ -952,6 +952,17 @@ class Test_Bootstrap extends WP_UnitTestCase {
 
 class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 
+	private array $pre_registered_bindings = [];
+
+	public function set_up(): void {
+		parent::set_up();
+		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
+			$this->pre_registered_bindings = array_keys(
+				WP_Block_Bindings_Registry::get_instance()->get_all_registered()
+			);
+		}
+	}
+
 	public function tear_down(): void {
 		unset( $_POST['_wpnonce'] );
 		remove_all_actions( 'gu_update_settings' );
@@ -959,6 +970,13 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 		remove_all_actions( 'gu_add_admin_page' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		delete_site_option( 'git_updater_additions' );
+		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
+			foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
+				if ( ! in_array( $name, $this->pre_registered_bindings, true ) ) {
+					unregister_block_bindings_source( $name );
+				}
+			}
+		}
 		parent::tear_down();
 	}
 
