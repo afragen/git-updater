@@ -1004,6 +1004,11 @@ class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
 
 	public function test_init_action_fires_add_settings_tabs_closure(): void {
 		( new Additions_Settings() )->load_hooks();
+		if ( class_exists( 'WP_Block_Bindings_Registry' ) ) {
+			foreach ( array_keys( WP_Block_Bindings_Registry::get_instance()->get_all_registered() ) as $name ) {
+				unregister_block_bindings_source( $name );
+			}
+		}
 		do_action( 'init' );
 		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
 		$this->assertArrayHasKey( 'git_updater_additions', $tabs );
