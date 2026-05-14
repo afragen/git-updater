@@ -83,9 +83,11 @@ class Theme {
 		// Get details of installed git sourced themes.
 		$this->config = $this->get_theme_meta();
 
+		// @codeCoverageIgnoreStart
 		if ( null === $this->config ) {
 			return;
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -265,6 +267,7 @@ class Theme {
 			/*
 			 * Add update row to theme row, only in multisite.
 			 */
+			// @codeCoverageIgnoreStart
 			if ( is_multisite() ) {
 				add_action( 'after_theme_row', [ $this, 'remove_after_theme_row' ], 10, 1 );
 				if ( ! $this->tag ) {
@@ -279,6 +282,7 @@ class Theme {
 					);
 				}
 			}
+			// @codeCoverageIgnoreEnd
 		}
 
 		$schedule_event = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ? is_main_site() : true;

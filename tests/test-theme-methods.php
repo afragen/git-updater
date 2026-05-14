@@ -579,6 +579,7 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_override_dot_org' );
 		remove_all_filters( 'gu_remote_is_newer' );
+		unset( $_GET['action'], $_GET['theme'], $_GET['_wpnonce'], $_GET['rollback'] );
 		parent::tear_down();
 	}
 
@@ -746,6 +747,57 @@ class Test_Theme_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$transient->no_update = [];
 		$result = $theme->update_site_transient( $transient );
 		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+	}
+
+	public function test_restful_skip_continues_loop_when_action_and_theme_match(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		// $response['theme'] is set to $theme->slug = 'test-gu-theme'.
+		$_GET['action'] = 'git-updater-update';
+		$_GET['theme']  = 'test-gu-theme';
+
+		$result = $theme->update_site_transient( $transient );
+
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->response );
+		$this->assertArrayNotHasKey( 'test-gu-theme', $result->no_update );
+	}
+
+	public function test_rollback_sets_response_with_valid_nonce(): void {
+		$theme_obj = $this->make_theme_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'owner'          => 'afragen',
+			'enterprise'     => null,
+			'enterprise_api' => null,
+			'tags'           => [],
+			'newest_tag'     => '0.0.0',
+			'gist_id'        => null,
+		] );
+		$theme     = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		$rollback_tag     = '1.0.0';
+		$_GET['_wpnonce'] = wp_create_nonce( 'upgrade-theme_test-gu-theme' );
+		$_GET['theme']    = 'test-gu-theme';
+		$_GET['rollback'] = $rollback_tag;
+
+		$result = $theme->update_site_transient( $transient );
+
+		$this->assertArrayHasKey( 'test-gu-theme', $result->response );
+		$entry = $result->response['test-gu-theme'];
+		$this->assertSame( $rollback_tag, $entry['new_version'] );
+		$this->assertSame( 'test-gu-theme', $entry['theme'] );
 	}
 }
 

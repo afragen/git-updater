@@ -669,6 +669,7 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_override_dot_org' );
 		remove_all_filters( 'gu_remote_is_newer' );
+		unset( $_GET['action'], $_GET['plugin'], $_GET['_wpnonce'], $_GET['rollback'] );
 		parent::tear_down();
 	}
 
@@ -840,6 +841,57 @@ class Test_Plugin_Update_Site_Transient_Method extends WP_UnitTestCase {
 		$result = $plugin->update_site_transient( $transient );
 		$this->assertArrayNotHasKey( 'test-plugin/test-plugin.php', $result->response );
 	}
+
+	public function test_restful_skip_continues_loop_when_action_and_plugin_match(): void {
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+		] );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		// $response['slug'] is set to $plugin->slug = 'test-plugin'.
+		$_GET['action'] = 'git-updater-update';
+		$_GET['plugin'] = 'test-plugin';
+
+		$result = $plugin->update_site_transient( $transient );
+
+		$this->assertArrayNotHasKey( 'test-plugin/test-plugin.php', $result->response );
+		$this->assertArrayNotHasKey( 'test-plugin/test-plugin.php', $result->no_update );
+	}
+
+	public function test_rollback_sets_response_with_valid_nonce(): void {
+		$plugin_obj = $this->make_plugin_obj( [
+			'remote_version' => '2.0.0',
+			'local_version'  => '1.0.0',
+			'dot_org'        => false,
+			'owner'          => 'test-owner',
+			'enterprise'     => null,
+			'enterprise_api' => null,
+			'tags'           => [],
+			'newest_tag'     => '0.0.0',
+			'gist_id'        => null,
+		] );
+		$plugin    = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$transient = new stdClass();
+		$transient->response  = [];
+		$transient->no_update = [];
+
+		$rollback_tag     = '1.0.0';
+		$_GET['_wpnonce'] = wp_create_nonce( 'upgrade-plugin_test-plugin/test-plugin.php' );
+		$_GET['plugin']   = 'test-plugin/test-plugin.php';
+		$_GET['rollback'] = $rollback_tag;
+
+		$result = $plugin->update_site_transient( $transient );
+
+		$this->assertArrayHasKey( 'test-plugin/test-plugin.php', $result->response );
+		$entry = $result->response['test-plugin/test-plugin.php'];
+		$this->assertSame( $rollback_tag, $entry->new_version );
+		$this->assertSame( 'test-plugin', $entry->slug );
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -869,6 +921,10 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		remove_all_filters( 'site_transient_update_plugins' );
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_disable_wpcron' );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_actions( 'after_plugin_row_test-plugin/test-plugin.php' );
+		remove_all_actions( 'get_remote_repo_meta' );
+		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
 		wp_cache_delete( 'cron', 'options' );
 		wp_unschedule_hook( 'gu_get_remote_plugin' );
 		parent::tear_down();
@@ -939,6 +995,95 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 
 		// Hook should still exist (not cleared), but no duplicate was added.
 		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_plugin' ) );
+	}
+
+	public function test_registers_after_plugin_row_action_when_current_filter_is_init(): void {
+		$plugin_obj = $this->make_plugin_obj();
+		$plugin     = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+
+		// Simulate the method being called from inside the 'init' hook.
+		$GLOBALS['wp_current_filter'][] = 'init';
+		$plugin->get_remote_plugin_meta();
+		array_pop( $GLOBALS['wp_current_filter'] );
+
+		$this->assertNotFalse(
+			has_action( 'after_plugin_row_test-plugin/test-plugin.php' )
+		);
+
+		// Fire the registered action to cover the closure body (Branch::plugin_branch_switcher).
+		// plugin_branch_switcher() returns false early when branch_switch option is empty.
+		do_action( 'after_plugin_row_test-plugin/test-plugin.php', 'test-plugin/test-plugin.php' );
+	}
+
+	public function test_not_waiting_plugin_triggers_direct_fetch_not_cron(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		// Seed a non-empty cache so waiting_for_background_update($plugin) returns false.
+		update_site_option(
+			'ghu-' . md5( 'test-plugin' ),
+			[
+				'timeout' => strtotime( '+12 hours' ),
+				'dot_org' => false,
+			]
+		);
+
+		// Mock HTTP to prevent outbound calls and error-cache contamination.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( false !== strpos( $url, 'api.wordpress.org' ) ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => '{"plugins":[],"translations":[],"no_update":[]}',
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200 ],
+					'body'     => '[]',
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Add the fields that Base::get_remote_repo_meta() → API::get_api_url() needs.
+		$plugin_obj = $this->make_plugin_obj(
+			[
+				'owner'          => 'test-owner',
+				'enterprise'     => null,
+				'enterprise_api' => null,
+				'slug_did'       => null,
+				'languages'      => null,
+				'ci_job'         => false,
+				'broken'         => false,
+				'is_private'     => false,
+				'update_uri'     => '',
+				'security'       => '',
+				'local_path'     => '',
+				'author_uri'     => '',
+				'license'        => '',
+			]
+		);
+
+		$action_called = false;
+		add_action(
+			'get_remote_repo_meta',
+			function () use ( &$action_called ) {
+				$action_called = true;
+			},
+			10,
+			2
+		);
+
+		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		// Plugin was processed directly (not queued) — no cron, and the action hook fired.
+		$this->assertFalse( $this->cron_hook_exists( 'gu_get_remote_plugin' ) );
+		$this->assertTrue( $action_called, 'get_remote_repo_meta action should fire for non-waiting plugin' );
 	}
 
 	/**

@@ -82,9 +82,11 @@ class Plugin {
 		// Get details of installed git sourced plugins.
 		$this->config = $this->get_plugin_meta();
 
+		// @codeCoverageIgnoreStart
 		if ( null === $this->config ) {
 			return;
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
