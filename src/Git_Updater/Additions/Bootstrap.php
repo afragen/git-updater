@@ -14,7 +14,7 @@ namespace Fragen\Git_Updater\Additions;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**

@@ -37,6 +37,7 @@
 use Fragen\Git_Updater\Add_Ons;
 use Fragen\Git_Updater\Base;
 use Fragen\Git_Updater\Additions\Additions;
+use Fragen\Git_Updater\Additions\Bootstrap;
 use Fragen\Git_Updater\Additions\Settings as Additions_Settings;
 use Fragen\Git_Updater\Additions\Repo_List_Table;
 
@@ -426,6 +427,18 @@ class Test_Additions_Add_Headers extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'plugin-a/plugin-a.php', $this->additions->add_to_git_updater );
 		$this->assertArrayNotHasKey( 'some-theme', $this->additions->add_to_git_updater );
+	}
+
+	public function test_add_headers_reads_file_data_when_plugin_file_exists(): void {
+		$config = [
+			[
+				'slug' => 'git-updater/git-updater.php',
+				'type' => 'github_plugin',
+				'uri'  => 'https://github.com/afragen/git-updater',
+			],
+		];
+		$this->additions->add_headers( $config, [], 'plugin' );
+		$this->assertArrayHasKey( 'git-updater/git-updater.php', $this->additions->add_to_git_updater );
 	}
 }
 
@@ -901,5 +914,423 @@ class Test_Repo_List_Table_Methods extends WP_UnitTestCase {
 		$b = [ 'type' => 'bitbucket_plugin', 'slug' => 'aaa' ];
 		// bitbucket < github → b before a when sorted by type asc → result > 0 (b < a)
 		$this->assertGreaterThan( 0, $this->table->usort_reorder( $a, $b ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Bootstrap
+// ---------------------------------------------------------------------------
+
+class Test_Bootstrap extends WP_UnitTestCase {
+
+	public function tear_down(): void {
+		remove_all_actions( 'gu_update_settings' );
+		remove_all_actions( 'init' );
+		remove_all_actions( 'gu_add_admin_page' );
+		parent::tear_down();
+	}
+
+	public function test_run_registers_gu_update_settings_action(): void {
+		( new Bootstrap() )->run();
+		$this->assertNotFalse( has_action( 'gu_update_settings' ) );
+	}
+
+	public function test_run_registers_init_action(): void {
+		( new Bootstrap() )->run();
+		$this->assertNotFalse( has_action( 'init' ) );
+	}
+
+	public function test_run_registers_gu_add_admin_page_action(): void {
+		( new Bootstrap() )->run();
+		$this->assertNotFalse( has_action( 'gu_add_admin_page' ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Settings::load_hooks()
+// ---------------------------------------------------------------------------
+
+class Test_Additions_Settings_Load_Hooks extends WP_UnitTestCase {
+
+	public function tear_down(): void {
+		unset( $_POST['_wpnonce'] );
+		remove_all_actions( 'gu_update_settings' );
+		remove_all_actions( 'init' );
+		remove_all_actions( 'gu_add_admin_page' );
+		remove_all_filters( 'gu_add_settings_tabs' );
+		delete_site_option( 'git_updater_additions' );
+		parent::tear_down();
+	}
+
+	public function test_load_hooks_registers_gu_update_settings_action(): void {
+		( new Additions_Settings() )->load_hooks();
+		$this->assertNotFalse( has_action( 'gu_update_settings' ) );
+	}
+
+	public function test_load_hooks_registers_init_action(): void {
+		( new Additions_Settings() )->load_hooks();
+		$this->assertNotFalse( has_action( 'init' ) );
+	}
+
+	public function test_load_hooks_registers_gu_add_admin_page_at_priority_10(): void {
+		( new Additions_Settings() )->load_hooks();
+		$this->assertNotFalse( has_action( 'gu_add_admin_page' ) );
+	}
+
+	public function test_gu_update_settings_action_fires_save_settings_closure(): void {
+		( new Additions_Settings() )->load_hooks();
+		unset( $_POST['_wpnonce'] );
+		do_action( 'gu_update_settings', [] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_init_action_fires_add_settings_tabs_closure(): void {
+		( new Additions_Settings() )->load_hooks();
+		do_action( 'init' );
+		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
+		$this->assertArrayHasKey( 'git_updater_additions', $tabs );
+	}
+
+	public function test_gu_add_admin_page_action_fires_add_admin_page_closure(): void {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		Additions_Settings::$options_additions = [];
+		( new Additions_Settings() )->load_hooks();
+		ob_start();
+		do_action( 'gu_add_admin_page', 'other_tab', admin_url() );
+		ob_get_clean();
+		$this->assertTrue( true );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Settings::save_settings()
+// ---------------------------------------------------------------------------
+
+class Test_Additions_Settings_Save_Settings extends WP_UnitTestCase {
+
+	private Additions_Settings $settings;
+
+	public function set_up(): void {
+		parent::set_up();
+		Additions_Settings::$options_additions = [];
+		$this->settings = new Additions_Settings();
+	}
+
+	public function tear_down(): void {
+		unset( $_POST['_wpnonce'], $_POST['action'] );
+		delete_site_option( 'git_updater_additions' );
+		remove_all_filters( 'gu_save_redirect' );
+		parent::tear_down();
+	}
+
+	private function make_post_data( array $overrides = [] ): array {
+		return array_merge(
+			[
+				'option_page'           => 'git_updater_additions',
+				'git_updater_additions' => [
+					'slug' => 'owner/plugin.php',
+					'uri'  => 'https://github.com/owner/plugin',
+					'type' => 'github_plugin',
+				],
+			],
+			$overrides
+		);
+	}
+
+	public function test_save_settings_returns_early_without_nonce(): void {
+		unset( $_POST['_wpnonce'] );
+		$this->settings->save_settings( $this->make_post_data() );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_returns_early_with_invalid_nonce(): void {
+		$_POST['_wpnonce'] = 'bad_nonce';
+		$this->settings->save_settings( $this->make_post_data() );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_does_nothing_when_option_page_absent(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( [] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_does_nothing_when_option_page_wrong(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( [ 'option_page' => 'other_page' ] );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_skips_save_when_slug_empty(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$post_data         = $this->make_post_data(
+			[
+				'git_updater_additions' => [
+					'slug' => '',
+					'uri'  => 'https://github.com/owner/plugin',
+					'type' => 'github_plugin',
+				],
+			]
+		);
+		$this->settings->save_settings( $post_data );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_skips_save_when_uri_empty(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$post_data         = $this->make_post_data(
+			[
+				'git_updater_additions' => [
+					'slug' => 'owner/plugin.php',
+					'uri'  => '',
+					'type' => 'github_plugin',
+				],
+			]
+		);
+		$this->settings->save_settings( $post_data );
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_skips_save_when_plugin_type_but_no_slash_in_slug(): void {
+		$existing = [
+			[
+				'slug'   => 'other/plugin.php',
+				'type'   => 'github_plugin',
+				'uri'    => 'https://github.com/owner/other',
+				'ID'     => md5( 'other/plugin.php' ),
+				'source' => md5( home_url() ),
+			],
+		];
+		update_site_option( 'git_updater_additions', $existing );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$post_data         = $this->make_post_data(
+			[
+				'git_updater_additions' => [
+					'slug' => 'noslash',
+					'uri'  => 'https://github.com/owner/plugin',
+					'type' => 'github_plugin',
+				],
+			]
+		);
+		$this->settings->save_settings( $post_data );
+		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_skips_save_when_theme_type_but_slug_has_slash(): void {
+		$existing = [
+			[
+				'slug'   => 'my-theme',
+				'type'   => 'github_theme',
+				'uri'    => 'https://github.com/owner/theme',
+				'ID'     => md5( 'my-theme' ),
+				'source' => md5( home_url() ),
+			],
+		];
+		update_site_option( 'git_updater_additions', $existing );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$post_data         = $this->make_post_data(
+			[
+				'git_updater_additions' => [
+					'slug' => 'with/slash',
+					'uri'  => 'https://github.com/owner/plugin',
+					'type' => 'github_theme',
+				],
+			]
+		);
+		$this->settings->save_settings( $post_data );
+		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_skips_save_when_duplicate_id(): void {
+		$slug     = 'owner/plugin.php';
+		$existing = [
+			[
+				'slug'   => $slug,
+				'type'   => 'github_plugin',
+				'uri'    => 'https://github.com/owner/plugin',
+				'ID'     => md5( $slug ),
+				'source' => md5( home_url() ),
+			],
+		];
+		update_site_option( 'git_updater_additions', $existing );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( $this->make_post_data() );
+		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_saves_option_when_valid_and_no_existing_options(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( $this->make_post_data() );
+		$this->assertCount( 1, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_saves_option_when_valid_and_existing_options_present(): void {
+		$existing = [
+			[
+				'slug'   => 'other/other.php',
+				'type'   => 'github_plugin',
+				'uri'    => 'https://github.com/owner/other',
+				'ID'     => md5( 'other/other.php' ),
+				'source' => md5( home_url() ),
+			],
+		];
+		update_site_option( 'git_updater_additions', $existing );
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( $this->make_post_data() );
+		$this->assertCount( 2, get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_save_settings_adds_gu_save_redirect_filter_when_option_page_matches(): void {
+		$_POST['_wpnonce'] = wp_create_nonce( 'git_updater_additions-options' );
+		$this->settings->save_settings( $this->make_post_data() );
+		$result = apply_filters( 'gu_save_redirect', [] );
+		$this->assertContains( 'git_updater_additions', $result );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Settings::add_admin_page() and additions_page_init()
+// ---------------------------------------------------------------------------
+
+class Test_Settings_Add_Admin_Page extends WP_UnitTestCase {
+
+	private Additions_Settings $settings;
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		Additions_Settings::$options_additions = [];
+		$this->settings = new Additions_Settings();
+	}
+
+	public function test_add_admin_page_registers_setting_regardless_of_tab(): void {
+		$this->settings->add_admin_page( 'other_tab', admin_url() );
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'git_updater_additions', $settings );
+	}
+
+	public function test_add_admin_page_renders_no_form_for_wrong_tab(): void {
+		ob_start();
+		$this->settings->add_admin_page( 'other_tab', admin_url() );
+		$output = ob_get_clean();
+		$this->assertStringNotContainsString( '<form', $output );
+	}
+
+	public function test_add_admin_page_renders_form_for_correct_tab(): void {
+		ob_start();
+		$this->settings->add_admin_page( 'git_updater_additions', admin_url() );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<form', $output );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Repo_List_Table — extended coverage
+// ---------------------------------------------------------------------------
+
+class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
+
+	private Repo_List_Table $table;
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		$this->table = new Repo_List_Table( [] );
+	}
+
+	public function tear_down(): void {
+		unset(
+			$_REQUEST['_wpnonce_row_action_delete'],
+			$_REQUEST['slug'],
+			$_REQUEST['action'],
+			$_REQUEST['page'],
+			$_REQUEST['tab']
+		);
+		delete_site_option( 'git_updater_additions' );
+		parent::tear_down();
+	}
+
+	private function make_item( array $overrides = [] ): array {
+		return array_merge(
+			[
+				'ID'              => md5( 'test-plugin/test-plugin.php' ),
+				'slug'            => 'test-plugin/test-plugin.php',
+				'uri'             => 'https://github.com/owner/test-plugin',
+				'type'            => 'github_plugin',
+				'primary_branch'  => 'master',
+				'release_asset'   => false,
+				'private_package' => false,
+				'source'          => md5( home_url() ),
+			],
+			$overrides
+		);
+	}
+
+	public function test_column_default_returns_print_r_for_unknown_column(): void {
+		$item   = $this->make_item();
+		$result = $this->table->column_default( $item, 'unknown_column' );
+		$this->assertIsString( $result );
+		$this->assertNotEmpty( $result );
+	}
+
+	public function test_column_slug_contains_slug_text(): void {
+		$item   = $this->make_item( [ 'slug' => 'my-plugin/my-plugin.php' ] );
+		$result = $this->table->column_slug( $item );
+		$this->assertStringContainsString( 'my-plugin/my-plugin.php', $result );
+	}
+
+	public function test_column_slug_contains_item_id(): void {
+		$id     = md5( 'my-plugin/my-plugin.php' );
+		$item   = $this->make_item( [ 'slug' => 'my-plugin/my-plugin.php', 'ID' => $id ] );
+		$result = $this->table->column_slug( $item );
+		$this->assertStringContainsString( $id, $result );
+	}
+
+	public function test_column_slug_contains_delete_link(): void {
+		$item   = $this->make_item();
+		$result = $this->table->column_slug( $item );
+		$this->assertStringContainsString( 'Delete', $result );
+	}
+
+	public function test_process_bulk_action_returns_without_nonce(): void {
+		unset( $_REQUEST['_wpnonce_row_action_delete'] );
+		$this->table->process_bulk_action();
+		$this->assertFalse( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_process_bulk_action_deletes_matching_entry(): void {
+		$id     = md5( 'test-plugin/test-plugin.php' );
+		$option = $this->make_item( [ 'ID' => $id ] );
+		$table  = new Repo_List_Table( [ $option ] );
+		update_site_option( 'git_updater_additions', [ $option ] );
+
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['slug']                       = $id;
+
+		$table->process_bulk_action();
+
+		$this->assertEmpty( get_site_option( 'git_updater_additions' ) );
+	}
+
+	public function test_process_bulk_action_edit_action_dies(): void {
+		$_REQUEST['_wpnonce_row_action_delete'] = wp_create_nonce( 'delete_row_item' );
+		$_REQUEST['action']                     = 'edit';
+
+		$this->expectException( WPDieException::class );
+		$this->table->process_bulk_action();
+	}
+
+	public function test_prepare_items_sets_items_to_array(): void {
+		$this->table->prepare_items();
+		$this->assertIsArray( $this->table->items );
+	}
+
+	public function test_render_list_table_outputs_wrap_div(): void {
+		ob_start();
+		$this->table->render_list_table();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<div class="wrap">', $output );
 	}
 }

@@ -22,12 +22,12 @@ use WP_List_Table;
  * PHP version check and exit.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 // Load base class.
 if ( ! class_exists( 'WP_List_Table' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php'; // @codeCoverageIgnore
 }
 
 /**
