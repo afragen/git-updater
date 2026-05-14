@@ -246,31 +246,6 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Calculate and store time until rate limit reset.
-	 *
-	 * @param array<string, mixed> $response HTTP headers.
-	 * @param string               $repo     Repo name.
-	 *
-	 * @return string|void
-	 */
-	public static function ratelimit_reset( $response, $repo ) {
-		$headers = wp_remote_retrieve_headers( $response );
-		if ( empty( $headers ) ) {
-			return '60';
-		}
-		$data = $headers->getAll();
-		if ( isset( $data['x-ratelimit-reset'] ) ) {
-			$reset = (int) $data['x-ratelimit-reset'];
-			//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-			$wait                        = date( 'i', $reset - time() );
-			static::$error_code[ $repo ] = static::$error_code[ $repo ] ?? [];
-			static::$error_code[ $repo ] = array_merge( static::$error_code[ $repo ], [ 'wait' => $wait ] );
-
-			return $wait;
-		}
-	}
-
-	/**
 	 * Parse API response call and return only array of tag numbers.
 	 *
 	 * @param stdClass|array<string, mixed> $response Response from API call.

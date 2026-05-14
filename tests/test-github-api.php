@@ -13,7 +13,6 @@
  * - parse_asset_dir_response()     — extract download URLs from asset directory
  * - construct_download_link()      — URL assembly for branches, tags, branch-switch
  * - add_endpoints()                — query-arg addition and enterprise prefix
- * - ratelimit_reset()              — header parsing and fallback
  * - remote_install()               — download link for github.com and enterprise
  *
  * @package Git_Updater
@@ -576,38 +575,6 @@ class Test_GitHub_API_Links extends WP_UnitTestCase {
 		$endpoint = '/repos/owner/repo';
 		$result   = $this->api->add_endpoints( $this->api, $endpoint );
 		$this->assertSame( $endpoint, $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// ratelimit_reset()
-	// -------------------------------------------------------------------------
-
-	public function test_ratelimit_reset_returns_60_when_response_has_empty_headers(): void {
-		$response = [
-			'headers'  => [],
-			'body'     => '',
-			'response' => [ 'code' => 403 ],
-		];
-
-		$result = GitHub_API::ratelimit_reset( $response, 'test-plugin' );
-
-		$this->assertSame( '60', $result );
-	}
-
-	public function test_ratelimit_reset_returns_wait_minutes_from_header(): void {
-		$reset_time = time() + 300; // 5 minutes from now
-		$response   = [
-			'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary(
-				[ 'x-ratelimit-reset' => (string) $reset_time ]
-			),
-			'body'     => '',
-			'response' => [ 'code' => 403 ],
-		];
-
-		$result = GitHub_API::ratelimit_reset( $response, 'test-plugin' );
-
-		$this->assertIsString( $result );
-		$this->assertNotSame( '60', $result, 'Should not fall back to default when header is present.' );
 	}
 
 	// -------------------------------------------------------------------------

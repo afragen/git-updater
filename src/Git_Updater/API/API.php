@@ -213,12 +213,6 @@ class API {
 			// Cache HTTP API error code for 60 minutes.
 			if ( ! in_array( $code, $allowed_codes, true ) ) {
 				$timeout = 60;
-
-				// @codeCoverageIgnoreStart
-				if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
-					$timeout = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
-				}
-				// @codeCoverageIgnoreEnd
 				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
@@ -245,12 +239,6 @@ class API {
 				'git'  => $this->type->git,
 			]
 		);
-		// @codeCoverageIgnoreStart
-		if ( in_array( $type['git'], [ 'github', 'gist' ], true ) && isset( $response[ md5( $url ) ] ) ) {
-			static::$error_code[ $this->type->slug ]['wait'] = GitHub_API::ratelimit_reset( $response[ md5( $url ) ], $this->type->slug );
-		}
-		// @codeCoverageIgnoreEnd
-		Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
 		// @codeCoverageIgnoreStart
 		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
