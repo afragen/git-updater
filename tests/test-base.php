@@ -836,6 +836,32 @@ class Test_Base_Upgrader_Source_Selection extends WP_UnitTestCase {
 		);
 		$this->assertInstanceOf( WP_Error::class, $result );
 	}
+
+	// Lines 512–515: remote install path — Install::$install carries the repo slug.
+	public function test_remote_install_path_sets_slug_and_options(): void {
+		$rp = new \ReflectionProperty( 'Fragen\Git_Updater\Install', 'install' );
+		$rp->setAccessible( true );
+		$original = $rp->getValue( null );
+		$rp->setValue( null, [ 'git_updater_install_repo' => 'my-install-plugin' ] );
+
+		try {
+			$_POST['git_updater_repo'] = '1';
+			$upgrader                  = new Plugin_Upgrader();
+			// Non-GU slug → $repo = [] → empty($repo) is true, bypassed early return via $_POST.
+			$result = $this->base->upgrader_source_selection(
+				'/tmp/nonexistent-source/',
+				'/tmp/',
+				$upgrader,
+				[ 'plugin' => 'nonexistent/nonexistent.php' ]
+			);
+			// Lines 513–515 executed; move_dir on missing path → WP_Error.
+			$this->assertTrue( is_string( $result ) || $result instanceof WP_Error );
+			$this->assertTrue( Base::$options['remote_install'] ?? false );
+		} finally {
+			$rp->setValue( null, $original );
+			unset( $_POST['git_updater_repo'] );
+		}
+	}
 }
 
 // =============================================================================

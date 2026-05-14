@@ -408,3 +408,6 @@ When tests set `Base::$options = [...]` directly (e.g. to test `set_defaults()` 
 
 ### `get_remote_repo_meta()` null-API early return — use `$repo->git = 'bitbucket'`
 `get_repo_api('bitbucket', $repo)` returns null when no Bitbucket add-on is installed (the Bitbucket API class is not registered via `gu_get_repo_api` filter). This is the simplest way to exercise the `$api === null → return false` branch at line 328 without installing any add-on plugin.
+
+### `upgrader_source_selection()` remote-install path — inject `Install::$install` via ReflectionProperty
+Lines 513–515 (the remote install source path) are only reachable when `$repo` is empty AND `Install::$install['git_updater_install_repo']` is set. `Install::$install` is `protected static`; set it via `ReflectionProperty::setValue(null, [...])`. Set `$_POST['git_updater_repo'] = '1'` to bypass the early return at line 502. Restore `Install::$install` in a `finally` block.
