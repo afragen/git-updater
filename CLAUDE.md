@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## General Instructions
+
+Do not make any changes until you have 95% confidence in what you need to build. Ask me follow-up questions until you reach that confidence.
+
 ## Commands
 
 ```sh
@@ -357,3 +361,6 @@ The `requests-requests.before_redirect` action only fires during real HTTP redir
 
 ### `construct_download_link()` dev asset path — seed `release_assets` with both `assets` and `dev_assets` keys
 Lines 171-174 (the `gu_dev_release_asset` filter block) require `release_assets['dev_assets']` to be non-empty and `version_compare(asset_version, dev_asset_version, '<')` to return true. Seed the cache with `['assets' => ['1.0.0' => stable_url], 'dev_assets' => ['2.0.0-beta1' => dev_url]]` and add `add_filter('gu_dev_release_asset', '__return_true')`. The `gu_dev_release_asset` filter cleanup is already in `Test_GitHub_API_DownloadLink_ReleaseAsset::tear_down()`.
+
+### Sub-cache methods respect the main timeout — no `timeout=false`
+`get_remote_api_tag()`, `get_remote_api_changes()`, `get_remote_api_readme()`, and `get_remote_api_assets()` all use `get_repo_cache($slug) ?: []` (respects timeout). When the main cache is expired these methods return `false` for their sub-key and make a fresh HTTP call. **Cache-hit tests for these methods must seed a future timeout** — tests using `seed_cache()` or `seed_main_cache()` already do this correctly. The `?: []` guard converts a `false` return (expired cache) to `[]` so that subsequent `$cache['key'] ?? false` array accesses are safe under `convertNoticesToExceptions`.

@@ -166,7 +166,7 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
+		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
 		$response = $cache['tags'] ?? false;
 
 		if ( ! $response ) {
@@ -200,7 +200,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
-		$cache      = $this->get_repo_cache( $this->type->slug, false );
+		$cache      = $this->get_repo_cache( $this->type->slug ) ?: [];
 		$response   = $cache['changes'] ?? false;
 		$changelogs = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $changelogs ) : $changelogs;
 
@@ -248,7 +248,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
+		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
 		$response = $cache['readme'] ?? false;
 		$readmes  = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
 
@@ -337,7 +337,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets   = [ '.wordpress-org', 'assets' ];
-		$cache    = $this->get_repo_cache( $this->type->slug, false );
+		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
 		$response = $cache['assets'] ?? false;
 		$assets   = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
 

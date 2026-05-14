@@ -308,6 +308,37 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When the main cache timeout has expired, get_remote_tag() must NOT serve stale
+	 * $cache['tags'] data — it must make a fresh HTTP call.
+	 *
+	 * Regression: previously get_repo_cache($slug, false) bypassed the timeout check
+	 * and returned stale sub-cache entries indefinitely after the main cache expired.
+	 */
+	public function test_get_remote_tag_fetches_fresh_data_when_cache_expired(): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[
+				'timeout' => strtotime( '-1 hour' ),
+				'tags'    => [ '1.0.0' => 'https://example.com/stale.zip' ],
+			]
+		);
+
+		$call = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$call ) {
+				$call++;
+				return $this->mock_http_response( 200, [] );
+			},
+			10,
+			3
+		);
+
+		$this->api->get_remote_tag();
+		$this->assertGreaterThanOrEqual( 1, $call, 'Expected a fresh HTTP call when cache is expired' );
+	}
+
+	/**
 	 * When a parsed changelog is already cached, get_remote_changes() reads
 	 * from cache and returns true without making an HTTP request.
 	 */

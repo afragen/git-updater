@@ -1089,7 +1089,8 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 	}
 
 	public function test_no_cron_scheduled_when_config_has_no_background_themes(): void {
-		wp_clear_scheduled_hook( 'gu_get_remote_theme' );
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
 
 		// Empty config → no themes queued → no cron.
 		$theme = $this->theme_with_config( [] );
