@@ -480,7 +480,7 @@ class Test_Base_Update_Row_Enclosure extends WP_UnitTestCase {
 	public function tear_down(): void {
 		delete_option( 'active_plugins' );
 		delete_site_option( 'allowedthemes' );
-		remove_all_filters( 'network_allowed_themes' );
+		remove_all_filters( 'allowed_themes' );
 		parent::tear_down();
 	}
 
@@ -511,9 +511,10 @@ class Test_Base_Update_Row_Enclosure extends WP_UnitTestCase {
 
 	// Theme type, network-allowed → ' active' class in open tag.
 	public function test_theme_type_network_allowed_has_active_class(): void {
-		// Use filter to bypass WP_Theme::get_allowed_on_network()'s static cache,
-		// which is already warm by the time this test runs on multisite.
-		add_filter( 'network_allowed_themes', fn( $themes ) => array_merge( $themes, [ 'my-theme' => true ] ) );
+		// is_allowed('network') calls get_allowed_on_network(), which applies the 'allowed_themes'
+		// filter (old MU-era filter) — NOT 'network_allowed_themes'. The filter runs on every call
+		// even after the static cache is warm, so hooking it is the correct bypass.
+		add_filter( 'allowed_themes', fn( $themes ) => array_merge( $themes, [ 'my-theme' => true ] ) );
 		$result = $this->base->update_row_enclosure( 'my-theme', 'theme' );
 		$this->assertStringContainsString( ' active"', $result['open'] );
 	}
