@@ -1161,8 +1161,31 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
 		$theme->get_remote_theme_meta();
 
-		// Hook should still exist (not cleared or duplicated to a second slot).
+		// Hook should still exist (not cleared), and exactly one event was scheduled.
 		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_theme' ) );
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_theme' ) );
+	}
+
+	public function test_multiple_existing_timestamps_consolidated_to_single_event(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_theme' );
+
+		$theme_obj = $this->make_theme_obj();
+
+		// Inject two events at different timestamps with different args to simulate
+		// what a previous race left behind (args differ so WP dedup doesn't catch them;
+		// timestamps are 2 hours apart so the 10-minute dedup window doesn't apply).
+		wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-a' => $theme_obj ] ] );
+		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_theme', [ [ 'slug-b' => $theme_obj ] ] );
+
+		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_theme' ), 'Pre-condition: two race-left events must exist' );
+
+		delete_site_option( 'ghu-' . md5( 'test-gu-theme' ) );
+		$theme = $this->theme_with_config( [ 'test-gu-theme' => $theme_obj ] );
+		$theme->get_remote_theme_meta();
+
+		// All pre-existing timestamps must be merged and collapsed into one event.
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_theme' ) );
 	}
 
 	public function test_gu_disable_wpcron_prevents_cron_scheduling(): void {
@@ -1312,6 +1335,23 @@ class Test_Theme_Get_Remote_Theme_Meta extends WP_UnitTestCase {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Count total cron entries for a hook across all timestamps.
+	 *
+	 * @param string $hook Cron hook name.
+	 * @return int
+	 */
+	private function cron_hook_count( string $hook ): int {
+		wp_cache_delete( 'cron', 'options' );
+		$count = 0;
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				$count += count( $hooks[ $hook ] );
+			}
+		}
+		return $count;
 	}
 }
 

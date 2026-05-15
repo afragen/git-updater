@@ -994,8 +994,31 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
 		$plugin->get_remote_plugin_meta();
 
-		// Hook should still exist (not cleared), but no duplicate was added.
+		// Hook should still exist (not cleared), and exactly one event was scheduled.
 		$this->assertTrue( $this->cron_hook_exists( 'gu_get_remote_plugin' ) );
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
+	}
+
+	public function test_multiple_existing_timestamps_consolidated_to_single_event(): void {
+		wp_cache_delete( 'cron', 'options' );
+		wp_unschedule_hook( 'gu_get_remote_plugin' );
+
+		$plugin_obj = $this->make_plugin_obj();
+
+		// Inject two events at different timestamps with different args to simulate
+		// what a previous race left behind (args differ so WP dedup doesn't catch them;
+		// timestamps are 2 hours apart so the 10-minute dedup window doesn't apply).
+		wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-a' => $plugin_obj ] ] );
+		wp_schedule_single_event( time() - HOUR_IN_SECONDS, 'gu_get_remote_plugin', [ [ 'slug-b' => $plugin_obj ] ] );
+
+		$this->assertSame( 2, $this->cron_hook_count( 'gu_get_remote_plugin' ), 'Pre-condition: two race-left events must exist' );
+
+		delete_site_option( 'ghu-' . md5( 'test-plugin' ) );
+		$plugin = $this->plugin_with_config( [ 'test-plugin' => $plugin_obj ] );
+		$plugin->get_remote_plugin_meta();
+
+		// All pre-existing timestamps must be merged and collapsed into one event.
+		$this->assertSame( 1, $this->cron_hook_count( 'gu_get_remote_plugin' ) );
 	}
 
 	public function test_registers_after_plugin_row_action_when_current_filter_is_init(): void {
@@ -1106,5 +1129,22 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Count total cron entries for a hook across all timestamps.
+	 *
+	 * @param string $hook Cron hook name.
+	 * @return int
+	 */
+	private function cron_hook_count( string $hook ): int {
+		wp_cache_delete( 'cron', 'options' );
+		$count = 0;
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			if ( isset( $hooks[ $hook ] ) ) {
+				$count += count( $hooks[ $hook ] );
+			}
+		}
+		return $count;
 	}
 }

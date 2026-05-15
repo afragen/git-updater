@@ -96,7 +96,34 @@ wp_unschedule_hook( 'gu_get_remote_plugin' );
 The `gu_get_remote_plugin` hook is bootstrapped at `init` time (via `Base::load()` → `get_meta_plugins()`) so it will always be present in the pre-test DB state.
 
 ### `merge_and_reschedule_cron_batch()` replaces `is_cron_event_scheduled()` at scheduling sites
-`Plugin::get_remote_plugin_meta()` and `Theme::get_remote_theme_meta()` now call `merge_and_reschedule_cron_batch($hook, $repos)` instead of the old guard+schedule pattern. The helper reads `_get_cron_array()`, merges any existing scheduled batch's `args[0]` into the new array (keyed by slug, so deduplication is automatic), calls `wp_unschedule_hook($hook)` to clear old events, then schedules one new consolidated event. `is_cron_event_scheduled()` is retained for read-only queries but is no longer called at the scheduling sites. Tests that assert a cron event was scheduled should still bust the object cache first: `wp_cache_delete('cron', 'options')`.
+`Plugin::get_remote_plugin_meta()` and `Theme::get_remote_theme_meta()` call `merge_and_reschedule_cron_batch($hook, $repos)` instead of the old guard+schedule pattern. The helper:
+1. Busts the object cache (`wp_cache_delete('cron', 'options')`) so it reads fresh DB state.
+2. Reads `_get_cron_array()` and iterates **all** timestamps (no `break`), merging every existing event's `args[0]` into `$new_args` (slug-keyed, so deduplication is automatic).
+3. Calls `wp_unschedule_hook($hook)` to clear all existing entries.
+4. Schedules exactly one consolidated event.
+
+`is_cron_event_scheduled()` is retained for read-only queries but is no longer called at the scheduling sites.
+
+**Testing count-based assertions:** use `cron_hook_count()` (available in both `Test_Plugin_Methods` and `Test_Theme_Methods`) rather than just `cron_hook_exists()`. The helper busts the cache before counting so it reflects DB truth:
+```php
+private function cron_hook_count( string $hook ): int {
+    wp_cache_delete( 'cron', 'options' );
+    $count = 0;
+    foreach ( (array) _get_cron_array() as $hooks ) {
+        if ( isset( $hooks[ $hook ] ) ) {
+            $count += count( $hooks[ $hook ] );
+        }
+    }
+    return $count;
+}
+```
+
+**Multi-timestamp pre-seeding:** to simulate race-left duplicates at different timestamps, schedule two events with different args (different MD5) at timestamps 2+ hours apart — WP's 10-minute dedup window doesn't apply:
+```php
+wp_schedule_single_event( time() - 2 * HOUR_IN_SECONDS, $hook, [ [ 'slug-a' => $obj ] ] );
+wp_schedule_single_event( time() - HOUR_IN_SECONDS,     $hook, [ [ 'slug-b' => $obj ] ] );
+```
+After calling the method under test, assert `$this->cron_hook_count($hook) === 1`.
 
 ### `gu_additions` filter is called with 3 args; register with `add_filter(..., 10, 3)`
 `get_theme_meta()` applies the filter as `apply_filters('gu_additions', null, $themes, 'theme')`. A listener registered without specifying the accepted-arg count (default 1) will never receive the `$type` argument. Always pass the priority and count explicitly:

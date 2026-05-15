@@ -862,6 +862,7 @@ trait GU_Trait {
 	 * @return void
 	 */
 	final protected function merge_and_reschedule_cron_batch( string $hook, array $new_args ): void {
+		wp_cache_delete( 'cron', 'options' );
 		$cron = _get_cron_array();
 		foreach ( (array) $cron as $hooks ) {
 			if ( isset( $hooks[ $hook ] ) ) {
@@ -869,10 +870,9 @@ trait GU_Trait {
 					$existing = $event['args'][0] ?? [];
 					$new_args = array_merge( $existing, $new_args );
 				}
-				wp_unschedule_hook( $hook );
-				break;
 			}
 		}
+		wp_unschedule_hook( $hook );
 		wp_schedule_single_event( time(), $hook, [ $new_args ] );
 	}
 
