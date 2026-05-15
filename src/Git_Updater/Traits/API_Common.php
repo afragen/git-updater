@@ -166,21 +166,16 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$response = $cache['tags'] ?? false;
+		self::$method = 'tags';
+		$response     = $this->api( $request );
 
-		if ( ! $response ) {
-			self::$method = 'tags';
-			$response     = $this->api( $request );
-
-			if ( ! $response || is_wp_error( $response ) ) {
-				$response          = new stdClass();
-				$response->message = 'No tags found';
-			}
-
-			$response = $this->parse_tag_response( $response );
-			$this->set_repo_cache( 'tags', $response );
+		if ( ! $response || is_wp_error( $response ) ) {
+			$response          = new stdClass();
+			$response->message = 'No tags found';
 		}
+
+		$response = $this->parse_tag_response( $response );
+		$this->set_repo_cache( 'tags', $response );
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
@@ -201,39 +196,35 @@ trait API_Common {
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
 		$cache      = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$response   = $cache['changes'] ?? false;
 		$changelogs = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $changelogs ) : $changelogs;
 
-		if ( ! $response ) {
-			self::$method = 'changes';
-			foreach ( $changelogs as $changelog ) {
-				$new_request = str_replace( ':changelog', $changelog, $request );
-				$response    = $this->api( $new_request );
+		$response     = false;
+		self::$method = 'changes';
+		foreach ( $changelogs as $changelog ) {
+			$new_request = str_replace( ':changelog', $changelog, $request );
+			$response    = $this->api( $new_request );
 
-				$error = isset( $response->message );
-				$error = isset( $response->error ) ? true : $error;
-				if ( ! $error ) {
-					break;
-				}
+			$error = isset( $response->message );
+			$error = isset( $response->error ) ? true : $error;
+			if ( ! $error ) {
+				break;
 			}
-			$response = $this->decode_response( $git, $response );
+		}
+		$response = $this->decode_response( $git, $response );
 
-			if ( ! is_string( $response ) || empty( $response ) ) {
-				$response          = new stdClass();
-				$response->message = 'No changelog found';
-				$this->set_repo_cache( 'changes', $response );
-			}
+		if ( ! is_string( $response ) || empty( $response ) ) {
+			$response          = new stdClass();
+			$response->message = 'No changelog found';
+			$this->set_repo_cache( 'changes', $response );
 		}
 
 		if ( $this->validate_response( $response ) && ! is_string( $response ) ) {
 			return false;
 		}
 
-		if ( ! isset( $cache['changes'] ) ) {
-			$parser   = new Parsedown();
-			$response = $parser->text( $response );
-			$this->set_repo_cache( 'changes', $response );
-		}
+		$parser   = new Parsedown();
+		$response = $parser->text( $response );
+		$this->set_repo_cache( 'changes', $response );
 
 		return true;
 	}
@@ -247,10 +238,9 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
-		$readmes  = [ 'readme.txt', 'README.md', 'readme.md' ];
-		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$response = $cache['readme'] ?? false;
-		$readmes  = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
+		$readmes = [ 'readme.txt', 'README.md', 'readme.md' ];
+		$cache   = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$readmes = ! empty( $cache['contents'] ) ? array_intersect( $cache['contents']['files'], $readmes ) : $readmes;
 
 		// Use readme.txt if it exists.
 		$readme_txt = array_filter(
@@ -263,37 +253,34 @@ trait API_Common {
 		);
 		$readmes    = array_unique( array_merge( $readme_txt, $readmes ) );
 
-		if ( ! $response ) {
-			self::$method = 'readme';
+		$response     = false;
+		self::$method = 'readme';
 
-			foreach ( $readmes as $readme ) {
-				$new_request = str_replace( ':readme', $readme, $request );
-				$response    = $this->api( $new_request );
+		foreach ( $readmes as $readme ) {
+			$new_request = str_replace( ':readme', $readme, $request );
+			$response    = $this->api( $new_request );
 
-				$error = isset( $response->message );
-				$error = isset( $response->error ) ? true : $error;
-				if ( ! $error ) {
-					break;
-				}
+			$error = isset( $response->message );
+			$error = isset( $response->error ) ? true : $error;
+			if ( ! $error ) {
+				break;
 			}
-			$response = $this->decode_response( $git, $response );
+		}
+		$response = $this->decode_response( $git, $response );
 
-			if ( ! is_string( $response ) ) {
-				$response          = new stdClass();
-				$response->message = 'No readme found';
-				$this->set_repo_cache( 'readme', $response );
-			}
+		if ( ! is_string( $response ) ) {
+			$response          = new stdClass();
+			$response->message = 'No readme found';
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( ! isset( $cache['readme'] ) ) {
-			$parser   = new Readme_Parser( $response, $this->type->slug );
-			$response = $parser->parse_data();
-			$this->set_repo_cache( 'readme', $response );
-		}
+		$parser   = new Readme_Parser( $response, $this->type->slug );
+		$response = $parser->parse_data();
+		$this->set_repo_cache( 'readme', $response );
 
 		return true;
 	}
@@ -307,17 +294,12 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_repo_meta( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache['meta'] ?? false;
+		self::$method = 'meta';
+		$response     = $this->api( $request );
 
-		if ( ! $response ) {
-			self::$method = 'meta';
-			$response     = $this->api( $request );
-
-			if ( $response ) {
-				$response = $this->parse_meta_response( $response );
-				$this->set_repo_cache( 'meta', $response );
-			}
+		if ( $response ) {
+			$response = $this->parse_meta_response( $response );
+			$this->set_repo_cache( 'meta', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
@@ -336,36 +318,33 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
-		$assets   = [ '.wordpress-org', 'assets' ];
-		$cache    = $this->get_repo_cache( $this->type->slug ) ?: [];
-		$response = $cache['assets'] ?? false;
-		$assets   = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
+		$assets       = [ '.wordpress-org', 'assets' ];
+		$cache        = $this->get_repo_cache( $this->type->slug ) ?: [];
+		$assets       = ! empty( $cache['contents'] ) ? array_intersect( (array) $cache['contents']['dirs'], $assets ) : $assets;
+		$response     = false;
+		self::$method = 'assets';
 
-		if ( ! $response ) {
-			self::$method = 'assets';
+		foreach ( $assets as $asset ) {
+			$new_request = str_replace( ':path', $asset, $request );
+			$response    = $this->api( $new_request );
 
-			foreach ( $assets as $asset ) {
-				$new_request = str_replace( ':path', $asset, $request );
-				$response    = $this->api( $new_request );
-
-				if ( ! is_object( $response ) ) {
-					break;
-				}
+			if ( ! is_object( $response ) ) {
+				break;
 			}
-
-			$error = isset( $response->message );
-			$error = isset( $response->error ) ? true : $error;
-			$error = ! is_array( $response ) ? true : $error;
-			$error = is_wp_error( $response ) ? true : $error;
-
-			if ( $error ) {
-				$response          = new stdClass();
-				$response->message = 'No assets found';
-			}
-
-			$response = $this->parse_asset_dir_response( $response );
-			$this->set_repo_cache( 'assets', $response );
 		}
+
+		$error = isset( $response->message );
+		$error = isset( $response->error ) ? true : $error;
+		$error = ! is_array( $response ) ? true : $error;
+		$error = is_wp_error( $response ) ? true : $error;
+
+		if ( $error ) {
+			$response          = new stdClass();
+			$response->message = 'No assets found';
+		}
+
+		$response = $this->parse_asset_dir_response( $response );
+		$this->set_repo_cache( 'assets', $response );
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
@@ -383,35 +362,26 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_branches( $git, $request ) {
-		$branches = [];
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache['branches'] ?? false;
+		$branches     = [];
+		self::$method = 'branches';
+		$response     = $this->api( $request );
 
-		if ( ! $response && $this->exit_no_update( $response, true ) ) {
+		/**
+		 * Filter API branch response.
+		 *
+		 * @since 10.0.0
+		 * @param array|stdClass $response
+		 * @param string         $git      Name of API, eg 'github'.
+		 */
+		$response = apply_filters( 'gu_parse_api_branches', $response, $git );
+
+		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( ! $response ) {
-			self::$method = 'branches';
-			$response     = $this->api( $request );
-
-			/**
-			 * Filter API branch response.
-			 *
-			 * @since 10.0.0
-			 * @param array|stdClass $response
-			 * @param string         $git      Name of API, eg 'github'.
-			 */
-			$response = apply_filters( 'gu_parse_api_branches', $response, $git );
-
-			if ( $this->validate_response( $response ) ) {
-				return false;
-			}
-
-			if ( $response ) {
-				$branches = $this->parse_branch_response( $response );
-				$this->set_repo_cache( 'branches', (array) $branches );
-			}
+		if ( $response ) {
+			$branches = $this->parse_branch_response( $response );
+			$this->set_repo_cache( 'branches', (array) $branches );
 		}
 
 		return true;
@@ -501,17 +471,12 @@ trait API_Common {
 	 * @return bool
 	 */
 	final public function get_remote_api_contents( $git, $request ) {
-		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache['contents'] ?? false;
+		self::$method = 'contents';
+		$response     = $this->api( $request );
 
-		if ( ! $response ) {
-			self::$method = 'contents';
-			$response     = $this->api( $request );
-
-			if ( $response ) {
-				$response = $this->parse_contents_response( $response );
-				$this->set_repo_cache( 'contents', $response );
-			}
+		if ( $response ) {
+			$response = $this->parse_contents_response( $response );
+			$this->set_repo_cache( 'contents', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {

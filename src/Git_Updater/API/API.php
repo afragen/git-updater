@@ -185,7 +185,7 @@ class API {
 	 *
 	 * @param string $url The URL to send the request to.
 	 *
-	 * @return boolean|stdClass|\WP_Error
+	 * @return bool|array<mixed>|stdClass|\WP_Error
 	 */
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );

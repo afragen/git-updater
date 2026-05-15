@@ -245,19 +245,31 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	/**
 	 * When $cache['contents'] is set, the changelogs list is filtered to only
-	 * files present in the repo. When $cache['changes'] is also set, the method
-	 * reads from cache and returns true without an HTTP round-trip.
+	 * files present in the repo, reducing the number of API calls made.
 	 */
 	public function test_get_remote_api_changes_filters_changelogs_via_contents_cache(): void {
 		$this->seed_cache(
-			[
-				'contents' => [ 'files' => [ 'CHANGES.md', 'readme.txt' ], 'dirs' => [] ],
-				'changes'  => '<h2>Changelog</h2><p>Initial release.</p>',
-			]
+			[ 'contents' => [ 'files' => [ 'CHANGES.md', 'readme.txt' ], 'dirs' => [] ] ]
+		);
+
+		$raw_content = "# Changelog\n\n## 1.0.0\n- Initial release";
+		$call        = 0;
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $raw_content, &$call ) {
+				$call++;
+				return $this->http_ok_raw(
+					wp_json_encode( [ 'content' => base64_encode( $raw_content ), 'encoding' => 'base64' ] )
+				);
+			},
+			10,
+			3
 		);
 
 		$result = $this->api->get_remote_changes( 'CHANGES.md' );
 		$this->assertTrue( $result );
+		$this->assertSame( 1, $call, 'Contents-cache filtering should narrow the search to CHANGES.md only' );
 	}
 
 	/**
@@ -300,19 +312,31 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	/**
 	 * When $cache['contents'] is set, the readmes list is filtered to matching
-	 * files. With $cache['readme'] already cached, the method returns true
-	 * without an HTTP round-trip.
+	 * files, reducing the number of API calls made.
 	 */
 	public function test_get_remote_api_readme_filters_readmes_via_contents_cache(): void {
 		$this->seed_cache(
-			[
-				'contents' => [ 'files' => [ 'readme.txt', 'test-plugin.php' ], 'dirs' => [] ],
-				'readme'   => [ 'sections' => [ 'description' => 'Cached description.' ] ],
-			]
+			[ 'contents' => [ 'files' => [ 'readme.txt', 'test-plugin.php' ], 'dirs' => [] ] ]
+		);
+
+		$readme_content = "=== Test Plugin ===\nContributors: test\nStable tag: 1.0.0\n\nDescription.";
+		$call           = 0;
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $readme_content, &$call ) {
+				$call++;
+				return $this->http_ok_raw(
+					wp_json_encode( [ 'content' => base64_encode( $readme_content ), 'encoding' => 'base64' ] )
+				);
+			},
+			10,
+			3
 		);
 
 		$result = $this->api->get_remote_readme();
 		$this->assertTrue( $result );
+		$this->assertSame( 1, $call, 'Contents-cache filtering should narrow the search to readme.txt only' );
 	}
 
 	/**
@@ -352,21 +376,37 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	/**
 	 * When $cache['contents']['dirs'] is set, the assets list is filtered to
-	 * matching directories. With $cache['assets'] already set, returns true
-	 * without an HTTP round-trip.
+	 * matching directories, reducing the number of API calls made.
 	 */
 	public function test_get_remote_api_assets_filters_dirs_via_contents_cache(): void {
 		$this->seed_cache(
-			[
-				'contents' => [ 'files' => [], 'dirs' => [ '.wordpress-org' ] ],
-				'assets'   => [
-					'Banners' => [ 'low' => 'https://ps.w.org/test-plugin/assets/banner-772x250.png' ],
-				],
-			]
+			[ 'contents' => [ 'files' => [], 'dirs' => [ '.wordpress-org' ] ] ]
+		);
+
+		$call = 0;
+
+		add_filter(
+			'pre_http_request',
+			function () use ( &$call ) {
+				$call++;
+				return $this->http_ok(
+					[
+						[
+							'type'         => 'file',
+							'name'         => 'banner-772x250.png',
+							'path'         => '.wordpress-org/banner-772x250.png',
+							'download_url' => 'https://raw.githubusercontent.com/test-owner/test-plugin/master/.wordpress-org/banner-772x250.png',
+						],
+					]
+				);
+			},
+			10,
+			3
 		);
 
 		$result = $this->api->get_repo_assets();
 		$this->assertTrue( $result );
+		$this->assertSame( 1, $call, 'Contents-cache filtering should narrow the search to .wordpress-org only' );
 	}
 
 	/**
@@ -451,12 +491,10 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When gu_always_fetch_update is true (bypasses exit_no_update) and the API
-	 * returns a response with a 'message' property, validate_response() = true
-	 * → get_remote_api_branches() returns false at line 408.
+	 * When the API returns a response with a 'message' property, validate_response()
+	 * returns true → get_remote_api_branches() returns false.
 	 */
 	public function test_get_remote_api_branches_returns_false_when_validate_response_true_during_fetch(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
 		add_filter(
 			'pre_http_request',
 			fn() => $this->http_ok( [ 'message' => 'Forbidden' ] ),

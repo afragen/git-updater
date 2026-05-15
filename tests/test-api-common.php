@@ -187,9 +187,6 @@ class Test_API_Common extends WP_UnitTestCase {
 	 * The removed is_scalar() check cannot break this path.
 	 */
 	public function test_get_remote_api_branches_with_valid_response_returns_true(): void {
-		// Force a fetch so exit_no_update() does not short-circuit.
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
 		// Include 'url' in each commit so parse_branch_response does not
 		// trigger an E_WARNING accessing an undefined stdClass property.
 		$branches_response = [

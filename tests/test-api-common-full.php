@@ -139,11 +139,16 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
-	 * After a successful fetch, a second call hits the cache and returns true
-	 * without making any HTTP request.
+	 * get_remote_readme() always fetches from the API and returns true on success.
 	 */
-	public function test_get_remote_readme_returns_true_from_cache(): void {
-		$this->seed_main_cache( [ 'readme' => [ 'sections' => [ 'description' => 'Cached readme.' ] ] ] );
+	public function test_get_remote_readme_returns_true_on_api_fetch(): void {
+		$readme_content = "=== Test Plugin ===\nContributors: test\nStable tag: 1.0.0\n\nDescription.";
+		$this->intercept_http_with(
+			$this->mock_http_response_raw(
+				200,
+				wp_json_encode( [ 'content' => base64_encode( $readme_content ), 'encoding' => 'base64' ] )
+			)
+		);
 
 		$result = $this->api->get_remote_readme();
 		$this->assertTrue( $result );
@@ -295,12 +300,11 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When tags are already cached, get_remote_tag() reads from cache and
-	 * returns true without making an HTTP request.
+	 * get_remote_tag() always fetches from the API and returns true on success.
 	 */
-	public function test_get_remote_tag_returns_true_from_cache(): void {
-		$this->seed_main_cache(
-			[ 'tags' => [ '1.0.0' => 'https://example.com/archive/1.0.0.zip' ] ]
+	public function test_get_remote_tag_returns_true_on_api_fetch(): void {
+		$this->intercept_http_with(
+			$this->mock_http_response( 200, [ [ 'name' => '1.0.0', 'commit' => [ 'sha' => 'abc123' ] ] ] )
 		);
 
 		$result = $this->api->get_remote_tag();
@@ -308,21 +312,9 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the main cache timeout has expired, get_remote_tag() must NOT serve stale
-	 * $cache['tags'] data — it must make a fresh HTTP call.
-	 *
-	 * Regression: previously get_repo_cache($slug, false) bypassed the timeout check
-	 * and returned stale sub-cache entries indefinitely after the main cache expired.
+	 * get_remote_tag() always makes a fresh API call regardless of cache state.
 	 */
-	public function test_get_remote_tag_fetches_fresh_data_when_cache_expired(): void {
-		update_site_option(
-			$this->api->get_cache_key( 'test-plugin' ),
-			[
-				'timeout' => strtotime( '-1 hour' ),
-				'tags'    => [ '1.0.0' => 'https://example.com/stale.zip' ],
-			]
-		);
-
+	public function test_get_remote_tag_always_fetches_fresh_data(): void {
 		$call = 0;
 		add_filter(
 			'pre_http_request',
@@ -335,16 +327,19 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 		);
 
 		$this->api->get_remote_tag();
-		$this->assertGreaterThanOrEqual( 1, $call, 'Expected a fresh HTTP call when cache is expired' );
+		$this->assertGreaterThanOrEqual( 1, $call, 'Expected a fresh HTTP call on every invocation' );
 	}
 
 	/**
-	 * When a parsed changelog is already cached, get_remote_changes() reads
-	 * from cache and returns true without making an HTTP request.
+	 * get_remote_changes() always fetches from the API and returns true on success.
 	 */
-	public function test_get_remote_changes_returns_true_from_cache(): void {
-		$this->seed_main_cache(
-			[ 'changes' => '<h2>Changelog</h2><p>Initial release.</p>' ]
+	public function test_get_remote_changes_returns_true_on_api_fetch(): void {
+		$raw_content = "# Changelog\n\n## 1.0.0\n- Initial release";
+		$this->intercept_http_with(
+			$this->mock_http_response_raw(
+				200,
+				wp_json_encode( [ 'content' => base64_encode( $raw_content ), 'encoding' => 'base64' ] )
+			)
 		);
 
 		$result = $this->api->get_remote_changes( 'CHANGES.md' );
@@ -352,12 +347,22 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When repo meta is already cached, get_repo_meta() reads from cache and
-	 * returns true without making an HTTP request.
+	 * get_repo_meta() always fetches from the API and returns true on success.
 	 */
-	public function test_get_repo_meta_returns_true_from_cache(): void {
-		$this->seed_main_cache(
-			[ 'meta' => [ 'last_updated' => '2024-01-01', 'watchers' => 10 ] ]
+	public function test_get_repo_meta_returns_true_on_api_fetch(): void {
+		$this->intercept_http_with(
+			$this->mock_http_response(
+				200,
+				[
+					'name'        => 'test-plugin',
+					'private'     => false,
+					'pushed_at'   => '2024-06-01T12:00:00Z',
+					'created_at'  => '2023-01-01T00:00:00Z',
+					'watchers'    => 10,
+					'forks'       => 1,
+					'open_issues' => 0,
+				]
+			)
 		);
 
 		$result = $this->api->get_repo_meta();
@@ -365,17 +370,17 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the contents listing is already cached, get_repo_contents() reads
-	 * from cache and returns true without making an HTTP request.
+	 * get_repo_contents() always fetches from the API and returns true on success.
 	 */
-	public function test_get_repo_contents_returns_true_from_cache(): void {
-		$this->seed_main_cache(
-			[
-				'contents' => [
-					'files' => [ 'readme.txt', 'test-plugin.php' ],
-					'dirs'  => [ 'src' ],
-				],
-			]
+	public function test_get_repo_contents_returns_true_on_api_fetch(): void {
+		$this->intercept_http_with(
+			$this->mock_http_response(
+				200,
+				[
+					[ 'type' => 'file', 'name' => 'readme.txt', 'path' => 'readme.txt' ],
+					[ 'type' => 'dir',  'name' => 'src',        'path' => 'src' ],
+				]
+			)
 		);
 
 		$result = $this->api->get_repo_contents();
