@@ -57,7 +57,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Get remote info for tags.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_remote_tag() {
 		return $this->get_remote_api_tag( 'github', '/repos/:owner/:repo/tags' );
@@ -68,7 +68,7 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @param string $changes The changelog filename - deprecated.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_remote_changes( $changes ) {
 		return $this->get_remote_api_changes( 'github', $changes, '/repos/:owner/:repo/contents/:changelog' );
@@ -77,7 +77,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Read and parse remote readme.txt.
 	 *
-	 * @return bool|void
+	 * @return bool|null
 	 */
 	public function get_remote_readme() {
 		return $this->get_remote_api_readme( 'github', '/repos/:owner/:repo/contents/:readme' );
@@ -86,7 +86,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Read the repository meta from API.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_repo_meta() {
 		return $this->get_remote_api_repo_meta( 'github', '/repos/:owner/:repo' );
@@ -95,7 +95,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Create array of branches and download links as array.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_remote_branches() {
 		return $this->get_remote_api_branches( 'github', '/repos/:owner/:repo/branches' );
@@ -122,7 +122,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of repository assets.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_repo_assets() {
 		return $this->get_remote_api_assets( 'github', '/repos/:owner/:repo/contents/:path' );
@@ -131,7 +131,7 @@ class GitHub_API extends API implements API_Interface {
 	/**
 	 * Return list of files at repo root.
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_repo_contents() {
 		return $this->get_remote_api_contents( 'github', '/repos/:owner/:repo/contents' );

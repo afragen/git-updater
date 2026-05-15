@@ -82,12 +82,9 @@ class Test_API_Common extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API returns false (error cache or empty body), the tag response
-	 * is set to 'No tags found' and get_remote_api_tag() returns false because
-	 * validate_response() considers an object-with-message as invalid.
-	 *
-	 * This also validates that parse_tag_response() is now always called after
-	 * the error branch (the removed always-true if-wrapper).
+	 * When api() returns false (error cache hit), get_remote_api_tag() enters the
+	 * !$response branch, caches a 'No tags found' placeholder, and returns null —
+	 * counting the call as complete (the API was unreachable, not a WP_Error).
 	 */
 	public function test_get_remote_api_tag_with_failed_api_returns_false(): void {
 		// Seed an in-force error cache so api() returns false immediately.
@@ -100,7 +97,7 @@ class Test_API_Common extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_remote_tag();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -124,12 +121,9 @@ class Test_API_Common extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API returns a non-200 response (no changelog content), the
-	 * changes response message is set and get_remote_changes() returns true
-	 * because the cache was written.
-	 *
-	 * The is_wp_error(string) guard was removed — this validates the simpler
-	 * non-string path still correctly sets 'No changelog found'.
+	 * When the API returns a non-200 response (no changelog content), the response
+	 * body is a stdClass (not a string), so get_remote_api_changes() caches a
+	 * 'No changelog found' placeholder and returns null — counted as complete.
 	 */
 	public function test_get_remote_api_changes_with_failed_api_returns_true(): void {
 		// Return a 404 for all changelog filenames.
@@ -138,9 +132,7 @@ class Test_API_Common extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_remote_changes( 'CHANGES.md' );
-		// validate_response returns true for the 'No changelog found' object,
-		// but get_remote_api_changes checks !is_string($response) too, so it returns false.
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -163,9 +155,9 @@ class Test_API_Common extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API returns no readable readme content, get_remote_readme()
-	 * returns false. The removed is_wp_error(string) guard cannot cause a
-	 * regression here.
+	 * When the API returns a non-200 response (no readme content), the response
+	 * body is a stdClass (not a string), so get_remote_api_readme() caches a
+	 * 'No readme found' placeholder and returns null — counted as complete.
 	 */
 	public function test_get_remote_api_readme_with_failed_api_returns_false(): void {
 		$this->intercept_http_with(
@@ -173,7 +165,7 @@ class Test_API_Common extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_remote_readme();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	// -------------------------------------------------------------------------
@@ -200,7 +192,8 @@ class Test_API_Common extends WP_UnitTestCase {
 	}
 
 	/**
-	 * When the API returns a non-200, get_remote_branches() returns false.
+	 * When api() returns false (error cache hit), get_remote_branches() enters the
+	 * !$response branch and returns null — counted as complete.
 	 */
 	public function test_get_remote_api_branches_with_failed_api_returns_false(): void {
 		update_site_option(
@@ -212,6 +205,6 @@ class Test_API_Common extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_remote_branches();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 }

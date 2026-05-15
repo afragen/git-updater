@@ -31,8 +31,34 @@ All API data is cached in WordPress site options. Cache keys follow the pattern 
 2. Checks the main repo cache; if hit, returns cached data.
 3. Checks the error cache (`slug_error` key); if fresh (within 60 min), returns `false` without making an HTTP request.
 4. Makes `wp_remote_get()` if both caches are cold.
-5. On non-200 response, writes to the error cache and returns `false`.
-6. On 200, stores the decoded body in the main cache.
+5. On `WP_Error` (network failure), returns the `WP_Error` immediately.
+6. On non-200 response, writes the 60-minute error cache entry, then still caches and returns the decoded body (e.g. `stdClass{message:'Not Found'}`).
+7. On 200, stores the decoded body in the main cache.
+
+### `get_remote_api_*` tri-state returns
+
+The seven shared API methods in `API_Common` (`get_remote_api_tag`, `get_remote_api_changes`, `get_remote_api_readme`, `get_remote_api_assets`, `get_remote_api_repo_meta`, `get_remote_api_branches`, `get_remote_api_contents`) return `bool|null`:
+
+- **`true`** — ran and cached useful data.
+- **`null`** — ran but found nothing (repo has no tags, no readme, etc.); a placeholder with `->message` is cached. Counts as complete.
+- **`false`** — `WP_Error` (network failure, DNS, SSL). Does NOT count as complete; causes a retry on the next WordPress update check.
+
+Note: when the error cache is active, `api()` returns literal `false`. In the `get_remote_api_*` methods this `false` hits the `!$response` branch and returns `null` (counted as complete, honouring the error cache's intent to stop retrying for 60 min).
+
+### Cache completion tracking (`$cache['ran']`)
+
+`Base::get_remote_api_info()` runs the seven secondary API calls after the main `get_remote_info()`. It records which calls completed in `$cache['ran']` using a ternary + `array_filter` pattern:
+
+```php
+$ran   = [];
+$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
+// ... six more lines ...
+$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+```
+
+`array_filter` strips `null` (WP_Error calls), leaving only string keys of completed calls.
+
+`GU_Trait::maybe_extend_repo_cache()` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_api_info()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry.
 
 `src/Git_Updater/API/GitHub_API.php` implements `API_Interface` and extends `API`. Additional git host APIs (Bitbucket, GitLab, Gitea) are loaded via add-on plugins and registered through the `gu_get_repo_api` filter.
 

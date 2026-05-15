@@ -163,15 +163,21 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no tags found, false on WP_Error.
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
 		self::$method = 'tags';
 		$response     = $this->api( $request );
 
-		if ( ! $response || is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		if ( ! $response ) {
 			$response          = new stdClass();
 			$response->message = 'No tags found';
+			$this->set_repo_cache( 'tags', $response );
+			return null;
 		}
 
 		$response = $this->parse_tag_response( $response );
@@ -191,7 +197,7 @@ trait API_Common {
 	 * @param string $changes Name of changelog file - deprecated.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no changelog found, false on WP_Error.
 	 */
 	final public function get_remote_api_changes( $git, $changes, $request ) {
 		$changelogs = [ 'CHANGES.md', 'CHANGELOG.md', 'changes.md', 'changelog.md', 'changelog.txt' ];
@@ -213,13 +219,13 @@ trait API_Common {
 		$response = $this->decode_response( $git, $response );
 
 		if ( ! is_string( $response ) || empty( $response ) ) {
+			if ( is_wp_error( $response ) ) {
+				return false;
+			}
 			$response          = new stdClass();
 			$response->message = 'No changelog found';
 			$this->set_repo_cache( 'changes', $response );
-		}
-
-		if ( $this->validate_response( $response ) && ! is_string( $response ) ) {
-			return false;
+			return null;
 		}
 
 		$parser   = new Parsedown();
@@ -235,7 +241,7 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no readme found, false on WP_Error.
 	 */
 	final public function get_remote_api_readme( $git, $request ) {
 		$readmes = [ 'readme.txt', 'README.md', 'readme.md' ];
@@ -269,13 +275,13 @@ trait API_Common {
 		$response = $this->decode_response( $git, $response );
 
 		if ( ! is_string( $response ) ) {
+			if ( is_wp_error( $response ) ) {
+				return false;
+			}
 			$response          = new stdClass();
 			$response->message = 'No readme found';
 			$this->set_repo_cache( 'readme', $response );
-		}
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
+			return null;
 		}
 
 		$parser   = new Readme_Parser( $response, $this->type->slug );
@@ -291,16 +297,22 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no meta found, false on WP_Error.
 	 */
 	final public function get_remote_api_repo_meta( $git, $request ) {
 		self::$method = 'meta';
 		$response     = $this->api( $request );
 
-		if ( $response ) {
-			$response = $this->parse_meta_response( $response );
-			$this->set_repo_cache( 'meta', $response );
+		if ( is_wp_error( $response ) ) {
+			return false;
 		}
+
+		if ( ! $response ) {
+			return null;
+		}
+
+		$response = $this->parse_meta_response( $response );
+		$this->set_repo_cache( 'meta', $response );
 
 		if ( $this->validate_response( $response ) ) {
 			return false;
@@ -315,7 +327,7 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no assets found, false on WP_Error.
 	 */
 	final public function get_remote_api_assets( $git, $request ) {
 		$assets       = [ '.wordpress-org', 'assets' ];
@@ -339,8 +351,13 @@ trait API_Common {
 		$error = is_wp_error( $response ) ? true : $error;
 
 		if ( $error ) {
+			if ( is_wp_error( $response ) ) {
+				return false;
+			}
 			$response          = new stdClass();
 			$response->message = 'No assets found';
+			$this->set_repo_cache( 'assets', $response );
+			return null;
 		}
 
 		$response = $this->parse_asset_dir_response( $response );
@@ -359,12 +376,15 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no branches found, false on WP_Error.
 	 */
 	final public function get_remote_api_branches( $git, $request ) {
-		$branches     = [];
 		self::$method = 'branches';
 		$response     = $this->api( $request );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
 
 		/**
 		 * Filter API branch response.
@@ -375,14 +395,16 @@ trait API_Common {
 		 */
 		$response = apply_filters( 'gu_parse_api_branches', $response, $git );
 
+		if ( ! $response ) {
+			return null;
+		}
+
 		if ( $this->validate_response( $response ) ) {
 			return false;
 		}
 
-		if ( $response ) {
-			$branches = $this->parse_branch_response( $response );
-			$this->set_repo_cache( 'branches', (array) $branches );
-		}
+		$branches = $this->parse_branch_response( $response );
+		$this->set_repo_cache( 'branches', (array) $branches );
 
 		return true;
 	}
@@ -468,16 +490,22 @@ trait API_Common {
 	 * @param string $git     Name of API, eg 'github'.
 	 * @param string $request API request.
 	 *
-	 * @return bool
+	 * @return bool|null True if data cached, null if no contents found, false on WP_Error.
 	 */
 	final public function get_remote_api_contents( $git, $request ) {
 		self::$method = 'contents';
 		$response     = $this->api( $request );
 
-		if ( $response ) {
-			$response = $this->parse_contents_response( $response );
-			$this->set_repo_cache( 'contents', $response );
+		if ( is_wp_error( $response ) ) {
+			return false;
 		}
+
+		if ( ! $response ) {
+			return null;
+		}
+
+		$response = $this->parse_contents_response( $response );
+		$this->set_repo_cache( 'contents', $response );
 
 		if ( $this->validate_response( $response ) ) {
 			return false;

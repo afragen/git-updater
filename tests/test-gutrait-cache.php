@@ -165,14 +165,14 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
-	public function test_maybe_extend_repo_cache_extends_when_version_matches_and_meta_present(): void {
+	public function test_maybe_extend_repo_cache_extends_when_version_matches_and_all_calls_ran(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option(
 			$cache_key,
 			[
 				'repo'        => 'test-plugin',
 				'test-plugin' => [ 'Version' => '1.0.0' ],
-				'meta'        => [ 'last_updated' => '2024-01-01' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
@@ -191,7 +191,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			[
 				'repo'        => 'test-plugin',
 				'test-plugin' => [ 'Version' => '2.0.0' ],
-				'meta'        => [ 'last_updated' => '2024-01-01' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
@@ -200,14 +200,31 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$this->assertFalse( $result );
 	}
 
-	public function test_maybe_extend_repo_cache_returns_false_when_meta_missing(): void {
+	public function test_maybe_extend_repo_cache_returns_false_when_ran_missing(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option(
 			$cache_key,
 			[
 				'repo'        => 'test-plugin',
 				'test-plugin' => [ 'Version' => '1.0.0' ],
-				// no 'meta' key — cache data incomplete
+				// no 'ran' key — cache data incomplete
+				'timeout'     => strtotime( '-1 hour' ),
+			]
+		);
+
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type );
+		$this->assertFalse( $result );
+	}
+
+	public function test_maybe_extend_repo_cache_returns_false_when_ran_incomplete(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'repo'        => 'test-plugin',
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				// 'ran' exists but missing 'branches' and 'meta' — interrupted mid-sequence
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
@@ -361,7 +378,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// maybe_extend_repo_cache() — expired timeout update (lines 225–226)
 	// -------------------------------------------------------------------------
 
-	public function test_maybe_extend_repo_cache_updates_timeout_when_expired_and_meta_present(): void {
+	public function test_maybe_extend_repo_cache_updates_timeout_when_expired_and_all_calls_ran(): void {
 		$slug      = 'test-plugin';
 		$cache_key = $this->api->get_cache_key( $slug );
 		update_site_option(
@@ -369,7 +386,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			[
 				'repo'    => $slug,
 				$slug     => [ 'Version' => '1.0.0' ],
-				'meta'    => [ 'last_updated' => '2024-01-01' ],
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 				'timeout' => strtotime( '-1 hour' ),
 			]
 		);

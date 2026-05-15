@@ -70,7 +70,7 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function get_remote_branches();
 

@@ -206,8 +206,9 @@ trait GU_Trait {
 	 * Maybe extend API cached data and set new timeout if remote version
 	 * is same as cached remote version?
 	 *
-	 * Use presence of 'meta' in cache to determine if cache data is present and complete.
-	 * If not present, do not extend or set timeout to avoid saving incomplete data.
+	 * Use presence of 'ran' in cache to determine if all API calls have executed and are complete.
+	 * Each key is appended to 'ran' after its specific call returns, so a partial list indicates
+	 * interrupted execution. If not present or incomplete, do not extend or set timeout.
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
@@ -220,14 +221,13 @@ trait GU_Trait {
 		$cache     = get_site_option( $cache_key, [] );
 
 		if ( isset( $cache['repo'] ) && version_compare( $remote_headers['Version'], $cache[ $cache['repo'] ]['Version'] ?? '', '==' ) ) {
-			if ( isset( $cache['meta'] ) ) {
+			$expected = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+			if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );
 				}
 				$return = true;
-			} else {
-				$return = false;
 			}
 		}
 

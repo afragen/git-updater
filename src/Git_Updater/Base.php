@@ -332,13 +332,15 @@ class Base {
 
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
-				$repo_api->get_repo_contents();
-				$repo_api->get_repo_assets();
-				$repo_api->get_remote_readme();
-				$repo_api->get_remote_changes( '' );
-				$repo_api->get_remote_tag();
-				$repo_api->get_remote_branches();
-				$repo_api->get_repo_meta();
+				$ran   = [];
+				$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
+				$ran[] = false !== $repo_api->get_repo_assets()      ? 'assets'   : null;
+				$ran[] = false !== $repo_api->get_remote_readme()    ? 'readme'   : null;
+				$ran[] = false !== $repo_api->get_remote_changes('') ? 'changes'  : null;
+				$ran[] = false !== $repo_api->get_remote_tag()       ? 'tags'     : null;
+				$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
+				$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
+				$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
 			}
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();

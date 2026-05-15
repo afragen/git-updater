@@ -164,12 +164,13 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API fails, get_repo_meta() returns false.
+	 * When api() returns false (error cache hit), get_repo_meta() hits the
+	 * !$response branch and returns null — counted as complete.
 	 */
 	public function test_get_repo_meta_returns_false_when_api_fails(): void {
 		$this->seed_error_cache();
 		$result = $this->api->get_repo_meta();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -200,8 +201,9 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API returns a non-200 for all asset paths, get_repo_assets()
-	 * returns false because the response object has a 'message' property.
+	 * When the API returns a non-200 for all asset paths, the response object
+	 * has a 'message' property which sets $error=true; since it's not a WP_Error,
+	 * get_repo_assets() caches a 'No assets found' placeholder and returns null.
 	 */
 	public function test_get_repo_assets_returns_false_when_api_fails(): void {
 		$this->intercept_http_with(
@@ -209,7 +211,7 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_repo_assets();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -282,12 +284,13 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the API fails, get_repo_contents() returns false.
+	 * When api() returns false (error cache hit), get_repo_contents() hits the
+	 * !$response branch and returns null — counted as complete.
 	 */
 	public function test_get_repo_contents_returns_false_when_api_fails(): void {
 		$this->seed_error_cache();
 		$result = $this->api->get_repo_contents();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**

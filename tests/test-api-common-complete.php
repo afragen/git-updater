@@ -194,17 +194,17 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * When the remote version equals the cached version AND $cache['meta'] exists,
-	 * maybe_extend_repo_cache() returns true → get_remote_api_info() returns false
-	 * (line 154) rather than true, to avoid an unnecessary cache overwrite.
+	 * When the remote version equals the cached version AND $cache['ran'] contains all
+	 * expected keys, maybe_extend_repo_cache() returns true → get_remote_api_info() returns
+	 * false (line 154) rather than true, to avoid an unnecessary cache overwrite.
 	 */
 	public function test_get_remote_api_info_returns_false_when_maybe_extend_cache_returns_true(): void {
-		// Pre-seed dot_org and meta so maybe_extend_repo_cache finds $cache['meta'].
+		// Pre-seed ran so maybe_extend_repo_cache confirms all API calls completed.
 		// The 'test-plugin' key is intentionally absent; api() will fetch it.
 		$this->seed_cache(
 			[
 				'dot_org' => 'not in dot org',
-				'meta'    => [ 'last_updated' => '2024-01-01T00:00:00Z', 'watchers' => 10 ],
+				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 			]
 		);
 
@@ -234,7 +234,7 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 		// get_remote_api_info runs, fetches headers (Version=1.0.0), writes
 		// $cache['test-plugin'] and $cache['repo'], then calls maybe_extend_repo_cache.
-		// Because $cache['meta'] exists and the versions match, it returns true → false.
+		// Because $cache['ran'] is complete and the versions match, it returns true → false.
 		$result = $this->api->get_remote_info( 'test-plugin.php' );
 		$this->assertFalse( $result );
 	}
@@ -454,7 +454,8 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	 * created, and the method returns false.
 	 *
 	 * Both asset paths return 200 + message body so the loop never breaks (both
-	 * are objects) and the final $response has the message property.
+	 * are objects) and the final $response has the message property triggering
+	 * $error=true; since it's not a WP_Error, a placeholder is cached and null returned.
 	 */
 	public function test_get_remote_api_assets_error_flag_set_from_message_property(): void {
 		// Both calls return stdClass{message: "Not Found"} → loop runs to exhaustion.
@@ -466,7 +467,7 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_repo_assets();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -503,6 +504,246 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_remote_branches();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_branches() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Empty API response (no branches) → returns null, does not add to $ran.
+	 */
+	public function test_get_remote_api_branches_returns_null_when_api_returns_empty(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok_raw( '[]' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_branches();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() → returns false immediately, does not add to $ran.
+	 */
+	public function test_get_remote_api_branches_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_branches();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_repo_meta() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Empty API response → returns null, does not add to $ran.
+	 */
+	public function test_get_remote_api_repo_meta_returns_null_when_api_returns_empty(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok_raw( '' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_meta();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() → returns false immediately, does not add to $ran.
+	 */
+	public function test_get_remote_api_repo_meta_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_meta();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_contents() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Empty API response → returns null, does not add to $ran.
+	 */
+	public function test_get_remote_api_contents_returns_null_when_api_returns_empty(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok_raw( '' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_contents();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() → returns false immediately, does not add to $ran.
+	 */
+	public function test_get_remote_api_contents_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_contents();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_tag() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Empty tags list from API → caches placeholder, returns null.
+	 */
+	public function test_get_remote_api_tag_returns_null_when_api_returns_empty(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok_raw( '[]' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_tag();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() → returns false immediately, does not cache placeholder.
+	 */
+	public function test_get_remote_api_tag_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_tag();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_changes() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * All changelog files return 404-style message → no string decoded → caches
+	 * placeholder, returns null.
+	 */
+	public function test_get_remote_api_changes_returns_null_when_no_changelog_found(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok( [ 'message' => 'Not Found' ] ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_changes( '' );
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() breaks the loop; after decode, is_wp_error check fires → false.
+	 */
+	public function test_get_remote_api_changes_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_changes( '' );
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_readme() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * All readme files return 404-style message → no string decoded → caches
+	 * placeholder, returns null.
+	 */
+	public function test_get_remote_api_readme_returns_null_when_no_readme_found(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok( [ 'message' => 'Not Found' ] ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_readme();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() breaks the loop; after decode, is_wp_error check fires → false.
+	 */
+	public function test_get_remote_api_readme_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_readme();
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_remote_api_assets() — null and WP_Error tri-state paths
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Non-array, non-WP_Error response → $error = true → caches placeholder, returns null.
+	 */
+	public function test_get_remote_api_assets_returns_null_when_no_assets_found(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok( [ 'message' => 'Not Found' ] ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_assets();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * WP_Error from api() → $error = true, is_wp_error check fires → false.
+	 */
+	public function test_get_remote_api_assets_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_assets();
 		$this->assertFalse( $result );
 	}
 
