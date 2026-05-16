@@ -223,7 +223,6 @@ trait GU_Trait {
 		if ( isset( $cache['repo'] ) && version_compare( $remote_headers['Version'], $cache[ $cache['repo'] ]['Version'] ?? '', '==' ) ) {
 			$expected = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 			if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
-				error_log( $repo->slug . ' cache is complete. ' );
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
 					error_log( $repo->slug . ' cache is complete. Timeout invalid. Extending cache.' );
 					$cache['timeout'] = strtotime( '+6 hours' );
