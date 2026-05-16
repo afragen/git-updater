@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Flow;
 use stdClass;
 
 /*
@@ -529,9 +530,9 @@ class GitHub_API extends API implements API_Interface {
 	 * Output OAuth controls and status messages.
 	 */
 	private function render_oauth_controls() {
-		$credentials = $this->get_oauth_credentials();
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status query arg for UI message only.
-		$status = isset( $_GET['gu_github_oauth'] ) ? sanitize_key( wp_unslash( $_GET['gu_github_oauth'] ) ) : '';
+		$oauth       = $this->get_oauth_flow();
+		$credentials = $oauth->get_credentials();
+		$status      = $oauth->get_status();
 
 		if ( 'success' === $status ) {
 			echo '<p><strong>' . esc_html__( 'OAuth token updated from GitHub.', 'git-updater' ) . '</strong></p>';
@@ -549,7 +550,7 @@ class GitHub_API extends API implements API_Interface {
 
 		printf(
 			'<p><a class="button button-secondary" href="%s">%s</a></p>',
-			esc_url( $this->get_oauth_start_url() ),
+			esc_url( $oauth->get_start_url() ),
 			esc_html__( 'Authorize via GitHub OAuth', 'git-updater' )
 		);
 	}
@@ -558,178 +559,34 @@ class GitHub_API extends API implements API_Interface {
 	 * Start OAuth flow and process callback.
 	 */
 	public function maybe_handle_oauth_flow() {
-		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce is validated in start_oauth_flow().
-		if ( isset( $_GET['gu_github_oauth_start'] ) ) {
-			$this->start_oauth_flow();
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth state+PKCE verifier validation is used on callback.
-		if ( isset( $_GET['gu_github_oauth_callback'] ) ) {
-			$this->complete_oauth_flow();
-		}
+		$this->get_oauth_flow()->maybe_handle_flow();
 	}
 
 	/**
-	 * Build start URL for OAuth flow.
+	 * Build GitHub OAuth flow controller.
 	 *
-	 * @return string
+	 * @return OAuth_Flow
 	 */
-	private function get_oauth_start_url() {
-		$redirect = $this->get_settings_redirect_url();
-
-		return add_query_arg(
+	private function get_oauth_flow() {
+		return new OAuth_Flow(
 			[
-				'gu_github_oauth_start' => 1,
-				'_wpnonce'              => wp_create_nonce( 'gu-github-oauth-start' ),
-			],
-			$redirect
-		);
-	}
-
-	/**
-	 * Start GitHub OAuth redirect.
-	 */
-	private function start_oauth_flow() {
-		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'gu-github-oauth-start' ) ) {
-			$this->oauth_redirect_with_status( 'error-nonce' );
-
-			return;
-		}
-
-		$credentials = $this->get_oauth_credentials();
-		if ( empty( $credentials['client_id'] ) ) {
-			$this->oauth_redirect_with_status( 'error-client-id' );
-
-			return;
-		}
-
-		$state    = wp_generate_password( 48, false, false );
-		$verifier = wp_generate_password( 96, false, false );
-		$key      = $this->get_oauth_transient_key( $state );
-
-		set_transient(
-			$key,
-			[
-				'code_verifier' => $verifier,
-			],
-			15 * MINUTE_IN_SECONDS
-		);
-
-		$authorize_url = add_query_arg(
-			[
-				'client_id'             => $credentials['client_id'],
-				'redirect_uri'          => $this->get_oauth_callback_url(),
-				'scope'                 => $credentials['scope'],
-				'state'                 => $state,
-				'code_challenge'        => $this->get_oauth_code_challenge( $verifier ),
-				'code_challenge_method' => 'S256',
-			],
-			'https://github.com/login/oauth/authorize'
-		);
-
-		wp_safe_redirect( $authorize_url );
-		exit;
-	}
-
-	/**
-	 * Process GitHub callback and save token.
-	 */
-	private function complete_oauth_flow() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated through state and PKCE verifier.
-		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated through state and PKCE verifier.
-		$code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
-
-		if ( empty( $state ) || empty( $code ) ) {
-			$this->oauth_redirect_with_status( 'error-callback' );
-
-			return;
-		}
-
-		$key      = $this->get_oauth_transient_key( $state );
-		$flow     = get_transient( $key );
-		$verifier = is_array( $flow ) && ! empty( $flow['code_verifier'] ) ? $flow['code_verifier'] : '';
-		delete_transient( $key );
-
-		if ( empty( $verifier ) ) {
-			$this->oauth_redirect_with_status( 'error-state' );
-
-			return;
-		}
-
-		$credentials = $this->get_oauth_credentials();
-		$token       = $this->exchange_code_for_token( $credentials, $code, $verifier );
-
-		if ( empty( $token ) ) {
-			$this->oauth_redirect_with_status( 'error-token' );
-
-			return;
-		}
-
-		$options                        = get_site_option( 'git_updater', [] );
-		$options['github_access_token'] = $token;
-		update_site_option( 'git_updater', $options );
-		static::$options['github_access_token'] = $token;
-
-		$this->oauth_redirect_with_status( 'success' );
-	}
-
-	/**
-	 * Exchange callback code for access token.
-	 *
-	 * @param array  $credentials OAuth credentials.
-	 * @param string $code Callback code.
-	 * @param string $verifier PKCE verifier.
-	 *
-	 * @return string
-	 */
-	private function exchange_code_for_token( $credentials, $code, $verifier ) {
-		$body = [
-			'client_id'     => $credentials['client_id'],
-			'code'          => $code,
-			'redirect_uri'  => $this->get_oauth_callback_url(),
-			'code_verifier' => $verifier,
-		];
-
-		if ( ! empty( $credentials['client_secret'] ) ) {
-			$body['client_secret'] = $credentials['client_secret'];
-		}
-
-		$response = wp_remote_post(
-			'https://github.com/login/oauth/access_token',
-			[
-				'timeout' => 15,
-				'headers' => [
-					'Accept' => 'application/json',
-				],
-				'body'    => $body,
+				'provider'               => 'github',
+				'label'                  => 'GitHub',
+				'option_name'            => 'github_access_token',
+				'settings_url'           => $this->get_settings_redirect_url(),
+				'authorize_url'          => 'https://github.com/login/oauth/authorize',
+				'token_url'              => 'https://github.com/login/oauth/access_token',
+				'default_scope'          => 'repo',
+				'credentials_filter'     => 'gu_github_oauth_credentials',
+				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
+				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
+				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
+				'start_arg'              => 'gu_github_oauth_start',
+				'callback_arg'           => 'gu_github_oauth_callback',
+				'status_arg'             => 'gu_github_oauth',
+				'nonce_action'           => 'gu-github-oauth-start',
 			]
 		);
-
-		if ( is_wp_error( $response ) ) {
-			return '';
-		}
-
-		$payload = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		if ( ! is_array( $payload ) || empty( $payload['access_token'] ) ) {
-			return '';
-		}
-
-		return sanitize_text_field( $payload['access_token'] );
-	}
-
-	/**
-	 * Build callback URL for GitHub OAuth.
-	 *
-	 * @return string
-	 */
-	private function get_oauth_callback_url() {
-		return add_query_arg( 'gu_github_oauth_callback', 1, $this->get_settings_redirect_url() );
 	}
 
 	/**
@@ -751,45 +608,12 @@ class GitHub_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Redirect to GitHub settings with flow status.
-	 *
-	 * @param string $status OAuth status value.
-	 */
-	private function oauth_redirect_with_status( $status ) {
-		wp_safe_redirect(
-			add_query_arg(
-				'gu_github_oauth',
-				$status,
-				$this->get_settings_redirect_url()
-			)
-		);
-		exit;
-	}
-
-	/**
 	 * Return GitHub OAuth credentials.
 	 *
 	 * @return array
 	 */
 	private function get_oauth_credentials() {
-		$client_id     = defined( 'GU_GITHUB_OAUTH_CLIENT_ID' ) ? GU_GITHUB_OAUTH_CLIENT_ID : '';
-		$client_secret = defined( 'GU_GITHUB_OAUTH_CLIENT_SECRET' ) ? GU_GITHUB_OAUTH_CLIENT_SECRET : '';
-		$scope         = defined( 'GU_GITHUB_OAUTH_SCOPE' ) ? GU_GITHUB_OAUTH_SCOPE : 'repo';
-
-		$credentials = [
-			'client_id'     => $client_id,
-			'client_secret' => $client_secret,
-			'scope'         => $scope,
-		];
-
-		/**
-		 * Filter OAuth credentials for GitHub auth flow.
-		 *
-		 * @since 13.4.0
-		 *
-		 * @param array $credentials OAuth configuration.
-		 */
-		return apply_filters( 'gu_github_oauth_credentials', $credentials );
+		return $this->get_oauth_flow()->get_credentials();
 	}
 
 	/**
@@ -800,7 +624,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string
 	 */
 	private function get_oauth_transient_key( $state ) {
-		return 'gu_github_oauth_' . md5( $state );
+		return $this->get_oauth_flow()->get_transient_key( $state );
 	}
 
 	/**
@@ -811,10 +635,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string
 	 */
 	private function get_oauth_code_challenge( $verifier ) {
-		$hash = hash( 'sha256', $verifier, true );
-
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for RFC7636 base64url PKCE encoding.
-		return rtrim( strtr( base64_encode( $hash ), '+/', '-_' ), '=' );
+		return $this->get_oauth_flow()->get_code_challenge( $verifier );
 	}
 
 	/**
