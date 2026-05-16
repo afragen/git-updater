@@ -17,6 +17,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
     // Plugin name
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_plugin_name(): void
     {
@@ -24,6 +25,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('My Awesome Plugin', $parser->name);
     }
 
+    /** @test */
     #[Test]
     public function it_trims_hash_and_equals_from_name(): void
     {
@@ -31,6 +33,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('My Plugin', $parser->name);
     }
 
+    /** @test */
     #[Test]
     public function it_sets_warning_when_first_line_is_a_header_field(): void
     {
@@ -40,6 +43,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertArrayHasKey('invalid_plugin_name_header', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_handles_literal_plugin_name_placeholder(): void
     {
@@ -49,6 +53,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertArrayHasKey('invalid_plugin_name_header', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_skips_github_style_underline_after_title(): void
     {
@@ -61,6 +66,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
     // Standard headers
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_all_standard_headers(): void
     {
@@ -75,6 +81,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('https://example.com/donate', $parser->donate_link);
     }
 
+    /** @test */
     #[Test]
     public function it_accepts_tested_up_to_as_alias_for_tested(): void
     {
@@ -82,6 +89,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('6.4', $parser->tested);
     }
 
+    /** @test */
     #[Test]
     public function it_accepts_requires_at_least_as_alias_for_requires(): void
     {
@@ -89,6 +97,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('6.1', $parser->requires);
     }
 
+    /** @test */
     #[Test]
     public function it_accepts_requires_php_header(): void
     {
@@ -96,6 +105,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('8.2', $parser->requires_php);
     }
 
+    /** @test */
     #[Test]
     public function it_parses_donate_link(): void
     {
@@ -103,6 +113,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('https://example.com/donate', $parser->donate_link);
     }
 
+    /** @test */
     #[Test]
     public function it_leaves_donate_link_empty_when_absent(): void
     {
@@ -110,6 +121,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('', $parser->donate_link);
     }
 
+    /** @test */
     #[Test]
     public function it_rejects_javascript_donate_link(): void
     {
@@ -117,6 +129,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('', $parser->donate_link);
     }
 
+    /** @test */
     #[Test]
     public function it_rejects_data_uri_donate_link(): void
     {
@@ -124,6 +137,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame('', $parser->donate_link);
     }
 
+    /** @test */
     #[Test]
     public function it_tolerates_blank_lines_within_the_header_block(): void
     {
@@ -137,6 +151,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
     // Contributors
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_contributors(): void
     {
@@ -144,6 +159,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame(['jsmith', 'jane-doe'], $parser->contributors);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_leading_at_from_contributor_slugs(): void
     {
@@ -151,6 +167,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame(['alice', 'bob'], $parser->contributors);
     }
 
+    /** @test */
     #[Test]
     public function it_normalises_contributor_slugs_to_lowercase(): void
     {
@@ -158,6 +175,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame(['alice', 'bob'], $parser->contributors);
     }
 
+    /** @test */
     #[Test]
     public function it_warns_and_drops_contributors_with_invalid_slugs(): void
     {
@@ -172,6 +190,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
     // Tags
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_tags(): void
     {
@@ -179,6 +198,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertSame(['widgets', 'api', 'rest'], $parser->tags);
     }
 
+    /** @test */
     #[Test]
     public function it_removes_ignored_tags(): void
     {
@@ -190,6 +210,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertContains('wordpress', $parser->warnings['ignored_tags']);
     }
 
+    /** @test */
     #[Test]
     public function it_enforces_five_tag_limit(): void
     {
@@ -198,6 +219,7 @@ class NameAndHeaderParsingTest extends ParserTestCase
         $this->assertArrayHasKey('too_many_tags', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_records_the_dropped_tags_in_the_warning(): void
     {

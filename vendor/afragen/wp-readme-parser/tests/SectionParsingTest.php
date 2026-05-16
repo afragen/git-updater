@@ -18,6 +18,7 @@ class SectionParsingTest extends ParserTestCase
     // Short description
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_short_description(): void
     {
@@ -25,6 +26,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertSame('A concise description of what this plugin does.', $parser->short_description);
     }
 
+    /** @test */
     #[Test]
     public function it_falls_back_to_description_section_for_short_description(): void
     {
@@ -35,6 +37,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey('no_short_description_present', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_truncates_short_description_to_150_chars(): void
     {
@@ -50,6 +53,7 @@ class SectionParsingTest extends ParserTestCase
     // Standard named sections
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_description_section(): void
     {
@@ -58,6 +62,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('REST API', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_parses_installation_section(): void
     {
@@ -66,6 +71,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('wp-content/plugins', $parser->sections['installation']);
     }
 
+    /** @test */
     #[Test]
     public function it_parses_changelog_section(): void
     {
@@ -74,6 +80,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('1.2.3', $parser->sections['changelog']);
     }
 
+    /** @test */
     #[Test]
     public function it_uses_short_description_as_description_when_section_absent(): void
     {
@@ -82,6 +89,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('short description', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_omits_empty_sections_from_output(): void
     {
@@ -96,6 +104,7 @@ class SectionParsingTest extends ParserTestCase
     // Markdown-style headings
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_accepts_markdown_h2_section_headings(): void
     {
@@ -104,6 +113,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('Markdown headings', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_does_not_treat_h3_as_a_new_section(): void
     {
@@ -118,6 +128,7 @@ class SectionParsingTest extends ParserTestCase
     // Section aliases
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_resolves_frequently_asked_questions_alias(): void
     {
@@ -126,6 +137,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertNotEmpty($parser->faq);
     }
 
+    /** @test */
     #[Test]
     public function it_resolves_change_log_alias(): void
     {
@@ -134,6 +146,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('Initial release', $parser->sections['changelog']);
     }
 
+    /** @test */
     #[Test]
     public function it_resolves_screenshot_alias(): void
     {
@@ -149,6 +162,7 @@ class SectionParsingTest extends ParserTestCase
     // other_notes
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_merges_other_notes_into_description(): void
     {
@@ -158,6 +172,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('<h3>', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_does_not_expose_other_notes_as_a_standalone_section(): void
     {
@@ -169,6 +184,7 @@ class SectionParsingTest extends ParserTestCase
     // FAQ
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_faq_into_associative_array(): void
     {
@@ -176,6 +192,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey('Does it work with multisite?', $parser->faq);
     }
 
+    /** @test */
     #[Test]
     public function it_renders_faq_as_dl_in_sections(): void
     {
@@ -185,6 +202,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('<dd>', $parser->sections['faq']);
     }
 
+    /** @test */
     #[Test]
     public function it_slugifies_faq_question_as_dt_id(): void
     {
@@ -193,6 +211,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString("id='does%20it%20work%20with%20multisite%3F'", $parser->sections['faq']);
     }
 
+    /** @test */
     #[Test]
     public function it_parses_bold_style_faq_headings(): void
     {
@@ -201,6 +220,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey('What about multiple questions?', $parser->faq);
     }
 
+    /** @test */
     #[Test]
     public function it_captures_bold_faq_answer_content(): void
     {
@@ -215,6 +235,7 @@ class SectionParsingTest extends ParserTestCase
     // Screenshots
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_screenshots_into_indexed_array(): void
     {
@@ -223,6 +244,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey(2, $parser->screenshots);
     }
 
+    /** @test */
     #[Test]
     public function it_starts_screenshot_index_at_one(): void
     {
@@ -231,6 +253,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('settings page', $parser->screenshots[1]);
     }
 
+    /** @test */
     #[Test]
     public function it_removes_screenshots_from_sections_after_parsing(): void
     {
@@ -242,6 +265,7 @@ class SectionParsingTest extends ParserTestCase
     // Upgrade notice
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_upgrade_notice_into_versioned_array(): void
     {
@@ -249,6 +273,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey('1.2.3', $parser->upgrade_notice);
     }
 
+    /** @test */
     #[Test]
     public function it_removes_upgrade_notice_from_sections_after_parsing(): void
     {
@@ -260,6 +285,7 @@ class SectionParsingTest extends ParserTestCase
     // Word-limit trimming
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_trims_description_section_at_2500_words_and_sets_warning(): void
     {
@@ -268,6 +294,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertArrayHasKey('trimmed_section_changelog', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_appends_hellip_when_section_is_trimmed(): void
     {
@@ -275,6 +302,7 @@ class SectionParsingTest extends ParserTestCase
         $this->assertStringContainsString('&hellip;', $parser->sections['changelog']);
     }
 
+    /** @test */
     #[Test]
     public function it_does_not_warn_when_section_is_within_limit(): void
     {

@@ -25,6 +25,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
     // HTML sanitization (real adapter)
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_strips_disallowed_html_tags(): void
     {
@@ -37,6 +38,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('<p>Safe</p>', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_disallowed_attributes(): void
     {
@@ -49,6 +51,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('Text', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_allows_anchor_tags_with_permitted_attributes(): void
     {
@@ -62,6 +65,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('rel=', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_allows_h3_and_h4_but_strips_h1_and_h2(): void
     {
@@ -76,6 +80,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('<h4>Yes</h4>', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_img_tags_produced_by_markdown(): void
     {
@@ -91,6 +96,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
     // Markdown rendering (real adapter)
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_renders_markdown_bold_in_sections(): void
     {
@@ -102,6 +108,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('<strong>', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_renders_markdown_links_in_sections(): void
     {
@@ -113,6 +120,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('<a href=', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_renders_markdown_code_blocks(): void
     {
@@ -128,6 +136,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
     // Dependency injection
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_uses_a_custom_html_sanitizer(): void
     {
@@ -147,6 +156,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString($marker, $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_uses_a_custom_markdown_converter(): void
     {
@@ -166,6 +176,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString($marker, $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_uses_default_adapters_when_none_are_injected(): void
     {
@@ -182,6 +193,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
     // HTML injection — sanitizer must strip dangerous content (security)
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_strips_script_tags_from_section_content(): void
     {
@@ -194,6 +206,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringNotContainsString('document.location', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_event_handler_attributes(): void
     {
@@ -206,6 +219,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringContainsString('Hover me', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_iframe_tags(): void
     {
@@ -217,6 +231,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringNotContainsString('<iframe', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_object_and_embed_tags(): void
     {
@@ -229,6 +244,7 @@ class HtmlAndMarkdownTest extends ParserTestCase
         $this->assertStringNotContainsString('<embed', $parser->sections['description']);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_style_attributes(): void
     {

@@ -96,29 +96,29 @@
         },
         {
             "name": "afragen/wp-readme-parser",
-            "version": "1.0.1",
-            "version_normalized": "1.0.1.0",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/wp-readme-parser.git",
-                "reference": "76b417362120b4b8c1ab84fd2488587c81436561"
+                "reference": "5d03fa084ea40b4f07c497ef7050e658d43bdcda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/76b417362120b4b8c1ab84fd2488587c81436561",
-                "reference": "76b417362120b4b8c1ab84fd2488587c81436561",
+                "url": "https://api.github.com/repos/afragen/wp-readme-parser/zipball/5d03fa084ea40b4f07c497ef7050e658d43bdcda",
+                "reference": "5d03fa084ea40b4f07c497ef7050e658d43bdcda",
                 "shasum": ""
             },
             "require": {
                 "erusev/parsedown": "^1.8",
-                "php": ">=8.1 <8.6"
+                "php": ">=8.0 <8.6"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.59",
                 "phpstan/phpstan": "^1.11 || ^2.0",
-                "phpunit/phpunit": "^10.5 || ^11.5 || ^12.0 || ^13.0"
+                "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.0 || ^13.0"
             },
-            "time": "2026-04-18T00:22:52+00:00",
+            "time": "2026-05-16T17:31:02+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -133,7 +133,7 @@
             "description": "A PHP library for parsing WordPress plugin readme.txt files into structured data.",
             "support": {
                 "issues": "https://github.com/afragen/wp-readme-parser/issues",
-                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.1"
+                "source": "https://github.com/afragen/wp-readme-parser/tree/1.0.2"
             },
             "install-path": "../afragen/wp-readme-parser"
         },
