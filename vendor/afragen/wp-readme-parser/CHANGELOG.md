@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] / 2026-05-16
+
+### Added
+- PHP 8.0 support: minimum PHP version lowered from 8.1 to 8.0.
+- `phpunit9.xml` — PHPUnit 9.x-compatible configuration (no `<source>` element) used by the PHP 8.0 CI matrix entry.
+- PHPUnit `^9.6` added to the `require-dev` constraint range to cover PHP 8.0.
+- All test classes now carry `@test` / `@dataProvider` docblocks alongside existing `#[Test]` / `#[DataProvider]` attributes so PHPUnit 9.x can discover them.
+
+### Changed
+- CI matrix extended with a PHP 8.0 / PHPUnit 9.6 entry that passes `--configuration phpunit9.xml`.
+- Code-style CI job updated to run on PHP 8.0 (the new minimum).
+
 ## [1.0.0] / 2026-04-15
 
 ### Added
