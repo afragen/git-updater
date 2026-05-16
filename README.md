@@ -7,7 +7,7 @@
 * Contributors: [Andy Fragen](https://github.com/afragen), [contributors](https://github.com/afragen/git-updater/graphs/contributors)
 * Tags: packages, update, github, language pack
 * Requires at least: 5.9
-* Requires PHP: 8.1
+* Requires PHP: 8.0
 * Stable tag: [master](https://github.com/afragen/git-updater/releases/latest)
 * Donate link: <https://thefragens.com/git-updater-donate>
 * License: GPL-3.0-or-later

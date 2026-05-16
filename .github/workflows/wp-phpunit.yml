@@ -23,7 +23,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["8.1", "8.2", "8.3", "8.4", "8.5"]
+        php-versions: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        include:
+          - php-versions: "8.0"
+            composer-flags: "--ignore-platform-reqs"
 
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
@@ -50,7 +53,7 @@ jobs:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Composer install
-        run: composer install --optimize-autoloader --prefer-dist
+        run: composer install --optimize-autoloader --prefer-dist ${{ matrix.composer-flags }}
 
       - name: Install SVN
         run: sudo apt-get update && sudo apt-get install -y subversion
