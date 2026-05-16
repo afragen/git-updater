@@ -38,8 +38,7 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
-		$this->type     = $type;
-		$this->response = [];
+		$this->type = $type;
 		add_action( 'admin_init', [ $this, 'maybe_handle_oauth_flow' ] );
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
@@ -528,6 +527,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Output OAuth controls and status messages.
+	 *
+	 * @return void
 	 */
 	private function render_oauth_controls() {
 		$oauth       = $this->get_oauth_flow();
@@ -557,6 +558,8 @@ class GitHub_API extends API implements API_Interface {
 
 	/**
 	 * Start OAuth flow and process callback.
+	 *
+	 * @return void
 	 */
 	public function maybe_handle_oauth_flow() {
 		$this->get_oauth_flow()->maybe_handle_flow();
@@ -605,37 +608,6 @@ class GitHub_API extends API implements API_Interface {
 			],
 			$base
 		);
-	}
-
-	/**
-	 * Return GitHub OAuth credentials.
-	 *
-	 * @return array
-	 */
-	private function get_oauth_credentials() {
-		return $this->get_oauth_flow()->get_credentials();
-	}
-
-	/**
-	 * Build transient key for OAuth flow state.
-	 *
-	 * @param string $state OAuth state.
-	 *
-	 * @return string
-	 */
-	private function get_oauth_transient_key( $state ) {
-		return $this->get_oauth_flow()->get_transient_key( $state );
-	}
-
-	/**
-	 * Build S256 PKCE challenge.
-	 *
-	 * @param string $verifier PKCE verifier.
-	 *
-	 * @return string
-	 */
-	private function get_oauth_code_challenge( $verifier ) {
-		return $this->get_oauth_flow()->get_code_challenge( $verifier );
 	}
 
 	/**
