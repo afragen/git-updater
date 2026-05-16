@@ -350,6 +350,7 @@ trait GU_Trait {
 			return false;
 		}
 		$property = $reflection_obj->getProperty( $name );
+		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
 
 		return $property->getValue( $class );
 	}
