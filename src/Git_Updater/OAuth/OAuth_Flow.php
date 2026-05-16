@@ -28,14 +28,14 @@ class OAuth_Flow {
 	/**
 	 * OAuth provider configuration.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private $config;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param array $config OAuth provider configuration.
+	 * @param array<string, mixed> $config OAuth provider configuration.
 	 */
 	public function __construct( $config ) {
 		$this->config = wp_parse_args(
@@ -62,6 +62,8 @@ class OAuth_Flow {
 
 	/**
 	 * Start OAuth flow and process callback.
+	 *
+	 * @return void
 	 */
 	public function maybe_handle_flow() {
 		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
@@ -112,7 +114,7 @@ class OAuth_Flow {
 	/**
 	 * Return OAuth credentials from constants and provider filter.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function get_credentials() {
 		$client_id_constant     = $this->config['client_id_constant'];
@@ -155,6 +157,8 @@ class OAuth_Flow {
 
 	/**
 	 * Start provider OAuth redirect.
+	 *
+	 * @return void
 	 */
 	private function start_flow() {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), $this->config['nonce_action'] ) ) {
@@ -207,6 +211,8 @@ class OAuth_Flow {
 
 	/**
 	 * Process provider callback and save token.
+	 *
+	 * @return void
 	 */
 	private function complete_flow() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth callback is validated through state and PKCE verifier.
@@ -249,9 +255,9 @@ class OAuth_Flow {
 	/**
 	 * Exchange callback code for access token.
 	 *
-	 * @param array  $credentials OAuth credentials.
-	 * @param string $code Callback code.
-	 * @param string $verifier PKCE verifier.
+	 * @param array<string, string> $credentials OAuth credentials.
+	 * @param string                $code        Callback code.
+	 * @param string                $verifier    PKCE verifier.
 	 *
 	 * @return string
 	 */
@@ -315,6 +321,7 @@ class OAuth_Flow {
 	 * Redirect to provider settings with flow status.
 	 *
 	 * @param string $status OAuth status value.
+	 * @return void
 	 */
 	private function redirect_with_status( $status ) {
 		wp_safe_redirect(
