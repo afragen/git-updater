@@ -331,6 +331,7 @@ trait GU_Trait {
 	 */
 	final public function get_reflection_method( $obj, $method ): ReflectionMethod {
 		$reflection_method = new ReflectionMethod( $obj, $method );
+		PHP_VERSION_ID < 80100 && $reflection_method->setAccessible( true );
 
 		return $reflection_method;
 	}

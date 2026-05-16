@@ -56,6 +56,7 @@ class Test_API_Dot_Org_Data extends WP_UnitTestCase {
 
 	private function call_get_dot_org_data(): mixed {
 		$rm = new ReflectionMethod( $this->api, 'get_dot_org_data' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api );
 	}
 
@@ -197,6 +198,7 @@ class Test_API_Exit_No_Update extends WP_UnitTestCase {
 
 	private function call_exit_no_update( $response = false, $branch = false ): bool {
 		$rm = new ReflectionMethod( $this->api, 'exit_no_update' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $response, $branch );
 	}
 
@@ -359,6 +361,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		$this->type->local_path = $this->temp_dir;
 
 		$rm     = new ReflectionMethod( $this->api, 'local_file_exists' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $this->api, 'test-file.txt' );
 
 		$this->assertTrue( $result );
@@ -368,6 +371,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		$this->type->local_path = $this->temp_dir;
 
 		$rm     = new ReflectionMethod( $this->api, 'local_file_exists' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$result = $rm->invoke( $this->api, 'nonexistent.txt' );
 
 		$this->assertFalse( $result );
@@ -399,6 +403,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		];
 
 		$rm = new ReflectionMethod( $this->api, 'set_file_info' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $this->api, $response );
 
 		$this->assertSame( '2.5.0', $this->type->remote_version );
@@ -428,6 +433,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		];
 
 		$rm = new ReflectionMethod( $this->api, 'set_file_info' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $this->api, $response );
 
 		$this->assertSame( 'My Test Plugin', $this->type->name );
@@ -446,6 +452,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		];
 
 		$rm = new ReflectionMethod( $this->api, 'add_meta_repo_object' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $this->api );
 
 		$this->assertSame( '2024-06-15T12:00:00Z', $this->type->last_updated );
@@ -460,6 +467,7 @@ class Test_API_Local_Info extends WP_UnitTestCase {
 		];
 
 		$rm = new ReflectionMethod( $this->api, 'add_meta_repo_object' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		$rm->invoke( $this->api );
 
 		$this->assertSame( '', $this->type->added );

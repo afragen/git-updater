@@ -226,6 +226,7 @@ class Test_API extends WP_UnitTestCase {
 	 */
 	private function call_validate_response( $value ): bool {
 		$rm = new ReflectionMethod( $this->api, 'validate_response' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $value );
 	}
 

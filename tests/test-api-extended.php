@@ -64,11 +64,13 @@ class Test_API_Extended extends WP_UnitTestCase {
 
 	private function call_sort_tags( array $tags ): bool {
 		$rm = new ReflectionMethod( $this->api, 'sort_tags' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $tags );
 	}
 
 	private function call_return_repo_type(): array {
 		$rm = new ReflectionMethod( $this->api, 'return_repo_type' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api );
 	}
 
