@@ -233,6 +233,19 @@ class Test_Add_Ons_Api_Results extends WP_UnitTestCase {
 
 		$this->assertSame( $original, $returned );
 	}
+
+	public function test_plugins_api_returns_result_object_when_slug_found_in_api_results(): void {
+		$data = [ 'git-updater-gist' => [ 'name' => 'Git Updater Gist', 'slug' => 'git-updater-gist' ] ];
+		update_site_option(
+			$this->cache_key,
+			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
+		);
+
+		$args   = (object) [ 'slug' => 'git-updater-gist' ];
+		$result = $this->addons->plugins_api( new stdClass(), 'plugin_information', $args );
+
+		$this->assertSame( 'Git Updater Gist', $result->name );
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -1355,5 +1368,173 @@ class Test_Repo_List_Table_Extended extends WP_UnitTestCase {
 		$this->table->render_list_table();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div class="wrap">', $output );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Add_Ons — add_admin_page and addons_page_init
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Add_Ons_Admin_Page_And_Init
+ */
+class Test_Add_Ons_Admin_Page_And_Init extends WP_UnitTestCase {
+
+	private Add_Ons $addons;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->addons = new Add_Ons();
+	}
+
+	public function tear_down(): void {
+		global $wp_settings_sections, $wp_settings_fields;
+		unset( $wp_settings_sections['git_updater_addons_settings'] );
+		unset( $wp_settings_fields['git_updater_addons_settings'] );
+		wp_dequeue_script( 'ajax-activate' );
+		wp_deregister_script( 'ajax-activate' );
+		remove_all_filters( 'gu_add_settings_tabs' );
+		remove_all_actions( 'gu_add_admin_page' );
+		remove_all_filters( 'pre_http_request' );
+		parent::tear_down();
+	}
+
+	public function test_add_admin_page_matching_tab_enqueues_plugin_install_script(): void {
+		$this->addons->add_admin_page( 'git_updater_addons' );
+		// ajax-activate is newly registered+enqueued by add_admin_page — reliable signal that the body ran.
+		$this->assertTrue( wp_script_is( 'ajax-activate', 'registered' ) );
+	}
+
+	public function test_gu_add_admin_page_action_closure_invokes_add_admin_page(): void {
+		// Fires the closure registered on 'gu_add_admin_page' by add_settings_tabs() — covers line 70.
+		// Pass two args: Additions\Settings also registers on this action with accepted_args=2.
+		$this->addons->add_settings_tabs();
+		do_action( 'gu_add_admin_page', 'git_updater_addons', admin_url() );
+		$this->assertTrue( wp_script_is( 'ajax-activate', 'registered' ) );
+	}
+
+	public function test_addons_page_init_registers_setting(): void {
+		$this->addons->addons_page_init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'git_updater_addons_settings', $settings );
+	}
+
+	public function test_addons_page_init_registers_settings_section(): void {
+		global $wp_settings_sections;
+		$this->addons->addons_page_init();
+		$this->assertArrayHasKey( 'addons', $wp_settings_sections['git_updater_addons_settings'] ?? [] );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Add_Ons — prevent_redirect_on_modal_activation
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Add_Ons_Modal_Prevention
+ */
+class Test_Add_Ons_Modal_Prevention extends WP_UnitTestCase {
+
+	private Add_Ons $addons;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->addons = new Add_Ons();
+		wp_dequeue_script( 'ajax-activate' );
+		wp_deregister_script( 'ajax-activate' );
+	}
+
+	public function tear_down(): void {
+		unset( $_GET['plugin'] );
+		wp_dequeue_script( 'ajax-activate' );
+		wp_deregister_script( 'ajax-activate' );
+		parent::tear_down();
+	}
+
+	public function test_prevent_redirect_enqueues_ajax_activate_for_addon_slug(): void {
+		$_GET['plugin'] = 'git-updater-gist';
+		$this->addons->prevent_redirect_on_modal_activation();
+		$this->assertTrue( wp_script_is( 'ajax-activate', 'registered' ) );
+	}
+
+	public function test_prevent_redirect_does_nothing_when_plugin_not_in_get(): void {
+		unset( $_GET['plugin'] );
+		$this->addons->prevent_redirect_on_modal_activation();
+		$this->assertFalse( wp_script_is( 'ajax-activate', 'registered' ) );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Add_Ons — insert_cards
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Add_Ons_Insert_Cards
+ */
+class Test_Add_Ons_Insert_Cards extends WP_UnitTestCase {
+
+	private Add_Ons $addons;
+	private string  $cache_key;
+
+	public function set_up(): void {
+		parent::set_up();
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		$this->addons    = new Add_Ons();
+		$this->cache_key = 'ghu-' . md5( 'gu_addon_api_results' );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( $this->cache_key );
+		remove_all_filters( 'pre_http_request' );
+		$GLOBALS['current_screen'] = null;
+		parent::tear_down();
+	}
+
+	private function make_addon_item( string $name, string $slug ): array {
+		return [
+			'name'              => $name,
+			'slug'              => $slug,
+			'version'           => '1.0.0',
+			'short_description' => '',
+			'author'            => '',
+			'author_profile'    => '',
+			'rating'            => 0,
+			'num_ratings'       => 0,
+			'active_installs'   => 0,
+			'downloaded'        => 0,
+			'last_updated'      => '',
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '',
+			'homepage'          => '',
+			'group'             => '',
+			'icons'             => [ 'default' => '' ],
+			'action_links'      => [],
+			'banners'           => [ 'default' => '', 'high' => '' ],
+			'donate_link'       => '',
+			'compatibility'     => [],
+		];
+	}
+
+	public function test_insert_cards_outputs_form_with_plugin_install_table(): void {
+		$data = [
+			'git-updater-gist'      => $this->make_addon_item( 'Git Updater Gist',      'git-updater-gist' ),
+			'git-updater-bitbucket' => $this->make_addon_item( 'Git Updater Bitbucket', 'git-updater-bitbucket' ),
+			'git-updater-gitlab'    => $this->make_addon_item( 'Git Updater GitLab',    'git-updater-gitlab' ),
+			'git-updater-gitea'     => $this->make_addon_item( 'Git Updater Gitea',     'git-updater-gitea' ),
+		];
+		update_site_option(
+			$this->cache_key,
+			[ 'gu_addon_api_results' => $data, 'timeout' => strtotime( '+7 days' ) ]
+		);
+
+		set_current_screen( 'plugin-install' );
+
+		ob_start();
+		$this->addons->insert_cards();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<form', $output );
+		$this->assertStringContainsString( 'git-updater-addons', $output );
 	}
 }

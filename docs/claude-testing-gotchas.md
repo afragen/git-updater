@@ -71,6 +71,15 @@ Methods that use `get_repo_cache($slug, false)` (ignore timeout) also read stale
 ### `get_addon_api_results()` uses `wp_remote_post`, interceptable via `pre_http_request`
 `Add_Ons::get_addon_api_results()` calls `wp_remote_post()` for each of the four add-on slugs. Mock all outbound HTTP via `add_filter('pre_http_request', ...)` — the filter intercepts POST requests too. Results are cached only when all four addons succeed (count check); partial results are returned but not cached. Cache key is `ghu-` + md5('gu_addon_api_results').
 
+### `Add_Ons::add_settings_tabs()` closure (line 70) — fire `gu_add_admin_page` with two args
+The closure registered on `gu_add_admin_page` by `add_settings_tabs()` is only covered when that action is fired. Call `$addons->add_settings_tabs()` then `do_action('gu_add_admin_page', 'git_updater_addons', admin_url())`. Two args are required: `Additions\Settings` also registers on this action with `$accepted_args=2`; passing only one arg causes an `ArgumentCountError`. The `Add_Ons` closure uses `$accepted_args=1` so it safely ignores the second arg.
+
+### `Add_Ons::add_admin_page()` — assert on `ajax-activate`, not `plugin-install`
+`add_admin_page('git_updater_addons')` calls `wp_enqueue_script('plugin-install')` (enqueue-only, no register) plus registers-and-enqueues `ajax-activate` with a full URL. `plugin-install` may already be in `done` state from prior tests, making `wp_script_is('plugin-install', 'enqueued')` unreliable. Assert `wp_script_is('ajax-activate', 'registered')` instead — `ajax-activate` is freshly registered by the method. Dequeue and deregister `ajax-activate` in both `set_up()` and `tear_down()` to prevent cross-test contamination.
+
+### `Add_Ons::insert_cards()` — load `template.php`, set screen, and supply full item schema
+`insert_cards()` calls `_get_list_table('WP_Plugin_Install_List_Table')`, which is defined in `wp-admin/includes/template.php` — load it in `set_up()`. The list table's `display()` is safe without full admin context but requires a screen object: call `set_current_screen('plugin-install')` before invoking `insert_cards()` and reset `$GLOBALS['current_screen'] = null` in `tear_down()`. Capture output with `ob_start()`/`ob_get_clean()`. Items must include all keys accessed by `single_row()` to avoid undefined-key notices under `convertNoticesToExceptions`. Required keys (beyond `name`/`slug`/`version`): `short_description`, `author`, `author_profile`, `rating`, `num_ratings`, `active_installs`, `downloaded`, `last_updated`, `requires`, `requires_php`, `tested`, `homepage`, `group`, `icons` (array with `'default'` key), `action_links`, `banners`, `donate_link`, `compatibility`.
+
 ### Additions\Settings has a static `$options_additions` property
 `Settings::$options_additions` is a static property populated in `__construct()` from `get_site_option('git_updater_additions', [])`. In tests, reset it before constructing: `Additions_Settings::$options_additions = []`. Set it directly on the class (not via site option) to drive `callback_checkbox()` checked-state tests.
 
