@@ -377,3 +377,18 @@ add_filter( 'allowed_themes', fn( $themes ) => array_merge( $themes, [ 'my-theme
 
 ### Multisite-only failures: `Plugin::get_remote_plugin_meta()` `after_plugin_row` guard
 `get_remote_plugin_meta()` only registers `after_plugin_row_*` actions when `! is_multisite() || is_network_admin()`. On single-site the first clause is true; on multisite CI (not in network admin) both are false and the action is never registered. Fix: call `set_current_screen('plugins-network')` when `is_multisite()` is true to satisfy `is_network_admin()`, and reset with `$GLOBALS['current_screen'] = null` in `tear_down()`.
+
+### Bootstrap.php testing: coverage is per-test, not per-bootstrap
+PHPUnit tracks coverage between each test's `setUp`/`tearDown`, not from the start of the run. Code executed during `tests/bootstrap.php` (plugin load via `plugins_loaded`) is **not** counted as covered. Methods like `Bootstrap::run()` that fire during the bootstrap need an explicit test that calls them.
+
+### `PLUGIN_FILE` is a namespaced constant
+`git-updater.php` declares `const PLUGIN_FILE = __FILE__` inside `namespace Fragen\Git_Updater`. Test files (global namespace) must use the fully qualified form: `\Fragen\Git_Updater\PLUGIN_FILE`.
+
+### `GU_Freemius::init()` namespace guard
+The original guard `function_exists('gu_fs')` checked the global namespace while `gu_fs()` is defined in `Fragen\Git_Updater` — so the guard never fired, causing a "Cannot redeclare" fatal on any second `init()` call. Fixed to `function_exists('\Fragen\Git_Updater\gu_fs')`. When writing tests that call `Bootstrap::run()`, ensure this fix is in place.
+
+### `rename_on_activation()` requires slash in `current_action()` result
+`get_file_without_did_hash()` does `explode('/', $file, 2)` expecting at least two parts. If `current_action()` returns a string without `/` (e.g. `''`), the explode returns a single-element array and the `list($slug, $file)` destructuring triggers an undefined-offset notice, which becomes an exception under `convertNoticesToExceptions="true"`. Always fire `rename_on_activation()` via `do_action('activate_git-updater/git-updater.php')` so `current_action()` returns a slash-containing string.
+
+### FAIR namespace shim for `check_update_api_redirect()`
+`check_update_api_redirect()` conditionally adds a filter only when `\Fair\Default_Repo\get_default_repo_domain()` exists. Define it in `tests/fixtures/fair-default-repo-shim.php` (with an `if (!function_exists(...))` guard) and `require_once` it in `set_up()`. To cover the arrow-function closure body, call `apply_filters('gu_api_domain', '')` after registering the filter.

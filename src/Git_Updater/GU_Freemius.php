@@ -38,7 +38,7 @@ class GU_Freemius {
 	 * @return void
 	 */
 	public function init() {
-		if ( ! function_exists( 'gu_fs' ) ) {
+		if ( ! function_exists( '\Fragen\Git_Updater\gu_fs' ) ) {
 
 			/**
 			 * Create a helper function for easy SDK access.
