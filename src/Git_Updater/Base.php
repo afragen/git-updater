@@ -332,6 +332,7 @@ class Base {
 
 		if ( $repo_api->get_remote_info( $file ) ) {
 			if ( ! self::is_wp_cli() ) {
+				// phpcs:disable
 				$ran   = [];
 				$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
 				$ran[] = false !== $repo_api->get_repo_assets()      ? 'assets'   : null;
@@ -341,6 +342,7 @@ class Base {
 				$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
 				$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
 				$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+				// phpcs:enable
 			}
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
