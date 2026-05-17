@@ -420,10 +420,6 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_asset'] ?? false;
 
-		if ( ! $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
@@ -457,10 +453,6 @@ trait API_Common {
 	final public function get_api_release_assets( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_assets'] ?? false;
-
-		if ( ! $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';

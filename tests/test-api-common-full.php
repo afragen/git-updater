@@ -160,7 +160,8 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 
 	/**
 	 * When wp_remote_get() fails with a WP_Error, parse_release_asset()
-	 * short-circuits and get_api_release_asset() returns false.
+	 * returns '' → stdClass{message} is set → validate_response() = true →
+	 * get_api_release_asset() returns false.
 	 *
 	 * get_release_asset() in GitHub_API has its body commented out; the
 	 * public trait method is called directly here.
@@ -190,8 +191,6 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	 * asset, and get_api_release_asset() returns the parsed assets array.
 	 */
 	public function test_get_api_release_asset_returns_array_with_valid_release(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
 		$release = [
 			'tag_name' => '1.0.0',
 			'assets'   => [
@@ -218,8 +217,6 @@ class Test_API_Common_Full extends WP_UnitTestCase {
 	 * an HTTP round-trip.
 	 */
 	public function test_get_api_release_asset_returns_from_cache(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
 		$cached = [
 			'assets'         => [ '1.0.0' => 'https://example.com/release.zip' ],
 			'created_at'     => [ '1.0.0' => '2024-06-01T12:00:00Z' ],

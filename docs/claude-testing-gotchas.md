@@ -44,6 +44,11 @@ add_filter('pre_http_request', fn() => new WP_Error('http_request_failed', 'Conn
 ### Cron scheduling in tests: use past timestamps
 `wp_get_ready_cron_jobs()` only returns events with a timestamp ≤ `time()`. Scheduling with `time() + HOUR_IN_SECONDS` (future) makes the event invisible. Use `time() - HOUR_IN_SECONDS` (1 hour ago) — past-due but within the 24-hour `is_cron_overdue()` window, so no error is triggered.
 
+### `get_api_release_assets()` / `get_api_release_asset()` always fetch when not cached
+These methods no longer have an `exit_no_update()` guard. They always make an API call when `$cache['release_assets']` / `$cache['release_asset']` is absent, regardless of whether the repo has a pending update. This is intentional: release asset data is needed by the REST `update-api` endpoint even when a repo is at its latest version. Tests for these methods must NOT add `add_filter('gu_always_fetch_update', '__return_true')` — that filter is now only relevant to methods that still contain the guard (e.g. `get_release_asset_redirect()`).
+
+Note: `get_api_release_assets()` calls `get_repo_cache($slug)` with the default `$timeout=true`, meaning an expired cache returns `false` and triggers a fresh API call. This differs from `construct_download_link()` and `populate_api_data()`, which both call `get_repo_cache(..., false)` (bypass timeout).
+
 ### `get_api_release_asset()` is commented out in GitHub_API
 `GitHub_API::get_release_asset()` has its body commented out; calling it is a no-op. The underlying trait method `get_api_release_asset()` is `final public` and can be invoked directly in tests:
 ```php

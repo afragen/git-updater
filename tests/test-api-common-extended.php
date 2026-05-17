@@ -257,8 +257,6 @@ class Test_API_Common_Extended extends WP_UnitTestCase {
 	 * get_release_assets() returns the parsed assets array.
 	 */
 	public function test_get_release_assets_returns_array_with_valid_releases(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
-
 		$releases = [
 			[
 				'tag_name' => '1.0.0',

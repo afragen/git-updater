@@ -748,34 +748,17 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
-	// get_api_release_assets() — gate fires (lines 469-470)
-	// -------------------------------------------------------------------------
-
-	/**
-	 * With no cache, no gu_always_fetch_update, and can_update_repo() = false
-	 * (make_type() sets no remote_version/local_version), the gate
-	 * `! $response && exit_no_update($response)` returns true → false at line 470.
-	 * No HTTP request is made.
-	 */
-	public function test_get_release_assets_returns_false_from_no_update_gate(): void {
-		$result = $this->api->get_release_assets();
-		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
 	// get_api_release_asset() — "No release asset found" path (lines 440-443)
 	// -------------------------------------------------------------------------
 
 	/**
-	 * With gu_always_fetch_update = true (gate bypassed) and a WP_Error HTTP
-	 * response, parse_release_asset() returns '' (falsy) → the inner
-	 * `if (!$response)` block (lines 440-443) sets stdClass{message} →
+	 * When a WP_Error HTTP response is returned, parse_release_asset() returns ''
+	 * (falsy) → the inner `if (!$response)` block sets stdClass{message} →
 	 * validate_response() = true → return false.
 	 *
 	 * Also covers parse_release_asset() line 59: `if (is_wp_error) return ''`.
 	 */
 	public function test_get_api_release_asset_wp_error_sets_no_asset_message(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
 		add_filter(
 			'pre_http_request',
 			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
@@ -796,10 +779,9 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	/**
 	 * Same WP_Error path as above but for get_api_release_assets() / get_release_assets().
-	 * Lines 478-481 set stdClass{message} → validate_response() = true → false.
+	 * Sets stdClass{message} → validate_response() = true → false.
 	 */
 	public function test_get_release_assets_wp_error_sets_no_assets_message(): void {
-		add_filter( 'gu_always_fetch_update', '__return_true' );
 		add_filter(
 			'pre_http_request',
 			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
