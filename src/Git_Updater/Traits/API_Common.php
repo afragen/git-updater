@@ -499,10 +499,6 @@ trait API_Common {
 		$response = $this->parse_contents_response( $response );
 		$this->set_repo_cache( 'contents', $response );
 
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
-
 		return true;
 	}
 }

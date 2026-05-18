@@ -72,7 +72,7 @@ class Readme_Parser extends Parser {
 	 * @return array<int, string>
 	 */
 	protected function sanitize_contributors( $users ) {
-		return $users;
+		return $users; // @codeCoverageIgnore
 	}
 
 	/**

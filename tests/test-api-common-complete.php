@@ -561,6 +561,23 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When api() returns a truthy object with a 'message' property, parse_meta_response()
+	 * validates it internally and returns it unchanged; the outer validate_response() then
+	 * fires true → return false (line 318).
+	 */
+	public function test_get_remote_api_repo_meta_returns_false_when_parse_returns_message_response(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok( [ 'message' => 'Forbidden' ] ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_meta();
+		$this->assertFalse( $result );
+	}
+
+	/**
 	 * WP_Error from api() → returns false immediately, does not add to $ran.
 	 */
 	public function test_get_remote_api_repo_meta_returns_false_on_wp_error(): void {
@@ -626,6 +643,23 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 		$result = $this->api->get_remote_tag();
 		$this->assertNull( $result );
+	}
+
+	/**
+	 * When api() returns a truthy object with a 'message' property, parse_tag_response()
+	 * validates it internally and returns it unchanged; the outer validate_response() then
+	 * fires true → return false (line 187).
+	 */
+	public function test_get_remote_api_tag_returns_false_when_parse_returns_message_response(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok( [ 'message' => 'Forbidden' ] ),
+			10,
+			3
+		);
+
+		$result = $this->api->get_remote_tag();
+		$this->assertFalse( $result );
 	}
 
 	/**
@@ -730,6 +764,29 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 		$result = $this->api->get_repo_assets();
 		$this->assertNull( $result );
+	}
+
+	/**
+	 * When api() returns an array of directory-only items:
+	 * - !is_object(array) → loop breaks immediately.
+	 * - Initial $error checks pass (is_array, no message/error property).
+	 * - parse_asset_dir_response() finds no 'file' items → returns stdClass{message: 'No assets found'}.
+	 * - validate_response() fires true → return false (line 369).
+	 */
+	public function test_get_remote_api_assets_returns_false_when_only_dirs_in_listing(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => $this->http_ok(
+				[
+					[ 'type' => 'dir', 'name' => 'subdir', 'path' => 'assets/subdir', 'download_url' => null ],
+				]
+			),
+			10,
+			3
+		);
+
+		$result = $this->api->get_repo_assets();
+		$this->assertFalse( $result );
 	}
 
 	/**
