@@ -22,12 +22,13 @@ use Plugin_Installer_Skin;
 use Plugin_Upgrader;
 use Theme_Installer_Skin;
 use Theme_Upgrader;
+use WP_Upgrader_Skin;
 
 /*
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -159,7 +160,7 @@ class Install {
 	 */
 	public function install( $type, $config = null ) {
 		if ( self::is_wp_cli() ) {
-			$this->set_install_post_data( $config );
+			$this->set_install_post_data( $config ); // @codeCoverageIgnore
 		}
 
 		if ( isset( $_POST['option_page'] ) && 'git_updater_install' === $_POST['option_page'] ) {
@@ -246,6 +247,7 @@ class Install {
 	 * @return void
 	 */
 	private function set_install_post_data( $config ) {
+		// @codeCoverageIgnoreStart
 		if ( ! isset( $config['uri'] ) ) {
 			return;
 		}
@@ -266,6 +268,7 @@ class Install {
 		if ( 'zipfile' === $config['git'] ) {
 			$_POST['zipfile_slug'] = $config['slug'];
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -284,9 +287,22 @@ class Install {
 			$plugin = self::$install['repo'];
 
 			// Create a new instance of Plugin_Upgrader.
-			$skin     = static::is_wp_cli()
-				? new CLI_Plugin_Installer_Skin()
+			$skin = static::is_wp_cli()
+				? new CLI_Plugin_Installer_Skin() // @codeCoverageIgnore
 				: new Plugin_Installer_Skin( compact( 'type', 'url', 'nonce', 'plugin' ) );
+
+			/**
+			 * Filters the upgrader skin used during a Git Updater install.
+			 *
+			 * Allows replacing the default skin with a custom implementation.
+			 * Primarily useful in test environments to suppress HTML output.
+			 *
+			 * @since 12.24.2
+			 *
+			 * @param WP_Upgrader_Skin $skin The skin instance.
+			 * @param string           $type Installer type: 'plugin' or 'theme'.
+			 */
+			$skin     = apply_filters( 'gu_get_upgrader_skin', $skin, $type );
 			$upgrader = new Plugin_Upgrader( $skin );
 		}
 
@@ -294,9 +310,12 @@ class Install {
 			$theme = self::$install['repo'];
 
 			// Create a new instance of Theme_Upgrader.
-			$skin     = static::is_wp_cli()
-				? new CLI_Theme_Installer_Skin()
+			$skin = static::is_wp_cli()
+				? new CLI_Theme_Installer_Skin() // @codeCoverageIgnore
 				: new Theme_Installer_Skin( compact( 'type', 'url', 'nonce', 'theme' ) );
+
+			/** This filter is documented in src/Git_Updater/Install.php */
+			$skin     = apply_filters( 'gu_get_upgrader_skin', $skin, $type );
 			$upgrader = new Theme_Upgrader( $skin );
 			add_filter(
 				'install_theme_complete_actions',

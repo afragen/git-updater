@@ -342,6 +342,34 @@ $rp->setValue( $api_singleton, $saved_type ); // restore in finally/tear_down
 ```
 Also: the `release_asset` value in the seeded cache must be a URL interceptable by `pre_http_request` — use a GitHub API URL (`https://api.github.com/repos/owner/repo/releases/assets/1234`) rather than `https://example.com/...`, since the mock only intercepts `api.github.com` requests.
 
+### Upgrader skin HTML output — use `gu_get_upgrader_skin` filter, not absorber buffers
+
+`WP_Upgrader_Skin::feedback()` calls `show_message()`, which echoes HTML and then calls `wp_ob_end_flush_all()`. That function flushes **every** PHP output buffer down to level 0 on its first call. Any subsequent echo (from more feedback calls, or from `header()`/`footer()`/`after()`) goes straight to stdout.
+
+The `show_message()` function_exists override never registers: `Rest_Update.php` has a file-level `require_once class-wp-upgrader.php`, which loads `misc.php` (where `show_message()` is defined without a `function_exists` guard) as a side-effect of `Bootstrap::run()` → `REST_API::load_hooks()` → `Singleton::get_instance('REST\Rest_Update', ...)`. This happens during the `plugins_loaded` hook — before PHPUnit parses any test file.
+
+**Fix:** `Install::get_upgrader()` exposes a `gu_get_upgrader_skin` filter. Register a `Silent_Upgrader_Skin` in `set_up()` so `show_message()` is never invoked:
+
+```php
+// In test file (after requiring class-wp-upgrader.php):
+if ( ! class_exists( 'Silent_Upgrader_Skin' ) ) {
+    class Silent_Upgrader_Skin extends WP_Upgrader_Skin {
+        public function header() {}
+        public function footer() {}
+        public function error( $errors ) {}
+        public function feedback( $feedback, ...$args ) {}
+    }
+}
+
+// In set_up():
+add_filter( 'gu_get_upgrader_skin', fn( $skin, $type ) => new Silent_Upgrader_Skin( [ 'type' => $type ] ), 10, 2 );
+
+// In tear_down():
+remove_all_filters( 'gu_get_upgrader_skin' );
+```
+
+Then a simple `ob_start()`/`ob_end_clean()` around the `install()` call is enough as a safety net.
+
 ### `do_action('admin_enqueue_scripts')` in tests — call `set_current_screen()` first
 Firing the `admin_enqueue_scripts` action without a screen context causes WP Site Health (`class-wp-site-health.php`) to throw "Attempt to read property 'id' on null". Always call `set_current_screen('plugins')` (or the appropriate screen slug) before firing this action in tests.
 
