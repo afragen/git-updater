@@ -224,6 +224,7 @@ trait GU_Trait {
 		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], ( $cache[ $cache['repo'] ]['Version'] ?? '' ), '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Cache diagnostics are intentionally logged for maintainers.
 					error_log( $repo->slug . ' cache is complete. Timeout invalid. Extending cache.' );
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );

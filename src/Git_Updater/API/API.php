@@ -198,6 +198,7 @@ class API {
 		$cached      = isset( $error_cache['error_cache'] );
 		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
 		if ( ! $response && ! $cached ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- API call diagnostics are intentionally logged for maintainers.
 			error_log( "Git Updater: Making API call to {$url}" );
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
