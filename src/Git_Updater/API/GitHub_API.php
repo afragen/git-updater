@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Flow;
 use stdClass;
 
 /*
@@ -31,13 +32,22 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class GitHub_API extends API implements API_Interface {
 	/**
+	 * OAuth flow controller.
+	 *
+	 * @var OAuth_Flow|null
+	 */
+	private $oauth_flow;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param stdClass $type plugin|theme.
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
-		$this->type = $type;
+		$this->type       = $type;
+		$this->oauth_flow = $this->get_oauth_flow();
+		add_action( 'admin_init', [ $this->oauth_flow, 'maybe_handle_flow' ] );
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -473,6 +483,14 @@ class GitHub_API extends API implements API_Interface {
 			]
 		);
 
+		add_settings_field(
+			'github_oauth_authorize',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ $this, 'github_oauth_authorize' ],
+			'git_updater_github_install_settings',
+			'github_access_token'
+		);
+
 		/*
 		 * Show section for private GitHub repositories.
 		 */
@@ -520,6 +538,94 @@ class GitHub_API extends API implements API_Interface {
 		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
+	}
+
+	/**
+	 * Output OAuth controls and status messages.
+	 *
+	 * @return void
+	 */
+	public function github_oauth_authorize() {
+		$oauth       = $this->get_oauth_flow();
+		$credentials = $oauth->get_credentials();
+		$status      = $oauth->get_status();
+
+		if ( 'success' === $status ) {
+			echo '<p><strong>' . esc_html__( 'OAuth token updated from GitHub.', 'git-updater' ) . '</strong></p>';
+		}
+
+		if ( str_starts_with( $status, 'error-' ) ) {
+			echo '<p><strong>' . esc_html__( 'GitHub OAuth was not completed. You can retry below.', 'git-updater' ) . '</strong></p>';
+		}
+
+		printf(
+			'<p class="description">%s <code>%s</code></p>',
+			esc_html__( 'OAuth callback URL:', 'git-updater' ),
+			esc_html( $oauth->get_callback_url() )
+		);
+
+		if ( empty( $credentials['client_id'] ) ) {
+			echo '<p class="description">' . esc_html__( 'To enable OAuth authorization, set GU_GITHUB_OAUTH_CLIENT_ID in wp-config.php or filter gu_github_oauth_credentials.', 'git-updater' ) . '</p>';
+
+			return;
+		}
+
+		printf(
+			'<p><a class="button button-secondary" href="%s">%s</a></p>',
+			esc_url( $oauth->get_start_url() ),
+			esc_html__( 'Authorize via GitHub OAuth', 'git-updater' )
+		);
+	}
+
+	/**
+	 * Build GitHub OAuth flow controller.
+	 *
+	 * @return OAuth_Flow
+	 */
+	public function get_oauth_flow() {
+		if ( $this->oauth_flow instanceof OAuth_Flow ) {
+			return $this->oauth_flow;
+		}
+
+		$this->oauth_flow = new OAuth_Flow(
+			[
+				'provider'               => 'github',
+				'label'                  => 'GitHub',
+				'option_name'            => 'github_access_token',
+				'settings_url'           => $this->get_settings_redirect_url(),
+				'authorize_url'          => 'https://github.com/login/oauth/authorize',
+				'token_url'              => 'https://github.com/login/oauth/access_token',
+				'default_scope'          => 'repo',
+				'credentials_filter'     => 'gu_github_oauth_credentials',
+				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
+				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
+				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
+				'start_arg'              => 'gu_github_oauth_start',
+				'callback_arg'           => 'gu_github_oauth_callback',
+				'status_arg'             => 'gu_github_oauth',
+				'nonce_action'           => 'gu-github-oauth-start',
+			]
+		);
+
+		return $this->oauth_flow;
+	}
+
+	/**
+	 * Build redirect URL to GitHub subtab.
+	 *
+	 * @return string
+	 */
+	private function get_settings_redirect_url() {
+		$base = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
+
+		return add_query_arg(
+			[
+				'page'   => 'git-updater',
+				'tab'    => 'git_updater_settings',
+				'subtab' => 'github',
+			],
+			$base
+		);
 	}
 
 	/**

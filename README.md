@@ -39,6 +39,12 @@ API plugins for Bitbucket, GitLab, Gitea, and Gist are available. API plugins ar
 * [Git Updater - Gitea](https://github.com/afragen/git-updater-gitea/releases/latest)
 * [Git Updater - Gist](https://github.com/afragen/git-updater-gist/releases/latest)
 
+### OAuth for API providers
+
+Git Updater includes a reusable OAuth 2.0 authorization-code flow with PKCE for Git API providers. The bundled GitHub settings tab can use it to save an OAuth token into the existing `github_access_token` option, and API add-ons can reuse the same callback/state/token exchange helper for their own providers.
+
+For GitHub, create an OAuth app with the callback URL shown on the GitHub settings tab. Then set `GU_GITHUB_OAUTH_CLIENT_ID` in `wp-config.php`, optionally set `GU_GITHUB_OAUTH_CLIENT_SECRET` and `GU_GITHUB_OAUTH_SCOPE`, or return those values with the `gu_github_oauth_credentials` filter. Use **Authorize via GitHub OAuth** to complete the flow.
+
 ### Sponsor
 
 Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial free trial period. After the trial period Git Updater will not be able to make authenticated API requests.
