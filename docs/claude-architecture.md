@@ -28,12 +28,13 @@ All API data is cached in WordPress site options. Cache keys follow the pattern 
 
 `src/Git_Updater/API/API.php` — base class for all git host APIs. The central method is `api($endpoint)`, which:
 1. Resolves the endpoint URL via `get_api_url()` (replaces `:owner`, `:repo`, etc. placeholders).
-2. Checks the main repo cache; if hit, returns cached data.
-3. Checks the error cache (`slug_error` key); if fresh (within 60 min), returns `false` without making an HTTP request.
-4. Makes `wp_remote_get()` if both caches are cold.
-5. On `WP_Error` (network failure), returns the `WP_Error` immediately.
-6. On non-200 response, writes the 60-minute error cache entry, then still caches and returns the decoded body (e.g. `stdClass{message:'Not Found'}`).
-7. On 200, stores the decoded body in the main cache.
+2. Checks the error cache (`slug_error` key); if fresh (within 60 min), returns `false` without making an HTTP request.
+3. Makes `wp_remote_get()` if the error cache is cold.
+4. On `WP_Error` (network failure), returns the `WP_Error` immediately.
+5. On non-200 response, writes the 60-minute error cache entry, then returns the decoded body (e.g. `stdClass{message:'Not Found'}`).
+6. On 200, returns the decoded body.
+
+`api()` does not cache HTTP responses itself. Whether to skip API calls entirely is controlled exclusively by `maybe_extend_repo_cache()` in `get_remote_api_info()`, which gates the whole secondary-call block in `Base::get_remote_repo_meta()`.
 
 ### `get_remote_api_*` tri-state returns
 

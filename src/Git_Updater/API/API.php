@@ -193,11 +193,10 @@ class API {
 		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
-		$response    = $this->get_repo_cache( $this->type->slug );
 		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
 		$cached      = isset( $error_cache['error_cache'] );
-		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
-		if ( ! $response && ! $cached ) {
+		$response    = false;
+		if ( ! $cached ) {
 			error_log( "Git Updater: Making API call to {$url}" );
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
 
@@ -216,13 +215,10 @@ class API {
 				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
-			// If we made it this far API data must be OK, save to avoid extra call above.
-			$cache_entry = [
+			$response = [
 				'url'  => $url,
 				'body' => wp_remote_retrieve_body( $response ),
 			];
-			$this->set_repo_cache( md5( $url ), $cache_entry, false, false );
-			$response = $cache_entry;
 		}
 
 		if ( $cached && ! $response ) {

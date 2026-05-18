@@ -116,17 +116,6 @@ class Test_API extends WP_UnitTestCase {
 		$this->assertSame( 'test-plugin', $result->name );
 	}
 
-	public function test_uses_main_cache_on_second_call(): void {
-		$call_count = 0;
-		$this->intercept_http( $this->mock_http_response( 200, [ 'name' => 'test-plugin' ] ), $call_count );
-
-		$this->api->api( $this->endpoint );
-		$result = $this->api->api( $this->endpoint );
-
-		$this->assertSame( 1, $call_count, 'Second call within cache window should not make an HTTP request.' );
-		$this->assertIsObject( $result );
-	}
-
 	public function test_non_200_response_writes_error_cache_to_dedicated_key(): void {
 		$call_count = 0;
 		$this->intercept_http( $this->mock_http_response( 403, [ 'message' => 'API rate limit exceeded' ] ), $call_count );
