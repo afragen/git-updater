@@ -65,4 +65,5 @@ All `missingType.iterableValue` and `missingType.return` errors have been resolv
 For architecture hints see docs/claude-architecture.md
 
 ## Testing
+When writing tests always check for passing in both single site, multisite, and PHPStan.
 For testing hints see docs/claude-testing-gotchas.md

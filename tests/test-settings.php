@@ -212,7 +212,8 @@ class Test_Settings_Load_Hooks extends WP_UnitTestCase {
 	public function test_load_hooks_registers_admin_menu_by_default(): void {
 		$this->settings = new Settings();
 		$this->settings->run();
-		$this->assertNotFalse( has_action( 'admin_menu', [ $this->settings, 'add_plugin_page' ] ) );
+		$hook = is_multisite() ? 'network_admin_menu' : 'admin_menu';
+		$this->assertNotFalse( has_action( $hook, [ $this->settings, 'add_plugin_page' ] ) );
 	}
 
 	public function test_load_hooks_skips_admin_menu_when_filter_hides_settings(): void {
@@ -231,13 +232,15 @@ class Test_Settings_Load_Hooks extends WP_UnitTestCase {
 	public function test_load_hooks_registers_plugin_action_links_filter(): void {
 		$this->settings = new Settings();
 		$this->settings->run();
-		$hook = 'plugin_action_links_' . $this->settings->gu_plugin_name();
+		$hook = is_multisite()
+			? 'network_admin_plugin_action_links_' . $this->settings->gu_plugin_name()
+			: 'plugin_action_links_' . $this->settings->gu_plugin_name();
 		$this->assertNotFalse( has_filter( $hook, [ $this->settings, 'plugin_action_links' ] ) );
 	}
 
 	public function test_load_hooks_registers_admin_init_when_on_settings_page(): void {
 		global $pagenow;
-		$pagenow        = 'options.php';
+		$pagenow        = is_multisite() ? 'settings.php' : 'options.php';
 		$this->settings = new Settings();
 		$this->settings->run();
 		$this->assertNotFalse( has_action( 'admin_init', [ $this->settings, 'update_settings' ] ) );
@@ -247,10 +250,10 @@ class Test_Settings_Load_Hooks extends WP_UnitTestCase {
 
 	public function test_load_hooks_enqueue_scripts_closure_runs(): void {
 		global $pagenow;
-		$pagenow        = 'options.php';
+		$pagenow        = is_multisite() ? 'settings.php' : 'options.php';
 		$this->settings = new Settings();
 		$this->settings->run();
-		set_current_screen( 'options-general' );
+		set_current_screen( is_multisite() ? 'settings-network' : 'options-general' );
 		do_action( 'admin_enqueue_scripts' );
 		$this->assertTrue( wp_style_is( 'git-updater-settings', 'enqueued' ) );
 		$pagenow = '';
@@ -350,8 +353,12 @@ class Test_Settings_Add_Plugin_Page extends WP_UnitTestCase {
 		global $submenu;
 		$admin = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $admin );
+		if ( is_multisite() ) {
+			grant_super_admin( $admin );
+		}
 		$this->settings->add_plugin_page();
-		$this->assertArrayHasKey( 'options-general.php', (array) $submenu );
+		$expected_parent = is_multisite() ? 'settings.php' : 'options-general.php';
+		$this->assertArrayHasKey( $expected_parent, (array) $submenu );
 	}
 }
 
