@@ -57,6 +57,8 @@ The `WP_TESTS_PHPUNIT_POLYFILLS_PATH` is passed explicitly in the npm scripts to
 
 PHPStan is configured at level 6 (`phpstan.neon`) with pre-existing errors tracked in `phpstan-baseline.neon`. The baseline should be regenerated with `composer phpstan-baseline` when intentional changes alter the error set.
 
+When removing dead code (unused static properties, intermediate writes), PHPStan may reveal type-narrowing errors (`booleanNot.alwaysTrue`, `function.alreadyNarrowedType`) in nearby conditions that were previously obscured. Fix the underlying redundancy — simplify the condition rather than suppressing the error.
+
 All `missingType.iterableValue` and `missingType.return` errors have been resolved across the codebase. When adding new methods or properties, follow the established PHPDoc conventions:
 - Use specific array value types: `array<string, mixed>`, `array<int, string>`, `array<string, stdClass>`, etc. — never bare `array`
 - Add `@return void` to every method that returns nothing

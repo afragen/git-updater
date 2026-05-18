@@ -39,13 +39,6 @@ class API {
 	use Basic_Auth_Loader;
 
 	/**
-	 * Holds HTTP error code from API call.
-	 *
-	 * @var array<string, mixed>
-	 */
-	protected static $error_code = [];
-
-	/**
 	 * Holds site options.
 	 *
 	 * @var array<string, mixed>
@@ -221,24 +214,13 @@ class API {
 			];
 		}
 
-		if ( $cached && ! $response ) {
+		if ( $cached ) {
 			return false;
 		}
 
-		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
-		static::$error_code[ $this->type->slug ] = array_merge(
-			static::$error_code[ $this->type->slug ],
-			[
-				'repo' => $this->type->slug,
-				'code' => isset( $code ) ? $code : '',
-				'name' => $this->type->name ?? $this->type->slug,
-				'git'  => $this->type->git,
-			]
-		);
-
 		// @codeCoverageIgnoreStart
-		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$response_body = is_array( $response ) ? json_decode( wp_remote_retrieve_body( $response ) ) : null;
+		if ( 'file' === self::$method && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
 			if ( null !== $response_body && is_object( $response_body ) && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
 				$log_message = "Git Updater Error: {$name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";

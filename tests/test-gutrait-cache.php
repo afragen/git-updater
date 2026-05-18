@@ -15,8 +15,6 @@
  * - is_cron_overdue()          — 24-hour overdue guard (non-overdue path)
  * - delete_upgrade_source()    — WP_Error and missing-destination pass-through
  * - get_class_vars()           — Singleton reflection on known property
- * - get_error_codes()          — delegation to get_class_vars on API error_code
- *
  * @package Git_Updater
  */
 
@@ -363,15 +361,6 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	public function test_get_class_vars_returns_false_for_nonexistent_property(): void {
 		$result = $this->api->get_class_vars( 'API\API', 'nonexistent_property_xyz' );
 		$this->assertFalse( $result );
-	}
-
-	// -------------------------------------------------------------------------
-	// get_error_codes()
-	// -------------------------------------------------------------------------
-
-	public function test_get_error_codes_returns_array(): void {
-		$result = $this->api->get_error_codes();
-		$this->assertIsArray( $result );
 	}
 
 	// -------------------------------------------------------------------------

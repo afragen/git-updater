@@ -357,15 +357,6 @@ trait GU_Trait {
 	}
 
 	/**
-	 * Returns static class variable $error_code.
-	 *
-	 * @return array<string, mixed>
-	 */
-	final public function get_error_codes() {
-		return $this->get_class_vars( 'API\API', 'error_code' );
-	}
-
-	/**
 	 * Function to check if plugin or theme object is able to be updated.
 	 *
 	 * @param stdClass $type Repo object.
