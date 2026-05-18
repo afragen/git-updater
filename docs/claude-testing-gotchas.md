@@ -35,6 +35,32 @@ update_site_option( $this->api->get_cache_key('test-plugin'), [
 ] );
 ```
 
+### `get_remote_api_info()` cache-extend path — use expired timeout, not `seed_cache()`
+To test the path where `maybe_extend_repo_cache()` returns `true` (all `ran` complete, versions match) causing `get_remote_api_info()` to return `false`, seed the cache with an **expired** timeout rather than a valid one. A valid-timeout cache causes `$response = $cache[$slug]` to be truthy, skipping `api()` — then `set_file_info()` receives the incomplete seeded array and throws an undefined-key notice.
+
+Seed with `strtotime('-1 hour')` so `get_repo_cache($slug)` returns `false` (forcing an `api()` call), but the raw site option still holds the old version for `get_repo_cache($slug, false)`:
+```php
+update_site_option(
+    $this->api->get_cache_key( 'test-plugin' ),
+    [
+        'timeout'     => strtotime( '-1 hour' ),
+        'repo'        => 'test-plugin',
+        'test-plugin' => [ 'Version' => '1.0.0' ],   // old version — must match API response
+        'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+    ]
+);
+```
+
+### `maybe_extend_repo_cache()` — always pass explicit `$old_version` in direct tests
+`maybe_extend_repo_cache( $remote_headers, $repo, $old_version = '' )` compares the new remote version against `$old_version`. The default `''` never equals any real version string, so omitting the argument means the version-match branch (the extend path) is unreachable. Direct test calls that exercise the extend path must pass the matching old version as the third argument:
+```php
+$this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
+```
+Tests for the version-mismatch (no extend) path pass a different old version:
+```php
+$this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+```
+
 ### `parse_release_asset()` does not guard against `false`
 `parse_release_asset()` checks `is_wp_error($response)` but not `false`. If `api()` returns `false` (via error cache) the subsequent `foreach($response as $release)` throws a TypeError. When testing failure paths for `get_release_assets()`, use a `WP_Error` mock via `pre_http_request` rather than seeding the error cache:
 ```php
