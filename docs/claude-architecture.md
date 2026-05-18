@@ -59,7 +59,9 @@ $repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
 
 `array_filter` strips `null` (WP_Error calls), leaving only string keys of completed calls.
 
-`GU_Trait::maybe_extend_repo_cache()` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_api_info()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry.
+`GU_Trait::maybe_extend_repo_cache( $remote_headers, $repo, $old_version )` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_api_info()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry.
+
+The `$old_version` parameter is the remote version from **before** this fetch, captured in `get_remote_api_info()` prior to calling `set_repo_cache()`. This prevents the version comparison from always seeing equal values (the ordering bug: comparing the freshly-written cache value against itself). When `$old_version` differs from the newly fetched version, `maybe_extend_repo_cache()` returns `false` and the secondary calls run to refresh all repo data.
 
 `src/Git_Updater/API/GitHub_API.php` implements `API_Interface` and extends `API`. Additional git host APIs (Bitbucket, GitLab, Gitea) are loaded via add-on plugins and registered through the `gu_get_repo_api` filter.
 

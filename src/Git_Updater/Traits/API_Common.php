@@ -130,6 +130,12 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache[ $this->type->slug ] ?? false;
 
+		// Capture old version before overwriting: use valid cache if available, else raw option.
+		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
+		$old_version = is_array( $prior ) && isset( $prior[ $this->type->slug ]['Version'] )
+			? (string) $prior[ $this->type->slug ]['Version']
+			: '';
+
 		if ( ! $response ) {
 			self::$method = 'file';
 			$response     = $this->api( $request );
@@ -149,8 +155,8 @@ trait API_Common {
 		$this->set_repo_cache( $this->type->slug, $response, false, false );
 		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
-		// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
-		if ( $this->maybe_extend_repo_cache( $response, $this->type ) ) {
+		// Check remote version against the pre-fetch cached version; extend cache if unchanged.
+		if ( $this->maybe_extend_repo_cache( $response, $this->type, $old_version ) ) {
 			return false;
 		}
 

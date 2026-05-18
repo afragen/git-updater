@@ -177,7 +177,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			]
 		);
 
-		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type );
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
 		$this->assertTrue( $result );
 
 		$cache = get_site_option( $cache_key );
@@ -190,13 +190,13 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			$cache_key,
 			[
 				'repo'        => 'test-plugin',
-				'test-plugin' => [ 'Version' => '2.0.0' ],
+				'test-plugin' => [ 'Version' => '1.0.0' ],
 				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 				'timeout'     => strtotime( '-1 hour' ),
 			]
 		);
 
-		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type );
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
 		$this->assertFalse( $result );
 	}
 
@@ -391,7 +391,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 			]
 		);
 		$repo   = (object) [ 'slug' => $slug ];
-		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $repo );
+		$result = $this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $repo, '1.0.0' );
 		$this->assertTrue( $result );
 		$cache = get_site_option( $cache_key );
 		$this->assertGreaterThan( time(), $cache['timeout'] );

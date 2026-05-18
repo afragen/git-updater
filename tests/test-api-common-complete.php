@@ -199,12 +199,15 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 	 * false (line 154) rather than true, to avoid an unnecessary cache overwrite.
 	 */
 	public function test_get_remote_api_info_returns_false_when_maybe_extend_cache_returns_true(): void {
-		// Pre-seed ran so maybe_extend_repo_cache confirms all API calls completed.
-		// The 'test-plugin' key is intentionally absent; api() will fetch it.
-		$this->seed_cache(
+		// Pre-seed with an expired timeout so api() is called, but the old cached version
+		// and ran are readable via get_repo_cache($slug, false) for maybe_extend_repo_cache.
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
 			[
-				'dot_org' => 'not in dot org',
-				'ran'     => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'     => strtotime( '-1 hour' ),
+				'repo'        => 'test-plugin',
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
 			]
 		);
 

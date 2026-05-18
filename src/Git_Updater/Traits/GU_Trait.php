@@ -212,17 +212,18 @@ trait GU_Trait {
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
+	 * @param string                $old_version    Previously cached remote version to compare against.
 	 *
 	 * @return bool
 	 */
-	final public function maybe_extend_repo_cache( $remote_headers, $repo ): bool {
+	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
 		$return    = false;
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
 		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
 		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
-			if ( version_compare( $remote_headers['Version'], ( $cache[ $cache['repo'] ]['Version'] ?? '' ), '==' ) ) {
+			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
 				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
 					error_log( $repo->slug . ' cache is complete. Timeout invalid. Extending cache.' );
 					$cache['timeout'] = strtotime( '+6 hours' );
