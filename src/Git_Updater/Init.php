@@ -18,7 +18,7 @@ use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**

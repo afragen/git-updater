@@ -18,7 +18,7 @@ use Fragen\Git_Updater\Traits\GU_Trait;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
