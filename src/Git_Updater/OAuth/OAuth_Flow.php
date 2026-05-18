@@ -301,10 +301,12 @@ class OAuth_Flow {
 		$label       = $this->config['label'];
 
 		if ( 'success' === $status ) {
+			/* translators: %s: Git provider label. */
 			printf( '<p><strong>%s</strong></p>', esc_html( sprintf( __( 'OAuth token updated from %s.', 'git-updater' ), $label ) ) );
 		}
 
 		if ( str_starts_with( $status, 'error-' ) ) {
+			/* translators: %s: Git provider label. */
 			printf( '<p><strong>%s</strong></p>', esc_html( sprintf( __( '%s OAuth was not completed. You can retry below.', 'git-updater' ), $label ) ) );
 		}
 
@@ -317,6 +319,7 @@ class OAuth_Flow {
 		if ( empty( $credentials['client_id'] ) ) {
 			printf(
 				'<p class="description">%s</p>',
+				/* translators: 1: OAuth client ID constant name. 2: OAuth credentials filter name. */
 				esc_html( sprintf( __( 'To enable OAuth authorization, set %1$s in wp-config.php or filter %2$s.', 'git-updater' ), $this->config['client_id_constant'], $this->config['credentials_filter'] ) )
 			);
 
@@ -326,6 +329,7 @@ class OAuth_Flow {
 		printf(
 			'<p><a class="button button-secondary" href="%s">%s</a></p>',
 			esc_url( $this->get_start_url() ),
+			/* translators: %s: Git provider label. */
 			esc_html( sprintf( __( 'Authorize via %s OAuth', 'git-updater' ), $label ) )
 		);
 	}
