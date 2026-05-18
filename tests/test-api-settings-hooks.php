@@ -405,6 +405,35 @@ class Test_OAuth_Flow extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'gu_example_oauth_callback=1', $callback_url );
 	}
+
+	public function test_provider_config_includes_all_api_addon_hosts(): void {
+		$providers = [ 'github', 'gist', 'gitlab', 'gitea', 'bitbucket' ];
+
+		foreach ( $providers as $provider ) {
+			$config = OAuth_Flow::get_provider_config( $provider );
+
+			$this->assertSame( $provider, $config['provider'] );
+			$this->assertNotEmpty( $config['option_name'] );
+			$this->assertNotEmpty( $config['authorize_url'] );
+			$this->assertNotEmpty( $config['token_url'] );
+			$this->assertNotEmpty( $config['credentials_filter'] );
+			$this->assertNotEmpty( $config['callback_arg'] );
+		}
+	}
+
+	public function test_for_provider_allows_self_hosted_endpoint_overrides(): void {
+		$flow = OAuth_Flow::for_provider(
+			'gitea',
+			'https://example.test/wp-admin/options-general.php?page=git-updater',
+			[
+				'authorize_url' => 'https://git.example.test/login/oauth/authorize',
+				'token_url'     => 'https://git.example.test/login/oauth/access_token',
+			]
+		);
+
+		$this->assertSame( 'gu_gitea_oauth_' . md5( 'state-value' ), $flow->get_transient_key( 'state-value' ) );
+		$this->assertStringContainsString( 'gu_gitea_oauth_callback=1', $flow->get_callback_url() );
+	}
 }
 
 /**

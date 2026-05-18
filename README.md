@@ -45,6 +45,8 @@ Git Updater includes a reusable OAuth 2.0 authorization-code flow with PKCE for 
 
 For GitHub, create an OAuth app with the callback URL shown on the GitHub settings tab. Then set `GU_GITHUB_OAUTH_CLIENT_ID` in `wp-config.php`, optionally set `GU_GITHUB_OAUTH_CLIENT_SECRET` and `GU_GITHUB_OAUTH_SCOPE`, or return those values with the `gu_github_oauth_credentials` filter. Use **Authorize via GitHub OAuth** to complete the flow.
 
+Provider presets are available for GitHub, Gist, GitLab, Gitea, and Bitbucket via `Fragen\Git_Updater\OAuth\OAuth_Flow::for_provider( $provider, $settings_url, $overrides )`. Add-ons can pass self-hosted authorize/token endpoint overrides and render the shared settings controls with `$flow->render_authorize_controls()`.
+
 ### Sponsor
 
 Purchase a license at the [Git Updater Store](https://git-updater.com/store/). An unlimited yearly license is very reasonable and allows for authenticated API requests. There is an initial free trial period. After the trial period Git Updater will not be able to make authenticated API requests.

@@ -548,35 +548,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return void
 	 */
 	public function github_oauth_authorize() {
-		$oauth       = $this->get_oauth_flow();
-		$credentials = $oauth->get_credentials();
-		$status      = $oauth->get_status();
-
-		if ( 'success' === $status ) {
-			echo '<p><strong>' . esc_html__( 'OAuth token updated from GitHub.', 'git-updater' ) . '</strong></p>';
-		}
-
-		if ( str_starts_with( $status, 'error-' ) ) {
-			echo '<p><strong>' . esc_html__( 'GitHub OAuth was not completed. You can retry below.', 'git-updater' ) . '</strong></p>';
-		}
-
-		printf(
-			'<p class="description">%s <code>%s</code></p>',
-			esc_html__( 'OAuth callback URL:', 'git-updater' ),
-			esc_html( $oauth->get_callback_url() )
-		);
-
-		if ( empty( $credentials['client_id'] ) ) {
-			echo '<p class="description">' . esc_html__( 'To enable OAuth authorization, set GU_GITHUB_OAUTH_CLIENT_ID in wp-config.php or filter gu_github_oauth_credentials.', 'git-updater' ) . '</p>';
-
-			return;
-		}
-
-		printf(
-			'<p><a class="button button-secondary" href="%s">%s</a></p>',
-			esc_url( $oauth->get_start_url() ),
-			esc_html__( 'Authorize via GitHub OAuth', 'git-updater' )
-		);
+		$this->get_oauth_flow()->render_authorize_controls();
 	}
 
 	/**
@@ -589,25 +561,7 @@ class GitHub_API extends API implements API_Interface {
 			return $this->oauth_flow;
 		}
 
-		$this->oauth_flow = new OAuth_Flow(
-			[
-				'provider'               => 'github',
-				'label'                  => 'GitHub',
-				'option_name'            => 'github_access_token',
-				'settings_url'           => $this->get_settings_redirect_url(),
-				'authorize_url'          => 'https://github.com/login/oauth/authorize',
-				'token_url'              => 'https://github.com/login/oauth/access_token',
-				'default_scope'          => 'repo',
-				'credentials_filter'     => 'gu_github_oauth_credentials',
-				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
-				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
-				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
-				'start_arg'              => 'gu_github_oauth_start',
-				'callback_arg'           => 'gu_github_oauth_callback',
-				'status_arg'             => 'gu_github_oauth',
-				'nonce_action'           => 'gu-github-oauth-start',
-			]
-		);
+		$this->oauth_flow = OAuth_Flow::for_provider( 'github', $this->get_settings_redirect_url() );
 
 		return $this->oauth_flow;
 	}
