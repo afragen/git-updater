@@ -18,7 +18,7 @@ use stdClass;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -205,7 +205,7 @@ class Branch {
 			$id       = $plugin['slug'] . '-id';
 			$branches = $config[ $plugin['slug'] ]->branches ?? null;
 		} else {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		// Get current branch.

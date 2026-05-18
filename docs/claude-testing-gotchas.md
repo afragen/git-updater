@@ -184,6 +184,34 @@ When called with `null`, the method merges Plugin and Theme configs then iterate
 ### `get_github_rate_limit_headers()` — mock with `CaseInsensitiveDictionary` as headers value
 `get_github_rate_limit_headers()` calls `wp_remote_retrieve_headers($response)->getAll()`. When short-circuited via `pre_http_request`, the filter must return an array whose `headers` key is a `WpOrg\Requests\Utility\CaseInsensitiveDictionary` instance. Use `new CaseInsensitiveDictionary(['x-ratelimit-reset' => (string)(time() + 300)])` for the reset-time test and `new CaseInsensitiveDictionary([])` for the 60-minute default test. Import with `use WpOrg\Requests\Utility\CaseInsensitiveDictionary;`.
 
+### Singleton config injection: always save and restore in `set_up`/`tear_down`
+`Fragen\Singleton::get_instance()` returns the **same PHP object** for every call with the same class name within a test process. When you inject into a singleton's `$config` (Plugin, Theme, API, etc.) via `ReflectionProperty`, the modified state persists to every subsequent test class in the suite. A `tear_down()` that only restores `Branch::$options` (or similar) but leaves Plugin/Theme config behind will corrupt API, REST, and other tests that read those singletons later.
+
+Always save the singleton config in `set_up()` and restore it in `tear_down()`:
+```php
+/** @var array<string, stdClass> */
+private array $saved_plugin_config = [];
+
+public function set_up(): void {
+    parent::set_up();
+    // ... other setup ...
+    $singleton                 = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
+    $rp                        = new ReflectionProperty( Plugin::class, 'config' );
+    $rp->setAccessible( true );
+    $this->saved_plugin_config = $rp->getValue( $singleton ) ?? [];
+}
+
+public function tear_down(): void {
+    $singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
+    $rp        = new ReflectionProperty( Plugin::class, 'config' );
+    $rp->setAccessible( true );
+    $rp->setValue( $singleton, $this->saved_plugin_config );
+    parent::tear_down();
+}
+```
+
+Alternatively, for a one-off injection inside a single test method, use a `try/finally` block (the existing `get_repo_slugs` pattern below). The `set_up`/`tear_down` pattern is preferable when the injection spans the entire test class.
+
 ### `get_repo_slugs()` dirname match — use `ReflectionProperty` to inject synthetic `$config`
 `Plugin::$config` and `Theme::$config` are both declared `private`. To inject a synthetic entry where `dirname($repo->file)` differs from `$repo->slug` (the `-master` suffix scenario), use `ReflectionProperty`:
 ```php

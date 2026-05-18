@@ -66,4 +66,5 @@ For architecture hints see docs/claude-architecture.md
 
 ## Testing
 When writing tests always check for passing in both single site, multisite, and PHPStan.
+Ensure that current tests are uneffected by new tests.
 For testing hints see docs/claude-testing-gotchas.md
