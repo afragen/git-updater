@@ -44,8 +44,9 @@ npm run wp-env start
 npm run wp-env stop
 
 # Run a single test class or method
-# Inside the wp-env tests-cli container, add --filter to the phpunit invocation:
-npm run wp-env -- run tests-cli /var/www/html/wp-content/plugins/git-updater/vendor/bin/phpunit --config=/var/www/html/wp-content/plugins/git-updater/phpunit.xml --filter=Test_API
+# Use npm test with --filter so WP_TESTS_PHPUNIT_POLYFILLS_PATH is set automatically.
+# Direct wp-env invocations omit this env var and will fail with a polyfills error.
+npm test -- --filter=Test_API
 ```
 
 ## Testing Environment

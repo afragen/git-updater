@@ -176,17 +176,27 @@ class Test_Remote_Management extends WP_UnitTestCase {
 
 	private array $saved_request;
 	private array $saved_post;
+	private array $saved_get;
+	/** @var array<string, mixed> */
+	private array $saved_base_options;
 
 	public function set_up(): void {
 		parent::set_up();
+		if ( ! function_exists( 'submit_button' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
 		// Snapshot superglobals so we can restore them in tear_down.
-		$this->saved_request = $_REQUEST;
-		$this->saved_post    = $_POST;
+		$this->saved_request      = $_REQUEST;
+		$this->saved_post         = $_POST;
+		$this->saved_get          = $_GET;
+		$this->saved_base_options = Base::$options;
 	}
 
 	public function tear_down(): void {
-		$_REQUEST = $this->saved_request;
-		$_POST    = $this->saved_post;
+		$_REQUEST      = $this->saved_request;
+		$_POST         = $this->saved_post;
+		$_GET          = $this->saved_get;
+		Base::$options = $this->saved_base_options;
 		delete_site_option( 'git_updater_api_key' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		remove_all_actions( 'gu_add_admin_page' );
@@ -255,6 +265,83 @@ class Test_Remote_Management extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'existing', $tabs );
 		$this->assertArrayHasKey( 'git_updater_remote_management', $tabs );
+	}
+
+	public function test_init_registers_settings_section(): void {
+		update_site_option( 'git_updater_api_key', 'test-key-init' );
+		$rm = new Remote_Management();
+		$rm->init();
+
+		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
+		$this->assertArrayHasKey( 'git_updater_remote_management', $tabs );
+		$this->assertNotFalse( has_action( 'gu_add_admin_page' ) );
+
+		global $wp_settings_sections;
+		$this->assertTrue( isset( $wp_settings_sections['git_updater_remote_settings'] ) );
+	}
+
+	public function test_add_admin_page_outputs_form_html_for_matching_tab(): void {
+		update_site_option( 'git_updater_api_key', 'test-key-admin' );
+		$rm = new Remote_Management();
+
+		ob_start();
+		$rm->add_admin_page( 'git_updater_remote_management', admin_url( 'admin.php' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'no-sub-tabs', $output );
+		$this->assertStringContainsString( 'git_updater_reset_api_key', $output );
+		$this->assertStringNotContainsString( 'updated', $output );
+	}
+
+	public function test_admin_page_notices_shows_reset_message_when_reset_is_one(): void {
+		update_site_option( 'git_updater_api_key', 'test-key-notice' );
+		$rm          = new Remote_Management();
+		$_GET['reset'] = '1';
+
+		ob_start();
+		$rm->add_admin_page( 'git_updater_remote_management', admin_url( 'admin.php' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'updated', $output );
+		$this->assertStringContainsString( 'REST API key reset', $output );
+	}
+
+	public function test_add_settings_tabs_action_closure_calls_add_admin_page(): void {
+		update_site_option( 'git_updater_api_key', 'test-key-closure' );
+		$rm = new Remote_Management();
+		$rm->add_settings_tabs();
+
+		ob_start();
+		do_action( 'gu_add_admin_page', 'git_updater_remote_management', admin_url( 'admin.php' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'no-sub-tabs', $output );
+	}
+
+	public function test_print_section_remote_management_with_empty_api_key(): void {
+		delete_site_option( 'git_updater_api_key' );
+		$rm = new Remote_Management();
+
+		ob_start();
+		$rm->print_section_remote_management();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wp-json', $output );
+		$this->assertStringContainsString( 'git-updater/v1', $output );
+		$this->assertStringContainsString( 'update/', $output );
+		$this->assertStringContainsString( 'reset-branch/', $output );
+	}
+
+	public function test_print_section_remote_management_embeds_api_key_in_endpoints(): void {
+		update_site_option( 'git_updater_api_key', 'known-test-key' );
+		$rm = new Remote_Management();
+
+		ob_start();
+		$rm->print_section_remote_management();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'known-test-key', $output );
+		$this->assertStringContainsString( 'git-updater/v1', $output );
 	}
 }
 
