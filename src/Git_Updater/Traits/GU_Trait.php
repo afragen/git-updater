@@ -224,7 +224,7 @@ trait GU_Trait {
 
 		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
 			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
-				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
+				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					error_log( $repo->slug . ' cache is complete. Timeout invalid. Extending cache.' );
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );

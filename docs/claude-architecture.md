@@ -48,7 +48,7 @@ Note: when the error cache is active, `api()` returns literal `false`. In the `g
 
 ### Cache completion tracking (`$cache['ran']`)
 
-`Base::get_remote_api_info()` runs the seven secondary API calls after the main `get_remote_info()`. It records which calls completed in `$cache['ran']` using a ternary + `array_filter` pattern:
+`Base::get_remote_repo_meta()` runs the seven secondary API calls unconditionally after `get_remote_info()` succeeds — there is no `is_wp_cli()` gate. It records which calls completed in `$cache['ran']` using a ternary + `array_filter` pattern:
 
 ```php
 $ran   = [];
@@ -59,7 +59,7 @@ $repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
 
 `array_filter` strips `null` (WP_Error calls), leaving only string keys of completed calls.
 
-`GU_Trait::maybe_extend_repo_cache( $remote_headers, $repo, $old_version )` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_api_info()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry.
+`GU_Trait::maybe_extend_repo_cache( $remote_headers, $repo, $old_version )` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_repo_meta()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry. The timeout comparison uses `$cache['timeout'] ?? 0` so a missing key safely passes `0` (treated as expired) rather than causing a TypeError in PHP 8.
 
 The `$old_version` parameter is the remote version from **before** this fetch, captured in `get_remote_api_info()` prior to calling `set_repo_cache()`. This prevents the version comparison from always seeing equal values (the ordering bug: comparing the freshly-written cache value against itself). When `$old_version` differs from the newly fetched version, `maybe_extend_repo_cache()` returns `false` and the secondary calls run to refresh all repo data.
 
