@@ -173,6 +173,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
 		self::$method = 'tags';
+		error_log( "Requesting tags" );
 		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
@@ -214,6 +215,7 @@ trait API_Common {
 		self::$method = 'changes';
 		foreach ( $changelogs as $changelog ) {
 			$new_request = str_replace( ':changelog', $changelog, $request );
+			error_log( "Requesting changelog" );
 			$response    = $this->api( $new_request );
 
 			$error = isset( $response->message );
@@ -270,6 +272,7 @@ trait API_Common {
 
 		foreach ( $readmes as $readme ) {
 			$new_request = str_replace( ':readme', $readme, $request );
+			error_log( "Requesting readme" );
 			$response    = $this->api( $new_request );
 
 			$error = isset( $response->message );
@@ -307,6 +310,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_repo_meta( $git, $request ) {
 		self::$method = 'meta';
+		error_log( "Requesting repo meta" );
 		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
@@ -344,6 +348,7 @@ trait API_Common {
 
 		foreach ( $assets as $asset ) {
 			$new_request = str_replace( ':path', $asset, $request );
+			error_log( "Requesting assets" );
 			$response    = $this->api( $new_request );
 
 			if ( ! is_object( $response ) ) {
@@ -386,6 +391,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_branches( $git, $request ) {
 		self::$method = 'branches';
+		error_log( "Requesting branches" );
 		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
@@ -492,6 +498,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_contents( $git, $request ) {
 		self::$method = 'contents';
+		error_log( "Requesting contents" );
 		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
