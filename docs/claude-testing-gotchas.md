@@ -508,3 +508,31 @@ private function run_as_plugin_filter( stdClass $transient ): stdClass {
 }
 ```
 This is safe because `current_filter()` reads `end($wp_current_filter)` and the array is cleaned up immediately.
+
+### `is_admin()` in tests — requires `set_current_screen()`
+`is_admin()` returns `false` by default in the wp-env test container. To enter code guarded by `if ( is_admin() )`, call `set_current_screen('update-core')` (or any admin screen name) before the assertion. Reset in `tear_down()` with `set_current_screen('front')`. Also clean up any actions registered inside the guarded block:
+```php
+public function tear_down(): void {
+    set_current_screen( 'front' );
+    remove_all_actions( 'admin_notices' );
+    remove_all_actions( 'network_admin_notices' );
+    parent::tear_down();
+}
+```
+
+### Switch `case` labels are dispatch opcodes — fall-through does NOT cover them
+In a PHP `switch`, each `case 'value':` compiles to a comparison opcode that Xdebug tracks as a coverable line. This opcode is only executed when the switch **dispatch chain reaches it** — i.e., when no earlier case matched. Fall-through from a previous `case` skips the dispatch entirely, so the label line stays uncovered.
+
+Example: `case 'git':` after `case 'waiting':` (with `// no break`) requires a dedicated test that passes `'git'` (or any value that the dispatch evaluates but doesn't match earlier) to cover it. Falling through from `'waiting'` is not sufficient.
+
+### Mocking `gu_fs()` via `$GLOBALS['gu_fs']`
+`gu_fs()` returns the global `$gu_fs` object (Freemius SDK). Replace it in tests with an anonymous-class mock to control methods like `is_not_paying()`:
+```php
+$orig_fs          = $GLOBALS['gu_fs'] ?? null;
+$GLOBALS['gu_fs'] = new class {
+    public function is_not_paying(): bool { return false; }
+};
+// ... test code ...
+$GLOBALS['gu_fs'] = $orig_fs;
+```
+Restore `$orig_fs` in the same test method (not `tear_down()`) since other tests need the real Freemius object.
