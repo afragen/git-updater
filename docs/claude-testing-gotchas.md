@@ -474,3 +474,37 @@ The original guard `function_exists('gu_fs')` checked the global namespace while
 
 ### FAIR namespace shim for `check_update_api_redirect()`
 `check_update_api_redirect()` conditionally adds a filter only when `\Fair\Default_Repo\get_default_repo_domain()` exists. Define it in `tests/fixtures/fair-default-repo-shim.php` (with an `if (!function_exists(...))` guard) and `require_once` it in `set_up()`. To cover the arrow-function closure body, call `apply_filters('gu_api_domain', '')` after registering the filter.
+
+### `get_available_languages()` is not empty in wp-env
+`get_available_languages()` scans `WP_LANG_DIR` for `.mo` files. In wp-env the languages directory ships with `de_DE`, `en_GB`, `es_ES`, `ja_JP`, and `de_CH` installed. Any code that falls back via `! empty($locales) ? $locales : [get_locale()]` will never use `get_locale()` in wp-env. Tests that rely on `$locales = ['en_US']` must force it via the filter WordPress provides:
+```php
+// In set_up() — override for the whole test class:
+add_filter( 'get_available_languages', fn() => [ 'en_US' ] );
+
+// In tear_down():
+remove_all_filters( 'get_available_languages' );
+
+// Per-test override (runs after the set_up callback; last callback wins):
+add_filter( 'get_available_languages', fn() => [ 'de_DE' ] );
+```
+
+### `wp_get_installed_translations()` — use pre-seeded WordPress test fixtures, not written .po files
+`wp_get_installed_translations('plugins')` does read `.po` files from `WP_LANG_DIR/plugins/`, but manually-written `.po` files in tests are not reliably parsed in the wp-env container (format issues, caching, etc.). Instead, use the pre-seeded WordPress test-suite translation fixtures that are already present:
+- `internationalized-plugin` — has `de_DE` and `es_ES` with `PO-Revision-Date: 2020-10-20 17:11+0200`
+
+To cover the `$translation_mod = strtotime($translations[$slug][$locale]['PO-Revision-Date'])` branch, inject a repo whose slug matches one of those fixtures (e.g. `internationalized-plugin`, locale `de_DE`) and set `language_packs->de_DE->updated = '2030-01-01 00:00:00'`. No file I/O needed.
+
+### Driving `current_filter()` in static method tests — push to `$wp_current_filter` directly
+`Language_Pack::update_site_transient()` (and similar static methods) branch on `current_filter()`. Wrapping the call in `apply_filters(...)` fires all registered callbacks at that priority — including `Plugin::update_site_transient` at priority 15, which accesses properties (`->git`, `->file`, etc.) that minimal test-repo stubs lack.
+
+Instead, push the filter name onto `$GLOBALS['wp_current_filter']` directly so only the target method is called:
+```php
+private function run_as_plugin_filter( stdClass $transient ): stdClass {
+    global $wp_current_filter;
+    $wp_current_filter[] = 'site_transient_update_plugins';
+    $result              = Language_Pack::update_site_transient( $transient );
+    array_pop( $wp_current_filter );
+    return $result;
+}
+```
+This is safe because `current_filter()` reads `end($wp_current_filter)` and the array is cleaned up immediately.
