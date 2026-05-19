@@ -215,6 +215,7 @@ class API {
 		}
 
 		if ( $cached ) {
+			error_log( sprintf( 'GU diag: api() short-circuit (error cache active) slug=%s url=%s', $this->type->slug, $url ) );
 			return false;
 		}
 
