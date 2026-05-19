@@ -145,9 +145,10 @@ class Test_Messages extends WP_UnitTestCase {
 		$error  = new WP_Error( 'test_code', 'Something went wrong' );
 		$result = $this->messages->create_error_message( $error );
 
+		$hook = is_multisite() ? 'network_admin_notices' : 'admin_notices';
 		$this->assertTrue( $result );
 		$this->assertSame( 'Something went wrong', Messages::$error_message );
-		$this->assertNotFalse( has_action( 'admin_notices', [ $this->messages, 'show_wp_error' ] ) );
+		$this->assertNotFalse( has_action( $hook, [ $this->messages, 'show_wp_error' ] ) );
 	}
 
 	public function test_create_error_message_get_license_registers_action(): void {
@@ -157,8 +158,9 @@ class Test_Messages extends WP_UnitTestCase {
 
 		$result = $this->messages->create_error_message( 'get_license' );
 
+		$hook = is_multisite() ? 'network_admin_notices' : 'admin_notices';
 		$this->assertTrue( $result );
-		$this->assertNotFalse( has_action( 'admin_notices', [ $this->messages, 'get_license' ] ) );
+		$this->assertNotFalse( has_action( $hook, [ $this->messages, 'get_license' ] ) );
 	}
 
 	public function test_create_error_message_waiting_registers_action(): void {
@@ -168,8 +170,9 @@ class Test_Messages extends WP_UnitTestCase {
 
 		$result = $this->messages->create_error_message( 'waiting' );
 
+		$hook = is_multisite() ? 'network_admin_notices' : 'admin_notices';
 		$this->assertTrue( $result );
-		$this->assertNotFalse( has_action( 'admin_notices', [ $this->messages, 'waiting' ] ) );
+		$this->assertNotFalse( has_action( $hook, [ $this->messages, 'waiting' ] ) );
 	}
 
 	public function test_show_wp_error_outputs_error_div(): void {
