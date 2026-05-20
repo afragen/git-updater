@@ -183,7 +183,6 @@ class API {
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );
 		$auth_header = $this->add_auth_header( [], $url );
-		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
 		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
