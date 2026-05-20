@@ -233,18 +233,6 @@ trait GU_Trait {
 			}
 		}
 
-		error_log(
-			sprintf(
-				'GU diag: maybe_extend_repo_cache slug=%s ran_present=%s ran_complete=%s version_match=%s timeout_valid=%s return=%s',
-				$repo->slug ?? '?',
-				isset( $cache['ran'] ) ? 'yes' : 'no',
-				( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) ? 'yes' : 'no',
-				version_compare( $remote_headers['Version'] ?? '', $old_version, '==' ) ? 'yes' : 'no',
-				$this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ? 'yes' : 'no',
-				$return ? 'true' : 'false'
-			)
-		);
-
 		return $return;
 	}
 

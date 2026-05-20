@@ -140,7 +140,6 @@ trait API_Common {
 			self::$method = 'file';
 			$response     = $this->api( $request );
 			$response     = $this->decode_response( $git, $response );
-			error_log( sprintf( 'GU diag: get_remote_api_info fetched fresh slug=%s old_version=%s', $this->type->slug, $old_version ) );
 		}
 
 		if ( $response && is_string( $response ) ) {
@@ -157,17 +156,7 @@ trait API_Common {
 		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
 		// Check remote version against the pre-fetch cached version; extend cache if unchanged.
-		$gate_closed = $this->maybe_extend_repo_cache( $response, $this->type, $old_version );
-		error_log(
-			sprintf(
-				'GU diag: get_remote_api_info gate slug=%s old_version=%s remote_version=%s gate_closed=%s',
-				$this->type->slug,
-				$old_version,
-				$response['Version'] ?? '?',
-				$gate_closed ? 'yes' : 'no'
-			)
-		);
-		if ( $gate_closed ) {
+		if ( $this->maybe_extend_repo_cache( $response, $this->type, $old_version ) ) {
 			return false;
 		}
 
