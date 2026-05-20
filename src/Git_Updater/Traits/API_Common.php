@@ -128,7 +128,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_info( $git, $request ): bool {
 		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache[ $this->type->slug ] ?? false;
+		$response = is_array( $cache ) ? ( $cache[ $this->type->slug ] ?? false ) : false;
 
 		// Capture old version before overwriting: use valid cache if available, else raw option.
 		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
