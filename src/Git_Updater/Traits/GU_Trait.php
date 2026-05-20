@@ -192,6 +192,31 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Refresh the repo cache timeout to the default `$hours` after a complete fetch cycle.
+	 *
+	 * Companion to set_repo_cache(): per-entry writes preserve an existing 'timeout'
+	 * via `??`, so without this an expired timeout from the prior cycle would linger
+	 * and force the next pass to re-fetch. No-op if 'ran' bookkeeping is incomplete.
+	 *
+	 * @param string $slug Repo slug.
+	 *
+	 * @return void
+	 */
+	final public function set_repo_cache_timeout( string $slug ): void {
+		$cache_key = $this->get_cache_key( $slug );
+		$cache     = get_site_option( $cache_key, [] );
+		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+			return;
+		}
+
+		$hours            = $this->get_class_vars( 'API\\API', 'hours' );
+		$cache['timeout'] = strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $cache['ran'], $slug ) );
+		update_site_option( $cache_key, $cache );
+	}
+
+	/**
 	 * Check if current cache timeout is valid.
 	 *
 	 * @param int $timestamp Cache timeout timestamp.

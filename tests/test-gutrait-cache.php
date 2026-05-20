@@ -6,6 +6,7 @@
  * Covers:
  * - get_repo_cache()           — cache read with/without timeout enforcement
  * - set_repo_cache()           — cache write, WP_Error short-circuit, timeout preservation
+ * - set_repo_cache_timeout()   — post-cycle timeout refresh, completeness guard
  * - maybe_extend_repo_cache()  — version-match cache extension logic
  * - delete_all_cached_data()   — ghu-prefixed option cleanup
  * - is_private()               — repo property guards
@@ -152,6 +153,95 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 		$cache = $this->api->get_repo_cache( 'test-plugin' );
 		$this->assertSame( 'a', $cache['alpha'] );
 		$this->assertSame( 'b', $cache['beta'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// set_repo_cache_timeout()
+	// -------------------------------------------------------------------------
+
+	public function test_set_repo_cache_timeout_no_op_when_ran_missing(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				'timeout'     => strtotime( '-1 hour' ),
+			]
+		);
+		$original = get_site_option( $cache_key );
+
+		$this->api->set_repo_cache_timeout( 'test-plugin' );
+
+		$this->assertSame( $original['timeout'], get_site_option( $cache_key )['timeout'] );
+	}
+
+	public function test_set_repo_cache_timeout_no_op_when_ran_incomplete(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags' ],
+				'timeout'     => strtotime( '-1 hour' ),
+			]
+		);
+		$original = get_site_option( $cache_key );
+
+		$this->api->set_repo_cache_timeout( 'test-plugin' );
+
+		$this->assertSame( $original['timeout'], get_site_option( $cache_key )['timeout'] );
+	}
+
+	public function test_set_repo_cache_timeout_refreshes_expired_timeout_when_ran_complete(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'     => strtotime( '-1 hour' ),
+			]
+		);
+
+		$this->api->set_repo_cache_timeout( 'test-plugin' );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertGreaterThan( time() + ( 11 * HOUR_IN_SECONDS ), $cache['timeout'] );
+	}
+
+	public function test_set_repo_cache_timeout_applies_filter(): void {
+		$cache_key = $this->api->get_cache_key( 'test-plugin' );
+		update_site_option(
+			$cache_key,
+			[
+				'test-plugin' => [ 'Version' => '1.0.0' ],
+				'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				'timeout'     => strtotime( '-1 hour' ),
+			]
+		);
+
+		$captured = [];
+		add_filter(
+			'gu_repo_cache_timeout',
+			function ( $timeout, $id, $response, $repo ) use ( &$captured ) {
+				$captured = compact( 'timeout', 'id', 'response', 'repo' );
+				return '+1 hour';
+			},
+			10,
+			4
+		);
+
+		$this->api->set_repo_cache_timeout( 'test-plugin' );
+
+		remove_all_filters( 'gu_repo_cache_timeout' );
+
+		$this->assertSame( '+12 hours', $captured['timeout'] );
+		$this->assertSame( 'ran', $captured['id'] );
+		$this->assertSame( [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ], $captured['response'] );
+		$this->assertSame( 'test-plugin', $captured['repo'] );
+
+		$cache = get_site_option( $cache_key );
+		$this->assertLessThan( time() + ( 2 * HOUR_IN_SECONDS ), $cache['timeout'] );
 	}
 
 	// -------------------------------------------------------------------------

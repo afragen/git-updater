@@ -24,6 +24,8 @@ All API data is cached in WordPress site options. Cache keys follow the pattern 
 
 `set_repo_cache($id, $response, $repo, $timeout)` — writes a single keyed value into the cache array for a repo. The `$repo` argument selects which site option (false = current `$this->type->slug`). `$timeout` is a strtotime-compatible string (e.g. `'+60 minutes'`).
 
+`set_repo_cache()` uses `$cache['timeout'] = $cache['timeout'] ?? strtotime($timeout)`, so the `timeout` field is preserved across per-entry writes within a cycle. The flip side: once a `timeout` exists on the option (even an expired one from a previous cycle), subsequent `set_repo_cache()` calls will never refresh it. After a complete fetch cycle, `GU_Trait::set_repo_cache_timeout($slug)` must be called explicitly to write the fresh default-`$hours` timeout. See *Cache completion tracking* below.
+
 ### API layer
 
 `src/Git_Updater/API/API.php` — base class for all git host APIs. The central method is `api($endpoint)`, which:
@@ -55,9 +57,12 @@ $ran   = [];
 $ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
 // ... six more lines ...
 $repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+$repo_api->set_repo_cache_timeout( $repo->slug );
 ```
 
 `array_filter` strips `null` (WP_Error calls), leaving only string keys of completed calls.
+
+`GU_Trait::set_repo_cache_timeout($slug)` runs immediately after the `'ran'` write. It is a no-op unless `$cache['ran']` contains all seven expected entries (`contents`, `assets`, `readme`, `changes`, `tags`, `branches`, `meta`); on a complete cycle it writes `cache['timeout'] = strtotime('+' . $hours . ' hours')` (default 12, applies `gu_repo_cache_timeout` filter with `$id = 'ran'`). This is the only path that refreshes the cache timeout after a new-version fetch — without it the prior cycle's expired timeout lingers and forces redundant API calls on the next pass within the same request (e.g. from the `wp_update_plugins` / `wp_update_themes` actions wired by `Base::background_update()`, which fires in addition to `Base::load()`'s direct call).
 
 `GU_Trait::maybe_extend_repo_cache( $remote_headers, $repo, $old_version )` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_repo_meta()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry. The timeout comparison uses `$cache['timeout'] ?? 0` so a missing key safely passes `0` (treated as expired) rather than causing a TypeError in PHP 8.
 

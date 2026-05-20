@@ -341,8 +341,8 @@ class Base {
 			$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
 			$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
 			$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+			$repo_api->set_repo_cache_timeout( $repo->slug );
 			// phpcs:enable
-			error_log( "Ran checks for {$repo->slug} " . var_export( $ran, true ) );
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}
