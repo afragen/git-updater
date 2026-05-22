@@ -787,3 +787,62 @@ class Test_Branch_MakeBranchSwitchRow extends GU_Test_Case {
 		$this->assertStringContainsString( 'rollback=custom-tag', $output );
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Test_Branch (from test-zipfile-branch-additions.php)
+// ---------------------------------------------------------------------------
+
+class Test_Branch_Current_Branch extends GU_Test_Case {
+
+	private Branch $branch;
+	private string $slug      = 'test-plugin';
+	private string $cache_key;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->branch    = new Branch();
+		$this->cache_key = 'ghu-' . md5( $this->slug );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( $this->cache_key );
+		parent::tear_down();
+	}
+
+	private function make_repo( string $branch = 'master' ): stdClass {
+		$repo         = new stdClass();
+		$repo->slug   = $this->slug;
+		$repo->branch = $branch;
+		return $repo;
+	}
+
+	public function test_get_current_branch_returns_repo_branch_when_cache_empty(): void {
+		$result = $this->branch->get_current_branch( $this->make_repo( 'master' ) );
+		$this->assertSame( 'master', $result );
+	}
+
+	public function test_get_current_branch_returns_cached_branch_when_set(): void {
+		update_site_option( $this->cache_key, [ 'current_branch' => 'develop' ] );
+
+		$result = $this->branch->get_current_branch( $this->make_repo( 'master' ) );
+
+		$this->assertSame( 'develop', $result );
+	}
+
+	public function test_get_current_branch_falls_back_to_repo_branch_when_cache_has_no_current_branch(): void {
+		update_site_option( $this->cache_key, [ 'some_other_key' => 'value' ] );
+
+		$result = $this->branch->get_current_branch( $this->make_repo( 'feature' ) );
+
+		$this->assertSame( 'feature', $result );
+	}
+
+	public function test_get_current_branch_falls_back_when_cached_current_branch_is_empty_string(): void {
+		update_site_option( $this->cache_key, [ 'current_branch' => '' ] );
+
+		$result = $this->branch->get_current_branch( $this->make_repo( 'main' ) );
+
+		$this->assertSame( 'main', $result );
+	}
+}
