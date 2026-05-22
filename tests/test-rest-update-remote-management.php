@@ -33,7 +33,7 @@ use Fragen\Git_Updater\Remote_Management;
 /**
  * Class Test_Rest_Upgrader_Skin
  */
-class Test_Rest_Upgrader_Skin extends WP_UnitTestCase {
+class Test_Rest_Upgrader_Skin extends GU_Test_Case {
 
 	private Rest_Upgrader_Skin $skin;
 
@@ -114,7 +114,7 @@ class Test_Rest_Upgrader_Skin extends WP_UnitTestCase {
 /**
  * Class Test_Rest_Update
  */
-class Test_Rest_Update extends WP_UnitTestCase {
+class Test_Rest_Update extends GU_Test_Case {
 
 	private Rest_Update $rest;
 
@@ -172,31 +172,26 @@ class Test_Rest_Update extends WP_UnitTestCase {
 /**
  * Class Test_Remote_Management
  */
-class Test_Remote_Management extends WP_UnitTestCase {
+class Test_Remote_Management extends GU_Test_Case {
 
 	private array $saved_request;
 	private array $saved_post;
 	private array $saved_get;
-	/** @var array<string, mixed> */
-	private array $saved_base_options;
 
 	public function set_up(): void {
 		parent::set_up();
 		if ( ! function_exists( 'submit_button' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
-		// Snapshot superglobals so we can restore them in tear_down.
-		$this->saved_request      = $_REQUEST;
-		$this->saved_post         = $_POST;
-		$this->saved_get          = $_GET;
-		$this->saved_base_options = Base::$options;
+		$this->saved_request = $_REQUEST;
+		$this->saved_post    = $_POST;
+		$this->saved_get     = $_GET;
 	}
 
 	public function tear_down(): void {
-		$_REQUEST      = $this->saved_request;
-		$_POST         = $this->saved_post;
-		$_GET          = $this->saved_get;
-		Base::$options = $this->saved_base_options;
+		$_REQUEST = $this->saved_request;
+		$_POST    = $this->saved_post;
+		$_GET     = $this->saved_get;
 		delete_site_option( 'git_updater_api_key' );
 		remove_all_filters( 'gu_add_settings_tabs' );
 		remove_all_actions( 'gu_add_admin_page' );
@@ -358,7 +353,7 @@ class Test_Remote_Management extends WP_UnitTestCase {
  * - process_request()     — various key/branch/webhook paths all end via WPDieException
  * - get_primary_branch()  — returns cached PrimaryBranch when present
  */
-class Test_Rest_Update_Process extends WP_UnitTestCase {
+class Test_Rest_Update_Process extends GU_Test_Case {
 
 	private Rest_Update $rest;
 	private array       $saved_request;
@@ -591,7 +586,7 @@ class Test_Rest_Update_Process extends WP_UnitTestCase {
  * HTTP is mocked via pre_http_request to avoid real network calls.
  * Plugin upgrade uses a local zip returned from upgrader_pre_download at priority 15.
  */
-class Test_Rest_Update_Full_Path extends WP_UnitTestCase {
+class Test_Rest_Update_Full_Path extends GU_Test_Case {
 
 	private const PLUGIN_SLUG = 'test-gu-plugin';
 	private const THEME_SLUG  = 'test-gu-theme';

@@ -16,9 +16,6 @@
 
 use Fragen\Git_Updater\Settings;
 use Fragen\Git_Updater\Base;
-use Fragen\Git_Updater\Plugin;
-use Fragen\Git_Updater\Theme;
-use Fragen\Singleton;
 
 // =============================================================================
 // Shared helper trait
@@ -71,17 +68,11 @@ trait Settings_Test_Helper {
 	}
 
 	private function inject_plugin_config( array $cfg ): void {
-		$p   = Singleton::get_instance( 'Plugin', $this->settings );
-		$ref = new ReflectionProperty( Plugin::class, 'config' );
-		$ref->setAccessible( true );
-		$ref->setValue( $p, $cfg );
+		$this->set_plugin_config( $cfg );
 	}
 
 	private function inject_theme_config( array $cfg ): void {
-		$t   = Singleton::get_instance( 'Theme', $this->settings );
-		$ref = new ReflectionProperty( Theme::class, 'config' );
-		$ref->setAccessible( true );
-		$ref->setValue( $t, $cfg );
+		$this->set_theme_config( $cfg );
 	}
 
 	private function call_private( string $method, array $args = [] ) {
@@ -145,7 +136,7 @@ trait Settings_Test_Helper {
  *
  * Tests refresh_caches() — called from constructor.
  */
-class Test_Settings_Refresh_Caches extends WP_UnitTestCase {
+class Test_Settings_Refresh_Caches extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -196,7 +187,7 @@ class Test_Settings_Refresh_Caches extends WP_UnitTestCase {
  *
  * Tests load_hooks() via run().
  */
-class Test_Settings_Load_Hooks extends WP_UnitTestCase {
+class Test_Settings_Load_Hooks extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -284,7 +275,7 @@ class Test_Settings_Load_Hooks extends WP_UnitTestCase {
  *
  * Tests load_api_subtabs() closures via the filters they register.
  */
-class Test_Settings_Load_Api_Subtabs extends WP_UnitTestCase {
+class Test_Settings_Load_Api_Subtabs extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -334,7 +325,7 @@ class Test_Settings_Load_Api_Subtabs extends WP_UnitTestCase {
  *
  * Tests add_plugin_page().
  */
-class Test_Settings_Add_Plugin_Page extends WP_UnitTestCase {
+class Test_Settings_Add_Plugin_Page extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -372,7 +363,7 @@ class Test_Settings_Add_Plugin_Page extends WP_UnitTestCase {
  * Tests create_admin_page() including options_tabs(), options_sub_tabs(),
  * add_hidden_settings_sections(), and display_gu_repos() branches.
  */
-class Test_Settings_Create_Admin_Page extends WP_UnitTestCase {
+class Test_Settings_Create_Admin_Page extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -472,7 +463,7 @@ class Test_Settings_Create_Admin_Page extends WP_UnitTestCase {
  *
  * @group ms-required
  */
-class Test_Settings_Admin_Page_Notices_Multisite extends WP_UnitTestCase {
+class Test_Settings_Admin_Page_Notices_Multisite extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -513,7 +504,7 @@ class Test_Settings_Admin_Page_Notices_Multisite extends WP_UnitTestCase {
  *
  * Tests page_init().
  */
-class Test_Settings_Page_Init extends WP_UnitTestCase {
+class Test_Settings_Page_Init extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -575,7 +566,7 @@ class Test_Settings_Page_Init extends WP_UnitTestCase {
  *
  * Tests gu_tokens() all branches.
  */
-class Test_Settings_Gu_Tokens extends WP_UnitTestCase {
+class Test_Settings_Gu_Tokens extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -709,7 +700,7 @@ class Test_Settings_Gu_Tokens extends WP_UnitTestCase {
  *
  * Tests unset_stale_options().
  */
-class Test_Settings_Unset_Stale_Options extends WP_UnitTestCase {
+class Test_Settings_Unset_Stale_Options extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -796,7 +787,7 @@ class Test_Settings_Unset_Stale_Options extends WP_UnitTestCase {
  *
  * Tests print_section_gu_settings() and display_dot_org_overrides().
  */
-class Test_Settings_Print_Section extends WP_UnitTestCase {
+class Test_Settings_Print_Section extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -876,7 +867,7 @@ class Test_Settings_Print_Section extends WP_UnitTestCase {
  *
  * Tests token_callback_text() and token_callback_checkbox().
  */
-class Test_Settings_Token_Callbacks extends WP_UnitTestCase {
+class Test_Settings_Token_Callbacks extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -954,7 +945,7 @@ class Test_Settings_Token_Callbacks extends WP_UnitTestCase {
  *
  * Tests update_settings() and filter_options().
  */
-class Test_Settings_Update_Settings extends WP_UnitTestCase {
+class Test_Settings_Update_Settings extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -1038,7 +1029,7 @@ class Test_Settings_Update_Settings extends WP_UnitTestCase {
  *
  * Tests redirect_on_save() via update_settings() and directly via reflection.
  */
-class Test_Settings_Redirect_On_Save extends WP_UnitTestCase {
+class Test_Settings_Redirect_On_Save extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -1149,7 +1140,7 @@ class Test_Settings_Redirect_On_Save extends WP_UnitTestCase {
  *
  * Tests refresh_transients() via reflection.
  */
-class Test_Settings_Refresh_Transients extends WP_UnitTestCase {
+class Test_Settings_Refresh_Transients extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -1193,7 +1184,7 @@ class Test_Settings_Refresh_Transients extends WP_UnitTestCase {
  *
  * Tests plugin_action_links().
  */
-class Test_Settings_Plugin_Action_Links extends WP_UnitTestCase {
+class Test_Settings_Plugin_Action_Links extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -1228,7 +1219,7 @@ class Test_Settings_Plugin_Action_Links extends WP_UnitTestCase {
  *
  * Tests display_gu_repos() via reflection.
  */
-class Test_Settings_Display_Gu_Repos extends WP_UnitTestCase {
+class Test_Settings_Display_Gu_Repos extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {
@@ -1361,7 +1352,7 @@ class Test_Settings_Display_Gu_Repos extends WP_UnitTestCase {
  *
  * Covers the gitlabce→gitlab rename branch in settings_sub_tabs()  (line 191).
  */
-class Test_Settings_Subtabs_Gitlabce extends WP_UnitTestCase {
+class Test_Settings_Subtabs_Gitlabce extends GU_Test_Case {
 	use Settings_Test_Helper;
 
 	public function set_up(): void {

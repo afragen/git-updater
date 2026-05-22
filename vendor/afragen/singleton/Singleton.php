@@ -25,6 +25,22 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 	 */
 	final class Singleton {
 		/**
+		 * Holds singleton instances.
+		 *
+		 * @var array<string, object>|null
+		 */
+		private static $instances;
+
+		/**
+		 * Reset all singleton instances. For test teardown only.
+		 *
+		 * @return void
+		 */
+		public static function reset(): void {
+			self::$instances = null;
+		}
+
+		/**
 		 * Get instance of class.
 		 *
 		 * @param string            $class_name Class name.
@@ -34,16 +50,14 @@ if ( ! class_exists( 'Fragen\\Singleton' ) ) {
 		 * @return object $instance[ $class ]
 		 */
 		public static function get_instance( $class_name, $caller, $options = null ) {
-			static $instance = null;
-
 			$class = get_class( $caller );
 			$class = self::get_class( $class_name, $class );
 
-			if ( null === $instance || ! isset( $instance[ $class ] ) ) {
-				$instance[ $class ] = new $class( $options );
+			if ( null === self::$instances || ! isset( self::$instances[ $class ] ) ) {
+				self::$instances[ $class ] = new $class( $options );
 			}
 
-			return $instance[ $class ];
+			return self::$instances[ $class ];
 		}
 
 		/**
