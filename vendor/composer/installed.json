@@ -2,23 +2,23 @@
     "packages": [
         {
             "name": "afragen/singleton",
-            "version": "1.0.5",
-            "version_normalized": "1.0.5.0",
+            "version": "1.0.6",
+            "version_normalized": "1.0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/afragen/singleton.git",
-                "reference": "c93d90651dcf027bcd365d81bccf1eda73fe2f2d"
+                "reference": "6a50bb80c0c4ff77bf75bea1e0ffbac7f15acc63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/afragen/singleton/zipball/c93d90651dcf027bcd365d81bccf1eda73fe2f2d",
-                "reference": "c93d90651dcf027bcd365d81bccf1eda73fe2f2d",
+                "url": "https://api.github.com/repos/afragen/singleton/zipball/6a50bb80c0c4ff77bf75bea1e0ffbac7f15acc63",
+                "reference": "6a50bb80c0c4ff77bf75bea1e0ffbac7f15acc63",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.5"
             },
-            "time": "2024-11-19T17:40:31+00:00",
+            "time": "2026-05-22T19:05:45+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -45,7 +45,7 @@
             ],
             "support": {
                 "issues": "https://github.com/afragen/singleton/issues",
-                "source": "https://github.com/afragen/singleton/tree/1.0.5"
+                "source": "https://github.com/afragen/singleton/tree/1.0.6"
             },
             "install-path": "../afragen/singleton"
         },
@@ -729,17 +729,17 @@
         },
         {
             "name": "php-stubs/wordpress-stubs",
-            "version": "v6.9.1",
-            "version_normalized": "6.9.1.0",
+            "version": "v6.9.4",
+            "version_normalized": "6.9.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-stubs/wordpress-stubs.git",
-                "reference": "f12220f303e0d7c0844c0e5e957b0c3cee48d2f7"
+                "reference": "90a9412826b9944f93b10bf41d795b5fe68abcd5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-stubs/wordpress-stubs/zipball/f12220f303e0d7c0844c0e5e957b0c3cee48d2f7",
-                "reference": "f12220f303e0d7c0844c0e5e957b0c3cee48d2f7",
+                "url": "https://api.github.com/repos/php-stubs/wordpress-stubs/zipball/90a9412826b9944f93b10bf41d795b5fe68abcd5",
+                "reference": "90a9412826b9944f93b10bf41d795b5fe68abcd5",
                 "shasum": ""
             },
             "conflict": {
@@ -749,7 +749,7 @@
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
                 "nikic/php-parser": "^5.5",
                 "php": "^7.4 || ^8.0",
-                "php-stubs/generator": "^0.8.3",
+                "php-stubs/generator": "^0.8.6",
                 "phpdocumentor/reflection-docblock": "^6.0",
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^9.5",
@@ -762,7 +762,7 @@
                 "symfony/polyfill-php80": "Symfony polyfill backporting some PHP 8.0+ features to lower PHP versions",
                 "szepeviktor/phpstan-wordpress": "WordPress extensions for PHPStan"
             },
-            "time": "2026-02-03T19:29:21+00:00",
+            "time": "2026-05-01T20:36:01+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -778,7 +778,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-stubs/wordpress-stubs/issues",
-                "source": "https://github.com/php-stubs/wordpress-stubs/tree/v6.9.1"
+                "source": "https://github.com/php-stubs/wordpress-stubs/tree/v6.9.4"
             },
             "install-path": "../php-stubs/wordpress-stubs"
         },
@@ -1012,12 +1012,12 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.54",
-            "version_normalized": "2.1.54.0",
+            "version": "2.1.55",
+            "version_normalized": "2.1.55.0",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/8be50c3992107dc837b17da4d140fbbdf9a5c5bd",
-                "reference": "8be50c3992107dc837b17da4d140fbbdf9a5c5bd",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9eaac3826ed5e9b8427350a43cac825eeca3f566",
+                "reference": "9eaac3826ed5e9b8427350a43cac825eeca3f566",
                 "shasum": ""
             },
             "require": {
@@ -1026,7 +1026,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2026-04-29T13:31:09+00:00",
+            "time": "2026-05-18T11:57:34+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"
