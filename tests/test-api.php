@@ -487,4 +487,33 @@ class Test_API extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'wordpress-plugin', $this->type->readme_tags );
 		$this->assertSame( 'My Plugin', $this->type->readme_tags['my-plugin'] );
 	}
+
+	public function test_set_readme_info_normalizes_patch_version_for_tested(): void {
+		global $wp_version;
+		$original_wp_version = $wp_version;
+		$wp_version          = '6.7.2';
+
+		$this->type->sections     = new stdClass();
+		$this->type->requires     = '';
+		$this->type->requires_php = '';
+		$this->type->tested       = '';
+
+		$readme = [
+			'sections'          => [],
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '6.5',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [],
+			'remaining_content' => '',
+		];
+
+		$result = $this->api->set_readme_info( $readme );
+
+		$wp_version = $original_wp_version;
+
+		$this->assertTrue( $result );
+		$this->assertSame( '6.5.2', $this->type->tested );
+	}
 }

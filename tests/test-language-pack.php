@@ -13,8 +13,6 @@
 use Fragen\Git_Updater\Language_Pack;
 use Fragen\Git_Updater\API\Language_Pack_API;
 use Fragen\Git_Updater\Base;
-use Fragen\Git_Updater\Plugin;
-use Fragen\Git_Updater\Theme;
 
 // ---------------------------------------------------------------------------
 // Shared helper trait
@@ -107,7 +105,7 @@ trait Language_Pack_Helper {
  *
  * Covers __construct() and run() in Language_Pack.
  */
-class Test_Language_Pack_Constructor_And_Run extends WP_UnitTestCase {
+class Test_Language_Pack_Constructor_And_Run extends GU_Test_Case {
 	use Language_Pack_Helper;
 
 	/** @var string */
@@ -248,68 +246,29 @@ class Test_Language_Pack_Constructor_And_Run extends WP_UnitTestCase {
  * Every test drives the method via apply_filters() so current_filter()
  * returns the correct filter name inside the method.
  */
-class Test_Language_Pack_Update_Site_Transient extends WP_UnitTestCase {
+class Test_Language_Pack_Update_Site_Transient extends GU_Test_Case {
 	use Language_Pack_Helper;
-
-	/** @var Plugin */
-	private object $plugin_obj;
-
-	/** @var Theme */
-	private object $theme_obj;
-
-	/** @var array<string, stdClass> */
-	private array $saved_plugin_config = [];
-
-	/** @var array<string, stdClass> */
-	private array $saved_theme_config = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->plugin_obj = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', new Base() );
-		$this->theme_obj  = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', new Base() );
-
-		$rp_plugin = new ReflectionProperty( Plugin::class, 'config' );
-		$rp_plugin->setAccessible( true );
-		$this->saved_plugin_config = $rp_plugin->getValue( $this->plugin_obj ) ?? [];
-
-		$rp_theme = new ReflectionProperty( Theme::class, 'config' );
-		$rp_theme->setAccessible( true );
-		$this->saved_theme_config = $rp_theme->getValue( $this->theme_obj ) ?? [];
 
 		// Force get_available_languages() to return ['en_US'] so $locales is predictable.
-		// Tests that need a different locale can add their own higher-priority callback.
 		add_filter( 'get_available_languages', fn() => [ 'en_US' ] );
 	}
 
 	public function tear_down(): void {
-		$this->inject_plugin_config( $this->saved_plugin_config );
-		$this->inject_theme_config( $this->saved_theme_config );
 		remove_all_filters( 'get_available_languages' );
 		remove_all_filters( 'locale' );
 		parent::tear_down();
 	}
 
-	// -----------------------------------------------------------------------
-	// Config injection helpers
-	// -----------------------------------------------------------------------
-
-	/**
-	 * @param array<string, stdClass> $config
-	 */
 	private function inject_plugin_config( array $config ): void {
-		$rp = new ReflectionProperty( Plugin::class, 'config' );
-		$rp->setAccessible( true );
-		$rp->setValue( $this->plugin_obj, $config );
+		$this->set_plugin_config( $config );
 	}
 
-	/**
-	 * @param array<string, stdClass> $config
-	 */
 	private function inject_theme_config( array $config ): void {
-		$rp = new ReflectionProperty( Theme::class, 'config' );
-		$rp->setAccessible( true );
-		$rp->setValue( $this->theme_obj, $config );
+		$this->set_theme_config( $config );
 	}
 
 	// -----------------------------------------------------------------------

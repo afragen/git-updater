@@ -18,137 +18,50 @@
 
 use Fragen\Git_Updater\Base;
 use Fragen\Git_Updater\Branch;
-use Fragen\Git_Updater\Plugin;
-use Fragen\Git_Updater\Theme;
 
-// ---------------------------------------------------------------------------
-// Shared helper trait
-// ---------------------------------------------------------------------------
+/**
+ * Build a minimal repo stdClass for Branch tests.
+ *
+ * @param array<string, mixed> $overrides
+ * @return stdClass
+ */
+function branch_make_repo_obj( array $overrides = [] ): stdClass {
+	return (object) array_merge(
+		[
+			'slug'           => 'test-repo',
+			'file'           => 'test-repo/test-repo.php',
+			'git'            => 'github',
+			'type'           => 'plugin',
+			'branch'         => 'main',
+			'primary_branch' => 'main',
+			'owner'          => 'test-owner',
+			'uri'            => 'https://github.com/test-owner/test-repo',
+			'branches'       => [ 'main' => [], 'develop' => [] ],
+			'tags'           => [],
+			'release_asset'  => false,
+			'newest_tag'     => '0.0.0',
+			'enterprise'     => null,
+			'enterprise_api' => null,
+		],
+		$overrides
+	);
+}
 
-trait Branch_Mock_Helper {
-
-	/**
-	 * Inject value into Branch::$options (protected static).
-	 *
-	 * @param array<string, mixed> $options
-	 */
-	private function inject_branch_options( array $options ): void {
-		$rp = new ReflectionProperty( Branch::class, 'options' );
-		$rp->setAccessible( true );
-		$rp->setValue( null, $options );
-	}
-
-	/**
-	 * Read Branch::$options (protected static).
-	 *
-	 * @return array<string, mixed>
-	 */
-	private function read_branch_options(): array {
-		$rp = new ReflectionProperty( Branch::class, 'options' );
-		$rp->setAccessible( true );
-		return $rp->getValue( null ) ?? [];
-	}
-
-	/**
-	 * Inject config into the Plugin singleton.
-	 *
-	 * @param object               $caller Branch instance (used to get the same singleton).
-	 * @param array<string, stdClass> $config
-	 */
-	private function inject_plugin_config( object $caller, array $config ): void {
-		$singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
-		$rp        = new ReflectionProperty( Plugin::class, 'config' );
-		$rp->setAccessible( true );
-		$rp->setValue( $singleton, $config );
-	}
-
-	/**
-	 * Inject config into the Theme singleton.
-	 *
-	 * @param object               $caller Branch instance.
-	 * @param array<string, stdClass> $config
-	 */
-	private function inject_theme_config( object $caller, array $config ): void {
-		$singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $caller );
-		$rp        = new ReflectionProperty( Theme::class, 'config' );
-		$rp->setAccessible( true );
-		$rp->setValue( $singleton, $config );
-	}
-
-	/**
-	 * Read current config from the Plugin singleton.
-	 *
-	 * @param object $caller
-	 * @return array<string, stdClass>
-	 */
-	private function read_plugin_config( object $caller ): array {
-		$singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
-		$rp        = new ReflectionProperty( Plugin::class, 'config' );
-		$rp->setAccessible( true );
-		return $rp->getValue( $singleton ) ?? [];
-	}
-
-	/**
-	 * Read current config from the Theme singleton.
-	 *
-	 * @param object $caller
-	 * @return array<string, stdClass>
-	 */
-	private function read_theme_config( object $caller ): array {
-		$singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Theme', $caller );
-		$rp        = new ReflectionProperty( Theme::class, 'config' );
-		$rp->setAccessible( true );
-		return $rp->getValue( $singleton ) ?? [];
-	}
-
-	/**
-	 * Build a minimal repo stdClass for Branch tests.
-	 *
-	 * @param array<string, mixed> $overrides
-	 * @return stdClass
-	 */
-	private function make_repo_obj( array $overrides = [] ): stdClass {
-		return (object) array_merge(
-			[
-				'slug'           => 'test-repo',
-				'file'           => 'test-repo/test-repo.php',
-				'git'            => 'github',
-				'type'           => 'plugin',
-				'branch'         => 'main',
-				'primary_branch' => 'main',
-				'owner'          => 'test-owner',
-				'uri'            => 'https://github.com/test-owner/test-repo',
-				'branches'       => [ 'main' => [], 'develop' => [] ],
-				'tags'           => [],
-				'release_asset'  => false,
-				'newest_tag'     => '0.0.0',
-				'enterprise'     => null,
-				'enterprise_api' => null,
-			],
-			$overrides
-		);
-	}
-
-	/**
-	 * Cache key helper.
-	 *
-	 * @param string $slug
-	 * @return string
-	 */
-	private function branch_cache_key( string $slug ): string {
-		return 'ghu-' . md5( $slug );
-	}
+/**
+ * Cache key helper.
+ *
+ * @param string $slug
+ * @return string
+ */
+function branch_cache_key( string $slug ): string {
+	return 'ghu-' . md5( $slug );
 }
 
 // ---------------------------------------------------------------------------
 // Test_Branch_Constructor
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_Constructor
- */
-class Test_Branch_Constructor extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_Constructor extends GU_Test_Case {
 
 	public function set_up(): void {
 		parent::set_up();
@@ -180,11 +93,7 @@ class Test_Branch_Constructor extends WP_UnitTestCase {
 // Test_Branch_GetCurrentBranch
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_GetCurrentBranch
- */
-class Test_Branch_GetCurrentBranch extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_GetCurrentBranch extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-gcb-repo';
@@ -194,7 +103,7 @@ class Test_Branch_GetCurrentBranch extends WP_UnitTestCase {
 		parent::set_up();
 		new Base();
 		$this->branch    = new Branch();
-		$this->cache_key = $this->branch_cache_key( $this->slug );
+		$this->cache_key = branch_cache_key( $this->slug );
 		delete_site_option( $this->cache_key );
 	}
 
@@ -211,7 +120,6 @@ class Test_Branch_GetCurrentBranch extends WP_UnitTestCase {
 	}
 
 	public function test_falls_back_to_repo_branch_on_cache_miss(): void {
-		// No cache seeded — get_site_option returns [] (default), empty() on missing key is safe.
 		$repo = (object) [ 'slug' => $this->slug, 'branch' => 'main' ];
 
 		$this->assertSame( 'main', $this->branch->get_current_branch( $repo ) );
@@ -222,25 +130,17 @@ class Test_Branch_GetCurrentBranch extends WP_UnitTestCase {
 // Test_Branch_SetRollbackTransient
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_SetRollbackTransient
- */
-class Test_Branch_SetRollbackTransient extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_SetRollbackTransient extends GU_Test_Case {
 
 	private Branch  $branch;
 	private stdClass $repo;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->branch        = new Branch();
-		$this->saved_options = $this->read_branch_options();
-		$this->repo          = $this->make_repo_obj();
+		$this->branch = new Branch();
+		$this->repo   = branch_make_repo_obj();
 
-		// Override download link to avoid HTTP; filter runs after construct_download_link().
 		add_filter(
 			'gu_post_construct_download_link',
 			function () {
@@ -252,8 +152,7 @@ class Test_Branch_SetRollbackTransient extends WP_UnitTestCase {
 	public function tear_down(): void {
 		unset( $_GET['rollback'] );
 		remove_all_filters( 'gu_post_construct_download_link' );
-		delete_site_option( $this->branch_cache_key( 'test-repo' ) );
-		$this->inject_branch_options( $this->saved_options );
+		delete_site_option( branch_cache_key( 'test-repo' ) );
 		parent::tear_down();
 	}
 
@@ -291,7 +190,7 @@ class Test_Branch_SetRollbackTransient extends WP_UnitTestCase {
 
 	public function test_returns_array_for_theme_type(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		$repo             = $this->make_repo_obj( [ 'type' => 'theme' ] );
+		$repo             = branch_make_repo_obj( [ 'type' => 'theme' ] );
 
 		$result = $this->branch->set_rollback_transient( 'theme', $repo );
 
@@ -306,11 +205,7 @@ class Test_Branch_SetRollbackTransient extends WP_UnitTestCase {
 // Test_Branch_SetBranchOnSwitch
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_SetBranchOnSwitch
- */
-class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_SetBranchOnSwitch extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-sbos-repo';
@@ -320,7 +215,7 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 		parent::set_up();
 		new Base();
 		$this->branch    = new Branch();
-		$this->cache_key = $this->branch_cache_key( $this->slug );
+		$this->cache_key = branch_cache_key( $this->slug );
 		delete_site_option( $this->cache_key );
 		delete_site_option( 'git_updater' );
 	}
@@ -334,7 +229,6 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 
 	public function test_exits_early_when_no_rollback_param(): void {
 		unset( $_GET['rollback'] );
-		// Seed cache so we can verify it wasn't modified.
 		update_site_option( $this->cache_key, [ 'branches' => [ 'main' => [] ] ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
@@ -361,7 +255,6 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 
 	public function test_falls_back_to_master_when_no_primary_branch_key_in_cache(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		// Tags contain the rollback but no nested slug sub-array — hits the ?? 'master' path.
 		update_site_option( $this->cache_key, [ 'tags' => [ 'v1.0.0' ] ] );
 
 		$this->branch->set_branch_on_switch( $this->slug );
@@ -373,7 +266,6 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 	public function test_sets_branch_from_branches_cache(): void {
 		$_GET['rollback'] = 'develop';
 		$_GET['action']   = 'upgrade-plugin';
-		// rollback is NOT in tags, so falls through to the branches path.
 		update_site_option(
 			$this->cache_key,
 			[
@@ -407,7 +299,6 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 
 	public function test_does_not_update_when_neither_branch_condition_matches(): void {
 		$_GET['rollback'] = 'v1.0.0';
-		// Not in tags, and no $_GET['action'] — neither if block sets $current_branch.
 		update_site_option(
 			$this->cache_key,
 			[
@@ -427,33 +318,25 @@ class Test_Branch_SetBranchOnSwitch extends WP_UnitTestCase {
 // Test_Branch_SetBranchOnInstall
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_SetBranchOnInstall
- */
-class Test_Branch_SetBranchOnInstall extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_SetBranchOnInstall extends GU_Test_Case {
 
 	private Branch $branch;
 	private string $slug      = 'test-sboi-repo';
 	private string $cache_key;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->branch        = new Branch();
-		$this->saved_options = $this->read_branch_options();
-		$this->cache_key     = $this->branch_cache_key( $this->slug );
+		$this->branch    = new Branch();
+		$this->cache_key = branch_cache_key( $this->slug );
 		delete_site_option( $this->cache_key );
 		delete_site_option( 'git_updater' );
-		$this->inject_branch_options( [] );
+		$this->set_branch_options( [] );
 	}
 
 	public function tear_down(): void {
 		delete_site_option( $this->cache_key );
 		delete_site_option( 'git_updater' );
-		$this->inject_branch_options( $this->saved_options );
 		parent::tear_down();
 	}
 
@@ -477,7 +360,7 @@ class Test_Branch_SetBranchOnInstall extends WP_UnitTestCase {
 
 		$this->branch->set_branch_on_install( $install );
 
-		$opts = $this->read_branch_options();
+		$opts = $this->get_branch_options();
 		$this->assertSame( 'develop', $opts[ 'current_branch_' . $this->slug ] );
 	}
 
@@ -490,7 +373,7 @@ class Test_Branch_SetBranchOnInstall extends WP_UnitTestCase {
 
 		$this->branch->set_branch_on_install( $install );
 
-		$opts = $this->read_branch_options();
+		$opts = $this->get_branch_options();
 		$this->assertSame( 'extra_value', $opts['extra_key'] );
 		$this->assertSame( 'main', $opts[ 'current_branch_' . $this->slug ] );
 	}
@@ -500,17 +383,9 @@ class Test_Branch_SetBranchOnInstall extends WP_UnitTestCase {
 // Test_Branch_PluginBranchSwitcher
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_PluginBranchSwitcher
- */
-class Test_Branch_PluginBranchSwitcher extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_PluginBranchSwitcher extends GU_Test_Case {
 
 	private Branch $branch;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
-	/** @var array<string, stdClass> */
-	private array $saved_plugin_config = [];
 
 	public function set_up(): void {
 		parent::set_up();
@@ -524,21 +399,17 @@ class Test_Branch_PluginBranchSwitcher extends WP_UnitTestCase {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
 		new Base();
-		$this->branch              = new Branch();
-		$this->saved_options       = $this->read_branch_options();
-		$this->saved_plugin_config = $this->read_plugin_config( $this->branch );
+		$this->branch = new Branch();
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'gu_number_rollbacks' );
 		remove_all_filters( 'gu_no_release_asset_branches' );
-		$this->inject_branch_options( $this->saved_options );
-		$this->inject_plugin_config( $this->branch, $this->saved_plugin_config );
 		parent::tear_down();
 	}
 
 	public function test_returns_false_when_branch_switch_disabled(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '' ] );
+		$this->set_branch_options( [ 'branch_switch' => '' ] );
 
 		$result = $this->branch->plugin_branch_switcher( 'any-plugin/any-plugin.php' );
 
@@ -550,11 +421,9 @@ class Test_Branch_PluginBranchSwitcher extends WP_UnitTestCase {
 			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
 		}
 
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 
-		// Use git='bitbucket' so get_remote_repo_meta() returns false immediately
-		// (null API → early return) — no HTTP calls.
-		$repo_obj = $this->make_repo_obj(
+		$repo_obj = branch_make_repo_obj(
 			[
 				'git'            => 'bitbucket',
 				'type'           => 'plugin',
@@ -563,7 +432,7 @@ class Test_Branch_PluginBranchSwitcher extends WP_UnitTestCase {
 			]
 		);
 
-		$this->inject_plugin_config( $this->branch, [ 'test-repo' => $repo_obj ] );
+		$this->set_plugin_config( [ 'test-repo' => $repo_obj ] );
 
 		ob_start();
 		$result = $this->branch->plugin_branch_switcher( 'test-repo/test-repo.php' );
@@ -578,17 +447,9 @@ class Test_Branch_PluginBranchSwitcher extends WP_UnitTestCase {
 // Test_Branch_MultiSiteBranchSwitcher
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_MultiSiteBranchSwitcher
- */
-class Test_Branch_MultiSiteBranchSwitcher extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_MultiSiteBranchSwitcher extends GU_Test_Case {
 
 	private Branch $branch;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
-	/** @var array<string, stdClass> */
-	private array $saved_theme_config = [];
 
 	public function set_up(): void {
 		parent::set_up();
@@ -602,21 +463,17 @@ class Test_Branch_MultiSiteBranchSwitcher extends WP_UnitTestCase {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
 		new Base();
-		$this->branch             = new Branch();
-		$this->saved_options      = $this->read_branch_options();
-		$this->saved_theme_config = $this->read_theme_config( $this->branch );
+		$this->branch = new Branch();
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'gu_number_rollbacks' );
 		remove_all_filters( 'gu_no_release_asset_branches' );
-		$this->inject_branch_options( $this->saved_options );
-		$this->inject_theme_config( $this->branch, $this->saved_theme_config );
 		parent::tear_down();
 	}
 
 	public function test_returns_false_when_branch_switch_disabled(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '' ] );
+		$this->set_branch_options( [ 'branch_switch' => '' ] );
 
 		$result = $this->branch->multisite_branch_switcher( 'test-theme' );
 
@@ -628,9 +485,9 @@ class Test_Branch_MultiSiteBranchSwitcher extends WP_UnitTestCase {
 			$this->markTestSkipped( '_get_list_table() not available outside admin context.' );
 		}
 
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 
-		$repo_obj = $this->make_repo_obj(
+		$repo_obj = branch_make_repo_obj(
 			[
 				'slug'           => 'test-theme',
 				'git'            => 'bitbucket',
@@ -640,7 +497,7 @@ class Test_Branch_MultiSiteBranchSwitcher extends WP_UnitTestCase {
 			]
 		);
 
-		$this->inject_theme_config( $this->branch, [ 'test-theme' => $repo_obj ] );
+		$this->set_theme_config( [ 'test-theme' => $repo_obj ] );
 
 		ob_start();
 		$result = $this->branch->multisite_branch_switcher( 'test-theme' );
@@ -655,35 +512,21 @@ class Test_Branch_MultiSiteBranchSwitcher extends WP_UnitTestCase {
 // Test_Branch_SingleInstallSwitcher
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_SingleInstallSwitcher
- */
-class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_SingleInstallSwitcher extends GU_Test_Case {
 
 	private Branch $branch;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->branch        = new Branch();
-		$this->saved_options = $this->read_branch_options();
+		$this->branch = new Branch();
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'gu_number_rollbacks' );
-		$this->inject_branch_options( $this->saved_options );
 		parent::tear_down();
 	}
 
-	/**
-	 * Build a theme-like stdClass for single_install_switcher().
-	 *
-	 * @param array<string, mixed> $overrides
-	 * @return stdClass
-	 */
 	private function make_theme( array $overrides = [] ): stdClass {
 		return (object) array_merge(
 			[
@@ -699,7 +542,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_returns_empty_string_when_branch_switch_not_1(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '0' ] );
+		$this->set_branch_options( [ 'branch_switch' => '0' ] );
 
 		$result = $this->branch->single_install_switcher( $this->make_theme() );
 
@@ -707,7 +550,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_renders_current_branch_info(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 
 		$result = $this->branch->single_install_switcher( $this->make_theme( [ 'branch' => 'main', 'tags' => [] ] ) );
 
@@ -716,7 +559,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_renders_branch_options(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		$theme = $this->make_theme(
 			[
 				'branches'      => [ 'main' => [], 'develop' => [] ],
@@ -731,7 +574,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_unsets_primary_branch_for_release_asset(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		$theme = $this->make_theme(
 			[
 				'release_asset'  => true,
@@ -748,8 +591,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_shows_one_tag_when_num_rollbacks_zero(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
-		// gu_number_rollbacks = 0 → array_slice to 1 entry.
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		$theme = $this->make_theme(
 			[
 				'branches' => [],
@@ -764,7 +606,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_shows_multiple_tags_when_num_rollbacks_filter_set(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		add_filter( 'gu_number_rollbacks', fn() => 2 );
 		$theme = $this->make_theme(
 			[
@@ -781,7 +623,7 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 	}
 
 	public function test_shows_no_tags_message_when_tags_empty(): void {
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 		$theme = $this->make_theme( [ 'branches' => [ 'main' => [] ], 'tags' => [] ] );
 
 		$result = $this->branch->single_install_switcher( $theme );
@@ -794,38 +636,24 @@ class Test_Branch_SingleInstallSwitcher extends WP_UnitTestCase {
 // Test_Branch_MakeBranchSwitchRow
 // ---------------------------------------------------------------------------
 
-/**
- * Class Test_Branch_MakeBranchSwitchRow
- */
-class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
-	use Branch_Mock_Helper;
+class Test_Branch_MakeBranchSwitchRow extends GU_Test_Case {
 
 	private Branch $branch;
-	/** @var array<string, mixed> */
-	private array $saved_options = [];
 
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->branch        = new Branch();
-		$this->saved_options = $this->read_branch_options();
-		$this->inject_branch_options( [ 'branch_switch' => '1' ] );
+		$this->branch = new Branch();
+		$this->set_branch_options( [ 'branch_switch' => '1' ] );
 	}
 
 	public function tear_down(): void {
 		remove_all_filters( 'gu_number_rollbacks' );
 		remove_all_filters( 'gu_no_release_asset_branches' );
 		remove_all_filters( 'gu_release_asset_rollback' );
-		$this->inject_branch_options( $this->saved_options );
 		parent::tear_down();
 	}
 
-	/**
-	 * Build data array for make_branch_switch_row().
-	 *
-	 * @param array<string, mixed> $overrides
-	 * @return array<string, mixed>
-	 */
 	private function make_data( array $overrides = [] ): array {
 		return array_merge(
 			[
@@ -841,12 +669,6 @@ class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Build config array for make_branch_switch_row().
-	 *
-	 * @param array<string, mixed> $obj_overrides
-	 * @return array<string, stdClass>
-	 */
 	private function make_config( array $obj_overrides = [] ): array {
 		return [
 			'test-repo' => (object) array_merge(
@@ -861,13 +683,6 @@ class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
 		];
 	}
 
-	/**
-	 * Capture make_branch_switch_row() output.
-	 *
-	 * @param array<string, mixed>    $data
-	 * @param array<string, stdClass> $config
-	 * @return string
-	 */
 	private function get_row_output( array $data, array $config ): string {
 		ob_start();
 		$this->branch->make_branch_switch_row( $data, $config );
@@ -906,7 +721,6 @@ class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
 		$data   = $this->make_data( [ 'branches' => null ] );
 		$output = $this->get_row_output( $data, $this->make_config() );
 
-		// No branch links, only the "no tags" message since tags=[] too.
 		$this->assertStringNotContainsString( '&rollback=', $output );
 	}
 
@@ -934,7 +748,6 @@ class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
 		);
 		$output = $this->get_row_output( $data, $this->make_config() );
 
-		// No rollback= links from branches; tags also empty → only "no tags" message.
 		$this->assertStringNotContainsString( '&rollback=', $output );
 	}
 
@@ -946,7 +759,6 @@ class Test_Branch_MakeBranchSwitchRow extends WP_UnitTestCase {
 	}
 
 	public function test_shows_one_tag_when_num_rollbacks_zero(): void {
-		// num_rollbacks = 0 → array_slice to 1 tag; uksort puts 2.0.0 first (descending).
 		$config = $this->make_config( [ 'tags' => [ '2.0.0' => 'url', '1.0.0' => 'url' ] ] );
 		$data   = $this->make_data( [ 'branches' => null ] );
 		$output = $this->get_row_output( $data, $config );
