@@ -77,13 +77,13 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-plugin
+	 *     wp plugin install-git https://github.com/afragen/my-plugin --github
 	 *
 	 *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop --github
 	 *
-	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password
+	 *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password --bitbucket
 	 *
-	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
+	 *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki --github
 	 *
 	 * @param array<int, string>   $args       An array of $uri.
 	 * @param array<string, mixed> $assoc_args Array of optional arguments.
@@ -149,13 +149,13 @@ class CLI_Integration extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp theme install-git https://github.com/afragen/my-theme
+	 *     wp theme install-git https://github.com/afragen/my-theme --github
 	 *
 	 *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop --bitbucket
 	 *
-	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password
+	 *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password --bitbucket
 	 *
-	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
+	 *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki --github
 	 *
 	 * @param array<int, string>   $args       An array of $uri.
 	 * @param array<string, mixed> $assoc_args Array of optional arguments.
@@ -270,6 +270,11 @@ class CLI_Integration extends WP_CLI_Command {
 			case isset( $assoc_args['zipfile'] ):
 				$cli_config['git'] = 'zipfile';
 				break;
+		}
+
+		if ( ! isset( $cli_config['git'] ) ) {
+			WP_CLI::error( 'Please specify the repository type with --github, --bitbucket, --gitlab, --gitea, --gist, or --zipfile.' );
+			exit;
 		}
 
 		return $cli_config;
