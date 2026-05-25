@@ -525,7 +525,7 @@ class Test_GUTrait_Cache extends WP_UnitTestCase {
 	// delete_all_cached_data()
 	// -------------------------------------------------------------------------
 
-	public function test_delete_all_cached_data_removes_ghu_prefixed_options(): void {
+	public function test_delete_all_cached_data_removes_git_updater_prefixed_options(): void {
 		$cache_key = $this->api->get_cache_key( 'test-plugin' );
 		update_site_option( $cache_key, [ 'data' => 'test' ] );
 		$this->assertIsArray( get_site_option( $cache_key ) );

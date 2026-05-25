@@ -173,7 +173,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_tag( $git, $request ) {
 		self::$method = 'tags';
-		$response = $this->api( $request );
+		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -214,7 +214,7 @@ trait API_Common {
 		self::$method = 'changes';
 		foreach ( $changelogs as $changelog ) {
 			$new_request = str_replace( ':changelog', $changelog, $request );
-			$response = $this->api( $new_request );
+			$response    = $this->api( $new_request );
 
 			$error = isset( $response->message );
 			$error = isset( $response->error ) ? true : $error;
@@ -270,7 +270,7 @@ trait API_Common {
 
 		foreach ( $readmes as $readme ) {
 			$new_request = str_replace( ':readme', $readme, $request );
-			$response = $this->api( $new_request );
+			$response    = $this->api( $new_request );
 
 			$error = isset( $response->message );
 			$error = isset( $response->error ) ? true : $error;
@@ -307,7 +307,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_repo_meta( $git, $request ) {
 		self::$method = 'meta';
-		$response = $this->api( $request );
+		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -344,7 +344,7 @@ trait API_Common {
 
 		foreach ( $assets as $asset ) {
 			$new_request = str_replace( ':path', $asset, $request );
-			$response = $this->api( $new_request );
+			$response    = $this->api( $new_request );
 
 			if ( ! is_object( $response ) ) {
 				break;
@@ -386,7 +386,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_branches( $git, $request ) {
 		self::$method = 'branches';
-		$response = $this->api( $request );
+		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -492,7 +492,7 @@ trait API_Common {
 	 */
 	final public function get_remote_api_contents( $git, $request ) {
 		self::$method = 'contents';
-		$response = $this->api( $request );
+		$response     = $this->api( $request );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
