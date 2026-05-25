@@ -35,6 +35,32 @@ update_site_option( $this->api->get_cache_key('test-plugin'), [
 ] );
 ```
 
+### `get_remote_api_info()` cache-extend path — use expired timeout, not `seed_cache()`
+To test the path where `maybe_extend_repo_cache()` returns `true` (all `ran` complete, versions match) causing `get_remote_api_info()` to return `false`, seed the cache with an **expired** timeout rather than a valid one. A valid-timeout cache causes `$response = $cache[$slug]` to be truthy, skipping `api()` — then `set_file_info()` receives the incomplete seeded array and throws an undefined-key notice.
+
+Seed with `strtotime('-1 hour')` so `get_repo_cache($slug)` returns `false` (forcing an `api()` call), but the raw site option still holds the old version for `get_repo_cache($slug, false)`:
+```php
+update_site_option(
+    $this->api->get_cache_key( 'test-plugin' ),
+    [
+        'timeout'     => strtotime( '-1 hour' ),
+        'repo'        => 'test-plugin',
+        'test-plugin' => [ 'Version' => '1.0.0' ],   // old version — must match API response
+        'ran'         => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+    ]
+);
+```
+
+### `maybe_extend_repo_cache()` — always pass explicit `$old_version` in direct tests
+`maybe_extend_repo_cache( $remote_headers, $repo, $old_version = '' )` compares the new remote version against `$old_version`. The default `''` never equals any real version string, so omitting the argument means the version-match branch (the extend path) is unreachable. Direct test calls that exercise the extend path must pass the matching old version as the third argument:
+```php
+$this->api->maybe_extend_repo_cache( [ 'Version' => '1.0.0' ], $this->type, '1.0.0' );
+```
+Tests for the version-mismatch (no extend) path pass a different old version:
+```php
+$this->api->maybe_extend_repo_cache( [ 'Version' => '2.0.0' ], $this->type, '1.0.0' );
+```
+
 ### `parse_release_asset()` does not guard against `false`
 `parse_release_asset()` checks `is_wp_error($response)` but not `false`. If `api()` returns `false` (via error cache) the subsequent `foreach($response as $release)` throws a TypeError. When testing failure paths for `get_release_assets()`, use a `WP_Error` mock via `pre_http_request` rather than seeding the error cache:
 ```php
@@ -184,6 +210,34 @@ When called with `null`, the method merges Plugin and Theme configs then iterate
 ### `get_github_rate_limit_headers()` — mock with `CaseInsensitiveDictionary` as headers value
 `get_github_rate_limit_headers()` calls `wp_remote_retrieve_headers($response)->getAll()`. When short-circuited via `pre_http_request`, the filter must return an array whose `headers` key is a `WpOrg\Requests\Utility\CaseInsensitiveDictionary` instance. Use `new CaseInsensitiveDictionary(['x-ratelimit-reset' => (string)(time() + 300)])` for the reset-time test and `new CaseInsensitiveDictionary([])` for the 60-minute default test. Import with `use WpOrg\Requests\Utility\CaseInsensitiveDictionary;`.
 
+### Singleton config injection: always save and restore in `set_up`/`tear_down`
+`Fragen\Singleton::get_instance()` returns the **same PHP object** for every call with the same class name within a test process. When you inject into a singleton's `$config` (Plugin, Theme, API, etc.) via `ReflectionProperty`, the modified state persists to every subsequent test class in the suite. A `tear_down()` that only restores `Branch::$options` (or similar) but leaves Plugin/Theme config behind will corrupt API, REST, and other tests that read those singletons later.
+
+Always save the singleton config in `set_up()` and restore it in `tear_down()`:
+```php
+/** @var array<string, stdClass> */
+private array $saved_plugin_config = [];
+
+public function set_up(): void {
+    parent::set_up();
+    // ... other setup ...
+    $singleton                 = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
+    $rp                        = new ReflectionProperty( Plugin::class, 'config' );
+    $rp->setAccessible( true );
+    $this->saved_plugin_config = $rp->getValue( $singleton ) ?? [];
+}
+
+public function tear_down(): void {
+    $singleton = Fragen\Singleton::get_instance( 'Fragen\Git_Updater\Plugin', $caller );
+    $rp        = new ReflectionProperty( Plugin::class, 'config' );
+    $rp->setAccessible( true );
+    $rp->setValue( $singleton, $this->saved_plugin_config );
+    parent::tear_down();
+}
+```
+
+Alternatively, for a one-off injection inside a single test method, use a `try/finally` block (the existing `get_repo_slugs` pattern below). The `set_up`/`tear_down` pattern is preferable when the injection spans the entire test class.
+
 ### `get_repo_slugs()` dirname match — use `ReflectionProperty` to inject synthetic `$config`
 `Plugin::$config` and `Theme::$config` are both declared `private`. To inject a synthetic entry where `dirname($repo->file)` differs from `$repo->slug` (the `-master` suffix scenario), use `ReflectionProperty`:
 ```php
@@ -314,6 +368,34 @@ $rp->setValue( $api_singleton, $saved_type ); // restore in finally/tear_down
 ```
 Also: the `release_asset` value in the seeded cache must be a URL interceptable by `pre_http_request` — use a GitHub API URL (`https://api.github.com/repos/owner/repo/releases/assets/1234`) rather than `https://example.com/...`, since the mock only intercepts `api.github.com` requests.
 
+### Upgrader skin HTML output — use `gu_get_upgrader_skin` filter, not absorber buffers
+
+`WP_Upgrader_Skin::feedback()` calls `show_message()`, which echoes HTML and then calls `wp_ob_end_flush_all()`. That function flushes **every** PHP output buffer down to level 0 on its first call. Any subsequent echo (from more feedback calls, or from `header()`/`footer()`/`after()`) goes straight to stdout.
+
+The `show_message()` function_exists override never registers: `Rest_Update.php` has a file-level `require_once class-wp-upgrader.php`, which loads `misc.php` (where `show_message()` is defined without a `function_exists` guard) as a side-effect of `Bootstrap::run()` → `REST_API::load_hooks()` → `Singleton::get_instance('REST\Rest_Update', ...)`. This happens during the `plugins_loaded` hook — before PHPUnit parses any test file.
+
+**Fix:** `Install::get_upgrader()` exposes a `gu_get_upgrader_skin` filter. Register a `Silent_Upgrader_Skin` in `set_up()` so `show_message()` is never invoked:
+
+```php
+// In test file (after requiring class-wp-upgrader.php):
+if ( ! class_exists( 'Silent_Upgrader_Skin' ) ) {
+    class Silent_Upgrader_Skin extends WP_Upgrader_Skin {
+        public function header() {}
+        public function footer() {}
+        public function error( $errors ) {}
+        public function feedback( $feedback, ...$args ) {}
+    }
+}
+
+// In set_up():
+add_filter( 'gu_get_upgrader_skin', fn( $skin, $type ) => new Silent_Upgrader_Skin( [ 'type' => $type ] ), 10, 2 );
+
+// In tear_down():
+remove_all_filters( 'gu_get_upgrader_skin' );
+```
+
+Then a simple `ob_start()`/`ob_end_clean()` around the `install()` call is enough as a safety net.
+
 ### `do_action('admin_enqueue_scripts')` in tests — call `set_current_screen()` first
 Firing the `admin_enqueue_scripts` action without a screen context causes WP Site Health (`class-wp-site-health.php`) to throw "Attempt to read property 'id' on null". Always call `set_current_screen('plugins')` (or the appropriate screen slug) before firing this action in tests.
 
@@ -392,3 +474,65 @@ The original guard `function_exists('gu_fs')` checked the global namespace while
 
 ### FAIR namespace shim for `check_update_api_redirect()`
 `check_update_api_redirect()` conditionally adds a filter only when `\Fair\Default_Repo\get_default_repo_domain()` exists. Define it in `tests/fixtures/fair-default-repo-shim.php` (with an `if (!function_exists(...))` guard) and `require_once` it in `set_up()`. To cover the arrow-function closure body, call `apply_filters('gu_api_domain', '')` after registering the filter.
+
+### `get_available_languages()` is not empty in wp-env
+`get_available_languages()` scans `WP_LANG_DIR` for `.mo` files. In wp-env the languages directory ships with `de_DE`, `en_GB`, `es_ES`, `ja_JP`, and `de_CH` installed. Any code that falls back via `! empty($locales) ? $locales : [get_locale()]` will never use `get_locale()` in wp-env. Tests that rely on `$locales = ['en_US']` must force it via the filter WordPress provides:
+```php
+// In set_up() — override for the whole test class:
+add_filter( 'get_available_languages', fn() => [ 'en_US' ] );
+
+// In tear_down():
+remove_all_filters( 'get_available_languages' );
+
+// Per-test override (runs after the set_up callback; last callback wins):
+add_filter( 'get_available_languages', fn() => [ 'de_DE' ] );
+```
+
+### `wp_get_installed_translations()` — use pre-seeded WordPress test fixtures, not written .po files
+`wp_get_installed_translations('plugins')` does read `.po` files from `WP_LANG_DIR/plugins/`, but manually-written `.po` files in tests are not reliably parsed in the wp-env container (format issues, caching, etc.). Instead, use the pre-seeded WordPress test-suite translation fixtures that are already present:
+- `internationalized-plugin` — has `de_DE` and `es_ES` with `PO-Revision-Date: 2020-10-20 17:11+0200`
+
+To cover the `$translation_mod = strtotime($translations[$slug][$locale]['PO-Revision-Date'])` branch, inject a repo whose slug matches one of those fixtures (e.g. `internationalized-plugin`, locale `de_DE`) and set `language_packs->de_DE->updated = '2030-01-01 00:00:00'`. No file I/O needed.
+
+### Driving `current_filter()` in static method tests — push to `$wp_current_filter` directly
+`Language_Pack::update_site_transient()` (and similar static methods) branch on `current_filter()`. Wrapping the call in `apply_filters(...)` fires all registered callbacks at that priority — including `Plugin::update_site_transient` at priority 15, which accesses properties (`->git`, `->file`, etc.) that minimal test-repo stubs lack.
+
+Instead, push the filter name onto `$GLOBALS['wp_current_filter']` directly so only the target method is called:
+```php
+private function run_as_plugin_filter( stdClass $transient ): stdClass {
+    global $wp_current_filter;
+    $wp_current_filter[] = 'site_transient_update_plugins';
+    $result              = Language_Pack::update_site_transient( $transient );
+    array_pop( $wp_current_filter );
+    return $result;
+}
+```
+This is safe because `current_filter()` reads `end($wp_current_filter)` and the array is cleaned up immediately.
+
+### `is_admin()` in tests — requires `set_current_screen()`
+`is_admin()` returns `false` by default in the wp-env test container. To enter code guarded by `if ( is_admin() )`, call `set_current_screen('update-core')` (or any admin screen name) before the assertion. Reset in `tear_down()` with `set_current_screen('front')`. Also clean up any actions registered inside the guarded block:
+```php
+public function tear_down(): void {
+    set_current_screen( 'front' );
+    remove_all_actions( 'admin_notices' );
+    remove_all_actions( 'network_admin_notices' );
+    parent::tear_down();
+}
+```
+
+### Switch `case` labels are dispatch opcodes — fall-through does NOT cover them
+In a PHP `switch`, each `case 'value':` compiles to a comparison opcode that Xdebug tracks as a coverable line. This opcode is only executed when the switch **dispatch chain reaches it** — i.e., when no earlier case matched. Fall-through from a previous `case` skips the dispatch entirely, so the label line stays uncovered.
+
+Example: `case 'git':` after `case 'waiting':` (with `// no break`) requires a dedicated test that passes `'git'` (or any value that the dispatch evaluates but doesn't match earlier) to cover it. Falling through from `'waiting'` is not sufficient.
+
+### Mocking `gu_fs()` via `$GLOBALS['gu_fs']`
+`gu_fs()` returns the global `$gu_fs` object (Freemius SDK). Replace it in tests with an anonymous-class mock to control methods like `is_not_paying()`:
+```php
+$orig_fs          = $GLOBALS['gu_fs'] ?? null;
+$GLOBALS['gu_fs'] = new class {
+    public function is_not_paying(): bool { return false; }
+};
+// ... test code ...
+$GLOBALS['gu_fs'] = $orig_fs;
+```
+Restore `$orig_fs` in the same test method (not `tear_down()`) since other tests need the real Freemius object.

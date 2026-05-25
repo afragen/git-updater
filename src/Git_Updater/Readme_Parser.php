@@ -18,7 +18,7 @@ use Fragen\Git_Updater\Traits\GU_Trait;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -72,7 +72,7 @@ class Readme_Parser extends Parser {
 	 * @return array<int, string>
 	 */
 	protected function sanitize_contributors( $users ) {
-		return $users;
+		return $users; // @codeCoverageIgnore
 	}
 
 	/**

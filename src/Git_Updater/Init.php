@@ -18,7 +18,7 @@ use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -56,6 +56,7 @@ class Init {
 		}
 
 		if ( static::is_wp_cli() ) {
+			// @codeCoverageIgnoreStart
 			include_once __DIR__ . '/WP_CLI/CLI.php';
 			include_once __DIR__ . '/WP_CLI/CLI_Integration.php';
 
@@ -64,6 +65,7 @@ class Init {
 
 			Singleton::get_instance( 'Theme', $this )->get_remote_theme_meta();
 			add_filter( 'site_transient_update_themes', [ Singleton::get_instance( 'Theme', $this ), 'update_site_transient' ], 15, 1 );
+			// @codeCoverageIgnoreEnd
 		}
 	}
 
@@ -107,7 +109,7 @@ class Init {
 	public function can_update() {
 		// WP-CLI access has full capabilities.
 		if ( static::is_wp_cli() ) {
-			return true;
+			return true; // @codeCoverageIgnore
 		}
 
 		return current_user_can( 'manage_options' );

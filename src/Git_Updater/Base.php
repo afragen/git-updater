@@ -331,19 +331,18 @@ class Base {
 		$this->set_defaults( $repo->type );
 
 		if ( $repo_api->get_remote_info( $file ) ) {
-			if ( ! self::is_wp_cli() ) {
-				// phpcs:disable
-				$ran   = [];
-				$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
-				$ran[] = false !== $repo_api->get_repo_assets()      ? 'assets'   : null;
-				$ran[] = false !== $repo_api->get_remote_readme()    ? 'readme'   : null;
-				$ran[] = false !== $repo_api->get_remote_changes('') ? 'changes'  : null;
-				$ran[] = false !== $repo_api->get_remote_tag()       ? 'tags'     : null;
-				$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
-				$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
-				$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
-				// phpcs:enable
-			}
+			// phpcs:disable
+			$ran   = [];
+			$ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
+			$ran[] = false !== $repo_api->get_repo_assets()      ? 'assets'   : null;
+			$ran[] = false !== $repo_api->get_remote_readme()    ? 'readme'   : null;
+			$ran[] = false !== $repo_api->get_remote_changes('') ? 'changes'  : null;
+			$ran[] = false !== $repo_api->get_remote_tag()       ? 'tags'     : null;
+			$ran[] = false !== $repo_api->get_remote_branches()  ? 'branches' : null;
+			$ran[] = false !== $repo_api->get_repo_meta()        ? 'meta'     : null;
+			$repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+			$repo_api->set_repo_cache_timeout( $repo->slug );
+			// phpcs:enable
 			$language_pack = new Language_Pack( $repo, new Language_Pack_API( $repo ) );
 			$language_pack->run();
 		}

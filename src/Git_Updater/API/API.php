@@ -39,13 +39,6 @@ class API {
 	use Basic_Auth_Loader;
 
 	/**
-	 * Holds HTTP error code from API call.
-	 *
-	 * @var array<string, mixed>
-	 */
-	protected static $error_code = [];
-
-	/**
 	 * Holds site options.
 	 *
 	 * @var array<string, mixed>
@@ -190,14 +183,12 @@ class API {
 	public function api( $url ) {
 		$url         = $this->get_api_url( $url );
 		$auth_header = $this->add_auth_header( [], $url );
-		$type        = $this->return_repo_type();
 
 		// Use cached API failure data to avoid hammering the API.
-		$response    = $this->get_repo_cache( $this->type->slug );
 		$error_cache = $this->get_repo_cache( $this->type->slug . '_error' );
 		$cached      = isset( $error_cache['error_cache'] );
-		$response    = ! empty( $response[ md5( $url ) ] ) ? $response[ md5( $url ) ] : false;
-		if ( ! $response && ! $cached ) {
+		$response    = false;
+		if ( ! $cached ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- API call diagnostics are intentionally logged for maintainers.
 			error_log( "Git Updater: Making API call to {$url}" );
 			$response = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
@@ -217,33 +208,19 @@ class API {
 				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
 			}
 
-			// If we made it this far API data must be OK, save to avoid extra call above.
-			$cache_entry = [
+			$response = [
 				'url'  => $url,
 				'body' => wp_remote_retrieve_body( $response ),
 			];
-			$this->set_repo_cache( md5( $url ), $cache_entry, false, false );
-			$response = $cache_entry;
 		}
 
-		if ( $cached && ! $response ) {
+		if ( $cached ) {
 			return false;
 		}
 
-		static::$error_code[ $this->type->slug ] = static::$error_code[ $this->type->slug ] ?? [];
-		static::$error_code[ $this->type->slug ] = array_merge(
-			static::$error_code[ $this->type->slug ],
-			[
-				'repo' => $this->type->slug,
-				'code' => isset( $code ) ? $code : '',
-				'name' => $this->type->name ?? $this->type->slug,
-				'git'  => $this->type->git,
-			]
-		);
-
 		// @codeCoverageIgnoreStart
-		if ( 'file' === self::$method && ! $cached && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$response_body = is_array( $response ) ? json_decode( wp_remote_retrieve_body( $response ) ) : null;
+		if ( 'file' === self::$method && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
 			if ( null !== $response_body && is_object( $response_body ) && property_exists( $response_body, 'message' ) ) {
 				$name        = $this->type->name ?? '';
 				$log_message = "Git Updater Error: {$name} ({$this->type->slug}:{$this->type->branch}) - {$response_body->message}";

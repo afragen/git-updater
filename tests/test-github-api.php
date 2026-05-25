@@ -20,6 +20,21 @@
 
 use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\OAuth\OAuth_Flow;
+
+function github_api_make_type(): stdClass {
+	$type                 = new stdClass();
+	$type->slug           = 'test-plugin';
+	$type->git            = 'github';
+	$type->type           = 'plugin';
+	$type->owner          = 'test-owner';
+	$type->branch         = 'master';
+	$type->primary_branch = 'master';
+	$type->enterprise     = false;
+	$type->enterprise_api = null;
+	$type->gist_id        = null;
+	return $type;
+}
 
 /**
  * Class Test_GitHub_API_Parse
@@ -814,5 +829,227 @@ class Test_GitHub_API_DownloadLink_ReleaseAsset extends WP_UnitTestCase {
 
 		// exit_no_update fires inside get_release_asset_redirect() → returns false.
 		$this->assertFalse( $result );
+	}
+}
+
+/**
+ * Class Test_GitHub_API_Settings
+ *
+ * Covers all settings output and registration methods in GitHub_API.
+ */
+class Test_GitHub_API_Settings extends WP_UnitTestCase {
+
+	private GitHub_API $api;
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = github_api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_add_settings_subtabs' );
+		remove_all_filters( 'gu_add_repo_setting_field' );
+		remove_all_actions( 'gu_add_settings' );
+		remove_all_actions( 'gu_add_install_settings_fields' );
+		parent::tear_down();
+	}
+
+	public function test_add_settings_subtab_adds_github_to_subtabs_filter(): void {
+		$subtabs = apply_filters( 'gu_add_settings_subtabs', [] );
+		$this->assertArrayHasKey( 'github', $subtabs );
+	}
+
+	public function test_add_settings_registers_access_token_section(): void {
+		global $wp_settings_sections;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$this->assertArrayHasKey( 'github_access_token', $wp_settings_sections['git_updater_github_install_settings'] ?? [] );
+	}
+
+	public function test_add_settings_registers_oauth_authorize_field(): void {
+		global $wp_settings_fields;
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$this->assertArrayHasKey( 'github_oauth_authorize', $wp_settings_fields['git_updater_github_install_settings']['github_access_token'] ?? [] );
+	}
+
+	public function test_add_settings_registers_private_section_when_auth_required(): void {
+		global $wp_settings_sections;
+
+		$this->api->add_settings( [ 'github_private' => true, 'github_enterprise' => false ] );
+
+		$this->assertArrayHasKey( 'github_id', $wp_settings_sections['git_updater_github_install_settings'] ?? [] );
+	}
+
+	public function test_add_settings_does_not_register_private_section_when_not_required(): void {
+		global $wp_settings_sections;
+
+		if ( isset( $wp_settings_sections['git_updater_github_install_settings']['github_id'] ) ) {
+			unset( $wp_settings_sections['git_updater_github_install_settings']['github_id'] );
+		}
+
+		$this->api->add_settings( [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$this->assertArrayNotHasKey( 'github_id', $wp_settings_sections['git_updater_github_install_settings'] ?? [] );
+	}
+
+	public function test_add_repo_setting_field_returns_correct_page(): void {
+		$result = $this->api->add_repo_setting_field();
+		$this->assertSame( 'git_updater_github_install_settings', $result['page'] );
+	}
+
+	public function test_add_repo_setting_field_returns_correct_section(): void {
+		$result = $this->api->add_repo_setting_field();
+		$this->assertSame( 'github_id', $result['section'] );
+	}
+
+	public function test_add_repo_setting_field_returns_callable_callback(): void {
+		$result = $this->api->add_repo_setting_field();
+		$this->assertIsCallable( $result['callback_method'] );
+	}
+
+	public function test_print_section_github_info_outputs_help_text(): void {
+		ob_start();
+		$this->api->print_section_github_info();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'GitHub Access Token', $output );
+	}
+
+	public function test_print_section_github_access_token_outputs_text_and_icon(): void {
+		ob_start();
+		$this->api->print_section_github_access_token();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'Access Token', $output );
+		$this->assertStringContainsString( 'github-logo.svg', $output );
+	}
+
+	public function test_add_install_settings_fields_registers_github_access_token_field(): void {
+		global $wp_settings_fields;
+
+		$this->api->add_install_settings_fields( 'plugin' );
+
+		$this->assertArrayHasKey( 'github_access_token', $wp_settings_fields['git_updater_install_plugin']['plugin'] ?? [] );
+	}
+
+	public function test_github_access_token_outputs_password_input(): void {
+		ob_start();
+		$this->api->github_access_token();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'github_access_token', $output );
+		$this->assertStringContainsString( 'type="password"', $output );
+	}
+
+	public function test_get_oauth_flow_returns_oauth_flow(): void {
+		$this->assertInstanceOf( OAuth_Flow::class, $this->api->get_oauth_flow() );
+	}
+
+	public function test_github_oauth_authorize_outputs_callback_url(): void {
+		ob_start();
+		$this->api->github_oauth_authorize();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'gu_github_oauth_callback', $output );
+		$this->assertStringContainsString( 'GU_GITHUB_OAUTH_CLIENT_ID', $output );
+	}
+}
+
+/**
+ * Class Test_OAuth_Flow
+ *
+ * Covers reusable OAuth helper methods for Git API providers.
+ */
+class Test_OAuth_Flow extends WP_UnitTestCase {
+	private function make_flow(): OAuth_Flow {
+		return new OAuth_Flow(
+			[
+				'provider'               => 'example',
+				'option_name'            => 'example_access_token',
+				'settings_url'           => 'https://example.test/wp-admin/options-general.php?page=git-updater',
+				'authorize_url'          => 'https://provider.test/oauth/authorize',
+				'token_url'              => 'https://provider.test/oauth/token',
+				'default_scope'          => 'repo',
+				'credentials_filter'     => 'gu_test_oauth_credentials',
+				'client_id_constant'     => '',
+				'client_secret_constant' => '',
+				'scope_constant'         => '',
+				'start_arg'              => 'gu_example_oauth_start',
+				'callback_arg'           => 'gu_example_oauth_callback',
+				'status_arg'             => 'gu_example_oauth',
+				'nonce_action'           => 'gu-example-oauth-start',
+			]
+		);
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_test_oauth_credentials' );
+		parent::tear_down();
+	}
+
+	public function test_get_code_challenge_uses_pkce_s256_encoding(): void {
+		$flow = $this->make_flow();
+
+		$this->assertSame( 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', $flow->get_code_challenge( 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk' ) );
+	}
+
+	public function test_get_transient_key_includes_sanitized_provider_and_state_hash(): void {
+		$flow = $this->make_flow();
+
+		$this->assertSame( 'gu_example_oauth_' . md5( 'state-value' ), $flow->get_transient_key( 'state-value' ) );
+	}
+
+	public function test_get_credentials_uses_provider_filter(): void {
+		add_filter(
+			'gu_test_oauth_credentials',
+			static function ( $credentials ) {
+				$credentials['client_id'] = 'filtered-client';
+
+				return $credentials;
+			}
+		);
+
+		$credentials = $this->make_flow()->get_credentials();
+
+		$this->assertSame( 'filtered-client', $credentials['client_id'] );
+		$this->assertSame( 'repo', $credentials['scope'] );
+	}
+
+	public function test_get_callback_url_adds_callback_arg(): void {
+		$callback_url = $this->make_flow()->get_callback_url();
+
+		$this->assertStringContainsString( 'gu_example_oauth_callback=1', $callback_url );
+	}
+
+	public function test_provider_config_includes_all_api_addon_hosts(): void {
+		$providers = [ 'github', 'gist', 'gitlab', 'gitea', 'bitbucket' ];
+
+		foreach ( $providers as $provider ) {
+			$config = OAuth_Flow::get_provider_config( $provider );
+
+			$this->assertSame( $provider, $config['provider'] );
+			$this->assertNotEmpty( $config['option_name'] );
+			$this->assertNotEmpty( $config['authorize_url'] );
+			$this->assertNotEmpty( $config['token_url'] );
+			$this->assertNotEmpty( $config['credentials_filter'] );
+			$this->assertNotEmpty( $config['callback_arg'] );
+		}
+	}
+
+	public function test_for_provider_allows_self_hosted_endpoint_overrides(): void {
+		$flow = OAuth_Flow::for_provider(
+			'gitea',
+			'https://example.test/wp-admin/options-general.php?page=git-updater',
+			[
+				'authorize_url' => 'https://git.example.test/login/oauth/authorize',
+				'token_url'     => 'https://git.example.test/login/oauth/access_token',
+			]
+		);
+
+		$this->assertSame( 'gu_gitea_oauth_' . md5( 'state-value' ), $flow->get_transient_key( 'state-value' ) );
+		$this->assertStringContainsString( 'gu_gitea_oauth_callback=1', $flow->get_callback_url() );
 	}
 }
