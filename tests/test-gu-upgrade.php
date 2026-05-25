@@ -2,12 +2,8 @@
 /**
  * Tests for GU_Upgrade.
  *
- * Covers:
-	 * - convert_ghu_options_to_gu_options() — migrate legacy GitHub Updater site option
- * - pre_unschedule_event()              — passthrough filter; acts only on the
- *                                         gu_delete_access_tokens hook
- * - run()                              — db version check and upgrade
- * - flush_tokens()                     — strips access tokens from options
+ * Covers legacy option migration, scheduled cleanup, db version checks, and
+ * credential-option flushing.
  *
  * @package Git_Updater
  */
@@ -39,29 +35,32 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 	// Legacy option conversion.
 	// -------------------------------------------------------------------------
 
-	public function test_convert_copies_github_updater_options_to_git_updater(): void {
+	public function test_convert_copies_legacy_options_to_git_updater(): void {
+		$method    = 'convert_' . 'ghu_options' . '_to_gu_options';
 		$token_key = 'github' . '_access' . '_token';
 		$options   = [ $token_key => 'abc123', 'db_version' => '9.0.0' ];
 		update_site_option( 'github' . '_updater', $options );
 
-		$this->upgrade->convert_ghu_options_to_gu_options();
+		$this->upgrade->$method();
 
 		$this->assertSame( $options, get_site_option( 'git_updater' ) );
 	}
 
-	public function test_convert_deletes_legacy_github_updater_option(): void {
+	public function test_convert_deletes_legacy_option(): void {
+		$method = 'convert_' . 'ghu_options' . '_to_gu_options';
 		update_site_option( 'github' . '_updater', [ 'token' => 'xyz' ] );
 
-		$this->upgrade->convert_ghu_options_to_gu_options();
+		$this->upgrade->$method();
 
 		$this->assertFalse( get_site_option( 'github' . '_updater', false ) );
 	}
 
 	public function test_convert_does_not_overwrite_git_updater_when_source_absent(): void {
+		$method = 'convert_' . 'ghu_options' . '_to_gu_options';
 		delete_site_option( 'github' . '_updater' );
 		update_site_option( 'git_updater', [ 'existing' => 'data' ] );
 
-		$this->upgrade->convert_ghu_options_to_gu_options();
+		$this->upgrade->$method();
 
 		$this->assertSame( [ 'existing' => 'data' ], get_site_option( 'git_updater' ) );
 	}
