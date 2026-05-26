@@ -117,9 +117,8 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string|bool|void
 	 */
 	public function get_release_asset() {
-		// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- Method retained for possible release asset support.
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Method retained for possible release asset support.
 		// return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
-		// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 	} // @codeCoverageIgnore
 
 	/**
