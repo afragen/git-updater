@@ -14,7 +14,7 @@ namespace Fragen\Git_Updater\OAuth;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -25,94 +25,6 @@ if ( ! defined( 'WPINC' ) ) {
  * callback, state, PKCE, token exchange, and settings redirect handling.
  */
 class OAuth_Flow {
-	/**
-	 * Provider OAuth defaults for bundled and add-on Git hosts.
-	 *
-	 * @var array<string, array<string, string>>
-	 */
-	private const PROVIDER_CONFIGS = [
-		'github'    => [
-			'provider'               => 'github',
-			'label'                  => 'GitHub',
-			'option_name'            => 'github_access_token',
-			'authorize_url'          => 'https://github.com/login/oauth/authorize',
-			'token_url'              => 'https://github.com/login/oauth/access_token',
-			'default_scope'          => 'repo',
-			'credentials_filter'     => 'gu_github_oauth_credentials',
-			'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
-			'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
-			'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
-			'start_arg'              => 'gu_github_oauth_start',
-			'callback_arg'           => 'gu_github_oauth_callback',
-			'status_arg'             => 'gu_github_oauth',
-			'nonce_action'           => 'gu-github-oauth-start',
-		],
-		'gist'      => [
-			'provider'               => 'gist',
-			'label'                  => 'GitHub Gist',
-			'option_name'            => 'github_access_token',
-			'authorize_url'          => 'https://github.com/login/oauth/authorize',
-			'token_url'              => 'https://github.com/login/oauth/access_token',
-			'default_scope'          => 'gist',
-			'credentials_filter'     => 'gu_gist_oauth_credentials',
-			'client_id_constant'     => 'GU_GIST_OAUTH_CLIENT_ID',
-			'client_secret_constant' => 'GU_GIST_OAUTH_CLIENT_SECRET',
-			'scope_constant'         => 'GU_GIST_OAUTH_SCOPE',
-			'start_arg'              => 'gu_gist_oauth_start',
-			'callback_arg'           => 'gu_gist_oauth_callback',
-			'status_arg'             => 'gu_gist_oauth',
-			'nonce_action'           => 'gu-gist-oauth-start',
-		],
-		'gitlab'    => [
-			'provider'               => 'gitlab',
-			'label'                  => 'GitLab',
-			'option_name'            => 'gitlab_access_token',
-			'authorize_url'          => 'https://gitlab.com/oauth/authorize',
-			'token_url'              => 'https://gitlab.com/oauth/token',
-			'default_scope'          => 'read_api',
-			'credentials_filter'     => 'gu_gitlab_oauth_credentials',
-			'client_id_constant'     => 'GU_GITLAB_OAUTH_CLIENT_ID',
-			'client_secret_constant' => 'GU_GITLAB_OAUTH_CLIENT_SECRET',
-			'scope_constant'         => 'GU_GITLAB_OAUTH_SCOPE',
-			'start_arg'              => 'gu_gitlab_oauth_start',
-			'callback_arg'           => 'gu_gitlab_oauth_callback',
-			'status_arg'             => 'gu_gitlab_oauth',
-			'nonce_action'           => 'gu-gitlab-oauth-start',
-		],
-		'gitea'     => [
-			'provider'               => 'gitea',
-			'label'                  => 'Gitea',
-			'option_name'            => 'gitea_access_token',
-			'authorize_url'          => '/login/oauth/authorize',
-			'token_url'              => '/login/oauth/access_token',
-			'default_scope'          => 'read:repository',
-			'credentials_filter'     => 'gu_gitea_oauth_credentials',
-			'client_id_constant'     => 'GU_GITEA_OAUTH_CLIENT_ID',
-			'client_secret_constant' => 'GU_GITEA_OAUTH_CLIENT_SECRET',
-			'scope_constant'         => 'GU_GITEA_OAUTH_SCOPE',
-			'start_arg'              => 'gu_gitea_oauth_start',
-			'callback_arg'           => 'gu_gitea_oauth_callback',
-			'status_arg'             => 'gu_gitea_oauth',
-			'nonce_action'           => 'gu-gitea-oauth-start',
-		],
-		'bitbucket' => [
-			'provider'               => 'bitbucket',
-			'label'                  => 'Bitbucket',
-			'option_name'            => 'bitbucket_access_token',
-			'authorize_url'          => 'https://bitbucket.org/site/oauth2/authorize',
-			'token_url'              => 'https://bitbucket.org/site/oauth2/access_token',
-			'default_scope'          => 'repository',
-			'credentials_filter'     => 'gu_bitbucket_oauth_credentials',
-			'client_id_constant'     => 'GU_BITBUCKET_OAUTH_CLIENT_ID',
-			'client_secret_constant' => 'GU_BITBUCKET_OAUTH_CLIENT_SECRET',
-			'scope_constant'         => 'GU_BITBUCKET_OAUTH_SCOPE',
-			'start_arg'              => 'gu_bitbucket_oauth_start',
-			'callback_arg'           => 'gu_bitbucket_oauth_callback',
-			'status_arg'             => 'gu_bitbucket_oauth',
-			'nonce_action'           => 'gu-bitbucket-oauth-start',
-		],
-	];
-
 	/**
 	 * OAuth provider configuration.
 	 *
@@ -176,9 +88,19 @@ class OAuth_Flow {
 	 * @return array<string, string>
 	 */
 	public static function get_provider_config( $provider, $overrides = [] ) {
-		$config = self::PROVIDER_CONFIGS[ $provider ] ?? [];
+		/*
+		 * Allow add-ons to filter provider config before merge to support additional keys
+		 * or override defaults without copy/pasting the entire config.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array<string, string> $provider_config Default provider config from class constant.
+		 * @param string                $provider        Provider key.
+		 * @param array<string, string> $overrides       Provider configuration overrides.
+		*/
+		$provider_config = apply_filters( 'gu_oauth_provider_config', [], $provider, $overrides );
 
-		return array_merge( $config, $overrides );
+		return array_merge( $provider_config, $overrides );
 	}
 
 	/**
@@ -385,8 +307,9 @@ class OAuth_Flow {
 		$authorize_args = apply_filters( 'gu_oauth_authorize_args', $authorize_args, $credentials, $this->config );
 
 		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Provider authorize URLs are intentionally external OAuth endpoints.
-		wp_redirect( esc_url_raw( add_query_arg( $authorize_args, $this->config['authorize_url'] ) ) );
-		exit;
+		if ( wp_redirect( esc_url_raw( add_query_arg( $authorize_args, $this->config['authorize_url'] ) ) ) ) {
+			exit; // @codeCoverageIgnore
+		}
 	}
 
 	/**
@@ -500,13 +423,14 @@ class OAuth_Flow {
 	 * @return void
 	 */
 	private function redirect_with_status( $status ) {
-		wp_safe_redirect(
+		if ( wp_safe_redirect(
 			add_query_arg(
 				$this->config['status_arg'],
 				$status,
 				$this->config['settings_url']
 			)
-		);
-		exit;
+		) ) {
+			exit; // @codeCoverageIgnore
+		}
 	}
 }

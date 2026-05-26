@@ -48,6 +48,7 @@ class GitHub_API extends API implements API_Interface {
 		$this->type       = $type;
 		$this->oauth_flow = $this->get_oauth_flow();
 		add_action( 'admin_init', [ $this->oauth_flow, 'maybe_handle_flow' ] );
+		add_filter( 'gu_oauth_provider_config', [ __CLASS__, 'get_github_oauth_config' ], 10, 3 );
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -663,5 +664,37 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return $install;
+	}
+
+	/**
+	 * Add GitHub OAuth config to gu_oauth_provider_config filter.
+	 *
+	 * @param array<string, mixed>  $config    Array of existing provider configs.
+	 * @param string                $provider  Provider key.
+	 * @param array<string, string> $overrides Provider configuration overrides.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function get_github_oauth_config( $config, $provider, $overrides = [] ) {
+		if ( 'github' === $provider ) {
+			$config = [
+				'provider'               => 'github',
+				'label'                  => 'GitHub',
+				'option_name'            => 'github_access_token',
+				'authorize_url'          => 'https://github.com/login/oauth/authorize',
+				'token_url'              => 'https://github.com/login/oauth/access_token',
+				'default_scope'          => 'repo',
+				'credentials_filter'     => 'gu_github_oauth_credentials',
+				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
+				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
+				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
+				'start_arg'              => 'gu_github_oauth_start',
+				'callback_arg'           => 'gu_github_oauth_callback',
+				'status_arg'             => 'gu_github_oauth',
+				'nonce_action'           => 'gu-github-oauth-start',
+			];
+		}
+
+		return $config;
 	}
 }
