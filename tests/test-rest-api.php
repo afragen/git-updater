@@ -717,6 +717,77 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
+	// /git-updater/v1/themes-api  (get_api_data — themes-api route)
+	// -------------------------------------------------------------------------
+
+	public function test_themes_api_endpoint_returns_slug_for_fixture_theme(): void {
+		$theme_path = get_theme_root() . '/test-gu-theme/style.css';
+		if ( ! file_exists( $theme_path ) ) {
+			$this->markTestSkipped( 'Fixture theme not installed. Run: npm run wp-env start' );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/themes-api' );
+		$request->set_param( 'slug', 'test-gu-theme' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( 'test-gu-theme', $data['slug'] );
+	}
+
+	public function test_themes_api_endpoint_returns_error_for_nonexistent_slug(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/themes-api' );
+		$request->set_param( 'slug', 'nonexistent-theme-xyzzy-abc' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'does not exist', $data['error'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// /git-updater/v1/update-api  (get_api_data — update-api route)
+	// -------------------------------------------------------------------------
+
+	public function test_update_api_endpoint_returns_slug_for_fixture_plugin(): void {
+		$this->skip_if_fixture_absent();
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( self::SLUG, $data['slug'] );
+	}
+
+	public function test_update_api_endpoint_returns_error_for_nonexistent_slug(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+		$request->set_param( 'slug', 'nonexistent-plugin-xyzzy-abc' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'does not exist', $data['error'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// /git-updater/v1/plugins-api — POST (CREATABLE) dispatch
+	// -------------------------------------------------------------------------
+
+	public function test_plugins_api_POST_endpoint_returns_slug_for_fixture_plugin(): void {
+		$this->skip_if_fixture_absent();
+
+		$request = new WP_REST_Request( 'POST', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( self::SLUG, $data['slug'] );
+	}
+
+	// -------------------------------------------------------------------------
 	// /git-updater/v1/repos — update_package paths (lines 403, 406)
 	// -------------------------------------------------------------------------
 
