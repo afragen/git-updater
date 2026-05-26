@@ -70,7 +70,9 @@ class Repo_List_Table extends WP_List_Table {
 				'uri'  => 'https://bitbucket.org/afragen/theme-noheader/',
 			],
 		];
+		// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- Example reassignment retained for package-list debugging.
 		// self::$examples = $examples;
+		// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 		foreach ( (array) $options as $key => $option ) {
 			$option['ID']              = $option['ID'] ?: null;
 			$option['type']            = $option['type'] ?: null;
@@ -147,7 +149,9 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return string Text to be placed inside the column <td> (site title only)
 	 **************************************************************************/
 	public function column_slug( $item ) {
-		$page     = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_slash( $_REQUEST['page'] ) ) : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list table URL reconstruction.
+		$page = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_slash( $_REQUEST['page'] ) ) : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list table URL reconstruction.
 		$tab      = isset( $_REQUEST['tab'] ) ? sanitize_title_with_dashes( wp_slash( $_REQUEST['tab'] ) ) : null;
 		$location = add_query_arg(
 			[
@@ -159,7 +163,9 @@ class Repo_List_Table extends WP_List_Table {
 
 		// Build row actions.
 		$actions = [
+			// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- Edit action placeholder retained for future row actions.
 			// 'edit'   => sprintf( '<a href="%s&action=%s&slug=%s">Edit</a>', $location, 'edit', $item['ID'] ),
+			// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 			'delete' => sprintf( '<a href="%s&action=%s&slug=%s">Delete</a>', wp_nonce_url( $location, 'delete_row_item', '_wpnonce_row_action_delete' ), 'delete_row_item', $item['ID'] ),
 		];
 
@@ -210,7 +216,9 @@ class Repo_List_Table extends WP_List_Table {
 	 **************************************************************************/
 	public function get_columns() {
 		$columns = [
+			// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- Checkbox column placeholder retained for future bulk actions.
 			// 'cb'             => '<input type="checkbox" />', // Render a checkbox instead of text.
+			// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 			'slug'            => esc_html__( 'Slug', 'git-updater' ),
 			'uri'             => esc_html__( 'URL', 'git-updater' ),
 			'primary_branch'  => esc_html__( 'Primary Branch', 'git-updater' ),
@@ -240,7 +248,9 @@ class Repo_List_Table extends WP_List_Table {
 		$sortable_columns = [
 			'slug' => [ 'slug', true ],     // true means it's already sorted.
 			'type' => [ 'type', true ],
+			// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- API key sort placeholder retained for future columns.
 			// 'api_key' => [ 'api_key', false ],
+			// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 		];
 
 		return $sortable_columns;
@@ -429,9 +439,11 @@ class Repo_List_Table extends WP_List_Table {
 	 * @return int Sort order, either 1 or -1.
 	 */
 	public function usort_reorder( $a, $b ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list table sort input.
 		$orderby = ( ! empty( $_REQUEST['orderby'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : 'slug'; // If no sort, default to site.
-		$order   = ( ! empty( $_REQUEST['order'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : 'asc'; // If no order, default to asc.
-		$result  = strcmp( $a[ $orderby ], $b[ $orderby ] ); // Determine sort order.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list table sort input.
+		$order  = ( ! empty( $_REQUEST['order'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : 'asc'; // If no order, default to asc.
+		$result = strcmp( $a[ $orderby ], $b[ $orderby ] ); // Determine sort order.
 
 		return ( 'asc' === $order ) ? $result : -$result; // Send final sort direction to usort.
 	}
@@ -454,6 +466,7 @@ class Repo_List_Table extends WP_List_Table {
 		wp_nonce_field( 'process-items', '_wpnonce_list' );
 
 		// For plugins, we also need to ensure that the form posts back to our current page.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only form target value.
 		$current_page = isset( $_REQUEST['page'] ) ? sanitize_title_with_dashes( wp_unslash( $_REQUEST['page'] ) ) : null;
 		echo '<input type="hidden" name="page" value="' . esc_attr( $current_page ) . '" />';
 

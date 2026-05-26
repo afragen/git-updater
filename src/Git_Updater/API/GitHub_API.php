@@ -13,6 +13,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Flow;
 use stdClass;
 
 /*
@@ -31,13 +32,22 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class GitHub_API extends API implements API_Interface {
 	/**
+	 * OAuth flow controller.
+	 *
+	 * @var OAuth_Flow|null
+	 */
+	private $oauth_flow;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param stdClass $type plugin|theme.
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
-		$this->type = $type;
+		$this->type       = $type;
+		$this->oauth_flow = $this->get_oauth_flow();
+		add_action( 'admin_init', [ $this->oauth_flow, 'maybe_handle_flow' ] );
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -107,6 +117,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string|bool|void
 	 */
 	public function get_release_asset() {
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Method retained for possible release asset support.
 		// return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
 	} // @codeCoverageIgnore
 
@@ -473,6 +484,14 @@ class GitHub_API extends API implements API_Interface {
 			]
 		);
 
+		add_settings_field(
+			'github_oauth_authorize',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ $this, 'github_oauth_authorize' ],
+			'git_updater_github_install_settings',
+			'github_access_token'
+		);
+
 		/*
 		 * Show section for private GitHub repositories.
 		 */
@@ -520,6 +539,48 @@ class GitHub_API extends API implements API_Interface {
 		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
+	}
+
+	/**
+	 * Output OAuth controls and status messages.
+	 *
+	 * @return void
+	 */
+	public function github_oauth_authorize() {
+		$this->get_oauth_flow()->render_authorize_controls();
+	}
+
+	/**
+	 * Build GitHub OAuth flow controller.
+	 *
+	 * @return OAuth_Flow
+	 */
+	public function get_oauth_flow() {
+		if ( $this->oauth_flow instanceof OAuth_Flow ) {
+			return $this->oauth_flow;
+		}
+
+		$this->oauth_flow = OAuth_Flow::for_provider( 'github', $this->get_settings_redirect_url() );
+
+		return $this->oauth_flow;
+	}
+
+	/**
+	 * Build redirect URL to GitHub subtab.
+	 *
+	 * @return string
+	 */
+	private function get_settings_redirect_url() {
+		$base = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
+
+		return add_query_arg(
+			[
+				'page'   => 'git-updater',
+				'tab'    => 'git_updater_settings',
+				'subtab' => 'github',
+			],
+			$base
+		);
 	}
 
 	/**

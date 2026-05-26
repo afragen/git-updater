@@ -506,7 +506,9 @@ class Install {
 		$activate_link = add_query_arg(
 			[
 				'action'     => 'activate',
+				// phpcs:disable Squiz.PHP.CommentedOutCode.Found -- Template support is retained for future activation link handling.
 				// 'template'   => rawurlencode( $template ),
+				// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 				'stylesheet' => rawurlencode( $stylesheet ),
 			],
 			admin_url( 'themes.php' )
