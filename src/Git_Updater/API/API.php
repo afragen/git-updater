@@ -62,7 +62,7 @@ class API {
 	/**
 	 * Holds 'plugin'|'theme' or plugin|theme object information for API classes.
 	 *
-	 * @var string|stdClass
+	 * @var stdClass
 	 */
 	public $type;
 
