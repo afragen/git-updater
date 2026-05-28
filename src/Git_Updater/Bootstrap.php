@@ -126,11 +126,13 @@ class Bootstrap {
 		$file = $this->get_file_without_did_hash( 'did:plc:afjf7gsjzsqmgc7dlhb553mv', $file );
 
 		if ( $slug && 'git-updater/git-updater.php' !== $file ) {
+			// @codeCoverageIgnoreStart
 			require_once __DIR__ . '/Shim.php';
 			$result = move_dir( $plugin_dir . dirname( $slug ), $plugin_dir . 'git-updater', true );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
+			// @codeCoverageIgnoreEnd
 		}
 	}
 

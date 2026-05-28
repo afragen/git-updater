@@ -1148,3 +1148,184 @@ class Test_Plugin_Get_Remote_Plugin_Meta extends WP_UnitTestCase {
 		return $count;
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Test_Plugin_Config_Discovery
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_Plugin_Config_Discovery
+ *
+ * Integration test that requires the fixture plugin to be mounted in the wp-env container.
+ */
+class Test_Plugin_Config_Discovery extends WP_UnitTestCase {
+
+	private const SLUG = 'test-gu-plugin';
+
+	private array $configs;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->configs = ( new Plugin() )->get_plugin_configs();
+
+		if ( ! isset( $this->configs[ self::SLUG ] ) ) {
+			$this->markTestSkipped( 'Fixture plugin not installed.' );
+		}
+	}
+
+	public function test_fixture_plugin_is_in_plugin_configs(): void {
+		$this->assertArrayHasKey( self::SLUG, $this->configs );
+	}
+
+	public function test_fixture_plugin_git_is_github(): void {
+		$this->assertSame( 'github', $this->configs[ self::SLUG ]->git );
+	}
+
+	public function test_fixture_plugin_owner_is_afragen(): void {
+		$this->assertSame( 'afragen', $this->configs[ self::SLUG ]->owner );
+	}
+
+	public function test_fixture_plugin_slug_matches(): void {
+		$this->assertSame( self::SLUG, $this->configs[ self::SLUG ]->slug );
+	}
+
+	public function test_fixture_plugin_type_is_plugin(): void {
+		$this->assertSame( 'plugin', $this->configs[ self::SLUG ]->type );
+	}
+
+	public function test_fixture_plugin_primary_branch_is_main(): void {
+		$this->assertSame( 'main', $this->configs[ self::SLUG ]->primary_branch );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_Plugin_Meta_HTTP_Mock
+// ---------------------------------------------------------------------------
+
+class Test_Plugin_Meta_HTTP_Mock extends WP_UnitTestCase {
+
+	private const SLUG = 'test-gu-plugin';
+
+	private string    $cache_key;
+	private stdClass  $config;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+
+		$this->cache_key = 'ghu-' . md5( self::SLUG );
+		delete_site_option( $this->cache_key );
+		delete_site_option( $this->cache_key . '_error' );
+
+		$configs = ( new Plugin() )->get_plugin_configs();
+		if ( ! isset( $configs[ self::SLUG ] ) ) {
+			$this->markTestSkipped( 'Fixture plugin not installed.' );
+		}
+		$this->config = $configs[ self::SLUG ];
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http' ], 10, 3 );
+	}
+
+	public function tear_down(): void {
+		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
+		delete_site_option( $this->cache_key );
+		delete_site_option( $this->cache_key . '_error' );
+		parent::tear_down();
+	}
+
+	public function mock_http( mixed $preempt, mixed $args, string $url ): mixed {
+		if ( str_contains( $url, 'api.wordpress.org' ) ) {
+			return $this->http_response( json_encode( [ 'error' => 'Plugin not found.' ] ) );
+		}
+
+		if ( ! str_contains( $url, 'api.github.com/repos/afragen/test-gu-plugin' ) ) {
+			return $preempt;
+		}
+
+		$path = (string) parse_url( $url, PHP_URL_PATH );
+
+		if ( str_contains( $path, '/contents/test-gu-plugin.php' ) ) {
+			return $this->http_response(
+				json_encode( [ 'content' => base64_encode( $this->fixture_plugin_content() ), 'encoding' => 'base64' ] )
+			);
+		}
+
+		if ( '/repos/afragen/test-gu-plugin/contents' === $path ) {
+			return $this->http_response( json_encode( [ [ 'name' => 'test-gu-plugin.php', 'type' => 'file' ] ] ) );
+		}
+
+		if ( str_ends_with( $path, '/tags' ) ) {
+			return $this->http_response(
+				json_encode( [ [ 'name' => '2.0.0', 'zipball_url' => '', 'commit' => [ 'sha' => 'abc123def456' ] ] ] )
+			);
+		}
+
+		if ( str_ends_with( $path, '/branches' ) ) {
+			return $this->http_response(
+				json_encode( [ [ 'name' => 'main', 'commit' => [ 'sha' => 'abc123def456', 'url' => '' ] ] ] )
+			);
+		}
+
+		if ( '/repos/afragen/test-gu-plugin' === $path ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'private'     => false,
+						'pushed_at'   => '2024-06-01T12:00:00Z',
+						'created_at'  => '2023-01-01T00:00:00Z',
+						'watchers'    => 0,
+						'forks'       => 0,
+						'open_issues' => 0,
+					]
+				)
+			);
+		}
+
+		return $this->http_response( '[]' );
+	}
+
+	private function http_response( string $body, int $code = 200 ): array {
+		return [
+			'headers'  => [],
+			'body'     => $body,
+			'response' => [ 'code' => $code, 'message' => 200 === $code ? 'OK' : 'Error' ],
+			'cookies'  => [],
+			'filename' => null,
+		];
+	}
+
+	private function fixture_plugin_content(): string {
+		return implode(
+			"\n",
+			[
+				'<?php',
+				'/**',
+				' * Plugin Name:       Test GU Plugin',
+				' * Plugin URI:        https://github.com/afragen/test-gu-plugin',
+				' * Description:       Minimal fixture plugin for PHPUnit integration tests.',
+				' * Version:           2.0.0',
+				' * Author:            Test Author',
+				' * License:           GPL-3.0-or-later',
+				' * GitHub Plugin URI: https://github.com/afragen/test-gu-plugin',
+				' * Primary Branch:    main',
+				' */',
+			]
+		);
+	}
+
+	public function test_get_remote_repo_meta_returns_truthy(): void {
+		$result = ( new Base() )->get_remote_repo_meta( $this->config );
+		$this->assertNotFalse( $result );
+	}
+
+	public function test_get_remote_repo_meta_sets_remote_version_away_from_default(): void {
+		( new Base() )->get_remote_repo_meta( $this->config );
+		$this->assertNotSame( '0.0.0', $this->config->remote_version );
+	}
+
+	public function test_get_remote_repo_meta_sets_correct_remote_version(): void {
+		( new Base() )->get_remote_repo_meta( $this->config );
+		$this->assertSame( '2.0.0', $this->config->remote_version );
+	}
+}

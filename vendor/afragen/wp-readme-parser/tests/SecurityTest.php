@@ -22,6 +22,11 @@ class SecurityTest extends ParserTestCase
     // donate_link — URL scheme allowlist
     // -------------------------------------------------------------------------
 
+    /**
+     * @test
+     *
+     * @dataProvider unsafeDonateUrlProvider
+     */
     #[Test]
     #[DataProvider('unsafeDonateUrlProvider')]
     public function it_rejects_unsafe_donate_link_schemes(string $url): void
@@ -48,6 +53,11 @@ class SecurityTest extends ParserTestCase
         ];
     }
 
+    /**
+     * @test
+     *
+     * @dataProvider safeDonateUrlProvider
+     */
     #[Test]
     #[DataProvider('safeDonateUrlProvider')]
     public function it_accepts_safe_donate_link_schemes(string $url): void
@@ -76,6 +86,7 @@ class SecurityTest extends ParserTestCase
     // XSS via plugin name / short description
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_html_encodes_plugin_name(): void
     {
@@ -84,6 +95,7 @@ class SecurityTest extends ParserTestCase
         $this->assertStringNotContainsString('<script>', (string) $parser->name);
     }
 
+    /** @test */
     #[Test]
     public function it_html_encodes_short_description(): void
     {
@@ -93,6 +105,7 @@ class SecurityTest extends ParserTestCase
         $this->assertStringNotContainsString('<script>', $parser->short_description);
     }
 
+    /** @test */
     #[Test]
     public function it_html_encodes_upgrade_notice_values(): void
     {
@@ -110,6 +123,7 @@ class SecurityTest extends ParserTestCase
     // $name type correctness
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function name_is_false_when_no_plugin_name_header_is_present(): void
     {
@@ -117,6 +131,7 @@ class SecurityTest extends ParserTestCase
         $this->assertFalse($parser->name);
     }
 
+    /** @test */
     #[Test]
     public function name_is_a_string_when_correctly_parsed(): void
     {
@@ -128,6 +143,7 @@ class SecurityTest extends ParserTestCase
     // contributor slug sanitization
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_rejects_contributor_slugs_containing_path_traversal(): void
     {
@@ -136,6 +152,7 @@ class SecurityTest extends ParserTestCase
         $this->assertArrayHasKey('contributor_ignored', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_rejects_contributor_slugs_with_html(): void
     {
@@ -143,6 +160,7 @@ class SecurityTest extends ParserTestCase
         $this->assertEmpty($parser->contributors);
     }
 
+    /** @test */
     #[Test]
     public function it_rejects_contributor_slugs_with_spaces(): void
     {
@@ -154,6 +172,7 @@ class SecurityTest extends ParserTestCase
     // Raw content preservation — ensure raw_contents is never processed
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function raw_contents_is_the_exact_unmodified_input(): void
     {

@@ -1,44 +1,60 @@
 <?php
-/**
- * Integration tests for REST_API route dispatch and Rest_Update::process_request_data().
- *
- * Test_REST_API_Dispatch:
- * - Routes are registered correctly and return expected HTTP status codes.
- * - /git-updater/v1/test             — 200, string payload.
- * - /git-updater/namespace           — 200, namespace array.
- * - /github-updater/v1/test          — 200, deprecation body (success=false).
- * - /git-updater/v1/repos            — bad/absent key → error body.
- * - /git-updater/v1/flush-repo-cache — bad key → error; valid key, no cache → success=false;
- *                                      valid key, cache present → success=true.
- * - /git-updater/v1/plugins-api      — nonexistent slug → error; private addition → error.
- *
- * Test_REST_API_Get_Methods:
- * - get_remote_repo_data() via /repos with valid key: sites/slugs structure.
- * - get_api_data() via /plugins-api with fixture slug: slug, version, git fields.
- *   Both groups skip when the fixture plugin is not installed.
- *
- * Test_Rest_Update_Request_Data_Via_REST:
- * - process_request_data() called with a real WP_REST_Request exercises the REST-path
- *   branch (not the $_REQUEST path already covered by existing unit tests).
- * - Verifies key, plugin, theme, tag, committish, branch, override, and deprecated fields.
- *
- * @package Git_Updater
- */
 
 use Fragen\Git_Updater\REST\REST_API;
-use Fragen\Git_Updater\REST\Rest_Update;
-use Fragen\Git_Updater\Remote_Management;
 use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\Plugin;
+use Fragen\Git_Updater\Theme;
+use Fragen\Git_Updater\Remote_Management;
 use Fragen\Singleton;
 use WpOrg\Requests\Utility\CaseInsensitiveDictionary;
 
+class Test_REST_API extends WP_UnitTestCase {
+
+	private REST_API $rest;
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->rest = new REST_API();
+	}
+
+	public function test_test_returns_connected_string(): void {
+		$this->assertSame( 'Connected to Git Updater!', $this->rest->test() );
+	}
+
+	public function test_get_namespace_returns_array_with_namespace_key(): void {
+		$result = $this->rest->get_namespace();
+		$this->assertArrayHasKey( 'namespace', $result );
+	}
+
+	public function test_get_namespace_returns_correct_namespace_value(): void {
+		$result = $this->rest->get_namespace();
+		$this->assertSame( 'git-updater/v1', $result['namespace'] );
+	}
+
+	public function test_deprecated_returns_success_false(): void {
+		$result = $this->rest->deprecated();
+		$this->assertFalse( $result['success'] );
+	}
+
+	public function test_deprecated_error_message_mentions_old_namespace(): void {
+		$result = $this->rest->deprecated();
+		$this->assertStringContainsString( 'github-updater/v1', $result['error'] );
+	}
+
+	public function test_deprecated_error_message_mentions_current_namespace(): void {
+		$result = $this->rest->deprecated();
+		$this->assertStringContainsString( 'git-updater/v1', $result['error'] );
+	}
+}
+
 // ---------------------------------------------------------------------------
-// Test_REST_API_Load_Hooks  (covers REST_API::load_hooks lines 49, 52, 53)
+// Messages
 // ---------------------------------------------------------------------------
 
 /**
- * Class Test_REST_API_Load_Hooks
+ * Class Test_Messages
  */
+
 class Test_REST_API_Load_Hooks extends WP_UnitTestCase {
 
 	public function tear_down(): void {
@@ -74,6 +90,7 @@ class Test_REST_API_Load_Hooks extends WP_UnitTestCase {
 /**
  * Class Test_REST_API_Dispatch
  */
+
 class Test_REST_API_Dispatch extends WP_UnitTestCase {
 
 	private WP_REST_Server $server;
@@ -335,160 +352,7 @@ class Test_REST_API_Dispatch extends WP_UnitTestCase {
  * Exercises the WP_REST_Request branch of process_request_data() —
  * the branch not covered by the existing null-argument unit tests.
  */
-class Test_Rest_Update_Request_Data_Via_REST extends WP_UnitTestCase {
 
-	private Rest_Update $rest;
-
-	public function set_up(): void {
-		parent::set_up();
-		new Base();
-		$_REQUEST   = [];
-		$this->rest = new Rest_Update();
-	}
-
-	// -------------------------------------------------------------------------
-	// Helpers
-	// -------------------------------------------------------------------------
-
-	private function make_request( string $route, array $params ): WP_REST_Request {
-		$request = new WP_REST_Request( 'GET', $route );
-		foreach ( $params as $key => $value ) {
-			$request->set_param( $key, $value );
-		}
-		return $request;
-	}
-
-	private function base_params( array $overrides = [] ): array {
-		return array_merge(
-			[
-				'key'        => 'some-key',
-				'plugin'     => 'my-plugin',
-				'theme'      => false,
-				'tag'        => false,
-				'committish' => false,
-				'branch'     => false,
-				'override'   => false,
-			],
-			$overrides
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Field extraction
-	// -------------------------------------------------------------------------
-
-	public function test_key_is_extracted_from_rest_request(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'key' => 'my-api-key' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'my-api-key', $result['key'] );
-	}
-
-	public function test_plugin_is_extracted_from_rest_request(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'plugin' => 'my-plugin' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'my-plugin', $result['plugin'] );
-	}
-
-	public function test_theme_is_extracted_when_no_plugin_present(): void {
-		$request = $this->make_request(
-			'/git-updater/v1/update',
-			$this->base_params(
-				[
-					'plugin' => false,
-					'theme'  => 'my-theme',
-				]
-			)
-		);
-		$result = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'my-theme', $result['theme'] );
-	}
-
-	public function test_tag_from_params_is_used_when_present(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'tag' => '2.1.0' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( '2.1.0', $result['tag'] );
-	}
-
-	public function test_tag_defaults_to_primary_branch_when_absent(): void {
-		// With no tag in params and no cache for the slug, get_primary_branch() returns 'master'.
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'tag' => false ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'master', $result['tag'] );
-	}
-
-	public function test_committish_is_extracted_from_rest_request(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'committish' => 'abc123' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'abc123', $result['committish'] );
-	}
-
-	public function test_branch_is_extracted_from_rest_request(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'branch' => 'develop' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertSame( 'develop', $result['branch'] );
-	}
-
-	public function test_override_is_false_by_default(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params() );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertFalse( $result['override'] );
-	}
-
-	public function test_override_is_true_when_param_is_set(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'override' => '1' ] ) );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertTrue( (bool) $result['override'] );
-	}
-
-	// -------------------------------------------------------------------------
-	// Deprecated flag
-	// -------------------------------------------------------------------------
-
-	public function test_deprecated_is_false_for_current_namespace_route(): void {
-		$request = $this->make_request( '/git-updater/v1/update', $this->base_params() );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertFalse( $result['deprecated'] );
-	}
-
-	public function test_deprecated_is_true_for_legacy_namespace_route(): void {
-		$request = $this->make_request( '/github-updater/v1/update', $this->base_params() );
-		$result  = $this->rest->process_request_data( $request );
-
-		$this->assertTrue( $result['deprecated'] );
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Test_REST_API_Get_Methods
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_REST_API_Get_Methods
- *
- * Exercises REST_API::get_remote_repo_data() and get_api_data() via dispatch,
- * using pre_http_request to mock all outbound HTTP calls.
- *
- * get_remote_repo_data():
- * - Valid API key path: update transients are pre-seeded so wp_update_plugins()
- *   and wp_update_themes() skip their HTTP calls. Asserts the 'sites' structure.
- *
- * get_api_data() (routes: plugins-api, themes-api, update-api):
- * - Valid fixture slug path: full GitHub API mock plus a minimal readme.txt
- *   response so get_remote_readme() populates sections['description'].
- *   Asserts slug, version, git, and type fields in the response.
- *
- * Both test groups skip when the fixture plugin is not installed.
- */
 class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 
 	private const SLUG   = 'test-gu-plugin';
@@ -853,6 +717,77 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
 	}
 
 	// -------------------------------------------------------------------------
+	// /git-updater/v1/themes-api  (get_api_data — themes-api route)
+	// -------------------------------------------------------------------------
+
+	public function test_themes_api_endpoint_returns_slug_for_fixture_theme(): void {
+		$theme_path = get_theme_root() . '/test-gu-theme/style.css';
+		if ( ! file_exists( $theme_path ) ) {
+			$this->markTestSkipped( 'Fixture theme not installed. Run: npm run wp-env start' );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/themes-api' );
+		$request->set_param( 'slug', 'test-gu-theme' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( 'test-gu-theme', $data['slug'] );
+	}
+
+	public function test_themes_api_endpoint_returns_error_for_nonexistent_slug(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/themes-api' );
+		$request->set_param( 'slug', 'nonexistent-theme-xyzzy-abc' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'does not exist', $data['error'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// /git-updater/v1/update-api  (get_api_data — update-api route)
+	// -------------------------------------------------------------------------
+
+	public function test_update_api_endpoint_returns_slug_for_fixture_plugin(): void {
+		$this->skip_if_fixture_absent();
+
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( self::SLUG, $data['slug'] );
+	}
+
+	public function test_update_api_endpoint_returns_error_for_nonexistent_slug(): void {
+		$request = new WP_REST_Request( 'GET', '/git-updater/v1/update-api' );
+		$request->set_param( 'slug', 'nonexistent-plugin-xyzzy-abc' );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data );
+		$this->assertStringContainsString( 'does not exist', $data['error'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// /git-updater/v1/plugins-api — POST (CREATABLE) dispatch
+	// -------------------------------------------------------------------------
+
+	public function test_plugins_api_POST_endpoint_returns_slug_for_fixture_plugin(): void {
+		$this->skip_if_fixture_absent();
+
+		$request = new WP_REST_Request( 'POST', '/git-updater/v1/plugins-api' );
+		$request->set_param( 'slug', self::SLUG );
+		$response = $this->server->dispatch( $request );
+		$data     = (array) $response->get_data();
+
+		$this->assertArrayNotHasKey( 'error', $data );
+		$this->assertSame( self::SLUG, $data['slug'] );
+	}
+
+	// -------------------------------------------------------------------------
 	// /git-updater/v1/repos — update_package paths (lines 403, 406)
 	// -------------------------------------------------------------------------
 
@@ -1067,6 +1002,7 @@ class Test_REST_API_Get_Methods extends WP_UnitTestCase {
  * - private addition → filtered out
  * - public addition → included after deduplicate() normalisation
  */
+
 class Test_REST_API_Additions extends WP_UnitTestCase {
 
 	private WP_REST_Server $server;
@@ -1290,6 +1226,7 @@ class Test_REST_API_Additions extends WP_UnitTestCase {
  * - slug not in options → UnexpectedValueException → WPDieException
  * - valid slug in options → clears cache, updates options, log_exit(200) → WPDieException
  */
+
 class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
 
 	private const API_KEY = 'test-reset-branch-key';
@@ -1413,6 +1350,7 @@ class Test_REST_API_Reset_Branch extends WP_UnitTestCase {
  *
  * Fixture-dependent: skips when test-gu-plugin is not installed.
  */
+
 class Test_REST_API_Zero_Version extends WP_UnitTestCase {
 
 	private const SLUG    = 'test-gu-plugin';

@@ -47,4 +47,6 @@ Tests live in `tests/` and extend `ParserTestCase`, which provides three factory
 
 Test suites are split by concern: `SectionParsingTest`, `NameAndHeaderParsingTest`, `LicenseValidationTest`, `VersionSanitizationTest`, `SecurityTest`, `HtmlAndMarkdownTest`, `EdgeCasesTest`, `GitUpdaterHelpersTest`.
 
-CI runs PHP 8.1–8.5 (matrix), PHPStan, and PHP CS Fixer. Coverage is uploaded from the PHP 8.5 job only.
+CI runs PHP 8.0–8.5 (matrix), PHPStan, and PHP CS Fixer. Coverage is uploaded from the PHP 8.5 job only.
+
+The PHP 8.0 matrix entry uses `phpunit9.xml` (a separate config without the `<source>` element) and PHPUnit `^9.6`. Test classes carry both `#[Test]`/`#[DataProvider]` attributes **and** `@test`/`@dataProvider` docblocks so PHPUnit 9.x can discover them.

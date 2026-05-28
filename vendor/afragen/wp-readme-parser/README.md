@@ -8,7 +8,7 @@ with no WordPress dependencies.
 
 ## Requirements
 
-- PHP 8.1 – 8.5
+- PHP 8.0 – 8.5
 - Composer
 
 ## Installation

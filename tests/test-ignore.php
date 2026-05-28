@@ -1,13 +1,8 @@
 <?php
 /**
- * Tests for GU_Upgrade and Ignore.
+ * Tests for Ignore.
  *
- * GU_Upgrade:
- * - convert_ghu_options_to_gu_options() — migrate legacy github_updater site option
- * - pre_unschedule_event()              — passthrough filter; acts only on the
- *                                         gu_delete_access_tokens hook
- *
- * Ignore:
+ * Covers:
  * - gu_config_pre_process filter        — removes the ignored slug from the repo config
  * - gu_display_repos filter             — marks the ignored repo dismiss=true /
  *                                         remote_version=false
@@ -16,115 +11,17 @@
  * @package Git_Updater
  */
 
-use Fragen\Git_Updater\GU_Upgrade;
 use Fragen\Git_Updater\Ignore;
 
-// ---------------------------------------------------------------------------
-// GU_Upgrade
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_GU_Upgrade
- */
-class Test_GU_Upgrade extends WP_UnitTestCase {
-
-	private GU_Upgrade $upgrade;
-
-	public function set_up(): void {
-		parent::set_up();
-		$this->upgrade = new GU_Upgrade();
-	}
-
-	public function tear_down(): void {
-		delete_site_option( 'github_updater' );
-		delete_site_option( 'git_updater' );
-		parent::tear_down();
-	}
-
-	// -------------------------------------------------------------------------
-	// convert_ghu_options_to_gu_options()
-	// -------------------------------------------------------------------------
-
-	public function test_convert_copies_github_updater_options_to_git_updater(): void {
-		$options = [ 'github_access_token' => 'abc123', 'db_version' => '9.0.0' ];
-		update_site_option( 'github_updater', $options );
-
-		$this->upgrade->convert_ghu_options_to_gu_options();
-
-		$this->assertSame( $options, get_site_option( 'git_updater' ) );
-	}
-
-	public function test_convert_deletes_legacy_github_updater_option(): void {
-		update_site_option( 'github_updater', [ 'token' => 'xyz' ] );
-
-		$this->upgrade->convert_ghu_options_to_gu_options();
-
-		$this->assertFalse( get_site_option( 'github_updater', false ) );
-	}
-
-	public function test_convert_does_not_overwrite_git_updater_when_source_absent(): void {
-		delete_site_option( 'github_updater' );
-		update_site_option( 'git_updater', [ 'existing' => 'data' ] );
-
-		$this->upgrade->convert_ghu_options_to_gu_options();
-
-		$this->assertSame( [ 'existing' => 'data' ], get_site_option( 'git_updater' ) );
-	}
-
-	// -------------------------------------------------------------------------
-	// pre_unschedule_event()
-	// -------------------------------------------------------------------------
-
-	public function test_pre_unschedule_returns_pre_unchanged_for_unrelated_hook(): void {
-		$result = $this->upgrade->pre_unschedule_event( null, time(), 'some_other_hook' );
-		$this->assertNull( $result );
-	}
-
-	public function test_pre_unschedule_returns_false_pre_unchanged_for_unrelated_hook(): void {
-		$result = $this->upgrade->pre_unschedule_event( false, time(), 'some_other_hook' );
-		$this->assertFalse( $result );
-	}
-
-	public function test_pre_unschedule_returns_pre_when_gu_event_not_scheduled(): void {
-		// wp_next_scheduled returns false → days is negative → flush_tokens not called.
-		$result = $this->upgrade->pre_unschedule_event( null, time(), 'gu_delete_access_tokens' );
-		$this->assertNull( $result );
-	}
-
-	public function test_pre_unschedule_returns_pre_when_event_is_less_than_30_days_away(): void {
-		$future = time() + DAY_IN_SECONDS; // 1 day from now — well under 29 days.
-		wp_schedule_single_event( $future, 'gu_delete_access_tokens' );
-
-		$result = $this->upgrade->pre_unschedule_event( null, time(), 'gu_delete_access_tokens' );
-
-		wp_unschedule_event( $future, 'gu_delete_access_tokens' );
-		$this->assertNull( $result );
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Ignore
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Ignore
- */
 class Test_Ignore extends WP_UnitTestCase {
 
 	public function tear_down(): void {
-		// Reset the shared static registry so tests don't bleed into each other.
 		Ignore::$repos = [];
-
 		remove_all_filters( 'gu_config_pre_process' );
 		remove_all_filters( 'gu_display_repos' );
 		remove_all_filters( 'gu_add_repo_setting_field' );
-
 		parent::tear_down();
 	}
-
-	// -------------------------------------------------------------------------
-	// gu_config_pre_process filter
-	// -------------------------------------------------------------------------
 
 	public function test_config_pre_process_removes_ignored_slug_from_config(): void {
 		new Ignore( 'my-plugin', 'my-plugin/plugin.php' );
@@ -174,10 +71,6 @@ class Test_Ignore extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'plugin-c', $result );
 	}
 
-	// -------------------------------------------------------------------------
-	// gu_display_repos filter
-	// -------------------------------------------------------------------------
-
 	public function test_display_repos_sets_dismiss_true_for_ignored_repo(): void {
 		new Ignore( 'my-plugin', 'my-plugin/plugin.php' );
 		$repo       = new stdClass();
@@ -210,10 +103,6 @@ class Test_Ignore extends WP_UnitTestCase {
 		$this->assertSame( '2.0.0', $result['other-plugin']->remote_version );
 	}
 
-	// -------------------------------------------------------------------------
-	// gu_add_repo_setting_field filter
-	// -------------------------------------------------------------------------
-
 	public function test_setting_field_returns_empty_array_when_file_matches_ignored_repo(): void {
 		new Ignore( 'my-plugin', 'my-plugin/plugin.php' );
 		$token       = new stdClass();
@@ -236,7 +125,6 @@ class Test_Ignore extends WP_UnitTestCase {
 	}
 
 	public function test_setting_field_returns_array_unchanged_when_no_repos_ignored(): void {
-		// Ignore with null file means no file-match is possible.
 		new Ignore( 'my-plugin', null );
 		$token       = new stdClass();
 		$token->file = 'my-plugin/plugin.php';

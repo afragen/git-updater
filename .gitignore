@@ -1,6 +1,8 @@
 .DS_Store
 .idea
 .vscode
+.claude
+.commandcode
 
 vendor/bin
 vendor/dealerdirect

@@ -19,6 +19,7 @@ class EdgeCasesTest extends ParserTestCase
     // Encoding
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_strips_utf8_bom_and_parses_plugin_name(): void
     {
@@ -26,6 +27,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertSame('BOM Plugin', $parser->name);
     }
 
+    /** @test */
     #[Test]
     public function it_strips_utf8_bom_from_raw_string(): void
     {
@@ -39,6 +41,7 @@ class EdgeCasesTest extends ParserTestCase
     // File-path loading
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_parses_from_a_file_path(): void
     {
@@ -47,6 +50,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertSame('My Awesome Plugin', $parser->name);
     }
 
+    /** @test */
     #[Test]
     public function it_stores_raw_contents_when_parsing_from_file(): void
     {
@@ -60,6 +64,7 @@ class EdgeCasesTest extends ParserTestCase
     // Degenerate input
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_handles_empty_string_gracefully(): void
     {
@@ -69,6 +74,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertEmpty($parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_handles_whitespace_only_input(): void
     {
@@ -77,6 +83,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertSame(['description' => ''], $parser->sections);
     }
 
+    /** @test */
     #[Test]
     public function it_handles_a_readme_with_no_sections_at_all(): void
     {
@@ -87,6 +94,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertArrayHasKey('description', $parser->sections);
     }
 
+    /** @test */
     #[Test]
     public function it_preserves_raw_contents_exactly(): void
     {
@@ -95,6 +103,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertSame($content, $parser->raw_contents);
     }
 
+    /** @test */
     #[Test]
     public function it_handles_windows_style_crlf_line_endings(): void
     {
@@ -104,6 +113,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertSame('Desc.', $parser->short_description);
     }
 
+    /** @test */
     #[Test]
     public function it_handles_classic_mac_style_cr_line_endings(): void
     {
@@ -117,6 +127,7 @@ class EdgeCasesTest extends ParserTestCase
     // (Accessed via the public API by triggering short_description truncation)
     // -------------------------------------------------------------------------
 
+    /** @test */
     #[Test]
     public function it_trims_by_character_count_and_appends_ellipsis(): void
     {
@@ -128,6 +139,7 @@ class EdgeCasesTest extends ParserTestCase
         $this->assertStringEndsWith('&hellip;', $parser->short_description);
     }
 
+    /** @test */
     #[Test]
     public function it_trims_at_sentence_boundary_when_close_to_limit(): void
     {

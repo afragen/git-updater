@@ -55,6 +55,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 */
 	private function get_credentials( string $url ): array {
 		$rm = new ReflectionMethod( $this->api, 'get_credentials' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $url );
 	}
 
@@ -65,6 +66,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 */
 	private function get_slug_for_credentials( array $headers, array $repos, string $url, array $options ) {
 		$rm = new ReflectionMethod( $this->api, 'get_slug_for_credentials' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $headers, $repos, $url, $options );
 	}
 
@@ -73,6 +75,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 	 */
 	private function get_type_for_credentials( string $slug, array $repos, string $url ): string {
 		$rm = new ReflectionMethod( $this->api, 'get_type_for_credentials' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $slug, $repos, $url );
 	}
 
@@ -353,6 +356,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$type     = $this->make_type(); // git='github', slug='test-plugin'
 		$lang_api = new Language_Pack_API( $type );
 		$rm       = new ReflectionMethod( $lang_api, 'get_credentials' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 
 		$credentials = $rm->invoke(
 			$lang_api,
@@ -432,6 +436,7 @@ class Test_Basic_Auth_Loader extends WP_UnitTestCase {
 		$type->gist_id = 'abc123def';
 		$gist_api      = new GitHub_API( $type );
 		$rm            = new ReflectionMethod( $gist_api, 'get_slug_for_credentials' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 
 		$result = $rm->invoke(
 			$gist_api,

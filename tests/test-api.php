@@ -21,6 +21,27 @@ use Fragen\Git_Updater\Base;
 /**
  * Class Test_API
  */
+
+/**
+ * Shared helper: build a minimal repo type object for API tests.
+ *
+ * @return stdClass
+ */
+function api_make_type(): stdClass {
+    $type                 = new stdClass();
+    $type->slug           = 'test-plugin';
+    $type->git            = 'github';
+    $type->type           = 'plugin';
+    $type->owner          = 'test-owner';
+    $type->branch         = 'master';
+    $type->primary_branch = 'master';
+    $type->enterprise     = false;
+    $type->enterprise_api = null;
+    $type->gist_id        = null;
+    return $type;
+}
+
+
 class Test_API extends WP_UnitTestCase {
 
 	/**
@@ -47,7 +68,7 @@ class Test_API extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		new Base();
-		$this->type = $this->make_type();
+		$this->type = api_make_type();
 		$this->api  = new GitHub_API( $this->type );
 	}
 
@@ -63,19 +84,6 @@ class Test_API extends WP_UnitTestCase {
 	// Helpers
 	// -------------------------------------------------------------------------
 
-	private function make_type(): stdClass {
-		$type                 = new stdClass();
-		$type->slug           = 'test-plugin';
-		$type->git            = 'github';
-		$type->type           = 'plugin';
-		$type->owner          = 'test-owner';
-		$type->branch         = 'master';
-		$type->primary_branch = 'master';
-		$type->enterprise     = false;
-		$type->enterprise_api = null;
-		$type->gist_id        = null;
-		return $type;
-	}
 
 	private function mock_http_response( int $code, array $body = [] ): array {
 		return [
@@ -114,17 +122,6 @@ class Test_API extends WP_UnitTestCase {
 		$this->assertSame( 1, $call_count, 'Expected exactly one HTTP request when no cache exists.' );
 		$this->assertIsObject( $result );
 		$this->assertSame( 'test-plugin', $result->name );
-	}
-
-	public function test_uses_main_cache_on_second_call(): void {
-		$call_count = 0;
-		$this->intercept_http( $this->mock_http_response( 200, [ 'name' => 'test-plugin' ] ), $call_count );
-
-		$this->api->api( $this->endpoint );
-		$result = $this->api->api( $this->endpoint );
-
-		$this->assertSame( 1, $call_count, 'Second call within cache window should not make an HTTP request.' );
-		$this->assertIsObject( $result );
 	}
 
 	public function test_non_200_response_writes_error_cache_to_dedicated_key(): void {
@@ -226,6 +223,7 @@ class Test_API extends WP_UnitTestCase {
 	 */
 	private function call_validate_response( $value ): bool {
 		$rm = new ReflectionMethod( $this->api, 'validate_response' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $this->api, $value );
 	}
 
@@ -497,4 +495,1109 @@ class Test_API extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'wordpress-plugin', $this->type->readme_tags );
 		$this->assertSame( 'My Plugin', $this->type->readme_tags['my-plugin'] );
 	}
+
+	public function test_set_readme_info_normalizes_patch_version_for_tested(): void {
+		global $wp_version;
+		$original_wp_version = $wp_version;
+		$wp_version          = '6.7.2';
+
+		$this->type->sections     = new stdClass();
+		$this->type->requires     = '';
+		$this->type->requires_php = '';
+		$this->type->tested       = '';
+
+		$readme = [
+			'sections'          => [],
+			'requires'          => '',
+			'requires_php'      => '',
+			'tested'            => '6.5',
+			'donate_link'       => '',
+			'contributors'      => [],
+			'tags'              => [],
+			'remaining_content' => '',
+		];
+
+		$result = $this->api->set_readme_info( $readme );
+
+		$wp_version = $original_wp_version;
+
+		$this->assertTrue( $result );
+		$this->assertSame( '6.5.2', $this->type->tested );
+	}
 }
+
+
+class Test_API_Extended extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_api_repo_type_data' );
+		remove_all_filters( 'gu_api_url_type' );
+		parent::tear_down();
+	}
+
+
+	// -------------------------------------------------------------------------
+	// Reflection helpers
+	// -------------------------------------------------------------------------
+
+	private function call_sort_tags( array $tags ): bool {
+		$rm = new ReflectionMethod( $this->api, 'sort_tags' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api, $tags );
+	}
+
+	private function call_return_repo_type(): array {
+		$rm = new ReflectionMethod( $this->api, 'return_repo_type' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api );
+	}
+
+	// -------------------------------------------------------------------------
+	// sort_tags()
+	// -------------------------------------------------------------------------
+
+	public function test_sort_tags_empty_array_returns_false(): void {
+		$this->assertFalse( $this->call_sort_tags( [] ) );
+	}
+
+	public function test_sort_tags_non_empty_returns_true(): void {
+		$tags = [ '1.0.0' => new stdClass(), '2.0.0' => new stdClass() ];
+		$this->assertTrue( $this->call_sort_tags( $tags ) );
+	}
+
+	public function test_sort_tags_sets_newest_tag_to_highest_version(): void {
+		$tags = [
+			'1.0.0' => new stdClass(),
+			'2.0.0' => new stdClass(),
+			'1.5.0' => new stdClass(),
+		];
+		$this->call_sort_tags( $tags );
+		$this->assertSame( '2.0.0', $this->type->newest_tag );
+	}
+
+	public function test_sort_tags_handles_v_prefix(): void {
+		$tags = [
+			'v1.0.0' => new stdClass(),
+			'v2.0.0' => new stdClass(),
+			'v1.5.0' => new stdClass(),
+		];
+		$this->call_sort_tags( $tags );
+		$this->assertSame( 'v2.0.0', $this->type->newest_tag );
+	}
+
+	public function test_sort_tags_stores_sorted_tags_on_type(): void {
+		$tags = [
+			'1.0.0' => new stdClass(),
+			'3.0.0' => new stdClass(),
+			'2.0.0' => new stdClass(),
+		];
+		$this->call_sort_tags( $tags );
+		$stored_keys = array_keys( $this->type->tags );
+		$this->assertSame( '3.0.0', $stored_keys[0] );
+		$this->assertSame( '2.0.0', $stored_keys[1] );
+		$this->assertSame( '1.0.0', $stored_keys[2] );
+	}
+
+	public function test_sort_tags_single_tag_sets_newest_tag(): void {
+		$tags = [ '1.2.3' => new stdClass() ];
+		$this->call_sort_tags( $tags );
+		$this->assertSame( '1.2.3', $this->type->newest_tag );
+	}
+
+	public function test_sort_tags_semantic_version_ordering(): void {
+		$tags = [
+			'1.10.0' => new stdClass(),
+			'1.9.0'  => new stdClass(),
+			'1.2.0'  => new stdClass(),
+		];
+		$this->call_sort_tags( $tags );
+		$this->assertSame( '1.10.0', $this->type->newest_tag );
+	}
+
+	// -------------------------------------------------------------------------
+	// return_repo_type()
+	// -------------------------------------------------------------------------
+
+	public function test_return_repo_type_includes_git_key_for_github(): void {
+		$result = $this->call_return_repo_type();
+		$this->assertSame( 'github', $result['git'] );
+	}
+
+	public function test_return_repo_type_includes_correct_base_uri(): void {
+		$result = $this->call_return_repo_type();
+		$this->assertSame( 'https://api.github.com', $result['base_uri'] );
+	}
+
+	public function test_return_repo_type_includes_correct_base_download(): void {
+		$result = $this->call_return_repo_type();
+		$this->assertSame( 'https://github.com', $result['base_download'] );
+	}
+
+	public function test_return_repo_type_includes_type(): void {
+		$result = $this->call_return_repo_type();
+		$this->assertSame( 'plugin', $result['type'] );
+	}
+
+	public function test_return_repo_type_filter_can_add_data(): void {
+		add_filter(
+			'gu_api_repo_type_data',
+			function ( array $arr ) {
+				$arr['extra'] = 'value';
+				return $arr;
+			}
+		);
+		$result = $this->call_return_repo_type();
+		$this->assertSame( 'value', $result['extra'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_api_url()
+	// -------------------------------------------------------------------------
+
+	public function test_get_api_url_replaces_owner_placeholder(): void {
+		$url = $this->api->get_api_url( '/repos/:owner/:repo' );
+		$this->assertStringContainsString( 'test-owner', $url );
+		$this->assertStringNotContainsString( ':owner', $url );
+	}
+
+	public function test_get_api_url_replaces_repo_placeholder(): void {
+		$url = $this->api->get_api_url( '/repos/:owner/:repo' );
+		$this->assertStringContainsString( 'test-plugin', $url );
+		$this->assertStringNotContainsString( ':repo', $url );
+	}
+
+	public function test_get_api_url_replaces_branch_placeholder(): void {
+		$url = $this->api->get_api_url( '/repos/:owner/:repo/contents/:branch' );
+		$this->assertStringContainsString( 'master', $url );
+		$this->assertStringNotContainsString( ':branch', $url );
+	}
+
+	public function test_get_api_url_prepends_github_api_base_uri(): void {
+		$url = $this->api->get_api_url( '/repos/:owner/:repo' );
+		$this->assertStringStartsWith( 'https://api.github.com', $url );
+	}
+
+	/**
+	 * For non-enterprise GitHub, both download_link=true and download_link=false
+	 * use the api.github.com base (the code sets base_download = base_uri when
+	 * !enterprise && download_link). Only GitHub Enterprise produces a different base.
+	 */
+	public function test_get_api_url_download_link_uses_api_base_for_non_enterprise(): void {
+		$api_url = $this->api->get_api_url( '/repos/:owner/:repo/zipball/:branch', false );
+		$dl_url  = $this->api->get_api_url( '/repos/:owner/:repo/zipball/:branch', true );
+		$this->assertStringStartsWith( 'https://api.github.com', $api_url );
+		$this->assertStringStartsWith( 'https://api.github.com', $dl_url );
+	}
+
+	public function test_get_api_url_does_not_double_prepend_base(): void {
+		$endpoint = 'https://api.github.com/repos/test-owner/test-plugin';
+		$url      = $this->api->get_api_url( $endpoint );
+		// Should not become https://api.github.comhttps://api.github.com/...
+		$this->assertSame( 1, substr_count( $url, 'https://api.github.com' ) );
+	}
+
+	public function test_get_api_url_uses_branch_fallback_to_primary_branch(): void {
+		$this->type->branch = '';
+		$url                = $this->api->get_api_url( '/repos/:owner/:repo/contents/:branch' );
+		$this->assertStringContainsString( 'master', $url );
+	}
+
+	// -------------------------------------------------------------------------
+	// parse_extra_headers()  (public, called on $this->api so Singleton resolves)
+	// -------------------------------------------------------------------------
+
+	public function test_parse_extra_headers_defaults_to_no_enterprise(): void {
+		$header       = [ 'host' => 'github.com', 'base_uri' => 'https://github.com' ];
+		$headers      = [];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertNull( $result['enterprise_uri'] );
+		$this->assertNull( $result['enterprise_api'] );
+	}
+
+	public function test_parse_extra_headers_detects_github_enterprise(): void {
+		$header = [
+			'host'     => 'github.mycompany.com',
+			'base_uri' => 'https://github.mycompany.com',
+		];
+		$headers      = [];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'https://github.mycompany.com', $result['enterprise_uri'] );
+		$this->assertStringEndsWith( '/api/v3', $result['enterprise_api'] );
+	}
+
+	public function test_parse_extra_headers_extracts_languages_header(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'GitHubLanguages' => 'en_US' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'en_US', $result['languages'] );
+	}
+
+	public function test_parse_extra_headers_extracts_ci_job_header(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'GitHubCIJob' => 'https://ci.example.com/build/1' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'https://ci.example.com/build/1', $result['ci_job'] );
+	}
+
+	public function test_parse_extra_headers_converts_release_asset_to_bool(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'ReleaseAsset' => 'true' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertTrue( $result['release_asset'] );
+	}
+
+	public function test_parse_extra_headers_release_asset_false_string_becomes_false(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'ReleaseAsset' => 'false' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertFalse( $result['release_asset'] );
+	}
+
+	public function test_parse_extra_headers_primary_branch_defaults_to_master(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'master', $result['primary_branch'] );
+	}
+
+	public function test_parse_extra_headers_sets_custom_primary_branch(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'PrimaryBranch' => 'main' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'main', $result['primary_branch'] );
+	}
+
+	public function test_parse_extra_headers_extracts_plugin_id(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [ 'PluginID' => 'did:example:abc123' ];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'did:example:abc123', $result['did'] );
+	}
+
+	public function test_parse_extra_headers_theme_id_overrides_plugin_id(): void {
+		$header       = [ 'host' => 'github.com' ];
+		$headers      = [
+			'PluginID' => 'did:example:plugin',
+			'ThemeID'  => 'did:example:theme',
+		];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertSame( 'did:example:theme', $result['did'] );
+	}
+
+	public function test_parse_extra_headers_no_host_skips_enterprise_detection(): void {
+		$header       = [];
+		$headers      = [];
+		$header_parts = [ 'GitHub' ];
+
+		$result = $this->api->parse_extra_headers( $header, $headers, $header_parts );
+
+		$this->assertNull( $result['enterprise_uri'] );
+	}
+}
+
+class Test_API_Dot_Org_Data extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_api_domain' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		parent::tear_down();
+	}
+
+
+	private function call_get_dot_org_data(): mixed {
+		$rm = new ReflectionMethod( $this->api, 'get_dot_org_data' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_dot_org_data() — cached path
+	// -------------------------------------------------------------------------
+
+	public function test_get_dot_org_data_returns_true_when_cache_says_in_dot_org(): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[ 'dot_org' => 'in dot org' ]
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_get_dot_org_data_returns_false_when_cache_says_not_in_dot_org(): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			[ 'dot_org' => 'not in dot org' ]
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_dot_org_data() — HTTP paths
+	// -------------------------------------------------------------------------
+
+	public function test_get_dot_org_data_returns_true_when_plugin_in_dot_org(): void {
+		$body = wp_json_encode(
+			[
+				'name'      => 'Test Plugin',
+				'slug'      => 'test-plugin',
+				'ac_origin' => 'wp_org',
+			]
+		);
+		add_filter(
+			'pre_http_request',
+			fn() => [ 'response' => [ 'code' => 200 ], 'body' => $body, 'headers' => [] ],
+			10,
+			3
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_get_dot_org_data_returns_false_when_plugin_not_in_dot_org(): void {
+		$body = wp_json_encode( [ 'name' => 'Test Plugin' ] ); // no ac_origin
+		add_filter(
+			'pre_http_request',
+			fn() => [ 'response' => [ 'code' => 200 ], 'body' => $body, 'headers' => [] ],
+			10,
+			3
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_dot_org_data_returns_false_on_wp_error(): void {
+		add_filter(
+			'pre_http_request',
+			fn() => new WP_Error( 'http_request_failed', 'Connection refused' ),
+			10,
+			3
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_dot_org_data_returns_false_when_body_has_error_property(): void {
+		$body = wp_json_encode( [ 'error' => 'Plugin not found', 'ac_origin' => 'wp_org' ] );
+		add_filter(
+			'pre_http_request',
+			fn() => [ 'response' => [ 'code' => 200 ], 'body' => $body, 'headers' => [] ],
+			10,
+			3
+		);
+
+		$result = $this->call_get_dot_org_data();
+
+		$this->assertFalse( $result );
+	}
+}
+
+/**
+ * Class Test_API_Exit_No_Update
+ *
+ * Covers exit_no_update() conditions.
+ */
+class Test_API_Exit_No_Update extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_always_fetch_update' );
+		delete_site_transient( 'gu_refresh_cache' );
+		parent::tear_down();
+	}
+
+
+	private function call_exit_no_update( $response = false, $branch = false ): bool {
+		$rm = new ReflectionMethod( $this->api, 'exit_no_update' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api, $response, $branch );
+	}
+
+	// -------------------------------------------------------------------------
+	// exit_no_update() conditions
+	// -------------------------------------------------------------------------
+
+	public function test_exit_no_update_returns_false_when_always_fetch_filter_set(): void {
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		$result = $this->call_exit_no_update( false );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_exit_no_update_returns_branch_switch_empty_when_branch_param_true(): void {
+		$rp = new ReflectionProperty( GitHub_API::class, 'options' );
+		$rp->setAccessible( true );
+		$original = $rp->getValue( null );
+
+		$rp->setValue( null, [] ); // no branch_switch option
+		$result = $this->call_exit_no_update( false, true );
+		$rp->setValue( null, $original );
+
+		$this->assertTrue( $result ); // empty(options['branch_switch']) = true
+	}
+
+	public function test_exit_no_update_returns_false_when_refresh_transient_set(): void {
+		set_site_transient( 'gu_refresh_cache', true );
+
+		$result = $this->call_exit_no_update( false );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_exit_no_update_returns_false_when_response_is_truthy(): void {
+		$result = $this->call_exit_no_update( [ 'some' => 'data' ] );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_exit_no_update_returns_true_when_no_refresh_no_response_and_cant_update(): void {
+		// In tests: type has no remote_version/local_version → can_update_repo returns false.
+		$result = $this->call_exit_no_update( false );
+
+		$this->assertTrue( $result );
+	}
+}
+
+/**
+ * Class Test_API_Local_Info
+ *
+ * Covers get_local_info(), local_file_exists(), set_file_info(), add_meta_repo_object().
+ */
+class Test_API_Local_Info extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	/**
+	 * @var string Temp directory for file-existence tests.
+	 */
+	private string $temp_dir;
+
+	/**
+	 * @var string Temp file path.
+	 */
+	private string $temp_file;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+
+		$this->temp_dir  = sys_get_temp_dir() . '/gu-test-' . uniqid() . '/';
+		mkdir( $this->temp_dir );
+		$this->temp_file = $this->temp_dir . 'test-file.txt';
+		file_put_contents( $this->temp_file, 'test content' );
+	}
+
+	public function tear_down(): void {
+		delete_site_transient( 'gu_refresh_cache' );
+		if ( file_exists( $this->temp_file ) ) {
+			unlink( $this->temp_file );
+		}
+		if ( is_dir( $this->temp_dir ) ) {
+			rmdir( $this->temp_dir );
+		}
+		parent::tear_down();
+	}
+
+
+	// -------------------------------------------------------------------------
+	// get_local_info()
+	// -------------------------------------------------------------------------
+
+	public function test_get_local_info_returns_null_when_refresh_cache_transient_set(): void {
+		set_site_transient( 'gu_refresh_cache', true );
+		$repo             = new stdClass();
+		$repo->local_path = $this->temp_dir;
+
+		$result = $this->api->get_local_info( $repo, 'test-file.txt' );
+
+		$this->assertNull( $result );
+	}
+
+	public function test_get_local_info_returns_file_contents_when_file_exists(): void {
+		$repo             = new stdClass();
+		$repo->local_path = $this->temp_dir;
+
+		$result = $this->api->get_local_info( $repo, 'test-file.txt' );
+
+		$this->assertSame( 'test content', $result );
+	}
+
+	public function test_get_local_info_returns_null_when_file_does_not_exist(): void {
+		$repo             = new stdClass();
+		$repo->local_path = $this->temp_dir;
+
+		$result = $this->api->get_local_info( $repo, 'nonexistent-file.txt' );
+
+		$this->assertNull( $result );
+	}
+
+	public function test_get_local_info_returns_null_when_directory_does_not_exist(): void {
+		$repo             = new stdClass();
+		$repo->local_path = '/nonexistent/directory/path/';
+
+		$result = $this->api->get_local_info( $repo, 'test-file.txt' );
+
+		$this->assertNull( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// local_file_exists()
+	// -------------------------------------------------------------------------
+
+	public function test_local_file_exists_returns_true_when_file_exists(): void {
+		$this->type->local_path = $this->temp_dir;
+
+		$rm     = new ReflectionMethod( $this->api, 'local_file_exists' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$result = $rm->invoke( $this->api, 'test-file.txt' );
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_local_file_exists_returns_false_when_file_missing(): void {
+		$this->type->local_path = $this->temp_dir;
+
+		$rm     = new ReflectionMethod( $this->api, 'local_file_exists' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$result = $rm->invoke( $this->api, 'nonexistent.txt' );
+
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// set_file_info()
+	// -------------------------------------------------------------------------
+
+	public function test_set_file_info_populates_type_remote_version(): void {
+		$response = [
+			'Name'           => 'Test Plugin',
+			'Version'        => '2.5.0',
+			'RequiresPHP'    => '8.0',
+			'RequiresWP'     => '6.0',
+			'Requires'       => '',
+			'dot_org'        => 'not in dot org',
+			'PrimaryBranch'  => 'main',
+			'UpdateURI'      => '',
+			'RequiresPlugins' => '',
+			'Author'         => 'Test Author',
+			'AuthorURI'      => '',
+			'PluginURI'      => 'https://example.com',
+			'Description'    => 'Test description.',
+			'PluginID'       => '',
+			'ThemeID'        => '',
+			'Security'       => '',
+			'License'        => '',
+		];
+
+		$rm = new ReflectionMethod( $this->api, 'set_file_info' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$rm->invoke( $this->api, $response );
+
+		$this->assertSame( '2.5.0', $this->type->remote_version );
+		$this->assertSame( '8.0', $this->type->requires_php );
+		$this->assertSame( 'main', $this->type->primary_branch );
+	}
+
+	public function test_set_file_info_populates_name_on_first_call(): void {
+		$response = [
+			'Name'           => 'My Test Plugin',
+			'Version'        => '1.0.0',
+			'RequiresPHP'    => '',
+			'RequiresWP'     => '',
+			'Requires'       => '',
+			'dot_org'        => 'not in dot org',
+			'PrimaryBranch'  => 'master',
+			'UpdateURI'      => '',
+			'RequiresPlugins' => '',
+			'Author'         => 'Andy Fragen',
+			'AuthorURI'      => '',
+			'PluginURI'      => '',
+			'Description'    => 'Description here.',
+			'PluginID'       => '',
+			'ThemeID'        => '',
+			'Security'       => '',
+			'License'        => '',
+		];
+
+		$rm = new ReflectionMethod( $this->api, 'set_file_info' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$rm->invoke( $this->api, $response );
+
+		$this->assertSame( 'My Test Plugin', $this->type->name );
+		$this->assertSame( '1.0.0', $this->type->local_version );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_meta_repo_object()
+	// -------------------------------------------------------------------------
+
+	public function test_add_meta_repo_object_sets_type_properties_from_repo_meta(): void {
+		$this->type->repo_meta = [
+			'last_updated' => '2024-06-15T12:00:00Z',
+			'added'        => '2023-01-01T00:00:00Z',
+			'private'      => false,
+		];
+
+		$rm = new ReflectionMethod( $this->api, 'add_meta_repo_object' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$rm->invoke( $this->api );
+
+		$this->assertSame( '2024-06-15T12:00:00Z', $this->type->last_updated );
+		$this->assertSame( '2023-01-01T00:00:00Z', $this->type->added );
+		$this->assertFalse( $this->type->is_private );
+	}
+
+	public function test_add_meta_repo_object_uses_empty_string_for_missing_added(): void {
+		$this->type->repo_meta = [
+			'last_updated' => '2024-06-15T12:00:00Z',
+			'private'      => true,
+		];
+
+		$rm = new ReflectionMethod( $this->api, 'add_meta_repo_object' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		$rm->invoke( $this->api );
+
+		$this->assertSame( '', $this->type->added );
+		$this->assertTrue( $this->type->is_private );
+	}
+}
+
+class Test_API_Release_Asset_Redirect extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'gu_always_fetch_update' );
+		remove_all_actions( 'requests-requests.before_redirect' );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin' ) );
+		delete_site_option( $this->api->get_cache_key( 'test-plugin_error' ) );
+		unset( $_REQUEST['key'], $_REQUEST['plugin'], $_REQUEST['theme'], $_REQUEST['override'], $_REQUEST['rollback'] );
+		parent::tear_down();
+	}
+
+
+	private function seed_cache( array $data ): void {
+		update_site_option(
+			$this->api->get_cache_key( 'test-plugin' ),
+			array_merge( [ 'timeout' => strtotime( '+12 hours' ) ], $data )
+		);
+	}
+
+	// -------------------------------------------------------------------------
+	// !$asset early return
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_returns_false_when_asset_is_false(): void {
+		$result = $this->api->get_release_asset_redirect( false );
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_release_asset_redirect_returns_false_when_asset_is_empty_string(): void {
+		$result = $this->api->get_release_asset_redirect( '' );
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// AWS timeout unset path (lines 637-640)
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_clears_aws_cache_when_older_than_5_min(): void {
+		// Seed cache with future timeout (so AWS time check fires: time() - strtotime('-12h', future_timeout) > 300).
+		$this->seed_cache(
+			[
+				'release_asset'          => 'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip',
+				'release_asset_redirect' => 'https://s3.amazonaws.com/something/plugin.zip?token=old',
+				'timeout'                => strtotime( '+6 hours' ),
+			]
+		);
+
+		// $aws=true triggers the unset block.
+		// After clearing, response is false, exit_no_update fires → return false.
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip',
+			true
+		);
+
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// $_REQUEST['key'] slug matching (lines 645-649)
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_matches_plugin_slug_from_request(): void {
+		// Seed cache with repo = 'test-plugin' and no release_asset_redirect.
+		$this->seed_cache( [ 'repo' => 'test-plugin' ] );
+
+		// Set request context.
+		$_REQUEST['key']    = 'some-api-key';
+		$_REQUEST['plugin'] = 'test-plugin/test-plugin.php'; // WordPress plugin file format.
+
+		// Mock HTTP to prevent real request.
+		add_filter( 'pre_http_request', fn() => new WP_Error( 'blocked', 'no real HTTP' ), 10, 3 );
+		add_filter( 'gu_always_fetch_update', '__return_true' ); // bypass exit_no_update gate
+
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		// No redirect was set (mocked request), response is false → return false.
+		$this->assertFalse( $result );
+	}
+
+	public function test_get_release_asset_redirect_matches_theme_slug_from_request(): void {
+		$this->seed_cache( [ 'repo' => 'test-plugin' ] );
+
+		$_REQUEST['key']   = 'some-api-key';
+		$_REQUEST['theme'] = 'test-plugin';
+
+		add_filter( 'pre_http_request', fn() => new WP_Error( 'blocked', 'no real HTTP' ), 10, 3 );
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// exit_no_update gate → return false
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_returns_false_when_exit_no_update_fires(): void {
+		// No cache, no override, no rollback, no $rest — exit_no_update returns true.
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// HTTP call path — no redirect
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_returns_false_when_http_call_produces_no_redirect(): void {
+		// Bypass exit_no_update so we reach the HTTP call.
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Mock HTTP — pre_http_request prevents real request; redirect action won't fire.
+		add_filter(
+			'pre_http_request',
+			fn() => [ 'response' => [ 'code' => 200 ], 'body' => '', 'headers' => [] ],
+			10,
+			3
+		);
+
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		// $this->redirect is empty (no real redirect), $response is false → return false.
+		$this->assertFalse( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// Cached release_asset_redirect → return cached URL
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_returns_cached_redirect_url(): void {
+		$cached_url = 'https://s3.amazonaws.com/downloads/plugin.zip?token=abc';
+		$this->seed_cache( [ 'release_asset_redirect' => $cached_url ] );
+
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		$this->assertSame( $cached_url, $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// HTTP call path — redirect set (lines 673, 675)
+	// -------------------------------------------------------------------------
+
+	public function test_get_release_asset_redirect_caches_and_returns_redirect_when_set(): void {
+		$redirect_url = 'https://s3.amazonaws.com/bucket/plugin.zip?token=abc';
+		$api          = $this->api;
+
+		add_filter( 'gu_always_fetch_update', '__return_true' );
+
+		// Call set_redirect() inside the HTTP mock to simulate the redirect action firing.
+		add_filter(
+			'pre_http_request',
+			function () use ( $api, $redirect_url ) {
+				$api->set_redirect( $redirect_url );
+				return [ 'response' => [ 'code' => 200 ], 'body' => '', 'headers' => [] ];
+			},
+			10,
+			3
+		);
+
+		$result = $this->api->get_release_asset_redirect(
+			'https://github.com/owner/repo/releases/download/v1.0.0/plugin.zip'
+		);
+
+		$this->assertSame( $redirect_url, $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// set_redirect()
+	// -------------------------------------------------------------------------
+
+	public function test_set_redirect_stores_location_on_redirect_property(): void {
+		$location = 'https://s3.amazonaws.com/bucket/plugin.zip?token=xyz';
+
+		$this->api->set_redirect( $location );
+
+		$rp = new ReflectionProperty( $this->api, 'redirect' );
+		$rp->setAccessible( true );
+		$this->assertSame( $location, $rp->getValue( $this->api ) );
+	}
+}
+
+class Test_API_Hooks extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		remove_all_filters( 'gu_add_repo_setting_field' );
+		remove_all_filters( 'gu_get_repo_api' );
+		remove_all_actions( 'gu_add_settings' );
+		remove_all_actions( 'gu_add_install_settings_fields' );
+		parent::tear_down();
+	}
+
+
+	// -------------------------------------------------------------------------
+	// settings_hook() — action + filter registration
+	// -------------------------------------------------------------------------
+
+	public function test_settings_hook_registers_gu_add_settings_action(): void {
+		// GitHub_API constructor calls settings_hook($this) which registers the action.
+		$this->assertNotFalse( has_action( 'gu_add_settings' ) );
+	}
+
+	public function test_settings_hook_registers_gu_add_repo_setting_field_filter(): void {
+		$this->assertNotFalse( has_filter( 'gu_add_repo_setting_field' ) );
+	}
+
+	public function test_settings_hook_fires_add_settings_when_gu_add_settings_action_called(): void {
+		global $wp_settings_sections;
+
+		// Firing the action invokes the lambda that calls $git->add_settings($auth_required).
+		do_action( 'gu_add_settings', [ 'github_private' => false, 'github_enterprise' => false ] );
+
+		$this->assertArrayHasKey(
+			'github_access_token',
+			$wp_settings_sections['git_updater_github_install_settings'] ?? []
+		);
+	}
+
+	// -------------------------------------------------------------------------
+	// add_setting_field() — both branches
+	// -------------------------------------------------------------------------
+
+	public function test_add_setting_field_returns_non_empty_fields_unchanged(): void {
+		$repo        = (object) [ 'git' => 'github' ];
+		$fields      = [ 'page' => 'some_page', 'section' => 'some_section' ];
+		$result      = $this->api->add_setting_field( $fields, $repo );
+		$this->assertSame( $fields, $result );
+	}
+
+	public function test_add_setting_field_calls_get_repo_api_when_fields_empty(): void {
+		$repo   = (object) [
+			'git'            => 'github',
+			'slug'           => 'test-plugin',
+			'type'           => 'plugin',
+			'owner'          => 'test-owner',
+			'branch'         => 'master',
+			'primary_branch' => 'master',
+			'enterprise'     => false,
+			'enterprise_api' => null,
+			'gist_id'        => null,
+		];
+		$result = $this->api->add_setting_field( [], $repo );
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'page', $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// get_repo_api() — github path and unknown path
+	// -------------------------------------------------------------------------
+
+	public function test_get_repo_api_returns_github_api_for_github_git(): void {
+		$result = $this->api->get_repo_api( 'github', $this->type );
+		$this->assertInstanceOf( GitHub_API::class, $result );
+	}
+
+	public function test_get_repo_api_returns_null_for_unknown_git(): void {
+		$result = $this->api->get_repo_api( 'unknown_git_host', $this->type );
+		$this->assertNull( $result );
+	}
+
+	// -------------------------------------------------------------------------
+	// add_install_fields() — registers gu_add_install_settings_fields action
+	// -------------------------------------------------------------------------
+
+	public function test_add_install_fields_registers_action(): void {
+		// GitHub_API constructor calls add_install_fields($this).
+		$this->assertNotFalse( has_action( 'gu_add_install_settings_fields' ) );
+	}
+
+	public function test_add_install_fields_action_fires_add_install_settings_fields(): void {
+		$called = false;
+		add_action(
+			'gu_add_install_settings_fields',
+			function ( $type ) use ( &$called ) {
+				$called = true;
+			},
+			20,
+			1
+		);
+
+		do_action( 'gu_add_install_settings_fields', 'plugin' );
+
+		$this->assertTrue( $called );
+	}
+}
+
+/**
+ * Class Test_GitHub_API_Settings
+ *
+ * Covers all settings output and registration methods in GitHub_API.
+ */

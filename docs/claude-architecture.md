@@ -24,16 +24,19 @@ All API data is cached in WordPress site options. Cache keys follow the pattern 
 
 `set_repo_cache($id, $response, $repo, $timeout)` — writes a single keyed value into the cache array for a repo. The `$repo` argument selects which site option (false = current `$this->type->slug`). `$timeout` is a strtotime-compatible string (e.g. `'+60 minutes'`).
 
+`set_repo_cache()` uses `$cache['timeout'] = $cache['timeout'] ?? strtotime($timeout)`, so the `timeout` field is preserved across per-entry writes within a cycle. The flip side: once a `timeout` exists on the option (even an expired one from a previous cycle), subsequent `set_repo_cache()` calls will never refresh it. After a complete fetch cycle, `GU_Trait::set_repo_cache_timeout($slug)` must be called explicitly to write the fresh default-`$hours` timeout. See *Cache completion tracking* below.
+
 ### API layer
 
 `src/Git_Updater/API/API.php` — base class for all git host APIs. The central method is `api($endpoint)`, which:
 1. Resolves the endpoint URL via `get_api_url()` (replaces `:owner`, `:repo`, etc. placeholders).
-2. Checks the main repo cache; if hit, returns cached data.
-3. Checks the error cache (`slug_error` key); if fresh (within 60 min), returns `false` without making an HTTP request.
-4. Makes `wp_remote_get()` if both caches are cold.
-5. On `WP_Error` (network failure), returns the `WP_Error` immediately.
-6. On non-200 response, writes the 60-minute error cache entry, then still caches and returns the decoded body (e.g. `stdClass{message:'Not Found'}`).
-7. On 200, stores the decoded body in the main cache.
+2. Checks the error cache (`slug_error` key); if fresh (within 60 min), returns `false` without making an HTTP request.
+3. Makes `wp_remote_get()` if the error cache is cold.
+4. On `WP_Error` (network failure), returns the `WP_Error` immediately.
+5. On non-200 response, writes the 60-minute error cache entry, then returns the decoded body (e.g. `stdClass{message:'Not Found'}`).
+6. On 200, returns the decoded body.
+
+`api()` does not cache HTTP responses itself. Whether to skip API calls entirely is controlled exclusively by `maybe_extend_repo_cache()` in `get_remote_api_info()`, which gates the whole secondary-call block in `Base::get_remote_repo_meta()`.
 
 ### `get_remote_api_*` tri-state returns
 
@@ -47,18 +50,23 @@ Note: when the error cache is active, `api()` returns literal `false`. In the `g
 
 ### Cache completion tracking (`$cache['ran']`)
 
-`Base::get_remote_api_info()` runs the seven secondary API calls after the main `get_remote_info()`. It records which calls completed in `$cache['ran']` using a ternary + `array_filter` pattern:
+`Base::get_remote_repo_meta()` runs the seven secondary API calls unconditionally after `get_remote_info()` succeeds — there is no `is_wp_cli()` gate. It records which calls completed in `$cache['ran']` using a ternary + `array_filter` pattern:
 
 ```php
 $ran   = [];
 $ran[] = false !== $repo_api->get_repo_contents()    ? 'contents' : null;
 // ... six more lines ...
 $repo_api->set_repo_cache( 'ran', array_filter( $ran ) );
+$repo_api->set_repo_cache_timeout( $repo->slug );
 ```
 
 `array_filter` strips `null` (WP_Error calls), leaving only string keys of completed calls.
 
-`GU_Trait::maybe_extend_repo_cache()` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_api_info()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry.
+`GU_Trait::set_repo_cache_timeout($slug)` runs immediately after the `'ran'` write. It is a no-op unless `$cache['ran']` contains all seven expected entries (`contents`, `assets`, `readme`, `changes`, `tags`, `branches`, `meta`); on a complete cycle it writes `cache['timeout'] = strtotime('+' . $hours . ' hours')` (default 12, applies `gu_repo_cache_timeout` filter with `$id = 'ran'`). This is the only path that refreshes the cache timeout after a new-version fetch — without it the prior cycle's expired timeout lingers and forces redundant API calls on the next pass within the same request (e.g. from the `wp_update_plugins` / `wp_update_themes` actions wired by `Base::background_update()`, which fires in addition to `Base::load()`'s direct call).
+
+`GU_Trait::maybe_extend_repo_cache( $remote_headers, $repo, $old_version )` uses `array_diff($expected, $cache['ran'])` to confirm all seven completed before extending the 6-hour cache timeout. An incomplete `$ran` causes it to return `false`, which makes `get_remote_repo_meta()` re-run all secondary calls on the very next WordPress update check — no need to wait for cache expiry. The timeout comparison uses `$cache['timeout'] ?? 0` so a missing key safely passes `0` (treated as expired) rather than causing a TypeError in PHP 8.
+
+The `$old_version` parameter is the remote version from **before** this fetch, captured in `get_remote_api_info()` prior to calling `set_repo_cache()`. This prevents the version comparison from always seeing equal values (the ordering bug: comparing the freshly-written cache value against itself). When `$old_version` differs from the newly fetched version, `maybe_extend_repo_cache()` returns `false` and the secondary calls run to refresh all repo data.
 
 `src/Git_Updater/API/GitHub_API.php` implements `API_Interface` and extends `API`. Additional git host APIs (Bitbucket, GitLab, Gitea) are loaded via add-on plugins and registered through the `gu_get_repo_api` filter.
 

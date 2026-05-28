@@ -951,3 +951,208 @@ class Test_Base_Fix_Misnamed_Directory extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'unknown-plugin', $result );
 	}
 }
+
+// =============================================================================
+// Test_Base_Get_Remote_Repo_Meta_Flow — version-match and version-differ paths
+// =============================================================================
+
+/**
+ * Class Test_Base_Get_Remote_Repo_Meta_Flow
+ *
+ * Verifies the maybe_extend_repo_cache gate:
+ * - Same remote version as cached old version → get_remote_api_info returns false
+ *   → secondary calls block skipped (1 HTTP request total).
+ * - Different remote version → secondary calls all execute (> 1 HTTP requests).
+ *
+ * Both tests seed an expired cache so get_repo_cache returns false and forces the
+ * main plugin-file fetch, while $old_version is still readable via the raw site
+ * option (get_repo_cache with $timeout=false).
+ */
+class Test_Base_Get_Remote_Repo_Meta_Flow extends WP_UnitTestCase {
+
+	private const SLUG = 'test-gu-plugin';
+
+	private string    $cache_key;
+	private \stdClass $config;
+	private int       $request_count = 0;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+
+		$this->cache_key     = 'ghu-' . md5( self::SLUG );
+		$this->request_count = 0;
+
+		delete_site_option( $this->cache_key );
+		delete_site_option( $this->cache_key . '_error' );
+
+		$configs = ( new Fragen\Git_Updater\Plugin() )->get_plugin_configs();
+		if ( ! isset( $configs[ self::SLUG ] ) ) {
+			$this->markTestSkipped( 'Fixture plugin not installed. Run: npm run wp-env start' );
+		}
+		$this->config = $configs[ self::SLUG ];
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http' ], 10, 3 );
+	}
+
+	public function tear_down(): void {
+		remove_filter( 'pre_http_request', [ $this, 'mock_http' ], 10 );
+		delete_site_option( $this->cache_key );
+		delete_site_option( $this->cache_key . '_error' );
+		parent::tear_down();
+	}
+
+	/**
+	 * Intercept wp_remote_get() calls; count only GitHub fixture-repo requests.
+	 *
+	 * @param mixed  $preempt Existing preempt value.
+	 * @param mixed  $args    Request args (unused).
+	 * @param string $url     Request URL.
+	 * @return mixed Canned HTTP response or original $preempt.
+	 */
+	public function mock_http( mixed $preempt, mixed $args, string $url ): mixed {
+		if ( str_contains( $url, 'api.wordpress.org' ) ) {
+			return $this->http_response( json_encode( [ 'error' => 'Plugin not found.' ] ) );
+		}
+
+		if ( ! str_contains( $url, 'api.github.com/repos/afragen/test-gu-plugin' ) ) {
+			return $preempt;
+		}
+
+		$this->request_count++;
+
+		$path = (string) parse_url( $url, PHP_URL_PATH );
+
+		if ( str_contains( $path, '/contents/test-gu-plugin.php' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'content'  => base64_encode( $this->fixture_plugin_content() ),
+						'encoding' => 'base64',
+					]
+				)
+			);
+		}
+
+		if ( '/repos/afragen/test-gu-plugin/contents' === $path ) {
+			return $this->http_response(
+				json_encode( [ [ 'name' => 'test-gu-plugin.php', 'type' => 'file' ] ] )
+			);
+		}
+
+		if ( str_ends_with( $path, '/tags' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[
+							'name'        => '2.0.0',
+							'zipball_url' => '',
+							'commit'      => [ 'sha' => 'abc123def456' ],
+						],
+					]
+				)
+			);
+		}
+
+		if ( str_ends_with( $path, '/branches' ) ) {
+			return $this->http_response(
+				json_encode(
+					[
+						[
+							'name'   => 'main',
+							'commit' => [ 'sha' => 'abc123def456', 'url' => '' ],
+						],
+					]
+				)
+			);
+		}
+
+		if ( '/repos/afragen/test-gu-plugin' === $path ) {
+			return $this->http_response(
+				json_encode(
+					[
+						'private'     => false,
+						'pushed_at'   => '2024-06-01T12:00:00Z',
+						'created_at'  => '2023-01-01T00:00:00Z',
+						'watchers'    => 0,
+						'forks'       => 0,
+						'open_issues' => 0,
+					]
+				)
+			);
+		}
+
+		return $this->http_response( '[]' );
+	}
+
+	/**
+	 * @param string $body
+	 * @param int    $code
+	 * @return array<string, mixed>
+	 */
+	private function http_response( string $body, int $code = 200 ): array {
+		return [
+			'headers'  => [],
+			'body'     => $body,
+			'response' => [
+				'code'    => $code,
+				'message' => 200 === $code ? 'OK' : 'Error',
+			],
+			'cookies'  => [],
+			'filename' => null,
+		];
+	}
+
+	private function fixture_plugin_content(): string {
+		return implode(
+			"\n",
+			[
+				'<?php',
+				'/**',
+				' * Plugin Name:       Test GU Plugin',
+				' * Plugin URI:        https://github.com/afragen/test-gu-plugin',
+				' * Description:       Minimal fixture plugin for PHPUnit integration tests.',
+				' * Version:           2.0.0',
+				' * Author:            Test Author',
+				' * License:           GPL-3.0-or-later',
+				' * GitHub Plugin URI: https://github.com/afragen/test-gu-plugin',
+				' * Primary Branch:    main',
+				' */',
+			]
+		);
+	}
+
+	private function seed_cache( string $version ): void {
+		update_site_option(
+			$this->cache_key,
+			[
+				'timeout'  => strtotime( '-1 hour' ),
+				'ran'      => [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ],
+				self::SLUG => [ 'Version' => $version ],
+				'repo'     => self::SLUG,
+			]
+		);
+	}
+
+	// Expired cache, old version == remote version: maybe_extend_repo_cache returns true
+	// → get_remote_api_info returns false → secondary calls block is skipped entirely.
+	public function test_versions_same_skips_secondary_calls(): void {
+		$this->seed_cache( '2.0.0' );
+
+		( new Base() )->get_remote_repo_meta( $this->config );
+
+		$this->assertSame( 1, $this->request_count );
+	}
+
+	// Expired cache, old version != remote version: maybe_extend_repo_cache returns false
+	// → get_remote_api_info returns true → all seven secondary calls execute.
+	public function test_versions_differ_runs_secondary_calls(): void {
+		$this->seed_cache( '1.0.0' );
+
+		( new Base() )->get_remote_repo_meta( $this->config );
+
+		$this->assertGreaterThan( 1, $this->request_count );
+		$cache = get_site_option( $this->cache_key );
+		$this->assertNotEmpty( $cache['ran'] );
+	}
+}

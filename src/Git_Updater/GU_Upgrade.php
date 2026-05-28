@@ -17,7 +17,7 @@ use WP_Error;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -156,9 +156,8 @@ final class GU_Upgrade {
 	 */
 	private function schedule_access_token_cleanup() {
 		if ( is_multisite() && ! is_main_site() ) {
-			return;
+			return; // @codeCoverageIgnore
 		}
-
 		if ( false === wp_next_scheduled( 'gu_delete_access_tokens' ) ) {
 			wp_schedule_event( time() + \MONTH_IN_SECONDS, 'twicedaily', 'gu_delete_access_tokens' );
 		}

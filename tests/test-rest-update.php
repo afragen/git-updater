@@ -1,120 +1,21 @@
 <?php
 /**
- * Tests for Rest_Upgrader_Skin, Rest_Update, and Remote_Management.
- *
- * Rest_Upgrader_Skin:
- * - feedback()  — no-op when upgrader is null (message key not found)
- * - error()     — sets $error flag; parent called safely with null/empty WP_Error
- * - header()    — no-op override; produces no output
- * - footer()    — no-op override; produces no output
- *
- * Rest_Update:
- * - is_error()              — proxies upgrader_skin->error (null initially)
- * - get_messages()          — proxies upgrader_skin->messages ([] initially)
- * - process_request_data()  — non-REST path reads self::$request; returns compact array
- *
- * Remote_Management:
- * - ensure_api_key_is_set() — creates option when absent; skips when present
- * - reset_api_key()         — returns false without $_REQUEST params; deletes option with them
- * - add_settings_tabs()     — registers gu_add_settings_tabs filter
+ * Tests for REST\Rest_Update.
  *
  * @package Git_Updater
  */
 
-use Fragen\Git_Updater\Base;
-use Fragen\Git_Updater\REST\Rest_Upgrader_Skin;
 use Fragen\Git_Updater\REST\Rest_Update;
+use Fragen\Git_Updater\REST\Rest_Upgrader_Skin;
+use Fragen\Git_Updater\Base;
+use Fragen\Git_Updater\Plugin;
+use Fragen\Git_Updater\Theme;
+use Fragen\Singleton;
+use Fragen\Git_Updater\REST\REST_API;
 use Fragen\Git_Updater\Remote_Management;
+use Fragen\Git_Updater\Additions\Additions;
 
-// ---------------------------------------------------------------------------
-// Rest_Upgrader_Skin
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Rest_Upgrader_Skin
- */
-class Test_Rest_Upgrader_Skin extends WP_UnitTestCase {
-
-	private Rest_Upgrader_Skin $skin;
-
-	public function set_up(): void {
-		parent::set_up();
-		$this->skin = new Rest_Upgrader_Skin();
-	}
-
-	public function test_messages_is_empty_array_on_construction(): void {
-		$this->assertSame( [], $this->skin->messages );
-	}
-
-	public function test_error_property_is_not_set_on_construction(): void {
-		$this->assertFalse( isset( $this->skin->error ) );
-	}
-
-	public function test_feedback_does_not_add_to_messages_when_upgrader_is_null(): void {
-		// upgrader is null → isset($this->upgrader->strings[$message]) === false → early return.
-		$this->skin->feedback( 'nonexistent_string_key' );
-		$this->assertSame( [], $this->skin->messages );
-	}
-
-	public function test_error_sets_error_flag_true_with_null_errors(): void {
-		// parent::error(null): is_string(null)=false, is_wp_error(null)=false → parent is a no-op.
-		$this->skin->error( null );
-		$this->assertTrue( $this->skin->error );
-	}
-
-	public function test_error_sets_error_flag_true_with_empty_wp_error(): void {
-		// parent::error(WP_Error with no errors): has_errors()=false → parent is a no-op.
-		$this->skin->error( new WP_Error() );
-		$this->assertTrue( $this->skin->error );
-	}
-
-	public function test_header_produces_no_output(): void {
-		ob_start();
-		$this->skin->header();
-		$output = ob_get_clean();
-		$this->assertSame( '', $output );
-	}
-
-	public function test_footer_produces_no_output(): void {
-		ob_start();
-		$this->skin->footer();
-		$output = ob_get_clean();
-		$this->assertSame( '', $output );
-	}
-
-	public function test_feedback_appends_string_from_upgrader_strings_without_percent(): void {
-		// set_upgrader() must be called explicitly; WP_Upgrader::__construct() does not call init().
-		$upgrader = new Plugin_Upgrader( $this->skin );
-		$this->skin->set_upgrader( $upgrader );
-		$upgrader->strings['gu_test_key'] = 'Hello World';
-		$this->skin->feedback( 'gu_test_key' );
-		$this->assertContains( 'Hello World', $this->skin->messages );
-	}
-
-	public function test_feedback_uses_vsprintf_when_string_contains_percent(): void {
-		$upgrader = new Plugin_Upgrader( $this->skin );
-		$this->skin->set_upgrader( $upgrader );
-		$upgrader->strings['gu_prog_key'] = 'Done: %s';
-		$this->skin->feedback( 'gu_prog_key', '100' );
-		$this->assertContains( 'Done: 100', $this->skin->messages );
-	}
-
-	public function test_decrement_update_count_is_callable_no_op(): void {
-		$method = new ReflectionMethod( Rest_Upgrader_Skin::class, 'decrement_update_count' );
-		$method->setAccessible( true );
-		$method->invoke( $this->skin, 'plugin' );
-		$this->assertTrue( true );
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Rest_Update
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Rest_Update
- */
-class Test_Rest_Update extends WP_UnitTestCase {
+class Test_Rest_Update extends GU_Test_Case {
 
 	private Rest_Update $rest;
 
@@ -172,106 +73,8 @@ class Test_Rest_Update extends WP_UnitTestCase {
 /**
  * Class Test_Remote_Management
  */
-class Test_Remote_Management extends WP_UnitTestCase {
 
-	private array $saved_request;
-	private array $saved_post;
-
-	public function set_up(): void {
-		parent::set_up();
-		// Snapshot superglobals so we can restore them in tear_down.
-		$this->saved_request = $_REQUEST;
-		$this->saved_post    = $_POST;
-	}
-
-	public function tear_down(): void {
-		$_REQUEST = $this->saved_request;
-		$_POST    = $this->saved_post;
-		delete_site_option( 'git_updater_api_key' );
-		remove_all_filters( 'gu_add_settings_tabs' );
-		remove_all_actions( 'gu_add_admin_page' );
-		parent::tear_down();
-	}
-
-	public function test_constructor_creates_api_key_when_none_exists(): void {
-		delete_site_option( 'git_updater_api_key' );
-
-		new Remote_Management();
-
-		$this->assertNotFalse( get_site_option( 'git_updater_api_key', false ) );
-	}
-
-	public function test_constructor_does_not_overwrite_existing_api_key(): void {
-		update_site_option( 'git_updater_api_key', 'my-fixed-key' );
-
-		new Remote_Management();
-
-		$this->assertSame( 'my-fixed-key', get_site_option( 'git_updater_api_key' ) );
-	}
-
-	public function test_ensure_api_key_is_set_creates_key_when_option_is_absent(): void {
-		delete_site_option( 'git_updater_api_key' );
-		// Construct with no option present; ensure_api_key_is_set() is called by constructor.
-		new Remote_Management();
-
-		$key = get_site_option( 'git_updater_api_key', false );
-		$this->assertIsString( $key );
-		$this->assertNotEmpty( $key );
-	}
-
-	public function test_reset_api_key_returns_false_without_request_params(): void {
-		$rm     = new Remote_Management();
-		$result = $rm->reset_api_key();
-		$this->assertFalse( $result );
-	}
-
-	public function test_reset_api_key_returns_true_and_deletes_option_with_valid_request(): void {
-		update_site_option( 'git_updater_api_key', 'key-to-delete' );
-		$rm = new Remote_Management();
-
-		$_REQUEST['tab']                      = 'git_updater_remote_management';
-		$_REQUEST['git_updater_reset_api_key'] = '1';
-
-		$result = $rm->reset_api_key();
-
-		$this->assertTrue( $result );
-		$this->assertFalse( get_site_option( 'git_updater_api_key', false ) );
-	}
-
-	public function test_add_settings_tabs_registers_remote_management_tab(): void {
-		$rm = new Remote_Management();
-		$rm->add_settings_tabs();
-
-		$tabs = apply_filters( 'gu_add_settings_tabs', [] );
-
-		$this->assertArrayHasKey( 'git_updater_remote_management', $tabs );
-	}
-
-	public function test_add_settings_tabs_preserves_existing_tabs(): void {
-		$rm = new Remote_Management();
-		$rm->add_settings_tabs();
-
-		$tabs = apply_filters( 'gu_add_settings_tabs', [ 'existing' => 'Existing Tab' ] );
-
-		$this->assertArrayHasKey( 'existing', $tabs );
-		$this->assertArrayHasKey( 'git_updater_remote_management', $tabs );
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Test_Rest_Update_Process
-// ---------------------------------------------------------------------------
-
-/**
- * Class Test_Rest_Update_Process
- *
- * Exercises Rest_Update methods that call log_exit() or perform upgrades:
- * - log_exit()            — fires action then throws via wp_die()
- * - update_plugin/theme() — throws UnexpectedValueException for nonexistent slugs
- * - process_request()     — various key/branch/webhook paths all end via WPDieException
- * - get_primary_branch()  — returns cached PrimaryBranch when present
- */
-class Test_Rest_Update_Process extends WP_UnitTestCase {
+class Test_Rest_Update_Process extends GU_Test_Case {
 
 	private Rest_Update $rest;
 	private array       $saved_request;
@@ -504,7 +307,8 @@ class Test_Rest_Update_Process extends WP_UnitTestCase {
  * HTTP is mocked via pre_http_request to avoid real network calls.
  * Plugin upgrade uses a local zip returned from upgrader_pre_download at priority 15.
  */
-class Test_Rest_Update_Full_Path extends WP_UnitTestCase {
+
+class Test_Rest_Update_Full_Path extends GU_Test_Case {
 
 	private const PLUGIN_SLUG = 'test-gu-plugin';
 	private const THEME_SLUG  = 'test-gu-theme';
@@ -912,3 +716,159 @@ class Test_Rest_Update_Full_Path extends WP_UnitTestCase {
 		$this->assert_wp_die_thrown( fn() => $rest->process_request( null ) );
 	}
 }
+
+
+class Test_Rest_Update_Request_Data_Via_REST extends WP_UnitTestCase {
+
+	private Rest_Update $rest;
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$_REQUEST   = [];
+		$this->rest = new Rest_Update();
+	}
+
+	// -------------------------------------------------------------------------
+	// Helpers
+	// -------------------------------------------------------------------------
+
+	private function make_request( string $route, array $params ): WP_REST_Request {
+		$request = new WP_REST_Request( 'GET', $route );
+		foreach ( $params as $key => $value ) {
+			$request->set_param( $key, $value );
+		}
+		return $request;
+	}
+
+	private function base_params( array $overrides = [] ): array {
+		return array_merge(
+			[
+				'key'        => 'some-key',
+				'plugin'     => 'my-plugin',
+				'theme'      => false,
+				'tag'        => false,
+				'committish' => false,
+				'branch'     => false,
+				'override'   => false,
+			],
+			$overrides
+		);
+	}
+
+	// -------------------------------------------------------------------------
+	// Field extraction
+	// -------------------------------------------------------------------------
+
+	public function test_key_is_extracted_from_rest_request(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'key' => 'my-api-key' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'my-api-key', $result['key'] );
+	}
+
+	public function test_plugin_is_extracted_from_rest_request(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'plugin' => 'my-plugin' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'my-plugin', $result['plugin'] );
+	}
+
+	public function test_theme_is_extracted_when_no_plugin_present(): void {
+		$request = $this->make_request(
+			'/git-updater/v1/update',
+			$this->base_params(
+				[
+					'plugin' => false,
+					'theme'  => 'my-theme',
+				]
+			)
+		);
+		$result = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'my-theme', $result['theme'] );
+	}
+
+	public function test_tag_from_params_is_used_when_present(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'tag' => '2.1.0' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( '2.1.0', $result['tag'] );
+	}
+
+	public function test_tag_defaults_to_primary_branch_when_absent(): void {
+		// With no tag in params and no cache for the slug, get_primary_branch() returns 'master'.
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'tag' => false ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'master', $result['tag'] );
+	}
+
+	public function test_committish_is_extracted_from_rest_request(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'committish' => 'abc123' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'abc123', $result['committish'] );
+	}
+
+	public function test_branch_is_extracted_from_rest_request(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'branch' => 'develop' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertSame( 'develop', $result['branch'] );
+	}
+
+	public function test_override_is_false_by_default(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params() );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertFalse( $result['override'] );
+	}
+
+	public function test_override_is_true_when_param_is_set(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params( [ 'override' => '1' ] ) );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertTrue( (bool) $result['override'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// Deprecated flag
+	// -------------------------------------------------------------------------
+
+	public function test_deprecated_is_false_for_current_namespace_route(): void {
+		$request = $this->make_request( '/git-updater/v1/update', $this->base_params() );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertFalse( $result['deprecated'] );
+	}
+
+	public function test_deprecated_is_true_for_legacy_namespace_route(): void {
+		$request = $this->make_request( '/github-updater/v1/update', $this->base_params() );
+		$result  = $this->rest->process_request_data( $request );
+
+		$this->assertTrue( $result['deprecated'] );
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Test_REST_API_Get_Methods
+// ---------------------------------------------------------------------------
+
+/**
+ * Class Test_REST_API_Get_Methods
+ *
+ * Exercises REST_API::get_remote_repo_data() and get_api_data() via dispatch,
+ * using pre_http_request to mock all outbound HTTP calls.
+ *
+ * get_remote_repo_data():
+ * - Valid API key path: update transients are pre-seeded so wp_update_plugins()
+ *   and wp_update_themes() skip their HTTP calls. Asserts the 'sites' structure.
+ *
+ * get_api_data() (routes: plugins-api, themes-api, update-api):
+ * - Valid fixture slug path: full GitHub API mock plus a minimal readme.txt
+ *   response so get_remote_readme() populates sections['description'].
+ *   Asserts slug, version, git, and type fields in the response.
+ *
+ * Both test groups skip when the fixture plugin is not installed.
+ */

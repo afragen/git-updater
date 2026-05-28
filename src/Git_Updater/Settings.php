@@ -18,7 +18,7 @@ use stdClass;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -111,7 +111,7 @@ class Settings {
 
 		add_filter(
 			is_multisite()
-			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name()
+			? 'network_admin_plugin_action_links_' . $this->gu_plugin_name() // @codeCoverageIgnore
 			: 'plugin_action_links_' . $this->gu_plugin_name(),
 			[ $this, 'plugin_action_links' ]
 		);
@@ -358,7 +358,7 @@ class Settings {
 			echo '<div class="updated"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
-			esc_html_e( 'Settings saved.', 'git-updater' );
+			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
 		}
@@ -750,7 +750,7 @@ class Settings {
 			);
 			$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 			wp_safe_redirect( $location );
-			exit;
+			exit; // @codeCoverageIgnore
 		}
 	}
 

@@ -14,7 +14,7 @@ namespace Fragen\Git_Updater\OAuth;
  * Exit if called directly.
  */
 if ( ! defined( 'WPINC' ) ) {
-	die;
+	die; // @codeCoverageIgnore
 }
 
 /**
@@ -28,14 +28,14 @@ class OAuth_Flow {
 	/**
 	 * OAuth provider configuration.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, string>
 	 */
 	private $config;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param array<string, mixed> $config OAuth provider configuration.
+	 * @param array<string, string> $config OAuth provider configuration.
 	 */
 	public function __construct( $config ) {
 		$this->config = wp_parse_args(
@@ -61,12 +61,56 @@ class OAuth_Flow {
 	}
 
 	/**
+	 * Create a provider flow using core defaults plus caller overrides.
+	 *
+	 * API add-ons can call this to use the same provider presets while still
+	 * supplying add-on-specific settings URLs or self-hosted endpoints.
+	 *
+	 * @param string                $provider Provider key.
+	 * @param string                $settings_url Settings redirect URL.
+	 * @param array<string, string> $overrides Provider configuration overrides.
+	 *
+	 * @return self
+	 */
+	public static function for_provider( $provider, $settings_url, $overrides = [] ) {
+		$config                 = self::get_provider_config( $provider, $overrides );
+		$config['settings_url'] = $settings_url;
+
+		return new self( $config );
+	}
+
+	/**
+	 * Return provider defaults merged with caller overrides.
+	 *
+	 * @param string                $provider Provider key.
+	 * @param array<string, string> $overrides Provider configuration overrides.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_provider_config( $provider, $overrides = [] ) {
+		/*
+		 * Allow add-ons to filter provider config before merge to support additional keys
+		 * or override defaults without copy/pasting the entire config.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array<string, string> $provider_config Default provider config from class constant.
+		 * @param string                $provider        Provider key.
+		 * @param array<string, string> $overrides       Provider configuration overrides.
+		*/
+		$provider_config = apply_filters( 'gu_oauth_provider_config', [], $provider, $overrides );
+
+		return array_merge( $provider_config, $overrides );
+	}
+
+	/**
 	 * Start OAuth flow and process callback.
 	 *
 	 * @return void
 	 */
 	public function maybe_handle_flow() {
-		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+		$capability = is_multisite() ? 'manage_network_options' : 'manage_options';
+		if ( ! is_admin() || ! current_user_can( $capability ) ) {
 			return;
 		}
 
@@ -122,12 +166,16 @@ class OAuth_Flow {
 		$scope_constant         = $this->config['scope_constant'];
 
 		$credentials = [
-			'client_id'     => $client_id_constant && defined( $client_id_constant ) ? constant( $client_id_constant ) : '',
-			'client_secret' => $client_secret_constant && defined( $client_secret_constant ) ? constant( $client_secret_constant ) : '',
-			'scope'         => $scope_constant && defined( $scope_constant ) ? constant( $scope_constant ) : $this->config['default_scope'],
+			'client_id'     => $client_id_constant && defined( $client_id_constant ) ? (string) constant( $client_id_constant ) : '',
+			'client_secret' => $client_secret_constant && defined( $client_secret_constant ) ? (string) constant( $client_secret_constant ) : '',
+			'scope'         => $scope_constant && defined( $scope_constant ) ? (string) constant( $scope_constant ) : $this->config['default_scope'],
 		];
 
-		return ! empty( $this->config['credentials_filter'] ) ? apply_filters( $this->config['credentials_filter'], $credentials, $this->config ) : $credentials;
+		if ( ! empty( $this->config['credentials_filter'] ) ) {
+			$credentials = apply_filters( $this->config['credentials_filter'], $credentials, $this->config );
+		}
+
+		return array_map( 'strval', $credentials );
 	}
 
 	/**
@@ -153,6 +201,59 @@ class OAuth_Flow {
 
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for RFC7636 base64url PKCE encoding.
 		return rtrim( strtr( base64_encode( $hash ), '+/', '-_' ), '=' );
+	}
+
+	/**
+	 * Build callback URL for provider OAuth.
+	 *
+	 * @return string
+	 */
+	public function get_callback_url() {
+		return add_query_arg( $this->config['callback_arg'], 1, $this->config['settings_url'] );
+	}
+
+	/**
+	 * Output reusable OAuth controls and status messages for provider settings.
+	 *
+	 * @return void
+	 */
+	public function render_authorize_controls() {
+		$credentials = $this->get_credentials();
+		$status      = $this->get_status();
+		$label       = $this->config['label'];
+
+		if ( 'success' === $status ) {
+			/* translators: %s: Git provider label. */
+			printf( '<p><strong>%s</strong></p>', esc_html( sprintf( __( 'OAuth token updated from %s.', 'git-updater' ), $label ) ) );
+		}
+
+		if ( str_starts_with( $status, 'error-' ) ) {
+			/* translators: %s: Git provider label. */
+			printf( '<p><strong>%s</strong></p>', esc_html( sprintf( __( '%s OAuth was not completed. You can retry below.', 'git-updater' ), $label ) ) );
+		}
+
+		printf(
+			'<p class="description">%s <code>%s</code></p>',
+			esc_html__( 'OAuth callback URL:', 'git-updater' ),
+			esc_html( $this->get_callback_url() )
+		);
+
+		if ( empty( $credentials['client_id'] ) ) {
+			printf(
+				'<p class="description">%s</p>',
+				/* translators: 1: OAuth client ID constant name. 2: OAuth credentials filter name. */
+				esc_html( sprintf( __( 'To enable OAuth authorization, set %1$s in wp-config.php or filter %2$s.', 'git-updater' ), $this->config['client_id_constant'], $this->config['credentials_filter'] ) )
+			);
+
+			return;
+		}
+
+		printf(
+			'<p><a class="button button-secondary" href="%s">%s</a></p>',
+			esc_url( $this->get_start_url() ),
+			/* translators: %s: Git provider label. */
+			esc_html( sprintf( __( 'Authorize via %s OAuth', 'git-updater' ), $label ) )
+		);
 	}
 
 	/**
@@ -199,14 +300,16 @@ class OAuth_Flow {
 		 *
 		 * @since 13.4.0
 		 *
-		 * @param array $authorize_args OAuth authorize query args.
-		 * @param array $credentials    OAuth credentials.
-		 * @param array $config         OAuth provider configuration.
+		 * @param array<string, string> $authorize_args OAuth authorize query args.
+		 * @param array<string, string> $credentials    OAuth credentials.
+		 * @param array<string, string> $config         OAuth provider configuration.
 		 */
 		$authorize_args = apply_filters( 'gu_oauth_authorize_args', $authorize_args, $credentials, $this->config );
 
-		wp_safe_redirect( add_query_arg( $authorize_args, $this->config['authorize_url'] ) );
-		exit;
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Provider authorize URLs are intentionally external OAuth endpoints.
+		if ( wp_redirect( esc_url_raw( add_query_arg( $authorize_args, $this->config['authorize_url'] ) ) ) ) {
+			exit; // @codeCoverageIgnore
+		}
 	}
 
 	/**
@@ -228,7 +331,7 @@ class OAuth_Flow {
 
 		$key      = $this->get_transient_key( $state );
 		$flow     = get_transient( $key );
-		$verifier = is_array( $flow ) && ! empty( $flow['code_verifier'] ) ? $flow['code_verifier'] : '';
+		$verifier = is_array( $flow ) && ! empty( $flow['code_verifier'] ) ? (string) $flow['code_verifier'] : '';
 		delete_transient( $key );
 
 		if ( empty( $verifier ) ) {
@@ -246,6 +349,7 @@ class OAuth_Flow {
 		}
 
 		$options                                 = get_site_option( 'git_updater', [] );
+		$options                                 = is_array( $options ) ? $options : [];
 		$options[ $this->config['option_name'] ] = $token;
 		update_site_option( 'git_updater', $options );
 
@@ -269,6 +373,10 @@ class OAuth_Flow {
 			'code_verifier' => $verifier,
 		];
 
+		if ( 'bitbucket' === $this->config['provider'] ) {
+			$body['grant_type'] = 'authorization_code';
+		}
+
 		if ( ! empty( $credentials['client_secret'] ) ) {
 			$body['client_secret'] = $credentials['client_secret'];
 		}
@@ -278,9 +386,9 @@ class OAuth_Flow {
 		 *
 		 * @since 13.4.0
 		 *
-		 * @param array $body        OAuth token request body.
-		 * @param array $credentials OAuth credentials.
-		 * @param array $config      OAuth provider configuration.
+		 * @param array<string, string> $body        OAuth token request body.
+		 * @param array<string, string> $credentials OAuth credentials.
+		 * @param array<string, string> $config      OAuth provider configuration.
 		 */
 		$body = apply_filters( 'gu_oauth_token_request_body', $body, $credentials, $this->config );
 
@@ -305,16 +413,7 @@ class OAuth_Flow {
 			return '';
 		}
 
-		return sanitize_text_field( $payload['access_token'] );
-	}
-
-	/**
-	 * Build callback URL for provider OAuth.
-	 *
-	 * @return string
-	 */
-	private function get_callback_url() {
-		return add_query_arg( $this->config['callback_arg'], 1, $this->config['settings_url'] );
+		return sanitize_text_field( (string) $payload['access_token'] );
 	}
 
 	/**
@@ -324,13 +423,14 @@ class OAuth_Flow {
 	 * @return void
 	 */
 	private function redirect_with_status( $status ) {
-		wp_safe_redirect(
+		if ( wp_safe_redirect(
 			add_query_arg(
 				$this->config['status_arg'],
 				$status,
 				$this->config['settings_url']
 			)
-		);
-		exit;
+		) ) {
+			exit; // @codeCoverageIgnore
+		}
 	}
 }

@@ -128,7 +128,13 @@ trait API_Common {
 	 */
 	final public function get_remote_api_info( $git, $request ): bool {
 		$cache    = $this->get_repo_cache( $this->type->slug );
-		$response = $cache[ $this->type->slug ] ?? false;
+		$response = is_array( $cache ) ? ( $cache[ $this->type->slug ] ?? false ) : false;
+
+		// Capture old version before overwriting: use valid cache if available, else raw option.
+		$prior       = is_array( $cache ) ? $cache : $this->get_repo_cache( $this->type->slug, false );
+		$old_version = is_array( $prior ) && isset( $prior[ $this->type->slug ]['Version'] )
+			? (string) $prior[ $this->type->slug ]['Version']
+			: '';
 
 		if ( ! $response ) {
 			self::$method = 'file';
@@ -149,8 +155,8 @@ trait API_Common {
 		$this->set_repo_cache( $this->type->slug, $response, false, false );
 		$this->set_repo_cache( 'repo', $this->type->slug, false, false );
 
-		// Check remote version and cached remote version and extend cache timeout if the same to prevent unnecessary API calls.
-		if ( $this->maybe_extend_repo_cache( $response, $this->type ) ) {
+		// Check remote version against the pre-fetch cached version; extend cache if unchanged.
+		if ( $this->maybe_extend_repo_cache( $response, $this->type, $old_version ) ) {
 			return false;
 		}
 
@@ -420,10 +426,6 @@ trait API_Common {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_asset'] ?? false;
 
-		if ( ! $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
-
 		if ( ! $response ) {
 			self::$method = 'release_asset';
 			$response     = $this->api( $request );
@@ -457,10 +459,6 @@ trait API_Common {
 	final public function get_api_release_assets( $git, $request ) {
 		$cache    = $this->get_repo_cache( $this->type->slug );
 		$response = $cache['release_assets'] ?? false;
-
-		if ( ! $response && $this->exit_no_update( $response ) ) {
-			return false;
-		}
 
 		if ( ! $response ) {
 			self::$method = 'release_asset';
@@ -506,10 +504,6 @@ trait API_Common {
 
 		$response = $this->parse_contents_response( $response );
 		$this->set_repo_cache( 'contents', $response );
-
-		if ( $this->validate_response( $response ) ) {
-			return false;
-		}
 
 		return true;
 	}

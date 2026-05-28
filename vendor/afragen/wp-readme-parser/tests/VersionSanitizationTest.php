@@ -18,6 +18,11 @@ class VersionSanitizationTest extends ParserTestCase
     // Requires at least
     // -------------------------------------------------------------------------
 
+    /**
+     * @test
+     *
+     * @dataProvider requiresVersionProvider
+     */
     #[Test]
     #[DataProvider('requiresVersionProvider')]
     public function it_sanitizes_requires_version(string $input, string $expected): void
@@ -43,6 +48,7 @@ class VersionSanitizationTest extends ParserTestCase
         ];
     }
 
+    /** @test */
     #[Test]
     public function it_sets_requires_header_ignored_warning_on_bad_value(): void
     {
@@ -50,6 +56,7 @@ class VersionSanitizationTest extends ParserTestCase
         $this->assertArrayHasKey('requires_header_ignored', $parser->warnings);
     }
 
+    /** @test */
     #[Test]
     public function it_does_not_warn_when_requires_is_valid(): void
     {
@@ -61,6 +68,11 @@ class VersionSanitizationTest extends ParserTestCase
     // Tested up to
     // -------------------------------------------------------------------------
 
+    /**
+     * @test
+     *
+     * @dataProvider validTestedVersionProvider
+     */
     #[Test]
     #[DataProvider('validTestedVersionProvider')]
     public function it_sanitizes_tested_version(string $input, string $expected): void
@@ -83,6 +95,7 @@ class VersionSanitizationTest extends ParserTestCase
         ];
     }
 
+    /** @test */
     #[Test]
     public function it_sets_tested_header_ignored_warning_on_bad_value(): void
     {
@@ -94,6 +107,11 @@ class VersionSanitizationTest extends ParserTestCase
     // Requires PHP
     // -------------------------------------------------------------------------
 
+    /**
+     * @test
+     *
+     * @dataProvider requiresPhpProvider
+     */
     #[Test]
     #[DataProvider('requiresPhpProvider')]
     public function it_sanitizes_requires_php(string $input, string $expected): void
@@ -114,6 +132,7 @@ class VersionSanitizationTest extends ParserTestCase
         ];
     }
 
+    /** @test */
     #[Test]
     public function it_sets_requires_php_header_ignored_warning_on_bad_value(): void
     {
@@ -125,6 +144,11 @@ class VersionSanitizationTest extends ParserTestCase
     // Stable tag
     // -------------------------------------------------------------------------
 
+    /**
+     * @test
+     *
+     * @dataProvider stableTagProvider
+     */
     #[Test]
     #[DataProvider('stableTagProvider')]
     public function it_sanitizes_stable_tag(string $input, string $expected): void

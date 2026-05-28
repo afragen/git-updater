@@ -192,6 +192,31 @@ trait GU_Trait {
 	}
 
 	/**
+	 * Refresh the repo cache timeout to the default `$hours` after a complete fetch cycle.
+	 *
+	 * Companion to set_repo_cache(): per-entry writes preserve an existing 'timeout'
+	 * via `??`, so without this an expired timeout from the prior cycle would linger
+	 * and force the next pass to re-fetch. No-op if 'ran' bookkeeping is incomplete.
+	 *
+	 * @param string $slug Repo slug.
+	 *
+	 * @return void
+	 */
+	final public function set_repo_cache_timeout( string $slug ): void {
+		$cache_key = $this->get_cache_key( $slug );
+		$cache     = get_site_option( $cache_key, [] );
+		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
+
+		if ( ! isset( $cache['ran'] ) || array_diff( $expected, $cache['ran'] ) ) {
+			return;
+		}
+
+		$hours            = $this->get_class_vars( 'API\\API', 'hours' );
+		$cache['timeout'] = strtotime( apply_filters( 'gu_repo_cache_timeout', '+' . $hours . ' hours', 'ran', $cache['ran'], $slug ) );
+		update_site_option( $cache_key, $cache );
+	}
+
+	/**
 	 * Check if current cache timeout is valid.
 	 *
 	 * @param int $timestamp Cache timeout timestamp.
@@ -212,18 +237,19 @@ trait GU_Trait {
 	 *
 	 * @param array<string, string> $remote_headers Remote headers data array.
 	 * @param stdClass              $repo           Repo data object.
+	 * @param string                $old_version    Previously cached remote version to compare against.
 	 *
 	 * @return bool
 	 */
-	final public function maybe_extend_repo_cache( $remote_headers, $repo ): bool {
+	final public function maybe_extend_repo_cache( $remote_headers, $repo, string $old_version = '' ): bool {
 		$return    = false;
 		$cache_key = $this->get_cache_key( $repo->slug ?? false );
 		$cache     = get_site_option( $cache_key, [] );
+		$expected  = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
 
-		if ( isset( $cache['repo'] ) && version_compare( $remote_headers['Version'], $cache[ $cache['repo'] ]['Version'] ?? '', '==' ) ) {
-			$expected = [ 'contents', 'assets', 'readme', 'changes', 'tags', 'branches', 'meta' ];
-			if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
-				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ) ) {
+		if ( isset( $cache['ran'] ) && ! array_diff( $expected, $cache['ran'] ) ) {
+			if ( version_compare( $remote_headers['Version'], $old_version, '==' ) ) {
+				if ( ! $this->is_cache_timeout_valid( $cache['timeout'] ?? 0 ) ) {
 					$cache['timeout'] = strtotime( '+6 hours' );
 					update_site_option( $cache_key, $cache );
 				}
@@ -329,6 +355,7 @@ trait GU_Trait {
 	 */
 	final public function get_reflection_method( $obj, $method ): ReflectionMethod {
 		$reflection_method = new ReflectionMethod( $obj, $method );
+		PHP_VERSION_ID < 80100 && $reflection_method->setAccessible( true );
 
 		return $reflection_method;
 	}
@@ -348,17 +375,9 @@ trait GU_Trait {
 			return false;
 		}
 		$property = $reflection_obj->getProperty( $name );
+		PHP_VERSION_ID < 80100 && $property->setAccessible( true );
 
 		return $property->getValue( $class );
-	}
-
-	/**
-	 * Returns static class variable $error_code.
-	 *
-	 * @return array<string, mixed>
-	 */
-	final public function get_error_codes() {
-		return $this->get_class_vars( 'API\API', 'error_code' );
 	}
 
 	/**

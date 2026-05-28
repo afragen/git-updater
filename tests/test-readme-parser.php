@@ -114,6 +114,7 @@ README;
 	 */
 	private function call_create_contributors( Readme_Parser $parser, array $users ): array {
 		$rm = new ReflectionMethod( $parser, 'create_contributors' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
 		return $rm->invoke( $parser, $users );
 	}
 

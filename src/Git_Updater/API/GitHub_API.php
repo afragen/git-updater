@@ -32,14 +32,23 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class GitHub_API extends API implements API_Interface {
 	/**
+	 * OAuth flow controller.
+	 *
+	 * @var OAuth_Flow|null
+	 */
+	private $oauth_flow;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param stdClass $type plugin|theme.
 	 */
 	public function __construct( $type = null ) {
 		parent::__construct();
-		$this->type = $type;
-		add_action( 'admin_init', [ $this, 'maybe_handle_oauth_flow' ] );
+		$this->type       = $type;
+		$this->oauth_flow = $this->get_oauth_flow();
+		add_action( 'admin_init', [ $this->oauth_flow, 'maybe_handle_flow' ] );
+		add_filter( 'gu_oauth_provider_config', [ __CLASS__, 'get_github_oauth_config' ], 10, 3 );
 		$this->settings_hook( $this );
 		$this->add_settings_subtab();
 		$this->add_install_fields( $this );
@@ -109,6 +118,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return string|bool|void
 	 */
 	public function get_release_asset() {
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Method retained for possible release asset support.
 		// return $this->get_api_release_asset( 'github', '/repos/:owner/:repo/releases/latest' );
 	} // @codeCoverageIgnore
 
@@ -475,6 +485,14 @@ class GitHub_API extends API implements API_Interface {
 			]
 		);
 
+		add_settings_field(
+			'github_oauth_authorize',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ $this, 'github_oauth_authorize' ],
+			'git_updater_github_install_settings',
+			'github_access_token'
+		);
+
 		/*
 		 * Show section for private GitHub repositories.
 		 */
@@ -520,7 +538,6 @@ class GitHub_API extends API implements API_Interface {
 	 */
 	public function print_section_github_access_token() {
 		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
-		$this->render_oauth_controls();
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
 	}
@@ -530,39 +547,8 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @return void
 	 */
-	private function render_oauth_controls() {
-		$oauth       = $this->get_oauth_flow();
-		$credentials = $oauth->get_credentials();
-		$status      = $oauth->get_status();
-
-		if ( 'success' === $status ) {
-			echo '<p><strong>' . esc_html__( 'OAuth token updated from GitHub.', 'git-updater' ) . '</strong></p>';
-		}
-
-		if ( str_starts_with( $status, 'error-' ) ) {
-			echo '<p><strong>' . esc_html__( 'GitHub OAuth was not completed. You can retry below.', 'git-updater' ) . '</strong></p>';
-		}
-
-		if ( empty( $credentials['client_id'] ) ) {
-			echo '<p>' . esc_html__( 'To enable OAuth login, set GU_GITHUB_OAUTH_CLIENT_ID in wp-config.php or filter gu_github_oauth_credentials.', 'git-updater' ) . '</p>';
-
-			return;
-		}
-
-		printf(
-			'<p><a class="button button-secondary" href="%s">%s</a></p>',
-			esc_url( $oauth->get_start_url() ),
-			esc_html__( 'Authorize via GitHub OAuth', 'git-updater' )
-		);
-	}
-
-	/**
-	 * Start OAuth flow and process callback.
-	 *
-	 * @return void
-	 */
-	public function maybe_handle_oauth_flow() {
-		$this->get_oauth_flow()->maybe_handle_flow();
+	public function github_oauth_authorize() {
+		$this->get_oauth_flow()->render_authorize_controls();
 	}
 
 	/**
@@ -570,26 +556,14 @@ class GitHub_API extends API implements API_Interface {
 	 *
 	 * @return OAuth_Flow
 	 */
-	private function get_oauth_flow() {
-		return new OAuth_Flow(
-			[
-				'provider'               => 'github',
-				'label'                  => 'GitHub',
-				'option_name'            => 'github_access_token',
-				'settings_url'           => $this->get_settings_redirect_url(),
-				'authorize_url'          => 'https://github.com/login/oauth/authorize',
-				'token_url'              => 'https://github.com/login/oauth/access_token',
-				'default_scope'          => 'repo',
-				'credentials_filter'     => 'gu_github_oauth_credentials',
-				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
-				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
-				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
-				'start_arg'              => 'gu_github_oauth_start',
-				'callback_arg'           => 'gu_github_oauth_callback',
-				'status_arg'             => 'gu_github_oauth',
-				'nonce_action'           => 'gu-github-oauth-start',
-			]
-		);
+	public function get_oauth_flow() {
+		if ( $this->oauth_flow instanceof OAuth_Flow ) {
+			return $this->oauth_flow;
+		}
+
+		$this->oauth_flow = OAuth_Flow::for_provider( 'github', $this->get_settings_redirect_url() );
+
+		return $this->oauth_flow;
 	}
 
 	/**
@@ -690,5 +664,37 @@ class GitHub_API extends API implements API_Interface {
 		}
 
 		return $install;
+	}
+
+	/**
+	 * Add GitHub OAuth config to gu_oauth_provider_config filter.
+	 *
+	 * @param array<string, mixed>  $config    Array of existing provider configs.
+	 * @param string                $provider  Provider key.
+	 * @param array<string, string> $overrides Provider configuration overrides.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function get_github_oauth_config( $config, $provider, $overrides = [] ) {
+		if ( 'github' === $provider ) {
+			$config = [
+				'provider'               => 'github',
+				'label'                  => 'GitHub',
+				'option_name'            => 'github_access_token',
+				'authorize_url'          => 'https://github.com/login/oauth/authorize',
+				'token_url'              => 'https://github.com/login/oauth/access_token',
+				'default_scope'          => 'repo',
+				'credentials_filter'     => 'gu_github_oauth_credentials',
+				'client_id_constant'     => 'GU_GITHUB_OAUTH_CLIENT_ID',
+				'client_secret_constant' => 'GU_GITHUB_OAUTH_CLIENT_SECRET',
+				'scope_constant'         => 'GU_GITHUB_OAUTH_SCOPE',
+				'start_arg'              => 'gu_github_oauth_start',
+				'callback_arg'           => 'gu_github_oauth_callback',
+				'status_arg'             => 'gu_github_oauth',
+				'nonce_action'           => 'gu-github-oauth-start',
+			];
+		}
+
+		return $config;
 	}
 }

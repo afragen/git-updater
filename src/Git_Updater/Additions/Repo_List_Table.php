@@ -11,6 +11,8 @@
  *
  * @phpcs:disable Squiz.Commenting.InlineComment.InvalidEndChar
  * @phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ * @phpcs:disable Squiz.PHP.CommentedOutCode.Found
+ * @phpcs:disable WordPress.Security.NonceVerification.Recommended
  */
 
 namespace Fragen\Git_Updater\Additions;
