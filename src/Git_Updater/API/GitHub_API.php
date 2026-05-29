@@ -473,6 +473,15 @@ class GitHub_API extends API implements API_Interface {
 			]
 		);
 
+		add_settings_field(
+			'github_oauth_connect',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ Singleton::get_instance( 'OAuth\OAuth_Connect', $this ), 'render_connect_field' ],
+			'git_updater_github_install_settings',
+			'github_access_token',
+			[ 'provider' => 'github' ]
+		);
+
 		/*
 		 * Show section for private GitHub repositories.
 		 */

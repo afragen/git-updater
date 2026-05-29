@@ -352,7 +352,10 @@ class Settings {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
-			|| isset( $_GET['refresh_transients'] );
+			|| isset( $_GET['refresh_transients'] )
+			|| isset( $_GET['oauth_connected'] )
+			|| isset( $_GET['oauth_disconnected'] )
+			|| isset( $_GET['oauth_error'] );
 
 		if ( $display ) {
 			echo '<div class="updated"><p>';
@@ -361,8 +364,20 @@ class Settings {
 			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_connected'] ) && '1' === $_GET['oauth_connected'] ) {
+			echo '<div class="updated"><p>';
+			esc_html_e( 'Connected successfully.', 'git-updater' );
+			echo '</p></div>';
+		} elseif ( isset( $_GET['oauth_disconnected'] ) && '1' === $_GET['oauth_disconnected'] ) {
+			echo '<div class="updated"><p>';
+			esc_html_e( 'Disconnected.', 'git-updater' );
+			echo '</p></div>';
+		} elseif ( isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ) {
+			echo '<div class="error"><p>';
+			esc_html_e( 'OAuth connection failed. Please try again.', 'git-updater' );
+			echo '</p></div>';
 		}
-		if ( $display ) {
+		if ( $display && ! isset( $_GET['oauth_connected'] ) && ! isset( $_GET['oauth_disconnected'] ) && ! isset( $_GET['oauth_error'] ) ) {
 			echo '</p></div>';
 		}
 	}
