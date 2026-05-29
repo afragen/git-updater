@@ -394,4 +394,92 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertEquals( 'github_token', $options['github_access_token'] );
 		$this->assertEquals( 'gitlab_token', $options['gitlab_access_token'] );
 	}
+
+	/**
+	 * Test handle_callback with invalid provider redirects with error.
+	 */
+	public function test_handle_callback_with_invalid_provider(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user );
+
+		$_GET['provider'] = 'invalid_provider';
+		$_GET['gu_exchange_code'] = 'test_code';
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
+	 * Test handle_callback with empty exchange code redirects with error.
+	 */
+	public function test_handle_callback_with_empty_exchange_code(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $user );
+
+		$_GET['provider'] = 'github';
+		$_GET['gu_exchange_code'] = '';
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
+	 * Test get_callback_url uses network_admin_url on multisite.
+	 * @group ms-required
+	 */
+	public function test_get_callback_url_uses_network_admin_on_multisite(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Multisite only test' );
+		}
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'get_callback_url' );
+		$method->setAccessible( true );
+
+		$url = $method->invoke( $this->oauth, 'github' );
+
+		$this->assertStringContainsString( 'network/admin-post.php', $url );
+		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
+	}
+
+	/**
+	 * Test fetch_token_from_connector returns null when connector not configured.
+	 */
+	public function test_fetch_token_from_connector_returns_null_without_config(): void {
+		if ( defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
+			$this->markTestSkipped( 'GIT_UPDATER_OAUTH_CONNECTOR_URL is defined' );
+		}
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'github', 'test_code' );
+
+		$this->assertNull( $result );
+	}
 }

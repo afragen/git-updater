@@ -148,7 +148,7 @@ class OAuth_Connect {
 
 		if ( ! isset( self::PROVIDERS[ $provider ] ) || empty( $exchange_code ) ) {
 			$this->redirect_with_status( $provider, 'oauth_error' );
-			return;
+			return; // @codeCoverageIgnore
 		}
 
 		$token = $this->fetch_token_from_connector( $provider, $exchange_code );
@@ -283,6 +283,6 @@ class OAuth_Connect {
 		$location = add_query_arg( '_wpnonce', wp_create_nonce( 'gu_settings' ), $location );
 
 		wp_safe_redirect( $location );
-		exit;
+		exit; // @codeCoverageIgnore
 	}
 }
