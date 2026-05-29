@@ -140,7 +140,7 @@ class OAuth_Connect {
 	 */
 	public function handle_callback(): void {
 		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore // @codeCoverageIgnore
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
 		}
 
 		$provider      = sanitize_key( $_GET['provider'] ?? '' );
