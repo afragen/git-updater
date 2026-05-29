@@ -49,13 +49,14 @@ class OAuth_Connect {
 	public function render_connect_field( array $args ): void {
 		$provider  = $args['provider'] ?? '';
 		$config    = self::PROVIDERS[ $provider ] ?? null;
-		$options   = get_site_option( 'git_updater', [] );
-		$token     = $options[ $config['option_key'] ] ?? '';
-		$connector = $this->get_connector_url();
 
 		if ( ! $config ) {
 			return;
 		}
+
+		$options   = get_site_option( 'git_updater', [] );
+		$token     = $options[ $config['option_key'] ] ?? '';
+		$connector = $this->get_connector_url();
 
 		if ( $token ) {
 			$this->render_connected_state( $provider, $config );
