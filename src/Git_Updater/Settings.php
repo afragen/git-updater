@@ -507,7 +507,7 @@ class Settings {
 					'id'          => $setting_field['callback'],
 					'token'       => true,
 					'title'       => $setting_field['title'],
-					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
+					'placeholder' => $setting_field['placeholder'] ?? null,
 				]
 			);
 		}
@@ -640,7 +640,7 @@ class Settings {
 		$options     = $this->get_class_vars( 'Base', 'options' );
 		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
 		$type        = isset( $args['token'] ) ? 'password' : 'text';
-		$placeholder = isset( $args['placeholder'] ) ? ( is_string( $args['placeholder'] ) ? $args['placeholder'] : 'username:password' ) : null;
+		$placeholder = $args['placeholder'] ?? null;
 		?>
 		<label for="<?php esc_attr( $args['id'] ); ?>">
 			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">

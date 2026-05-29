@@ -945,7 +945,7 @@ class Test_Settings_Token_Callbacks extends GU_Test_Case {
 
 	public function test_token_callback_text_outputs_placeholder_when_set(): void {
 		ob_start();
-		$this->settings->token_callback_text( [ 'id' => 'some_field', 'placeholder' => true ] );
+		$this->settings->token_callback_text( [ 'id' => 'some_field', 'placeholder' => 'username:password' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'username:password', $output );
 	}
