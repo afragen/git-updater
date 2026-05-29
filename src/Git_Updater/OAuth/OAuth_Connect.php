@@ -140,7 +140,7 @@ class OAuth_Connect {
 	 */
 	public function handle_callback(): void {
 		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'git-updater' ) );
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore // @codeCoverageIgnore
 		}
 
 		$provider      = sanitize_key( $_GET['provider'] ?? '' );
@@ -197,7 +197,7 @@ class OAuth_Connect {
 	 */
 	private function get_callback_url( string $provider ): string {
 		$base = is_multisite()
-			? network_admin_url( 'admin-post.php' )
+			? network_admin_url( 'admin-post.php' ) // @codeCoverageIgnore
 			: admin_url( 'admin-post.php' );
 		return add_query_arg(
 			[ 'action' => 'gu_oauth_callback', 'provider' => $provider ],

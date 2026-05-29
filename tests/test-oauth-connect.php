@@ -25,11 +25,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	public function set_up(): void {
 		parent::set_up();
 		$this->oauth = new OAuth_Connect();
-		// Clear any existing options
 		delete_site_option( 'git_updater' );
-		// Unset GET/POST variables
 		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_POST['provider'], $_POST['_wpnonce'] );
-		// Remove all filters
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 	}
@@ -45,6 +42,30 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 		parent::tear_down();
+	}
+
+	/**
+	 * Test fetch_token_from_connector returns null when connector not configured.
+	 * Must run before any test that defines GIT_UPDATER_OAUTH_CONNECTOR_URL.
+	 */
+	public function test_fetch_token_from_connector_returns_null_without_config(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'github', 'test_code' );
+
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test render_connect_field shows no connector message.
+	 * Must run before any test that defines GIT_UPDATER_OAUTH_CONNECTOR_URL.
+	 */
+	public function test_render_connect_field_shows_no_connector_message(): void {
+		ob_start();
+		$this->oauth->render_connect_field( [ 'provider' => 'github' ] );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', $output );
 	}
 
 	/**
@@ -90,20 +111,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertStringContainsString( 'Connected', $output );
 		$this->assertStringContainsString( 'Disconnect', $output );
 		$this->assertStringContainsString( 'gu_oauth_disconnect', $output );
-	}
-
-	/**
-	 * Test render_connect_field shows no connector message
-	 */
-	public function test_render_connect_field_shows_no_connector_message(): void {
-		// Ensure constant is not defined
-		if ( defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
-			$this->markTestSkipped( 'GIT_UPDATER_OAUTH_CONNECTOR_URL is defined' );
-		}
-		ob_start();
-		$this->oauth->render_connect_field( [ 'provider' => 'github' ] );
-		$output = ob_get_clean();
-		$this->assertStringContainsString( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', $output );
 	}
 
 	/**
@@ -170,12 +177,22 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 * Test handle_callback with insufficient permissions
 	 */
 	public function test_handle_callback_with_insufficient_permissions(): void {
-		// Create a subscriber user without proper permissions
 		$user = self::factory()->user->create( [ 'role' => 'subscriber' ] );
 		wp_set_current_user( $user );
 
 		$this->expectException( WPDieException::class );
 		$this->oauth->handle_callback();
+	}
+
+	/**
+	 * Grant super admin on multisite for admin users.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	private function maybe_grant_super_admin( int $user_id ): void {
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
 	}
 
 	/**
@@ -187,12 +204,12 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
 
-		// Mock the HTTP response
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
 				return [
@@ -204,12 +221,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			return $preempt;
 		}, 10, 3 );
 
-		// Capture redirect by hooking into it before exit
 		$redirected = false;
 		add_filter( 'wp_redirect', function( $url ) use ( &$redirected ) {
 			$redirected = true;
 			$this->assertStringContainsString( 'oauth_connected', $url );
-			// Throw instead of exit to stop execution
 			throw new RuntimeException( 'Redirect captured' );
 		} );
 
@@ -220,7 +235,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
 		}
 
-		// Verify token was saved
 		$options = get_site_option( 'git_updater' );
 		$this->assertEquals( 'test_access_token', $options['github_access_token'] );
 	}
@@ -234,12 +248,12 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}
 
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
 
-		// Mock the HTTP response with error
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
 				return new WP_Error( 'http_error', 'Connection failed' );
@@ -247,11 +261,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			return $preempt;
 		}, 10, 3 );
 
-		// Store the redirect URL for verification
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
 			$captured_url = $url;
-			// Throw instead of exit to stop execution
 			throw new RuntimeException( 'Redirect captured' );
 		} );
 
@@ -285,6 +297,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_handle_disconnect_with_invalid_nonce(): void {
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		$_POST['provider'] = 'github';
@@ -299,9 +312,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_handle_disconnect_successfully_removes_token(): void {
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
-		// Set up initial token
 		update_site_option( 'git_updater', [
 			'github_access_token' => 'test_token',
 			'gitlab_access_token' => 'other_token',
@@ -310,11 +323,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_POST['provider'] = 'github';
 		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'] = wp_create_nonce( 'gu_oauth_disconnect_github' );
 
-		// Test that we reach the redirect by verifying the nonce check passed
 		$redirect_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$redirect_url ) {
 			$redirect_url = $url;
-			// Throw instead of exit to stop execution
 			throw new RuntimeException( 'Redirect captured' );
 		} );
 
@@ -325,11 +336,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
 		}
 
-		// If we got a redirect URL with oauth_disconnected, the delete_token succeeded
 		$this->assertNotNull( $redirect_url );
 		$this->assertStringContainsString( 'oauth_disconnected', $redirect_url );
 
-		// Verify token was removed
 		$options = get_site_option( 'git_updater' );
 		$this->assertArrayNotHasKey( 'github_access_token', $options );
 		$this->assertEquals( 'other_token', $options['gitlab_access_token'] );
@@ -340,13 +349,13 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_token_persistence_across_providers(): void {
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		if ( ! defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
 			define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://connector.example.com' );
 		}
 
-		// Connect GitHub
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'github_code';
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
@@ -360,7 +369,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		}, 10, 3 );
 
 		add_filter( 'wp_redirect', static function() {
-			// Throw instead of exit to stop execution
 			throw new RuntimeException( 'Redirect captured' );
 		} );
 		try {
@@ -369,7 +377,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			// Expected
 		}
 
-		// Connect GitLab - update filter to return gitlab token
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, 'gitlab' ) !== false && strpos( $url, '/token' ) !== false ) {
 				return [
@@ -389,7 +396,6 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			// Expected
 		}
 
-		// Verify both tokens exist
 		$options = get_site_option( 'git_updater' );
 		$this->assertEquals( 'github_token', $options['github_access_token'] );
 		$this->assertEquals( 'gitlab_token', $options['gitlab_access_token'] );
@@ -400,6 +406,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_handle_callback_with_invalid_provider(): void {
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		$_GET['provider'] = 'invalid_provider';
@@ -427,6 +434,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_handle_callback_with_empty_exchange_code(): void {
 		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
 		$_GET['provider'] = 'github';
@@ -465,21 +473,5 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->assertStringContainsString( 'network/admin-post.php', $url );
 		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
-	}
-
-	/**
-	 * Test fetch_token_from_connector returns null when connector not configured.
-	 */
-	public function test_fetch_token_from_connector_returns_null_without_config(): void {
-		if ( defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
-			$this->markTestSkipped( 'GIT_UPDATER_OAUTH_CONNECTOR_URL is defined' );
-		}
-
-		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->oauth, 'github', 'test_code' );
-
-		$this->assertNull( $result );
 	}
 }
