@@ -79,13 +79,16 @@ class OAuth_Connect {
 	 * @return void
 	 */
 	private function render_connected_state( string $provider, array $config ): void {
+		$disconnect_url = add_query_arg(
+			[
+				'action'   => 'gu_oauth_disconnect',
+				'provider' => $provider,
+				'_wpnonce' => wp_create_nonce( 'gu_oauth_disconnect_' . $provider ),
+			],
+			admin_url( 'admin-post.php' )
+		);
 		echo '<span class="gu-oauth-connected">&#10003; ' . esc_html__( 'Connected', 'git-updater' ) . '</span> ';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline">';
-		echo '<input type="hidden" name="action" value="gu_oauth_disconnect">';
-		echo '<input type="hidden" name="provider" value="' . esc_attr( $provider ) . '">';
-		wp_nonce_field( 'gu_oauth_disconnect_' . $provider );
-		echo '<button type="submit" class="button button-small">' . esc_html__( 'Disconnect', 'git-updater' ) . '</button>';
-		echo '</form>';
+		echo '<a href="' . esc_url( $disconnect_url ) . '" class="button button-small">' . esc_html__( 'Disconnect', 'git-updater' ) . '</a>';
 	}
 
 	/**
@@ -167,12 +170,12 @@ class OAuth_Connect {
 	 * @return void
 	 */
 	public function handle_disconnect(): void {
-		$provider = sanitize_key( $_POST['provider'] ?? '' );
+		$provider = sanitize_key( $_GET['provider'] ?? '' );
 
 		check_admin_referer( 'gu_oauth_disconnect_' . $provider );
 
 		if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'git-updater' ) );
+			wp_die( esc_html__( 'Forbidden', 'git-updater' ) ); // @codeCoverageIgnore
 		}
 
 		$this->delete_token( $provider );

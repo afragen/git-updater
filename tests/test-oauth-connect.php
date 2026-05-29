@@ -26,7 +26,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		parent::set_up();
 		$this->oauth = new OAuth_Connect();
 		delete_site_option( 'git_updater' );
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 	}
@@ -36,7 +36,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function tear_down(): void {
 		delete_site_option( 'git_updater' );
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		remove_all_actions( 'admin_post_gu_oauth_callback' );
 		remove_all_actions( 'admin_post_gu_oauth_disconnect' );
 		remove_all_filters( 'pre_http_request' );
@@ -285,8 +285,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$user = self::factory()->user->create( [ 'role' => 'subscriber' ] );
 		wp_set_current_user( $user );
 
-		$_POST['provider'] = 'github';
-		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'] = wp_create_nonce( 'gu_oauth_disconnect_github' );
+		$_GET['provider'] = 'github';
+		$_REQUEST['_wpnonce'] = $_GET['_wpnonce'] = wp_create_nonce( 'gu_oauth_disconnect_github' );
 
 		$this->expectException( WPDieException::class );
 		$this->oauth->handle_disconnect();
@@ -300,8 +300,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->maybe_grant_super_admin( $user );
 		wp_set_current_user( $user );
 
-		$_POST['provider'] = 'github';
-		$_POST['_wpnonce'] = 'invalid_nonce';
+		$_GET['provider'] = 'github';
+		$_GET['_wpnonce'] = 'invalid_nonce';
 
 		$this->expectException( WPDieException::class );
 		$this->oauth->handle_disconnect();
@@ -320,8 +320,8 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			'gitlab_access_token' => 'other_token',
 		] );
 
-		$_POST['provider'] = 'github';
-		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'] = wp_create_nonce( 'gu_oauth_disconnect_github' );
+		$_GET['provider'] = 'github';
+		$_REQUEST['_wpnonce'] = $_GET['_wpnonce'] = wp_create_nonce( 'gu_oauth_disconnect_github' );
 
 		$redirect_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$redirect_url ) {

@@ -357,27 +357,22 @@ class Settings {
 			|| isset( $_GET['oauth_disconnected'] )
 			|| isset( $_GET['oauth_error'] );
 
+		$class = isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ? 'error' : 'updated';
 		if ( $display ) {
-			echo '<div class="updated"><p>';
+			echo '<div class="' . esc_attr( $class ) . '"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
 			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
 		} elseif ( isset( $_GET['oauth_connected'] ) && '1' === $_GET['oauth_connected'] ) {
-			echo '<div class="updated"><p>';
 			esc_html_e( 'Connected successfully.', 'git-updater' );
-			echo '</p></div>';
 		} elseif ( isset( $_GET['oauth_disconnected'] ) && '1' === $_GET['oauth_disconnected'] ) {
-			echo '<div class="updated"><p>';
 			esc_html_e( 'Disconnected.', 'git-updater' );
-			echo '</p></div>';
 		} elseif ( isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ) {
-			echo '<div class="error"><p>';
 			esc_html_e( 'OAuth connection failed. Please try again.', 'git-updater' );
-			echo '</p></div>';
 		}
-		if ( $display && ! isset( $_GET['oauth_connected'] ) && ! isset( $_GET['oauth_disconnected'] ) && ! isset( $_GET['oauth_error'] ) ) {
+		if ( $display ) {
 			echo '</p></div>';
 		}
 	}
@@ -642,8 +637,8 @@ class Settings {
 		$type        = isset( $args['token'] ) ? 'password' : 'text';
 		$placeholder = $args['placeholder'] ?? null;
 		?>
-		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+		<label for="<?php echo esc_attr( $args['id'] ); ?>">
+			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 		</label>
 		<?php
 	}
