@@ -209,17 +209,16 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		add_filter( 'wp_redirect', function( $url ) use ( &$redirected ) {
 			$redirected = true;
 			$this->assertStringContainsString( 'oauth_connected', $url );
-			return false; // Prevent actual redirect
+			// Throw instead of exit to stop execution
+			throw new RuntimeException( 'Redirect captured' );
 		} );
 
-		// Use output buffering to catch any output
-		ob_start();
 		try {
 			$this->oauth->handle_callback();
-		} catch ( Exception $e ) {
-			// Expected - redirect calls exit
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
 		}
-		ob_end_clean();
 
 		// Verify token was saved
 		$options = get_site_option( 'git_updater' );
@@ -252,16 +251,16 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
 			$captured_url = $url;
-			return false;
+			// Throw instead of exit to stop execution
+			throw new RuntimeException( 'Redirect captured' );
 		} );
 
-		ob_start();
 		try {
 			$this->oauth->handle_callback();
-		} catch ( Exception $e ) {
-			// Expected - exit called after redirect
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
 		}
-		ob_end_clean();
 
 		$this->assertNotNull( $captured_url );
 		$this->assertStringContainsString( 'oauth_error', $captured_url );
@@ -351,7 +350,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'github_code';
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
-			if ( strpos( $url, '/token' ) !== false ) {
+			if ( strpos( $url, 'github' ) !== false && strpos( $url, '/token' ) !== false ) {
 				return [
 					'response' => [ 'code' => 200 ],
 					'body'     => wp_json_encode( [ 'access_token' => 'github_token' ] ),
@@ -360,24 +359,35 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			return $preempt;
 		}, 10, 3 );
 
-		add_filter( 'wp_redirect', '__return_false' );
-		ob_start();
+		add_filter( 'wp_redirect', static function() {
+			// Throw instead of exit to stop execution
+			throw new RuntimeException( 'Redirect captured' );
+		} );
 		try {
 			$this->oauth->handle_callback();
-		} catch ( Exception $e ) {
+		} catch ( RuntimeException $e ) {
+			// Expected
 		}
-		ob_end_clean();
 
-		// Connect GitLab
+		// Connect GitLab - update filter to return gitlab token
+		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
+			if ( strpos( $url, 'gitlab' ) !== false && strpos( $url, '/token' ) !== false ) {
+				return [
+					'response' => [ 'code' => 200 ],
+					'body'     => wp_json_encode( [ 'access_token' => 'gitlab_token' ] ),
+				];
+			}
+			return $preempt;
+		}, 10, 4 );
+
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'gitlab_code';
 
-		ob_start();
 		try {
 			$this->oauth->handle_callback();
-		} catch ( Exception $e ) {
+		} catch ( RuntimeException $e ) {
+			// Expected
 		}
-		ob_end_clean();
 
 		// Verify both tokens exist
 		$options = get_site_option( 'git_updater' );
