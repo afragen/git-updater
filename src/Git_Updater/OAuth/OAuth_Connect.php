@@ -24,10 +24,22 @@ class OAuth_Connect {
 	 * @var array<string, array<string, string>>
 	 */
 	const PROVIDERS = [
-		'github'    => [ 'option_key' => 'github_access_token', 'label' => 'GitHub' ],
-		'gitlab'    => [ 'option_key' => 'gitlab_access_token', 'label' => 'GitLab' ],
-		'bitbucket' => [ 'option_key' => 'bitbucket_access_token', 'label' => 'Bitbucket' ],
-		'gitea'     => [ 'option_key' => 'gitea_access_token', 'label' => 'Gitea' ],
+		'github'    => [
+			'option_key' => 'github_access_token',
+			'label'      => 'GitHub',
+		],
+		'gitlab'    => [
+			'option_key' => 'gitlab_access_token',
+			'label'      => 'GitLab',
+		],
+		'bitbucket' => [
+			'option_key' => 'bitbucket_access_token',
+			'label'      => 'Bitbucket',
+		],
+		'gitea'     => [
+			'option_key' => 'gitea_access_token',
+			'label'      => 'Gitea',
+		],
 	];
 
 	/**
@@ -47,8 +59,8 @@ class OAuth_Connect {
 	 * @return void
 	 */
 	public function render_connect_field( array $args ): void {
-		$provider  = $args['provider'] ?? '';
-		$config    = self::PROVIDERS[ $provider ] ?? null;
+		$provider = $args['provider'] ?? '';
+		$config   = self::PROVIDERS[ $provider ] ?? null;
 
 		if ( ! $config ) {
 			return;
@@ -74,7 +86,7 @@ class OAuth_Connect {
 	/**
 	 * Render the connected state with disconnect button.
 	 *
-	 * @param string               $provider Provider slug.
+	 * @param string                $provider Provider slug.
 	 * @param array<string, string> $config   Provider configuration.
 	 * @return void
 	 */
@@ -105,9 +117,9 @@ class OAuth_Connect {
 	/**
 	 * Render the connect button.
 	 *
-	 * @param string               $provider  Provider slug.
+	 * @param string                $provider  Provider slug.
 	 * @param array<string, string> $config    Provider configuration.
-	 * @param string               $connector Connector URL.
+	 * @param string                $connector Connector URL.
 	 * @return void
 	 */
 	private function render_connect_button( string $provider, array $config, string $connector ): void {
@@ -203,7 +215,10 @@ class OAuth_Connect {
 			? network_admin_url( 'admin-post.php' ) // @codeCoverageIgnore
 			: admin_url( 'admin-post.php' );
 		return add_query_arg(
-			[ 'action' => 'gu_oauth_callback', 'provider' => $provider ],
+			[
+				'action'   => 'gu_oauth_callback',
+				'provider' => $provider,
+			],
 			$base
 		);
 	}
@@ -275,10 +290,10 @@ class OAuth_Connect {
 
 		$location = add_query_arg(
 			[
-				'page'    => 'git-updater',
-				'tab'     => 'git_updater_settings',
-				'subtab'  => $subtab,
-				$status   => '1',
+				'page'   => 'git-updater',
+				'tab'    => 'git_updater_settings',
+				'subtab' => $subtab,
+				$status  => '1',
 			],
 			$base_url
 		);

@@ -204,7 +204,15 @@ class API {
 			// Cache HTTP API error code for 60 minutes.
 			if ( ! in_array( $code, $allowed_codes, true ) ) {
 				$timeout = 60;
-				$this->set_repo_cache( 'error_cache', [ 'timeout' => $timeout ], $this->type->slug . '_error', "+{$timeout} minutes" );
+				$this->set_repo_cache(
+					'error_cache',
+					[
+						'timeout'   => $timeout,
+						'http_code' => $code,
+					],
+					$this->type->slug . '_error',
+					"+{$timeout} minutes"
+				);
 			}
 
 			$response = [
