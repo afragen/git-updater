@@ -43,6 +43,14 @@ class OAuth_Connect {
 	];
 
 	/**
+	 * Override for connector URL. When set, bypasses the constant check.
+	 * Used for testing the "no connector" path.
+	 *
+	 * @var string|null
+	 */
+	public ?string $connector_url = null;
+
+	/**
 	 * Load hooks for OAuth handling.
 	 *
 	 * @return void
@@ -200,6 +208,9 @@ class OAuth_Connect {
 	 * @return string
 	 */
 	private function get_connector_url(): string {
+		if ( null !== $this->connector_url ) {
+			return $this->connector_url;
+		}
 		$url = defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ? constant( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) : '';
 		return $url ? trailingslashit( $url ) : '';
 	}

@@ -46,9 +46,9 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 	/**
 	 * Test fetch_token_from_connector returns null when connector not configured.
-	 * Must run before any test that defines GIT_UPDATER_OAUTH_CONNECTOR_URL.
 	 */
 	public function test_fetch_token_from_connector_returns_null_without_config(): void {
+		$this->oauth->connector_url = '';
 		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
 		$method->setAccessible( true );
 
@@ -58,14 +58,33 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	}
 
 	/**
-	 * Test render_connect_field shows no connector message.
-	 * Must run before any test that defines GIT_UPDATER_OAUTH_CONNECTOR_URL.
+	 * Test render_connect_field shows no connector message when connector URL is empty.
 	 */
 	public function test_render_connect_field_shows_no_connector_message(): void {
+		$this->oauth->connector_url = '';
 		ob_start();
 		$this->oauth->render_connect_field( [ 'provider' => 'github' ] );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', $output );
+	}
+
+	/**
+	 * Test fetch_token_from_connector returns null when response has no access_token.
+	 */
+	public function test_fetch_token_from_connector_returns_null_on_empty_token_response(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $method->invoke( $this->oauth, 'github', 'bad_code' );
+		$this->assertNull( $result );
 	}
 
 	/**

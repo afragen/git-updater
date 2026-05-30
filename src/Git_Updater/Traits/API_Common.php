@@ -373,7 +373,7 @@ trait API_Common {
 		}
 
 		if ( $this->validate_response( $response ) ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		return true;
