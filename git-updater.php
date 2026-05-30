@@ -36,6 +36,8 @@ use Fragen\Git_Updater\Additions\Additions;
 const PLUGIN_FILE = __FILE__;
 const PLUGIN_DIR  = __DIR__;
 
+define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://git-updater.com' );
+
 /*
  * Exit if called directly.
  * PHP version check and exit.
