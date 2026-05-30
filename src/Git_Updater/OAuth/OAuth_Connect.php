@@ -83,7 +83,7 @@ class OAuth_Connect {
 		$connector = $this->get_connector_url();
 
 		if ( $token ) {
-			$this->render_connected_state( $provider, $config );
+			$this->render_connected_state( $provider );
 			return;
 		}
 
@@ -98,11 +98,10 @@ class OAuth_Connect {
 	/**
 	 * Render the connected state with disconnect button.
 	 *
-	 * @param string                $provider Provider slug.
-	 * @param array<string, string> $config   Provider configuration.
+	 * @param string $provider Provider slug.
 	 * @return void
 	 */
-	private function render_connected_state( string $provider, array $config ): void {
+	private function render_connected_state( string $provider ): void {
 		$disconnect_url = add_query_arg(
 			[
 				'action'   => 'gu_oauth_disconnect',
@@ -136,12 +135,19 @@ class OAuth_Connect {
 	 */
 	private function render_connect_button( string $provider, array $config, string $connector ): void {
 		$callback_url = $this->get_callback_url( $provider );
+		$state        = wp_create_nonce( 'gu_oauth_connect_' . $provider );
 
-		// Build the authorize URL on the connector
+		// Build the authorize URL on the connector.
 		$authorize_url = $connector . 'git-updater/' . $provider . '/oauth/authorize';
-		$authorize_url = add_query_arg( 'redirect', rawurlencode( $callback_url ), $authorize_url );
+		$authorize_url = add_query_arg(
+			[
+				'redirect' => rawurlencode( $callback_url ),
+				'state'    => $state,
+			],
+			$authorize_url
+		);
 
-		// Add Gitea-specific parameters if needed
+		// Add Gitea-specific parameters if needed.
 		if ( 'gitea' === $provider ) {
 			$options = get_site_option( 'git_updater', [] );
 			if ( ! empty( $options['gitea_server'] ) && ! empty( $options['gitea_client_id'] ) ) {
@@ -156,6 +162,7 @@ class OAuth_Connect {
 		}
 
 		echo '<a href="' . esc_url( $authorize_url ) . '" class="button button-primary">';
+		/* translators: %s: Git provider name. */
 		echo esc_html( sprintf( __( 'Connect %s', 'git-updater' ), $config['label'] ) );
 		echo '</a>';
 	}
@@ -172,8 +179,13 @@ class OAuth_Connect {
 
 		$provider      = sanitize_key( $_GET['provider'] ?? '' );
 		$exchange_code = sanitize_text_field( wp_unslash( $_GET['gu_exchange_code'] ?? '' ) );
+		$state         = sanitize_text_field( wp_unslash( $_GET['state'] ?? '' ) );
 
-		if ( ! isset( self::PROVIDERS[ $provider ] ) || empty( $exchange_code ) ) {
+		if (
+			! isset( self::PROVIDERS[ $provider ] )
+			|| empty( $exchange_code )
+			|| ! wp_verify_nonce( $state, 'gu_oauth_connect_' . $provider )
+		) {
 			$this->redirect_with_status( $provider, 'oauth_error' );
 			return; // @codeCoverageIgnore
 		}
@@ -257,10 +269,20 @@ class OAuth_Connect {
 		}
 
 		$url = $connector . 'git-updater/' . $provider . '/oauth/token';
-		$url = add_query_arg( 'code', $exchange_code, $url );
 
-		$response = wp_remote_get( $url, [ 'timeout' => 15 ] );
+		$response = wp_remote_post(
+			$url,
+			[
+				'timeout' => 15,
+				'body'    => [ 'code' => $exchange_code ],
+			]
+		);
 		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			return null;
 		}
 
@@ -355,6 +377,11 @@ class OAuth_Connect {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			return null;
 		}
 

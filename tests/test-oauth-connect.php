@@ -26,7 +26,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		parent::set_up();
 		$this->oauth = new OAuth_Connect();
 		delete_site_option( 'git_updater' );
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'wp_redirect' );
 	}
@@ -36,7 +36,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function tear_down(): void {
 		delete_site_option( 'git_updater' );
-		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
+		unset( $_GET['provider'], $_GET['gu_exchange_code'], $_GET['state'], $_GET['_wpnonce'], $_POST['provider'], $_POST['_wpnonce'] );
 		remove_all_actions( 'admin_post_gu_oauth_callback' );
 		remove_all_actions( 'admin_post_gu_oauth_disconnect' );
 		remove_all_filters( 'pre_http_request' );
@@ -161,6 +161,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertStringContainsString( 'Connect GitHub', $output );
 		$this->assertStringContainsString( 'button-primary', $output );
 		$this->assertStringContainsString( 'gu_oauth_callback', $output );
+		$this->assertStringContainsString( 'state=', $output );
 	}
 
 	/**
@@ -244,9 +245,12 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['state']            = wp_create_nonce( 'gu_oauth_connect_github' );
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
+				self::assertSame( 'POST', $args['method'] );
+				self::assertSame( 'test_exchange_code', $args['body']['code'] );
 				return [
 					'response' => [ 'code' => 200, 'message' => 'OK' ],
 					'body'     => wp_json_encode( [ 'access_token' => 'test_access_token' ] ),
@@ -288,6 +292,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['state']            = wp_create_nonce( 'gu_oauth_connect_github' );
 
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
@@ -295,6 +300,35 @@ class Test_OAuth_Connect extends GU_Test_Case {
 			}
 			return $preempt;
 		}, 10, 3 );
+
+		$captured_url = null;
+		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $captured_url );
+		$this->assertStringContainsString( 'oauth_error', $captured_url );
+	}
+
+	/**
+	 * Test handle_callback rejects an invalid state value.
+	 */
+	public function test_handle_callback_with_invalid_state(): void {
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		$_GET['provider']         = 'github';
+		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['state']            = 'invalid_state';
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -393,6 +427,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider']         = 'github';
 		$_GET['gu_exchange_code'] = 'github_code';
+		$_GET['state']            = wp_create_nonce( 'gu_oauth_connect_github' );
 		add_filter( 'pre_http_request', static function( $preempt, $args, $url ) {
 			if ( strpos( $url, 'github' ) !== false && strpos( $url, '/token' ) !== false ) {
 				return [
@@ -424,6 +459,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'gitlab_code';
+		$_GET['state']            = wp_create_nonce( 'gu_oauth_connect_gitlab' );
 
 		try {
 			$this->oauth->handle_callback();
@@ -446,6 +482,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider'] = 'invalid_provider';
 		$_GET['gu_exchange_code'] = 'test_code';
+		$_GET['state'] = wp_create_nonce( 'gu_oauth_connect_invalid_provider' );
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -474,6 +511,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider'] = 'github';
 		$_GET['gu_exchange_code'] = '';
+		$_GET['state'] = wp_create_nonce( 'gu_oauth_connect_github' );
 
 		$captured_url = null;
 		add_filter( 'wp_redirect', function( $url ) use ( &$captured_url ) {
@@ -621,6 +659,21 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
 	}
 
+	public function test_refresh_token_returns_null_on_failed_http_status(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 500 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+	}
+
 	public function test_refresh_token_returns_new_token_on_success(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
 		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'old_tok', 'gitlab_refresh_token' => 'ref' ] );
@@ -673,7 +726,10 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	public function test_fetch_token_returns_array_with_access_token_only(): void {
 		$this->oauth->connector_url = 'https://connector.example.com/';
 
-		add_filter( 'pre_http_request', static function () {
+		add_filter( 'pre_http_request', static function ( $preempt, $args ) {
+			self::assertSame( 'POST', $args['method'] );
+			self::assertSame( 'code', $args['body']['code'] );
+
 			return [
 				'response' => [ 'code' => 200 ],
 				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
@@ -690,6 +746,25 @@ class Test_OAuth_Connect extends GU_Test_Case {
 		$this->assertSame( 'tok', $result['access_token'] );
 		$this->assertNull( $result['refresh_token'] );
 		$this->assertNull( $result['expires_in'] );
+	}
+
+	public function test_fetch_token_returns_null_on_failed_http_status(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 400 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'github', 'code' );
+
+		$this->assertNull( $result );
 	}
 
 	public function test_fetch_token_returns_array_with_all_fields(): void {
@@ -807,6 +882,7 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$_GET['provider']         = 'gitlab';
 		$_GET['gu_exchange_code'] = 'test_exchange_code';
+		$_GET['state']            = wp_create_nonce( 'gu_oauth_connect_gitlab' );
 
 		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
 			if ( strpos( $url, '/token' ) !== false ) {
