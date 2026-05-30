@@ -25,20 +25,24 @@ class OAuth_Connect {
 	 */
 	const PROVIDERS = [
 		'github'    => [
-			'option_key' => 'github_access_token',
-			'label'      => 'GitHub',
+			'option_key'         => 'github_access_token',
+			'refresh_option_key' => 'github_refresh_token',
+			'label'              => 'GitHub',
 		],
 		'gitlab'    => [
-			'option_key' => 'gitlab_access_token',
-			'label'      => 'GitLab',
+			'option_key'         => 'gitlab_access_token',
+			'refresh_option_key' => 'gitlab_refresh_token',
+			'label'              => 'GitLab',
 		],
 		'bitbucket' => [
-			'option_key' => 'bitbucket_access_token',
-			'label'      => 'Bitbucket',
+			'option_key'         => 'bitbucket_access_token',
+			'refresh_option_key' => 'bitbucket_refresh_token',
+			'label'              => 'Bitbucket',
 		],
 		'gitea'     => [
-			'option_key' => 'gitea_access_token',
-			'label'      => 'Gitea',
+			'option_key'         => 'gitea_access_token',
+			'refresh_option_key' => 'gitea_refresh_token',
+			'label'              => 'Gitea',
 		],
 	];
 
@@ -174,10 +178,15 @@ class OAuth_Connect {
 			return; // @codeCoverageIgnore
 		}
 
-		$token = $this->fetch_token_from_connector( $provider, $exchange_code );
+		$result = $this->fetch_token_from_connector( $provider, $exchange_code );
 
-		if ( $token ) {
-			$this->save_token( $provider, $token );
+		if ( $result && ! empty( $result['access_token'] ) ) {
+			$this->save_token(
+				$provider,
+				$result['access_token'],
+				$result['refresh_token'] ?? null,
+				$result['expires_in'] ?? null
+			);
 			$this->redirect_with_status( $provider, 'oauth_connected' );
 		} else {
 			$this->redirect_with_status( $provider, 'oauth_error' );
@@ -235,13 +244,13 @@ class OAuth_Connect {
 	}
 
 	/**
-	 * Fetch token from connector using exchange code.
+	 * Fetch token data from connector using exchange code.
 	 *
 	 * @param string $provider      Provider slug.
 	 * @param string $exchange_code Exchange code from connector.
-	 * @return string|null Token or null on failure.
+	 * @return array<string, mixed>|null Token data array or null on failure.
 	 */
-	private function fetch_token_from_connector( string $provider, string $exchange_code ): ?string {
+	private function fetch_token_from_connector( string $provider, string $exchange_code ): ?array {
 		$connector = $this->get_connector_url();
 		if ( ! $connector ) {
 			return null;
@@ -256,26 +265,50 @@ class OAuth_Connect {
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		return ! empty( $body['access_token'] ) ? sanitize_text_field( $body['access_token'] ) : null;
+		if ( empty( $body['access_token'] ) ) {
+			return null;
+		}
+
+		return [
+			'access_token'  => sanitize_text_field( $body['access_token'] ),
+			'refresh_token' => ! empty( $body['refresh_token'] ) ? sanitize_text_field( $body['refresh_token'] ) : null,
+			'expires_in'    => ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null,
+		];
 	}
 
 	/**
-	 * Save token to options.
+	 * Save token and optional refresh token / expiry metadata to options.
 	 *
-	 * @param string $provider Provider slug.
-	 * @param string $token    Access token.
+	 * @param string      $provider      Provider slug.
+	 * @param string      $token         Access token.
+	 * @param string|null $refresh_token Refresh token, if available.
+	 * @param int|null    $expires_in    Seconds until token expiry, if known.
 	 * @return void
 	 */
-	private function save_token( string $provider, string $token ): void {
+	private function save_token( string $provider, string $token, ?string $refresh_token = null, ?int $expires_in = null ): void {
 		$config  = self::PROVIDERS[ $provider ];
 		$options = get_site_option( 'git_updater', [] );
 
 		$options[ $config['option_key'] ] = $token;
+
+		if ( $refresh_token ) {
+			$options[ $config['refresh_option_key'] ] = $refresh_token;
+		} else {
+			unset( $options[ $config['refresh_option_key'] ] );
+		}
+
+		if ( $expires_in ) {
+			$options[ $provider . '_token_expires_in' ]  = $expires_in;
+			$options[ $provider . '_token_acquired_at' ] = time();
+		} else {
+			unset( $options[ $provider . '_token_expires_in' ], $options[ $provider . '_token_acquired_at' ] );
+		}
+
 		update_site_option( 'git_updater', $options );
 	}
 
 	/**
-	 * Delete token from options.
+	 * Delete token and associated metadata from options.
 	 *
 	 * @param string $provider Provider slug.
 	 * @return void
@@ -285,7 +318,91 @@ class OAuth_Connect {
 		$options = get_site_option( 'git_updater', [] );
 
 		unset( $options[ $config['option_key'] ] );
+		unset( $options[ $config['refresh_option_key'] ] );
+		unset( $options[ $provider . '_token_expires_in' ] );
+		unset( $options[ $provider . '_token_acquired_at' ] );
 		update_site_option( 'git_updater', $options );
+	}
+
+	/**
+	 * Attempt to refresh an expired token via the connector.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return string|null New access token or null on failure.
+	 */
+	public function refresh_token( string $provider ): ?string {
+		$connector = $this->get_connector_url();
+		if ( ! $connector || ! isset( self::PROVIDERS[ $provider ] ) ) {
+			return null;
+		}
+
+		$config        = self::PROVIDERS[ $provider ];
+		$options       = get_site_option( 'git_updater', [] );
+		$refresh_token = $options[ $config['refresh_option_key'] ] ?? null;
+
+		if ( ! $refresh_token ) {
+			return null;
+		}
+
+		$url = $connector . 'git-updater/' . $provider . '/oauth/refresh';
+
+		$response = wp_remote_post(
+			$url,
+			[
+				'timeout' => 15,
+				'body'    => [ 'refresh_token' => $refresh_token ],
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( empty( $body['access_token'] ) ) {
+			return null;
+		}
+
+		$new_token         = sanitize_text_field( $body['access_token'] );
+		$new_refresh_token = ! empty( $body['refresh_token'] ) ? sanitize_text_field( $body['refresh_token'] ) : null;
+		$expires_in        = ! empty( $body['expires_in'] ) ? (int) $body['expires_in'] : null;
+
+		$this->save_token( $provider, $new_token, $new_refresh_token ?? $refresh_token, $expires_in );
+
+		return $new_token;
+	}
+
+	/**
+	 * Check if a provider's token is expired or about to expire.
+	 *
+	 * @param string $provider Provider slug.
+	 * @param int    $buffer   Seconds before expiry to consider "expired" (default 300 = 5 minutes).
+	 * @return bool True if token is expired, missing, or unknown provider.
+	 */
+	public function is_token_expired( string $provider, int $buffer = 300 ): bool {
+		if ( ! isset( self::PROVIDERS[ $provider ] ) ) {
+			return true;
+		}
+
+		$config  = self::PROVIDERS[ $provider ];
+		$options = get_site_option( 'git_updater', [] );
+
+		// No token stored — treat as expired for refresh purposes.
+		if ( empty( $options[ $config['option_key'] ] ) ) {
+			return true;
+		}
+
+		// No expiry metadata (e.g., GitHub tokens never expire) — assume valid.
+		$expires_in  = $options[ $provider . '_token_expires_in' ] ?? null;
+		$acquired_at = $options[ $provider . '_token_acquired_at' ] ?? null;
+		if ( null === $expires_in || null === $acquired_at ) {
+			return false;
+		}
+
+		$elapsed   = time() - (int) $acquired_at;
+		$remaining = (int) $expires_in - $elapsed;
+
+		return $remaining <= $buffer;
 	}
 
 	/**

@@ -1601,3 +1601,321 @@ class Test_API_Hooks extends WP_UnitTestCase {
  *
  * Covers all settings output and registration methods in GitHub_API.
  */
+
+class Test_API_Detect_Provider extends WP_UnitTestCase {
+
+	/**
+	 * @var GitHub_API
+	 */
+	private GitHub_API $api;
+
+	/**
+	 * @var stdClass
+	 */
+	private stdClass $type;
+
+	/**
+	 * @var string
+	 */
+	private string $endpoint = '/repos/:owner/:repo';
+
+	public function set_up(): void {
+		parent::set_up();
+		new Base();
+		$this->type = api_make_type();
+		$this->api  = new GitHub_API( $this->type );
+	}
+
+	public function tear_down(): void {
+		delete_site_option( 'git_updater' );
+		parent::tear_down();
+	}
+
+	private function call_detect_provider_from_url( string $url ): ?string {
+		$rm = new ReflectionMethod( $this->api, 'detect_provider_from_url' );
+		PHP_VERSION_ID < 80100 && $rm->setAccessible( true );
+		return $rm->invoke( $this->api, $url );
+	}
+
+	public function test_detect_provider_from_url_returns_github_for_api_github(): void {
+		$this->assertSame( 'github', $this->call_detect_provider_from_url( 'https://api.github.com/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_github_for_github_com_api(): void {
+		$this->assertSame( 'github', $this->call_detect_provider_from_url( 'https://github.com/api/v3/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_bitbucket_for_api_bitbucket(): void {
+		$this->assertSame( 'bitbucket', $this->call_detect_provider_from_url( 'https://api.bitbucket.org/2.0/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_bitbucket_for_bitbucket_org(): void {
+		$this->assertSame( 'bitbucket', $this->call_detect_provider_from_url( 'https://bitbucket.org/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_gitlab_api(): void {
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://gitlab.com/api/v4/projects/123' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_generic_api_v(): void {
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://custom-gitlab.example.com/api/v4/projects' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitea_when_server_configured(): void {
+		update_site_option( 'git_updater', [ 'gitea_server' => 'https://gitea.example.com' ] );
+		$this->assertSame( 'gitea', $this->call_detect_provider_from_url( 'https://gitea.example.com/api/v1/repos/owner/repo' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_null_for_unknown_url(): void {
+		$this->assertNull( $this->call_detect_provider_from_url( 'https://example.com/something' ) );
+	}
+
+	public function test_detect_provider_from_url_returns_gitlab_for_gitea_url_without_server(): void {
+		// Without gitea_server configured, a Gitea URL with /api/v matches the GitLab heuristic.
+		$this->assertSame( 'gitlab', $this->call_detect_provider_from_url( 'https://gitea.example.com/api/v1/repos' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// Reactive refresh in api()
+	// -------------------------------------------------------------------------
+
+	public function test_api_retries_on_401_after_successful_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				// Don't count refresh calls.
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				// First API call returns 401, second (retry) returns 200.
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+						'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Mock refresh_token to succeed.
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok', 'expires_in' => 7200 ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+		$this->assertSame( 'test-plugin', $result->name );
+	}
+
+	public function test_api_retries_on_403_after_successful_refresh(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				if ( 1 === $api_call_count ) {
+					return [
+						'response' => [ 'code' => 403, 'message' => 'Forbidden' ],
+						'body'     => wp_json_encode( [ 'message' => 'rate limit' ] ),
+						'headers'  => [],
+					];
+				}
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [ 'name' => 'test-plugin' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 200 ],
+						'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$result = $this->api->api( $this->endpoint );
+
+		$this->assertSame( 2, $api_call_count );
+		$this->assertIsObject( $result );
+	}
+
+	public function test_api_does_not_retry_when_refresh_fails(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$oauth = \Fragen\Singleton::get_instance( \Fragen\Git_Updater\OAuth\OAuth_Connect::class, $this->api );
+		$oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [
+			'github_access_token'  => 'old_tok',
+			'github_refresh_token' => 'ref',
+		] );
+
+		// Mock refresh to return error.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return [
+						'response' => [ 'code' => 401 ],
+						'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+						'headers'  => [],
+					];
+				}
+				return $preempt;
+			},
+			20,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		// Only 1 API call — no retry after failed refresh.
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_when_no_refresh_token(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// No refresh token stored.
+		update_site_option( 'git_updater', [ 'github_access_token' => 'old_tok' ] );
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_for_non_auth_errors(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 500, 'message' => 'Server Error' ],
+					'body'     => wp_json_encode( [ 'message' => 'Internal error' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+
+	public function test_api_does_not_retry_when_provider_not_detected(): void {
+		$api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( &$api_call_count ) {
+				if ( strpos( $url, '/oauth/refresh' ) !== false ) {
+					return $preempt;
+				}
+				$api_call_count++;
+				return [
+					'response' => [ 'code' => 401, 'message' => 'Unauthorized' ],
+					'body'     => wp_json_encode( [ 'message' => 'Bad credentials' ] ),
+					'headers'  => [],
+				];
+			},
+			10,
+			3
+		);
+
+		// Use a URL that doesn't match any provider pattern.
+		$this->type->enterprise_api = 'https://unknown.example.com/api';
+		$this->api->api( $this->endpoint );
+
+		$this->assertSame( 1, $api_call_count );
+	}
+}

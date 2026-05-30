@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\API;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Connect;
 use Fragen\Git_Updater\Traits\API_Common;
 use Fragen\Git_Updater\Traits\GU_Trait;
 use Fragen\Git_Updater\Traits\Basic_Auth_Loader;
@@ -199,6 +200,19 @@ class API {
 				Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
 
 				return $response;
+			}
+
+			// Reactive token refresh on 401/403.
+			if ( in_array( $code, [ 401, 403 ], true ) ) {
+				$provider = $this->detect_provider_from_url( $url );
+				if ( $provider ) {
+					$new_token = Singleton::get_instance( OAuth_Connect::class, $this )->refresh_token( $provider );
+					if ( $new_token ) {
+						$auth_header = $this->add_auth_header( [], $url );
+						$response    = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+						$code        = (int) wp_remote_retrieve_response_code( $response );
+					}
+				}
 			}
 
 			// Cache HTTP API error code for 60 minutes.
@@ -663,5 +677,29 @@ class API {
 	 */
 	public function set_redirect( $location ) {
 		$this->redirect = $location;
+	}
+
+	/**
+	 * Detect the git provider from a URL.
+	 *
+	 * @param string $url API URL to inspect.
+	 * @return string|null Provider slug or null if not detected.
+	 */
+	private function detect_provider_from_url( string $url ): ?string {
+		if ( str_contains( $url, 'api.github.com' ) || str_contains( $url, 'github.com/api' ) ) {
+			return 'github';
+		}
+		if ( str_contains( $url, 'api.bitbucket.org' ) || str_contains( $url, 'bitbucket.org' ) ) {
+			return 'bitbucket';
+		}
+		// Check Gitea before GitLab since Gitea URLs may also contain /api/v.
+		$options = get_site_option( 'git_updater', [] );
+		if ( ! empty( $options['gitea_server'] ) && str_contains( $url, $options['gitea_server'] ) ) {
+			return 'gitea';
+		}
+		if ( str_contains( $url, 'gitlab.com/api' ) || str_contains( $url, '/api/v' ) ) {
+			return 'gitlab';
+		}
+		return null;
 	}
 }

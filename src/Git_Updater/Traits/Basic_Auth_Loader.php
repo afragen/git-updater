@@ -11,6 +11,7 @@
 namespace Fragen\Git_Updater\Traits;
 
 use Fragen\Singleton;
+use Fragen\Git_Updater\OAuth\OAuth_Connect;
 use Fragen\Git_Updater\API\GitHub_API;
 use Fragen\Git_Updater\API\Language_Pack_API;
 
@@ -62,6 +63,18 @@ trait Basic_Auth_Loader {
 			return $args;
 		}
 		if ( null !== $credentials['token'] ) {
+			// Proactive refresh: check expiry before using the token.
+			$provider = $credentials['type'] ?? null;
+			if ( $provider && isset( OAuth_Connect::PROVIDERS[ $provider ] ) ) {
+				$oauth = Singleton::get_instance( OAuth_Connect::class, $this );
+				if ( $oauth->is_token_expired( $provider ) ) {
+					$new_token = $oauth->refresh_token( $provider );
+					if ( $new_token ) {
+						$credentials['token'] = $new_token;
+					}
+				}
+			}
+
 			if ( 'github' === $credentials['type'] ) {
 				$args['headers']['Authorization'] = 'Bearer ' . $credentials['token'];
 				$args['headers']['github']        = $credentials['slug'];

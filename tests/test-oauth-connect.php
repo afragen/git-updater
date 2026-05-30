@@ -92,10 +92,26 @@ class Test_OAuth_Connect extends GU_Test_Case {
 	 */
 	public function test_providers_constant(): void {
 		$expected = [
-			'github'    => [ 'option_key' => 'github_access_token', 'label' => 'GitHub' ],
-			'gitlab'    => [ 'option_key' => 'gitlab_access_token', 'label' => 'GitLab' ],
-			'bitbucket' => [ 'option_key' => 'bitbucket_access_token', 'label' => 'Bitbucket' ],
-			'gitea'     => [ 'option_key' => 'gitea_access_token', 'label' => 'Gitea' ],
+			'github'    => [
+				'option_key'         => 'github_access_token',
+				'refresh_option_key' => 'github_refresh_token',
+				'label'              => 'GitHub',
+			],
+			'gitlab'    => [
+				'option_key'         => 'gitlab_access_token',
+				'refresh_option_key' => 'gitlab_refresh_token',
+				'label'              => 'GitLab',
+			],
+			'bitbucket' => [
+				'option_key'         => 'bitbucket_access_token',
+				'refresh_option_key' => 'bitbucket_refresh_token',
+				'label'              => 'Bitbucket',
+			],
+			'gitea'     => [
+				'option_key'         => 'gitea_access_token',
+				'refresh_option_key' => 'gitea_refresh_token',
+				'label'              => 'Gitea',
+			],
 		];
 		$this->assertEquals( $expected, OAuth_Connect::PROVIDERS );
 	}
@@ -492,5 +508,336 @@ class Test_OAuth_Connect extends GU_Test_Case {
 
 		$this->assertStringContainsString( 'network/admin-post.php', $url );
 		$this->assertStringContainsString( 'action=gu_oauth_callback', $url );
+	}
+
+	// -------------------------------------------------------------------------
+	// is_token_expired() tests
+	// -------------------------------------------------------------------------
+
+	public function test_is_token_expired_returns_true_for_unknown_provider(): void {
+		$this->assertTrue( $this->oauth->is_token_expired( 'invalid_provider' ) );
+	}
+
+	public function test_is_token_expired_returns_true_when_no_token_stored(): void {
+		$this->assertTrue( $this->oauth->is_token_expired( 'github' ) );
+	}
+
+	public function test_is_token_expired_returns_false_when_no_expiry_metadata(): void {
+		update_site_option( 'git_updater', [ 'github_access_token' => 'tok' ] );
+		$this->assertFalse( $this->oauth->is_token_expired( 'github' ) );
+	}
+
+	public function test_is_token_expired_returns_false_when_token_is_fresh(): void {
+		update_site_option( 'git_updater', [
+			'gitlab_access_token'       => 'tok',
+			'gitlab_token_expires_in'   => 7200,
+			'gitlab_token_acquired_at'  => time(),
+		] );
+		$this->assertFalse( $this->oauth->is_token_expired( 'gitlab' ) );
+	}
+
+	public function test_is_token_expired_returns_true_when_token_is_expired(): void {
+		update_site_option( 'git_updater', [
+			'gitlab_access_token'       => 'tok',
+			'gitlab_token_expires_in'   => 7200,
+			'gitlab_token_acquired_at'  => time() - 7201,
+		] );
+		$this->assertTrue( $this->oauth->is_token_expired( 'gitlab' ) );
+	}
+
+	public function test_is_token_expired_returns_true_when_within_buffer(): void {
+		update_site_option( 'git_updater', [
+			'gitlab_access_token'       => 'tok',
+			'gitlab_token_expires_in'   => 7200,
+			'gitlab_token_acquired_at'  => time() - 7000,
+		] );
+		// 200s remaining, buffer=300 → expired
+		$this->assertTrue( $this->oauth->is_token_expired( 'gitlab' ) );
+	}
+
+	public function test_is_token_expired_returns_false_when_outside_buffer(): void {
+		update_site_option( 'git_updater', [
+			'gitlab_access_token'       => 'tok',
+			'gitlab_token_expires_in'   => 7200,
+			'gitlab_token_acquired_at'  => time() - 6000,
+		] );
+		// 1200s remaining, buffer=300 → not expired
+		$this->assertFalse( $this->oauth->is_token_expired( 'gitlab' ) );
+	}
+
+	public function test_is_token_expired_custom_buffer(): void {
+		update_site_option( 'git_updater', [
+			'bitbucket_access_token'       => 'tok',
+			'bitbucket_token_expires_in'   => 7200,
+			'bitbucket_token_acquired_at'  => time() - 7100,
+		] );
+		// 100s remaining, buffer=60 → not expired
+		$this->assertFalse( $this->oauth->is_token_expired( 'bitbucket', 60 ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// refresh_token() tests
+	// -------------------------------------------------------------------------
+
+	public function test_refresh_token_returns_null_without_connector_url(): void {
+		$this->oauth->connector_url = '';
+		$this->assertNull( $this->oauth->refresh_token( 'github' ) );
+	}
+
+	public function test_refresh_token_returns_null_for_invalid_provider(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		$this->assertNull( $this->oauth->refresh_token( 'invalid_provider' ) );
+	}
+
+	public function test_refresh_token_returns_null_without_refresh_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok' ] );
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+	}
+
+	public function test_refresh_token_returns_null_on_http_error(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return new WP_Error( 'http_error', 'Connection failed' );
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+	}
+
+	public function test_refresh_token_returns_null_on_missing_access_token(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'error' => 'invalid_grant' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$this->assertNull( $this->oauth->refresh_token( 'gitlab' ) );
+	}
+
+	public function test_refresh_token_returns_new_token_on_success(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'old_tok', 'gitlab_refresh_token' => 'ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [
+					'access_token'  => 'new_tok',
+					'refresh_token' => 'new_ref',
+					'expires_in'    => 7200,
+				] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'gitlab' );
+		$this->assertSame( 'new_tok', $result );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 'new_tok', $options['gitlab_access_token'] );
+		$this->assertSame( 'new_ref', $options['gitlab_refresh_token'] );
+		$this->assertSame( 7200, $options['gitlab_token_expires_in'] );
+		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
+	}
+
+	public function test_refresh_token_preserves_old_refresh_when_not_rotated(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+		update_site_option( 'git_updater', [ 'gitlab_access_token' => 'old_tok', 'gitlab_refresh_token' => 'old_ref' ] );
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'new_tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$result = $this->oauth->refresh_token( 'gitlab' );
+		$this->assertSame( 'new_tok', $result );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 'old_ref', $options['gitlab_refresh_token'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// fetch_token_from_connector() — updated return type
+	// -------------------------------------------------------------------------
+
+	public function test_fetch_token_returns_array_with_access_token_only(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [ 'access_token' => 'tok' ] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'github', 'code' );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'tok', $result['access_token'] );
+		$this->assertNull( $result['refresh_token'] );
+		$this->assertNull( $result['expires_in'] );
+	}
+
+	public function test_fetch_token_returns_array_with_all_fields(): void {
+		$this->oauth->connector_url = 'https://connector.example.com/';
+
+		add_filter( 'pre_http_request', static function () {
+			return [
+				'response' => [ 'code' => 200 ],
+				'body'     => wp_json_encode( [
+					'access_token'  => 'tok',
+					'refresh_token' => 'ref',
+					'expires_in'    => 7200,
+				] ),
+				'headers'  => [],
+			];
+		}, 10, 3 );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'fetch_token_from_connector' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->oauth, 'gitlab', 'code' );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'tok', $result['access_token'] );
+		$this->assertSame( 'ref', $result['refresh_token'] );
+		$this->assertSame( 7200, $result['expires_in'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// save_token() — updated behavior
+	// -------------------------------------------------------------------------
+
+	public function test_save_token_stores_refresh_token(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$method->setAccessible( true );
+
+		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', null );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 'tok', $options['gitlab_access_token'] );
+		$this->assertSame( 'ref', $options['gitlab_refresh_token'] );
+	}
+
+	public function test_save_token_stores_expires_in_and_acquired_at(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$method->setAccessible( true );
+
+		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', 7200 );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertSame( 7200, $options['gitlab_token_expires_in'] );
+		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
+	}
+
+	public function test_save_token_clears_refresh_token_when_null(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$method->setAccessible( true );
+
+		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', null );
+		$method->invoke( $this->oauth, 'gitlab', 'tok', null, null );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'gitlab_refresh_token', $options );
+	}
+
+	public function test_save_token_clears_expiry_when_null(): void {
+		$method = new ReflectionMethod( OAuth_Connect::class, 'save_token' );
+		$method->setAccessible( true );
+
+		$method->invoke( $this->oauth, 'gitlab', 'tok', 'ref', 7200 );
+		$method->invoke( $this->oauth, 'gitlab', 'tok', null, null );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'gitlab_token_expires_in', $options );
+		$this->assertArrayNotHasKey( 'gitlab_token_acquired_at', $options );
+	}
+
+	// -------------------------------------------------------------------------
+	// delete_token() — updated behavior
+	// -------------------------------------------------------------------------
+
+	public function test_delete_token_removes_all_provider_keys(): void {
+		update_site_option( 'git_updater', [
+			'github_access_token'       => 'tok',
+			'github_refresh_token'      => 'ref',
+			'github_token_expires_in'   => 7200,
+			'github_token_acquired_at'  => time(),
+			'gitlab_access_token'       => 'other_tok',
+		] );
+
+		$method = new ReflectionMethod( OAuth_Connect::class, 'delete_token' );
+		$method->setAccessible( true );
+		$method->invoke( $this->oauth, 'github' );
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertArrayNotHasKey( 'github_access_token', $options );
+		$this->assertArrayNotHasKey( 'github_refresh_token', $options );
+		$this->assertArrayNotHasKey( 'github_token_expires_in', $options );
+		$this->assertArrayNotHasKey( 'github_token_acquired_at', $options );
+		$this->assertSame( 'other_tok', $options['gitlab_access_token'] );
+	}
+
+	// -------------------------------------------------------------------------
+	// handle_callback() — saves refresh token and expires_in
+	// -------------------------------------------------------------------------
+
+	public function test_handle_callback_saves_refresh_token_on_success(): void {
+		if ( ! defined( 'GIT_UPDATER_OAUTH_CONNECTOR_URL' ) ) {
+			define( 'GIT_UPDATER_OAUTH_CONNECTOR_URL', 'https://connector.example.com' );
+		}
+
+		$user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$this->maybe_grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		$_GET['provider']         = 'gitlab';
+		$_GET['gu_exchange_code'] = 'test_exchange_code';
+
+		add_filter( 'pre_http_request', static function ( $preempt, $args, $url ) {
+			if ( strpos( $url, '/token' ) !== false ) {
+				return [
+					'response' => [ 'code' => 200, 'message' => 'OK' ],
+					'body'     => wp_json_encode( [
+						'access_token'  => 'test_access_token',
+						'refresh_token' => 'test_refresh_token',
+						'expires_in'    => 7200,
+					] ),
+					'headers'  => [],
+				];
+			}
+			return $preempt;
+		}, 10, 3 );
+
+		add_filter( 'wp_redirect', static function() {
+			throw new RuntimeException( 'Redirect captured' );
+		} );
+
+		try {
+			$this->oauth->handle_callback();
+			$this->fail( 'Expected redirect to be captured' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( 'Redirect captured', $e->getMessage() );
+		}
+
+		$options = get_site_option( 'git_updater' );
+		$this->assertEquals( 'test_access_token', $options['gitlab_access_token'] );
+		$this->assertEquals( 'test_refresh_token', $options['gitlab_refresh_token'] );
+		$this->assertEquals( 7200, $options['gitlab_token_expires_in'] );
+		$this->assertArrayHasKey( 'gitlab_token_acquired_at', $options );
 	}
 }
