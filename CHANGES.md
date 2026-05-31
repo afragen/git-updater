@@ -1,4 +1,6 @@
 #### [unreleased]
+
+#### 13.0.0 / 2026-05-31 🎂
 * use `afragen/wp-readme-parser` drop-in replacement for `afragen/wordpress-plugin-readme-parser`
 * update requirements to PHP 8.0 for new parser due to testing
 * add `maybe_extend_repo_cache()` to update the timeout if the remote and cached version numbers are same, should avoid API calls for current data
