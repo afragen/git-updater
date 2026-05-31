@@ -956,12 +956,11 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 
 	/**
 	 * When api() returns an array of directory-only items:
-	 * - !is_object(array) → loop breaks immediately.
-	 * - Initial $error checks pass (is_array, no message/error property).
-	 * - parse_asset_dir_response() finds no 'file' items → returns stdClass{message: 'No assets found'}.
-	 * - validate_response() fires true → return false (line 369).
+	 * - Loop iterates but no 'file' items found.
+	 * - parse_asset_dir_response() returns stdClass{message: 'No assets found'}.
+	 * - get_remote_api_assets() returns null (not false) for "no assets" case.
 	 */
-	public function test_get_remote_api_assets_returns_false_when_only_dirs_in_listing(): void {
+	public function test_get_remote_api_assets_returns_null_when_only_dirs_in_listing(): void {
 		add_filter(
 			'pre_http_request',
 			fn() => $this->http_ok(
@@ -974,7 +973,26 @@ class Test_API_Common_Complete extends WP_UnitTestCase {
 		);
 
 		$result = $this->api->get_repo_assets();
-		$this->assertFalse( $result );
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * When $cache['contents']['dirs'] contains none of the expected asset
+	 * directories (.wordpress-org, assets), array_intersect produces [].
+	 * The foreach is skipped, $response stays false, the error block fires,
+	 * and null is returned with no HTTP requests made.
+	 */
+	public function test_get_remote_api_assets_returns_null_when_cache_dirs_match_none(): void {
+		$this->seed_cache(
+			[ 'contents' => [ 'files' => [], 'dirs' => [ 'src', 'lib', 'vendor' ] ] ]
+		);
+
+		$call = 0;
+		add_filter( 'pre_http_request', function () use ( &$call ) { $call++; }, 10, 3 );
+
+		$result = $this->api->get_repo_assets();
+		$this->assertNull( $result );
+		$this->assertSame( 0, $call, 'No HTTP request expected when no asset dirs match' );
 	}
 
 	/**

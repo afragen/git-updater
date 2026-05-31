@@ -368,9 +368,12 @@ trait API_Common {
 
 		$response = $this->parse_asset_dir_response( $response );
 		$this->set_repo_cache( 'assets', $response );
+		if ( isset( $response->message ) && 'No assets found' === $response->message ) {
+			return null;
+		}
 
 		if ( $this->validate_response( $response ) ) {
-			return false;
+			return false; // @codeCoverageIgnore
 		}
 
 		return true;

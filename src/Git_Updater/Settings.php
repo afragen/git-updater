@@ -352,15 +352,25 @@ class Settings {
 			return;
 		}
 		$display = ( isset( $_GET['updated'] ) && is_multisite() )
-			|| isset( $_GET['refresh_transients'] );
+			|| isset( $_GET['refresh_transients'] )
+			|| isset( $_GET['oauth_connected'] )
+			|| isset( $_GET['oauth_disconnected'] )
+			|| isset( $_GET['oauth_error'] );
 
+		$class = isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ? 'error' : 'updated';
 		if ( $display ) {
-			echo '<div class="updated"><p>';
+			echo '<div class="' . esc_attr( $class ) . '"><p>';
 		}
 		if ( ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) && is_multisite() ) {
 			esc_html_e( 'Settings saved.', 'git-updater' ); // @codeCoverageIgnore
 		} elseif ( isset( $_GET['refresh_transients'] ) && '1' === $_GET['refresh_transients'] ) {
 			esc_html_e( 'Cache refreshed.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_connected'] ) && '1' === $_GET['oauth_connected'] ) {
+			esc_html_e( 'Connected successfully.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_disconnected'] ) && '1' === $_GET['oauth_disconnected'] ) {
+			esc_html_e( 'Disconnected.', 'git-updater' );
+		} elseif ( isset( $_GET['oauth_error'] ) && '1' === $_GET['oauth_error'] ) {
+			esc_html_e( 'OAuth connection failed. Please try again.', 'git-updater' );
 		}
 		if ( $display ) {
 			echo '</p></div>';
@@ -492,7 +502,7 @@ class Settings {
 					'id'          => $setting_field['callback'],
 					'token'       => true,
 					'title'       => $setting_field['title'],
-					'placeholder' => isset( $setting_field['placeholder'] ) ? true : null,
+					'placeholder' => $setting_field['placeholder'] ?? null,
 				]
 			);
 		}
@@ -523,7 +533,7 @@ class Settings {
 		];
 
 		foreach ( $running_servers as $server ) {
-			$always_unset = array_merge( $always_unset, [ "{$server}_access_token" ] );
+			$always_unset = array_merge( $always_unset, [ "{$server}_access_token", "{$server}_server", "{$server}_client_id" ] );
 			$always_unset = array_unique( $always_unset );
 		}
 
@@ -625,10 +635,10 @@ class Settings {
 		$options     = $this->get_class_vars( 'Base', 'options' );
 		$name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
 		$type        = isset( $args['token'] ) ? 'password' : 'text';
-		$placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
+		$placeholder = $args['placeholder'] ?? null;
 		?>
-		<label for="<?php esc_attr( $args['id'] ); ?>">
-			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
+		<label for="<?php echo esc_attr( $args['id'] ); ?>">
+			<input class="gu-callback-text" type="<?php echo esc_attr( $type ); ?>" id="<?php echo esc_attr( $args['id'] ); ?>" name="git_updater[<?php echo esc_attr( $args['id'] ); ?>]" value="<?php echo esc_attr( $name ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>">
 		</label>
 		<?php
 	}

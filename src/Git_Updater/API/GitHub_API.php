@@ -456,14 +456,14 @@ class GitHub_API extends API implements API_Interface {
 	public function add_settings( $auth_required ) {
 		add_settings_section(
 			'github_access_token',
-			esc_html__( 'GitHub Personal Access Token', 'git-updater' ),
+			esc_html__( 'GitHub Token', 'git-updater' ),
 			[ $this, 'print_section_github_access_token' ],
 			'git_updater_github_install_settings'
 		);
 
 		add_settings_field(
 			'github_access_token',
-			esc_html__( 'GitHub.com Access Token', 'git-updater' ),
+			esc_html__( 'GitHub Access Token', 'git-updater' ),
 			[ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
 			'git_updater_github_install_settings',
 			'github_access_token',
@@ -471,6 +471,15 @@ class GitHub_API extends API implements API_Interface {
 				'id'    => 'github_access_token',
 				'token' => true,
 			]
+		);
+
+		add_settings_field(
+			'github_oauth_connect',
+			esc_html__( 'GitHub OAuth', 'git-updater' ),
+			[ Singleton::get_instance( 'OAuth\OAuth_Connect', $this ), 'render_connect_field' ],
+			'git_updater_github_install_settings',
+			'github_access_token',
+			[ 'provider' => 'github' ]
 		);
 
 		/*
@@ -517,7 +526,7 @@ class GitHub_API extends API implements API_Interface {
 	 * @return void
 	 */
 	public function print_section_github_access_token() {
-		esc_html_e( 'Enter your personal GitHub.com or GitHub Enterprise Access Token to avoid API access limits.', 'git-updater' );
+		esc_html_e( 'Click the "Connect GitHub" button for an OAuth connection or enter your GitHub Access Token to avoid API access limits.', 'git-updater' );
 		$icon = plugin_dir_url( dirname( __DIR__, 2 ) ) . 'assets/github-logo.svg';
 		printf( '<img class="git-oauth-icon" src="%s" alt="GitHub logo" />', esc_attr( $icon ) );
 	}
