@@ -19,6 +19,12 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 	private GU_Upgrade $upgrade;
 	private array $original_options;
 
+	private function get_db_version(): string {
+		$rp = new \ReflectionProperty( GU_Upgrade::class, 'db_version' );
+		$rp->setAccessible( true );
+		return $rp->getValue( $this->upgrade );
+	}
+
 	public function set_up(): void {
 		parent::set_up();
 		$this->upgrade          = new GU_Upgrade();
@@ -99,13 +105,13 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 	// -------------------------------------------------------------------------
 
 	public function test_run_returns_early_when_db_version_matches_current(): void {
-		\Fragen\Git_Updater\Base::$options = [ 'db_version' => '12.24.2' ];
+		\Fragen\Git_Updater\Base::$options = [ 'db_version' => $this->get_db_version() ];
 		update_site_option( 'git_updater', \Fragen\Git_Updater\Base::$options );
 
 		$this->upgrade->run();
 
 		$stored = get_site_option( 'git_updater' );
-		$this->assertSame( '12.24.2', $stored['db_version'] );
+		$this->assertSame( $this->get_db_version(), $stored['db_version'] );
 		$this->assertNotFalse( wp_next_scheduled( 'gu_delete_access_tokens' ) );
 	}
 
@@ -116,7 +122,7 @@ class Test_GU_Upgrade extends WP_UnitTestCase {
 		$this->upgrade->run();
 
 		$stored = get_site_option( 'git_updater' );
-		$this->assertSame( '12.24.2', $stored['db_version'] );
+		$this->assertSame( $this->get_db_version(), $stored['db_version'] );
 		$this->assertArrayHasKey( 'some_token', $stored );
 	}
 
